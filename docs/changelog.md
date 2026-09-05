@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Algorithms:
+
+  - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
+
 - Data structures:
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
     `sidb::layout` stores cells and defects without templates. `to_sidb_layout` converts
@@ -42,6 +46,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `operational_domain_ratio`, `critical_temperature_gate_based`, `critical_temperature_non_gate_based`,
     `time_to_solution`, `physical_population_stability`, `physically_valid_parameters`,
     `can_positive_charges_occur`, and `calculate_energy_and_state_type_with_kinks_*`
+  - SiDB gate and random-layout generators accept and return `sidb_layout`
+  - SiDB defect analyses accept `sidb_layout`; the displacement analysis returns
+    `displacement_robustness_domain`, and defect-domain writers return `None`
+  - `displacement_robustness_domain` replaces its `_100` and `_111` variants
+  - `apply_bestagon_library` returns `sidb_layout`
 
 ### Changed
 
@@ -55,6 +64,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     10,000× less heap traffic, and _QuickExact_ holds speed with 28× less heap traffic
   - Potential landscape construction computes each symmetric SiDB interaction once
   - **Breaking:** SiDB logic and analysis algorithms use `sidb::layout` and non-template simulation types
+  - **Breaking:** SiDB defect analyses, generators, and gate libraries use `sidb::layout`
+  - Their parameters use `lattice_site` for canvases, scan areas, and fixed SiDBs
+  - Defect-influence and displacement-robustness domains are non-template types
+  - Gate designers retain cell-level overloads while the remaining consumers migrate
+  - Random gate design stops after `maximal_random_design_attempts` candidate layouts
+  - Gate-design and defect-influence APIs reject empty specifications
+  - `on_the_fly_gate_library` measures the distance between a defect and the gate's SiDBs on the surface's
+    lattice
+
+- Physical design:
+
+  - `apply_gate_library_to_defective_surface` and `apply_parameterized_gate_library_to_defective_surface`
+    take the defective surface as a `sidb::layout` and return one that carries its defects. The cell-level
+    layout to place gates on is their first template argument
+  - `surface_analysis` and `surface_black_list` live in `physical_design/surface_analysis.hpp` and namespace
+    `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
+    SiDB header dependency
 
 - Data structures:
   - Simulation results store charge states and energy beside one shared layout and potential

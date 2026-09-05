@@ -18,14 +18,15 @@
 
 #pragma once
 
-#include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/generators/design_gates.hpp"
 #include "fiction/technology/sidb/generators/is_gate_design_impossible.hpp"
-#include "fiction/technology/sidb/model/nm_distance.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
@@ -112,9 +113,7 @@ class gate_design_exception : public std::exception
 /**
  * This struct encapsulates parameters for the parameterized SiDB gate library.
  *
- * @tparam CellType SiDB cell type.
  */
-template <typename CellType>
 struct on_the_fly_gate_library_params
 {
     /**
@@ -134,7 +133,7 @@ struct on_the_fly_gate_library_params
     /**
      * This struct holds parameters to design SiDB gates.
      */
-    sidb::generators::design_gates_params<CellType> design_gate_params{};
+    sidb::generators::design_gates_params design_gate_params{};
     /**
      * This variable defines the number of canvas SiDBs dedicated to complex gates, such as crossing, double wire,
      * and half-adder.
@@ -178,7 +177,7 @@ class on_the_fly_gate_library
      */
     template <typename GateLyt, typename CellLyt, typename Params>
     static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const Params& params,
-                            const std::optional<CellLyt>& defect_surface = std::nullopt)
+                            const std::optional<layout>& defect_surface = std::nullopt)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
         static_assert(has_cube_coord_v<CellLyt>, "CellLyt must be based on cube coordinates");
@@ -192,12 +191,13 @@ class on_the_fly_gate_library
         // center cell of the Bestagon tile. IMPORTANT: There is no center for the specified Bestagon library. The
         // middle is at 22.66666 (34*2/3). However, this is not an integer and does not specify a cell. Cell close to it
         // is chosen.
-        auto center_cell = layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
-            lyt, t, cell<CellLyt>{gate_x_size() / 2, gate_y_size() / 2});
+        const auto center_cell =
+            to_lattice_site(layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
+                lyt, t, cell<CellLyt>{gate_x_size() / 2, gate_y_size() / 2}));
         // center cell of the current tile
-        auto absolute_cell =
-            layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
-                lyt, t, cell<CellLyt>{0, 0});
+        const auto absolute_cell =
+            to_lattice_site(layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
+                lyt, t, cell<CellLyt>{0, 0}));
 
         auto complex_gate_param                                      = params;
         complex_gate_param.design_gate_params.number_of_canvas_sidbs = params.canvas_sidb_complex_gates;
@@ -210,22 +210,19 @@ class on_the_fly_gate_library
                 {
                     if (lyt.fanout_size(n) == 2)
                     {
-                        const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(ONE_IN_TWO_OUT_MAP.at(p));
+                        const auto skeleton = cell_list_to_layout(ONE_IN_TWO_OUT_MAP.at(p));
 
-                        if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                        if (defect_surface.has_value())
                         {
-                            if (defect_surface.has_value())
-                            {
-                                const auto skeleton_with_defects = add_defect_to_skeleton(
-                                    defect_surface.value(), skeleton, params.influence_radius_charged_defects,
-                                    center_cell, absolute_cell);
+                            const auto skeleton_with_defects = add_defect_to_skeleton(
+                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
+                                absolute_cell);
 
-                                return design_gate<CellLyt, tt, CellLyt, GateLyt>(
-                                    skeleton_with_defects, synthesis::create_fan_out_tt(), params, p, t);
-                            }
+                            return design_gate<tt, GateLyt>(skeleton_with_defects, synthesis::create_fan_out_tt(),
+                                                            params, p, t);
                         }
-                        return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, synthesis::create_fan_out_tt(),
-                                                                          params, p, t);
+
+                        return design_gate<tt, GateLyt>(skeleton, synthesis::create_fan_out_tt(), params, p, t);
                     }
                 }
             }
@@ -241,42 +238,9 @@ class on_the_fly_gate_library
                             // two possible options: actual crossover and (parallel) hourglass wire
                             const auto pa = determine_port_routing(lyt, at);
 
-                            const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_TWO_OUT);
+                            const auto skeleton = cell_list_to_layout(TWO_IN_TWO_OUT);
 
                             if (auto cell_list = TWO_IN_TWO_OUT_MAP.at({p, pa}); cell_list == DOUBLE_WIRE)
-                            {
-                                if constexpr (is_sidb_defect_surface_v<CellLyt>)
-                                {
-                                    if (defect_surface.has_value())
-                                    {
-                                        const auto skeleton_with_defects = add_defect_to_skeleton(
-                                            defect_surface.value(), skeleton, params.influence_radius_charged_defects,
-                                            center_cell, absolute_cell);
-
-                                        if (is_predefined_bestagon_gate_applicable(
-                                                cell_list_to_cell_level_layout<CellLyt>(DOUBLE_WIRE),
-                                                skeleton_with_defects, synthesis::create_double_wire_tt(), params))
-                                        {
-                                            return DOUBLE_WIRE;
-                                        }
-
-                                        return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                            skeleton_with_defects, synthesis::create_double_wire_tt(),
-                                            complex_gate_param, p, t);
-                                    }
-                                }
-
-                                if (params.using_predefined_crossing_and_double_wire_if_possible ==
-                                    Params::complex_gate_design_policy::USING_PREDEFINED)
-                                {
-                                    return DOUBLE_WIRE;
-                                }
-
-                                return design_gate<CellLyt, tt, CellLyt, GateLyt>(
-                                    skeleton, synthesis::create_double_wire_tt(), complex_gate_param, p, t);
-                            }
-
-                            if constexpr (is_sidb_defect_surface_v<CellLyt>)
                             {
                                 if (defect_surface.has_value())
                                 {
@@ -285,16 +249,43 @@ class on_the_fly_gate_library
                                         center_cell, absolute_cell);
 
                                     if (is_predefined_bestagon_gate_applicable(
-                                            cell_list_to_cell_level_layout<CellLyt>(CROSSING), skeleton_with_defects,
-                                            synthesis::create_crossing_wire_tt(), params))
+                                            cell_list_to_layout(DOUBLE_WIRE), skeleton_with_defects,
+                                            synthesis::create_double_wire_tt(), params))
                                     {
-                                        return CROSSING;
+                                        return DOUBLE_WIRE;
                                     }
 
-                                    return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                        skeleton_with_defects, synthesis::create_crossing_wire_tt(), complex_gate_param,
-                                        p, t);
+                                    return design_gate<tt, GateLyt>(skeleton_with_defects,
+                                                                    synthesis::create_double_wire_tt(),
+                                                                    complex_gate_param, p, t);
                                 }
+
+                                if (params.using_predefined_crossing_and_double_wire_if_possible ==
+                                    Params::complex_gate_design_policy::USING_PREDEFINED)
+                                {
+                                    return DOUBLE_WIRE;
+                                }
+
+                                return design_gate<tt, GateLyt>(skeleton, synthesis::create_double_wire_tt(),
+                                                                complex_gate_param, p, t);
+                            }
+
+                            if (defect_surface.has_value())
+                            {
+                                const auto skeleton_with_defects = add_defect_to_skeleton(
+                                    defect_surface.value(), skeleton, params.influence_radius_charged_defects,
+                                    center_cell, absolute_cell);
+
+                                if (is_predefined_bestagon_gate_applicable(
+                                        cell_list_to_layout(CROSSING), skeleton_with_defects,
+                                        synthesis::create_crossing_wire_tt(), params))
+                                {
+                                    return CROSSING;
+                                }
+
+                                return design_gate<tt, GateLyt>(skeleton_with_defects,
+                                                                synthesis::create_crossing_wire_tt(),
+                                                                complex_gate_param, p, t);
                             }
 
                             if (params.using_predefined_crossing_and_double_wire_if_possible ==
@@ -303,8 +294,8 @@ class on_the_fly_gate_library
                                 return CROSSING;
                             }
 
-                            return design_gate<CellLyt, tt, CellLyt, GateLyt>(
-                                skeleton, synthesis::create_crossing_wire_tt(), complex_gate_param, p, t);
+                            return design_gate<tt, GateLyt>(skeleton, synthesis::create_crossing_wire_tt(),
+                                                            complex_gate_param, p, t);
                         }
 
                         const auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
@@ -313,21 +304,17 @@ class on_the_fly_gate_library
                             return EMPTY_GATE;
                         }
 
-                        const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(cell_list);
+                        const auto skeleton = cell_list_to_layout(cell_list);
 
-                        if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                        if (defect_surface.has_value())
                         {
-                            if (defect_surface.has_value())
-                            {
-                                const auto skeleton_with_defects = add_defect_to_skeleton(
-                                    defect_surface.value(), skeleton, params.influence_radius_charged_defects,
-                                    center_cell, absolute_cell);
-                                return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                    skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                            }
+                            const auto skeleton_with_defects = add_defect_to_skeleton(
+                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
+                                absolute_cell);
+                            return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                         }
 
-                        return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                        return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                     }
                     return EMPTY_GATE;
                 }
@@ -336,242 +323,198 @@ class on_the_fly_gate_library
             {
                 if (lyt.is_inv(n))
                 {
-                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(ONE_IN_ONE_OUT_MAP.at(p));
+                    const auto skeleton = cell_list_to_layout(ONE_IN_ONE_OUT_MAP.at(p));
 
-                    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                    if (defect_surface.has_value())
                     {
-                        if (defect_surface.has_value())
-                        {
-                            const auto skeleton_with_defects = add_defect_to_skeleton(
-                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
-                                absolute_cell);
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                            return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                        }
+                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_and_v<GateLyt>)
             {
                 if (lyt.is_and(n))
                 {
-                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
+                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                    if (defect_surface.has_value())
                     {
-                        if (defect_surface.has_value())
-                        {
-                            const auto skeleton_with_defects = add_defect_to_skeleton(
-                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
-                                absolute_cell);
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                            return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                        }
+                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_or_v<GateLyt>)
             {
                 if (lyt.is_or(n))
                 {
-                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
+                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                    if (defect_surface.has_value())
                     {
-                        if (defect_surface.has_value())
-                        {
-                            const auto skeleton_with_defects = add_defect_to_skeleton(
-                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
-                                absolute_cell);
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                            return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                        }
+                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_nand_v<GateLyt>)
             {
                 if (lyt.is_nand(n))
                 {
-                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
+                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                    if (defect_surface.has_value())
                     {
-                        if (defect_surface.has_value())
-                        {
-                            const auto skeleton_with_defects = add_defect_to_skeleton(
-                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
-                                absolute_cell);
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                            return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                        }
+                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_nor_v<GateLyt>)
             {
                 if (lyt.is_nor(n))
                 {
-                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
+                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                    if (defect_surface.has_value())
                     {
-                        if (defect_surface.has_value())
-                        {
-                            const auto layout = add_defect_to_skeleton(defect_surface.value(), skeleton,
-                                                                       params.influence_radius_charged_defects,
-                                                                       center_cell, absolute_cell);
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                            return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f},
-                                                                                       params, p, t);
-                        }
+                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
-                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+
+                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_xor_v<GateLyt>)
             {
-                const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
-
                 if (lyt.is_xor(n))
                 {
+                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                    if (defect_surface.has_value())
                     {
-                        if (defect_surface.has_value())
-                        {
-                            const auto skeleton_with_defects = add_defect_to_skeleton(
-                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
-                                absolute_cell);
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                            return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                        }
+                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_xnor_v<GateLyt>)
             {
                 if (lyt.is_xnor(n))
                 {
-                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
+                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                    if (defect_surface.has_value())
                     {
-                        if (defect_surface.has_value())
-                        {
-                            const auto skeleton_with_defects = add_defect_to_skeleton(
-                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
-                                absolute_cell);
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                            return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                        }
+                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_ge_v<GateLyt>)
             {
                 if (lyt.is_ge(n))
                 {
-                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
+                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                    if (defect_surface.has_value())
                     {
-                        if (defect_surface.has_value())
-                        {
-                            const auto skeleton_with_defects = add_defect_to_skeleton(
-                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
-                                absolute_cell);
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                            return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                        }
+                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_le_v<GateLyt>)
             {
                 if (lyt.is_le(n))
                 {
-                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
+                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                    if (defect_surface.has_value())
                     {
-                        if (defect_surface.has_value())
-                        {
-                            const auto skeleton_with_defects = add_defect_to_skeleton(
-                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
-                                absolute_cell);
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                            return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                        }
+                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_gt_v<GateLyt>)
             {
                 if (lyt.is_gt(n))
                 {
-                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
+                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                    if (defect_surface.has_value())
                     {
-                        if (defect_surface.has_value())
-                        {
-                            const auto skeleton_with_defects = add_defect_to_skeleton(
-                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
-                                absolute_cell);
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                            return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                        }
+                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_lt_v<GateLyt>)
             {
                 if (lyt.is_lt(n))
                 {
-                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
+                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+                    if (defect_surface.has_value())
                     {
-                        if (defect_surface.has_value())
-                        {
-                            const auto skeleton_with_defects = add_defect_to_skeleton(
-                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
-                                absolute_cell);
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                            return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                        }
+                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
         }
@@ -586,96 +529,86 @@ class on_the_fly_gate_library
 
   private:
     /**
-     * This function evaluates whether a predefined Bestagon gate can be applied to the given node by considering
-     * various conditions, including the presence of defects and spacing requirements.
+     * Checks whether a predefined Bestagon gate can be used on a skeleton with defects: none of its logic cells may be
+     * affected by a defect, and the gate has to be operational with the defects in place.
      *
-     * @tparam CellLyt SiDB defect surface type.
      * @tparam TT Truth table type.
-     * @tparam Params Type of the parameters used for the parametrized gate library.
-     * @param bestagon_lyt The Bestagon gate which is to be applied.
-     * @param skeleton_with_defects The skeleton layout with atomic defects.
-     * @param truth_table The truth table representing the gate's logic function.
-     * @param parameters Parameters for the gate design and simulation.
-     * @return `true` if the Bestagon gate is applicable to the layout, considering the provided conditions;
-     *         otherwise, returns `false`.
+     * @param bestagon_lyt The predefined gate.
+     * @param skeleton_with_defects The skeleton with the surface defects nearby.
+     * @param truth_table The Boolean function(s) of the gate.
+     * @param parameters Parameters.
+     * @return `true` if the predefined gate can be used.
      */
-    template <typename CellLyt, typename TT>
-    [[nodiscard]] static bool
-    is_predefined_bestagon_gate_applicable(const CellLyt& bestagon_lyt, const CellLyt& skeleton_with_defects,
-                                           const std::vector<TT>&                               truth_table,
-                                           const on_the_fly_gate_library_params<cell<CellLyt>>& parameters)
+    template <typename TT>
+    [[nodiscard]] static bool is_predefined_bestagon_gate_applicable(const layout&          bestagon_lyt,
+                                                                     const layout&          skeleton_with_defects,
+                                                                     const std::vector<TT>& truth_table,
+                                                                     const on_the_fly_gate_library_params& parameters)
     {
-        static_assert(is_sidb_defect_surface_v<CellLyt>, "Lyt is not an SiDB defect surface");
+        const auto sidbs_affected_by_defects =
+            skeleton_with_defects.all_affected_sidbs(std::pair<uint16_t, uint16_t>{0, 0});
 
-        const auto sidbs_affected_by_defects = skeleton_with_defects.all_affected_sidbs(std::pair(0, 0));
+        auto skeleton_with_defects_copy = skeleton_with_defects;
 
-        auto skeleton_with_defects_copy = skeleton_with_defects.clone();
-
-        const auto logic_cells = bestagon_lyt.get_cells_by_type(fiction::technology<CellLyt>::cell_type::LOGIC);
+        const auto logic_cells = bestagon_lyt.cells_of_type(sidb::sidb_technology::cell_type::LOGIC);
 
         assert(!logic_cells.empty() && "No Logic cells are found");
 
         if (std::ranges::any_of(logic_cells,
-                                [&](const auto& l_cell) { return sidbs_affected_by_defects.count(l_cell); }))
+                                [&](const auto& l_cell) { return sidbs_affected_by_defects.contains(l_cell); }))
         {
             return false;
         }
 
-        for (const auto& l_cells : logic_cells)
+        for (const auto& l_cell : logic_cells)
         {
-            skeleton_with_defects_copy.assign_cell_type(l_cells, sidb::sidb_technology::cell_type::LOGIC);
+            skeleton_with_defects_copy.assign_cell_type(l_cell, sidb::sidb_technology::cell_type::LOGIC);
         }
 
-        const auto status =
-            sidb::simulation::logic::is_operational(skeleton_with_defects_copy, truth_table,
-                                                    sidb::simulation::logic::is_operational_params{
-                                                        parameters.design_gate_params.operational_params.sim_params,
-                                                        parameters.design_gate_params.operational_params.sim_engine})
-                .first;
+        const auto status = sidb::simulation::logic::is_operational(skeleton_with_defects_copy, truth_table,
+                                                                    parameters.design_gate_params.operational_params)
+                                .first;
 
-        return static_cast<bool>(status == sidb::simulation::logic::operational_status::OPERATIONAL);
+        return status == sidb::simulation::logic::operational_status::OPERATIONAL;
     }
     /**
-     * Generates a cell-level layout as a 2D array of characters based on the provided cell layout information.
+     * Reads the cell types of a designed gate back into a cell list: the tile's sites in raster order become
+     * `'x'` (normal), `'i'` (input), `'o'` (output), `'l'` (logic), or `' '` (empty).
      *
-     * @tparam Lyt Cell-level layout type.
-     * @param lyt Cell-level layout
-     * @return A 2D array of characters representing the cell-level layout.
+     * @param lyt The designed gate; its cells lie within the tile.
+     * @return The cell list.
      */
-    template <typename Lyt>
     [[nodiscard]] static std::array<std::array<char, gate_x_size()>, gate_y_size()>
-    cell_level_layout_to_list(const Lyt& lyt) noexcept
+    cell_level_layout_to_list(const layout& lyt)
     {
         std::array<std::array<char, gate_x_size()>, gate_y_size()> result{};
-        const auto                                                 all_coordinates_in_the_spanned_area =
-            layouts::all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
 
-        uint64_t cell_index = 0;
+        const auto sites = sites_in_area(site_at_row(0, 0), site_at_row(gate_x_size() - 1, gate_y_size() - 1));
+
+        std::size_t cell_index = 0;
 
         for (auto& row : result)
         {
             for (auto& cell : row)
             {
-                const auto cell_type = lyt.get_cell_type(all_coordinates_in_the_spanned_area[cell_index]);
-
-                switch (cell_type)
+                switch (lyt.get_cell_type(sites[cell_index]))
                 {
-                    case (Lyt::technology::cell_type::NORMAL):
+                    case sidb::sidb_technology::cell_type::NORMAL:
                     {
                         cell = 'x';
                         break;
                     }
-                    case (Lyt::technology::cell_type::INPUT):
+                    case sidb::sidb_technology::cell_type::INPUT:
                     {
                         cell = 'i';
                         break;
                     }
-                    case (Lyt::technology::cell_type::OUTPUT):
+                    case sidb::sidb_technology::cell_type::OUTPUT:
                     {
                         cell = 'o';
                         break;
                     }
-                    case (Lyt::technology::cell_type::LOGIC):
+                    case sidb::sidb_technology::cell_type::LOGIC:
                     {
                         cell = 'l';
                         break;
@@ -686,174 +619,111 @@ class on_the_fly_gate_library
                         break;
                     }
                 }
-                cell_index++;
+
+                ++cell_index;
             }
         }
 
         return result;
     }
     /**
-     * This function designs an SiDB gate for a given Boolean function at a given tile and a given rotation. If atomic
-     * defects exist, they are incorporated into the design process.
+     * Designs a gate on a skeleton and returns it as a cell list. If the skeleton holds defects that make a design
+     * impossible, or if the designer finds no gate, a `gate_design_exception` names the tile, the function, and the
+     * ports so that placement can blacklist them.
      *
-     * An exception is thrown in case there is no possible gate design.
-     *
-     * @tparam LytSkeleton The cell-level layout of the skeleton.
      * @tparam TT Truth table type.
-     * @tparam CellLyt The cell-level layout.
-     * @tparam GateLyt The gate-level layout.
-     * @param skeleton Skeleton with atomic defects if available.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
-     * @param parameters Parameters for the SiDB gate design process.
-     * @param p The list of ports and their directions.
-     * @param tile The specific tile on which the gate should be designed.
-     * @return An `gate` object.
+     * @tparam GateLyt Gate-level layout type.
+     * @param skeleton The skeleton, possibly with defects.
+     * @param spec The Boolean function(s) to implement.
+     * @param parameters Parameters.
+     * @param p The ports of the tile.
+     * @param tile The tile.
+     * @return The designed gate.
+     * @throws gate_design_exception if no gate can be designed.
      */
-    template <typename LytSkeleton, typename TT, typename CellLyt, typename GateLyt>
-    [[nodiscard]] static gate design_gate(const LytSkeleton& skeleton, const std::vector<TT>& spec,
-                                          const on_the_fly_gate_library_params<cell<CellLyt>>& parameters,
+    template <typename TT, typename GateLyt>
+    [[nodiscard]] static gate design_gate(const layout& skeleton, const std::vector<TT>& spec,
+                                          const on_the_fly_gate_library_params&      parameters,
                                           const fcn::port_list<fcn::port_direction>& p, const tile<GateLyt>& tile)
     {
-        static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
-        static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
-        static_assert(has_cube_coord_v<CellLyt>, "CellLyt is not based on cube coordinates");
-
         const auto params = sidb::generators::is_gate_design_impossible_params{
-            parameters.design_gate_params.operational_params.sim_params};
+            .sim_params          = parameters.design_gate_params.operational_params.sim_params,
+            .bdl_iterator_params = parameters.design_gate_params.operational_params.input_bdl_iterator_params};
 
-        if (spec == synthesis::create_crossing_wire_tt() || spec == synthesis::create_double_wire_tt())
+        const bool is_wire = spec == synthesis::create_crossing_wire_tt() || spec == synthesis::create_double_wire_tt();
+        const auto function_to_report = is_wire ? synthesis::create_id_tt() : spec.front();
+
+        if (skeleton.num_defects() > 0 && sidb::generators::is_gate_design_impossible(skeleton, spec, params))
         {
-            if constexpr (is_sidb_defect_surface_v<LytSkeleton>)
-            {
-                if (sidb::generators::is_gate_design_impossible(skeleton, spec, params))
-                {
-                    throw gate_design_exception<tt, GateLyt>(tile, synthesis::create_id_tt(), p);
-                }
-            }
-
-            const auto found_gate_layouts =
-                sidb::generators::design_gates(skeleton, spec, parameters.design_gate_params);
-
-            if (found_gate_layouts.empty())
-            {
-                throw gate_design_exception<tt, GateLyt>(tile, synthesis::create_id_tt(), p);
-            }
-
-            return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
-        }
-
-        if constexpr (is_sidb_defect_surface_v<LytSkeleton>)
-        {
-            if (sidb::generators::is_gate_design_impossible(skeleton, spec, params))
-            {
-                throw gate_design_exception<tt, GateLyt>(tile, spec.front(), p);
-            }
+            throw gate_design_exception<tt, GateLyt>(tile, function_to_report, p);
         }
 
         const auto found_gate_layouts = sidb::generators::design_gates(skeleton, spec, parameters.design_gate_params);
 
         if (found_gate_layouts.empty())
         {
-            throw gate_design_exception<tt, GateLyt>(tile, spec.front(), p);
+            throw gate_design_exception<tt, GateLyt>(tile, function_to_report, p);
         }
 
         return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
     }
     /**
-     * The function generates a layout where each cell is assigned a specific
-     * cell type according to the characters in the cell list/input grid.
+     * Builds a layout from a cell list: the tile's sites in raster order take the listed cell types.
      *
-     * @tparam Lyt The type of the cell-level layout to be generated.
-     * @param cell_list A 2D grid representing the cells and their types.
-     * @return The cell-level layout with assigned cell types.
+     * @param cell_list The cell list.
+     * @return The layout.
      */
-    template <typename Lyt>
-    [[nodiscard]] static Lyt cell_list_to_cell_level_layout(const gate& cell_list) noexcept
+    [[nodiscard]] static layout cell_list_to_layout(const gate& cell_list)
     {
-        Lyt lyt{};
+        layout lyt{};
 
-        const auto all_cell =
-            layouts::all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
-        uint64_t counter = 0;
+        const auto sites = sites_in_area(site_at_row(0, 0), site_at_row(gate_x_size() - 1, gate_y_size() - 1));
+
+        std::size_t counter = 0;
 
         for (std::size_t i = 0; i < gate_y_size(); ++i)
         {
             for (std::size_t j = 0; j < gate_x_size(); ++j)
             {
-                const auto cell = cell_list.at(i).at(j);
-
-                switch (cell)
+                if (const auto cell = cell_list.at(i).at(j); cell != sidb::sidb_technology::cell_type::EMPTY)
                 {
-                    case Lyt::technology::cell_type::NORMAL:  // normal cell
-                    {
-                        lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::NORMAL);
-                        break;
-                    }
-                    case Lyt::technology::cell_type::INPUT:  // input cell
-                    {
-                        lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::INPUT);
-                        break;
-                    }
-                    case Lyt::technology::cell_type::OUTPUT:  // output cell
-                    {
-                        lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::OUTPUT);
-                        break;
-                    }
-                    case Lyt::technology::cell_type::LOGIC:  // logic cell
-                    {
-                        lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::LOGIC);
-                        break;
-                    }
-                    case Lyt::technology::cell_type::EMPTY:
-                    {
-                        break;
-                    }
+                    lyt.assign_cell_type(sites[counter], cell);
                 }
-                counter += 1;
+
+                ++counter;
             }
         }
 
         return lyt;
     }
     /**
-     * This function takes a defect surface and a skeleton skeleton and adds defects from the surrounding area
-     * to the skeleton. The defects within a specified distance from the center cell are taken into account.
-     * The resulting skeleton with added defects is returned.
+     * Copies the surface defects within the influence radius of a tile's center into the skeleton, at their position
+     * relative to the tile's origin.
      *
-     * @tparam CellLyt SiDB defect surface type.
-     * @tparam Params Type of Parameters.
-     * @param skeleton The skeleton to which defects will be added.
-     * @param center_cell The coordinates of the center cell.
-     * @param absolute_cell The coordinates of the skeleton's absolute cell.
-     * @param parameters Parameters for defect handling.
-     * @return The updated skeleton with added defects from the surrounding area.
+     * @param defect_surface The surface with the defects.
+     * @param skeleton The skeleton of the tile.
+     * @param influence_distance Radius (unit: nm) around the tile's center within which defects are copied.
+     * @param center_cell The tile's center on the surface.
+     * @param absolute_cell The tile's origin on the surface.
+     * @return The skeleton with the defects.
      */
-    template <typename CellLyt>
-    [[nodiscard]] static CellLyt
-    add_defect_to_skeleton(const CellLyt& defect_surface, const CellLyt& skeleton, const double influence_distance,
-                           const cell<CellLyt>& center_cell, const cell<CellLyt>& absolute_cell)
+    [[nodiscard]] static layout add_defect_to_skeleton(const layout& defect_surface, const layout& skeleton,
+                                                       const double influence_distance, const lattice_site& center_cell,
+                                                       const lattice_site& absolute_cell)
     {
-        static_assert(is_sidb_defect_surface_v<CellLyt>, "CellLyt is not a defect surface");
-        static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
-        static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
-        static_assert(has_cube_coord_v<CellLyt>, "CellLyt is not based on cube coordinates");
-
         auto skeleton_with_defect = skeleton;
 
-        defect_surface.foreach_sidb_defect(
-            [&skeleton_with_defect, &center_cell, &absolute_cell, &influence_distance](const auto& cd)
-            {
-                // all defects (charged) in a distance of influence_radius_charged_defects from the center are taken
-                // into account.
-                if (sidb::model::nm_distance(CellLyt{}, center_cell, cd.first) < influence_distance)
-                {
-                    const auto relative_defect_position = cd.first - absolute_cell;
-                    skeleton_with_defect.assign_defect(relative_defect_position, cd.second);
-                }
-            });
+        const auto& lat = defect_surface.get_lattice();
 
-        const auto bb = layouts::bounding_box_2d(skeleton_with_defect);
-        skeleton_with_defect.resize(bb.get_max());
+        for (const auto& [s, d] : defect_surface.defects())
+        {
+            // all defects (charged) in a distance of influence_radius_charged_defects from the center are taken
+            // into account
+            if (lat.nm_distance(center_cell, s) < influence_distance)
+            {
+                skeleton_with_defect.assign_defect(s - absolute_cell, d);
+            }
+        }
 
         return skeleton_with_defect;
     }

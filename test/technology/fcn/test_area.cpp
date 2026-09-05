@@ -15,11 +15,20 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/technology/fcn/area.hpp>
+#include <fiction/technology/inml/technology.hpp>
+#include <fiction/technology/qca/technology.hpp>
+#include <fiction/technology/sidb/layout.hpp>
+#include <fiction/technology/sidb/model/defect.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
+
+#include <cstdint>
+#include <limits>
 
 using namespace fiction;
 using namespace fiction::fcn;
@@ -32,7 +41,7 @@ TEST_CASE("Area computation for different technologies", "[area]")
 {
     SECTION("QCA")
     {
-        qca_cell_clk_lyt lyt{{4, 4}};
+        const qca_cell_clk_lyt lyt{{4, 4}};
 
         const auto area_nm2 = area<qca_cell_clk_lyt>(lyt, area_params<qca_technology>{});
         CHECK_THAT(area_nm2, Catch::Matchers::WithinAbs(9604.0, 0.0001));
@@ -51,7 +60,7 @@ TEST_CASE("Area computation for different technologies", "[area]")
 
     SECTION("iNML")
     {
-        inml_cell_clk_lyt lyt{{4, 4}};
+        const inml_cell_clk_lyt lyt{{4, 4}};
 
         const auto area_nm2 = area<inml_cell_clk_lyt>(lyt, area_params<inml_technology>{});
         CHECK_THAT(area_nm2, Catch::Matchers::WithinAbs(174000.0, 0.0001));
@@ -70,7 +79,7 @@ TEST_CASE("Area computation for different technologies", "[area]")
 
     SECTION("SiDB")
     {
-        sidb_cell_clk_lyt lyt{{4, 4}};
+        const sidb_cell_clk_lyt lyt{{4, 4}};
 
         const auto area_nm2 = area<sidb_cell_clk_lyt>(lyt, area_params<sidb_technology>{});
         CHECK_THAT(area_nm2, Catch::Matchers::WithinAbs(2.359296, 0.000001));
@@ -85,5 +94,40 @@ TEST_CASE("Area computation for different technologies", "[area]")
         const bounding_box_2d bb{lyt};
         const auto            area_bb = area<sidb_cell_clk_lyt>(bb, area_params<sidb_technology>{});
         CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(0.0, 0.000001));
+    }
+    SECTION("SiDB layout over a crystal lattice")
+    {
+        layout lyt{};
+
+        CHECK_THAT(area(lyt), Catch::Matchers::WithinAbs(0.0, 0.000001));
+
+        // four columns and four single-SiDB rows span the same box as the 5 x 5 cell-level layout above
+        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::NORMAL);
+
+        area_stats stats{};
+        CHECK_THAT(area(lyt, area_params<sidb_technology>{}, &stats), Catch::Matchers::WithinAbs(2.359296, 0.000001));
+
+        CHECK_THAT(stats.width, Catch::Matchers::WithinAbs(1.536, 0.0001));
+        CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(1.536, 0.0001));
+        CHECK_THAT(stats.area, Catch::Matchers::WithinAbs(2.359296, 0.000001));
+
+        // defects extend the bounding box
+        lyt.assign_defect({4, 4, 1}, model::defect{model::defect_type::DB, -1});
+        CHECK_THAT(area(lyt, area_params<sidb_technology>{}, &stats), Catch::Matchers::WithinAbs(5.308416, 0.000001));
+
+        CHECK_THAT(stats.width, Catch::Matchers::WithinAbs(1.536, 0.0001));
+        CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(3.456, 0.0001));
+    }
+    SECTION("SiDB layout spanning the full column range")
+    {
+        layout lyt{};
+        lyt.assign_cell_type({std::numeric_limits<int32_t>::min(), 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({std::numeric_limits<int32_t>::max(), 0}, sidb_technology::cell_type::NORMAL);
+
+        area_stats stats{};
+        CHECK_THAT(area(lyt, area_params<sidb_technology>{}, &stats), Catch::Matchers::WithinAbs(0.0, 0.000001));
+
+        CHECK_THAT(stats.width, Catch::Matchers::WithinRel(4'294'967'295.0 * sidb_technology::CELL_HSPACE, 0.000001));
     }
 }

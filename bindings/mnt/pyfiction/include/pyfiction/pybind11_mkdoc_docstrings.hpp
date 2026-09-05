@@ -63,6 +63,23 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_fcn_area_3 =
+R"doc(Computes real-world area requirements in nm² of the bounding box of a
+given SiDB layout. The bounding box covers the layout's SiDBs and
+defects; every column and every single-SiDB row inside it is assigned
+a horizontal and vertical size, and a spacing between neighboring
+columns and rows is taken into account. An empty layout has no area.
+
+Args:
+    lyt: The SiDB layout whose area is desired.
+    ps: Area parameters.
+    pst: Area statistics.
+
+Returns:
+    Area requirements in nm².
+
+)doc";
+
 static const char *mkd_doc_fiction_fcn_area_params =
 R"doc(Parameters for area computation of cell-level layouts. Default
 parameters are loaded from the given cell technology.
@@ -7800,28 +7817,22 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_apply_gate_library_to_defective_surface =
-R"doc(Applies a gate library to a given gate-level layout and maps the SiDB
-and defect locations onto a defect surface. The gate library type
-should provide all functions specified in gate_library. It is, thus,
-easiest to extend gate_library to implement a new gate library.
-Examples are `qca_one_library`, `topolinano_library`, and
-`sidb::bestagon_library`.
-
-May pass through, and thereby throw, an
-`unsupported_gate_type_exception` or an
-`unsupported_gate_orientation_exception`.
+R"doc(Applies a static gate library to a gate-level layout on a defective
+SiDB surface: the gates are placed on a Cartesian SiDB cell-level
+layout as with `apply_gate_library`, the result is converted with
+`to_sidb_layout`, and the surface's defects are copied into it.
 
 Args:
     lyt: The gate-level layout.
+    defect_surface: The surface with the defects.
 
 Template Args:
-    CellLyt: Type of the returned cell-level layout.
-    GateLibrary: Type of the gate library to apply.
-    GateLyt: Type of the gate-level layout to apply the library to.
+    CellLyt: SiDB cell-level layout type the gates are placed on.
+    GateLibrary: Gate library type.
+    GateLyt: Gate-level layout type.
 
 Returns:
-    A cell-level layout that implements `lyt`'s gate types with
-    building blocks defined in `GateLibrary`.
+    The SiDB layout with the gates and the defects.
 
 )doc";
 
@@ -7852,29 +7863,26 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_apply_parameterized_gate_library_to_defective_surface =
-R"doc(Applies a defect-aware parameterized gate library to a given gate-
-level layout and, thereby, creates and returns a cell-level layout.
-
-May pass through, and thereby throw, an
-`unsupported_gate_type_exception`, an
-`unsupported_gate_orientation_exception` and any further custom
-exceptions of the gate libraries.
+R"doc(Applies a parameterized gate library to a gate-level layout on a
+defective SiDB surface: the library designs every gate with the
+surface's defects near its tile in place, the gates are placed on a
+Cartesian SiDB cell-level layout, the result is converted with
+`to_sidb_layout`, and the surface's defects are copied into it.
 
 Args:
     lyt: The gate-level layout.
-    params: Parameter for the gate library.
-    defect_lyt: Defect surface.
+    params: Parameters of the gate library.
+    defect_surface: The surface with the defects.
 
 Template Args:
-    DefectLyt: Type of the returned cell-level layout.
-    GateLibrary: Type of the gate library to apply.
-    GateLyt: Type of the gate-level layout to apply the library to.
-    Params: Type of the parameter used for SiDB on-the-fly gate
-            library.
+    CellLyt: SiDB cell-level layout type the gates are placed on; it
+             has to use cube coordinates.
+    GateLibrary: Gate library type.
+    GateLyt: Gate-level layout type.
+    Params: Parameter type of the gate library.
 
 Returns:
-    A cell-level layout that implements `lyt`'s gate types with
-    building blocks defined in `GateLibrary`.
+    The SiDB layout with the gates and the defects.
 
 )doc";
 
@@ -12817,6 +12825,32 @@ static const char *mkd_doc_fiction_physical_design_routing_objective_source = R"
 
 static const char *mkd_doc_fiction_physical_design_routing_objective_target = R"doc()doc";
 
+static const char *mkd_doc_fiction_physical_design_surface_analysis =
+R"doc(Analyzes a defective SiDB surface for a gate-level layout: for every
+tile and every gate implementation of the library, the gate's SiDBs
+are placed at the tile's position, and if any of them is affected by a
+defect of the surface, the gate's ports are blacklisted for that tile
+and function. Placement can then avoid those gates.
+
+Args:
+    gate_lyt: The gate-level layout.
+    surface: The defective surface.
+    charged_defect_spacing_overwrite: Overrides the spacing charged
+                                      defects keep SiDBs at.
+    neutral_defect_spacing_overwrite: Overrides the spacing neutral
+                                      defects keep SiDBs at.
+
+Template Args:
+    GateLibrary: SiDB gate library type.
+    GateLyt: Gate-level layout type.
+    CellLyt: SiDB cell-level layout type that positions the gates; it
+             has to use cube coordinates.
+
+Returns:
+    The black list.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_technology_constraints = R"doc(Target technologies.)doc";
 
 static const char *mkd_doc_fiction_physical_design_technology_constraints_NONE = R"doc(No technology-specific constraints.)doc";
@@ -14244,397 +14278,388 @@ static const char *mkd_doc_fiction_sidb_gate_design_exception_which_tile = R"doc
 static const char *mkd_doc_fiction_sidb_gate_design_exception_which_truth_table = R"doc(Get the truth table associated with the exception.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates =
-R"doc(The *SiDB Gate Designer* designs SiDB gate implementations based on a
-specified Boolean function, a skeleton layout (can hold defects),
-canvas size, and a predetermined number of canvas SiDBs. Three
-different design modes are implemented: `quickcell`, `exhaustive` and
-`random design`.
-
-A first version of `QuickCell` was proposed in \"Towards Fast
-Automatic Design of Silicon Dangling Bond Logic\" by J. Drewniok, M.
-Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
-(https://ieeexplore.ieee.org/abstract/document/10992885).
-
-An extended version of `QuickCell` was proposed in \"QuickCell: Fast
-Automatic Design of Standard Cells for Silicon Dangling Bond Logic\"
-by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in TCAD
-2025 (https://ieeexplore.ieee.org/document/11146893).
-
-The `Automatic Exhaustive Gate Designer` was proposed in \"Minimal
-Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon
-Dangling Bonds\" by J. Drewniok, M. Walter, and R. Wille in NANOARCH
-2023 (https://dl.acm.org/doi/10.1145/3611315.3633241).
-
-The `quickcell` design mode consists of two key steps:
-1. **Initial Pruning:** Efficient filtering techniques are applied to
-   discard layouts that cannot correctly
-implement the specified logic.
-2. **Physical Simulation:** The remaining candidate layouts undergo
-   physical simulation to verify their
-operationality.
-
-The `exhaustive design` is composed of three steps:
-1. In the initial step, all possible distributions of
-   `number_of_canvas_sidbs` SiDBs within a given canvas are
-exhaustively determined. This ensures exhaustive coverage of every
-potential arrangement of `number_of_canvas_sidbs` SiDBs across the
-canvas.
-2. The calculated SiDB distributions are then incorporated into the
-   skeleton, resulting in the generation of distinct
-SiDB layouts.
-3. The generated SiDB layouts then undergo an extensive simulation
-   process. All input combinations possible for the
-given Boolean function are used to verify if the logic is fulfilled.
-
-The `random design` is composed of four steps:
-1. A specified number of canvas SiDBs (`number_of_canvas_sidbs`) are
-   randomly added to the skeleton layout.
-2. The operation status of the layout is simulated based on a given
-   Boolean function.
-3. If the layout is `operational`, it is returned as the result, and
-   the process terminates successfully.
-4. If the layout is `non-operational`, the process is repeated from
-   the first step until an operational layout is
-found.
+R"doc(Designs SiDB gates on a skeleton: canvas SiDBs are placed in the
+canvas area so that the skeleton's input and output wires implement
+the given Boolean function(s). The design mode chooses between
+simulating every combination of canvas SiDBs, *QuickCell*'s pruning
+followed by simulation, random placement, and pruning only.
 
 Args:
-    skeleton: The skeleton layout used for gate design.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    params: Parameters for the *SiDB Gate Designer*.
+    skeleton: The skeleton with its input and output wires.
+    spec: The Boolean function(s) to implement; must not be empty.
+    params: Parameters.
+    stats: Statistics.
+
+Template Args:
+    TT: Truth table type.
+
+Returns:
+    The designed gates.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_design_gates_2 =
+R"doc(Transitional overload for SiDB cell-level layouts: the skeleton is
+converted with `to_sidb_layout` and the gates with
+`to_cell_level_layout`.
+
+Args:
+    skeleton: The skeleton.
+    spec: The Boolean function(s) to implement; must not be empty.
+    params: Parameters.
     stats: Statistics.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: The type of the truth table specifying the gate behavior.
+    TT: Truth table type.
 
 Returns:
-    A vector of designed SiDB gate layouts.
+    The designed gates.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params =
-R"doc(This struct contains parameters and settings to design SiDB gates.
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params = R"doc(Parameters of the gate designers.)doc";
 
-Template Args:
-    CellType: Cell type.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_canvas =
+R"doc(The canvas: the area canvas SiDBs are placed in, as two opposite
+corners.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_canvas = R"doc(Canvas spanned by the northwest and southeast cell.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode = R"doc(The design mode.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode = R"doc(Selector for the available design approaches.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Simulate every canvas layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_PRUNING_ONLY =
-R"doc(This design approach adopts the three pruning techniques used by
-*QuickCell* to efficiently filter out non-operational layouts. Unlike
-*QuickCell*, the subsequent physical simulation step is skipped to
-enhance efficiency. As a result, the operational validity of the final
-layouts cannot be guaranteed, although a substantial portion of them
-are usually operational.)doc";
+R"doc(Only run the pruning filters of *QuickCell* and return the surviving
+candidates.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_QUICKCELL = R"doc(Gates are designed by using *QuickCell*.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_QUICKCELL =
+R"doc(*QuickCell*: prune the canvas layouts with the filters of the
+operational check, then simulate the rest.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_RANDOM = R"doc(Gate layouts are designed randomly.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_RANDOM =
+R"doc(Place canvas SiDBs at random until an operational gate is found or the
+attempt limit is reached.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_mode = R"doc(Gate design mode.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_mode = R"doc(The design mode.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs = R"doc(Number of SiDBs placed in the canvas to create a working gate.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_maximal_random_design_attempts =
+R"doc(Maximum number of layouts evaluated by random gate design across all
+threads.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_operational_params = R"doc(Parameters for the `is_operational` function.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs = R"doc(Number of canvas SiDBs.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_cond =
-R"doc(The design process is terminated after a valid SiDB gate design is
-found.
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_operational_params = R"doc(Parameters of the operational check.)doc";
 
-Note:
-    This parameter has no effect unless the gate design is exhaustive.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_cond = R"doc(When to stop.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition =
-R"doc(Selector for the different termination conditions for the SiDB gate
-design process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition = R"doc(When to stop.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_AFTER_FIRST_SOLUTION =
-R"doc(The design process is terminated as soon as the first valid SiDB gate
-design is found.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_AFTER_FIRST_SOLUTION = R"doc(Stop after the first operational gate.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED =
-R"doc(The design process ends after all possible combinations of SiDBs
-within the canvas are enumerated.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED = R"doc(Enumerate every combination of canvas SiDBs.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats = R"doc(Statistics for the design of SiDB gates.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats = R"doc(Statistics of the gate designers.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts = R"doc(The number of all possible layouts.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts = R"doc(Number of canvas layouts.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_first_pruning =
-R"doc(The number of layouts that remain after first pruning (discarding
-layouts with potential positive SiDBs).)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_first_pruning = R"doc(Number of canvas layouts that survived the first pruning filter.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_second_pruning =
-R"doc(The number of layouts that remain after second pruning (discarding
-layouts that fail to satisfy the physical model).)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_second_pruning = R"doc(Number of canvas layouts that survived the second pruning filter.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_third_pruning =
-R"doc(The number of layouts that remain after third pruning (discarding
-layouts with unstable I/O signals).)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_third_pruning = R"doc(Number of canvas layouts that survived the third pruning filter.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_pruning_total = R"doc(The runtime of the pruning process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_pruning_total = R"doc(Runtime of the pruning.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_report =
-R"doc(This function outputs the total time taken for the SiDB gate design
-process to the provided output stream. If no output stream is
-provided, it defaults to standard output (`std::cout`).
+R"doc(Prints the statistics.
 
 Args:
-    out: The output stream to which the report will be written.
+    out: The stream to print to.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_sim_engine =
-R"doc(The simulation engine to be used for the operational domain
-computation.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_sim_engine = R"doc(The simulation engine used.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_time_total = R"doc(The total runtime of SiDB gate design process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_time_total = R"doc(Total runtime.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl =
+R"doc(Implementation of the gate designers.
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_canvas_layouts = R"doc(All Canvas SiDB layout (without I/O pins).)doc";
+Template Args:
+    TT: Truth table type.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_canvas_layouts = R"doc(All canvas layouts: one per combination of canvas SiDBs.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_sidbs_in_canvas = R"doc(All sites of the canvas.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_design_canvas_layout =
-R"doc(This function designs canvas SiDB layouts based on given indices.
+R"doc(Builds the canvas layout of a combination: its canvas SiDBs plus the
+skeleton's own logic cells. A combination that puts an SiDB onto a
+defect yields no layout.
 
 Args:
-    cell_indices: A vector of indices of cells to be added to the
-                  skeleton layout.
+    cell_indices: Indices into the canvas sites.
 
 Returns:
-    An SiDB cell-level layout consisting of canvas SidBs.
+    The canvas layout, or `std::nullopt`.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_design_gates_impl =
-R"doc(This constructor initializes an instance of the *SiDB Gate Designer*
-implementation with the provided skeleton layout and configuration
-parameters.
+R"doc(Constructor.
 
 Args:
-    skeleton: The skeleton layout used as a basis for gate design.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    ps: Parameters and settings for the gate designer.
-    st: Statistics for the gate design process.
+    skeleton: The skeleton: the input and output wires the gate has to
+              connect.
+    spec: The Boolean function(s) to implement.
+    ps: Parameters.
+    st: Statistics.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_determine_all_possible_canvas_layouts =
-R"doc(This function calculates all combinations of distributing a given
-number of SiDBs across a specified number of positions in the canvas.
-Each combination is then used to create a gate layout candidate.
+R"doc(Builds one canvas layout per combination of canvas SiDBs.
 
 Returns:
-    A vector containing all possible gate layouts generated from the
-    combinations.
+    The canvas layouts.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_for_each_in_parallel =
+R"doc(Runs `fn` on every item on the configured number of threads; stops
+early once `done` is set and the termination condition asks for the
+first solution only.
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_first_pruning = R"doc(Number of discarded layouts at first pruning.)doc";
+Args:
+    items: The items.
+    fn: The function.
+    done: The stop flag.
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_second_pruning = R"doc(Number of discarded layouts at second pruning.)doc";
+Template Args:
+    Items: Container type.
+    Fn: Callable type.
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_third_pruning = R"doc(Number of discarded layouts at third pruning.)doc";
+)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_input_bdl_wires = R"doc(The input wires of the skeleton.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_first_pruning = R"doc(Number of canvas layouts the first pruning filter discarded.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_threads = R"doc(Number of threads to be used for the design process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_second_pruning = R"doc(Number of canvas layouts the second pruning filter discarded.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_third_pruning = R"doc(Number of canvas layouts the third pruning filter discarded.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_threads = R"doc(Number of threads to use.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_output_bdl_wires = R"doc(The output wires of the skeleton.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_params = R"doc(Parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_automatic_exhaustive_gate_designer =
-R"doc(Design gates by using the *Automatic Exhaustive Gate Designer*. This
-algorithm was proposed in \"Minimal Design of SiDB Gates: An Optimal
-Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok,
-M. Walter, and R. Wille in NANOARCH 2023
-(https://dl.acm.org/doi/10.1145/3611315.3633241).
-
-This function adds each cell combination to the given skeleton, and
-determines whether the layout is operational based on the specified
-parameters. The design process is parallelized to improve performance.
+R"doc(Simulates every combination of canvas SiDBs.
 
 Returns:
-    A vector of designed SiDB gate layouts.
+    The operational gates.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_pruning =
-R"doc(This function processes each layout to determine if it represents a
-valid gate implementation or if it can be pruned by using three
-distinct physically-informed pruning steps. It leverages multi-
-threading to accelerate the evaluation and ensures thread-safe access
-to shared resources.
+R"doc(Runs the pruning filters of the operational check on every canvas
+layout.
 
 Returns:
-    A vector containing the valid gate candidates that were not
-    pruned.
+    The surviving candidates.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_quickcell =
-R"doc(Design Standard Cells/gates by using the *QuickCell* algorithm.
+R"doc(*QuickCell*: prunes the canvas layouts with the filters of the
+operational check and simulates the survivors.
 
 Returns:
-    A vector of designed SiDB gate layouts.
+    The operational gates, or the pruned candidates in `PRUNING_ONLY`
+    mode.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_random_design =
-R"doc(Design gates randomly and in parallel.
-
-This function adds cells randomly to the given skeleton, and
-determines whether the layout is operational based on the specified
-parameters. The design process is parallelized to improve performance.
+R"doc(Places canvas SiDBs at random until an operational gate is found.
 
 Returns:
-    A vector of designed SiDB gate layouts.
+    The operational gate, or an empty vector if none was found.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_skeleton_layout =
-R"doc(The skeleton layout serves as a starting layout to which SiDBs are
-added to create unique SiDB layouts and, if possible, working gates.
-It defines input and output wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_skeleton_layout = R"doc(The skeleton.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_skeleton_layout_with_canvas_sidbs =
-R"doc(This function adds SiDBs (given by indices) to the skeleton layout
-that is returned afterwards.
+R"doc(Adds the canvas SiDBs of a combination to the skeleton as logic cells;
+sites that hold a defect stay empty.
 
 Args:
-    cell_indices: A vector of indices of cells to be added to the
-                  skeleton layout.
+    cell_indices: Indices into the canvas sites.
 
 Returns:
-    A copy of the original layout (`skeleton_layout`) with SiDB cells
-    added at specified indices.
+    The skeleton with the canvas SiDBs.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_stats = R"doc(The statistics of the gate design.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_stats = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_truth_table = R"doc(Truth table of the given gate.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_truth_table = R"doc(The Boolean function(s).)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_multiple_random_layouts =
-R"doc(Generates multiple random layouts featuring a random arrangement of
-SiDBs. These randomly placed dots can be incorporated into an existing
-layout skeleton that may be optionally provided.
-
-Args:
-    params: The parameters for generating the random SiDB layouts.
-    skeleton: Optional layout to which random dots are added.
-
-Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
+static const char *mkd_doc_fiction_sidb_generators_detail_random_generator =
+R"doc(The generator's random source, one per thread.
 
 Returns:
-    A vector containing the unique randomly generated SiDB layouts. If
-    the design is impossible, `std::nullopt`
+    The generator.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_multiple_random_layouts =
+R"doc(Generates several unique random SiDB layouts with
+`generate_random_layout`.
+
+Args:
+    params: Parameters; `number_of_unique_generated_layouts` layouts
+            are requested.
+    skeleton: The skeleton to place SiDBs on, if any.
+
+Returns:
+    The layouts, or `std::nullopt` if none could be generated within
+    the attempt limit.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_multiple_random_layouts_2 =
+R"doc(Transitional overload for SiDB cell-level layouts; see
+`generate_random_layout`.
+
+Args:
+    params: Parameters.
+    skeleton: The skeleton to place SiDBs on, if any.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    The layouts, or `std::nullopt`.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout =
-R"doc(Generates a layout featuring a random arrangement of SiDBs. These
-randomly placed dots can be incorporated into an existing layout
-skeleton that may be optionally provided.
+R"doc(Generates a random SiDB layout by placing SiDBs at random sites of an
+area, optionally on top of a skeleton. The skeleton's lattice, cells,
+and defects carry over; sites that hold a defect or that a neutral
+defect affects are left empty. Depending on the positive charge
+policy, SiDBs that would allow positive charges are removed again, or
+the generation is repeated until positive charges are possible.
 
 Args:
-    params: The parameters for generating the random layout.
-    skeleton: Optional layout to which random dots are added.
-
-Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
+    params: Parameters.
+    skeleton: The skeleton to place SiDBs on, if any.
 
 Returns:
-    A randomly generated SiDB layout, or `std::nullopt` if the process
-    failed due to conflicting parameters.
+    The generated layout, or `std::nullopt` if not all SiDBs could be
+    placed within the attempt limit.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params =
-R"doc(This struct stores the parameters for the `generate_random_layout`
-algorithm.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_coordinate_pair =
-R"doc(Two coordinates that span the region where SiDBs may be placed (order
-is not important). The first coordinate is the upper left corner and
-the second coordinate is the lower right corner of the area.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_maximal_attempts =
-R"doc(Maximum number of steps to place the specified number of SiDBs.
-Example: If the area, where SiDBs can be placed, is small and many
-SiDBs are to be placed, several tries are required to generate a
-layout with no positively charged SiDBs.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_maximal_attempts_for_multiple_layouts =
-R"doc(The maximum number of attempts allowed to generate the given number of
-unique layouts (default: :math:`10^{6}`).
-Example: If the area, where SiDBs can be placed, is small and many
-         SiDBs are to be placed, it may be difficult or
-even impossible to find several unique (given by
-number_of_unique_generated_layouts) layouts. Therefore, this parameter
-sets a limit for the maximum number of tries.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_sidbs = R"doc(Number of SiDBs that are placed on the layout.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_unique_generated_layouts = R"doc(The desired number of unique layouts to be generated.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges =
-R"doc(An enumeration of modes to use for the generation of random SiDB
-layouts to control control the appearance of positive charges.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_ALLOWED =
-R"doc(Positive charges can occur (i.e. SiDBs can be placed right next to
-each other).)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_FORBIDDEN =
-R"doc(Positive charges are not allowed to occur (i.e. SiDBs need to be
-separated by a few lattice points).)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_MAY_OCCUR =
-R"doc(Positive charges can occur, which means that the
-`can_positive_charges_occur` function returns `true`.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_sidbs =
-R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed
-closer than the minimal_spacing.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_sim_params = R"doc(Simulation parameters.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible =
-R"doc(This function evaluates whether it is impossible to design an SiDB
-gate for a given truth table and a given skeleton with atomic defects.
-It determines the possible charge states at the output BDL pairs.
-Atomic defects can cause a BDL pair to be neutrally charged only.
-Thus, the BDL pair would not work as intended.
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_2 =
+R"doc(Transitional overload for SiDB cell-level layouts: the skeleton is
+converted with `to_sidb_layout` and the result with
+`to_cell_level_layout`.
 
 Args:
-    skeleton_with_defects: An SiDB skeleton layout with atomic
-                           defects.
-    spec: A vector of truth tables (each truth table is representing
-          one output) representing the gate's intended functionality.
-    params: Parameters to determine if the gate design is impossible.
+    params: Parameters.
+    skeleton: The skeleton to place SiDBs on, if any.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: The truth table type.
 
 Returns:
-    `true` if gate design is impossible, `false` otherwise.
+    The generated layout, or `std::nullopt`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params = R"doc(Parameters of the random layout generator.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_coordinate_pair = R"doc(The area to place SiDBs in, as two opposite corners.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_maximal_attempts = R"doc(Maximum number of placement attempts.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_maximal_attempts_for_multiple_layouts = R"doc(Maximum number of generation attempts for multiple layouts.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_sidbs = R"doc(Number of SiDBs to place.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_unique_generated_layouts =
+R"doc(Number of unique layouts to generate with
+`generate_multiple_random_layouts`.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges = R"doc(Whether positively charged SiDBs may occur in the generated layout.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_ALLOWED = R"doc(Positive charges are allowed.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_FORBIDDEN =
+R"doc(Positive charges are forbidden: SiDBs that would enable them are
+removed again.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_MAY_OCCUR =
+R"doc(Positive charges have to be possible: generation is repeated until
+they are.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_sidbs = R"doc(Positive charge policy.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_sim_params = R"doc(Physical parameters for the positive charge check.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible =
+R"doc(Checks whether a gate can be designed on a skeleton with defects at
+all: if the charged defects push one SiDB of an output BDL pair past
+its neutral transition threshold for any input pattern, that SiDB can
+never be negatively charged, the pair loses its BDL property, and no
+canvas can fix that.
+
+Args:
+    skeleton_with_defects: The skeleton, including the defects of the
+                           surface it sits on.
+    spec: The Boolean function(s) to implement; must not be empty.
+    params: Parameters.
+
+Template Args:
+    TT: Truth table type.
+
+Returns:
+    `true` if no gate can be designed on the skeleton.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible_2 =
+R"doc(Transitional overload for SiDB cell-level layouts, converted with
+`to_sidb_layout`; see the `layout` overload.
+
+Args:
+    skeleton_with_defects: The skeleton with defects.
+    spec: The Boolean function(s) to implement; must not be empty.
+    params: Parameters.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+    TT: Truth table type.
+
+Returns:
+    `true` if no gate can be designed on the skeleton.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
 
 )doc";
 
@@ -14715,10 +14740,7 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params =
 R"doc(This struct stores the parameters to design an SiDB circuit on a
-defective surface.
-
-Template Args:
-    CellLyt: SiDB cell-level layout type.)doc";
+defective surface.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params_exact_design_parameters = R"doc(Parameters for the *exact* placement and routing algorithm.)doc";
 
@@ -14736,11 +14758,7 @@ static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_stats_time_total = R"doc(The total runtime of the on-the-fly circuit design.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_params =
-R"doc(This struct stores the parameters to design an SiDB circuit.
-
-Template Args:
-    CellLyt: SiDB cell-level layout type.)doc";
+static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_params = R"doc(This struct stores the parameters to design an SiDB circuit.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_params_sidb_on_the_fly_gate_library_parameters = R"doc(Parameters for the SiDB on-the-fly gate library.)doc";
 
@@ -16033,7 +16051,8 @@ R"doc(Applies `fn` to every element of `range`, passing the index too if
 static const char *mkd_doc_fiction_sidb_layout_foreach_cell =
 R"doc(Applies a function to every SiDB site in raster order. `fn` takes the
 site and optionally its index, and may return `false` to stop the
-traversal.
+traversal. The layout must not be modified during the traversal;
+collect the sites with `cells_of_type` first to add or remove SiDBs.
 
 Args:
     fn: Function to apply.
@@ -16648,79 +16667,70 @@ skeleton (i.e., the pre-defined input and output wires) are hexagonal
 in shape.)doc";
 
 static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_add_defect_to_skeleton =
-R"doc(This function takes a defect surface and a skeleton skeleton and adds
-defects from the surrounding area to the skeleton. The defects within
-a specified distance from the center cell are taken into account. The
-resulting skeleton with added defects is returned.
+R"doc(Copies the surface defects within the influence radius of a tile's
+center into the skeleton, at their position relative to the tile's
+origin.
 
 Args:
-    skeleton: The skeleton to which defects will be added.
-    center_cell: The coordinates of the center cell.
-    absolute_cell: The coordinates of the skeleton's absolute cell.
-    parameters: Parameters for defect handling.
-
-Template Args:
-    CellLyt: SiDB defect surface type.
-    Params: Type of Parameters.
+    defect_surface: The surface with the defects.
+    skeleton: The skeleton of the tile.
+    influence_distance: Radius (unit: nm) around the tile's center
+                        within which defects are copied.
+    center_cell: The tile's center on the surface.
+    absolute_cell: The tile's origin on the surface.
 
 Returns:
-    The updated skeleton with added defects from the surrounding area.
+    The skeleton with the defects.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_cell_level_layout_to_list =
-R"doc(Generates a cell-level layout as a 2D array of characters based on the
-provided cell layout information.
+R"doc(Reads the cell types of a designed gate back into a cell list: the
+tile's sites in raster order become `'x'` (normal), `'i'` (input),
+`'o'` (output), `'l'` (logic), or `' '` (empty).
 
 Args:
-    lyt: Cell-level layout
-
-Template Args:
-    Lyt: Cell-level layout type.
+    lyt: The designed gate; its cells lie within the tile.
 
 Returns:
-    A 2D array of characters representing the cell-level layout.
+    The cell list.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_cell_list_to_cell_level_layout =
-R"doc(The function generates a layout where each cell is assigned a specific
-cell type according to the characters in the cell list/input grid.
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_cell_list_to_layout =
+R"doc(Builds a layout from a cell list: the tile's sites in raster order
+take the listed cell types.
 
 Args:
-    cell_list: A 2D grid representing the cells and their types.
-
-Template Args:
-    Lyt: The type of the cell-level layout to be generated.
+    cell_list: The cell list.
 
 Returns:
-    The cell-level layout with assigned cell types.
+    The layout.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_design_gate =
-R"doc(This function designs an SiDB gate for a given Boolean function at a
-given tile and a given rotation. If atomic defects exist, they are
-incorporated into the design process.
-
-An exception is thrown in case there is no possible gate design.
+R"doc(Designs a gate on a skeleton and returns it as a cell list. If the
+skeleton holds defects that make a design impossible, or if the
+designer finds no gate, a `gate_design_exception` names the tile, the
+function, and the ports so that placement can blacklist them.
 
 Args:
-    skeleton: Skeleton with atomic defects if available.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    parameters: Parameters for the SiDB gate design process.
-    p: The list of ports and their directions.
-    tile: The specific tile on which the gate should be designed.
+    skeleton: The skeleton, possibly with defects.
+    spec: The Boolean function(s) to implement.
+    parameters: Parameters.
+    p: The ports of the tile.
+    tile: The tile.
 
 Template Args:
-    LytSkeleton: The cell-level layout of the skeleton.
     TT: Truth table type.
-    CellLyt: The cell-level layout.
-    GateLyt: The gate-level layout.
+    GateLyt: Gate-level layout type.
 
 Returns:
-    An `gate` object.
+    The designed gate.
+
+Raises:
+    gate_design_exception: if no gate can be designed.
 
 )doc";
 
@@ -16739,26 +16749,22 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_is_predefined_bestagon_gate_applicable =
-R"doc(This function evaluates whether a predefined Bestagon gate can be
-applied to the given node by considering various conditions, including
-the presence of defects and spacing requirements.
+R"doc(Checks whether a predefined Bestagon gate can be used on a skeleton
+with defects: none of its logic cells may be affected by a defect, and
+the gate has to be operational with the defects in place.
 
 Args:
-    bestagon_lyt: The Bestagon gate which is to be applied.
-    skeleton_with_defects: The skeleton layout with atomic defects.
-    truth_table: The truth table representing the gate's logic
-                 function.
-    parameters: Parameters for the gate design and simulation.
+    bestagon_lyt: The predefined gate.
+    skeleton_with_defects: The skeleton with the surface defects
+                           nearby.
+    truth_table: The Boolean function(s) of the gate.
+    parameters: Parameters.
 
 Template Args:
-    CellLyt: SiDB defect surface type.
     TT: Truth table type.
-    Params: Type of the parameters used for the parametrized gate
-            library.
 
 Returns:
-    `true` if the Bestagon gate is applicable to the layout,
-    considering the provided conditions; otherwise, returns `false`.
+    `true` if the predefined gate can be used.
 
 )doc";
 
@@ -16766,10 +16772,7 @@ static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_on_the_fly_gate_
 
 static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_params =
 R"doc(This struct encapsulates parameters for the parameterized SiDB gate
-library.
-
-Template Args:
-    CellType: SiDB cell type.)doc";
+library.)doc";
 
 static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_params_canvas_sidb_complex_gates =
 R"doc(This variable defines the number of canvas SiDBs dedicated to complex
@@ -17979,406 +17982,339 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_calculate_defect_clearance =
-R"doc(Computes the defect clearance for a given SiDB layout based on a
-defect influence domain. The defect clearance is the maximum distance
-at which a defect can influence the layout. It calculates the minimum
-distance from each SiDB to any influential defect position.
+R"doc(Computes the defect clearance from a defect influence domain: for
+every influential position, the distance to the closest SiDB of the
+layout is determined, and the maximum of those distances is the
+clearance. Any defect farther away than that does not influence the
+layout.
 
 Args:
-    lyt: SiDB layout for which the defect clearance is computed.
-    defect_inf_domain: Defect influence domain of the given SiDB
-                       layout.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
+    lyt: The layout.
+    defect_inf_domain: The defect influence domain of `lyt`.
 
 Returns:
-    Defect clearance.
+    The defect clearance.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_clearance =
-R"doc(Results of the defect clearance calculation.
+R"doc(The defect clearance of a layout: the farthest influential defect
+position, measured by the distance to the closest SiDB, and that
+distance.)doc";
 
-Template Args:
-    CellType: Cell type of the layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_clearance_defect_clearance_distance = R"doc(Its distance to the closest SiDB (unit: nm).)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_clearance_defect_clearance_distance =
-R"doc(The maximum of the minimum distances between any SiDB of the layout
-and the defect responsible for gate failure (unit: nm).)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_clearance_defect_position =
-R"doc(Position with maximum distance to the SiDB layout at which the
-placement of an SiDB defect still causes the gate to fail.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_clearance_defect_position = R"doc(The influential defect position farthest from the layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_domain =
-R"doc(A `defect_influence_domain` defines for each defect position the
-influence of the defect on the layout. Depending on the chosen
-definition of influence, this can either mean that the operational
-status or the ground state of the layout is changed due to the
-presence of the defect.)doc";
+R"doc(The influence of a defect on a layout for every evaluated defect
+position.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_grid_search =
-R"doc(This algorithm uses a grid search to determine the defect influence
-domain. The grid search is performed by exhaustively sweeping all
-possible atomic defect positions in x and y dimensions.
+R"doc(Determines the influence of a defect on the operational status of an
+SiDB gate by placing the defect at every position of a grid over the
+scanning area and checking whether the gate still implements its
+Boolean function (or, with `GROUND_STATE_CHANGE`, whether the ground
+state of any input pattern changes).
 
 Args:
-    lyt: Layout to compute the defect influence domain for.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    step_size: The parameter specifying the interval between
-               consecutive defect positions to be evaluated.
-    params: Defect influence domain computation parameters.
+    lyt: The gate layout.
+    spec: The Boolean function(s) it implements.
+    params: Parameters.
+    step_size: Only positions whose column and row are multiples of
+               this are evaluated.
     stats: Statistics.
 
 Template Args:
-    Lyt: SiDB cell-level layout type.
     TT: Truth table type.
 
 Returns:
-    The defect influence domain of the layout.
+    The defect influence domain.
+
+Raises:
+    std::invalid_argument: if `step_size` is zero.
+                           std::invalid_argument: if `spec` is empty.
+                           std::invalid_argument: if
+                           `params.additional_scanning_area` contains
+                           a negative value.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_grid_search_2 =
-R"doc(This algorithm uses a grid search to determine the defect influence
-domain. The grid search is performed by exhaustively sweeping all
-possible atomic defect positions in x and y dimensions.
+R"doc(Determines the influence of a defect on the ground state of an SiDB
+layout by placing the defect at every position of a grid over the
+scanning area.
 
 Args:
-    lyt: Layout to compute the defect influence domain for.
-    step_size: The parameter specifying the interval between
-               consecutive defect positions to be evaluated.
-    params: Defect influence domain computation parameters.
+    lyt: The layout.
+    params: Parameters; the influence definition has to be
+            `GROUND_STATE_CHANGE`.
+    step_size: Only positions whose column and row are multiples of
+               this are evaluated.
     stats: Statistics.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
 Returns:
-    The defect influence domain of the layout.
+    The defect influence domain.
+
+Raises:
+    std::invalid_argument: if `step_size` is zero.
+                           std::invalid_argument: if
+                           `params.additional_scanning_area` contains
+                           a negative value.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params =
-R"doc(Parameters to determine the defect influence.
-
-Template Args:
-    CellType: Type of the cell.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params = R"doc(Parameters of the defect influence analysis.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_additional_scanning_area =
-R"doc(Area around the layout for additional defect scanning. This describes
-the additional space around the bounding box of the layout.)doc";
+R"doc(The scanning area extends the layout's bounding box by this many
+columns and rows in every direction.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_defect = R"doc(The defect to calculate the defect influence for.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_defect = R"doc(The defect to place.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_influence_def = R"doc(Definition of defect influence.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_influence_def = R"doc(The influence definition.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_influence_definition = R"doc(Definition of defect influence.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_influence_definition = R"doc(What counts as an influence of the defect on the layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_influence_definition_GROUND_STATE_CHANGE =
-R"doc(Influence is considered as the ability to change the ground state of
-the layout.)doc";
+R"doc(The defect changes the ground state of the layout (for every input
+pattern if a specification is given).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_influence_definition_OPERATIONALITY_CHANGE =
-R"doc(Influence is considered as the ability to change the operational
-status of the layout.)doc";
+R"doc(The defect changes the operational status of the layout (a
+specification is required).)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_number_of_threads =
-R"doc(Number of worker threads to distribute the defect positions over.
-Defaults to the number of hardware threads, which is the behavior this
-setting replaces, and to `1` where that count is not detectable.
-Values below `1` are treated as `1`.
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_number_of_threads = R"doc(Number of threads to use.)doc";
 
-Pinning it makes wall-clock comparisons reproducible across runs and
-machines, and allows a defect influence computation to leave cores
-free for other work.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_operational_params = R"doc(Parameters of the operational check and the simulation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_quicktrace =
-R"doc(The *QuickTrace* algorithm which was proposed in \"QuickTrace: An
-Efficient Contour Tracing Algorithm for Defect Robustness Simulation
-of Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, and R.
-Wille in ISCAS 2025 (https://ieeexplore.ieee.org/document/11044082)
-applies contour tracing to identify the boundary (contour) between
-influencing and non-influencing defect positions for a given SiDB
-layout.
-
-The algorithm leverages the concept of a screened Coulomb potential,
-where the electrostatic interaction weakens as distance increases. If
-a defect at position `p` causes the SiDB layout to be non-influential,
-then defects further away from the layout are also likely to have no
-influence on the layout's functionality or performance. Conversely,
-defects closer to the layout may cause it to fail. This behavior
-allows for efficient contour tracing of the transition between
-influential and non-influential states.
-
-The process is as follows:
-1. **Initialization**: Randomly select `samples` initial defect
-   positions several nanometers away from the layout where they are
-   unlikely to influence the layout.
-2. **Contour Tracing**: For each position, perform a defect-aware
-   physical simulation to identify adjacent positions along the x-axis
-   that influence the layout.
-3. **Contour Following**: Trace the contour of non-influential
-   positions until the starting point is reached
-again, thereby closing the contour.
-4. **Repetition**: Repeat steps 1-3 for multiple initial heights to
-   identify additional contours, since multiple
-influential-to-non-influential contours may exist. This process helps
-to detect all relevant transitions in the layout. This algorithm uses
-contour tracing to identify the transition between influencing and
-non-influencing defect positions of the SiDB layout. It starts by
-searching for defect locations on the left side (bounding_box +
-additional scanning area). The y-coordinate for these positions is
-chosen randomly. The number of samples is determined by the `samples`
-parameter. Then, the algorithm moves each defect position to the
-right, searching for the first last non-influencing defect position.
+R"doc(*QuickTrace*: traces the contour of the region in which a defect
+influences an SiDB gate, which needs far fewer evaluations than a grid
+search.
 
 Args:
-    lyt: Layout to compute the defect influence domain for.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    samples: Number of samples to perform.
-    params: Defect influence domain computation parameters.
-    stats: Defect influence computation statistics.
+    lyt: The gate layout.
+    spec: The Boolean function(s) it implements.
+    samples: Number of starting rows to try.
+    params: Parameters.
+    stats: Statistics.
 
 Template Args:
-    Lyt: SiDB cell-level layout type.
     TT: Truth table type.
 
 Returns:
-    The (partial) defect influence domain of the layout.
+    The defect influence domain.
+
+Raises:
+    std::invalid_argument: if `spec` is empty. std::invalid_argument:
+                           if `params.additional_scanning_area`
+                           contains a negative value.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_quicktrace_2 =
-R"doc(Applies contour tracing to identify the boundary (contour) between
-influencing and non-influencing defect positions for a given SiDB
-layout.
-
-The algorithm leverages the concept of a screened Coulomb potential,
-where the electrostatic interaction weakens as distance increases. If
-a defect at position `p` causes the SiDB layout to be non-influential,
-then defects further away from the layout are also likely to have no
-influence on the layout's functionality or performance. Conversely,
-defects closer to the layout may cause it to fail. This behavior
-allows for efficient contour tracing of the transition between
-influential and non-influential states.
-
-The process is as follows:
-1. **Initialization**: Randomly select `samples` initial defect
-   positions several nanometers away from the layout where they are
-   unlikely to influence the layout.
-2. **Contour Tracing**: For each position, perform a defect-aware
-   physical simulation to identify adjacent positions along the x-axis
-   that influence the layout.
-3. **Contour Following**: Trace the contour of non-influential
-   positions until the starting point is reached
-again, thereby closing the contour.
-4. **Repetition**: Repeat steps 1-3 for multiple initial heights to
-   identify additional contours, since multiple
-influential-to-non-influential contours may exist. This process helps
-to detect all relevant transitions in the layout.
+R"doc(*QuickTrace* without a specification: traces the contour of the region
+in which a defect changes the ground state of an SiDB layout.
 
 Args:
-    lyt: Layout to compute the defect influence domain for.
-    samples: Number of samples to perform.
-    params: Defect influence domain computation parameters.
-    stats: Defect influence computation statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
+    lyt: The layout.
+    samples: Number of starting rows to try.
+    params: Parameters; the influence definition has to be
+            `GROUND_STATE_CHANGE`.
+    stats: Statistics.
 
 Returns:
-    The (partial) defect influence domain of the layout.
+    The defect influence domain.
+
+Raises:
+    std::invalid_argument: if `params.additional_scanning_area`
+                           contains a negative value.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_random_sampling =
-R"doc(This algorithm uses random sampling to find a part of the defect
-influence domain that might not be complete. It performs a total of
-`samples` uniformly-distributed random samples within the specified
-area.
+R"doc(Like `defect_influence_grid_search`, but evaluates randomly chosen
+positions of the scanning area.
 
 Args:
-    lyt: Layout to compute the defect influence domain for.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    samples: Number of random samples to perform.
-    params: Defect influence domain computation parameters.
+    lyt: The gate layout.
+    spec: The Boolean function(s) it implements.
+    samples: Number of positions to evaluate.
+    params: Parameters.
     stats: Statistics.
 
 Template Args:
-    Lyt: SiDB cell-level layout type.
     TT: Truth table type.
 
 Returns:
-    The (partial) defect influence domain of the layout.
+    The defect influence domain.
+
+Raises:
+    std::invalid_argument: if `spec` is empty. std::invalid_argument:
+                           if `params.additional_scanning_area`
+                           contains a negative value.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_random_sampling_2 =
-R"doc(This algorithm uses random sampling to find a part of the defect
-influence domain that might not be complete. It performs a total of
-`samples` uniformly-distributed random samples within the specified
-area.
+R"doc(Like `defect_influence_grid_search` without a specification, but
+evaluates randomly chosen positions.
 
 Args:
-    lyt: Layout to compute the defect influence domain for.
-    samples: Number of random samples to perform.
-    params: Defect influence domain computation parameters.
+    lyt: The layout.
+    samples: Number of positions to evaluate.
+    params: Parameters; the influence definition has to be
+            `GROUND_STATE_CHANGE`.
     stats: Statistics.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
 Returns:
-    The (partial) defect influence domain of the layout.
+    The defect influence domain.
+
+Raises:
+    std::invalid_argument: if `params.additional_scanning_area`
+                           contains a negative value.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_stats = R"doc(Statistics.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_stats = R"doc(Statistics of the defect influence analysis.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_stats_num_evaluated_defect_positions = R"doc(Number of evaluated parameter combinations.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_stats_num_evaluated_defect_positions = R"doc(Number of evaluated defect positions.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_stats_num_influencing_defect_positions =
-R"doc(Number of parameter combinations, for which the layout gets
-influenced.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_stats_num_influencing_defect_positions = R"doc(Number of influencing defect positions.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_stats_num_non_influencing_defect_positions =
-R"doc(Number of parameter combinations, for which the layout is not
-influenced.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_stats_num_non_influencing_defect_positions = R"doc(Number of non-influencing defect positions.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_stats_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_stats_time_total = R"doc(The total runtime of the defect influence computation.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_stats_time_total = R"doc(Total runtime.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_status =
-R"doc(Defines whether the influence of a defect is present at a particular
-position in the layout. It can be used to classify positions as having
-an influence or not.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_status = R"doc(Whether a defect at a position influences the layout.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_status_INFLUENTIAL =
-R"doc(This indicates that the defect is actively influencing the layout at
-this position. It implies that some form of impact, such as a change
-in operational status or ground state, is being caused by the defect
-at this position.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_status_INFLUENTIAL = R"doc(The defect influences the layout.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_status_NON_INFLUENTIAL =
-R"doc(This indicates that the defect does not influence the layout at this
-position. It implies that the layout remains unaffected by the defect
-at this location, meaning there is no change in the operational status
-or the ground state.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_status_NON_INFLUENTIAL = R"doc(The defect does not influence the layout.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl =
+R"doc(Implementation of the defect influence analysis. Defect positions are
+addressed by column and row (`2y + z`), so the scanning area, the step
+size, and the neighborhoods of the contour trace are rectangular in
+rows.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_current_defect_position = R"doc(The current defect position.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_all_positions =
+R"doc(All positions of the scanning area in raster order.
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_defect_influence_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_determine_nw_se_cells =
-R"doc(This function determines the northwest and southeast cells based on
-the layout and the additional scan area specified.
+Returns:
+    The positions.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_dist = R"doc(Uniform distribution for the y-coordinate of the defect.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_base_layout = R"doc(The layout before placing the candidate defect.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_does_defect_influence_groundstate =
-R"doc(This function checks if the defect at position `defect_pos` influences
-the ground state of the layout.
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_defect_influence_impl =
+R"doc(Constructor.
 
 Args:
-    lyt_without_defect: Layout without the defect.
-    defect_pos: Position of the defect.
+    lyt: The layout to analyze.
+    ps: Parameters.
+    st: Statistics.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_determine_scanning_area = R"doc(Extends the layout's bounding box by the additional scanning area.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_does_defect_influence_groundstate =
+R"doc(Compares the ground states of a layout with and without the defect.
+
+Args:
+    lyt_without_candidate: The layout without the candidate defect.
+    defect_pos: The defect position.
 
 Returns:
-    The influence status of the defect.
+    Whether the defect changes the ground state.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_find_last_non_influential_defect_position_moving_right =
-R"doc(This function identifies the most recent non-influential defect
-position while traversing from left to right towards the SiDB layout.
+R"doc(Moves right from a non-influential position until the defect becomes
+influential.
 
 Args:
-    spec: The optional truth table to be used for the simulation.
-    starting_defect_position: The starting position of the defect,
-                              from which the traversal towards the
-                              right is conducted until an influential
-                              defect is found.
+    spec: The specification.
+    starting_defect_position: The non-influential starting position.
+
+Template Args:
+    TT: Truth table type.
 
 Returns:
-    The last non-influential defect position. If no non-influential
-    defect position is found, `std::nullopt` is returned.
+    The last non-influential position before the influential region,
+    or `std::nullopt` if none is hit.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_find_non_influential_defect_position_at_left_side =
-R"doc(This function aims to identify an influential defect position within
-the layout. It does so by selecting a defect position with the
-leftmost x-coordinate and a randomly selected y-coordinate limited the
-layout's bounding box.
+R"doc(Picks a random row at the left edge of the scanning area and returns
+it if a defect there is not influential.
 
 Args:
-    spec: The optional truth table to be used for the simulation.
+    spec: The specification.
+
+Template Args:
+    TT: Truth table type.
 
 Returns:
-    Defect position which does not influence the SiDB layout. If no
-    non-influential defect position is found, `std::nullopt` is
-    returned.
+    The position, or `std::nullopt` if the defect is influential
+    there.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_grid_search =
-R"doc(Simulates for each position in the area (spanned by `nw_cell` and
-`se_cell`) if the existence of a defect influences the layout.
+R"doc(Evaluates every position of the scanning area whose column and row are
+multiples of the step size.
 
 Args:
-    step_size: The step size used to sample defect positions in the
-               grid. Only positions with x and y coordinates divisible
-               by `step_size` will be checked.
+    step_size: Step size.
+    spec: The specification, if the influence definition needs one.
+
+Template Args:
+    TT: Truth table type.
 
 Returns:
     The defect influence domain.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_influence_domain = R"doc(The defect influence domain of the layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_influence_domain = R"doc(The defect influence domain under construction.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_is_defect_influential =
-R"doc(This function evaluates if the defect at position `c` influences the
-layout.
+R"doc(Determines whether a defect at `defect_cell` influences the layout and
+records the verdict.
 
 Args:
-    spec: The optional truth table to be used for the simulation.
-    defect_cell: Defect position to be investigated.
+    spec: The specification.
+    defect_cell: The defect position.
 
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_layout = R"doc(The SiDB cell-level layout to investigate.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_log_stats =
-R"doc(Helper function that writes the the statistics of the defect influence
-domain computation to the statistics object.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_moore_neighborhood =
-R"doc(Computes the Moore neighborhood of a given cell within the SiDB
-layout. The Moore neighborhood consists of the eight cells surrounding
-the central cell in horizontal, vertical, and diagonal directions.
-
-Args:
-    c: The cell for which the Moore neighborhood is computed.
+Template Args:
+    TT: Truth table type.
 
 Returns:
-    A vector containing the cells in the Moore neighborhood that are
-    empty. If a cell is outside the layout boundaries or occupied, it
-    is not included in the result.
+    The verdict.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_layout_to_analyze = R"doc(The layout to analyze.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_log_stats = R"doc(Writes the counters into the statistics.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_moore_neighborhood =
+R"doc(The empty positions in the Moore neighborhood of `c` within the
+scanning area, in clockwise order starting east.
+
+Args:
+    c: The position.
+
+Returns:
+    The neighbors.
 
 )doc";
 
@@ -18386,53 +18322,25 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influen
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_num_threads =
-R"doc(Number of worker threads to distribute the defect positions over,
-taken from the parameters and floored at `1`.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_nw_row = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_nw_bb_layout = R"doc(The north-west cell of the bounding box of the layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_nw_x = R"doc(Bounds of the scanning area in columns and rows.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_nw_cell = R"doc(North-west cell.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_params = R"doc(The parameters for the defect influence domain computation.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_previous_defect_position = R"doc(The previous defect position.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_params = R"doc(Parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_quicktrace =
-R"doc(Applies contour tracing to identify the boundary (contour) between
-influencing and non-influencing defect positions for a given SiDB
-layout.
-
-The algorithm leverages the concept of a screened Coulomb potential,
-where the electrostatic interaction weakens as distance increases. If
-a defect at position `p` causes the SiDB layout to be non-influential,
-then defects further away from the layout are also likely to have no
-influence on the layout's functionality or performance. Conversely,
-defects closer to the layout may cause it to fail. This behavior
-allows for efficient contour tracing of the transition between
-influential and non-influential states.
-
-The process is as follows:
-1. **Initialization**: Randomly select `samples` initial defect
-   positions several nanometers away from the layout where they are
-   unlikely to influence the layout.
-2. **Contour Tracing**: For each position, perform a defect-aware
-   physical simulation to identify adjacent positions along the x-axis
-   that influence the layout.
-3. **Contour Following**: Trace the contour of non-influential
-   positions until the starting point is reached
-again, thereby closing the contour.
-4. **Repetition**: Repeat steps 1-3 for multiple initial heights to
-   identify additional contours, since multiple
-influential-to-non-influential contours may exist. This process helps
-to detect all relevant transitions in the layout.
+R"doc(*QuickTrace*: traces the contour of the influential region around the
+layout. From a non-influential position at the left edge of the
+scanning area, the trace moves right until it hits the first
+influential position and follows the boundary of the influential
+region clockwise from there.
 
 Args:
-    samples: The number of random initial positions used to identify
-             and trace contours. Higher values increase the chance of
-             capturing all relevant contours but increase computation
-             time.
-    spec: The optional truth table to be used for the simulation.
+    samples: Number of starting rows to try.
+    spec: The specification, if the influence definition needs one.
+
+Template Args:
+    TT: Truth table type.
 
 Returns:
     The defect influence domain.
@@ -18440,281 +18348,215 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_random_sampling =
-R"doc(Checks for a certain number of random positions (given by `samples`)
-in the area (spanned by `nw_cell` and `se_cell`) if the existence of a
-defect leads to an influence of the layout.
+R"doc(Evaluates randomly chosen positions of the scanning area.
 
 Args:
-    samples: The number of positions to sample. The actual number of
-             iterations may be less than the total number of positions
-             or the `samples` value.
-    spec: The optional truth table to be used for the simulation.
+    samples: Number of positions to evaluate.
+    spec: The specification, if the influence definition needs one.
+
+Template Args:
+    TT: Truth table type.
 
 Returns:
     The defect influence domain.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_se_bb_layout = R"doc(The south-east cell of the bounding box of the layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_run_in_parallel =
+R"doc(Runs `fn(i)` for `i` in `[0, n)` on the configured number of threads.
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_se_cell = R"doc(South-east cell.)doc";
+Args:
+    n: Number of indices.
+    fn: The function to run.
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_stats = R"doc(The statistics of the defect influence domain computation.)doc";
+Template Args:
+    Fn: Callable type.
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_all_possible_sidb_displacements =
-R"doc(This stores all possible displacements for all SiDBs in the SiDB
-layout. This means e.g. the first vector describes all possible
-positions of the first SiDB due to the allowed/possible displacements.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_se_row = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_se_x = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_stats = R"doc(Statistics.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl =
+R"doc(Implementation of the displacement robustness analysis. Displacements
+are measured in columns and rows (`2y + z`), so a displacement of one
+row moves an SiDB to the other site of its dimer.
+
+Template Args:
+    TT: Truth table type.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_all_possible_sidb_displacements = R"doc(The possible positions of every SiDB.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_calculate_all_possible_displacements_for_each_sidb =
-R"doc(This function calculates all permitted displacements for each SiDB
-based on the specified allowed displacements.
+R"doc(Determines the possible positions of every SiDB: the fixed ones stay,
+the others may move by up to the displacement variations in columns
+and rows, or stay on their dimer.
 
 Returns:
-    A vector containing all possible displacements for each SiDB.
+    One position list per SiDB.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_determine_probability_of_fabricating_operational_gate =
-R"doc(The manufacturing error rate is highly dependent on the speed of the
-manufacturing process. Therefore, fast fabrication requires SiDB
-layouts with high displacement tolerance to ensure functionality in
-the presence of displacements. This function determines the
-probability of fabricating an operational SiDB layout for a given
-fabrication error rate. If the fabrication error rate is 0.0 or
-negative, it means that the SiDB layout is designed without
-displacement.
+R"doc(Estimates the probability that a fabricated gate is operational when a
+share of its SiDBs is displaced.
 
 Args:
-    fabrication_error_rate: The fabrication error rate. For example,
-                            0.1 describes that 10% of all manufactured
-                            SiDBs have a slight displacement.
+    fabrication_error_rate: Share of the SiDBs that are displaced.
 
 Returns:
-    Probability of fabricating a working SiDB gate implementation.
+    The probability.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_determine_robustness_domain =
-R"doc(This function calculates the robustness domain of the SiDB layout
-based on the provided truth table specification and displacement
-robustness computation parameters.
+R"doc(Generates the displaced layouts and checks each for operability.
+
+Returns:
+    The displacement robustness domain.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_displacement_robustness_domain_impl =
-R"doc(Standard constructor. Initializes the layout, the truth table, the
-parameters, and the statistics.
+R"doc(Constructor.
 
 Args:
-    lyt: SiDB cell-level layout to be evaluated regarding displacement
-         robustness.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    ps: Parameters for the displacement robustness computation.
-    st: Statistics related to the displacement robustness computation.
+    lyt: The operational gate layout.
+    spec: The Boolean function(s) it implements.
+    ps: Parameters.
+    st: Statistics.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_generate_valid_displaced_sidb_layouts =
-R"doc(This function generates all SiDB layouts with displacements based on
-the original layout. It filters out layouts where two or more SiDBs
-would be on the same spot due to displacement.
+R"doc(Combines the position lists into displaced layouts; combinations in
+which two SiDBs collide are dropped.
 
 Returns:
-    A vector containing all valid SiDB layouts with displacements.
+    The displaced layouts.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_generator =
-R"doc(Mersenne Twister random number generator. Generates high-quality
-pseudo-random numbers using a random seed from 'rd'.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_generator = R"doc(Random generator for shuffling.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_layout =
-R"doc(The SiDB layout for which the displacement robustness calculation is
-performed.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_layout_to_analyze = R"doc(The gate layout.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_params = R"doc(The parameters for the displacement robustness computation.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_params = R"doc(Parameters.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_rd =
-R"doc(Random device for obtaining seed for the random number generator.
-Provides a source of quasi-non-deterministic pseudo-random numbers.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_rd = R"doc(Seed source.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_sidbs_of_the_original_layout = R"doc(SiDB positions of the originally given SiDB layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_sidbs_of_the_original_layout = R"doc(The SiDBs of the original layout.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_stats = R"doc(The statistics of the displacement robustness computation.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_stats = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_truth_table = R"doc(The logical specification of the layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_truth_table = R"doc(The Boolean function(s).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_update_displacement_robustness_domain =
-R"doc(This function adds the provided layout and its corresponding
-operational status to the list of operational values in the
-displacement robustness domain. Depending on the operational status,
-it also updates the count of operational or non-operational SiDB
-displacements in the statistics.
+R"doc(Records a verdict.
 
 Args:
-    domain: The displacement robustness domain to be updated.
-    lyt: The SiDB layout to be added.
-    status: The operational status of the provided layout.
-
-Template Args:
-    Lyt: SiDB cell-layout type.
+    domain: The domain to extend.
+    lyt: The displaced layout.
+    status: Its operational status.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_determine_displacement_robustness_domain =
-R"doc(During fabrication, SiDBs may not align precisely with their intended
-atomic positions, resulting in displacement. This means that an SiDB
-is fabricated close to the desired one, typically one or a few H-Si
-positions away. Consequently, depending on the fabrication speed, a
-certain number of SiDBs may experience displacement.
-
-This function determines the operational status of all possible
-displacements of the SiDBs of the given SiDB layout, based on the
-provided truth table specification and displacement robustness
-computation parameters. The number of displacements grows
-exponentially with the number of SiDBs. For small layouts, all
-displacements can be analyzed. For larger layouts, random sampling can
-be applied, controllable by the `analysis_mode` and
-`percentage_of_analyzed_displaced_layouts` in `params`.
+R"doc(Determines the displacement robustness domain of an SiDB gate: every
+SiDB that is not fixed is displaced by up to the configured number of
+columns and rows, and every resulting layout is checked for
+operability.
 
 Args:
-    spec: Vector of truth table specifications.
-    params: Parameters for the displacement robustness computation.
-    stats: Statistics related to the displacement robustness
-           computation.
+    lyt: The operational gate layout.
+    spec: The Boolean function(s) it implements.
+    params: Parameters.
+    stats: Statistics.
 
 Template Args:
-    Lyt: The SiDB cell-level layout type.
     TT: Truth table type.
 
 Returns:
-    The displacement robustness domain of the SiDB layout.
+    The displacement robustness domain.
+
+Raises:
+    std::out_of_range: if a displacement exceeds the lattice-site
+                       range.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_determine_probability_of_fabricating_operational_gate =
-R"doc(During fabrication, SiDBs may not align precisely with their intended
-atomic positions, resulting in displacement. This means that an SiDB
-is fabricated close to the desired one, typically one or a few H-Si
-positions away. The percentage of displaced SiDBs depends on the
-fabrication speed. Therefore, SiDB layouts with high displacement
-tolerance are preferred to speed up the fabrication process.
-
-This function calculates the probability of fabricating an operational
-SiDB layout for an originally given SiDB layout and a given
-fabrication error rate. A fabrication error rate of 0.0 or negative
-indicates that the SiDB layout is designed without displacement.
+R"doc(Estimates the probability that a fabricated SiDB gate is operational
+when a share of its SiDBs is displaced: for every combination of
+displaced SiDBs, the displaced layouts are checked for operability,
+and the share of operational ones is the probability.
 
 Args:
-    layout: The SiDB cell-level layout which is analyzed.
-    spec: Vector of truth table specifications.
-    params: Parameters for the displacement robustness computation.
-    fabrication_error_rate: The fabrication error rate. For example,
-                            0.1 describes that 10% of all manufactured
-                            SiDBs have a slight displacement.
+    lyt: The operational gate layout.
+    spec: The Boolean function(s) it implements.
+    params: Parameters.
+    fabrication_error_rate: Share of the SiDBs that are displaced.
 
 Template Args:
-    Lyt: The SiDB cell-level layout type.
-    TT: The type of the truth table.
+    TT: Truth table type.
 
 Returns:
-    The probability of fabricating an operational SiDB layout.
+    The probability.
+
+Raises:
+    std::out_of_range: if a displacement exceeds the lattice-site
+                       range.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain =
-R"doc(During fabrication, SiDBs may not align precisely with their intended
-atomic positions, resulting in displacement. This means that an SiDB
-is fabricated close to the desired one, typically one or a few H-Si
-positions away. Consequently, depending on the fabrication speed, a
-certain number of SiDBs may experience displacement. To address and
-analyze this occurrence, we introduce the *Displacement Robustness
-Domain*. This domain consists of SiDB layouts derived from an original
-layout, each showing displaced SiDBs, together with the `operational`
-or `non-operational` status, based on the specified logic.)doc";
+R"doc(The displacement robustness domain of an SiDB gate: every analyzed
+displaced layout together with its operational status.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_operational_values =
-R"doc(Represents a domain of displacement robustness for layouts resulting
-from applying a displacement to a given SiDB layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_operational_values = R"doc(The displaced layouts and their operational status.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params =
-R"doc(Parameters for the `determine_displacement_robustness_domain` and
-`determine_probability_of_fabricating_operational_gate` algorithms.
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params = R"doc(Parameters of the displacement robustness analysis.)doc";
 
-Args:
-    CellType: SiDB layout cell type.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_analysis_mode = R"doc(The analysis mode.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_analysis_mode =
-R"doc(This parameter defines the mode of the displacement. If `EXHAUSTIVE`,
-all possible displacements are analyzed. Otherwise, a certain amount
-of all possible displacements is analyzed randomly.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_dimer_displacement_policy = R"doc(Whether a displaced SiDB may leave its dimer.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_dimer_displacement_policy =
-R"doc(Specifies the allowed displacement range options for SiDB fabrication
-simulation.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_dimer_displacement_policy_ALLOW_OTHER_DIMER =
-R"doc(In this mode, SiDBs are allowed to be displaced from the original
-dimer to any other dimer within the layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_dimer_displacement_policy_ALLOW_OTHER_DIMER = R"doc(The SiDB may be displaced across dimers.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_dimer_displacement_policy_STAY_ON_ORIGINAL_DIMER =
-R"doc(In this mode, any displacement of SiDBs must remain within the
-boundaries of the initial dimer they are placed on.)doc";
+R"doc(The SiDB stays on its dimer: only the two sites of the dimer are
+possible positions.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_dimer_policy =
-R"doc(This flag controls whether the displacement in the y-direction can
-lead to changes in the Si dimer.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_dimer_policy = R"doc(The dimer policy.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_analysis_mode = R"doc(Possible modes to determine the displacement robustness domain.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_analysis_mode = R"doc(Whether every displaced layout is analyzed or only a random share.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_analysis_mode_EXHAUSTIVE = R"doc(All possible displacements are analyzed.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_analysis_mode_EXHAUSTIVE = R"doc(All displaced layouts are analyzed.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_analysis_mode_RANDOM =
-R"doc(A certain amount of all possible displacements is analyzed randomly.
-Defined by `percentage_of_analyzed_displaced_layouts`.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_analysis_mode_RANDOM = R"doc(A random share of the displaced layouts is analyzed.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_variations =
-R"doc(Possible displacement range of H-Si positions in the x- and
-y-directions. The default value is (1, 0), which means that
-displacements of ±1 position in the x-direction are analyzed, with no
-displacement in the y-direction.)doc";
+R"doc(Maximum displacement in columns and rows; the displaced sites must
+remain representable.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_fixed_sidbs = R"doc(SiDBs in the given layout which shall not be affected by variations.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_fixed_sidbs = R"doc(SiDBs that are not displaced.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_number_of_threads =
-R"doc(Number of worker threads to distribute the displaced layouts over.
-Defaults to the number of hardware threads, which is the behavior this
-setting replaces, and to `1` where that count is not detectable.
-Values below `1` are treated as `1`.
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_number_of_threads = R"doc(Number of threads to use.)doc";
 
-Pinning it makes wall-clock comparisons reproducible across runs and
-machines, and allows a robustness domain computation to leave cores
-free for other work.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_operational_params = R"doc(Parameters of the operational check.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_operational_params = R"doc(Parameters to check the operational status of the SiDB layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_percentage_of_analyzed_displaced_layouts = R"doc(Share of the displaced layouts to analyze in `RANDOM` mode.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_percentage_of_analyzed_displaced_layouts =
-R"doc(This parameter defines the percentage of all possible displaced SiDB
-layouts that are analyzed. The default value is 1.0 (100 %), which
-means that all possible displacements are covered.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats = R"doc(Statistics of the displacement robustness analysis.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats = R"doc(Statistics for the displacement robustness domain computation.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats_num_non_operational_sidb_displacements = R"doc(Number of non-operational displaced layouts.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats_num_non_operational_sidb_displacements =
-R"doc(The number of non-operational SiDB layouts resulting from the given
-layout by displacements.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats_num_operational_sidb_displacements = R"doc(Number of operational displaced layouts.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats_num_operational_sidb_displacements =
-R"doc(The number of operational SiDB layouts resulting from the given layout
-by displacements.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats_time_total =
-R"doc(Total runtime in seconds to determine the robustness of the passed
-SiDB layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats_time_total = R"doc(Total runtime.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_charge_distribution_history =
 R"doc(Whether the local potentials are updated from the record of changed
@@ -22012,6 +21854,12 @@ The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
 Influence STATUS ... subsequent rows for each set of simulation
 parameters.
 
+
+
+Writes a defect influence domain as CSV: one line per evaluated defect
+position with its column, its row (`2y + z` of the lattice site), and
+the influence tag.
+
 Args:
     defect_infdom: The defect influence domain to be written. It
                    contains a mapping from defect positions to their
@@ -22022,29 +21870,23 @@ Args:
             and non-influential tags. Defaults to an empty
             `write_defect_influence_domain_params` object, which
             provides standard tags.
+    defect_infdom: The domain to write.
+    os: The output stream.
+    params: Parameters.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_defect_influence_domain_2 =
-R"doc(Writes a CSV representation of an defect influence domain to the
-specified file. The data are written as rows, each corresponding to
-one set of simulation parameters and their corresponding influence
-status.
-
-The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
-Influence STATUS ... subsequent rows for each set of simulation
-parameters.
+R"doc(Writes a defect influence domain as CSV to a file; see the stream
+overload.
 
 Args:
-    defect_infdom: The defect influence domain to be written. It
-                   contains a mapping from defect positions to their
-                   influence status.
-    filename: The filename where the CSV representation of the defect
-              influence domain is written to.
-    params: The parameters used for writing, including the influential
-            and non-influential tags. Defaults to an empty
-            `write_defect_influence_domain_params` object, which
-            provides standard tags.
+    defect_infdom: The domain to write.
+    filename: The file to write to.
+    params: Parameters.
+
+Raises:
+    std::ofstream::failure: if the file cannot be opened.
 
 )doc";
 
@@ -26314,45 +26156,6 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library_skeleton_bestagon_library = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_surface_analysis =
-R"doc(Analyzes a given defective SiDB surface and matches it against gate
-tiles provided by a library. Any gate type that cannot be realized on
-a certain tile due to disturbances caused by defects gets blacklisted
-on said tile. The black list is then returned by this function.
-
-Args:
-    gate_lyt: Gate-level layout instance that specifies the aspect
-              ratio.
-    surface: SiDB surface that instantiates the defects.
-    charged_defect_spacing_overwrite: Override the default influence
-                                      distance of charged atomic
-                                      defects on SiDBs with an
-                                      optional pair of horizontal and
-                                      vertical distances.
-    neutral_defect_spacing_overwrite: Override the default influence
-                                      distance of neutral atomic
-                                      defects on SiDBs with an
-                                      optional pair of horizontal and
-                                      vertical distances.
-
-Template Args:
-    GateLibrary: FCN gate library type to fetch the gate descriptions
-                 from.
-    GateLyt: Gate-level layout type that specifies the tiling of the
-             SiDB surface.
-    CellLyt: SiDB cell-level layout type that is underlying to the
-             SiDB defect surface.
-
-Returns:
-    A black list of gate functions associated with tiles.
-
-Note:
-    The given gate library must implement both the
-    `get_functional_implementations()` and `get_gate_ports()`
-    functions.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_surfaces = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_surfaces_2 = R"doc()doc";
@@ -26518,6 +26321,25 @@ Template Args:
 
 Returns:
     The cell of `CellLyt` at `s`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_to_cell_level_layout =
+R"doc(Converts a `sidb::layout` back into a Cartesian SiDB cell-level
+layout: cell types, inputs, outputs, the layout name, and, for defect
+surfaces, the surface defects carry over. The layout's lattice is not
+represented in the cell-level type and is dropped. This is the inverse
+of `to_sidb_layout` for the algorithms that still hand out cell-level
+layouts.
+
+Args:
+    lyt: The layout to convert.
+
+Template Args:
+    CellLyt: SiDB cell-level layout type to create.
+
+Returns:
+    The cell-level layout.
 
 )doc";
 

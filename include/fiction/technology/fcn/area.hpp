@@ -12,15 +12,20 @@
  * @file
  * @brief Real-world area requirements of a cell-level layout in nm².
  * @author Marcel Walter (marcelwa)
+ * @author Claude Fable 5.1 (via Claude Code)
  */
 
 #pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
 
+#include <cstdint>
 #include <iostream>
 
 namespace fiction::fcn
@@ -76,9 +81,9 @@ struct area_stats
      */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] Width  = {:.2f} nm", width) << std::endl;
-        out << fmt::format("[i] Height = {:.2f} nm", height) << std::endl;
-        out << fmt::format("[i] Area   = {:.2f} nm²", area) << std::endl;
+        out << fmt::format("[i] Width  = {:.2f} nm", width) << '\n';
+        out << fmt::format("[i] Height = {:.2f} nm", height) << '\n';
+        out << fmt::format("[i] Area   = {:.2f} nm²", area) << '\n';
     }
 };
 
@@ -100,11 +105,11 @@ double area(const Lyt& lyt, const area_params<technology<Lyt>>& ps = {}, area_st
 
     area_stats st{};
 
-    st.width  = static_cast<double>(lyt.x() + 1) * ps.width + static_cast<double>(lyt.x()) * ps.hspace;
-    st.height = static_cast<double>(lyt.y() + 1) * ps.height + static_cast<double>(lyt.y()) * ps.vspace;
+    st.width  = (static_cast<double>(lyt.x() + 1) * ps.width) + (static_cast<double>(lyt.x()) * ps.hspace);
+    st.height = (static_cast<double>(lyt.y() + 1) * ps.height) + (static_cast<double>(lyt.y()) * ps.vspace);
     st.area   = st.width * st.height;
 
-    if (pst)
+    if (pst != nullptr)
     {
         *pst = st;
     }
@@ -130,11 +135,47 @@ double area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<technolog
 
     area_stats st{};
 
-    st.width  = static_cast<double>(bb.get_x_size() + 1) * ps.width + static_cast<double>(bb.get_x_size()) * ps.hspace;
-    st.height = static_cast<double>(bb.get_y_size() + 1) * ps.height + static_cast<double>(bb.get_y_size()) * ps.vspace;
-    st.area   = st.width * st.height;
+    st.width =
+        (static_cast<double>(bb.get_x_size() + 1) * ps.width) + (static_cast<double>(bb.get_x_size()) * ps.hspace);
+    st.height =
+        (static_cast<double>(bb.get_y_size() + 1) * ps.height) + (static_cast<double>(bb.get_y_size()) * ps.vspace);
+    st.area = st.width * st.height;
 
-    if (pst)
+    if (pst != nullptr)
+    {
+        *pst = st;
+    }
+
+    return st.area;
+}
+/**
+ * Computes real-world area requirements in nm² of the bounding box of a given SiDB layout. The bounding box covers the
+ * layout's SiDBs and defects; every column and every single-SiDB row inside it is assigned a horizontal and vertical
+ * size, and a spacing between neighboring columns and rows is taken into account. An empty layout has no area.
+ *
+ * @param lyt The SiDB layout whose area is desired.
+ * @param ps Area parameters.
+ * @param pst Area statistics.
+ * @return Area requirements in nm².
+ */
+[[nodiscard]] inline double area(const sidb::layout& lyt, const area_params<sidb::sidb_technology>& ps = {},
+                                 area_stats* pst = nullptr) noexcept
+{
+    area_stats st{};
+
+    if (!lyt.is_empty() || lyt.num_defects() > 0)
+    {
+        const auto [nw, se] = lyt.bounding_box();
+
+        const auto x_size = int64_t{se.x} - int64_t{nw.x};
+        const auto y_size = sidb::row_of(se) - sidb::row_of(nw);
+
+        st.width  = (static_cast<double>(x_size + 1) * ps.width) + (static_cast<double>(x_size) * ps.hspace);
+        st.height = (static_cast<double>(y_size + 1) * ps.height) + (static_cast<double>(y_size) * ps.vspace);
+        st.area   = st.width * st.height;
+    }
+
+    if (pst != nullptr)
     {
         *pst = st;
     }

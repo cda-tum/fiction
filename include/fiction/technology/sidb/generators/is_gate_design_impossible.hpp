@@ -18,21 +18,28 @@
 
 #pragma once
 
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/charge_distribution.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
-#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
+#include <kitty/traits.hpp>
+
 #include <cassert>
 #include <cstddef>
-#include <cstdint>
+#include <stdexcept>
 #include <vector>
 
 namespace fiction::sidb::generators
 {
+
 /**
  * This struct contains parameters to determine if SiDB gate design is impossible.
  */
@@ -48,77 +55,84 @@ struct is_gate_design_impossible_params
     sidb::simulation::logic::bdl_input_iterator_params bdl_iterator_params{};
 };
 /**
- * This function evaluates whether it is impossible to design an SiDB gate for a given truth table and a given skeleton
- * with atomic defects. It determines the possible charge states at the output BDL pairs. Atomic defects can cause a BDL
- * pair to be neutrally charged only. Thus, the BDL pair would not work as intended.
+ * Checks whether a gate can be designed on a skeleton with defects at all: if the charged defects push one SiDB
+ * of an output BDL pair past its neutral transition threshold for any input pattern, that SiDB can never be
+ * negatively charged, the pair loses its BDL property, and no canvas can fix that.
  *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT The truth table type.
- * @param skeleton_with_defects An SiDB skeleton layout with atomic defects.
- * @param spec A vector of truth tables (each truth table is representing one output) representing the gate's intended
- * functionality.
- * @param params Parameters to determine if the gate design is impossible.
- * @return `true` if gate design is impossible, `false` otherwise.
+ * @tparam TT Truth table type.
+ * @param skeleton_with_defects The skeleton, including the defects of the surface it sits on.
+ * @param spec The Boolean function(s) to implement; must not be empty.
+ * @param params Parameters.
+ * @return `true` if no gate can be designed on the skeleton.
+ * @throws std::invalid_argument if `spec` is empty.
  */
-template <typename Lyt, typename TT>
-[[nodiscard]] bool is_gate_design_impossible(const Lyt& skeleton_with_defects, const std::vector<TT>& spec,
-                                             const is_gate_design_impossible_params& params = {}) noexcept
+template <typename TT>
+[[nodiscard]] bool is_gate_design_impossible(const layout& skeleton_with_defects, const std::vector<TT>& spec,
+                                             const is_gate_design_impossible_params& params = {})
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(is_sidb_defect_surface_v<Lyt>, "Lyt is not an SiDB defect surface");
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not an SiDB cell-level layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    if (spec.empty())
+    {
+        throw std::invalid_argument{"spec must not be empty"};
+    }
 
     assert(skeleton_with_defects.num_pis() > 0 && "lyt needs input cells");
     assert(skeleton_with_defects.num_pos() > 0 && "lyt needs output cells");
 
     const auto output_pairs =
-        sidb::simulation::logic::detect_bdl_pairs(skeleton_with_defects, sidb::sidb_technology::cell_type::OUTPUT,
-                                                  params.bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
+        simulation::logic::detect_bdl_pairs(skeleton_with_defects, sidb_technology::cell_type::OUTPUT,
+                                            params.bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
 
-    assert(output_pairs.empty() == false && "lyt needs output BDL pairs");
+    assert(!output_pairs.empty() && "lyt needs output BDL pairs");
 
-    auto bdl_iter =
-        sidb::simulation::logic::legacy_bdl_input_iterator<Lyt>{skeleton_with_defects, params.bdl_iterator_params};
+    simulation::logic::bdl_input_iterator bii{skeleton_with_defects, params.bdl_iterator_params};
 
-    for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bdl_iter)
+    for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
     {
-        auto charge_lyt = sidb::surfaces::charge_distribution_surface<Lyt>{*bdl_iter, params.sim_params};
-        charge_lyt.assign_all_charge_states(sidb::model::charge_state::NEUTRAL);
-        charge_lyt.update_after_charge_change();
+        const simulation::potential_landscape land{*bii, params.sim_params};
 
-        // checks if parts of the bdl pairs are already neutrally charged due to nearby charged atomic defects.
+        // with every SiDB neutral, the local potentials are those the defects cause
+        const auto potentials =
+            land.local_internal_potentials(charge_distribution{land.sites(), model::charge_state::NEUTRAL});
+
+        const auto can_never_be_negative = [&land, &potentials](const lattice_site& s)
+        {
+            const auto index = land.get_layout().index_of(s);
+            assert(index.has_value() && "BDL SiDB is not part of the layout");
+
+            return -potentials[*index] > land.effective_charge_transition_thresholds(*index)[static_cast<std::size_t>(
+                                             simulation::charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)];
+        };
+
         for (const auto& bdl : output_pairs)
         {
-            const int64_t ix_lower = charge_lyt.cell_to_index(bdl.lower);
-
-            assert(ix_lower >= 0 && "Lower cell of BDL pair is not part of the layout.");
-
-            if (-*charge_lyt.get_local_internal_potential_by_index(static_cast<uint64_t>(ix_lower)) >
-                charge_lyt.get_effective_charge_transition_thresholds(
-                    static_cast<uint64_t>(ix_lower))[static_cast<std::size_t>(
-                    sidb::surfaces::charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)])
+            if (can_never_be_negative(bdl.lower) || can_never_be_negative(bdl.upper))
             {
-                return true;  // the lower part can never be negatively charged. Thus, BDL property is not fulfilled
-                              // anymore
-            }
-
-            const int64_t ix_upper = charge_lyt.cell_to_index(bdl.upper);
-
-            assert(ix_upper >= 0 && "Upper cell of BDL pair is not part of the layout.");
-
-            if (-*charge_lyt.get_local_internal_potential_by_index(static_cast<uint64_t>(ix_upper)) >
-                charge_lyt.get_effective_charge_transition_thresholds(
-                    static_cast<uint64_t>(ix_upper))[static_cast<std::size_t>(
-                    sidb::surfaces::charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)])
-            {
-                return true;  // the upper part can never be negatively charged. Thus, BDL property is not fulfilled
-                              // anymore
+                return true;
             }
         }
     }
 
     return false;
+}
+/**
+ * Transitional overload for SiDB cell-level layouts, converted with `to_sidb_layout`; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param skeleton_with_defects The skeleton with defects.
+ * @param spec The Boolean function(s) to implement; must not be empty.
+ * @param params Parameters.
+ * @return `true` if no gate can be designed on the skeleton.
+ * @throws std::invalid_argument if `spec` is empty.
+ */
+template <typename Lyt, typename TT>
+    requires(is_cell_level_layout_v<Lyt>)
+[[nodiscard]] bool is_gate_design_impossible(const Lyt& skeleton_with_defects, const std::vector<TT>& spec,
+                                             const is_gate_design_impossible_params& params = {})
+{
+    return is_gate_design_impossible(to_sidb_layout(skeleton_with_defects), spec, params);
 }
 
 }  // namespace fiction::sidb::generators

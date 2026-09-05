@@ -145,4 +145,38 @@ template <typename CellLyt>
     return to_sidb_layout(lyt, lattice_of<CellLyt>());
 }
 
+/**
+ * Converts a `sidb::layout` back into a Cartesian SiDB cell-level layout: cell types, inputs, outputs, the layout
+ * name, and, for defect surfaces, the surface defects carry over. The layout's lattice is not represented in the
+ * cell-level type and is dropped. This is the inverse of `to_sidb_layout` for the algorithms that still hand out
+ * cell-level layouts.
+ *
+ * @tparam CellLyt SiDB cell-level layout type to create.
+ * @param lyt The layout to convert.
+ * @return The cell-level layout.
+ */
+template <typename CellLyt>
+[[nodiscard]] CellLyt to_cell_level_layout(const layout& lyt)
+{
+    static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
+
+    CellLyt result{};
+
+    if constexpr (has_set_layout_name_v<CellLyt>)
+    {
+        result.set_layout_name(lyt.get_layout_name());
+    }
+
+    lyt.foreach_cell([&result, &lyt](const auto& s)
+                     { result.assign_cell_type(to_cell<CellLyt>(s), lyt.get_cell_type(s)); });
+
+    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+    {
+        lyt.foreach_defect([&result](const auto& sd) { result.assign_defect(to_cell<CellLyt>(sd.first), sd.second); });
+    }
+
+    return result;
+}
+
 }  // namespace fiction::sidb

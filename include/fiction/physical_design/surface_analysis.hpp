@@ -19,6 +19,8 @@
 
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
@@ -32,116 +34,95 @@
 #include <utility>
 #include <vector>
 
-namespace fiction::sidb
+namespace fiction::physical_design
 {
 
 /**
- * This alias represents a black list of gates that cannot be placed on certain positions on a (layout) surface in
- * certain rotations. The type is just a map of tile positions to another map that associates gate functions with port
- * lists. The second map ensures that each gate function stays unique while the port lists represent the black listed
- * gate rotations.
+ * A black list of gates per tile and function: for each tile, the functions that cannot be implemented by the gates
+ * with the listed ports. `surface_analysis` produces one from a defective SiDB surface, and `exact_with_blacklist`
+ * consumes it.
  *
- * An empty port list vector means that the gate cannot be placed on the associated tile position AT ALL. This notion is
- * to be used preferably as it, e.g., helps the exact physical design algorithm to convert these assertions into unit
- * clauses which significantly helps runtime.
+ * @tparam Lyt Gate-level layout type.
+ * @tparam PortType Port type of the gate library.
  */
 template <typename Lyt, typename PortType>
 using surface_black_list =
     std::unordered_map<tile<Lyt>, std::unordered_map<kitty::dynamic_truth_table, std::vector<fcn::port_list<PortType>>,
                                                      kitty::hash<kitty::dynamic_truth_table>>>;
+
 /**
- * Analyzes a given defective SiDB surface and matches it against gate tiles provided by a library. Any gate type that
- * cannot be realized on a certain tile due to disturbances caused by defects gets blacklisted on said tile. The black
- * list is then returned by this function.
+ * Analyzes a defective SiDB surface for a gate-level layout: for every tile and every gate implementation of the
+ * library, the gate's SiDBs are placed at the tile's position, and if any of them is affected by a defect of the
+ * surface, the gate's ports are blacklisted for that tile and function. Placement can then avoid those gates.
  *
- * @note The given gate library must implement both the `get_functional_implementations()` and `get_gate_ports()`
- * functions.
- *
- * @tparam GateLibrary FCN gate library type to fetch the gate descriptions from.
- * @tparam GateLyt Gate-level layout type that specifies the tiling of the SiDB surface.
- * @tparam CellLyt SiDB cell-level layout type that is underlying to the SiDB defect surface.
- * @param gate_lyt Gate-level layout instance that specifies the aspect ratio.
- * @param surface SiDB surface that instantiates the defects.
- * @param charged_defect_spacing_overwrite Override the default influence distance of charged atomic defects on SiDBs
- * with an optional pair of horizontal and vertical distances.
- * @param neutral_defect_spacing_overwrite Override the default influence distance of neutral atomic defects on SiDBs
- * with an optional pair of horizontal and vertical distances.
- * @return A black list of gate functions associated with tiles.
+ * @tparam GateLibrary SiDB gate library type.
+ * @tparam GateLyt Gate-level layout type.
+ * @tparam CellLyt SiDB cell-level layout type that positions the gates; it has to use cube coordinates.
+ * @param gate_lyt The gate-level layout.
+ * @param surface The defective surface.
+ * @param charged_defect_spacing_overwrite Overrides the spacing charged defects keep SiDBs at.
+ * @param neutral_defect_spacing_overwrite Overrides the spacing neutral defects keep SiDBs at.
+ * @return The black list.
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
     requires std::same_as<fiction::technology<CellLyt>, sidb::sidb_technology> &&
              std::same_as<fiction::technology<CellLyt>, fiction::technology<GateLibrary>>
 [[nodiscard]] auto surface_analysis(
-    const GateLyt& gate_lyt, const CellLyt& surface,
-    const std::optional<std::pair<uint64_t, uint64_t>>& charged_defect_spacing_overwrite = std::nullopt,
-    const std::optional<std::pair<uint64_t, uint64_t>>& neutral_defect_spacing_overwrite = std::nullopt) noexcept
+    const GateLyt& gate_lyt, const sidb::layout& surface,
+    const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,
+    const std::optional<std::pair<uint16_t, uint16_t>>& neutral_defect_spacing_overwrite = std::nullopt) noexcept
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
-    static_assert(is_sidb_defect_surface_v<CellLyt>, "CellLyt is not an SiDB defect layout");
-
     static_assert(has_get_functional_implementations_v<GateLibrary>,
                   "GateLibrary does not implement the get_functional_implementations function");
     static_assert(has_get_gate_ports_v<GateLibrary>, "GateLibrary does not implement the get_gate_ports function");
 
-    // fetch the port type used by the gate library
     using port_type = typename decltype(GateLibrary::get_gate_ports())::mapped_type::value_type::port_type;
 
     surface_black_list<GateLyt, port_type> black_list{};
 
     const auto sidbs_affected_by_defects =
         surface.all_affected_sidbs(charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
+
     const auto gate_implementations = GateLibrary::get_functional_implementations();
     const auto gate_ports           = GateLibrary::get_gate_ports();
 
-    // a lambda that analyzes defect impact on a gate at a given layout tile
-    // it had to be extracted from the foreach_tile lambda because its nesting caused an C1001: internal compiler error
-    // on Visual Studio 17 (2022) as it could not access GateLibrary::gate_x_size() and GateLibrary::gate_y_size()
-    // even though that should be possible and is perfectly valid C++ code... either way, this workaround fixes it
     const auto analyze_gate = [&](const auto& it, const auto& t) noexcept
     {
         const auto& [fun, impls] = it;
 
-        // for each gate in the list of possible implementations
         for (const auto& gate : impls)
         {
-            // flag to indicate that the current gate is exhaustively checked and can be skipped
             auto continue_with_next_gate = false;
 
-            // for each cell position in the gate
             for (uint16_t y = 0u; y < GateLibrary::gate_y_size(); ++y)
             {
                 for (uint16_t x = 0u; x < GateLibrary::gate_x_size(); ++x)
                 {
-                    // if the cell type at position (x, y) in the gate is non-empty
                     if (const auto cell_type = gate[y][x]; cell_type != fiction::technology<CellLyt>::cell_type::EMPTY)
                     {
-                        // cell position within the gate
                         const cell<CellLyt> relative_cell_pos{x, y, t.z};
 
-                        const auto sidb_pos =
+                        const auto sidb_pos = sidb::to_lattice_site(
                             layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
                                                                         GateLibrary::gate_y_size(), GateLyt, CellLyt>(
-                                gate_lyt, t, relative_cell_pos);
+                                gate_lyt, t, relative_cell_pos));
 
-                        // if any SiDB position of the current gate is compromised
-                        if (sidbs_affected_by_defects.count(sidb_pos) > 0)
+                        if (sidbs_affected_by_defects.contains(sidb_pos))
                         {
-                            // add this gate's function to the black list of tile t using the ports specified by
-                            // get_gate_ports in GateLibrary
                             for (const auto& port : gate_ports.at(gate))
                             {
                                 black_list[t][fun].push_back(port);
                             }
 
                             continue_with_next_gate = true;
-
                             break;
                         }
                     }
                 }
-                // break if any SiDB position of the current gate is found compromised in the inner loop
+
                 if (continue_with_next_gate)
                 {
                     break;
@@ -150,14 +131,11 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
         }
     };
 
-    // for each tile in the layout
     gate_lyt.foreach_tile(
         [&](const auto& t) noexcept
         {
-            // for each gate in the library
             for (const auto& impl : gate_implementations)
             {
-                // analyze the gate by matching its cell positions against the affected SiDBs on the surface
                 analyze_gate(impl, t);
             }
         });
@@ -165,4 +143,4 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
     return black_list;
 }
 
-}  // namespace fiction::sidb
+}  // namespace fiction::physical_design
