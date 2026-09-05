@@ -43,6 +43,19 @@ using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::utils::math;
 
+TEST_CASE("No heuristic results", "[time-to-solution]")
+{
+    time_to_solution_stats stats{};
+    stats.algorithm = "QuickExact";
+
+    time_to_solution_for_given_simulation_results(result{}, {}, 0.997, &stats);
+
+    CHECK(std::isinf(stats.time_to_solution));
+    CHECK(stats.acc == 0.0);
+    CHECK(stats.mean_single_runtime == 0.0);
+    CHECK(stats.algorithm == "QuickExact");
+}
+
 // Test 1: Basic time-to-solution test with different layout types
 TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to-solution]")
 {

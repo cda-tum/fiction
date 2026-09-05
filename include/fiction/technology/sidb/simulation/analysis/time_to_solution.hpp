@@ -119,6 +119,20 @@ inline void time_to_solution_for_given_simulation_results(const result&         
 {
     time_to_solution_stats st{};
 
+    if (results_heuristic.empty())
+    {
+        st.single_runtime_exact = mockturtle::to_seconds(results_exact.simulation_runtime);
+        st.time_to_solution     = std::numeric_limits<double>::infinity();
+
+        if (ps != nullptr)
+        {
+            st.algorithm = ps->algorithm;
+            *ps          = st;
+        }
+
+        return;
+    }
+
     auto        total_runtime_heuristic = 0.0;
     std::size_t gs_count                = 0;
 
@@ -226,10 +240,7 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
 
     for (auto i = 0u; i < tts_params.repetitions; ++i)
     {
-        if (const auto quicksim_result = engines::quicksim(lyt, qs_params); quicksim_result.has_value())
-        {
-            simulation_results_quicksim.push_back(*quicksim_result);
-        }
+        simulation_results_quicksim.push_back(engines::quicksim(lyt, qs_params).value_or(result{}));
     }
 
     time_to_solution_for_given_simulation_results(simulation_result, simulation_results_quicksim,

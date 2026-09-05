@@ -38,6 +38,17 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::sidb::simulation::logic;
 
+TEST_CASE("Reject charge distributions from another layout", "[determine-physically-valid-parameters]")
+{
+    layout lyt{};
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    layout other{};
+    other.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    CHECK(physically_valid_parameters(lyt, charge_distribution{other}).size() == 0u);
+}
+
 TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 input combination",
           "[determine-physically-valid-parameters]")
 {

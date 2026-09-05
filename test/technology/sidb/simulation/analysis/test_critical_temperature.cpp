@@ -679,40 +679,45 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
 {
     const layout lat{to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>())};
 
-    for (const auto condition : {is_operational_params::operational_condition::TOLERATE_KINKS,
-                                 is_operational_params::operational_condition::REJECT_KINKS})
+    for (const auto input_config : {bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED,
+                                    bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED})
     {
-        critical_temperature_params params{};
-        params.operational_params.sim_params   = simulation_parameters{2, -0.32};
-        params.operational_params.sim_engine   = engine::QUICKEXACT;
-        params.operational_params.op_condition = condition;
+        for (const auto condition : {is_operational_params::operational_condition::TOLERATE_KINKS,
+                                     is_operational_params::operational_condition::REJECT_KINKS})
+        {
+            critical_temperature_params params{};
+            params.operational_params.sim_params                                 = simulation_parameters{2, -0.32};
+            params.operational_params.sim_engine                                 = engine::QUICKEXACT;
+            params.operational_params.op_condition                               = condition;
+            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_config;
 
-        critical_temperature_stats expected_stats{};
+            critical_temperature_stats expected_stats{};
 
-        const auto expected_ct =
-            critical_temperature_gate_based(lat, std::vector<tt>{create_and_tt()}, params, &expected_stats);
+            const auto expected_ct =
+                critical_temperature_gate_based(lat, std::vector<tt>{create_and_tt()}, params, &expected_stats);
 
-        const auto input_wires = detect_bdl_wires(
-            lat, params.operational_params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT);
-        const auto output_wires = detect_bdl_wires(
-            lat, params.operational_params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT);
-        const auto output_pairs =
-            detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT,
-                             params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
+            const auto input_wires = detect_bdl_wires(
+                lat, params.operational_params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT);
+            const auto output_wires = detect_bdl_wires(
+                lat, params.operational_params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT);
+            const auto output_pairs =
+                detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT,
+                                 params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
 
-        const auto input_pattern_layouts =
-            generate_bdl_input_pattern_layouts(lat, params.operational_params.input_bdl_iterator_params, input_wires);
+            const auto input_pattern_layouts = generate_bdl_input_pattern_layouts(
+                lat, params.operational_params.input_bdl_iterator_params, input_wires);
 
-        critical_temperature_stats stats{};
+            critical_temperature_stats stats{};
 
-        const auto ct = critical_temperature_gate_based(input_pattern_layouts, std::vector<tt>{create_and_tt()}, params,
-                                                        output_pairs, input_wires, output_wires, &stats);
+            const auto ct = critical_temperature_gate_based(input_pattern_layouts, std::vector<tt>{create_and_tt()},
+                                                            params, output_pairs, input_wires, output_wires, &stats);
 
-        // the two overloads run the same computation, so the results must be bit-identical
-        CHECK_THAT(ct, Catch::Matchers::WithinULP(expected_ct, 0));
-        CHECK(stats.num_valid_lyt == expected_stats.num_valid_lyt);
-        CHECK(stats.energy_between_ground_state_and_first_erroneous ==
-              expected_stats.energy_between_ground_state_and_first_erroneous);
+            // the two overloads run the same computation, so the results must be bit-identical
+            CHECK_THAT(ct, Catch::Matchers::WithinULP(expected_ct, 0));
+            CHECK(stats.num_valid_lyt == expected_stats.num_valid_lyt);
+            CHECK(stats.energy_between_ground_state_and_first_erroneous ==
+                  expected_stats.energy_between_ground_state_and_first_erroneous);
+        }
     }
 }
 

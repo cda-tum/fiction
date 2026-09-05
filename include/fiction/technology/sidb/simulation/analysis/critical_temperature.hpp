@@ -179,7 +179,7 @@ class critical_temperature_impl
                               const std::vector<logic::bdl_pair<lattice_site>>& output_pairs,
                               const std::vector<logic::bdl_wire>&               input_wires,
                               const std::vector<logic::bdl_wire>&               output_wires) :
-            // a shallow copy, so that the `is_empty()`, `num_pis()`, `num_pos()` and `num_cells()` guards keep working
+            // a shallow copy, so that the `is_empty()`, `num_pos()` and `num_cells()` guards keep working
             sidb_layout{input_pattern_lyts.front()},
             params{ps},
             stats{st},
@@ -212,7 +212,7 @@ class critical_temperature_impl
             return;
         }
 
-        assert(sidb_layout.num_pis() > 0 && "gate needs input cells");
+        assert((input_pattern_layouts != nullptr || sidb_layout.num_pis() > 0) && "gate needs input cells");
         assert(sidb_layout.num_pos() > 0 && "gate needs output cells");
 
         if (sidb_layout.num_cells() > 1)

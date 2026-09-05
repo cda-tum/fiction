@@ -30,6 +30,7 @@
 #include <cstdint>
 #include <iterator>
 #include <type_traits>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -163,9 +164,12 @@ TEST_CASE("Incomplete BDL wire set", "[bdl-input-iterator]")
 {
     const auto lyt = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
 
-    const bdl_input_iterator bii{lyt, bdl_input_iterator_params{}, std::vector<bdl_wire>{}};
+    bdl_input_iterator bii{lyt, bdl_input_iterator_params{}, std::vector<bdl_wire>{}};
 
     CHECK_FALSE(bii.is_valid());
+    bii = 0;
+    ++bii;
+    CHECK(generate_bdl_input_pattern_layouts(lyt, bdl_input_iterator_params{}, {}).empty());
 }
 
 TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")

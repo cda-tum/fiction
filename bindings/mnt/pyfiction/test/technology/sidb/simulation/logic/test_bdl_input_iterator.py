@@ -42,7 +42,8 @@ def bdl_wire() -> sidb_layout:
     return layout
 
 
-def test_empty_layout():
+def test_empty_layout() -> None:
+    """Check comparisons for an iterator over an empty layout."""
     layout = sidb_layout()
 
     bii = bdl_input_iterator(layout)
@@ -55,7 +56,8 @@ def test_empty_layout():
     assert bii >= 0
 
 
-def test_iteration_empty_layout():
+def test_iteration_empty_layout() -> None:
+    """Check manual iterator operations on an empty layout."""
     layout = sidb_layout()
 
     bii = bdl_input_iterator(layout)
@@ -77,7 +79,12 @@ def test_iteration_empty_layout():
     assert bii.get_layout().num_cells() == 0
 
 
-def test_manual_bdl_wire_iteration(bdl_wire):
+def test_manual_bdl_wire_iteration(bdl_wire: sidb_layout) -> None:
+    """Check manual input-pattern iteration over a BDL wire.
+
+    Args:
+        bdl_wire: BDL wire layout.
+    """
     layout = bdl_wire
     bii = bdl_input_iterator(layout)
 
@@ -119,26 +126,29 @@ def test_manual_bdl_wire_iteration(bdl_wire):
     assert lyt0.get_cell_type(lattice_site(2, 0, 0)) == sidb_technology.cell_type.EMPTY
 
 
-def test_automatic_bdl_wire_iteration(bdl_wire):
+def test_automatic_bdl_wire_iteration(bdl_wire: sidb_layout) -> None:
+    """Check automatic input-pattern iteration over a BDL wire.
+
+    Args:
+        bdl_wire: BDL wire layout.
+    """
     layout = bdl_wire
     bii = bdl_input_iterator(layout)
 
-    for index, bii_iterator in enumerate(bii):
-        lyt = bii_iterator.get_layout()
+    input_pattern_layouts = list(bii)
+    assert len(input_pattern_layouts) == 2
+
+    for index, lyt in enumerate(input_pattern_layouts):
         if index == 0:
             assert lyt.get_cell_type(lattice_site(0, 0, 0)) == sidb_technology.cell_type.INPUT
             assert lyt.get_cell_type(lattice_site(2, 0, 0)) == sidb_technology.cell_type.EMPTY
         elif index == 1:
             assert lyt.get_cell_type(lattice_site(0, 0, 0)) == sidb_technology.cell_type.EMPTY
             assert lyt.get_cell_type(lattice_site(2, 0, 0)) == sidb_technology.cell_type.INPUT
-        elif index == 2:
-            assert lyt.get_cell_type(lattice_site(0, 0, 0)) == sidb_technology.cell_type.INPUT
-            assert lyt.get_cell_type(lattice_site(2, 0, 0)) == sidb_technology.cell_type.EMPTY
-        elif index == 3:
-            break
 
 
-def test_automatic_siqad_and_gate_iteration():
+def test_automatic_siqad_and_gate_iteration() -> None:
+    """Check automatic iteration over all SiQAD AND-gate input patterns."""
     layout = sidb_layout(lattice.si_100_2x1(), "AND gate")
 
     layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.INPUT)
@@ -160,8 +170,10 @@ def test_automatic_siqad_and_gate_iteration():
 
     bii = bdl_input_iterator(layout)
 
-    for index, bii_iterator in enumerate(bii):
-        lyt = bii_iterator.get_layout()
+    input_pattern_layouts = list(bii)
+    assert len(input_pattern_layouts) == 4
+
+    for index, lyt in enumerate(input_pattern_layouts):
         if index == 0:
             assert lyt.get_cell_type(lattice_site(0, 0, 1)) == sidb_technology.cell_type.INPUT
             assert lyt.get_cell_type(lattice_site(2, 1, 1)) == sidb_technology.cell_type.EMPTY
@@ -189,6 +201,3 @@ def test_automatic_siqad_and_gate_iteration():
 
             assert lyt.get_cell_type(lattice_site(20, 0, 1)) == sidb_technology.cell_type.EMPTY
             assert lyt.get_cell_type(lattice_site(18, 1, 1)) == sidb_technology.cell_type.INPUT
-
-        else:
-            break

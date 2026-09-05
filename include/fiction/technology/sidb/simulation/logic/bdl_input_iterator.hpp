@@ -109,10 +109,7 @@ class bdl_input_iterator
             upper_input_closer_to_wire_end{determine_upper_input_closer_to_wire_end()},
             params{ps}
     {
-        if (is_valid())
-        {
-            set_all_inputs();
-        }
+        set_all_inputs();
     }
     /**
      * The layout with the current input pattern applied.
@@ -403,7 +400,10 @@ class bdl_input_iterator
      */
     void set_all_inputs() noexcept
     {
-        assert(is_valid() && "number of inputs and number of complete wires don't match");
+        if (!is_valid())
+        {
+            return;
+        }
 
         const auto num_inputs = input_pairs.size();
 
@@ -463,6 +463,11 @@ generate_bdl_input_pattern_layouts(const layout& lyt, const bdl_input_iterator_p
                                    const std::vector<bdl_wire>& input_wires) noexcept
 {
     bdl_input_iterator bii{lyt, ps, input_wires};
+
+    if (!bii.is_valid())
+    {
+        return {};
+    }
 
     assert(bii.num_input_pairs() < 64 && "too many input BDL pairs to enumerate");
 
