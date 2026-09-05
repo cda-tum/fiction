@@ -162,7 +162,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
 
     physical_design::exact_physical_design_stats exact_stats{};
 
-    CellLyt result{};
+    layout result{};
 
     {
         const mockturtle::stopwatch stop{st.time_total};
