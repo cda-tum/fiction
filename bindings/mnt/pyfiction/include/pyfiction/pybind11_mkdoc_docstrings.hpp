@@ -17544,8 +17544,6 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_layout = R"doc(The layout to analyze.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_params = R"doc(Parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_physical_population_stability_impl =
@@ -17566,6 +17564,8 @@ Returns:
     charge distribution.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_sidb_layout = R"doc(The layout to analyze.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_energy_distribution =
 R"doc(This class is used to store the energy distribution of an SiDB layout.
