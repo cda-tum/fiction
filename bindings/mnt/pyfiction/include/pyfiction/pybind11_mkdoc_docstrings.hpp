@@ -18175,7 +18175,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_base =
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_base_layout =
 R"doc(The layout without any defects; the ground state comparison places the
 defect itself.)doc";
 
@@ -18271,7 +18271,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_layout = R"doc(The layout to analyze.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_layout_to_analyze = R"doc(The layout to analyze.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_log_stats = R"doc(Writes the counters into the statistics.)doc";
 
@@ -18422,7 +18422,7 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_generator = R"doc(Random generator for shuffling.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_layout = R"doc(The gate layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_layout_to_analyze = R"doc(The gate layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_params = R"doc(Parameters.)doc";
 
