@@ -42,6 +42,7 @@ void register_synthesis(nanobind::module_& m);
 void register_verification(nanobind::module_& m);
 void register_path_finding(nanobind::module_& m);
 void register_physical_design(nanobind::module_& m);
+void register_sidb(nanobind::module_& m);
 void register_sidb_simulation_engines(nanobind::module_& m);
 void register_sidb_simulation_logic(nanobind::module_& m);
 void register_sidb_simulation_analysis(nanobind::module_& m);
@@ -61,6 +62,7 @@ NB_MODULE(pyfiction, m)
     pyfiction::register_layouts(m);
     pyfiction::register_networks(m);
     pyfiction::register_sidb_model(m);
+    pyfiction::register_sidb(m);
     pyfiction::register_sidb_surfaces(m);
     pyfiction::register_sidb_simulation(m);
     pyfiction::register_fcn(m);

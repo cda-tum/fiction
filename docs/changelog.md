@@ -8,15 +8,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Data structures:
+  - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
+    `sidb::layout` stores cells and defects without templates. `to_sidb_layout` converts
+    Cartesian cell-level layouts
+
 - Documentation:
 
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
   - Added synchronized C++/Python tabs and code copy buttons.
   - Added `llms.txt`, `llms-full.txt`, and Markdown exports of documentation pages.
 
+- I/O:
+  - `read_sqd_layout`, `write_sqd_layout`, `write_sidb_layout_svg`, `read_surface_defects`, and
+    `print_sidb_layout` accept and produce `sidb::layout`; the SQD reader takes the lattice from the file
+    instead of a template parameter
+
 - Python bindings:
 
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
+  - `lattice`, `lattice_site`, `sidb_layout` (the lattice-based layout), `read_sqd_layout`,
+    `read_surface_defects`, and the `sidb_layout` overloads of `write_sqd_layout` and
+    `write_sidb_layout_svg`
 
 ### Changed
 
@@ -154,10 +167,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** The Python class `sidb_layout` now names the lattice-based `sidb::layout`. The Cartesian
+    SiDB cell-level layout is `sidb_cell_level_layout`
+
   - **Breaking:** `critical_temperature_stats.is_ground_state_transparent` is renamed
     `energy_between_ground_state_and_first_erroneous`, the member it always exposed
 
 ### Fixed
+
+- Continuous integration:
+  - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
+  - Change detection now allows five minutes for runner setup and file comparisons.
+
+- Data structures:
+  - SiDB row conversion and area iteration now handle coordinate limits without signed overflow;
+    defect influence clips to representable sites, and cube conversion rejects rows outside its range
+  - Lattice-site construction and arithmetic now reject coordinate overflow; cell insertion preserves the layout on
+    allocation failure, and moving a defect from an empty site leaves the target unchanged
+  - Moving a defect now preserves its target when the site arguments refer to stored defects.
 
 - Documentation:
 
@@ -167,6 +194,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `types.hpp`: `sidb_111_cell_clk_lyt_siqad_ptr`, `cds_sidb_cell_clk_lyt_cube`,
   `cds_sidb_111_cell_clk_lyt_siqad_ptr`, and `cds_sidb_111_cell_clk_lyt_cube_ptr` pointed at
   the wrong type; a `static_assert` per `*_ptr` alias pins each to the type its name says
+
+- I/O:
+  - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites
+  - SQD cell-level output now propagates exceptions from cell and defect formatting
+  - `write_sidb_layout_svg` now propagates allocation errors when setting colors and formatting lattice points
+  - SVG and text output now reject padding outside the lattice-site coordinate range
+  - SQD readers now reject empty defect labels, invalid numeric values, and invalid Coulomb parameters.
+    SQD output escapes lattice names, and defect-matrix readers report oversized indices with the documented exception
 
 - Python bindings:
 

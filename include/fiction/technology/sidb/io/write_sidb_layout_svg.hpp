@@ -18,8 +18,9 @@
 #pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
-#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/layout_utils.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/nm_position.hpp"
 #include "fiction/traits.hpp"
@@ -31,7 +32,6 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
-#include <exception>
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -39,7 +39,6 @@
 #include <string>
 #include <string_view>
 #include <tuple>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -210,7 +209,7 @@ class write_sidb_layout_svg_impl
     /**
      * Sets the colors based on the color mode.
      */
-    void set_colors() noexcept
+    void set_colors()
     {
         if (ps.color_background == write_sidb_layout_svg_params::color_mode::LIGHT)
         {
@@ -238,7 +237,7 @@ class write_sidb_layout_svg_impl
      * @return The SVG string representing the lattice point.
      */
     [[nodiscard]] std::string generate_lattice_point(const double x, const double y,
-                                                     const std::string& fill_color) const noexcept
+                                                     const std::string& fill_color) const
     {
         return fmt::format(R"(<use xlink:href="#lattice_point" x="{0}" y="{1}" style="fill:{2};"/>)", x, y, fill_color);
     }
@@ -422,6 +421,120 @@ class write_sidb_layout_svg_impl
     }
 };
 
+/**
+ * Draws an `sidb::layout` as an SVG image: the lattice points of the layout's bounding box, if requested, and every
+ * SiDB at its position on the layout's lattice.
+ */
+class sidb_layout_svg_writer
+{
+  public:
+    /**
+     * Creates an SVG writer for a lattice layout.
+     *
+     * @param layout Layout to draw.
+     * @param stream Output stream.
+     * @param p Drawing parameters.
+     */
+    sidb_layout_svg_writer(const layout& layout, std::ostream& stream, const write_sidb_layout_svg_params& p) :
+            lyt{layout},
+            os{stream},
+            ps{p}
+    {
+        if (ps.color_background == write_sidb_layout_svg_params::color_mode::LIGHT)
+        {
+            background_color = svg::BACKGROUND_COLOR_BRIGHT;
+            sidb_color       = svg::SIDB_DOT_BRIGHT_MODE;
+            sidb_edge_color  = svg::SIDB_DOT_LINE_COLOR_BRIGHT_MODE;
+        }
+        else
+        {
+            background_color = svg::BACKGROUND_COLOR_DARK;
+            sidb_color       = svg::SIDB_DOT_DARK_MODE;
+            sidb_edge_color  = svg::SIDB_DOT_LINE_COLOR_DARK_MODE;
+        }
+    }
+
+    /**
+     * Draws the lattice and SiDBs with padding around the bounding box.
+     *
+     * @throws std::out_of_range if padding exceeds the lattice-site coordinate range.
+     */
+    void run() const
+    {
+        std::stringstream svg_content{};
+
+        const auto [min_site, max_site] = lyt.bounding_box();
+        const auto padded_max           = max_site + lattice_site{2, 1, 1};
+
+        // sites are drawn one column and one unit cell away from the top-left corner as padding
+        const auto padded = [](const lattice_site& s) { return s + lattice_site{1, 1}; };
+
+        if (ps.lattice_mode == write_sidb_layout_svg_params::sidb_lattice_mode::SHOW_LATTICE)
+        {
+            for (const auto& s : sites_in_area(min_site, max_site))
+            {
+                const auto [x, y] = lyt.get_lattice().nm_position(padded(s));
+
+                svg_content << fmt::format(R"(<use xlink:href="#lattice_point" x="{0}" y="{1}" style="fill:{2};"/>)",
+                                           x * 10, y * 10, svg::SI_LATTICE);
+            }
+        }
+
+        lyt.foreach_cell(
+            [&](const auto& s)
+            {
+                const auto [x, y] = lyt.get_lattice().nm_position(padded(s));
+
+                svg_content << fmt::format(
+                    R"(<use xlink:href="#sidb_color" x="{0}" y="{1}" style="fill:{2}; fill-opacity:{3}; stroke:{4}; stroke-width:{5};"/>)",
+                    x * 10, y * 10, sidb_color, 1.0, sidb_edge_color, ps.sidb_border_width);
+            });
+
+        const auto [min_x, min_y] = lyt.get_lattice().nm_position(min_site);
+        const auto [max_x, max_y] = lyt.get_lattice().nm_position(padded_max);
+
+        const auto viewbox_x      = min_x * 10;
+        const auto viewbox_y      = min_y * 10;
+        const auto viewbox_width  = (max_x - min_x) * 10;
+        const auto viewbox_height = (max_y - min_y) * 10;
+
+        const auto background_rect =
+            fmt::format(R"(<rect x="{0}" y="{1}" width="{2}" height="{3}" style="fill:{4};"/>)", viewbox_x, viewbox_y,
+                        viewbox_width, viewbox_height, background_color);
+
+        os << fmt::format(svg::HEADER_TEMPLATE, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y, viewbox_width,
+                          viewbox_height,
+                          fmt::format(svg::PATH_DEFINITION_TEMPLATE, ps.lattice_point_size, ps.sidb_size),
+                          background_rect, svg_content.str());
+    }
+
+  private:
+    /**
+     * Layout to draw.
+     */
+    const layout& lyt;
+    /**
+     * Output stream.
+     */
+    std::ostream& os;
+    /**
+     * Drawing parameters.
+     */
+    const write_sidb_layout_svg_params ps;
+    /**
+     * Background color.
+     */
+    std::string background_color{};
+    /**
+     * SiDB fill color.
+     */
+    std::string sidb_color{};
+    /**
+     * SiDB border color.
+     */
+    std::string sidb_edge_color{};
+};
+
 }  // namespace detail
 
 /**
@@ -464,6 +577,43 @@ void write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
     static_assert(!is_sidb_defect_surface_v<Lyt>, "SiDB defects are not supported");
 
     std::ofstream os{std::string(filename), std::ofstream::out};
+
+    if (!os.is_open())
+    {
+        throw std::ofstream::failure("Could not open file");
+    }
+
+    write_sidb_layout_svg(lyt, os, ps);
+    os.close();
+}
+
+/**
+ * Writes an `sidb::layout` as an SVG image to a stream: the lattice points of the layout's bounding box, if the
+ * parameters ask for them, and every SiDB at its position on the layout's lattice. Surface defects are not drawn.
+ *
+ * @param lyt Layout to draw.
+ * @param os Output stream to write into.
+ * @param ps Drawing parameters.
+ * @throws std::out_of_range if padding exceeds the lattice-site coordinate range.
+ */
+inline void write_sidb_layout_svg(const layout& lyt, std::ostream& os, const write_sidb_layout_svg_params& ps = {})
+{
+    const detail::sidb_layout_svg_writer p{lyt, os, ps};
+    p.run();
+}
+/**
+ * Writes an `sidb::layout` as an SVG image. See the stream overload for the image's content.
+ *
+ * @param lyt Layout to draw.
+ * @param filename File to write into.
+ * @param ps Drawing parameters.
+ * @throws std::ofstream::failure if the file cannot be opened.
+ * @throws std::out_of_range if padding exceeds the lattice-site coordinate range.
+ */
+inline void write_sidb_layout_svg(const layout& lyt, const std::string_view& filename,
+                                  const write_sidb_layout_svg_params& ps = {})
+{
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {

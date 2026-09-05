@@ -40,15 +40,33 @@ foreach(FILE IN LISTS FILENAMES)
   get_filename_component(TEST_NAME ${FILE} NAME_WE)
   add_executable(${TEST_NAME} ${FILE})
 
-  # Link the test executable against libfiction and Catch2
-  target_link_libraries(
-    ${TEST_NAME} PRIVATE libfiction_test fiction::libfiction
-                         Catch2::Catch2WithMain)
+  target_link_libraries(${TEST_NAME} PRIVATE libfiction_test)
+
+  if(TEST_NAME STREQUAL "test_layout")
+    # This test replaces global new/delete to inject allocation failures. Link
+    # its header dependencies directly so jemalloc cannot supply a second
+    # replacement.
+    target_link_libraries(${TEST_NAME} PRIVATE fiction::fiction_options
+                                               fiction::fiction_warnings fmt)
+    target_include_directories(
+      ${TEST_NAME}
+      PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_compile_options(
+      ${TEST_NAME}
+      PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_COMPILE_OPTIONS>)
+    target_compile_definitions(
+      ${TEST_NAME}
+      PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_COMPILE_DEFINITIONS>)
+  else()
+    target_link_libraries(${TEST_NAME} PRIVATE fiction::libfiction)
+  endif()
+
+  target_link_libraries(${TEST_NAME} PRIVATE Catch2::Catch2WithMain)
 
   # Make Catch2 ignore SIGTERMs sent to applications when timeouts are reached
   target_compile_definitions(${TEST_NAME} PRIVATE CATCH_CONFIG_NO_POSIX_SIGNALS)
 
-  if(FICTION_ENABLE_PCH)
+  if(FICTION_ENABLE_PCH AND NOT TEST_NAME STREQUAL "test_layout")
     target_precompile_headers(${TEST_NAME} REUSE_FROM libfiction_test_pch)
   endif()
 

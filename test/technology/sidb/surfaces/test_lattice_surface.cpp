@@ -52,7 +52,8 @@ TEST_CASE("use different lattice orientations", "[sidb-lattice]")
     lyt_100.assign_cell_type({5, 0}, sidb_100_cell_clk_lyt::cell_type::NORMAL);
     CHECK(lyt_100.num_cells() == 3);
 
-    using lattice_layout_111 = lattice<lattice_100, sidb_cell_clk_lyt>;
+    using lattice_layout_111 = lattice<lattice_111, sidb_cell_clk_lyt>;
+    CHECK(is_sidb_lattice_111_v<lattice_layout_111>);
     lattice_layout_111 lyt_111{};
     lyt_111.assign_cell_type({0, 0}, sidb_100_cell_clk_lyt::cell_type::NORMAL);
     lyt_111.assign_cell_type({3, 0}, sidb_100_cell_clk_lyt::cell_type::NORMAL);

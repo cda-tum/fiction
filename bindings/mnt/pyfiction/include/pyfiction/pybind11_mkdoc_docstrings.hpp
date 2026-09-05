@@ -14519,6 +14519,33 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_io_detail_parse_defect_label =
+R"doc(Maps SiQAD's defect labels to defect types; unknown labels yield
+`defect_type::UNKNOWN`.
+
+Args:
+    label: The label text.
+
+Returns:
+    The defect type.
+
+Raises:
+    sqd_parsing_error: if the label has no text.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_parse_dot_type =
+R"doc(Parses the `<type>` element of a `<dbdot>`; a missing element means a
+normal SiDB.
+
+Args:
+    dot_type: The element, or `nullptr`.
+
+Returns:
+    The cell type.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_dimer_to_cell =
@@ -14542,47 +14569,40 @@ static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_lyt = R"d
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_max_cell_pos = R"doc(The maximum position of a cell in the layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_parse_db_dot =
-R"doc(Parses a <dbdot> element from the SQD file and adds the respective dot
-to the layout.
-
-Args:
-    db_dot: The <dbdot> element.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_parse_defect =
-R"doc(Parses a <defect> element from the SQD file and adds the respective
-defect to the layout if it implements the has_assign_sidb_defect
-function..
-
-Args:
-    label: The <defect> element.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_parse_defect_label =
-R"doc(Parses a <val> attribute of a <type_label> element of a <property_map>
-element from the SQD file and converts it to the respective SiDB
-defect type.
-
-Args:
-    label: The <type_label> element's <val> attribute.
-
-Returns:
-    The SiDB defect type corresponding to the given label.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_parse_dot_type =
 R"doc(Parses the <type> attribute of a <dbdot> element from the SQD file and
 returns the corresponding cell type.
 
+
+
+Parses a <dbdot> element from the SQD file and adds the respective dot
+to the layout.
+
 Args:
-    db_dot: The <dbdot> element.
+    db_dot: The <dbdot> element. db_dot: The <dbdot> element.
 
 Returns:
     The cell type specified by the <dbdot> element. If non is
     specified, the cell type is assumed to be normal.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_parse_defect =
+R"doc(Parses a <val> attribute of a <type_label> element of a <property_map>
+element from the SQD file and converts it to the respective SiDB
+defect type.
+
+
+
+Parses a <defect> element from the SQD file and adds the respective
+defect to the layout if it implements the has_assign_sidb_defect
+function..
+
+Args:
+    label: The <type_label> element's <val> attribute. label: The
+           <defect> element.
+
+Returns:
+    The SiDB defect type corresponding to the given label.
 
 )doc";
 
@@ -14614,7 +14634,17 @@ static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_read_sqd_
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_read_sqd_layout_impl_2 = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_run =
+R"doc(Parses the stream and reports malformed numeric attributes as SQD
+parsing errors.
+
+Returns:
+    The parsed layout.
+
+Raises:
+    sqd_parsing_error: if the SQD input is malformed.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_update_bounding_box =
 R"doc(Updates the bounding box given by the maximum position of a cell in
@@ -14637,6 +14667,229 @@ static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_max_
 static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_read_surface_defects_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_run = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer =
+R"doc(Draws an `sidb::layout` as an SVG image: the lattice points of the
+layout's bounding box, if requested, and every SiDB at its position on
+the layout's lattice.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_background_color = R"doc(Background color.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_lyt = R"doc(Layout to draw.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_os = R"doc(Output stream.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_ps = R"doc(Drawing parameters.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_run =
+R"doc(Draws the lattice and SiDBs with padding around the bounding box.
+
+Raises:
+    std::out_of_range: if padding exceeds the lattice-site coordinate
+                       range.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_color = R"doc(SiDB fill color.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_edge_color = R"doc(SiDB border color.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_layout_svg_writer =
+R"doc(Creates an SVG writer for a lattice layout.
+
+Args:
+    layout: Layout to draw.
+    stream: Output stream.
+    p: Drawing parameters.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader =
+R"doc(Reads an SQD file into an `sidb::layout`. The file's lattice
+definition selects the lattice; SiDBs and surface defects are placed
+at the `(n, m, l)` lattice coordinates the file names.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_is = R"doc(Input stream.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_lyt = R"doc(Layout being parsed.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_db_dot =
+R"doc(Adds a DB dot at its lattice coordinate with the specified cell type.
+
+Args:
+    db_dot: DB-dot element.
+
+Raises:
+    sqd_parsing_error: if the lattice-coordinate element is missing or
+                       invalid.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_defect =
+R"doc(Reads a defect with finite, non-negative Coulomb material parameters.
+
+Args:
+    defect: The defect element.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_latcoord =
+R"doc(Parses a lattice coordinate within the representable site range.
+
+Args:
+    latcoord: The lattice-coordinate element.
+
+Returns:
+    The lattice site.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice =
+R"doc(Reads explicit two-site lattice geometry, or a predefined lattice when
+geometry is absent.
+
+Args:
+    name: Lattice name from the SQD layer.
+    element: Lattice definition element.
+
+Returns:
+    The lattice defined by the layer.
+
+Raises:
+    sqd_parsing_error: if the geometry is incomplete, the basis count
+                       is not two, or a name-only lattice is unknown.
+    std::invalid_argument: if a geometry component is not numeric.
+    std::out_of_range: if a geometry component exceeds the range of a
+                       double.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice_number =
+R"doc(Parses a finite lattice number without trailing non-whitespace
+characters.
+
+Args:
+    text: Numeric XML text or attribute.
+
+Returns:
+    The parsed number.
+
+Raises:
+    sqd_parsing_error: if the number is missing, non-finite, or has
+                       trailing characters.
+    std::invalid_argument: if the text is not numeric.
+    std::out_of_range: if the number exceeds the range of a double.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice_vector =
+R"doc(Parses a lattice vector or basis site with finite components.
+
+Args:
+    element: Vector element with x and y attributes.
+
+Returns:
+    The vector.
+
+Raises:
+    sqd_parsing_error: if the element or a component is missing or
+                       malformed.
+    std::invalid_argument: if a component is not numeric.
+    std::out_of_range: if a component exceeds the range of a double.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_run =
+R"doc(Parses the stream and reports malformed numeric attributes as SQD
+parsing errors.
+
+Returns:
+    The parsed layout.
+
+Raises:
+    sqd_parsing_error: if the SQD input is malformed.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_sqd_reader =
+R"doc(Creates an SQD reader with a layout name.
+
+Args:
+    s: Input stream.
+    name: Layout name.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer =
+R"doc(Writes an `sidb::layout` as an SQD file: the layout's lattice as the
+lattice layer, every SiDB as a `<dbdot>` at its `(n, m, l)` lattice
+coordinate, and every surface defect as a `<defect>`.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_lyt = R"doc(Layout to write.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_os = R"doc(Output stream.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run = R"doc(Writes the layout with XML-escaped lattice text.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_sqd_writer =
+R"doc(Creates an SQD writer for a lattice layout.
+
+Args:
+    src: Layout to write.
+    s: Output stream.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_db_dot =
+R"doc(Appends a DB dot with its lattice coordinate and cell type.
+
+Args:
+    design: SQD design buffer.
+    s: Site of the SiDB.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_defect =
+R"doc(Appends a defect with its lattice coordinate and Coulomb parameters
+when charged.
+
+Args:
+    design: SQD design buffer.
+    s: Site of the defect.
+    d: Defect to write.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader =
+R"doc(Reads a defect matrix into a defects-only `sidb::layout`: entry `x` of
+row `y` becomes the defect at column `x` of single-SiDB row `y`.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_defect_matrix = R"doc(Matrix text read from the input stream.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_lyt = R"doc(Layout being populated.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_run =
+R"doc(Assigns each matrix entry to its site on the H-Si(100)-2x1 lattice.
+
+Returns:
+    Layout containing the parsed defects.
+
+Raises:
+    unsupported_defect_index_exception: if an index is unsupported or
+                                        exceeds the integer range.
+    missing_position_exception: if a row is shorter than a preceding
+                                row.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_surface_defects_reader =
+R"doc(Reads the defect matrix text and sets the layout name.
+
+Args:
+    s: Input stream.
+    name: Layout name.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl = R"doc()doc";
 
@@ -14688,9 +14941,21 @@ static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_wri
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_db_blocks = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_db_blocks =
+R"doc(Appends the SiDB or QCA cell blocks to the SQD design.
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_defect_blocks = R"doc()doc";
+Args:
+    design: SQD design buffer.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_defect_blocks =
+R"doc(Appends surface defect blocks when the layout exposes defects.
+
+Args:
+    design: SQD design buffer.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_get_defect_type_name = R"doc()doc";
 
@@ -14700,7 +14965,12 @@ static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_os = R"d
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_run = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_write_sqd_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_write_sqd_layout_impl =
+R"doc(Args:
+    src: Layout to serialize.
+    s: Stream receiving the SQD output.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception =
 R"doc(Exception thrown when a missing SiDB position is encountered in the
@@ -14711,6 +14981,27 @@ static const char *mkd_doc_fiction_sidb_io_missing_position_exception_line = R"d
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception_missing_position_exception = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception_where = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_io_print_sidb_layout =
+R"doc(Prints an `sidb::layout` as a lattice picture: one symbol per lattice
+site of the bounding box, row by row, with a blank line between the
+dimer rows of an H-Si(100)-2x1 surface and an indented second row per
+unit cell of an H-Si(111)-1x1 surface. Inputs, outputs, normal SiDBs,
+defects, and empty sites differ by color and symbol.
+
+Args:
+    os: Output stream to print into.
+    lyt: Layout to print.
+    lat_color: Whether to color the picture.
+    crop_layout: Whether to pad the bounding box by two columns and
+                 one unit cell instead of printing it tight.
+    draw_lattice: Whether to print empty lattice sites as dots.
+
+Raises:
+    std::out_of_range: if padding exceeds the lattice-site coordinate
+                       range.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_read_sqd_layout =
 R"doc(Reads a cell-level SiDB layout from an sqd file provided as an input
@@ -14797,6 +15088,45 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_io_read_sqd_layout_5 =
+R"doc(Reads an SQD file from a stream into an `sidb::layout`. The lattice
+comes from the file's lattice definition; SiDBs and surface defects
+are placed at the `(n, m, l)` lattice coordinates the file names.
+Explicit geometry must contain finite vectors and two basis sites.
+Without geometry, the reader accepts the two predefined reconstruction
+names and defaults to H-Si(100)-2x1 when the name is absent.
+
+Args:
+    is: The input stream to read from.
+    name: The name to give to the layout.
+
+Returns:
+    The layout read from the stream.
+
+Raises:
+    sqd_parsing_error: if the file is malformed or a name-only lattice
+                       is unknown.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_read_sqd_layout_6 =
+R"doc(Reads an SQD file into an `sidb::layout`. See the stream overload for
+the file's interpretation.
+
+Args:
+    filename: The file to read.
+    name: The name to give to the layout.
+
+Returns:
+    The layout read from the file.
+
+Raises:
+    sqd_parsing_error: if the file is malformed or a name-only lattice
+                       is unknown.
+    std::ifstream::failure: if the file cannot be opened.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_io_read_surface_defects =
 R"doc(Reads a defective SiDB surface from a text file provided as an input
 stream. The format is rudimentary and consists of a simple 2D array of
@@ -14843,6 +15173,43 @@ Note:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_io_read_surface_defects_3 =
+R"doc(Reads a defect matrix from a stream into a defects-only `sidb::layout`
+on the H-Si(100)-2x1 lattice. Each `[...]` row lists one defect index
+per column; entry `x` of row `y` becomes the defect at column `x` of
+single-SiDB row `y`.
+
+Args:
+    is: The input stream to read from.
+    name: The name to give to the layout.
+
+Returns:
+    The layout holding the defects.
+
+Raises:
+    unsupported_defect_index_exception: if an index names no known
+                                        defect type.
+    missing_position_exception: if a row is shorter than a row before
+                                it.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_read_surface_defects_4 =
+R"doc(Reads a defect matrix from a file into a defects-only `sidb::layout`.
+See the stream overload for the format.
+
+Args:
+    filename: The file to read.
+    name: The name to give to the layout.
+
+Returns:
+    The layout holding the defects.
+
+Raises:
+    std::ifstream::failure: if the file cannot be opened.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_io_sqd_parsing_error = R"doc(Exception thrown when an error occurs during parsing of an SQD file.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_sqd_parsing_error_sqd_parsing_error =
@@ -14857,11 +15224,19 @@ static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception =
 R"doc(Exception thrown when an unsupported defect index is encountered in
 the parsed file.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_defect_index_exception = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_defect_index_exception =
+R"doc(Args:
+    i: Unsupported index, or -1 if the input exceeds the int range.
 
-static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_index = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_which = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_index = R"doc(Unsupported index, or -1 for an index outside the int range.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_which =
+R"doc(Returns:
+    Unsupported index, or -1 if the input exceeds the int range.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg =
 R"doc(Writes an SVG representation of an SiDB cell-level SiDB layout into an
@@ -14894,6 +15269,39 @@ Template Args:
 
 Note:
     SiDB defects are not supported yet.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_3 =
+R"doc(Writes an `sidb::layout` as an SVG image to a stream: the lattice
+points of the layout's bounding box, if the parameters ask for them,
+and every SiDB at its position on the layout's lattice. Surface
+defects are not drawn.
+
+Args:
+    lyt: Layout to draw.
+    os: Output stream to write into.
+    ps: Drawing parameters.
+
+Raises:
+    std::out_of_range: if padding exceeds the lattice-site coordinate
+                       range.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_4 =
+R"doc(Writes an `sidb::layout` as an SVG image. See the stream overload for
+the image's content.
+
+Args:
+    lyt: Layout to draw.
+    filename: File to write into.
+    ps: Drawing parameters.
+
+Raises:
+    std::ofstream::failure: if the file cannot be opened.
+    std::out_of_range: if padding exceeds the lattice-site coordinate
+                       range.
 
 )doc";
 
@@ -14961,6 +15369,628 @@ Template Args:
     Lyt: Cell-level SiDB or QCA layout type.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_io_write_sqd_layout_3 =
+R"doc(Writes an `sidb::layout` as an SQD file to a stream. The layout's
+lattice becomes the file's lattice layer, SiDBs are written at their
+`(n, m, l)` lattice coordinates, and surface defects, if any, in a
+defect layer.
+
+Args:
+    lyt: Layout to write.
+    os: Output stream to write into.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_write_sqd_layout_4 =
+R"doc(Writes an `sidb::layout` as an SQD file. See the stream overload for
+the file's content.
+
+Args:
+    lyt: Layout to write.
+    filename: File to write into.
+
+Raises:
+    std::ofstream::failure: if the file cannot be opened.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice =
+R"doc(A hydrogen-passivated silicon surface lattice: a Bravais lattice given
+by two lattice vectors plus a two-site basis. Site `(x, y, z)` lies at
+`x * a1 + y * a2 + basis[z]`. The vectors are stored in ångström, as
+SiQAD stores them; positions are reported in nanometers. The two
+reconstructions SiQAD defines are available as `si_100_2x1()` and
+`si_111_1x1()`; any other reconstruction with a two-site basis can be
+described by setting the vectors directly.)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_a1 = R"doc(First lattice vector (unit: Å).)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_a2 = R"doc(Second lattice vector (unit: Å).)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_basis =
+R"doc(The two basis sites of the unit cell (unit: Å). The first one is the
+origin.)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_name =
+R"doc(Name of the reconstruction as SiQAD spells it in SQD files, e.g.,
+`"Si(100) 2x1"`.)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_nm_distance =
+R"doc(The Euclidean distance between two sites.
+
+Args:
+    source: First site.
+    target: Second site.
+
+Returns:
+    Distance between `source` and `target` (unit: nm).
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_nm_position =
+R"doc(The position of a site relative to the site `(0, 0, 0)`.
+
+Args:
+    s: Site.
+
+Returns:
+    The `(x, y)` position of `s` (unit: nm).
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_of =
+R"doc(The lattice a cell-level layout type is tagged with: H-Si(111)-1x1 for
+a `lattice<lattice_111, …>` layout and H-Si(100)-2x1 for every other
+SiDB layout.
+
+Template Args:
+    CellLyt: SiDB cell-level layout type.
+
+Returns:
+    The lattice of `CellLyt`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_operator_eq =
+R"doc(Compares two lattices for equality.
+
+Args:
+    other: Right-hand side lattice.
+
+Returns:
+    `true` iff name, vectors, and basis are identical.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_si_100_2x1 =
+R"doc(The H-Si(100)-2x1 surface: dimer rows 7.68 Å apart, dimer atoms 3.84 Å
+apart along the row and 2.25 Å apart across it.
+
+Returns:
+    The H-Si(100)-2x1 lattice.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_si_111_1x1 =
+R"doc(The H-Si(111)-1x1 surface: a hexagonal arrangement with 3.84 Å between
+neighboring sites, described by a rectangular 6.65 Å × 3.84 Å cell
+with a centered second site.
+
+Returns:
+    The H-Si(111)-1x1 lattice.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_site =
+R"doc(A site of the H-Si surface lattice. Site `(x, y, z)` is the `z`-th
+basis site of the unit cell reached by `x` steps along the first and
+`y` steps along the second lattice vector of a `lattice`. This is the
+`(n, m, l)` lattice coordinate of SiQAD's SQD files. Both supported
+reconstructions have a two-site basis, so `z` is either 0 or 1.
+
+Sites order in raster order: by `y`, then by `z`, then by `x`.)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site = R"doc(Default constructor. Creates the site `(0, 0, 0)`.)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site_2 =
+R"doc(Creates the site `(x, y, z)`.
+
+Args:
+    x_coord: Steps along the first lattice vector.
+    y_coord: Steps along the second lattice vector.
+    basis_site: Basis site, 0 or 1.
+
+Template Args:
+    X: Integral type of `x`.
+    Y: Integral type of `y`.
+    Z: Integral type of `z`.
+
+Raises:
+    std::out_of_range: if a coordinate exceeds the lattice-site range.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site_3 =
+R"doc(Creates the site `(x, y, 0)`.
+
+Args:
+    x_coord: Steps along the first lattice vector.
+    y_coord: Steps along the second lattice vector.
+
+Template Args:
+    X: Integral type of `x`.
+    Y: Integral type of `y`.
+
+Raises:
+    std::out_of_range: if a coordinate exceeds the lattice-site range.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_site_operator_add =
+R"doc(Adds another site to this one, carrying an overflowing basis index
+into the next unit cell along the second lattice vector. Does not
+modify this site.
+
+Args:
+    other: Site to add.
+
+Returns:
+    Sum of both sites.
+
+Raises:
+    std::out_of_range: if a result coordinate exceeds the lattice-site
+                       range.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_site_operator_eq =
+R"doc(Compares two sites for equality.
+
+Args:
+    other: Right-hand side site.
+
+Returns:
+    `true` iff both sites are identical.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_site_operator_le =
+R"doc(Orders two sites in raster order: by `y`, then by `z`, then by `x`.
+
+Args:
+    other: Right-hand side site.
+
+Returns:
+    The ordering of this site relative to `other`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_site_operator_sub =
+R"doc(Subtracts another site from this one, borrowing from the previous unit
+cell along the second lattice vector when the basis index underflows.
+Does not modify this site.
+
+Args:
+    other: Site to subtract.
+
+Returns:
+    Difference of both sites.
+
+Raises:
+    std::out_of_range: if a result coordinate exceeds the lattice-site
+                       range.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_site_str =
+R"doc(Returns a string representation of the form `"(x,y,z)"`.
+
+Returns:
+    String representation of the form `"(x,y,z)"`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_site_x = R"doc(Steps along the first lattice vector.)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_site_y = R"doc(Steps along the second lattice vector.)doc";
+
+static const char *mkd_doc_fiction_sidb_lattice_site_z = R"doc(Basis site within the unit cell, 0 or 1.)doc";
+
+static const char *mkd_doc_fiction_sidb_layout =
+R"doc(An SiDB layout: SiDBs of a given cell type and surface defects placed
+on lattice sites of one H-Si lattice. The layout has value semantics;
+copies are independent.
+
+Cells and defects are kept sorted in raster order, so `sidbs()` is the
+canonical SiDB order that index-based structures such as charge
+distributions refer to, and every `foreach_*` traversal is
+deterministic.)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_affected_sidbs =
+R"doc(The sites whose SiDBs the defect at a given site would influence: the
+rectangle around the defect spanned by `model::defect_extent`, counted
+in unit cells along the lattice vectors and keeping the defect's basis
+site. The rectangle is clipped to the representable lattice-site
+coordinates.
+
+Args:
+    s: Site of the defect.
+    charged_defect_spacing_overwrite: Horizontal and vertical extent
+                                      to use for charged defects
+                                      instead of the default.
+    neutral_defect_spacing_overwrite: Horizontal and vertical extent
+                                      to use for neutral defects
+                                      instead of the default.
+
+Returns:
+    Sites influenced by the defect at `s`; empty if `s` holds no
+    defect.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_all_affected_sidbs =
+R"doc(The union of `affected_sidbs` over every defect.
+
+Args:
+    charged_defect_spacing_overwrite: Horizontal and vertical extent
+                                      to use for charged defects
+                                      instead of the default.
+    neutral_defect_spacing_overwrite: Horizontal and vertical extent
+                                      to use for neutral defects
+                                      instead of the default.
+
+Returns:
+    Sites influenced by any defect.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_assign_cell_type =
+R"doc(Assigns a cell type to a site. Assigning `cell_type::EMPTY` removes
+the SiDB from the site. Allocation failure leaves the cells unchanged.
+
+Args:
+    s: Site.
+    ct: Cell type to assign.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_assign_defect =
+R"doc(Places a surface defect at a site. A defect of type
+`defect_type::NONE` removes the defect from the site.
+
+Args:
+    s: Site.
+    d: Defect to place.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_bounding_box =
+R"doc(The smallest rectangle of sites containing every SiDB and every
+defect. The corners are the north-western and south-eastern site; an
+empty layout yields `{(0,0,0), (0,0,0)}`.
+
+Returns:
+    North-western and south-eastern corner.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_cell_sites = R"doc(SiDB sites in raster order.)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_cell_types = R"doc(Cell type of the SiDB at the same index in `cell_sites`.)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_cells_of_type =
+R"doc(All sites holding an SiDB of a given cell type, in raster order.
+
+Args:
+    ct: Cell type.
+
+Returns:
+    Sites of type `ct`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_count_defects = R"doc(Counts the defects satisfying a predicate.)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_defects =
+R"doc(All defects with their sites, in raster order.
+
+Returns:
+    Site-defect pairs.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_for_each_site =
+R"doc(Applies `fn` to every element of `range`, passing the index too if
+`fn` takes it, and stopping early if `fn` returns `false`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_foreach_cell =
+R"doc(Applies a function to every SiDB site in raster order. `fn` takes the
+site and optionally its index, and may return `false` to stop the
+traversal.
+
+Args:
+    fn: Function to apply.
+
+Template Args:
+    Fn: Callable on `(const lattice_site&)` or `(const lattice_site&,
+        std::size_t)`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_foreach_defect =
+R"doc(Applies a function to every defect in raster order. `fn` takes the
+`(site, defect)` pair and optionally its index, and may return `false`
+to stop the traversal.
+
+Args:
+    fn: Function to apply.
+
+Template Args:
+    Fn: Callable on `(const std::pair<lattice_site, model::defect>&)`
+        or the same plus `std::size_t`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_foreach_pi =
+R"doc(Applies a function to every input SiDB site in raster order. Same
+callable contract as `foreach_cell`.
+
+Args:
+    fn: Function to apply.
+
+Template Args:
+    Fn: Callable on `(const lattice_site&)` or `(const lattice_site&,
+        std::size_t)`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_foreach_po =
+R"doc(Applies a function to every output SiDB site in raster order. Same
+callable contract as `foreach_cell`.
+
+Args:
+    fn: Function to apply.
+
+Template Args:
+    Fn: Callable on `(const lattice_site&)` or `(const lattice_site&,
+        std::size_t)`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_get_cell_type =
+R"doc(The cell type at a site.
+
+Args:
+    s: Site.
+
+Returns:
+    Cell type at `s`, `cell_type::EMPTY` if no SiDB is there.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_get_defect =
+R"doc(The defect at a site.
+
+Args:
+    s: Site.
+
+Returns:
+    Defect at `s`, or a defect of type `defect_type::NONE` if there is
+    none.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_get_lattice =
+R"doc(The lattice of the surface.
+
+Returns:
+    The lattice.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_get_layout_name =
+R"doc(The layout name.
+
+Returns:
+    Layout name.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_index_of =
+R"doc(The index of a site in `sidbs()`.
+
+Args:
+    s: Site.
+
+Returns:
+    Index of `s`, or `std::nullopt` if `s` holds no SiDB.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_is_empty =
+R"doc(Whether the layout holds no SiDB. Defects do not count.
+
+Returns:
+    `true` iff there is no SiDB.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_is_empty_cell =
+R"doc(Whether no SiDB sits at a site.
+
+Args:
+    s: Site.
+
+Returns:
+    `true` iff `s` holds no SiDB.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_is_pi =
+R"doc(Whether a site holds an input SiDB.
+
+Args:
+    s: Site.
+
+Returns:
+    `true` iff `s` holds an input SiDB.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_is_po =
+R"doc(Whether a site holds an output SiDB.
+
+Args:
+    s: Site.
+
+Returns:
+    `true` iff `s` holds an output SiDB.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_layout = R"doc(Creates an empty layout on the H-Si(100)-2x1 lattice.)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_layout_2 =
+R"doc(Creates an empty layout on the given lattice.
+
+Args:
+    lat: Lattice of the surface.
+    name: Layout name.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_layout_name = R"doc(Layout name.)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_move_defect =
+R"doc(Moves the defect at one site to another, replacing whatever defect the
+target site held. An empty source or identical source and target
+leaves the defects unchanged.
+
+Args:
+    source: Site holding the defect.
+    target: Site to move the defect to.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_num_cells =
+R"doc(Number of SiDBs.
+
+Returns:
+    Number of SiDBs.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_num_cells_of_type =
+R"doc(Number of SiDBs of a given cell type.
+
+Args:
+    ct: Cell type.
+
+Returns:
+    Number of SiDBs of type `ct`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_num_charged_defects =
+R"doc(Number of charged defects.
+
+Returns:
+    Number of defects with non-zero charge.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_num_defects =
+R"doc(Number of surface defects.
+
+Returns:
+    Number of defects.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_num_negatively_charged_defects =
+R"doc(Number of negatively charged defects.
+
+Returns:
+    Number of defects with negative charge.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_num_neutral_defects =
+R"doc(Number of neutral defects.
+
+Returns:
+    Number of defects with zero charge.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_num_pis =
+R"doc(Number of input SiDBs.
+
+Returns:
+    Number of input SiDBs.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_num_pos =
+R"doc(Number of output SiDBs.
+
+Returns:
+    Number of output SiDBs.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_num_positively_charged_defects =
+R"doc(Number of positively charged defects.
+
+Returns:
+    Number of defects with positive charge.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_operator_eq =
+R"doc(Compares two layouts for equality: same lattice, name, SiDBs, and
+defects.
+
+Args:
+    other: Right-hand side layout.
+
+Returns:
+    `true` iff both layouts are identical.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_set_lattice =
+R"doc(Reassigns the lattice. Sites are kept as they are; only their physical
+positions change.
+
+Args:
+    lat: New lattice.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_set_layout_name =
+R"doc(Sets the layout name.
+
+Args:
+    name: New layout name.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_sidbs =
+R"doc(All sites holding an SiDB, in raster order. This is the canonical SiDB
+order that index-based structures refer to.
+
+Returns:
+    Sorted SiDB sites.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_surface_defects = R"doc(Defects with their sites in raster order.)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_surface_lattice = R"doc(The lattice of the surface.)doc";
 
 static const char *mkd_doc_fiction_sidb_model_charge_configuration_to_string =
 R"doc(Converts a vector of charge states to a string representation
@@ -15459,6 +16489,36 @@ Template Args:
 
 Returns:
     Bestagon gate representation of `t` including mirroring.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_random_site_in_area =
+R"doc(A uniformly random site in the rectangle spanned by two corner sites,
+both corners included.
+
+Args:
+    first_corner: One corner of the rectangle.
+    second_corner: The opposite corner.
+    rng: Random number generator to draw from.
+
+Template Args:
+    Rng: Uniform random bit generator type.
+
+Returns:
+    A random site in the rectangle.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_row_of =
+R"doc(The row of a site counted in single SiDB rows: `2 * y + z`. This is
+the y-coordinate of the Cartesian cell-level layouts that
+`physical_design::apply_gate_library` produces.
+
+Args:
+    s: Site.
+
+Returns:
+    Row of `s`.
 
 )doc";
 
@@ -23183,6 +24243,41 @@ static const char *mkd_doc_fiction_sidb_simulation_result_sim_params = R"doc(Phy
 
 static const char *mkd_doc_fiction_sidb_simulation_result_simulation_runtime = R"doc(Total simulation runtime in seconds.)doc";
 
+static const char *mkd_doc_fiction_sidb_site_at_row =
+R"doc(The site at a given column and single-SiDB row, the inverse of
+`row_of`. Negative rows map to the unit cell below them, so `(x, -1)`
+is `(x, -1, 1)`.
+
+Args:
+    x: Column.
+    row: Row counted in single SiDB rows.
+
+Returns:
+    The site `(x, floor(row / 2), row mod 2)`.
+
+Raises:
+    std::out_of_range: if the row exceeds the range of lattice sites.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_sites_in_area =
+R"doc(All sites in the rectangle spanned by two corner sites, in raster
+order (top to bottom, left to right), both corners included. The
+corners may be given in any order.
+
+Args:
+    first_corner: One corner of the rectangle.
+    second_corner: The opposite corner.
+
+Returns:
+    The sites in the rectangle in raster order.
+
+Raises:
+    std::length_error: if the rectangle exceeds the maximum vector
+                       size.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library =
 R"doc(This library contains SiDB I/O wires designed for both 1- and 2-input
 functions. Each wire comprises 2 BDL pairs. The library contains all
@@ -23420,6 +24515,71 @@ static const char *mkd_doc_fiction_sidb_surfaces_lattice_100_lattice_100 = R"doc
 static const char *mkd_doc_fiction_sidb_surfaces_lattice_111 = R"doc(H-Si(111)-1x1 surface.)doc";
 
 static const char *mkd_doc_fiction_sidb_surfaces_lattice_111_lattice_111 = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_to_cube =
+R"doc(The cube coordinate of a lattice site in a Cartesian SiDB cell-level
+layout, the inverse of `to_lattice_site`.
+
+Args:
+    s: Lattice site.
+
+Returns:
+    Cube coordinate at column `x` and single-SiDB row `2 * y + z`.
+
+Raises:
+    std::out_of_range: if the row exceeds the cube coordinate range.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_to_lattice_site =
+R"doc(The lattice site a cell-level layout coordinate refers to. SiQAD
+coordinates map one-to-one; Cartesian coordinates count single SiDB
+rows, so row `y` becomes unit cell `y / 2`, basis site `y mod 2`.
+
+Args:
+    c: Coordinate.
+
+Template Args:
+    Coordinate: Coordinate type: `layouts::coords::offset`, `cube`, or
+                `siqad`.
+
+Returns:
+    The lattice site of `c`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_to_sidb_layout =
+R"doc(Converts an SiDB cell-level layout into an `sidb::layout` on the given
+lattice. Cell types, inputs, outputs, the layout name, and surface
+defects carry over; cell names, cell modes, tile sizes, and clocking
+do not.
+
+Args:
+    lyt: Layout to convert.
+    lat: Lattice of the resulting layout.
+
+Template Args:
+    CellLyt: SiDB cell-level layout type.
+
+Returns:
+    The SiDB layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_to_sidb_layout_2 =
+R"doc(Converts an SiDB cell-level layout into an `sidb::layout` on the
+lattice the layout type is tagged with, see `lattice_of`.
+
+Args:
+    lyt: Layout to convert.
+
+Template Args:
+    CellLyt: SiDB cell-level layout type.
+
+Returns:
+    The SiDB layout.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_all_2_input_functions =
 R"doc(Auxiliary function to create technology mapping parameters for AND,
@@ -26187,6 +27347,12 @@ static const char *mkd_doc_fmt_formatter_parse_4 = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_parse_5 = R"doc()doc";
 
+static const char *mkd_doc_formatter = R"doc(`fmt` formatter for lattice sites, printing `(x,y,z)`.)doc";
+
+static const char *mkd_doc_formatter_format = R"doc()doc";
+
+static const char *mkd_doc_formatter_parse = R"doc()doc";
+
 static const char *mkd_doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
 
 static const char *mkd_doc_mockturtle_edge =
@@ -26220,9 +27386,13 @@ static const char *mkd_doc_std_hash_4 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_5 = R"doc()doc";
 
-static const char *mkd_doc_std_hash_6 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
+static const char *mkd_doc_std_hash_6 = R"doc(Hash for lattice sites.)doc";
 
-static const char *mkd_doc_std_hash_7 = R"doc()doc";
+static const char *mkd_doc_std_hash_7 = R"doc(Hash for SiDB layouts, over the SiDBs and their cell types.)doc";
+
+static const char *mkd_doc_std_hash_8 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
+
+static const char *mkd_doc_std_hash_9 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_operator_call = R"doc()doc";
 
@@ -26235,6 +27405,24 @@ static const char *mkd_doc_std_hash_operator_call_4 = R"doc()doc";
 static const char *mkd_doc_std_hash_operator_call_5 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_operator_call_6 =
+R"doc(Args:
+    s: Site to hash.
+
+Returns:
+    Hash of the lattice coordinates.
+
+)doc";
+
+static const char *mkd_doc_std_hash_operator_call_7 =
+R"doc(Args:
+    lyt: Layout to hash.
+
+Returns:
+    Hash of the SiDB sites and cell types.
+
+)doc";
+
+static const char *mkd_doc_std_hash_operator_call_8 =
 R"doc(Computes the hash value of a given SiDB defect.
 
 Every member that `fiction::defect`'s equality operator compares
@@ -26248,7 +27436,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_7 = R"doc()doc";
+static const char *mkd_doc_std_hash_operator_call_9 = R"doc()doc";
 
 static const char *mkd_doc_std_iterator_traits = R"doc()doc";
 

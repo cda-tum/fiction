@@ -15,17 +15,21 @@
  */
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
+#include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/technology.hpp>
+#include <fiction/types.hpp>
 
+#include <fstream>
+#include <initializer_list>
 #include <sstream>
-#include <string>
-#include <type_traits>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -187,5 +191,64 @@ TEMPLATE_TEST_CASE(
             CHECK(lyt.x() == 3);
             CHECK(lyt.y() == 1);  // only two rows are being parsed
         }
+    }
+}
+
+TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defects]")
+{
+    SECTION("empty surfaces")
+    {
+        for (const auto* const surface : {"[]", "[[]]", "[[][][]]"})
+        {
+            std::istringstream surface_stream{surface};
+
+            const auto lyt = read_surface_defects(surface_stream);
+
+            CHECK(lyt.is_empty());
+            CHECK(lyt.num_defects() == 0);
+        }
+    }
+    SECTION("defective surface")
+    {
+        static constexpr const char* sidb_surface = "[[0 1 2 3]"
+                                                    " [4 5 6 7]"
+                                                    " [8 9 10 0]]";
+
+        std::istringstream surface_stream{sidb_surface};
+
+        const auto lyt = read_surface_defects(surface_stream, "surface");
+
+        CHECK(lyt.get_layout_name() == "surface");
+        CHECK(lyt.is_empty());
+        CHECK(lyt.num_defects() == 10);
+
+        CHECK(lyt.get_defect({0, 0, 0}).type == defect_type::NONE);
+        CHECK(lyt.get_defect({1, 0, 0}).type == defect_type::DB);
+        CHECK(lyt.get_defect({2, 0, 0}).type == defect_type::SI_VACANCY);
+        CHECK(lyt.get_defect({3, 0, 0}).type == defect_type::DIHYDRIDE_PAIR);
+        CHECK(lyt.get_defect({0, 0, 1}).type == defect_type::SINGLE_DIHYDRIDE);
+        CHECK(lyt.get_defect({1, 0, 1}).type == defect_type::ONE_BY_ONE);
+        CHECK(lyt.get_defect({2, 0, 1}).type == defect_type::THREE_BY_ONE);
+        CHECK(lyt.get_defect({3, 0, 1}).type == defect_type::SILOXANE);
+        CHECK(lyt.get_defect({0, 1, 0}).type == defect_type::RAISED_SI);
+        CHECK(lyt.get_defect({1, 1, 0}).type == defect_type::ETCH_PIT);
+        CHECK(lyt.get_defect({2, 1, 0}).type == defect_type::MISSING_DIMER);
+        CHECK(lyt.get_defect({3, 1, 0}).type == defect_type::NONE);
+    }
+    SECTION("exceptions")
+    {
+        std::istringstream unsupported{"[[0 1 2 3] [4 5 6 7] [8 9 10 11]]"};
+        CHECK_THROWS_AS(read_surface_defects(unsupported), unsupported_defect_index_exception);
+
+        std::istringstream oversized{"[[999999999999999999999999]]"};
+        CHECK_THROWS_AS(read_surface_defects(oversized), unsupported_defect_index_exception);
+        std::istringstream template_oversized{"[[999999999999999999999999]]"};
+        CHECK_THROWS_AS(read_surface_defects<sidb_cell_clk_lyt>(template_oversized),
+                        unsupported_defect_index_exception);
+
+        std::istringstream missing{"[[0 1 2 3] [4 5 6] [8 9 10 0]]"};
+        CHECK_THROWS_AS(read_surface_defects(missing), missing_position_exception);
+
+        CHECK_THROWS_AS(read_surface_defects("/this/file/does/not/exist.txt"), std::ifstream::failure);
     }
 }
