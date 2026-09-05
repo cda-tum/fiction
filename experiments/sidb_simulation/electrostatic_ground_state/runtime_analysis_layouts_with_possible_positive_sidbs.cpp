@@ -33,6 +33,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::engines;
@@ -43,8 +44,6 @@ using namespace fiction::sidb::simulation::engines;
 
 int main()  // NOLINT
 {
-    using Lyt = sidb_100_cell_clk_lyt;
-
     experiments::experiment<std::size_t, std::size_t, double, double, double> simulation_exp{
         "Benchmark",
         "Number SiDBs",
@@ -58,10 +57,10 @@ int main()  // NOLINT
     const quickexact_params qe_params{.sim_params            = sim_params,
                                       .base_number_detection = quickexact_params::automatic_base_number_detection::OFF};
 
-    auto random_layouts_params = generate_random_layout_params<cell<Lyt>>{
-        .coordinate_pair                    = {{0, 0}, {10, 10}},
+    auto random_layouts_params = generate_random_layout_params{
+        .coordinate_pair                    = {site_at_row(0, 0), site_at_row(10, 10)},
         .number_of_sidbs                    = 0,
-        .positive_sidbs                     = generate_random_layout_params<cell<Lyt>>::positive_charges::MAY_OCCUR,
+        .positive_sidbs                     = generate_random_layout_params::positive_charges::MAY_OCCUR,
         .sim_params                         = sim_params,
         .maximal_attempts                   = static_cast<uint64_t>(10E6),
         .number_of_unique_generated_layouts = 10};
@@ -70,7 +69,7 @@ int main()  // NOLINT
     {
         random_layouts_params.number_of_sidbs = num_sidbs;
 
-        const auto random_layouts = generate_multiple_random_layouts<Lyt>(random_layouts_params);
+        const auto random_layouts = generate_multiple_random_layouts(random_layouts_params);
 
         double runtime_exhaustive = 0;
         double runtime_quickexact = 0;

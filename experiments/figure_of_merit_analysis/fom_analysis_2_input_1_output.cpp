@@ -49,6 +49,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
@@ -65,10 +66,8 @@ using namespace fiction::utils::math;
 
 int main()  // NOLINT
 {
-    using Lyt = sidb_100_cell_clk_lyt_cube;
-
     // 2-input/1-output gate skeleton for the experiments. It is used to design gates with 2 inputs and 1 output.
-    static const auto skeleton = read_sqd_layout<Lyt>(fmt::format(
+    static const auto skeleton = read_sqd_layout(fmt::format(
         "{}/gate_skeletons/skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", EXPERIMENTS_PATH));
 
     // This table is used to explore the figures of merit for 2-input/1-output SiDB gates.
@@ -80,13 +79,13 @@ int main()  // NOLINT
         "Minimal Cost", "gate", "#canvas SiDBs", "CT", "OPD", "MDC_arsenic", "MDC_vacancy", "BBR", "X_custom,min"};
 
     const auto op_params     = is_operational_params{simulation_parameters{2, -0.32}};
-    auto       design_params = design_gates_params<cell<Lyt>>{};
+    auto       design_params = design_gates_params{};
 
-    design_params.operational_params = op_params;
-    design_params.design_mode = design_gates_params<cell<Lyt>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-    design_params.canvas      = {{17, 14, 0}, {21, 22, 0}};
+    design_params.operational_params     = op_params;
+    design_params.design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+    design_params.canvas                 = {site_at_row(17, 14), site_at_row(21, 22)};
     design_params.number_of_canvas_sidbs = 2;
-    design_params.termination_cond = design_gates_params<cell<Lyt>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
+    design_params.termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED;
     // QuickExact was used for the paper. However, ClusterComplete is more efficient and faster but does not influence
     // the results.
     design_params.operational_params.sim_engine = engine::CLUSTERCOMPLETE;
@@ -130,7 +129,7 @@ int main()  // NOLINT
 
     const std::vector<defect> defects = {si_vacancy, arsenic};
 
-    defect_influence_params<cell<sidb_100_cell_clk_lyt_cube>> params{};
+    defect_influence_params params{};
     params.additional_scanning_area = {20, 20};
     params.operational_params       = op_params;
 
@@ -155,8 +154,8 @@ int main()  // NOLINT
             std::vector<double> defect_influence_vacancy      = {};
             std::vector<double> bbr_all                       = {};
 
-            std::vector<Lyt>   all_gates{};
-            design_gates_stats efficient_stats{};
+            std::vector<layout> all_gates{};
+            design_gates_stats  efficient_stats{};
 
             all_gates = design_gates(skeleton, truth_table, design_params, &efficient_stats);
 

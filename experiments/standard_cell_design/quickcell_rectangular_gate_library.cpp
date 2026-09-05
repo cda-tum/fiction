@@ -41,6 +41,7 @@
 // rectangular skeleton.
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
@@ -87,41 +88,41 @@ int main()  // NOLINT
 
     static const std::string folder = fmt::format("{}/gate_skeletons/rectangular_skeletons/", EXPERIMENTS_PATH);
 
-    const auto rectangular_2i_top_left_2o_down_right = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder, "rectangular_2i_top_left_2o_down_right.sqd"));
+    const auto rectangular_2i_top_left_2o_down_right =
+        read_sqd_layout(fmt::format("{}/{}", folder, "rectangular_2i_top_left_2o_down_right.sqd"));
 
-    const auto rectangular_2i_top_left_1o_right = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder, "rectangular_2i_top_left_1o_right.sqd"));
+    const auto rectangular_2i_top_left_1o_right =
+        read_sqd_layout(fmt::format("{}/{}", folder, "rectangular_2i_top_left_1o_right.sqd"));
 
     const auto rectangular_1i_top_1o_right =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "rectangular_1i_top_1o_right.sqd"));
+        read_sqd_layout(fmt::format("{}/{}", folder, "rectangular_1i_top_1o_right.sqd"));
 
     const auto rectangular_1i_top_1o_down =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "rectangular_1i_top_1o_down.sqd"));
+        read_sqd_layout(fmt::format("{}/{}", folder, "rectangular_1i_top_1o_down.sqd"));
 
     const auto rectangular_1i_left_1o_right =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "rectangular_1i_left_1o_right.sqd"));
+        read_sqd_layout(fmt::format("{}/{}", folder, "rectangular_1i_left_1o_right.sqd"));
 
-    const auto rectangular_1i_top_2o_right_down = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder, "rectangular_1i_top_2o_right_down.sqd"));
+    const auto rectangular_1i_top_2o_right_down =
+        read_sqd_layout(fmt::format("{}/{}", folder, "rectangular_1i_top_2o_right_down.sqd"));
 
-    const auto rectangular_1i_top_2o_left_right = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder, "rectangular_1i_top_2o_left_right.sqd"));
+    const auto rectangular_1i_top_2o_left_right =
+        read_sqd_layout(fmt::format("{}/{}", folder, "rectangular_1i_top_2o_left_right.sqd"));
 
     constexpr auto num_canvas_sidbs                  = 3u;
     constexpr auto num_canvas_sidbs_2_input_2_output = 4u;
 
-    design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
-        is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT, bdl_input_iterator_params{{3}},
-                              is_operational_params::operational_condition::REJECT_KINKS},
-        design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
-        {{18, 9, 0}, {26, 13, 0}},
-        num_canvas_sidbs};
+    design_gates_params params{is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT,
+                                                     bdl_input_iterator_params{{3}},
+                                                     is_operational_params::operational_condition::REJECT_KINKS},
+                               design_gates_params::design_gates_mode::QUICKCELL,
+                               {{18, 9, 0}, {26, 13, 0}},
+                               num_canvas_sidbs};
 
     for (const auto& [truth_table, gate_name] : truth_tables_and_names)
     {
-        std::vector<sidb_100_cell_clk_lyt_siqad> quickcell_design{};
-        design_gates_stats                       stats_quickcell{};
+        std::vector<layout> quickcell_design{};
+        design_gates_stats  stats_quickcell{};
 
         if (gate_name == "cx_2i_top_left_2o_down_right" || gate_name == "ha_2i_top_left_2o_down_right" ||
             gate_name == "hourglass_2i_top_left_2o_down_right")
