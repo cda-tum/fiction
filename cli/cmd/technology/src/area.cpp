@@ -71,11 +71,11 @@ void area_command::execute()
 
         if constexpr (fiction::cli::is_sidb_store_v<Lyt>)
         {
-            fiction::fcn::area(fiction::cli::sidb_layout_of(*lyt_ptr), ps, &st);
+            st.area = fiction::fcn::area(fiction::cli::sidb_layout_of(*lyt_ptr), ps, &st);
         }
         else
         {
-            fiction::fcn::area(*lyt_ptr, ps, &st);
+            st.area = fiction::fcn::area(*lyt_ptr, ps, &st);
         }
     };
 
