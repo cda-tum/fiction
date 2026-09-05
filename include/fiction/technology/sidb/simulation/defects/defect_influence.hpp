@@ -270,7 +270,7 @@ class defect_influence_impl
 
             if (!operational_starting_point.has_value())
             {
-                return influence_domain;
+                continue;
             }
 
             if (!starting_points.insert(*operational_starting_point).second)
@@ -319,7 +319,13 @@ class defect_influence_impl
                 }
 
                 current_neighborhood = moore_neighborhood(current_contour_point);
-                next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
+
+                if (std::ranges::find(current_neighborhood, backtrack_point) == current_neighborhood.cend())
+                {
+                    break;
+                }
+
+                next_point = next_clockwise_point(current_neighborhood, backtrack_point);
             }
         }
 
