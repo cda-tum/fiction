@@ -43,6 +43,7 @@
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -270,6 +271,78 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
             }
         }
     }
+}
+
+TEST_CASE("On-the-fly SiDB fanout gate", "[apply-gate-library]")
+{
+    hex_even_row_gate_clk_lyt layout{{2, 2}, clocking::row<hex_even_row_gate_clk_lyt>()};
+
+    const auto input  = layout.create_pi("input", {0, 0});
+    const auto fanout = layout.create_buf(input, {1, 1});
+    layout.create_po(fanout, "output1", {0, 2});
+    layout.create_po(fanout, "output2", {1, 2});
+
+    on_the_fly_gate_library_params params{};
+    params.design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.design_gate_params.design_mode                   = design_gates_params::design_gates_mode::QUICKCELL;
+    params.design_gate_params.number_of_canvas_sidbs        = 3;
+
+    const auto fanout_gate =
+        on_the_fly_gate_library::set_up_gate<hex_even_row_gate_clk_lyt, cell_lyt>(layout, {1, 1}, params);
+
+    CHECK(std::ranges::any_of(fanout_gate,
+                              [](const auto& row)
+                              {
+                                  return std::ranges::any_of(row, [](const auto cell)
+                                                             { return cell == sidb_technology::cell_type::LOGIC; });
+                              }));
+
+    sidb::layout surface{};
+    surface.assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
+
+    const auto fanout_gate_with_defect =
+        on_the_fly_gate_library::set_up_gate<hex_even_row_gate_clk_lyt, cell_lyt>(layout, {1, 1}, params, surface);
+
+    CHECK(std::ranges::any_of(fanout_gate_with_defect,
+                              [](const auto& row)
+                              {
+                                  return std::ranges::any_of(row, [](const auto cell)
+                                                             { return cell == sidb_technology::cell_type::LOGIC; });
+                              }));
+}
+
+TEST_CASE("On-the-fly SiDB crossing gate", "[apply-gate-library]")
+{
+    hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row<hex_even_row_gate_clk_lyt>()};
+
+    const auto input1 = layout.create_pi("input1", {0, 0});
+    const auto wire1  = layout.create_buf(input1, {1, 1, 0});
+    layout.create_po(wire1, "output1", {1, 2, 0});
+
+    const auto input2 = layout.create_pi("input2", {1, 0});
+    const auto wire2  = layout.create_buf(input2, {1, 1, 1});
+    layout.create_po(wire2, "output2", {0, 2, 0});
+
+    on_the_fly_gate_library_params params{};
+    params.design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.using_predefined_crossing_and_double_wire_if_possible =
+        on_the_fly_gate_library_params::complex_gate_design_policy::USING_PREDEFINED;
+
+    const auto crossing_gate =
+        on_the_fly_gate_library::set_up_gate<hex_even_row_gate_clk_lyt, cell_lyt>(layout, {1, 1, 0}, params);
+
+    CHECK(std::ranges::any_of(crossing_gate,
+                              [](const auto& row)
+                              {
+                                  return std::ranges::any_of(row, [](const auto cell)
+                                                             { return cell == sidb_technology::cell_type::LOGIC; });
+                              }));
+
+    sidb::layout surface{};
+    surface.assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
+
+    CHECK(on_the_fly_gate_library::set_up_gate<hex_even_row_gate_clk_lyt, cell_lyt>(layout, {1, 1, 0}, params,
+                                                                                    surface) == crossing_gate);
 }
 
 TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
