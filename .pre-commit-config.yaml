@@ -195,6 +195,10 @@ repos:
           # `experiments/` plots with `matplotlib` and holds its surfaces in `numpy` arrays
           - matplotlib
           - numpy
+          # the `fiction` shell in `bindings/mnt/pyfiction/cli`
+          - aigverse
+          - prompt_toolkit
+          - rich
         priority: 9
 
   # Format configuration files with prettier

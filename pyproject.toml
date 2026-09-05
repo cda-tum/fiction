@@ -53,8 +53,17 @@ dependencies = [
     # the split-mode extension carries no copy of the nanobind library and resolves it at import
     # time from this wheel. Never pin or upper-bound it: two projects pinning different versions
     # could not be installed together
-    "nanobind-backend>=1.0"
+    "nanobind-backend>=1.0",
+    # the `fiction` command-line interface
+    "prompt_toolkit>=3.0.43",
+    "rich>=13.7.0",
+    # AIG optimization and generators for the CLI. 0.1.5 is the first split-mode release, which
+    # shares the nanobind backend with pyfiction instead of embedding a second copy
+    "aigverse>=0.1.5",
 ]
+
+[project.scripts]
+fiction = "mnt.pyfiction.cli.app:main"
 
 [project.urls]
 Source = 'https://github.com/cda-tum/fiction'
@@ -307,6 +316,9 @@ known-first-party = ["mnt.pyfiction"]
 required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
+# a command's docstring is the help text `fiction` shows for it, so it describes the command for a
+# user; every command returns the log entry and raises `CommandError`, which `registry.py` documents
+"bindings/mnt/pyfiction/cli/commands/*.py" = ["docstring-missing-returns", "docstring-missing-exception"]
 # E501: the expected SVG output is compared verbatim, so its lines cannot be wrapped
 "bindings/mnt/pyfiction/test/technology/sidb/io/test_write_sidb_layout_svg.py" = ["line-too-long"]
 # RUF069: a test that stores a float through a binding and reads it back asserts that it
