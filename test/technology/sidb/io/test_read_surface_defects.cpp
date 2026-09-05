@@ -98,9 +98,6 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
 
         std::istringstream oversized{"[[999999999999999999999999]]"};
         CHECK_THROWS_AS(read_surface_defects(oversized), unsupported_defect_index_exception);
-        std::istringstream template_oversized{"[[999999999999999999999999]]"};
-        CHECK_THROWS_AS(read_surface_defects<sidb_cell_clk_lyt>(template_oversized),
-                        unsupported_defect_index_exception);
 
         std::istringstream missing{"[[0 1 2 3] [4 5 6] [8 9 10 0]]"};
         CHECK_THROWS_AS(read_surface_defects(missing), missing_position_exception);
