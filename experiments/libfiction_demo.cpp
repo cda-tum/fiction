@@ -12,6 +12,7 @@
  * @file
  * @brief Walkthrough of the design flow from a logic network to a cell-level layout.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #if (FICTION_Z3_SOLVER)
@@ -32,7 +33,6 @@
 #include <fiction/technology/qca/io/write_qca_layout_svg.hpp>  // SVG writer for cell-level layout representation
 #include <fiction/technology/qca/qca_one_library.hpp>          // a pre-defined QCA gate library
 #include <fiction/technology/qca/technology.hpp>               // pre-defined cell implementations
-#include <fiction/technology/sidb/io/write_sqd_layout.hpp>     // writer for SiQAD files (physical simulation)
 #include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
@@ -252,9 +252,6 @@ int main(int argc, char* argv[])  // NOLINT
     write_qca_layout_svg(ortho_cell_layout, designs + "ortho_qca.svg");
     // write a QCADesigner simulation file
     write_qca_layout(ortho_cell_layout, designs + "ortho_qca.qca");
-    // write a SiQAD simulation file
-    write_sqd_layout(ortho_cell_layout, designs + "ortho_qca.sqd");
-
     std::cout << std::endl;
 
     /**************************************************************/
@@ -296,8 +293,6 @@ int main(int argc, char* argv[])  // NOLINT
             write_qca_layout_svg(exact_cell_layout, designs + "exact_qca.svg");
             // write a QCADesigner simulation file
             write_qca_layout(exact_cell_layout, designs + "exact_qca.qca");
-            // write a SiQAD simulation file
-            write_sqd_layout(exact_cell_layout, designs + "exact_qca.sqd");
         }
         // not successful
         else

@@ -342,6 +342,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Experiments:
   - SiDB circuit experiments now reject missing placement and equivalence results before reporting.
   - The Bestagon experiment converts placed SiDB cells to `sidb::layout` before SQD export.
+  - The library walkthrough writes QCA layouts only in QCADesigner and SVG formats.
 
 - I/O:
 
