@@ -647,7 +647,8 @@ class on_the_fly_gate_library
                                           const fcn::port_list<fcn::port_direction>& p, const tile<GateLyt>& tile)
     {
         const auto params = sidb::generators::is_gate_design_impossible_params{
-            .sim_params = parameters.design_gate_params.operational_params.sim_params};
+            .sim_params          = parameters.design_gate_params.operational_params.sim_params,
+            .bdl_iterator_params = parameters.design_gate_params.operational_params.input_bdl_iterator_params};
 
         const bool is_wire = spec == synthesis::create_crossing_wire_tt() || spec == synthesis::create_double_wire_tt();
         const auto function_to_report = is_wire ? synthesis::create_id_tt() : spec.front();
