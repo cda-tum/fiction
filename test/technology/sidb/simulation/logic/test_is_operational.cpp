@@ -133,6 +133,18 @@ TEST_CASE("Test is_physical_validity_feasible for empty canvas", "[is-operationa
     CHECK(is_operational(lyt, create_crossing_wire_tt(), op_params).first == operational_status::NON_OPERATIONAL);
 }
 
+TEST_CASE("Incomplete BDL wire set is non-operational", "[is-operational]")
+{
+    const auto lyt = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
+
+    const auto [status, simulator_invocations] =
+        is_operational(lyt, std::vector<tt>{create_id_tt()}, is_operational_params{}, std::vector<bdl_wire>{},
+                       std::vector<bdl_wire>{});
+
+    CHECK(status == operational_status::NON_OPERATIONAL);
+    CHECK(simulator_invocations == 0u);
+}
+
 TEST_CASE("SiQAD NAND gate", "[is-operational]")
 {
     const auto nand_gate = to_sidb_layout(blueprints::siqad_nand_gate<sidb_cell_clk_lyt_siqad>());
