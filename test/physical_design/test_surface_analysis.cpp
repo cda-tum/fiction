@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Tests for `fiction/technology/sidb/surface_analysis.hpp`.
+ * @brief Tests for `fiction/physical_design/surface_analysis.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */
