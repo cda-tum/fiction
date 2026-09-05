@@ -605,7 +605,7 @@ class defect_influence_impl
         auto previous               = starting_defect_position;
         auto current                = starting_defect_position;
 
-        for (auto x = starting_defect_position.x; x <= se_x; ++x)
+        for (auto x = starting_defect_position.x;; ++x)
         {
             previous = current;
             current  = site_at_row(x, row);
@@ -617,6 +617,11 @@ class defect_influence_impl
             else
             {
                 return previous;
+            }
+
+            if (x == se_x)
+            {
+                break;
             }
         }
 
@@ -663,8 +668,8 @@ class defect_influence_impl
         const auto x   = c.x;
         const auto row = row_of(c);
 
-        const auto decr_x   = (x - 1 >= nw_x) ? x - 1 : x;
-        const auto incr_x   = (x + 1 <= se_x) ? x + 1 : x;
+        const auto decr_x   = x == nw_x ? x : x - 1;
+        const auto incr_x   = x == se_x ? x : x + 1;
         const auto decr_row = (row - 1 >= nw_row) ? row - 1 : row;
         const auto incr_row = (row + 1 <= se_row) ? row + 1 : row;
 

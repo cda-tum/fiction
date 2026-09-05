@@ -104,6 +104,18 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
 
         CHECK(domain.size() == 4);
     }
+
+    SECTION("QuickTrace at the maximum lattice column")
+    {
+        auto lyt = layout{};
+        lyt.assign_cell_type({std::numeric_limits<int32_t>::max(), 0}, sidb_technology::cell_type::NORMAL);
+
+        auto boundary_params                     = params;
+        boundary_params.additional_scanning_area = {0, 0};
+        const auto domain                        = defect_influence_quicktrace(lyt, 1, boundary_params);
+
+        CHECK(domain.size() == 1);
+    }
 }
 
 TEST_CASE("novel designed AND Gate influence distance function which fails again", "[defect-influence]")
