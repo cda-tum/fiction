@@ -18,6 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 
@@ -41,91 +42,92 @@ namespace pyfiction
 namespace detail
 {
 
-template <typename Lyt>
-void is_operational_impl(nanobind::module_& m)
+/**
+ * Registers the operational checks on `sidb_layout`.
+ *
+ * @param m The module.
+ */
+inline void is_operational_functions(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
-    m.def("is_operational",
-          py::overload_cast<const Lyt&, const std::vector<py_tt>&,
-                            const fiction::sidb::simulation::logic::is_operational_params&>(
-              &fiction::sidb::simulation::logic::is_operational<Lyt, py_tt>),
-          py::arg("lyt"), py::arg("spec"),
-          py::arg("params") = fiction::sidb::simulation::logic::is_operational_params{},
-          DOC(fiction_sidb_simulation_logic_is_operational));
+    using fiction::sidb::layout;
+    using fiction::sidb::simulation::logic::bdl_wire;
+    using fiction::sidb::simulation::logic::is_operational_params;
+    using wires = std::vector<bdl_wire>;
 
-    m.def("is_operational",
-          py::overload_cast<
-              const Lyt&, const std::vector<py_tt>&, const fiction::sidb::simulation::logic::is_operational_params&,
-              const std::vector<fiction::sidb::simulation::logic::bdl_wire<Lyt>>&,
-              const std::vector<fiction::sidb::simulation::logic::bdl_wire<Lyt>>&, const std::optional<Lyt>&>(
-              &fiction::sidb::simulation::logic::is_operational<Lyt, py_tt>),
-          py::arg("lyt"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"), py::arg("output_bdl_wire"),
-          py::arg("canvas_lyt") = std::nullopt, DOC(fiction_sidb_simulation_logic_is_operational_2));
-
-    m.def("is_operational",
-          py::overload_cast<const std::vector<Lyt>&, const std::vector<py_tt>&,
-                            const fiction::sidb::simulation::logic::is_operational_params&,
-                            const std::vector<fiction::sidb::simulation::logic::bdl_wire<Lyt>>&,
-                            const std::vector<fiction::sidb::simulation::logic::bdl_wire<Lyt>>&,
-                            const std::optional<Lyt>&>(&fiction::sidb::simulation::logic::is_operational<Lyt, py_tt>),
-          py::arg("input_pattern_layouts"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"),
-          py::arg("output_bdl_wire"), py::arg("canvas_lyt") = std::nullopt,
-          DOC(fiction_sidb_simulation_logic_is_operational_3));
-
-    m.def("operational_input_patterns",
-          py::overload_cast<const Lyt&, const std::vector<py_tt>&,
-                            const fiction::sidb::simulation::logic::is_operational_params&>(
-              &fiction::sidb::simulation::logic::operational_input_patterns<Lyt, py_tt>),
-          py::arg("lyt"), py::arg("spec"),
-          py::arg("params") = fiction::sidb::simulation::logic::is_operational_params{},
-          DOC(fiction_sidb_simulation_logic_operational_input_patterns));
-
-    m.def("operational_input_patterns",
-          py::overload_cast<
-              const Lyt&, const std::vector<py_tt>&, const fiction::sidb::simulation::logic::is_operational_params&,
-              const std::vector<fiction::sidb::simulation::logic::bdl_wire<Lyt>>&,
-              const std::vector<fiction::sidb::simulation::logic::bdl_wire<Lyt>>&, const std::optional<Lyt>&>(
-              &fiction::sidb::simulation::logic::operational_input_patterns<Lyt, py_tt>),
-          py::arg("lyt"), py::arg("spec"),
-          py::arg("params") = fiction::sidb::simulation::logic::is_operational_params{}, py::arg("input_bdl_wire"),
-          py::arg("output_bdl_wire"), py::arg("canvas_lyt") = std::nullopt,
-          DOC(fiction_sidb_simulation_logic_operational_input_patterns_2));
-
-    m.def("kink_induced_non_operational_input_patterns",
-          py::overload_cast<const Lyt&, const std::vector<py_tt>&,
-                            const fiction::sidb::simulation::logic::is_operational_params&>(
-              &fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns<Lyt, py_tt>),
-          py::arg("lyt"), py::arg("spec"),
-          py::arg("params") = fiction::sidb::simulation::logic::is_operational_params{},
-          DOC(fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns));
-
-    m.def("kink_induced_non_operational_input_patterns",
-          py::overload_cast<
-              const Lyt&, const std::vector<py_tt>&, const fiction::sidb::simulation::logic::is_operational_params&,
-              const std::vector<fiction::sidb::simulation::logic::bdl_wire<Lyt>>&,
-              const std::vector<fiction::sidb::simulation::logic::bdl_wire<Lyt>>&, const std::optional<Lyt>&>(
-              &fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns<Lyt, py_tt>),
-          py::arg("lyt"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"), py::arg("output_bdl_wire"),
-          py::arg("canvas_lyt") = std::nullopt,
-          DOC(fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns_2));
-
-    m.def("is_kink_induced_non_operational",
-          py::overload_cast<const Lyt&, const std::vector<py_tt>&,
-                            const fiction::sidb::simulation::logic::is_operational_params&>(
-              &fiction::sidb::simulation::logic::is_kink_induced_non_operational<Lyt, py_tt>),
-          py::arg("lyt"), py::arg("spec"),
-          py::arg("params") = fiction::sidb::simulation::logic::is_operational_params{},
-          DOC(fiction_sidb_simulation_logic_is_kink_induced_non_operational));
-
-    m.def("is_kink_induced_non_operational",
-          py::overload_cast<
-              const Lyt&, const std::vector<py_tt>&, const fiction::sidb::simulation::logic::is_operational_params&,
-              const std::vector<fiction::sidb::simulation::logic::bdl_wire<Lyt>>&,
-              const std::vector<fiction::sidb::simulation::logic::bdl_wire<Lyt>>&, const std::optional<Lyt>&>(
-              &fiction::sidb::simulation::logic::is_kink_induced_non_operational<Lyt, py_tt>),
-          py::arg("lyt"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"), py::arg("output_bdl_wire"),
-          py::arg("canvas_lyt") = std::nullopt, DOC(fiction_sidb_simulation_logic_is_kink_induced_non_operational_2));
+    m.def(
+        "is_operational", [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params)
+        { return fiction::sidb::simulation::logic::is_operational(lyt, spec, params); }, py::arg("lyt"),
+        py::arg("spec"), py::arg("params") = is_operational_params{},
+        DOC(fiction_sidb_simulation_logic_is_operational));
+    m.def(
+        "is_operational",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params, const wires& in,
+           const wires& out, const std::optional<layout>& canvas_lyt)
+        { return fiction::sidb::simulation::logic::is_operational(lyt, spec, params, in, out, canvas_lyt); },
+        py::arg("lyt"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"), py::arg("output_bdl_wire"),
+        py::arg("canvas_lyt") = std::nullopt, DOC(fiction_sidb_simulation_logic_is_operational_2));
+    m.def(
+        "is_operational",
+        [](const std::vector<layout>& input_pattern_layouts, const std::vector<py_tt>& spec,
+           const is_operational_params& params, const wires& in, const wires& out,
+           const std::optional<layout>& canvas_lyt)
+        {
+            return fiction::sidb::simulation::logic::is_operational(input_pattern_layouts, spec, params, in, out,
+                                                                    canvas_lyt);
+        },
+        py::arg("input_pattern_layouts"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"),
+        py::arg("output_bdl_wire"), py::arg("canvas_lyt") = std::nullopt,
+        DOC(fiction_sidb_simulation_logic_is_operational_3));
+    m.def(
+        "operational_input_patterns",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params)
+        { return fiction::sidb::simulation::logic::operational_input_patterns(lyt, spec, params); }, py::arg("lyt"),
+        py::arg("spec"), py::arg("params") = is_operational_params{},
+        DOC(fiction_sidb_simulation_logic_operational_input_patterns));
+    m.def(
+        "operational_input_patterns",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params, const wires& in,
+           const wires& out, const std::optional<layout>& canvas_lyt)
+        {
+            return fiction::sidb::simulation::logic::operational_input_patterns(lyt, spec, params, in, out, canvas_lyt);
+        },
+        py::arg("lyt"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"), py::arg("output_bdl_wire"),
+        py::arg("canvas_lyt") = std::nullopt, DOC(fiction_sidb_simulation_logic_operational_input_patterns_2));
+    m.def(
+        "kink_induced_non_operational_input_patterns",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params)
+        { return fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(lyt, spec, params); },
+        py::arg("lyt"), py::arg("spec"), py::arg("params") = is_operational_params{},
+        DOC(fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns));
+    m.def(
+        "kink_induced_non_operational_input_patterns",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params, const wires& in,
+           const wires& out, const std::optional<layout>& canvas_lyt)
+        {
+            return fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(lyt, spec, params, in,
+                                                                                                 out, canvas_lyt);
+        },
+        py::arg("lyt"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"), py::arg("output_bdl_wire"),
+        py::arg("canvas_lyt") = std::nullopt,
+        DOC(fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns_2));
+    m.def(
+        "is_kink_induced_non_operational",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params)
+        { return fiction::sidb::simulation::logic::is_kink_induced_non_operational(lyt, spec, params); },
+        py::arg("lyt"), py::arg("spec"), py::arg("params") = is_operational_params{},
+        DOC(fiction_sidb_simulation_logic_is_kink_induced_non_operational));
+    m.def(
+        "is_kink_induced_non_operational",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params, const wires& in,
+           const wires& out, const std::optional<layout>& canvas_lyt)
+        {
+            return fiction::sidb::simulation::logic::is_kink_induced_non_operational(lyt, spec, params, in, out,
+                                                                                     canvas_lyt);
+        },
+        py::arg("lyt"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"), py::arg("output_bdl_wire"),
+        py::arg("canvas_lyt") = std::nullopt, DOC(fiction_sidb_simulation_logic_is_kink_induced_non_operational_2));
 }
 
 }  // namespace detail
@@ -181,9 +183,7 @@ void is_operational(nanobind::module_& m)
                 &fiction::sidb::simulation::logic::is_operational_params::strategy_to_analyze_operational_status,
                 DOC(fiction_sidb_simulation_logic_is_operational_params_strategy_to_analyze_operational_status));
 
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::is_operational_impl<py_sidb_100_lattice>(m);
-    detail::is_operational_impl<py_sidb_111_lattice>(m);
+    detail::is_operational_functions(m);
 }
 
 }  // namespace pyfiction

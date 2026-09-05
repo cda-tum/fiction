@@ -21,9 +21,14 @@
 
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/charge_distribution.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp"
+#include "fiction/technology/sidb/simulation/detail/simulation_state.hpp"
 #include "fiction/technology/sidb/simulation/engine.hpp"
 #include "fiction/technology/sidb/simulation/engines/clustercomplete.hpp"
 #include "fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp"
@@ -32,8 +37,8 @@
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
+#include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
@@ -158,7 +163,7 @@ namespace detail
 {
 
 /**
- * Reason why a layout is non-operational.
+ * Reasons why a layout is not operational.
  */
 enum class non_operationality_reason : uint8_t
 {
@@ -171,7 +176,7 @@ enum class non_operationality_reason : uint8_t
      */
     LOGIC_MISMATCH,
     /**
-     * Positive charges may occur but the simulation base is set to `2`.
+     * Positive charges may occur.
      */
     POTENTIAL_POSITIVE_CHARGES,
     /**
@@ -179,233 +184,200 @@ enum class non_operationality_reason : uint8_t
      */
     NONE,
 };
+
 /**
- * Reason why the layout is not a valid gate implementation for the given Boolean function.
+ * Reasons why a layout is invalid before any simulation ran.
  */
 enum class layout_invalidity_reason : uint8_t
 {
     /**
-     * Positive SiDBs can potentially occur.
+     * Positive charges may occur.
      */
     POTENTIAL_POSITIVE_CHARGES,
     /**
-     * The layout is physically infeasible, meaning no charge distribution of the canvas SiDBs satisfies the criteria
-     * for physical validity.
+     * No physically valid charge distribution exists for the expected input and output pins.
      */
     PHYSICAL_INFEASIBILITY,
     /**
-     * I/O signals are unstable, indicating that an information flip results in a lower energy state.
+     * A wrong I/O assignment is energetically preferred.
      */
     IO_INSTABILITY,
 };
 
 /**
- * Implementation of the `is_operational` algorithm for a given SiDB layout.
+ * Implementation of the operational check. It applies every input pattern to the input BDL pairs of the layout,
+ * simulates the ground states, and compares the charge states of the output BDL pairs with the expected truth-table
+ * entries. With a canvas, the three pruning filters (positive charges, physical infeasibility, I/O instability) run
+ * before any simulation on the layout's potential landscape.
  *
- * This class provides an implementation of the `is_operational` algorithm for
- * a specified SiDB layout and parameters. It checks whether the SiDB layout is operational
- * by simulating its behavior for different input combinations and comparing the results
- * to expected outputs from a truth table.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Type of the truth table.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @tparam TT Truth table type.
  */
-template <typename Lyt, typename TT>
+template <typename TT>
 class is_operational_impl
 {
   public:
     /**
-     * Constructor to initialize the algorithm with a layout and parameters.
+     * Detects the BDL pairs and wires of `lyt` itself.
      *
-     * @param lyt The SiDB cell-level layout to be checked.
-     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
-     * @param params Parameters for the `is_operational` algorithm.
+     * @param lyt The layout to check.
+     * @param spec The Boolean function(s) to implement.
+     * @param params Parameters.
      */
-    is_operational_impl(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params) :
-            layout{lyt},
+    is_operational_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params) :
+            sidb_layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(lyt, sidb::sidb_technology::cell_type::OUTPUT,
-                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
-            bii(bdl_input_iterator<Lyt>{lyt, params.input_bdl_iterator_params}),
+            output_bdl_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
+            bii{lyt, params.input_bdl_iterator_params},
             input_bdl_wires{
                 detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT)},
             output_bdl_wires{
-                detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT)},
-            number_of_output_wires{output_bdl_wires.size()},
-            number_of_input_wires{input_bdl_wires.size()}
+                detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT)}
     {}
     /**
-     * Constructor to initialize the algorithm with a layout, parameters, input and output wires.
+     * Takes the wires of `lyt` from the caller.
      *
-     * @param lyt The SiDB cell-level layout to be checked.
-     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
-     * @param params Parameters for the `is_operational` algorithm.
-     * @param input_wires BDL input wires of lyt.
-     * @param output_wires BDL output wires of lyt.
-     * @param initialize_bii If `true`, the BDL input iterator is initialized, `false` otherwise. This parameter is only
-     * needed in special cases (verify_logic_match.hpp).
+     * @param lyt The layout to check.
+     * @param spec The Boolean function(s) to implement.
+     * @param params Parameters.
+     * @param input_wires The input BDL wires of `lyt`.
+     * @param output_wires The output BDL wires of `lyt`.
+     * @param initialize_bii Whether to set up the input iterator. `verify_logic_match` passes `false` since it
+     * checks a given charge distribution.
      */
-    is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
-                        const std::vector<bdl_wire<Lyt>>& input_wires, const std::vector<bdl_wire<Lyt>>& output_wires,
+    is_operational_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+                        const std::vector<bdl_wire>& input_wires, const std::vector<bdl_wire>& output_wires,
                         const bool initialize_bii = true) :
-            layout{lyt},
-            truth_table{tt},
-            parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(layout, sidb::sidb_technology::cell_type::OUTPUT,
-                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
-            bii{initialize_bii ? bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires} :
-                                 bdl_input_iterator<Lyt>{Lyt{}}},
-            input_bdl_wires{input_wires},
-            output_bdl_wires{output_wires},
-            number_of_output_wires{output_bdl_wires.size()},
-            number_of_input_wires{input_bdl_wires.size()}
-    {}
-
-    /**
-     * Constructor to initialize the algorithm with a layout, parameters, input and output wires, and a canvas layout.
-     *
-     * @param lyt The SiDB cell-level layout to be checked.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
-     * @param params Parameters for the `is_operational` algorithm.
-     * @param input_wires BDL input wires of lyt.
-     * @param output_wires BDL output wires of lyt.
-     * @param c_lyt Canvas layout.
-     */
-    is_operational_impl(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-                        const std::vector<bdl_wire<Lyt>>& input_wires, const std::vector<bdl_wire<Lyt>>& output_wires,
-                        const Lyt& c_lyt) :
-            layout{lyt},
+            sidb_layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(lyt, sidb::sidb_technology::cell_type::OUTPUT,
-                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
-            bii{bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires}},
+            output_bdl_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
+            bii{initialize_bii ? bdl_input_iterator{lyt, params.input_bdl_iterator_params, input_wires} :
+                                 bdl_input_iterator{layout{}}},
             input_bdl_wires{input_wires},
-            output_bdl_wires{output_wires},
-            number_of_output_wires{output_bdl_wires.size()},
-            number_of_input_wires{input_bdl_wires.size()},
-            canvas_lyt{c_lyt}
+            output_bdl_wires{output_wires}
     {}
-
     /**
-     * Constructor to initialize the algorithm with a layout and parameters.
+     * Takes the wires and the canvas of `lyt` from the caller.
      *
-     * @param lyt The SiDB cell-level layout to be checked.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
-     * @param params Parameters for the `is_operational` algorithm.
+     * @param lyt The layout to check.
+     * @param spec The Boolean function(s) to implement.
+     * @param params Parameters.
+     * @param input_wires The input BDL wires of `lyt`.
+     * @param output_wires The output BDL wires of `lyt`.
+     * @param c_lyt The canvas: the SiDBs of `lyt` whose charge states the pruning filters enumerate.
      */
-    is_operational_impl(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-                        const Lyt& c_lyt) :
-            layout{lyt},
+    is_operational_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+                        const std::vector<bdl_wire>& input_wires, const std::vector<bdl_wire>& output_wires,
+                        layout c_lyt) :
+            sidb_layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(lyt, sidb::sidb_technology::cell_type::OUTPUT,
-                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
-            bii(bdl_input_iterator<Lyt>{lyt, params.input_bdl_iterator_params}),
+            output_bdl_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
+            bii{lyt, params.input_bdl_iterator_params, input_wires},
+            input_bdl_wires{input_wires},
+            output_bdl_wires{output_wires},
+            canvas_lyt{std::move(c_lyt)}
+    {}
+    /**
+     * Detects the wires of `lyt` and takes the canvas from the caller.
+     *
+     * @param lyt The layout to check.
+     * @param spec The Boolean function(s) to implement.
+     * @param params Parameters.
+     * @param c_lyt The canvas.
+     */
+    is_operational_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+                        layout c_lyt) :
+            sidb_layout{lyt},
+            truth_table{spec},
+            parameters{params},
+            output_bdl_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
+            bii{lyt, params.input_bdl_iterator_params},
             input_bdl_wires{
                 detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT)},
             output_bdl_wires{
                 detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT)},
-            number_of_output_wires{output_bdl_wires.size()},
-            number_of_input_wires{input_bdl_wires.size()},
-            canvas_lyt{c_lyt}
+            canvas_lyt{std::move(c_lyt)}
     {}
-
     /**
-     * Constructor to initialize the algorithm with pre-generated input pattern layouts.
+     * Takes one layout per input pattern instead of applying the patterns itself.
      *
-     * The layouts are not copied and must outlive this object. They are only read, so the same layouts may be shared
-     * by concurrently running instances.
-     *
-     * @param input_pattern_lyts One layout per input pattern, indexed by input pattern, as generated by
-     * `generate_bdl_input_pattern_layouts`.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
-     * @param params Parameters for the `is_operational` algorithm.
-     * @param input_wires BDL input wires of the layout.
-     * @param output_wires BDL output wires of the layout.
-     * @param c_lyt Canvas layout.
+     * @param input_pattern_lyts One layout per input pattern, pattern `0` first.
+     * @param spec The Boolean function(s) to implement.
+     * @param params Parameters.
+     * @param input_wires The input BDL wires.
+     * @param output_wires The output BDL wires.
+     * @param c_lyt The canvas.
      */
-    is_operational_impl(const std::vector<Lyt>& input_pattern_lyts, const std::vector<TT>& spec,
-                        const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_wires,
-                        const std::vector<bdl_wire<Lyt>>& output_wires, const Lyt& c_lyt) :
+    is_operational_impl(const std::vector<layout>& input_pattern_lyts, const std::vector<TT>& spec,
+                        const is_operational_params& params, const std::vector<bdl_wire>& input_wires,
+                        const std::vector<bdl_wire>& output_wires, layout c_lyt) :
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(input_pattern_lyts.front(), sidb::sidb_technology::cell_type::OUTPUT,
-                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
-            // the input pattern layouts make the iterator redundant; this is the same no-op instantiation that
-            // `verify_logic_match` uses
-            bii{bdl_input_iterator<Lyt>{Lyt{}}},
+            output_bdl_pairs{detect_bdl_pairs(input_pattern_lyts.front(), sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
+            // the input pattern layouts make the iterator redundant
+            bii{layout{}},
             input_bdl_wires{input_wires},
             output_bdl_wires{output_wires},
-            number_of_output_wires{output_bdl_wires.size()},
-            number_of_input_wires{input_bdl_wires.size()},
-            canvas_lyt{c_lyt},
+            canvas_lyt{std::move(c_lyt)},
             input_pattern_layouts{&input_pattern_lyts}
-    {
-        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    }
-
+    {}
     /**
-     * This function evaluates whether the given layout is invalid, i.e., it cannot implement the given Boolean
-     * function. This is done in three separate filtering steps: (1) discarding SiDB layouts with
-     * potentially positively charged SiDBs, (2) utilizing an efficient method to identify and discard SiDB layouts that
-     * do not satisfy physical model constraints under the I/O pin conditions required for the desired Boolean function,
-     * and (3) detecting I/O signal instability.
+     * Runs the pruning filters for one input pattern: positive charges, physical infeasibility of the expected I/O
+     * charge states, and I/O instability.
      *
-     * @param input_pattern The current input pattern.
-     * @return A `layout_invalidity_reason` object indicating why the layout is non-operational; or `std::nullopt` if it
-     * could not certainly be determined to be in fact non-operational.
+     * @param input_pattern The input pattern.
+     * @return The reason the layout is invalid, or `std::nullopt` if the filters accept it.
      */
     [[nodiscard]] std::optional<layout_invalidity_reason> is_layout_invalid(const uint64_t input_pattern) noexcept
     {
         const auto& lyt_with_input_pattern = layout_with_input_pattern(input_pattern);
 
-        sidb::surfaces::charge_distribution_surface<Lyt> cds_layout{lyt_with_input_pattern};
-        cds_layout.assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
-        cds_layout.assign_physical_parameters(parameters.sim_params);
+        const potential_landscape land{lyt_with_input_pattern, parameters.sim_params};
 
-        if ((parameters.sim_params.base == 2) &&
-            (analysis::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params)))
+        if (parameters.sim_params.base == 2 && analysis::can_positive_charges_occur(land))
         {
             return layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES;
         }
 
-        const auto input_index = input_pattern;
+        simulation::detail::simulation_state state{land, model::charge_state::NEGATIVE};
 
-        set_charge_distribution_of_input_pins(cds_layout, input_index);
-        set_charge_distribution_of_output_pins(cds_layout, synthesis::evaluate_output(truth_table, input_index));
+        set_charge_distribution_of_input_pins(state, input_pattern);
+        set_charge_distribution_of_output_pins(state, synthesis::evaluate_output(truth_table, input_pattern));
 
-        if (const auto physical_validity = is_physical_validity_feasible(cds_layout); physical_validity.has_value())
+        if (const auto physical_validity = is_physical_validity_feasible(state); physical_validity.has_value())
         {
-            if (const auto output_index = synthesis::evaluate_output(truth_table, input_index); is_io_signal_unstable(
-                    cds_layout, truth_table.front().num_bits(), input_index, output_index, physical_validity.value()))
+            if (const auto output_index = synthesis::evaluate_output(truth_table, input_pattern); is_io_signal_unstable(
+                    state, truth_table.front().num_bits(), input_pattern, output_index, *physical_validity))
             {
                 return layout_invalidity_reason::IO_INSTABILITY;
-            };
+            }
 
             return std::nullopt;
         }
 
         return layout_invalidity_reason::PHYSICAL_INFEASIBILITY;
     }
-
     /**
-     * Run the `is_operational` algorithm.
+     * Runs the operational check.
      *
-     * This function executes the operational status checking algorithm for the given SiDB layout
-     * and parameters provided during initialization.
-     *
-     * @return Pair with the first element indicating the operational status (either `OPERATIONAL` or `NON_OPERATIONAL`)
-     * and the second element indicating the reason if it is non-operational.
+     * @return The status and, if non-operational, the reason.
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason> run() noexcept
     {
+        if (!has_valid_bdl_configuration())
+        {
+            return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
+        }
+
         if (canvas_filtering_applicable)
         {
-            // number of different input combinations
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
                 if (is_layout_invalid(i))
@@ -414,6 +386,7 @@ class is_operational_impl
                 }
             }
         }
+
         // if the layout is not discarded during the three filtering steps, it is considered operational.
         // This is only an approximation.
         if (parameters.strategy_to_analyze_operational_status ==
@@ -429,20 +402,19 @@ class is_operational_impl
                 is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION ||
             !canvas_filtering_applicable)
         {
-            // number of different input combinations
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
                 const auto& lyt_with_input_pattern = layout_with_input_pattern(i);
 
                 // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
-                if ((parameters.sim_params.base == 2) &&
-                    (analysis::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params)))
+                if (parameters.sim_params.base == 2 &&
+                    analysis::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params))
                 {
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
                 }
 
                 ++simulator_invocations;
-                // performs physical simulation of a given SiDB layout at a given input combination
+
                 const auto simulation_results = physical_simulation_of_layout(lyt_with_input_pattern);
 
                 // if no physically valid charge distributions were found, the layout is non-operational
@@ -451,11 +423,10 @@ class is_operational_impl
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                 }
 
-                const auto ground_states = simulation_results.groundstates();
-
-                for (const auto& gs : ground_states)
+                for (const auto& gs : simulation_results.groundstates())
                 {
-                    const auto [op_status, non_op_reason] = verify_logic_match_of_cds(gs, i);
+                    const auto [op_status, non_op_reason] = verify_logic_match_of_cd(gs, i);
+
                     if (op_status == operational_status::NON_OPERATIONAL &&
                         non_op_reason == non_operationality_reason::LOGIC_MISMATCH)
                     {
@@ -471,68 +442,45 @@ class is_operational_impl
             }
         }
 
-        // if we made it here, the layout is operational
         return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
     }
     /**
-     * Checks if the given charge distribution correctly encodes the expected logic for the given input pattern,
-     * based on a provided truth table.
+     * Checks whether a charge distribution encodes the expected output for an input pattern, and, if kinks are
+     * rejected, whether the wires are free of kinks. The positive-charge check of `run()` is not repeated here.
      *
-     * Example:
-     * In the ground state charge distribution of an AND gate, kinks are rejected for the gate to be considered
-     * operational. Given an input pattern of `01`, this function will:
-     * - Verify that the left input wire encodes `0`.
-     * - Verify that the right input wire encodes `1`.
-     * - Verify that the output wire encodes `0`.
-     * Determines if the given charge distribution fulfills the correct logic based on the provided charge index and
-     * truth table.
-     *
-     * @param given_cds The charge distribution surface to be checked for operation.
-     * @param input_pattern Input pattern represented by the position of perturbers.
-     * @return Pair with the first element indicating the operational status (either `OPERATIONAL` or `NON_OPERATIONAL`)
-     * and the second element indicating the reason if it is non-operational.
+     * @param cd The charge distribution to check.
+     * @param input_pattern The input pattern it belongs to.
+     * @return The status and, if non-operational, the reason.
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason>
-    verify_logic_match_of_cds(const sidb::surfaces::charge_distribution_surface<Lyt>& given_cds,
-                              const uint64_t                                          input_pattern) noexcept
+    verify_logic_match_of_cd(const charge_distribution& cd, const uint64_t input_pattern) const noexcept
     {
-        auto non_operational_reason = non_operationality_reason::LOGIC_MISMATCH;
-
-        // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
-        if (parameters.sim_params.base == 2 && analysis::can_positive_charges_occur(given_cds, parameters.sim_params))
+        if (output_bdl_pairs.size() != truth_table.size() || output_bdl_wires.size() != truth_table.size())
         {
-            return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
+            return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
         }
 
-        assert(!output_bdl_pairs.empty() && "No output cell provided.");
-
-        // fetch the charge states of the output BDL pair
-        for (auto output = 0u; output < output_bdl_pairs.size(); output++)
+        for (std::size_t output = 0; output < output_bdl_pairs.size(); ++output)
         {
-            const auto charge_state_output_upper = given_cds.get_charge_state(output_bdl_pairs[output].upper);
-            const auto charge_state_output_lower = given_cds.get_charge_state(output_bdl_pairs[output].lower);
+            const auto upper = cd.get_charge_state(output_bdl_pairs[output].upper);
+            const auto lower = cd.get_charge_state(output_bdl_pairs[output].lower);
 
             // if the output charge states are equal, the layout is not operational
-            if (charge_state_output_lower == charge_state_output_upper)
+            if (lower == upper)
             {
                 return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
             }
 
-            // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
             if (kitty::get_bit(truth_table[output], input_pattern))
             {
-                if (!encodes_bit_one(given_cds, output_bdl_pairs[output], output_bdl_wires[output].port))
+                if (!encodes_bit_one(cd, output_bdl_pairs[output], output_bdl_wires[output].port))
                 {
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                 }
             }
-            // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
-            else
+            else if (!encodes_bit_zero(cd, output_bdl_pairs[output], output_bdl_wires[output].port))
             {
-                if (!encodes_bit_zero(given_cds, output_bdl_pairs[output], output_bdl_wires[output].port))
-                {
-                    return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
-                }
+                return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
             }
         }
 
@@ -543,142 +491,137 @@ class is_operational_impl
             assert((truth_table.size() == output_bdl_wires.size()) &&
                    "Number of truth tables and output BDL wires don't not match");
 
-            if (check_existence_of_kinks_in_input_wires(given_cds, input_pattern) ||
-                check_existence_of_kinks_in_output_wires(given_cds, input_pattern))
+            if (check_existence_of_kinks_in_input_wires(cd, input_pattern) ||
+                check_existence_of_kinks_in_output_wires(cd, input_pattern))
             {
-                non_operational_reason = non_operationality_reason::KINKS;
+                return {operational_status::NON_OPERATIONAL, non_operationality_reason::KINKS};
             }
         }
 
-        if (non_operational_reason == non_operationality_reason::KINKS)
-        {
-            return {operational_status::NON_OPERATIONAL, non_operationality_reason::KINKS};
-        }
-
-        // if we made it here, the layout is operational
         return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
     }
     /**
-     * Determines the input combinations for which the layout is non-operational and the reason why the layout is
-     * non-operational.
+     * Simulates every input pattern and collects the non-operational ones with their reasons.
      *
-     * @return Vector of pairs where the first element of the pair is the input pattern (e.g. 2-input Boolean function:
-     * 00 ^= 0; 10 ^= 2) for which the layout is non-operational. The second entry indicates the reason why the
-     * layout is non-operational (`non_operationality_reason`) for the given input pattern.
+     * @return The non-operational input patterns and the reason for each.
      */
     [[nodiscard]] std::vector<std::pair<uint64_t, non_operationality_reason>>
     determine_non_operational_input_patterns_and_non_operationality_reason() noexcept
     {
-        assert((truth_table.size() == output_bdl_wires.size()) &&
-               "Number of truth tables and output BDL pairs does not match");
+        std::vector<std::pair<uint64_t, non_operationality_reason>> non_operational{};
 
-        std::vector<std::pair<uint64_t, detail::non_operationality_reason>>
-            non_operational_input_pattern_and_non_operationality_reason{};
+        if (!has_valid_bdl_configuration())
+        {
+            for (uint64_t i = 0; i < truth_table.front().num_bits(); ++i)
+            {
+                non_operational.emplace_back(i, non_operationality_reason::LOGIC_MISMATCH);
+            }
 
-        // number of different input combinations
+            return non_operational;
+        }
+
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
         {
             ++simulator_invocations;
 
             const auto& lyt_with_input_pattern = layout_with_input_pattern(i);
 
-            // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
-            if ((parameters.sim_params.base == 2) &&
-                (analysis::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params)))
+            if (parameters.sim_params.base == 2 &&
+                analysis::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params))
             {
-                non_operational_input_pattern_and_non_operationality_reason.emplace_back(
-                    i, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES);
+                non_operational.emplace_back(i, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES);
                 continue;
             }
 
-            // performs physical simulation of a given SiDB layout at a given input combination
             const auto simulation_results = physical_simulation_of_layout(lyt_with_input_pattern);
 
-            // if no physically valid charge distributions were found, the layout is non-operational
             if (simulation_results.charge_distributions.empty())
             {
                 continue;
             }
 
-            const auto ground_states = simulation_results.groundstates();
-
-            for (const auto& gs : ground_states)
+            for (const auto& gs : simulation_results.groundstates())
             {
-                const auto [op_status, non_op_reason] = verify_logic_match_of_cds(gs, i);
+                const auto [op_status, non_op_reason] = verify_logic_match_of_cd(gs, i);
+
                 if (op_status == operational_status::NON_OPERATIONAL)
                 {
-                    non_operational_input_pattern_and_non_operationality_reason.emplace_back(i, non_op_reason);
+                    non_operational.emplace_back(i, non_op_reason);
                 }
             }
         }
 
-        // if we made it here, the layout is operational
-        return non_operational_input_pattern_and_non_operationality_reason;
+        return non_operational;
     }
     /**
-     * Returns the total number of simulator invocations.
+     * Number of simulator invocations so far.
      *
-     * @return The number of simulator invocations.
+     * @return The count.
      */
     [[nodiscard]] std::size_t get_number_of_simulator_invocations() const noexcept
     {
         return simulator_invocations;
     }
-
     /**
-     * This function determines if there is a charge distribution of the canvas SiDBs for which the charge distribution
-     * of the whole layout is physically valid.
+     * Enumerates the charge states of the canvas SiDBs, with the remaining SiDBs' charges fixed as set in `state`,
+     * and returns the lowest energy of a physically valid configuration.
      *
-     * @param cds_layout The charge distribution surface layout to be evaluated.
-     * @return The minimum energy value if a physically valid configuration is found, `std::nullopt`
-     * otherwise.
+     * @param state Simulation state over the layout with the current input pattern; the canvas charges are varied.
+     * @return The minimum energy, or `std::nullopt` if no configuration is physically valid.
      */
     [[nodiscard]] std::optional<double>
-    is_physical_validity_feasible(sidb::surfaces::charge_distribution_surface<Lyt>& cds_layout) noexcept
+    is_physical_validity_feasible(simulation::detail::simulation_state& state) noexcept
     {
         assert(!canvas_lyt.is_empty() && "The canvas layout must not be empty.");
 
+        const auto& lyt = state.landscape().get_layout();
+
+        // the canvas SiDBs by their index in the layout; the first one is the dependent SiDB
+        std::vector<std::size_t> canvas{};
+        canvas.reserve(canvas_lyt.num_cells());
+
+        for (const auto& site : canvas_lyt.sidbs())
+        {
+            const auto index = lyt.index_of(site);
+            assert(index.has_value() && "canvas SiDB is not part of the layout");
+            canvas.push_back(*index);
+        }
+
+        state.assign_dependent_cell(canvas.front());
+
         auto min_energy = std::numeric_limits<double>::infinity();
 
-        uint64_t canvas_charge_index = 0;
+        const auto num_free  = canvas.size() - 1;
+        const auto max_index = (uint64_t{1} << num_free) - 1;
 
-        auto& cds_canvas = canvas_charge_distribution();
-        cds_canvas.assign_charge_index(canvas_charge_index);
-        cds_layout.assign_dependent_cell(cds_canvas.get_sidb_order().front());
-
-        const auto max_index = cds_canvas.get_max_charge_index();
-
-        assert(max_index == static_cast<uint64_t>(std::pow(2, cds_canvas.num_cells() - 1) - 1) &&
-               "The maximum charge index is incorrect. Probably, the dependent cell is not set.");
-
-        while (canvas_charge_index <= max_index)
+        for (uint64_t canvas_index = 0;; ++canvas_index)
         {
-            cds_canvas.foreach_cell(
-                [&cds_layout, &cds_canvas](const auto& c)
-                {
-                    cds_layout.assign_charge_state(c, cds_canvas.get_charge_state(c),
-                                                   sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                });
-            cds_layout.update_after_charge_change(sidb::surfaces::dependent_cell_mode::VARIABLE,
-                                                  sidb::surfaces::energy_calculation::KEEP_OLD_ENERGY_VALUE);
-
-            if (cds_layout.is_physically_valid())
+            for (std::size_t j = 0; j < num_free; ++j)
             {
-                cds_layout.recompute_electrostatic_potential_energy();
-                if (cds_layout.get_electrostatic_potential_energy() + fiction::utils::math::ERROR_MARGIN < min_energy)
+                state.assign_charge_state_by_index(canvas[j + 1],
+                                                   ((canvas_index >> j) & uint64_t{1}) == 0 ?
+                                                       model::charge_state::NEGATIVE :
+                                                       model::charge_state::NEUTRAL,
+                                                   simulation::detail::charge_index_mode::KEEP_CHARGE_INDEX);
+            }
+
+            state.update_after_charge_change(simulation::detail::dependent_cell_mode::VARIABLE,
+                                             simulation::detail::energy_calculation::KEEP_OLD_ENERGY_VALUE);
+
+            if (state.is_physically_valid())
+            {
+                state.recompute_energy();
+
+                if (state.energy() + utils::math::ERROR_MARGIN < min_energy)
                 {
-                    min_energy = cds_layout.get_electrostatic_potential_energy();
+                    min_energy = state.energy();
                 }
             }
 
-            if (canvas_charge_index == max_index)
+            if (canvas_index == max_index)
             {
                 break;
             }
-
-            canvas_charge_index++;
-            cds_canvas.assign_charge_index(canvas_charge_index,
-                                           sidb::surfaces::charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION);
         }
 
         if (std::isinf(min_energy))
@@ -688,199 +631,100 @@ class is_operational_impl
 
         return min_energy;
     }
-
     /**
-     * This function assigns the charge states of the input pins in the layout according to the input index provided.
-     * This means that when a zero is applied, each BDL pair in the wire is set to zero.
+     * Sets the charge states of the input wires to encode an input pattern (the input pairs themselves are set by
+     * the layout); every other SiDB becomes negative.
      *
-     * @param cds The charge distribution surface layout to be modified.
-     * @param current_input_index The index representing the current input pattern.
+     * @param state The state to modify.
+     * @param current_input_index The input pattern.
      */
-    void set_charge_distribution_of_input_pins(sidb::surfaces::charge_distribution_surface<Lyt>& cds,
-                                               const uint64_t current_input_index) const noexcept
+    void set_charge_distribution_of_input_pins(simulation::detail::simulation_state& state,
+                                               const uint64_t                        current_input_index) const noexcept
     {
-        cds.assign_all_charge_states(sidb::model::charge_state::NEGATIVE,
-                                     sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
+        state.assign_all_charge_states(model::charge_state::NEGATIVE,
+                                       simulation::detail::charge_index_mode::KEEP_CHARGE_INDEX);
 
-        for (auto i = 0u; i < number_of_input_wires; i++)
-        {
-            if (input_bdl_wires[number_of_input_wires - 1 - i].port.dir == fcn::port_direction::SOUTH ||
-                input_bdl_wires[number_of_input_wires - 1 - i].port.dir == fcn::port_direction::EAST)
-            {
-                if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
-                {
-                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
-                    {
-                        if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
-                        {
-                            continue;
-                        }
-                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEUTRAL,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEGATIVE,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-                else
-                {
-                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
-                    {
-                        if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
-                        {
-                            continue;
-                        }
-                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEGATIVE,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEUTRAL,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-            }
-            else
-            {
-                if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
-                {
-                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
-                    {
-                        if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
-                        {
-                            continue;
-                        }
-                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEGATIVE,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEUTRAL,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-                else
-                {
-                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
-                    {
-                        if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
-                        {
-                            continue;
-                        }
-                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEUTRAL,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEGATIVE,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-            }
-        }
-    }
+        const auto& lyt = state.landscape().get_layout();
 
-    /**
-     * This function assigns the charge states of the output pins in the layout according to the input index provided.
-     * This means that when a zero is applied, each BDL pair in the wire is set to zero.
-     *
-     * @param cds The charge distribution surface layout to be modified.
-     * @param output_wire_index The index representing the current input pattern of the output wire.
-     */
-    void set_charge_distribution_of_output_pins(sidb::surfaces::charge_distribution_surface<Lyt>& cds,
-                                                const uint64_t output_wire_index) const noexcept
-    {
-        for (auto i = 0u; i < number_of_output_wires; i++)
+        const auto number_of_input_wires = input_bdl_wires.size();
+
+        for (std::size_t i = 0; i < number_of_input_wires; ++i)
         {
-            if (output_bdl_wires[i].port.dir == fcn::port_direction::SOUTH ||
-                output_bdl_wires[i].port.dir == fcn::port_direction::EAST)
+            const auto& wire = input_bdl_wires[number_of_input_wires - 1 - i];
+            const bool  forward =
+                wire.port.dir == fcn::port_direction::SOUTH || wire.port.dir == fcn::port_direction::EAST;
+            const bool bit_set = (current_input_index & (uint64_t{1} << i)) != 0;
+
+            // a set bit on a forward wire puts the neutral SiDB on top; a cleared bit or a backward wire flips that
+            const bool upper_neutral = forward == bit_set;
+
+            for (const auto& bdl : wire.pairs)
             {
-                if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
+                if (bdl.type == sidb_technology::cell_type::INPUT)
                 {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEUTRAL,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEGATIVE,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
+                    continue;
                 }
-                else
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEGATIVE,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEUTRAL,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-            }
-            else if (output_bdl_wires[i].port.dir == fcn::port_direction::NONE)
-            {
-                if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
-                        {
-                            continue;
-                        }
-                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEUTRAL,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEGATIVE,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-                else
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEGATIVE,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEUTRAL,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-            }
-            else
-            {
-                if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
-                        {
-                            continue;
-                        }
-                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEGATIVE,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEUTRAL,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-                else
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEUTRAL,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEGATIVE,
-                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
+
+                assign(state, lyt, bdl.upper,
+                       upper_neutral ? model::charge_state::NEUTRAL : model::charge_state::NEGATIVE);
+                assign(state, lyt, bdl.lower,
+                       upper_neutral ? model::charge_state::NEGATIVE : model::charge_state::NEUTRAL);
             }
         }
     }
     /**
-     * This function iterates through various input patterns and output wire indices to determine if any configuration
-     * results in a physically valid layout with energy below the given energy value, indicating I/O signal instability.
+     * Sets the charge states of the output wires to encode an output pattern.
      *
-     * @param cds_layout The charge distribution surface layout to be modified and checked.
-     * @param max_input_pattern_index The maximum index for input pattern
-     * @param input_pattern The specific input pattern for which the stability check is conducted.
-     * @param logical_correct_output_pattern The expected correct output pattern for the given input.
-     * @param minimal_energy_of_physically_valid_layout The minimum energy threshold below which the layout is
-     * considered unstable.
-     * @return `true` if the I/O signal is unstable, `false` otherwise.
+     * @param state The state to modify.
+     * @param output_wire_index The output pattern.
      */
-    [[nodiscard]] bool is_io_signal_unstable(sidb::surfaces::charge_distribution_surface<Lyt>& cds_layout,
+    void set_charge_distribution_of_output_pins(simulation::detail::simulation_state& state,
+                                                const uint64_t                        output_wire_index) const noexcept
+    {
+        const auto& lyt = state.landscape().get_layout();
+
+        for (std::size_t i = 0; i < output_bdl_wires.size(); ++i)
+        {
+            const auto& wire    = output_bdl_wires[i];
+            const bool  forward = wire.port.dir == fcn::port_direction::SOUTH ||
+                                  wire.port.dir == fcn::port_direction::EAST ||
+                                  wire.port.dir == fcn::port_direction::NONE;
+            const bool  bit_set = (output_wire_index & (uint64_t{1} << i)) != 0;
+
+            const bool upper_neutral = forward == bit_set;
+
+            for (const auto& bdl : wire.pairs)
+            {
+                // input pairs on an output wire keep the charge the input pattern gave them
+                if (bit_set && wire.port.dir != fcn::port_direction::SOUTH &&
+                    wire.port.dir != fcn::port_direction::EAST && bdl.type == sidb_technology::cell_type::INPUT)
+                {
+                    continue;
+                }
+
+                assign(state, lyt, bdl.upper,
+                       upper_neutral ? model::charge_state::NEUTRAL : model::charge_state::NEGATIVE);
+                assign(state, lyt, bdl.lower,
+                       upper_neutral ? model::charge_state::NEGATIVE : model::charge_state::NEUTRAL);
+            }
+        }
+    }
+    /**
+     * Checks whether any wrong I/O assignment has a physically valid configuration with lower energy than the
+     * expected one.
+     *
+     * @param state Simulation state over the layout with the current input pattern.
+     * @param max_input_pattern_index Number of input patterns.
+     * @param input_pattern The current input pattern.
+     * @param logical_correct_output_pattern The expected output pattern.
+     * @param minimal_energy_of_physically_valid_layout The minimum energy of the expected I/O assignment.
+     * @return `true` if a wrong assignment is energetically preferred.
+     */
+    [[nodiscard]] bool is_io_signal_unstable(simulation::detail::simulation_state& state,
                                              const uint64_t max_input_pattern_index, const uint64_t input_pattern,
                                              const uint64_t logical_correct_output_pattern,
                                              const double   minimal_energy_of_physically_valid_layout) noexcept
     {
-        // the number of output patterns is fixed for this layout, so it is determined once instead of on every
-        // iteration of the inner loop
         const uint64_t max_output_pattern_index{uint64_t{1} << output_bdl_wires.size()};
 
         for (uint64_t kink_states_input = 0; kink_states_input < max_input_pattern_index; ++kink_states_input)
@@ -892,18 +736,14 @@ class is_operational_impl
                     continue;
                 }
 
-                set_charge_distribution_of_input_pins(cds_layout, kink_states_input);
-                set_charge_distribution_of_output_pins(cds_layout, output_wire_index);
+                set_charge_distribution_of_input_pins(state, kink_states_input);
+                set_charge_distribution_of_output_pins(state, output_wire_index);
 
-                const auto physical_validity = is_physical_validity_feasible(cds_layout);
-
-                if (physical_validity.has_value())
+                if (const auto physical_validity = is_physical_validity_feasible(state);
+                    physical_validity.has_value() &&
+                    *physical_validity + utils::math::ERROR_MARGIN < minimal_energy_of_physically_valid_layout)
                 {
-                    if (physical_validity.value() + fiction::utils::math::ERROR_MARGIN <
-                        minimal_energy_of_physically_valid_layout)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
@@ -913,57 +753,43 @@ class is_operational_impl
 
   private:
     /**
-     * SiDB cell-level layout.
+     * The layout to check.
      */
-    const Lyt layout;
+    const layout sidb_layout{};
     /**
-     * The specification of the layout.
+     * The Boolean function(s) to implement.
      */
-    const std::vector<TT>& truth_table{};
+    const std::vector<TT>& truth_table;
     /**
-     * Parameters for the `is_operational` algorithm.
+     * Parameters.
      */
     const is_operational_params& parameters;
     /**
-     * Output BDL pairs.
+     * The output BDL pairs.
      */
-    std::vector<bdl_pair<cell<Lyt>>> output_bdl_pairs;
+    std::vector<bdl_pair<lattice_site>> output_bdl_pairs;
     /**
-     * Iterator that iterates over all possible input states.
+     * Iterator over the input patterns.
      */
-    bdl_input_iterator<Lyt> bii;
+    bdl_input_iterator bii;
     /**
-     * Input BDL wires.
+     * The input BDL wires.
      */
-    std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    std::vector<bdl_wire> input_bdl_wires;
     /**
-     * Output BDL wires.
+     * The output BDL wires.
      */
-    std::vector<bdl_wire<Lyt>> output_bdl_wires;
+    std::vector<bdl_wire> output_bdl_wires;
     /**
      * Number of simulator invocations.
      */
     std::size_t simulator_invocations{0};
-
     /**
-     * Number of output BDL wires.
+     * The canvas.
      */
-    const std::size_t number_of_output_wires;
+    layout canvas_lyt{};
     /**
-     * Number of input BDL wires.
-     */
-    const std::size_t number_of_input_wires;
-    /**
-     * Layout consisting of all canvas SiDBs.
-     */
-    Lyt canvas_lyt{};
-    /**
-     * Whether the canvas-based filtering steps can be applied. They need a canvas to enumerate, they are skipped by
-     * `SIMULATION_ONLY`, and they are only defined for `REJECT_KINKS`.
-     *
-     * This is the single place the condition is decided. The entry points build a canvas whenever the layout has
-     * `LOGIC` cells and leave it to `run()` to determine whether the filtering applies, so that the same layout and the
-     * same parameters take the same path regardless of which overload the caller reached.
+     * Whether the pruning filters apply: a canvas is given, the strategy asks for filtering, and kinks are rejected.
      */
     const bool canvas_filtering_applicable{!canvas_lyt.is_empty() &&
                                            parameters.strategy_to_analyze_operational_status !=
@@ -971,49 +797,42 @@ class is_operational_impl
                                            parameters.op_condition ==
                                                is_operational_params::operational_condition::REJECT_KINKS};
     /**
-     * Pre-generated layouts, one per input pattern, or `nullptr` if the BDL input iterator is used instead. Not owned
-     * by this object and only ever read.
+     * Caller-supplied layouts, one per input pattern, or `nullptr`.
      */
-    const std::vector<Lyt>* input_pattern_layouts{nullptr};
+    const std::vector<layout>* input_pattern_layouts{nullptr};
     /**
-     * The charge distribution surface of the canvas layout, enumerated by `is_physical_validity_feasible`. It is built
-     * on first use and reused afterwards, since the canvas does not change over this object's lifetime. Empty until
-     * then, so that the strategies that never inspect the canvas do not pay for it.
-     */
-    std::optional<sidb::surfaces::charge_distribution_surface<Lyt>> canvas_cds{};
-
-    /**
-     * Returns the charge distribution surface of the canvas layout, constructing it on first use.
+     * Whether the input and output BDL topology supports the requested Boolean function.
      *
-     * Constructing it means computing the potential matrix over the canvas SiDBs, which
-     * `is_physical_validity_feasible` would otherwise repeat on each of its calls even though the canvas is fixed. The
-     * caller is responsible for resetting the charge index; the base number and the dependent cell are set here and
-     * stay valid.
-     *
-     * @return The canvas charge distribution surface.
+     * @return `true` if every input pattern and output can be evaluated.
      */
-    [[nodiscard]] sidb::surfaces::charge_distribution_surface<Lyt>& canvas_charge_distribution() noexcept
+    [[nodiscard]] bool has_valid_bdl_configuration() const noexcept
     {
-        if (!canvas_cds.has_value())
-        {
-            canvas_cds.emplace(canvas_lyt);
-            canvas_cds->assign_base_number(2);
-            canvas_cds->assign_dependent_cell(canvas_cds->get_sidb_order().front());
-        }
-
-        return *canvas_cds;
+        return (input_pattern_layouts != nullptr || bii.is_valid()) && output_bdl_pairs.size() == truth_table.size() &&
+               output_bdl_wires.size() == truth_table.size();
     }
-
     /**
-     * Returns the layout with the given input pattern applied.
+     * Assigns a charge state to the SiDB at `site` without touching the charge index.
      *
-     * Reads from the pre-generated input pattern layouts if they were supplied, and drives the BDL input iterator to
-     * the requested pattern otherwise.
-     *
-     * @param input_pattern The input pattern to apply.
-     * @return The layout with `input_pattern` applied.
+     * @param state The state to modify.
+     * @param lyt The state's layout.
+     * @param site The site.
+     * @param cs The charge state.
      */
-    [[nodiscard]] const Lyt& layout_with_input_pattern(const uint64_t input_pattern) noexcept
+    static void assign(simulation::detail::simulation_state& state, const layout& lyt, const lattice_site& site,
+                       const model::charge_state cs) noexcept
+    {
+        if (const auto index = lyt.index_of(site); index.has_value())
+        {
+            state.assign_charge_state_by_index(*index, cs, simulation::detail::charge_index_mode::KEEP_CHARGE_INDEX);
+        }
+    }
+    /**
+     * The layout with an input pattern applied.
+     *
+     * @param input_pattern The input pattern.
+     * @return The layout.
+     */
+    [[nodiscard]] const layout& layout_with_input_pattern(const uint64_t input_pattern) noexcept
     {
         if (input_pattern_layouts != nullptr)
         {
@@ -1026,747 +845,631 @@ class is_operational_impl
 
         return *bii;
     }
-
     /**
-     * This function conducts physical simulation of the given SiDB layout.
-     * The simulation results are stored in the `sim_result` variable.
+     * Simulates the layout with the configured engine.
      *
-     * @param lyt_with_input_pattern The SiDB layout with a given input combination applied.
-     * @return Simulation results.
+     * @param lyt_with_input_pattern The layout to simulate.
+     * @return The simulation result; empty if the engine found no valid configuration.
      */
-    [[nodiscard]] sidb::simulation::legacy_result<Lyt>
-    physical_simulation_of_layout(const Lyt& lyt_with_input_pattern) noexcept
+    [[nodiscard]] result physical_simulation_of_layout(const layout& lyt_with_input_pattern) const noexcept
     {
         if (parameters.sim_engine == engine::EXGS)
         {
-            // perform exhaustive ground state simulation
-            return sidb::simulation::engines::exhaustive_ground_state_simulation(lyt_with_input_pattern,
-                                                                                 parameters.sim_params);
+            return engines::exhaustive_ground_state_simulation(lyt_with_input_pattern, parameters.sim_params);
         }
         if (parameters.sim_engine == engine::QUICKEXACT)
         {
-            // perform QuickExact exact simulation
-            const sidb::simulation::engines::quickexact_params qe_params{
-                .sim_params = parameters.sim_params,
-                .base_number_detection =
-                    fiction::sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
-            return sidb::simulation::engines::quickexact(lyt_with_input_pattern, qe_params);
+            const engines::quickexact_params qe_params{
+                .sim_params            = parameters.sim_params,
+                .base_number_detection = engines::quickexact_params::automatic_base_number_detection::OFF};
+
+            return engines::quickexact(lyt_with_input_pattern, qe_params);
         }
 #if (FICTION_ALGLIB_ENABLED)
         if (parameters.sim_engine == engine::CLUSTERCOMPLETE)
         {
-            // perform ClusterComplete exact simulation
-            const sidb::simulation::engines::clustercomplete_params cc_params{.sim_params = parameters.sim_params};
-            return sidb::simulation::engines::clustercomplete(lyt_with_input_pattern, cc_params);
+            const engines::clustercomplete_params cc_params{.sim_params = parameters.sim_params};
+
+            return engines::clustercomplete(lyt_with_input_pattern, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED
-        if constexpr (!is_sidb_defect_surface_v<Lyt>)
+        if (parameters.sim_engine == engine::QUICKSIM)
         {
-            if (parameters.sim_engine == engine::QUICKSIM)
+            assert(parameters.sim_params.base == 2 && "QuickSim does not support base-3 simulation");
+
+            const engines::quicksim_params qs_params{.sim_params      = parameters.sim_params,
+                                                     .iteration_steps = 500,
+                                                     .alpha           = 0.6};
+
+            if (const auto qs_result = engines::quicksim(lyt_with_input_pattern, qs_params); qs_result.has_value())
             {
-                assert(parameters.sim_params.base == 2 && "QuickSim does not support base-3 simulation");
-
-                // perform QuickSim heuristic simulation
-                const sidb::simulation::engines::quicksim_params qs_params{.sim_params      = parameters.sim_params,
-                                                                           .iteration_steps = 500,
-                                                                           .alpha           = 0.6};
-
-                if (const auto qs_result = sidb::simulation::engines::quicksim(lyt_with_input_pattern, qs_params);
-                    qs_result.has_value())
-                {
-                    return qs_result.value();
-                }
-                return sidb::simulation::legacy_result<Lyt>{};  // return empty result if no valid charge distribution
-                                                                // was found
+                return *qs_result;
             }
+
+            return result{};
         }
 
         assert(false && "unsupported simulation engine");
 
-        return sidb::simulation::legacy_result<Lyt>{};
+        return result{};
     }
     /**
-     * This function iterates through the input wires and evaluates their charge states against the expected
-     * states derived from the input pattern. A kink is considered to exist if an input wire's charge state does not
-     * match the expected value (i.e., bit one or bit zero) for the given input index.
+     * Whether any pair of an input wire (the input pairs aside) does not encode the bit of the input pattern.
      *
-     * @param ground_state The ground state charge distribution surface.
-     * @param current_input_index The current input index used to retrieve the expected output from the truth table.
-     * @return `true` if any input wire contains a kink (i.e., an unexpected charge state), `false` otherwise.
+     * @param cd The charge distribution.
+     * @param current_input_index The input pattern.
+     * @return `true` if a kink exists.
      */
-    [[nodiscard]] bool
-    check_existence_of_kinks_in_input_wires(const sidb::surfaces::charge_distribution_surface<Lyt>& ground_state,
-                                            const uint64_t current_input_index) const noexcept
+    [[nodiscard]] bool check_existence_of_kinks_in_input_wires(const charge_distribution& cd,
+                                                               const uint64_t current_input_index) const noexcept
     {
-        return std::ranges::any_of(
-            input_bdl_wires | std::views::reverse,
-            [this, &ground_state, &current_input_index, i = 0u](const auto& wire) mutable
-            {
-                const auto current_bit_set = (current_input_index & (uint64_t{1ull} << i++)) != 0ull;
-                return std::ranges::any_of(wire.pairs,
-                                           [this, &ground_state, &current_bit_set, &wire](const auto& bdl)
-                                           {
-                                               if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
-                                               {
-                                                   return false;  // Skip processing for input type.
-                                               }
+        return std::ranges::any_of(input_bdl_wires | std::views::reverse,
+                                   [this, &cd, &current_input_index, i = 0u](const auto& wire) mutable
+                                   {
+                                       const auto current_bit_set = (current_input_index & (uint64_t{1} << i++)) != 0;
 
-                                               if (current_bit_set)
-                                               {
-                                                   return !encodes_bit_one(ground_state, bdl, wire.port);
-                                               }
-
-                                               return !encodes_bit_zero(ground_state, bdl, wire.port);
-                                           });
-            });
+                                       return std::ranges::any_of(wire.pairs,
+                                                                  [this, &cd, current_bit_set, &wire](const auto& bdl)
+                                                                  {
+                                                                      if (bdl.type == sidb_technology::cell_type::INPUT)
+                                                                      {
+                                                                          return false;
+                                                                      }
+                                                                      if (current_bit_set)
+                                                                      {
+                                                                          return !encodes_bit_one(cd, bdl, wire.port);
+                                                                      }
+                                                                      return !encodes_bit_zero(cd, bdl, wire.port);
+                                                                  });
+                                   });
     }
-
     /**
-     * This function iterates through the output wires and evaluates their charge states against the expected
-     * states derived from the truth table. A kink is considered to exist if an output wire's charge state does not
-     * match the expected value (i.e., bit one or bit zero) for the given input index.
+     * Whether any pair of an output wire does not encode the expected output bit.
      *
-     * @param ground_state The ground state charge distribution surface.
-     * @param current_input_index The current input index used to retrieve the expected output from the truth table.
-     * @return `true` if any output wire contains a kink (i.e., an unexpected charge state), `false` otherwise.
+     * @param cd The charge distribution.
+     * @param current_input_index The input pattern.
+     * @return `true` if a kink exists.
      */
-    [[nodiscard]] bool
-    check_existence_of_kinks_in_output_wires(const sidb::surfaces::charge_distribution_surface<Lyt>& ground_state,
-                                             const uint64_t current_input_index) const noexcept
+    [[nodiscard]] bool check_existence_of_kinks_in_output_wires(const charge_distribution& cd,
+                                                                const uint64_t current_input_index) const noexcept
     {
-        for (auto i = 0u; i < output_bdl_wires.size(); i++)
+        for (std::size_t i = 0; i < output_bdl_wires.size(); ++i)
         {
             for (const auto& bdl : output_bdl_wires[i].pairs)
             {
                 if (kitty::get_bit(truth_table[i], current_input_index))
                 {
-                    if (!encodes_bit_one(ground_state, bdl, output_bdl_wires[i].port))
+                    if (!encodes_bit_one(cd, bdl, output_bdl_wires[i].port))
                     {
                         return true;
                     }
                 }
-                else
+                else if (!encodes_bit_zero(cd, bdl, output_bdl_wires[i].port))
                 {
-                    if (!encodes_bit_zero(ground_state, bdl, output_bdl_wires[i].port))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
+
         return false;
     }
-
     /**
-     * This function returns `true` if `0` is encoded in the charge state of the given BDL pair. `false` otherwise.
+     * Whether a BDL pair encodes bit `0` given the wire's port direction.
      *
-     * @param ground_state The ground state charge distribution surface.
-     * @param bdl BDL pair to be evaluated.
-     * @return `true` if `0` is encoded, `false` otherwise.
+     * @param cd The charge distribution.
+     * @param bdl The pair.
+     * @param port The wire's port.
+     * @return `true` if the pair encodes `0`.
      */
-    [[nodiscard]] bool encodes_bit_zero(const sidb::surfaces::charge_distribution_surface<Lyt>& ground_state,
-                                        const bdl_pair<cell<Lyt>>& bdl, const fcn::port_direction port) const noexcept
+    [[nodiscard]] static bool encodes_bit_zero(const charge_distribution& cd, const bdl_pair<lattice_site>& bdl,
+                                               const fcn::port_direction port) noexcept
     {
         if (port.dir == fcn::port_direction::SOUTH || port.dir == fcn::port_direction::EAST ||
             port.dir == fcn::port_direction::NONE)
         {
-            return static_cast<bool>(
-                (ground_state.get_charge_state(bdl.upper) == sidb::model::charge_state::NEGATIVE) &&
-                (ground_state.get_charge_state(bdl.lower) == sidb::model::charge_state::NEUTRAL));
+            return cd.get_charge_state(bdl.upper) == model::charge_state::NEGATIVE &&
+                   cd.get_charge_state(bdl.lower) == model::charge_state::NEUTRAL;
         }
-        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb::model::charge_state::NEUTRAL) &&
-                                 (ground_state.get_charge_state(bdl.lower) == sidb::model::charge_state::NEGATIVE));
+
+        return cd.get_charge_state(bdl.upper) == model::charge_state::NEUTRAL &&
+               cd.get_charge_state(bdl.lower) == model::charge_state::NEGATIVE;
     }
-
     /**
-     * This function returns `true` if `1` is encoded in the charge state of the given BDL pair. `false` otherwise.
+     * Whether a BDL pair encodes bit `1` given the wire's port direction.
      *
-     * @param ground_state The ground state charge distribution surface.
-     * @param bdl BDL pair to be evaluated.
-     * @return `true` if `1` is encoded, `false` otherwise.
+     * @param cd The charge distribution.
+     * @param bdl The pair.
+     * @param port The wire's port.
+     * @return `true` if the pair encodes `1`.
      */
-    [[nodiscard]] bool encodes_bit_one(const sidb::surfaces::charge_distribution_surface<Lyt>& ground_state,
-                                       const bdl_pair<cell<Lyt>>& bdl, const fcn::port_direction port) const noexcept
+    [[nodiscard]] static bool encodes_bit_one(const charge_distribution& cd, const bdl_pair<lattice_site>& bdl,
+                                              const fcn::port_direction port) noexcept
     {
         if (port.dir == fcn::port_direction::SOUTH || port.dir == fcn::port_direction::EAST ||
             port.dir == fcn::port_direction::NONE)
         {
-            return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb::model::charge_state::NEUTRAL) &&
-                                     (ground_state.get_charge_state(bdl.lower) == sidb::model::charge_state::NEGATIVE));
+            return cd.get_charge_state(bdl.upper) == model::charge_state::NEUTRAL &&
+                   cd.get_charge_state(bdl.lower) == model::charge_state::NEGATIVE;
         }
 
-        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb::model::charge_state::NEGATIVE) &&
-                                 (ground_state.get_charge_state(bdl.lower) == sidb::model::charge_state::NEUTRAL));
+        return cd.get_charge_state(bdl.upper) == model::charge_state::NEGATIVE &&
+               cd.get_charge_state(bdl.lower) == model::charge_state::NEUTRAL;
     }
 };
+
+/**
+ * Collects the logic cells of a layout into a canvas layout on the same lattice.
+ *
+ * @param lyt The layout.
+ * @return A layout holding only the logic cells of `lyt`.
+ */
+[[nodiscard]] inline layout canvas_of(const layout& lyt)
+{
+    layout canvas{lyt.get_lattice()};
+
+    for (const auto& c : lyt.cells_of_type(sidb_technology::cell_type::LOGIC))
+    {
+        canvas.assign_cell_type(c, sidb_technology::cell_type::LOGIC);
+    }
+
+    return canvas;
+}
+/**
+ * Sanity checks shared by every entry point.
+ *
+ * @tparam TT Truth table type.
+ * @param lyt The layout.
+ * @param spec The specification.
+ */
+template <typename TT>
+void check_arguments([[maybe_unused]] const layout& lyt, [[maybe_unused]] const std::vector<TT>& spec) noexcept
+{
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    assert(lyt.num_pis() > 0 && "lyt needs input cells");
+    assert(lyt.num_pos() > 0 && "lyt needs output cells");
+    assert(!spec.empty());
+    // all elements in spec must have the same number of variables
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
+}
+/**
+ * Builds the implementation for a layout with optional wires and canvas: the canvas defaults to the layout's logic
+ * cells.
+ *
+ * @tparam TT Truth table type.
+ * @param lyt The layout.
+ * @param spec The specification.
+ * @param params Parameters.
+ * @param input_wires The input wires, or `std::nullopt` to detect them.
+ * @param output_wires The output wires, or `std::nullopt` to detect them.
+ * @param canvas_lyt The canvas, or `std::nullopt` to use the logic cells.
+ * @return The implementation object.
+ */
+template <typename TT>
+[[nodiscard]] is_operational_impl<TT>
+make_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+          const std::optional<std::vector<bdl_wire>>& input_wires,
+          const std::optional<std::vector<bdl_wire>>& output_wires, const std::optional<layout>& canvas_lyt)
+{
+    const auto canvas = canvas_lyt.has_value() ? *canvas_lyt : canvas_of(lyt);
+
+    if (input_wires.has_value() && output_wires.has_value())
+    {
+        if (!canvas.is_empty())
+        {
+            return is_operational_impl<TT>{lyt, spec, params, *input_wires, *output_wires, canvas};
+        }
+
+        return is_operational_impl<TT>{lyt, spec, params, *input_wires, *output_wires};
+    }
+
+    if (!canvas.is_empty())
+    {
+        return is_operational_impl<TT>{lyt, spec, params, canvas};
+    }
+
+    return is_operational_impl<TT>{lyt, spec, params};
+}
+/**
+ * The input patterns that are not operational for the given reasons.
+ *
+ * @tparam TT Truth table type.
+ * @param p The implementation object.
+ * @param num_patterns The number of input patterns.
+ * @return All patterns that are operational.
+ */
+template <typename TT>
+[[nodiscard]] std::set<uint64_t> operational_patterns_of(is_operational_impl<TT>& p, const uint64_t num_patterns)
+{
+    std::set<uint64_t> input_patterns{};
+
+    for (uint64_t i = 0; i < num_patterns; ++i)
+    {
+        input_patterns.insert(i);
+    }
+
+    for (const auto& [input_pattern, _] : p.determine_non_operational_input_patterns_and_non_operationality_reason())
+    {
+        input_patterns.erase(input_pattern);
+    }
+
+    return input_patterns;
+}
+/**
+ * The input patterns that kinks render non-operational.
+ *
+ * @tparam TT Truth table type.
+ * @param p The implementation object, configured to reject kinks.
+ * @return The kink-induced non-operational patterns.
+ */
+template <typename TT>
+[[nodiscard]] std::set<uint64_t> kink_patterns_of(is_operational_impl<TT>& p)
+{
+    std::set<uint64_t> patterns{};
+
+    for (const auto& [input_pattern, reason] :
+         p.determine_non_operational_input_patterns_and_non_operationality_reason())
+    {
+        if (reason == non_operationality_reason::KINKS)
+        {
+            patterns.insert(input_pattern);
+        }
+    }
+
+    return patterns;
+}
 
 }  // namespace detail
 
 /**
- * Determine the operational status of an SiDB layout.
+ * Determines whether an SiDB layout implements the given Boolean function(s). Every input pattern is applied to the
+ * input BDL pairs, the ground states are simulated with the configured engine, and the charge states of the output
+ * BDL pairs are compared with the expected truth-table entries. If the layout carries logic cells, they form the
+ * canvas of the pruning filters that run before any simulation whenever the parameters ask for filtering and reject
+ * kinks.
  *
- * This function checks the operational status of a given SiDB layout using the `is_operational` algorithm. It
- * determines whether the SiDB layout is operational and returns the correct result for all \f$2^n\f$ input
- * combinations.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Type of the truth table.
- * @param lyt The SiDB cell-level layout to be checked.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param params Parameters for the `is_operational` algorithm.
- * @return A pair containing the operational status of the SiDB layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
- * the number of input combinations tested.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to check.
+ * @param spec The Boolean function(s) it has to implement.
+ * @param params Parameters.
+ * @return The operational status and the number of simulator invocations.
  */
-template <typename Lyt, typename TT>
+template <typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {}) noexcept
+is_operational(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params = {}) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+    detail::check_arguments(lyt, spec);
 
-    assert(lyt.num_pis() > 0 && "lyt needs input cells");
-    assert(lyt.num_pos() > 0 && "lyt needs output cells");
-
-    assert(!spec.empty());
-    // all elements in spec must have the same number of variables
-    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
-                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
-
-    const auto logic_cells = lyt.get_cells_by_type(fiction::technology<Lyt>::cell_type::LOGIC);
-
-    // if there are logic cells, we can design the canvas layout consisting of all logic cells. Whether the canvas is
-    // actually used is decided by `is_operational_impl::run()`, so that every entry point takes the same path
-    if (!logic_cells.empty())
-    {
-        Lyt canvas_lyt{};
-
-        // assign all logic cells to the canvas layout
-        for (const auto& c : logic_cells)
-        {
-            canvas_lyt.assign_cell_type(c, fiction::technology<Lyt>::cell_type::LOGIC);
-        }
-
-        fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, canvas_lyt};
-
-        const auto [status, _] = p.run();
-
-        return {status, p.get_number_of_simulator_invocations()};
-    }
-
-    fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
+    auto p = detail::make_impl(lyt, spec, params, std::nullopt, std::nullopt, std::nullopt);
 
     const auto [status, _] = p.run();
 
     return {status, p.get_number_of_simulator_invocations()};
 }
-
 /**
- * Determine the operational status of an SiDB layout.
+ * Like the overload above, with the BDL wires and, optionally, the canvas given by the caller.
  *
- * This function checks the operational status of a given SiDB layout using the `is_operational` algorithm. It
- * determines whether the SiDB layout is operational and returns the correct result for all \f$2^n\f$ input
- * combinations.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Type of the truth table.
- * @param lyt The SiDB cell-level layout to be checked.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param params Parameters for the `is_operational` algorithm.
- * @param input_bdl_wire Optional BDL input wires of lyt.
- * @param output_bdl_wire Optional BDL output wires of lyt.
- * @param canvas_lyt Optional canvas layout.
- * @return A pair containing the operational status of the SiDB layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
- * the number of input combinations tested.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to check.
+ * @param spec The Boolean function(s) it has to implement.
+ * @param params Parameters.
+ * @param input_bdl_wire The input BDL wires of `lyt`.
+ * @param output_bdl_wire The output BDL wires of `lyt`.
+ * @param canvas_lyt The canvas; defaults to the logic cells of `lyt`.
+ * @return The operational status and the number of simulator invocations.
  */
-template <typename Lyt, typename TT>
+template <typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-               const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
-               const std::optional<Lyt>& canvas_lyt = std::nullopt) noexcept
+is_operational(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+               const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire,
+               const std::optional<layout>& canvas_lyt = std::nullopt) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+    detail::check_arguments(lyt, spec);
 
-    assert(lyt.num_pis() > 0 && "lyt needs input cells");
-    assert(lyt.num_pos() > 0 && "lyt needs output cells");
-
-    assert(!spec.empty());
-    // all elements in spec must have the same number of variables
-    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
-                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
-
-    if (canvas_lyt.has_value())
-    {
-        fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{
-            lyt, spec, params, input_bdl_wire, output_bdl_wire, canvas_lyt.value()};
-
-        const auto [status, _] = p.run();
-
-        return {status, p.get_number_of_simulator_invocations()};
-    }
-
-    const auto logic_cells = lyt.get_cells_by_type(fiction::technology<Lyt>::cell_type::LOGIC);
-
-    if (!logic_cells.empty())
-    {
-        Lyt c_lyt{};
-
-        for (const auto& c : logic_cells)
-        {
-            c_lyt.assign_cell_type(c, fiction::technology<Lyt>::cell_type::LOGIC);
-        }
-
-        fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{
-            lyt, spec, params, input_bdl_wire, output_bdl_wire, c_lyt};
-
-        const auto [status, _] = p.run();
-
-        return {status, p.get_number_of_simulator_invocations()};
-    }
-
-    fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire,
-                                                                             output_bdl_wire};
+    auto p = detail::make_impl(lyt, spec, params, input_bdl_wire, output_bdl_wire, canvas_lyt);
 
     const auto [status, _] = p.run();
 
     return {status, p.get_number_of_simulator_invocations()};
 }
-
 /**
- * Determine the operational status of an SiDB layout from its pre-generated input pattern layouts.
+ * Like the overloads above, but with one layout per input pattern given by the caller instead of applying the
+ * patterns to the input BDL pairs.
  *
- * The layout is operational only if it produces the correct output for every input pattern, so this overload takes
- * one layout per input pattern and reports the layout operational only if all of them are. Since the input
- * configuration does not depend on the simulation parameters, a caller that evaluates the same layout under many
- * parameter settings can generate the layouts once with `generate_bdl_input_pattern_layouts` and pass them to every
- * call, instead of re-deriving them each time.
- *
- * The layouts are only read and may be shared by concurrent calls.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Type of the truth table.
- * @param input_pattern_layouts One layout per input pattern, indexed by input pattern, as generated by
- * `generate_bdl_input_pattern_layouts`. All of them must be operational for the layout to be operational.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param params Parameters for the `is_operational` algorithm.
- * @param input_bdl_wire BDL input wires of the layout.
- * @param output_bdl_wire BDL output wires of the layout.
- * @param canvas_lyt Optional canvas layout.
- * @return A pair containing the operational status of the SiDB layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
- * the number of input combinations tested.
- * @throws std::invalid_argument if `spec` is empty, or if the number of input pattern layouts does not match the
- * number of input combinations of `spec`.
+ * @tparam TT Truth table type.
+ * @param input_pattern_layouts One layout per input pattern, pattern `0` first.
+ * @param spec The Boolean function(s) to implement.
+ * @param params Parameters.
+ * @param input_bdl_wire The input BDL wires.
+ * @param output_bdl_wire The output BDL wires.
+ * @param canvas_lyt The canvas; defaults to the logic cells of the first layout.
+ * @return The operational status and the number of simulator invocations.
+ * @throws std::invalid_argument if `spec` is empty or the number of layouts does not match the number of patterns.
  */
-template <typename Lyt, typename TT>
+template <typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const std::vector<Lyt>& input_pattern_layouts, const std::vector<TT>& spec,
-               const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
-               const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+is_operational(const std::vector<layout>& input_pattern_layouts, const std::vector<TT>& spec,
+               const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire,
+               const std::vector<bdl_wire>& output_bdl_wire, const std::optional<layout>& canvas_lyt = std::nullopt)
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    // unlike the other overloads, this one indexes a caller-supplied container, so a wrong size is an out-of-bounds
-    // read rather than a wrong answer. It is also reachable from `pyfiction` with an arbitrary list, so the checks
-    // have to survive `NDEBUG`
+    // this overload indexes a caller-supplied container, so a wrong size is an out-of-bounds read rather than a
+    // wrong answer. It is also reachable from `pyfiction` with an arbitrary list, so the checks survive `NDEBUG`
     if (spec.empty())
     {
         throw std::invalid_argument("spec is empty");
     }
-
     if (input_pattern_layouts.size() != spec.front().num_bits())
     {
         throw std::invalid_argument(
             fmt::format("expected {} input pattern layouts for a {}-input specification, but got {}",
                         spec.front().num_bits(), spec.front().num_vars(), input_pattern_layouts.size()));
     }
-
     // all elements in spec must have the same number of variables
     assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
                                       { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
-    if (canvas_lyt.has_value())
-    {
-        fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{
-            input_pattern_layouts, spec, params, input_bdl_wire, output_bdl_wire, canvas_lyt.value()};
+    const auto canvas = canvas_lyt.has_value() ? *canvas_lyt : detail::canvas_of(input_pattern_layouts.front());
 
-        const auto [status, _] = p.run();
-
-        return {status, p.get_number_of_simulator_invocations()};
-    }
-
-    Lyt c_lyt{};
-
-    for (const auto& c : input_pattern_layouts.front().get_cells_by_type(fiction::technology<Lyt>::cell_type::LOGIC))
-    {
-        c_lyt.assign_cell_type(c, fiction::technology<Lyt>::cell_type::LOGIC);
-    }
-
-    fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{
-        input_pattern_layouts, spec, params, input_bdl_wire, output_bdl_wire, c_lyt};
+    detail::is_operational_impl<TT> p{input_pattern_layouts, spec, params, input_bdl_wire, output_bdl_wire, canvas};
 
     const auto [status, _] = p.run();
 
     return {status, p.get_number_of_simulator_invocations()};
 }
-
 /**
- * This function determines the input combinations for which the layout is operational.
+ * Determines the input patterns for which the layout is operational.
  *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Type of the truth table.
- * @param lyt The SiDB layout.
- * @param spec Vector of truth table specifications.
- * @param params Parameters to simulate if a input combination is operational.
- * @return The operational input combinations.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to check.
+ * @param spec The Boolean function(s) it has to implement.
+ * @param params Parameters.
+ * @return The operational input patterns.
  */
-template <typename Lyt, typename TT>
-[[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
+template <typename TT>
+[[nodiscard]] std::set<uint64_t> operational_input_patterns(const layout& lyt, const std::vector<TT>& spec,
                                                             const is_operational_params& params = {}) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+    detail::check_arguments(lyt, spec);
 
-    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
-    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
+    detail::is_operational_impl<TT> p{lyt, spec, params};
 
-    assert(!spec.empty());
-    // all elements in spec must have the same number of variables
-    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
-                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
-
-    fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
-
-    std::set<uint64_t> input_patterns{};
-
-    // all possible input patterns
-    for (auto i = 0u; i < spec.front().num_bits(); ++i)
-    {
-        input_patterns.insert(i);
-    }
-
-    const auto non_op_patterns_and_non_op_reason =
-        p.determine_non_operational_input_patterns_and_non_operationality_reason();
-
-    for (const auto& [input_pattern, _] : non_op_patterns_and_non_op_reason)
-    {
-        input_patterns.erase(input_pattern);
-    }
-
-    return input_patterns;
+    return detail::operational_patterns_of(p, spec.front().num_bits());
 }
 /**
- * This function determines the input combinations for which the layout is operational.
+ * Like the overload above, with the BDL wires and, optionally, the canvas given by the caller.
  *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Type of the truth table.
- * @param lyt The SiDB layout.
- * @param spec Vector of truth table specifications.
- * @param params Parameters to simulate if a input combination is operational.
- * @param input_bdl_wire Optional BDL input wires of lyt.
- * @param output_bdl_wire Optional BDL output wires of lyt.
- * @param canvas_lyt Optional canvas layout.
- * @return The count of operational input combinations.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to check.
+ * @param spec The Boolean function(s) it has to implement.
+ * @param params Parameters.
+ * @param input_bdl_wire The input BDL wires of `lyt`.
+ * @param output_bdl_wire The output BDL wires of `lyt`.
+ * @param canvas_lyt The canvas; defaults to none.
+ * @return The operational input patterns.
  */
-template <typename Lyt, typename TT>
+template <typename TT>
 [[nodiscard]] std::set<uint64_t>
-operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-                           const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
-                           const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
-                           const std::optional<Lyt>&         canvas_lyt = std::nullopt) noexcept
+operational_input_patterns(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+                           const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire,
+                           const std::optional<layout>& canvas_lyt = std::nullopt) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
-    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
-    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
-
-    assert(!spec.empty());
-    // all elements in spec must have the same number of variables
-    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
-                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    detail::check_arguments(lyt, spec);
 
     if (canvas_lyt.has_value())
     {
-        fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{
-            lyt, spec, params, input_bdl_wire, output_bdl_wire, canvas_lyt.value()};
+        detail::is_operational_impl<TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire, *canvas_lyt};
 
-        std::set<uint64_t> input_patterns{};
-
-        // all possible input patterns
-        for (auto i = 0u; i < spec.front().num_bits(); ++i)
-        {
-            input_patterns.insert(i);
-        }
-
-        const auto non_op_patterns_and_non_op_reason =
-            p.determine_non_operational_input_patterns_and_non_operationality_reason();
-
-        for (const auto& [input_pattern, _] : non_op_patterns_and_non_op_reason)
-        {
-            input_patterns.erase(input_pattern);
-        }
-
-        return input_patterns;
+        return detail::operational_patterns_of(p, spec.front().num_bits());
     }
 
-    fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire,
-                                                                             output_bdl_wire};
+    detail::is_operational_impl<TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire};
 
-    std::set<uint64_t> input_patterns{};
-
-    // all possible input patterns
-    for (auto i = 0u; i < spec.front().num_bits(); ++i)
-    {
-        input_patterns.insert(i);
-    }
-
-    const auto non_op_patterns_and_non_op_reason =
-        p.determine_non_operational_input_patterns_and_non_operationality_reason();
-
-    for (const auto& [input_pattern, _] : non_op_patterns_and_non_op_reason)
-    {
-        input_patterns.erase(input_pattern);
-    }
-
-    return input_patterns;
+    return detail::operational_patterns_of(p, spec.front().num_bits());
 }
-
 /**
- * This function determines all input combinations for which kinks induce the SiDB layout to become non-operational.
- * This means that the layout is operational if kinks would be accepted.
+ * Determines the input patterns for which kinks render the layout non-operational.
  *
- * @note "Kink induced non-operational" refers to the non-operational status being exclusively caused by kinks with an
- * otherwise correct logic match.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Type of the truth table.
- * @param lyt The SiDB layout.
- * @param spec Vector of truth table specifications.
- * @param params Parameters for the `is_operational` algorithm.
- * @return The input combinations where kinks induce the SiDB layout to become non-operational.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to check.
+ * @param spec The Boolean function(s) it has to implement.
+ * @param params Parameters; kinks are rejected regardless of `params.op_condition`.
+ * @return The kink-induced non-operational input patterns.
  */
-template <typename Lyt, typename TT>
+template <typename TT>
 [[nodiscard]] std::set<uint64_t>
-kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
+kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector<TT>& spec,
                                             const is_operational_params& params = {}) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
-    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
-    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
-
-    assert(!spec.empty());
-    // all elements in tts must have the same number of variables
-    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
-                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
-
-    is_operational_params params_with_rejecting_kinks = params;
-
-    params_with_rejecting_kinks.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-
-    fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks};
-
-    std::set<uint64_t> kink_induced_non_op_patterns{};
-
-    const auto input_patterns_and_non_op_reason =
-        p.determine_non_operational_input_patterns_and_non_operationality_reason();
-
-    for (const auto& [input_pattern, status] : input_patterns_and_non_op_reason)
-    {
-        if (status == detail::non_operationality_reason::KINKS)
-        {
-            kink_induced_non_op_patterns.insert(input_pattern);
-        }
-    }
-
-    return kink_induced_non_op_patterns;
-}
-/**
- * This function determines all input combinations for which kinks induce the SiDB layout to become non-operational.
- * This means that the layout is operational if kinks would be accepted.
- *
- * @note "Kink induced non-operational" refers to the non-operational status being exclusively caused by kinks with an
- * otherwise correct logic match.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Type of the truth table.
- * @param lyt The SiDB layout.
- * @param spec Vector of truth table specifications.
- * @param params Parameters for the `is_operational` algorithm.
- * @param input_bdl_wire Optional BDL input wires of lyt.
- * @param output_bdl_wire Optional BDL output wires of lyt.
- * @param canvas_lyt Optional canvas layout.
- * @return The input combinations where kinks induce the SiDB layout to become non-operational.
- */
-template <typename Lyt, typename TT>
-[[nodiscard]] std::set<uint64_t> kink_induced_non_operational_input_patterns(
-    const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-    const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
-    const std::optional<Lyt>& canvas_lyt = std::nullopt) noexcept
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
-    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
-    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
-
-    assert(!spec.empty());
-    // all elements in tts must have the same number of variables
-    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
-                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
-
-    is_operational_params params_with_rejecting_kinks = params;
-
-    params_with_rejecting_kinks.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-
-    if (canvas_lyt.has_value())
-    {
-        fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{
-            lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire, canvas_lyt.value()};
-
-        std::set<uint64_t> kink_induced_non_op_patterns{};
-
-        const auto input_patterns_and_non_op_reason =
-            p.determine_non_operational_input_patterns_and_non_operationality_reason();
-
-        for (const auto& [input_pattern, status] : input_patterns_and_non_op_reason)
-        {
-            if (status == detail::non_operationality_reason::KINKS)
-            {
-                kink_induced_non_op_patterns.insert(input_pattern);
-            }
-        }
-
-        return kink_induced_non_op_patterns;
-    }
-
-    fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks,
-                                                                             input_bdl_wire, output_bdl_wire};
-
-    std::set<uint64_t> kink_induced_non_op_patterns{};
-
-    const auto input_patterns_and_non_op_reason =
-        p.determine_non_operational_input_patterns_and_non_operationality_reason();
-
-    for (const auto& [input_pattern, status] : input_patterns_and_non_op_reason)
-    {
-        if (status == detail::non_operationality_reason::KINKS)
-        {
-            kink_induced_non_op_patterns.insert(input_pattern);
-        }
-    }
-
-    return kink_induced_non_op_patterns;
-}
-/**
- * This function determines if the layout is only considered non-operational because of kinks. This means that
- * the layout would be considered as operational, if kinks were accepted.
- *
- * @note "Kink induced non-operational" refers to the non-operational status being exclusively caused by kinks with an
- * otherwise correct logic match.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Type of the truth table.
- * @param lyt The SiDB cell-level layout to be checked.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param params Parameters for the `is_operational` algorithm.
- * @return Bool that indicates whether kinks induce the layout to become non-operational. `true` if the layout is
- * non-operational due to kinks, `false` otherwise.
- */
-template <typename Lyt, typename TT>
-[[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
-                                                   const is_operational_params& params = {}) noexcept
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
-    assert(lyt.num_pis() > 0 && "lyt needs input cells");
-    assert(lyt.num_pos() > 0 && "lyt needs output cells");
-
-    assert(!spec.empty());
-    // all elements in spec must have the same number of variables
-    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
-                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    detail::check_arguments(lyt, spec);
 
     is_operational_params params_with_rejecting_kinks = params;
     params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
 
-    fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks};
+    detail::is_operational_impl<TT> p{lyt, spec, params_with_rejecting_kinks};
+
+    return detail::kink_patterns_of(p);
+}
+/**
+ * Like the overload above, with the BDL wires and, optionally, the canvas given by the caller.
+ *
+ * @tparam TT Truth table type.
+ * @param lyt The layout to check.
+ * @param spec The Boolean function(s) it has to implement.
+ * @param params Parameters; kinks are rejected regardless of `params.op_condition`.
+ * @param input_bdl_wire The input BDL wires of `lyt`.
+ * @param output_bdl_wire The output BDL wires of `lyt`.
+ * @param canvas_lyt The canvas; defaults to none.
+ * @return The kink-induced non-operational input patterns.
+ */
+template <typename TT>
+[[nodiscard]] std::set<uint64_t> kink_induced_non_operational_input_patterns(
+    const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+    const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire,
+    const std::optional<layout>& canvas_lyt = std::nullopt) noexcept
+{
+    detail::check_arguments(lyt, spec);
+
+    is_operational_params params_with_rejecting_kinks = params;
+    params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
+
+    if (canvas_lyt.has_value())
+    {
+        detail::is_operational_impl<TT> p{
+            lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire, *canvas_lyt};
+
+        return detail::kink_patterns_of(p);
+    }
+
+    detail::is_operational_impl<TT> p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire};
+
+    return detail::kink_patterns_of(p);
+}
+/**
+ * Determines whether kinks are the reason the layout is non-operational.
+ *
+ * @tparam TT Truth table type.
+ * @param lyt The layout to check.
+ * @param spec The Boolean function(s) it has to implement.
+ * @param params Parameters; kinks are rejected regardless of `params.op_condition`.
+ * @return `true` if the layout is non-operational because of kinks.
+ */
+template <typename TT>
+[[nodiscard]] bool is_kink_induced_non_operational(const layout& lyt, const std::vector<TT>& spec,
+                                                   const is_operational_params& params = {}) noexcept
+{
+    detail::check_arguments(lyt, spec);
+
+    is_operational_params params_with_rejecting_kinks = params;
+    params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
+
+    detail::is_operational_impl<TT> p{lyt, spec, params_with_rejecting_kinks};
 
     const auto [op_status, non_op_reason] = p.run();
 
     return op_status == operational_status::NON_OPERATIONAL &&
            non_op_reason == detail::non_operationality_reason::KINKS;
 }
-
 /**
- * This function determines if the layout is only considered non-operational because of kinks. This means that
- * the layout would be considered as operational, if kinks were accepted.
+ * Like the overload above, with the BDL wires and, optionally, the canvas given by the caller.
  *
- * @note "Kink induced non-operational" refers to the non-operational status being exclusively caused by kinks with an
- * otherwise correct logic match.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Type of the truth table.
- * @param lyt The SiDB cell-level layout to be checked.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param params Parameters for the `is_operational` algorithm.
- * @param input_bdl_wire Optional BDL input wires of lyt.
- * @param output_bdl_wire Optional BDL output wires of lyt.
- * @param canvas_lyt Optional canvas layout.
- * @return Bool that indicates whether kinks induce the layout to become non-operational. `true` if the layout is
- * non-operational due to kinks, `false` otherwise.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to check.
+ * @param spec The Boolean function(s) it has to implement.
+ * @param params Parameters; kinks are rejected regardless of `params.op_condition`.
+ * @param input_bdl_wire The input BDL wires of `lyt`.
+ * @param output_bdl_wire The output BDL wires of `lyt`.
+ * @param canvas_lyt The canvas; defaults to none.
+ * @return `true` if the layout is non-operational because of kinks.
  */
-template <typename Lyt, typename TT>
-[[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
-                                                   const is_operational_params&      params,
-                                                   const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
-                                                   const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
-                                                   const std::optional<Lyt>&         canvas_lyt = std::nullopt) noexcept
+template <typename TT>
+[[nodiscard]] bool is_kink_induced_non_operational(const layout& lyt, const std::vector<TT>& spec,
+                                                   const is_operational_params& params,
+                                                   const std::vector<bdl_wire>& input_bdl_wire,
+                                                   const std::vector<bdl_wire>& output_bdl_wire,
+                                                   const std::optional<layout>& canvas_lyt = std::nullopt) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
-    assert(lyt.num_pis() > 0 && "lyt needs input cells");
-    assert(lyt.num_pos() > 0 && "lyt needs output cells");
-
-    assert(!spec.empty());
-    // all elements in spec must have the same number of variables
-    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
-                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    detail::check_arguments(lyt, spec);
 
     is_operational_params params_with_rejecting_kinks = params;
     params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
 
-    if (canvas_lyt.has_value())
+    const auto run = [&](auto& p)
     {
-        fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{
-            lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire, canvas_lyt.value()};
-
         const auto [op_status, non_op_reason] = p.run();
 
         return op_status == operational_status::NON_OPERATIONAL &&
                non_op_reason == detail::non_operationality_reason::KINKS;
+    };
+
+    if (canvas_lyt.has_value())
+    {
+        detail::is_operational_impl<TT> p{
+            lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire, *canvas_lyt};
+
+        return run(p);
     }
 
-    fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks,
-                                                                             input_bdl_wire, output_bdl_wire};
+    detail::is_operational_impl<TT> p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire};
 
-    const auto [op_status, non_op_reason] = p.run();
+    return run(p);
+}
 
-    return op_status == operational_status::NON_OPERATIONAL &&
-           non_op_reason == detail::non_operationality_reason::KINKS;
+// ---------------------------------------------------------------------------------------------------------------
+// Transitional: overloads for SiDB cell-level layouts, converted with `to_sidb_layout`. They serve the algorithms
+// that still run on such layouts and disappear once every consumer takes `sidb::layout`.
+// ---------------------------------------------------------------------------------------------------------------
+
+/**
+ * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to check.
+ * @param spec The Boolean function(s) it has to implement.
+ * @param params Parameters.
+ * @return The operational status and the number of simulator invocations.
+ */
+template <typename Lyt, typename TT>
+    requires(is_cell_level_layout_v<Lyt>)
+[[nodiscard]] std::pair<operational_status, std::size_t>
+is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {}) noexcept
+{
+    return is_operational(to_sidb_layout(lyt), spec, params);
+}
+/**
+ * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to check.
+ * @param spec The Boolean function(s) it has to implement.
+ * @param params Parameters.
+ * @return The operational input patterns.
+ */
+template <typename Lyt, typename TT>
+    requires(is_cell_level_layout_v<Lyt>)
+[[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
+                                                            const is_operational_params& params = {}) noexcept
+{
+    return operational_input_patterns(to_sidb_layout(lyt), spec, params);
+}
+/**
+ * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to check.
+ * @param spec The Boolean function(s) it has to implement.
+ * @param params Parameters.
+ * @return The kink-induced non-operational input patterns.
+ */
+template <typename Lyt, typename TT>
+    requires(is_cell_level_layout_v<Lyt>)
+[[nodiscard]] std::set<uint64_t>
+kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
+                                            const is_operational_params& params = {}) noexcept
+{
+    return kink_induced_non_operational_input_patterns(to_sidb_layout(lyt), spec, params);
+}
+/**
+ * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to check.
+ * @param spec The Boolean function(s) it has to implement.
+ * @param params Parameters.
+ * @return `true` if the layout is non-operational because of kinks.
+ */
+template <typename Lyt, typename TT>
+    requires(is_cell_level_layout_v<Lyt>)
+[[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
+                                                   const is_operational_params& params = {}) noexcept
+{
+    return is_kink_induced_non_operational(to_sidb_layout(lyt), spec, params);
 }
 
 }  // namespace fiction::sidb::simulation::logic

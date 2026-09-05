@@ -18,14 +18,12 @@
 #pragma once
 
 #include "fiction/layouts/layout_utils.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/generators/random_layout_generator.hpp"
-#include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/simulation/engine.hpp"
-#include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
@@ -192,10 +190,10 @@ class design_gates_impl
             all_sidbs_in_canvas{layouts::all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)},
             stats{st},
             input_bdl_wires{sidb::simulation::logic::detect_bdl_wires(
-                skeleton_layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                to_sidb_layout(skeleton_layout), params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                 sidb::simulation::logic::bdl_wire_selection::INPUT)},
             output_bdl_wires{sidb::simulation::logic::detect_bdl_wires(
-                skeleton_layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                to_sidb_layout(skeleton_layout), params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                 sidb::simulation::logic::bdl_wire_selection::OUTPUT)},
             number_of_input_wires{input_bdl_wires.size()},
             number_of_output_wires{output_bdl_wires.size()},
@@ -246,7 +244,8 @@ class design_gates_impl
             const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
 
             if (const auto [status, sim_calls] = sidb::simulation::logic::is_operational(
-                    layout_with_added_cells, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
+                    to_sidb_layout(layout_with_added_cells), truth_table, params.operational_params, input_bdl_wires,
+                    output_bdl_wires);
                 status == sidb::simulation::logic::operational_status::OPERATIONAL)
             {
                 {
@@ -359,8 +358,8 @@ class design_gates_impl
                         }
 
                         if (const auto [status, sim_calls] = sidb::simulation::logic::is_operational(
-                                result_lyt.value(), truth_table, params.operational_params, input_bdl_wires,
-                                output_bdl_wires);
+                                to_sidb_layout(result_lyt.value()), truth_table, params.operational_params,
+                                input_bdl_wires, output_bdl_wires);
                             status == sidb::simulation::logic::operational_status::OPERATIONAL)
                         {
                             const std::scoped_lock lock{mutex_to_protect_designed_gate_layouts};
@@ -463,7 +462,8 @@ class design_gates_impl
                 sidb::simulation::logic::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
 
             if (const auto [status, sim_calls] = sidb::simulation::logic::is_operational(
-                    candidate, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
+                    to_sidb_layout(candidate), truth_table, params.operational_params, input_bdl_wires,
+                    output_bdl_wires);
                 status == sidb::simulation::logic::operational_status::OPERATIONAL)
             {
                 // Lock and update shared resources
@@ -533,11 +533,11 @@ class design_gates_impl
     /**
      * Input BDL wires.
      */
-    const std::vector<sidb::simulation::logic::bdl_wire<Lyt>> input_bdl_wires;
+    const std::vector<sidb::simulation::logic::bdl_wire> input_bdl_wires;
     /**
      * Output BDL wires.
      */
-    const std::vector<sidb::simulation::logic::bdl_wire<Lyt>> output_bdl_wires;
+    const std::vector<sidb::simulation::logic::bdl_wire> output_bdl_wires;
     /**
      * Number of input BDL wires.
      */
@@ -595,30 +595,20 @@ class design_gates_impl
 
             auto current_layout = skeleton_layout.clone();
 
-            cell<Lyt> dependent_cell{};
+            canvas_lyt.foreach_cell([&current_layout](const auto& c)
+                                    { current_layout.assign_cell_type(c, Lyt::technology::cell_type::LOGIC); });
 
-            canvas_lyt.foreach_cell(
-                [&current_layout, &dependent_cell](const auto& c)
-                {
-                    current_layout.assign_cell_type(c, Lyt::technology::cell_type::LOGIC);
-                    dependent_cell = c;
-                });
+            fiction::sidb::simulation::logic::detail::is_operational_impl<TT> is_operational_impl{
+                to_sidb_layout(current_layout),
+                truth_table,
+                params.operational_params,
+                input_bdl_wires,
+                output_bdl_wires,
+                to_sidb_layout(canvas_lyt)};
 
-            sidb::surfaces::charge_distribution_surface<Lyt> cds_canvas{
-                canvas_lyt, params.operational_params.sim_params, sidb::model::charge_state::NEGATIVE,
-                sidb::surfaces::cds_configuration::CHARGE_LOCATION_ONLY};
-
-            cds_canvas.assign_dependent_cell(dependent_cell);
-
-            auto bii = sidb::simulation::logic::bdl_input_iterator<Lyt>{
-                current_layout, params.operational_params.input_bdl_iterator_params, input_bdl_wires};
-
-            fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> is_operational_impl{
-                current_layout, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires, canvas_lyt};
-
-            for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
+            for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
-                const auto reason_for_filtering = is_operational_impl.is_layout_invalid(bii.get_current_input_index());
+                const auto reason_for_filtering = is_operational_impl.is_layout_invalid(i);
 
                 if (reason_for_filtering.has_value())
                 {

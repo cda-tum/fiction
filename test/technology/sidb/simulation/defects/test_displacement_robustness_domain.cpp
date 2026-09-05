@@ -272,7 +272,9 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
                                            stats.num_non_operational_sidb_displacements),
                    Catch::Matchers::WithinAbs(result, ERROR_MARGIN));
 
-        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.63671875, ERROR_MARGIN));
+        // the wires of a layout in offset coordinates follow the same dimer-row semantics as those in SiQAD
+        // coordinates now: a pair displaced within its dimer keeps its row, so more displacements stay operational
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.703125, ERROR_MARGIN));
 
         const auto result_20_percent_error = determine_probability_of_fabricating_operational_gate(
             lyt_offset, std::vector<tt>{create_id_tt()}, params, 0.2);

@@ -36,6 +36,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `write_sidb_layout_svg`
   - Exposed `charge_distribution`, `potential_landscape`, charge transition thresholds,
     and `sidb_simulation_result`; simulation engines and consumers accept the new types
+  - `bdl_pair`, `bdl_wire`, `bdl_input_iterator`, `population_stability_information`, and the
+    `sidb_layout` versions of `detect_bdl_pairs`, `detect_bdl_wires`, `generate_bdl_input_pattern_layouts`,
+    `is_operational` and its pattern queries, the operational and critical temperature domain algorithms,
+    `operational_domain_ratio`, `critical_temperature_gate_based`, `critical_temperature_non_gate_based`,
+    `time_to_solution`, `physical_population_stability`, `physically_valid_parameters`,
+    `can_positive_charges_occur`, and `calculate_energy_and_state_type_with_kinks_*`
 
 ### Changed
 
@@ -48,6 +54,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     56-SiDB NAND: 19.7 → 3.3 s). _QuickSim_ improves by one third, _ExGS_ by one quarter with
     10,000× less heap traffic, and _QuickExact_ holds speed with 28× less heap traffic
   - Potential landscape construction computes each symmetric SiDB interaction once
+  - **Breaking:** SiDB logic and analysis algorithms use `sidb::layout` and non-template simulation types
 
 - Data structures:
   - Simulation results store charge states and energy beside one shared layout and potential

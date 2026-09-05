@@ -15,9 +15,10 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/time_to_solution.hpp>
+#include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 
 #include <sstream>
 
@@ -33,26 +34,6 @@
 
 namespace pyfiction
 {
-
-namespace detail
-{
-
-template <typename Lyt>
-void time_to_solution_impl(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("time_to_solution", &fiction::sidb::simulation::analysis::time_to_solution<Lyt>, py::arg("lyt"),
-          py::arg("quicksim_params"),
-          py::arg("tts_params") = fiction::sidb::simulation::analysis::time_to_solution_params{},
-          py::arg("ps")         = nullptr, DOC(fiction_sidb_simulation_analysis_time_to_solution));
-    m.def("time_to_solution_for_given_simulation_results",
-          &fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results<Lyt>,
-          py::arg("results_exact"), py::arg("results_heuristic"), py::arg("confidence_level") = 0.997,
-          py::arg("ps") = nullptr, DOC(fiction_sidb_simulation_analysis_time_to_solution_for_given_simulation_results));
-}
-
-}  // namespace detail
 
 void time_to_solution(nanobind::module_& m)
 {
@@ -104,8 +85,19 @@ void time_to_solution(nanobind::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::time_to_solution_impl<py_sidb_100_lattice>(m);
-    detail::time_to_solution_impl<py_sidb_111_lattice>(m);
+    m.def(
+        "time_to_solution",
+        [](const fiction::sidb::layout& lyt, const fiction::sidb::simulation::engines::quicksim_params& qs_params,
+           const fiction::sidb::simulation::analysis::time_to_solution_params& tts_params,
+           fiction::sidb::simulation::analysis::time_to_solution_stats*        ps)
+        { fiction::sidb::simulation::analysis::time_to_solution(lyt, qs_params, tts_params, ps); },
+        py::arg("lyt"), py::arg("quicksim_params"),
+        py::arg("tts_params") = fiction::sidb::simulation::analysis::time_to_solution_params{}, py::arg("ps") = nullptr,
+        DOC(fiction_sidb_simulation_analysis_time_to_solution));
+    m.def("time_to_solution_for_given_simulation_results",
+          &fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results, py::arg("results_exact"),
+          py::arg("results_heuristic"), py::arg("confidence_level") = 0.997, py::arg("ps") = nullptr,
+          DOC(fiction_sidb_simulation_analysis_time_to_solution_for_given_simulation_results));
 }
 
 }  // namespace pyfiction

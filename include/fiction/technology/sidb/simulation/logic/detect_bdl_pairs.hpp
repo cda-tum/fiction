@@ -17,12 +17,15 @@
 
 #pragma once
 
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/nm_distance.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <iterator>
 #include <optional>
 #include <unordered_set>
@@ -188,6 +191,115 @@ struct detect_bdl_pairs_params
 };
 
 /**
+ * Detects the BDL pairs of an SiDB layout. All SiDBs of the given type are collected and uniquely paired up by
+ * distance: the pairwise distances are sorted, and the closest unpaired SiDBs within the distance window
+ * `[params.minimum_distance, params.maximum_distance]` (defaults: 0.75 nm and 1.5 nm) form a pair. The lower bound
+ * keeps, e.g., the SiDBs of an atomic wire from being paired; the upper bound prevents unlikely pairings and bounds
+ * the work. Distances follow the layout's lattice. The pairs are returned sorted.
+ *
+ * @param lyt The layout to detect BDL pairs in.
+ * @param type Optional SiDB type to restrict the detection to (`INPUT`, `OUTPUT`, `NORMAL`, ...). If omitted, the
+ * BDL pairs of the input, output, and normal SiDBs are detected and returned in that order.
+ * @param params Parameters for the BDL pair detection.
+ * @return The detected BDL pairs.
+ */
+[[nodiscard]] inline std::vector<bdl_pair<lattice_site>>
+detect_bdl_pairs(const layout& lyt, const std::optional<sidb_technology::cell_type>& type = std::nullopt,
+                 const detect_bdl_pairs_params& params = {}) noexcept
+{
+    assert(params.minimum_distance <= params.maximum_distance);
+
+    // in case no type is given, detect BDL pairs for all types
+    if (!type.has_value())
+    {
+        const auto input_bdls  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdls = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
+        const auto normal_bdls = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL, params);
+
+        std::vector<bdl_pair<lattice_site>> all_bdls{};
+        all_bdls.reserve(input_bdls.size() + output_bdls.size() + normal_bdls.size());
+
+        std::ranges::copy(input_bdls, std::back_inserter(all_bdls));
+        std::ranges::copy(output_bdls, std::back_inserter(all_bdls));
+        std::ranges::copy(normal_bdls, std::back_inserter(all_bdls));
+
+        return all_bdls;
+    }
+
+    const auto dots = lyt.cells_of_type(*type);
+
+    /**
+     * A pair of SiDBs together with their distance (unit: nm).
+     */
+    struct pairwise_dot_distance
+    {
+        lattice_site sidb1{};
+        lattice_site sidb2{};
+        double       distance{};
+    };
+
+    const auto& lat = lyt.get_lattice();
+
+    // compute pairwise distances
+    std::vector<pairwise_dot_distance> pairwise_distances{};
+    pairwise_distances.reserve((dots.size() * (dots.size() - 1)) / 2);
+
+    for (std::size_t i = 0; i < dots.size(); ++i)
+    {
+        for (std::size_t j = i + 1; j < dots.size(); ++j)
+        {
+            pairwise_distances.push_back({dots[i], dots[j], lat.nm_distance(dots[i], dots[j])});
+        }
+    }
+
+    // sort pairwise distances
+    std::ranges::sort(pairwise_distances,
+                      [](const auto& lhs, const auto& rhs) noexcept { return lhs.distance < rhs.distance; });
+
+    std::vector<bdl_pair<lattice_site>> bdl_pairs{};
+    bdl_pairs.reserve(dots.size() / 2);
+
+    std::unordered_set<lattice_site> paired_dots{};
+    paired_dots.reserve(dots.size());
+
+    // pair unique dots with the smallest distance
+    for (const auto& candidate : pairwise_distances)
+    {
+        // too close, e.g., the SiDBs of an atomic wire
+        if (candidate.distance < params.minimum_distance)
+        {
+            continue;
+        }
+        // too far apart; every following candidate is farther apart still
+        if (candidate.distance > params.maximum_distance)
+        {
+            break;
+        }
+        // if either dot has already been matched, skip
+        if (paired_dots.contains(candidate.sidb1) || paired_dots.contains(candidate.sidb2))
+        {
+            continue;
+        }
+
+        // a BDL pair has been detected (swap SiDBs if necessary)
+        if (candidate.sidb1 > candidate.sidb2)
+        {
+            bdl_pairs.emplace_back(lyt.get_cell_type(candidate.sidb1), candidate.sidb2, candidate.sidb1);
+        }
+        else
+        {
+            bdl_pairs.emplace_back(lyt.get_cell_type(candidate.sidb1), candidate.sidb1, candidate.sidb2);
+        }
+
+        paired_dots.insert(candidate.sidb1);
+        paired_dots.insert(candidate.sidb2);
+    }
+
+    std::ranges::sort(bdl_pairs);
+
+    return bdl_pairs;
+}
+/**
  * This algorithm detects BDL pairs in an SiDB layout. It does so by first collecting all dots of the given type and
  * then uniquely pairing them up based on their distance. Lower and upper distance thresholds can be defined (defaults =
  * 0.75 nm and 1.5 nm, respectively) to narrow down the range in which SiDBs could be considered a BDL pair. The
@@ -203,6 +315,7 @@ struct detect_bdl_pairs_params
  * @return A vector of BDL pairs.
  */
 template <typename Lyt>
+    requires(is_cell_level_layout_v<Lyt>)
 std::vector<bdl_pair<cell<Lyt>>>
 detect_bdl_pairs(const Lyt& lyt, const std::optional<typename fiction::technology<Lyt>::cell_type>& type = std::nullopt,
                  const detect_bdl_pairs_params& params = {}) noexcept

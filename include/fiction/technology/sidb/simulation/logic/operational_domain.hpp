@@ -17,16 +17,23 @@
 
 #pragma once
 
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/charge_distribution.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/critical_temperature.hpp"
 #include "fiction/technology/sidb/simulation/analysis/energy_distribution.hpp"
 #include "fiction/technology/sidb/simulation/domain.hpp"
 #include "fiction/technology/sidb/simulation/engine.hpp"
+#include "fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/engines/quicksim.hpp"
+#include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+#include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
@@ -426,10 +433,9 @@ namespace detail
  * @param algorithm_name The name of the calling algorithm, used to phrase the sweep dimension count error.
  * @throws std::invalid_argument if the parameters are invalid.
  */
-template <typename Lyt>
-void validate_operational_domain_params(const Lyt& lyt, const operational_domain_params& params,
-                                        const std::size_t      min_sweep_dimensions = 1,
-                                        const std::string_view algorithm_name       = "The operational domain")
+inline void validate_operational_domain_params(const layout& lyt, const operational_domain_params& params,
+                                               const std::size_t      min_sweep_dimensions = 1,
+                                               const std::string_view algorithm_name       = "The operational domain")
 {
     if (params.sweep_dimensions.size() < min_sweep_dimensions)
     {
@@ -445,7 +451,7 @@ void validate_operational_domain_params(const Lyt& lyt, const operational_domain
             throw std::invalid_argument("The operational domain sketch requires that kinks are rejected: the "
                                         "filtering steps are only defined for 'REJECT_KINKS'");
         }
-        if (lyt.num_cells_of_given_type(fiction::technology<Lyt>::cell_type::LOGIC) == 0)
+        if (lyt.num_cells_of_type(sidb_technology::cell_type::LOGIC) == 0)
         {
             throw std::invalid_argument("The operational domain sketch requires a canvas: the layout has no 'LOGIC' "
                                         "cells for the filtering steps to enumerate");
@@ -469,40 +475,42 @@ void validate_operational_domain_params(const Lyt& lyt, const operational_domain
     }
 }
 
-template <typename Lyt, typename TT, typename OpDomain = operational_domain>
+template <typename TT, typename OpDomain = operational_domain>
 class operational_domain_impl
 {
   public:
     /**
-     * Standard constructor. Initializes the lyt, the truth table, the parameters and the statistics. Also
-     * detects the output BDL pair, which is necessary for the operational domain computation. The lyt must
+     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also
+     * detects the output BDL pair, which is necessary for the operational domain computation. The layout must
      * have exactly one output BDL pair.
      *
-     * @param lyt SiDB cell-level lyt to be evaluated.
-     * @param tt Expected Boolean function of the lyt given as a multi-output truth table.
+     * @param source_layout SiDB cell-level layout to be evaluated.
+     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
-    operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt, const operational_domain_params& ps,
+    operational_domain_impl(const layout& source_layout, const std::vector<TT>& tt, const operational_domain_params& ps,
                             operational_domain_stats& st) noexcept :
-            layout{lyt},
+            sidb_layout{source_layout},
             truth_table{tt},
             params{ps},
             stats{st},
-            output_bdl_pairs{detect_bdl_pairs<Lyt>(
-                layout, sidb::sidb_technology::cell_type::OUTPUT,
-                ps.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
+            output_bdl_pairs{
+                detect_bdl_pairs(source_layout, sidb::sidb_technology::cell_type::OUTPUT,
+                                 ps.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             num_dimensions{params.sweep_dimensions.size()},
-            input_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+            input_bdl_wires{detect_bdl_wires(source_layout,
+                                             params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                                              bdl_wire_selection::INPUT)},
-            output_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+            output_bdl_wires{detect_bdl_wires(source_layout,
+                                              params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                                               bdl_wire_selection::OUTPUT)},
             input_pattern_layouts{generate_bdl_input_pattern_layouts(
-                lyt, params.operational_params.input_bdl_iterator_params, input_bdl_wires)}
+                source_layout, params.operational_params.input_bdl_iterator_params, input_bdl_wires)}
     {
         // the public entry points reject a `FILTER_ONLY` request on a layout without `LOGIC` cells, so this may only
         // be empty for the strategies that do not need a canvas
-        const auto logic_cells = lyt.get_cells_by_type(fiction::technology<Lyt>::cell_type::LOGIC);
+        const auto logic_cells = source_layout.cells_of_type(sidb_technology::cell_type::LOGIC);
 
         assert(((params.operational_params.strategy_to_analyze_operational_status !=
                  is_operational_params::operational_analysis_strategy::FILTER_ONLY) ||
@@ -512,9 +520,11 @@ class operational_domain_impl
         // the canvas layout is created which is defined by the logic cells. The cell type matches the one the
         // `is_operational` entry points assign to the canvases they build themselves; the canvas is only ever used to
         // construct a `charge_distribution_surface`, which reads positions and charges, so the two behave identically
+        canvas_lyt.set_lattice(source_layout.get_lattice());
+
         for (const auto& c : logic_cells)
         {
-            canvas_lyt.assign_cell_type(c, fiction::technology<Lyt>::cell_type::LOGIC);
+            canvas_lyt.assign_cell_type(c, sidb_technology::cell_type::LOGIC);
         }
 
         indices.reserve(num_dimensions);
@@ -551,14 +561,15 @@ class operational_domain_impl
     /**
      * Additional Constructor. Initializes the layout, the parameters and the statistics.
      *
-     * @param lyt SiDB cell-level layout to be evaluated.
+     * @param source_layout SiDB layout to be evaluated.
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
+    // The implementation stores a reference to the caller-owned layout.
     // NOLINTNEXTLINE(modernize-pass-by-value)
-    operational_domain_impl(const Lyt& lyt, const operational_domain_params& ps, operational_domain_stats& st) noexcept
-            :
-            layout{lyt},
+    operational_domain_impl(const layout& source_layout, const operational_domain_params& ps,
+                            operational_domain_stats& st) noexcept :
+            sidb_layout{source_layout},
             truth_table{std::vector<TT>{}},
             params{ps},
             stats{st},
@@ -1052,11 +1063,11 @@ class operational_domain_impl
      * which the given CDS is physically valid, it is determined whether the CDS is the ground state or the n-th excited
      * state.
      *
-     * @param lyt SiDB cell-level layout that is simulated and compared to the given CDS.
+     * @param cd Charge distribution to evaluate.
      * @return All physically valid physical parameters and the excited state number.
      */
     [[nodiscard]] sidb::simulation::domain<parameter_point, uint64_t>
-    grid_search_for_physically_valid_parameters(Lyt& lyt) noexcept
+    grid_search_for_physically_valid_parameters(const charge_distribution& cd) noexcept
     {
         sidb::simulation::domain<parameter_point, uint64_t> suitable_params_domain{};
 
@@ -1087,12 +1098,12 @@ class operational_domain_impl
             }
 
             threads.emplace_back(
-                [this, &lyt, start, end, &all_index_combinations]
+                [this, &cd, start, end, &all_index_combinations]
                 {
                     for (auto it = all_index_combinations.cbegin() + static_cast<int64_t>(start);
                          it != all_index_combinations.cbegin() + static_cast<int64_t>(end); ++it)
                     {
-                        is_step_point_suitable(lyt, step_point{*it});  // construct a step_point
+                        is_step_point_suitable(cd, step_point{*it});  // construct a step_point
                     }
                 });
         }
@@ -1109,7 +1120,7 @@ class operational_domain_impl
         sidb::model::simulation_parameters sim_params = params.operational_params.sim_params;
 
         op_domain.for_each(
-            [&sim_params, &lyt, this, &suitable_params_domain](const auto& param_point, const auto& status)
+            [&sim_params, &cd, this, &suitable_params_domain](const auto& param_point, const auto& status)
             {
                 if constexpr (std::is_same_v<OpDomain, operational_domain>)
                 {
@@ -1123,21 +1134,22 @@ class operational_domain_impl
                         set_dimension_value(sim_params, param_point.get_parameters().at(d), d);
                     }
 
-                    auto sim_results = sidb::simulation::legacy_result<Lyt>{};
+                    auto sim_results = result{};
 
                     if (params.operational_params.sim_engine == engine::QUICKEXACT)
                     {
                         // perform an exact ground state simulation
                         sim_results = sidb::simulation::engines::quickexact(
-                            lyt, sidb::simulation::engines::quickexact_params{
-                                     .sim_params            = sim_params,
-                                     .base_number_detection = sidb::simulation::engines::quickexact_params::
-                                         automatic_base_number_detection::OFF});
+                            sidb_layout, sidb::simulation::engines::quickexact_params{
+                                             .sim_params            = sim_params,
+                                             .base_number_detection = sidb::simulation::engines::quickexact_params::
+                                                 automatic_base_number_detection::OFF});
                     }
                     else if (params.operational_params.sim_engine == engine::EXGS)
                     {
                         // perform an exhaustive ground state simulation
-                        sim_results = sidb::simulation::engines::exhaustive_ground_state_simulation(lyt, sim_params);
+                        sim_results =
+                            sidb::simulation::engines::exhaustive_ground_state_simulation(sidb_layout, sim_params);
                     }
                     else if (params.operational_params.sim_engine == engine::QUICKSIM)
                     {
@@ -1146,9 +1158,10 @@ class operational_domain_impl
                                                                                    .iteration_steps = 500,
                                                                                    .alpha           = 0.6};
 
-                        if (const auto result = sidb::simulation::engines::quicksim(lyt, qs_params); result.has_value())
+                        if (const auto qs_result = sidb::simulation::engines::quicksim(sidb_layout, qs_params);
+                            qs_result.has_value())
                         {
-                            sim_results = result.value();
+                            sim_results = qs_result.value();
                         }
                         else
                         {
@@ -1163,9 +1176,8 @@ class operational_domain_impl
                     const auto energy_dist =
                         sidb::simulation::analysis::calculate_energy_distribution(sim_results.charge_distributions);
 
-                    lyt.assign_physical_parameters(sim_params);
                     const auto degeneracy_of_layout_energy =
-                        energy_dist.degeneracy(lyt.get_electrostatic_potential_energy());
+                        energy_dist.degeneracy(potential_landscape{sidb_layout, sim_params}.energy(cd));
 
                     if (!degeneracy_of_layout_energy.has_value())
                     {
@@ -1199,9 +1211,9 @@ class operational_domain_impl
 
   private:
     /**
-     * The SiDB cell-level layout to investigate.
+     * The SiDB layout to investigate.
      */
-    const Lyt& layout;
+    const layout& sidb_layout;
     /**
      * The logical specification of the layout.
      */
@@ -1217,7 +1229,7 @@ class operational_domain_impl
     /**
      * The output BDL pairs of the layout.
      */
-    const std::vector<bdl_pair<cell<Lyt>>> output_bdl_pairs;
+    const std::vector<bdl_pair<lattice_site>> output_bdl_pairs;
     /**
      * The number of dimensions.
      */
@@ -1233,7 +1245,7 @@ class operational_domain_impl
     /**
      * This layout consists of the canvas cells of the layout.
      */
-    Lyt canvas_lyt{};
+    layout canvas_lyt{};
     /**
      * The operational domain of the layout.
      */
@@ -1261,17 +1273,17 @@ class operational_domain_impl
     /**
      * Input BDL wires.
      */
-    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    const std::vector<bdl_wire> input_bdl_wires;
     /**
      * Output BDL wires.
      */
-    const std::vector<bdl_wire<Lyt>> output_bdl_wires;
+    const std::vector<bdl_wire> output_bdl_wires;
     /**
      * The layout with each input pattern applied, indexed by input pattern. The input configuration does not depend on
      * the swept parameters, so these layouts are generated once and read by every sample point evaluation. Empty if
      * the layout-only constructor was used, which never evaluates operational status.
      */
-    const std::vector<Lyt> input_pattern_layouts;
+    const std::vector<layout> input_pattern_layouts;
     /**
      * A step point holds one step value per sweep dimension, each from 0 to the maximum number of steps in that
      * dimension. A step point does not hold the actual parameter values, but the step values.
@@ -1491,11 +1503,11 @@ class operational_domain_impl
      * This function checks if the given charge distribution surface (CDS) is physically valid for the parameter point
      * represented by the step point `sp`.
      *
-     * @param lyt CDS to check.
+     * @param cd The charge distribution to check.
      * @param sp Step point to be investigated.
-     * @return The operational status of the layout under the given simulation parameters.
+     * @return Whether `cd` is physically valid under the parameters of `sp`.
      */
-    operational_status is_step_point_suitable(Lyt lyt, const step_point& sp) noexcept
+    operational_status is_step_point_suitable(const charge_distribution& cd, const step_point& sp) noexcept
     {
         // if the point has already been sampled, return the stored operational status
         if (const auto op_value = op_domain.contains(to_parameter_point(sp)); op_value.has_value())
@@ -1530,9 +1542,7 @@ class operational_domain_impl
             set_dimension_value(sim_params, param_point.get_parameters().at(d), d);
         }
 
-        lyt.assign_physical_parameters(sim_params);
-
-        if (lyt.is_physically_valid())
+        if (potential_landscape{sidb_layout, sim_params}.is_physically_valid(cd))
         {
             return operational();
         }
@@ -1999,7 +2009,7 @@ class operational_domain_impl
 }  // namespace detail
 
 /**
- * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
+ * Computes the operational domain of the given SiDB layout. The operational domain is the set of all
  * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
  * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
  * inputs of the truth table.
@@ -2012,7 +2022,6 @@ class operational_domain_impl
  * state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation has
  * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
  * @param tt Expected Boolean function of the lyt given as a multi-output truth table.
@@ -2023,18 +2032,17 @@ class operational_domain_impl
  * is requested without rejecting kinks or on a layout without `LOGIC` cells. Any number of sweep
  * dimensions is accepted.
  */
-template <typename Lyt, typename TT>
-    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
-[[nodiscard]] operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
+template <typename TT>
+    requires kitty::is_truth_table<TT>::value
+[[nodiscard]] operational_domain operational_domain_grid_search(const layout& lyt, const std::vector<TT>& spec,
                                                                 const operational_domain_params& params = {},
                                                                 operational_domain_stats*        stats  = nullptr)
 {
     // this may throw an `std::invalid_argument` exception
     detail::validate_operational_domain_params(lyt, params);
 
-    operational_domain_stats                                                                       st{};
-    fiction::sidb::simulation::logic::detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params,
-                                                                                                     st};
+    operational_domain_stats                                                                  st{};
+    fiction::sidb::simulation::logic::detail::operational_domain_impl<TT, operational_domain> p{lyt, spec, params, st};
 
     const auto result = p.grid_search();
 
@@ -2046,7 +2054,7 @@ template <typename Lyt, typename TT>
     return result;
 }
 /**
- * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
+ * Computes the operational domain of the given SiDB layout. The operational domain is the set of all
  * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
  * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
  * inputs of the truth table.
@@ -2057,7 +2065,6 @@ template <typename Lyt, typename TT>
  * ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation
  * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2069,9 +2076,9 @@ template <typename Lyt, typename TT>
  * is requested without rejecting kinks or on a layout without `LOGIC` cells. Any number of sweep
  * dimensions is accepted.
  */
-template <typename Lyt, typename TT>
-    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
-[[nodiscard]] operational_domain operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec,
+template <typename TT>
+    requires kitty::is_truth_table<TT>::value
+[[nodiscard]] operational_domain operational_domain_random_sampling(const layout& lyt, const std::vector<TT>& spec,
                                                                     const std::size_t                samples,
                                                                     const operational_domain_params& params = {},
                                                                     operational_domain_stats*        stats  = nullptr)
@@ -2079,9 +2086,8 @@ template <typename Lyt, typename TT>
     // this may throw an `std::invalid_argument` exception
     detail::validate_operational_domain_params(lyt, params);
 
-    operational_domain_stats                                                                       st{};
-    fiction::sidb::simulation::logic::detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params,
-                                                                                                     st};
+    operational_domain_stats                                                                  st{};
+    fiction::sidb::simulation::logic::detail::operational_domain_impl<TT, operational_domain> p{lyt, spec, params, st};
 
     const auto result = p.random_sampling(samples);
 
@@ -2093,7 +2099,7 @@ template <typename Lyt, typename TT>
     return result;
 }
 /**
- * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
+ * Computes the operational domain of the given SiDB layout. The operational domain is the set of all
  * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
  * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
  * inputs of the truth table.
@@ -2114,7 +2120,6 @@ template <typename Lyt, typename TT>
  * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
  * NANOARCH 2023.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2127,18 +2132,17 @@ template <typename Lyt, typename TT>
  * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
  * any number.
  */
-template <typename Lyt, typename TT>
-    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+template <typename TT>
+    requires kitty::is_truth_table<TT>::value
 [[nodiscard]] operational_domain
-operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+operational_domain_flood_fill(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples,
                               const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 {
     // this may throw an `std::invalid_argument` exception
     detail::validate_operational_domain_params(lyt, params, 2, "Flood fill");
 
-    operational_domain_stats                                                                       st{};
-    fiction::sidb::simulation::logic::detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params,
-                                                                                                     st};
+    operational_domain_stats                                                                  st{};
+    fiction::sidb::simulation::logic::detail::operational_domain_impl<TT, operational_domain> p{lyt, spec, params, st};
 
     const auto result = p.flood_fill(samples);
 
@@ -2150,7 +2154,7 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
     return result;
 }
 /**
- * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
+ * Computes the operational domain of the given SiDB layout. The operational domain is the set of all
  * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
  * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
  * inputs of the truth table.
@@ -2170,7 +2174,6 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
  * layouts with few inputs.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2183,9 +2186,9 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
  * any number.
  */
-template <typename Lyt, typename TT>
-    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
-[[nodiscard]] operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec,
+template <typename TT>
+    requires kitty::is_truth_table<TT>::value
+[[nodiscard]] operational_domain operational_domain_contour_tracing(const layout& lyt, const std::vector<TT>& spec,
                                                                     const std::size_t                samples,
                                                                     const operational_domain_params& params = {},
                                                                     operational_domain_stats*        stats  = nullptr)
@@ -2193,9 +2196,8 @@ template <typename Lyt, typename TT>
     // this may throw an `std::invalid_argument` exception
     detail::validate_operational_domain_params(lyt, params, 2, "Contour tracing");
 
-    operational_domain_stats                                                                       st{};
-    fiction::sidb::simulation::logic::detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params,
-                                                                                                     st};
+    operational_domain_stats                                                                  st{};
+    fiction::sidb::simulation::logic::detail::operational_domain_impl<TT, operational_domain> p{lyt, spec, params, st};
     const auto result = p.contour_tracing(samples);
 
     if (stats)
@@ -2206,7 +2208,7 @@ template <typename Lyt, typename TT>
     return result;
 }
 /**
- * Computes the critical temperature domain of the given SiDB cell-level layout. The critical temperature domain
+ * Computes the critical temperature domain of the given SiDB layout. The critical temperature domain
  * consists of all parameter combinations for which the layout is logically operational, along with the critical
  * temperature for each specific parameter point.
  *
@@ -2218,7 +2220,6 @@ template <typename Lyt, typename TT>
  * state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation has
  * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of the Boolean
@@ -2230,19 +2231,19 @@ template <typename Lyt, typename TT>
  * is requested without rejecting kinks or on a layout without `LOGIC` cells. Any number of sweep
  * dimensions is accepted.
  */
-template <typename Lyt, typename TT>
-    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+template <typename TT>
+    requires kitty::is_truth_table<TT>::value
 [[nodiscard]] critical_temperature_domain
-critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
+critical_temperature_domain_grid_search(const layout& lyt, const std::vector<TT>& spec,
                                         const operational_domain_params& params = {},
                                         operational_domain_stats*        stats  = nullptr)
 {
     // this may throw an `std::invalid_argument` exception
     detail::validate_operational_domain_params(lyt, params);
 
-    operational_domain_stats                                                                                st{};
-    fiction::sidb::simulation::logic::detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{
-        lyt, spec, params, st};
+    operational_domain_stats                                                                           st{};
+    fiction::sidb::simulation::logic::detail::operational_domain_impl<TT, critical_temperature_domain> p{lyt, spec,
+                                                                                                         params, st};
 
     const auto result = p.grid_search();
 
@@ -2254,7 +2255,7 @@ critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& s
     return result;
 }
 /**
- * Computes the critical temperature domain of the given SiDB cell-level layout. The critical temperature domain
+ * Computes the critical temperature domain of the given SiDB layout. The critical temperature domain
  * consists of all parameter combinations for which the layout is logically operational, along with the critical
  * temperature for each specific parameter point.
  *
@@ -2264,7 +2265,6 @@ critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& s
  * ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation
  * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2276,19 +2276,19 @@ critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& s
  * is requested without rejecting kinks or on a layout without `LOGIC` cells. Any number of sweep
  * dimensions is accepted.
  */
-template <typename Lyt, typename TT>
-    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+template <typename TT>
+    requires kitty::is_truth_table<TT>::value
 [[nodiscard]] critical_temperature_domain
-critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+critical_temperature_domain_random_sampling(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples,
                                             const operational_domain_params& params = {},
                                             operational_domain_stats*        stats  = nullptr)
 {
     // this may throw an `std::invalid_argument` exception
     detail::validate_operational_domain_params(lyt, params);
 
-    operational_domain_stats                                                                                st{};
-    fiction::sidb::simulation::logic::detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{
-        lyt, spec, params, st};
+    operational_domain_stats                                                                           st{};
+    fiction::sidb::simulation::logic::detail::operational_domain_impl<TT, critical_temperature_domain> p{lyt, spec,
+                                                                                                         params, st};
 
     const auto result = p.random_sampling(samples);
 
@@ -2300,7 +2300,7 @@ critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT
     return result;
 }
 /**
- * Computes the critical temperature domain of the given SiDB cell-level layout. The critical temperature domain
+ * Computes the critical temperature domain of the given SiDB layout. The critical temperature domain
  * consists of all parameter combinations for which the layout is logically operational, along with the critical
  * temperature for each specific parameter point.
  *
@@ -2316,7 +2316,6 @@ critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT
  * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
  * algorithm is only feasible for small layouts with few inputs.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2329,19 +2328,19 @@ critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT
  * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
  * any number.
  */
-template <typename Lyt, typename TT>
-    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+template <typename TT>
+    requires kitty::is_truth_table<TT>::value
 [[nodiscard]] critical_temperature_domain
-critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples,
                                        const operational_domain_params& params = {},
                                        operational_domain_stats*        stats  = nullptr)
 {
     // this may throw an `std::invalid_argument` exception
     detail::validate_operational_domain_params(lyt, params, 2, "Flood fill");
 
-    operational_domain_stats                                                                                st{};
-    fiction::sidb::simulation::logic::detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{
-        lyt, spec, params, st};
+    operational_domain_stats                                                                           st{};
+    fiction::sidb::simulation::logic::detail::operational_domain_impl<TT, critical_temperature_domain> p{lyt, spec,
+                                                                                                         params, st};
 
     const auto result = p.flood_fill(samples);
 
@@ -2353,7 +2352,7 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
     return result;
 }
 /**
- * Computes the critical temperature domain of the given SiDB cell-level layout. The critical temperature domain
+ * Computes the critical temperature domain of the given SiDB layout. The critical temperature domain
  * consists of all parameter combinations for which the layout is logically operational, along with the critical
  * temperature for each specific parameter point.
  *
@@ -2372,7 +2371,6 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
  * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
  * layouts with few inputs.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2385,19 +2383,19 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
  * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
  * any number.
  */
-template <typename Lyt, typename TT>
-    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+template <typename TT>
+    requires kitty::is_truth_table<TT>::value
 [[nodiscard]] critical_temperature_domain
-critical_temperature_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+critical_temperature_domain_contour_tracing(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples,
                                             const operational_domain_params& params = {},
                                             operational_domain_stats*        stats  = nullptr)
 {
     // this may throw an `std::invalid_argument` exception
     detail::validate_operational_domain_params(lyt, params, 2, "Contour tracing");
 
-    operational_domain_stats                                                                                st{};
-    fiction::sidb::simulation::logic::detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{
-        lyt, spec, params, st};
+    operational_domain_stats                                                                           st{};
+    fiction::sidb::simulation::logic::detail::operational_domain_impl<TT, critical_temperature_domain> p{lyt, spec,
+                                                                                                         params, st};
     const auto result = p.contour_tracing(samples);
 
     if (stats)
@@ -2406,6 +2404,183 @@ critical_temperature_domain_contour_tracing(const Lyt& lyt, const std::vector<TT
     }
 
     return result;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Transitional: overloads for SiDB cell-level layouts, converted with `to_sidb_layout`. They serve the CLI and the
+// experiments that still run on such layouts and disappear once every consumer takes `sidb::layout`.
+// ---------------------------------------------------------------------------------------------------------------
+
+/**
+ * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to investigate.
+ * @param spec The Boolean function(s) the layout implements.
+ * @param params Parameters.
+ * @param stats Statistics.
+ * @return The domain.
+ */
+template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+[[nodiscard]] operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
+                                                                const operational_domain_params& params = {},
+                                                                operational_domain_stats*        stats  = nullptr)
+{
+    return operational_domain_grid_search(to_sidb_layout(lyt), spec, params, stats);
+}
+
+/**
+ * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to investigate.
+ * @param spec The Boolean function(s) the layout implements.
+ * @param samples Number of random samples.
+ * @param params Parameters.
+ * @param stats Statistics.
+ * @return The domain.
+ */
+template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+[[nodiscard]] operational_domain operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec,
+                                                                    const std::size_t                samples,
+                                                                    const operational_domain_params& params = {},
+                                                                    operational_domain_stats*        stats  = nullptr)
+{
+    return operational_domain_random_sampling(to_sidb_layout(lyt), spec, samples, params, stats);
+}
+
+/**
+ * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to investigate.
+ * @param spec The Boolean function(s) the layout implements.
+ * @param samples Number of random samples.
+ * @param params Parameters.
+ * @param stats Statistics.
+ * @return The domain.
+ */
+template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+[[nodiscard]] operational_domain
+operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                              const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
+{
+    return operational_domain_flood_fill(to_sidb_layout(lyt), spec, samples, params, stats);
+}
+
+/**
+ * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to investigate.
+ * @param spec The Boolean function(s) the layout implements.
+ * @param samples Number of random samples.
+ * @param params Parameters.
+ * @param stats Statistics.
+ * @return The domain.
+ */
+template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+[[nodiscard]] operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec,
+                                                                    const std::size_t                samples,
+                                                                    const operational_domain_params& params = {},
+                                                                    operational_domain_stats*        stats  = nullptr)
+{
+    return operational_domain_contour_tracing(to_sidb_layout(lyt), spec, samples, params, stats);
+}
+
+/**
+ * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to investigate.
+ * @param spec The Boolean function(s) the layout implements.
+ * @param params Parameters.
+ * @param stats Statistics.
+ * @return The domain.
+ */
+template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+[[nodiscard]] critical_temperature_domain
+critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
+                                        const operational_domain_params& params = {},
+                                        operational_domain_stats*        stats  = nullptr)
+{
+    return critical_temperature_domain_grid_search(to_sidb_layout(lyt), spec, params, stats);
+}
+
+/**
+ * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to investigate.
+ * @param spec The Boolean function(s) the layout implements.
+ * @param samples Number of random samples.
+ * @param params Parameters.
+ * @param stats Statistics.
+ * @return The domain.
+ */
+template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+[[nodiscard]] critical_temperature_domain
+critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                                            const operational_domain_params& params = {},
+                                            operational_domain_stats*        stats  = nullptr)
+{
+    return critical_temperature_domain_random_sampling(to_sidb_layout(lyt), spec, samples, params, stats);
+}
+
+/**
+ * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to investigate.
+ * @param spec The Boolean function(s) the layout implements.
+ * @param samples Number of random samples.
+ * @param params Parameters.
+ * @param stats Statistics.
+ * @return The domain.
+ */
+template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+[[nodiscard]] critical_temperature_domain
+critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                                       const operational_domain_params& params = {},
+                                       operational_domain_stats*        stats  = nullptr)
+{
+    return critical_temperature_domain_flood_fill(to_sidb_layout(lyt), spec, samples, params, stats);
+}
+
+/**
+ * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to investigate.
+ * @param spec The Boolean function(s) the layout implements.
+ * @param samples Number of random samples.
+ * @param params Parameters.
+ * @param stats Statistics.
+ * @return The domain.
+ */
+template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
+[[nodiscard]] critical_temperature_domain
+critical_temperature_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                                            const operational_domain_params& params = {},
+                                            operational_domain_stats*        stats  = nullptr)
+{
+    return critical_temperature_domain_contour_tracing(to_sidb_layout(lyt), spec, samples, params, stats);
 }
 
 }  // namespace fiction::sidb::simulation::logic

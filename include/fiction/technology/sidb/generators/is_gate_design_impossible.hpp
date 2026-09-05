@@ -19,7 +19,6 @@
 #pragma once
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
@@ -79,7 +78,8 @@ template <typename Lyt, typename TT>
 
     assert(output_pairs.empty() == false && "lyt needs output BDL pairs");
 
-    auto bdl_iter = sidb::simulation::logic::bdl_input_iterator<Lyt>{skeleton_with_defects, params.bdl_iterator_params};
+    auto bdl_iter =
+        sidb::simulation::logic::legacy_bdl_input_iterator<Lyt>{skeleton_with_defects, params.bdl_iterator_params};
 
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bdl_iter)
     {

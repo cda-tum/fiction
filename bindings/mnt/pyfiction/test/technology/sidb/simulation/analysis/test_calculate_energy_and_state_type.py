@@ -9,21 +9,25 @@
 from __future__ import annotations
 
 from itertools import pairwise
+from typing import TYPE_CHECKING
 
 import pytest
 
 from mnt.pyfiction import (
-    bdl_input_iterator_100,
+    bdl_input_iterator,
     calculate_energy_and_state_type_with_kinks_accepted,
     calculate_energy_distribution,
     create_and_tt,
     detect_bdl_pairs,
     occupation_probability_gate_based,
     quickexact,
-    read_sqd_layout_100,
+    read_sqd_layout,
     sidb_technology,
     state_type,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 # The Bestagon AND gate, evaluated at input pattern 01, has five physically valid charge
 # distributions. The two lowest-energy ones encode AND(0, 1) = 0; the three above them do not.
@@ -38,11 +42,16 @@ EXPECTED_ENERGIES_AND_STATE_TYPES = [
 ]
 
 
-def test_calculate_energy_and_state_type(resources_dir):
-    layout = read_sqd_layout_100(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
+def test_calculate_energy_and_state_type(resources_dir: Path) -> None:
+    """Validate energy ordering, state types, and occupation probability.
+
+    Args:
+        resources_dir: Directory that contains the test layout.
+    """
+    layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
     # advance the iterator to input pattern 01
-    input_iterator = bdl_input_iterator_100(layout)
+    input_iterator = bdl_input_iterator(layout)
     input_iterator += 1
     layout_with_inputs = input_iterator.get_layout()
 

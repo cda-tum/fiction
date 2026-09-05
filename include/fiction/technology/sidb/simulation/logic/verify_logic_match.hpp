@@ -17,10 +17,11 @@
 
 #pragma once
 
+#include "fiction/technology/sidb/charge_distribution.hpp"
+#include "fiction/technology/sidb/layout.hpp"
+#include "fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
-#include "fiction/traits.hpp"
 
 #include <kitty/traits.hpp>
 
@@ -32,37 +33,27 @@ namespace fiction::sidb::simulation::logic
 {
 
 /**
- * Checks if a given charge distribution correctly encodes the expected logic for a specified input pattern,
- * based on a provided truth table.
+ * Checks whether a given charge distribution of a layout implements the expected output for an input pattern: the
+ * output BDL pairs have to encode the truth-table entries and, if the parameters reject kinks, the wires have to be
+ * free of kinks. If positively charged SiDBs can occur in the layout under the given parameters (base 2 only), the
+ * layout is non-operational.
  *
- * @note Kinks are rejected.
- *
- * Example:
- * In the ground state charge distribution of an AND gate, kinks are rejected for the gate to be considered operational.
- * Given an input pattern of `01`, this function will:
- * - Verify that the left input wire encodes `0`.
- * - Verify that the right input wire encodes `1`.
- * - Verify that the output wire encodes `0`.
- *
- * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
- * @param cds Charge distribution surface, containing charge state information for each SiDB.
- * @param params The parameters used to determine if a layout is `operational` or `non-operational`.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param input_pattern The specific input pattern of the given charge distribution surface.
- * @param input_wires Input BDL wires.
- * @param output_wires Output BDL wires.
- * @return The operational status indicating if the charge distribution matches the logic for the given input pattern.
+ * @param lyt The layout the charge distribution belongs to.
+ * @param cd The charge distribution to check.
+ * @param params Parameters.
+ * @param spec The Boolean function(s) to implement.
+ * @param input_pattern The input pattern `cd` was simulated for.
+ * @param input_wires The input BDL wires of `lyt`.
+ * @param output_wires The output BDL wires of `lyt`.
+ * @return The operational status.
  */
-template <typename Lyt, typename TT>
-[[nodiscard]] operational_status verify_logic_match(const sidb::surfaces::charge_distribution_surface<Lyt>& cds,
-                                                    const is_operational_params& params, const std::vector<TT>& spec,
-                                                    const uint64_t                    input_pattern,
-                                                    const std::vector<bdl_wire<Lyt>>& input_wires,
-                                                    const std::vector<bdl_wire<Lyt>>& output_wires) noexcept
+template <typename TT>
+[[nodiscard]] operational_status
+verify_logic_match(const layout& lyt, const charge_distribution& cd, const is_operational_params& params,
+                   const std::vector<TT>& spec, const uint64_t input_pattern, const std::vector<bdl_wire>& input_wires,
+                   const std::vector<bdl_wire>& output_wires) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     assert(!spec.empty());
@@ -70,10 +61,14 @@ template <typename Lyt, typename TT>
     assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
                                       { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
-    fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> p{cds,         spec,         params,
-                                                                             input_wires, output_wires, false};
+    if (params.sim_params.base == 2 && analysis::can_positive_charges_occur(lyt, params.sim_params))
+    {
+        return operational_status::NON_OPERATIONAL;
+    }
 
-    const auto [op_status, _] = p.verify_logic_match_of_cds(cds, input_pattern);
+    const detail::is_operational_impl<TT> p{lyt, spec, params, input_wires, output_wires, false};
+
+    const auto [op_status, _] = p.verify_logic_match_of_cd(cd, input_pattern);
 
     return op_status;
 }

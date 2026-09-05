@@ -21,6 +21,7 @@ from mnt.pyfiction import (
     critical_temperature_domain_grid_search,
     critical_temperature_domain_random_sampling,
     input_bdl_configuration,
+    lattice_site,
     operational_analysis_strategy,
     operational_condition,
     operational_domain,
@@ -33,9 +34,8 @@ from mnt.pyfiction import (
     operational_domain_value_range,
     operational_status,
     parameter_point,
-    read_sqd_layout_100,
-    read_sqd_layout_111,
-    sidb_100_lattice,
+    read_sqd_layout,
+    sidb_layout,
     sidb_simulation_engine,
     sidb_technology,
     sweep_parameter,
@@ -43,38 +43,38 @@ from mnt.pyfiction import (
 
 
 @pytest.fixture
-def wire_with_canvas() -> sidb_100_lattice:
+def wire_with_canvas() -> sidb_layout:
     """A BDL wire with two LOGIC cells, so that the sketch has a canvas to enumerate.
 
     Returns:
         The wire layout.
     """
-    lyt = sidb_100_lattice()
+    lyt = sidb_layout()
 
-    lyt.assign_cell_type((0, 0, 0), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type((2, 1, 0), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type(lattice_site(2, 0, 1), sidb_technology.cell_type.INPUT)
 
-    lyt.assign_cell_type((6, 2, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((8, 3, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((12, 4, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((14, 5, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(6, 1, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(8, 1, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(12, 2, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(14, 2, 1), sidb_technology.cell_type.NORMAL)
 
-    lyt.assign_cell_type((11, 7, 0), sidb_technology.cell_type.LOGIC)
-    lyt.assign_cell_type((13, 13, 0), sidb_technology.cell_type.LOGIC)
+    lyt.assign_cell_type(lattice_site(11, 3, 1), sidb_technology.cell_type.LOGIC)
+    lyt.assign_cell_type(lattice_site(13, 6, 1), sidb_technology.cell_type.LOGIC)
 
-    lyt.assign_cell_type((14, 15, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((12, 16, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(14, 7, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(12, 8, 0), sidb_technology.cell_type.NORMAL)
 
-    lyt.assign_cell_type((8, 17, 0), sidb_technology.cell_type.OUTPUT)
-    lyt.assign_cell_type((6, 18, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_cell_type(lattice_site(8, 8, 1), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_cell_type(lattice_site(6, 9, 0), sidb_technology.cell_type.OUTPUT)
 
-    lyt.assign_cell_type((2, 19, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(2, 9, 1), sidb_technology.cell_type.NORMAL)
 
     return lyt
 
 
 def test_operational_domain_siqad_or_100_lattice(resources_dir):
-    lyt = read_sqd_layout_100(str(resources_dir / "siqad_or_gate.sqd"))
+    lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -97,7 +97,7 @@ def test_operational_domain_siqad_or_100_lattice(resources_dir):
 
 def test_number_of_threads(resources_dir):
     """The thread count is configurable and does not change the resulting operational domain."""
-    lyt = read_sqd_layout_100(str(resources_dir / "siqad_or_gate.sqd"))
+    lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -164,7 +164,7 @@ def test_three_dimensional_operational_domain_sketch(wire_with_canvas):
 
 def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir):
     """The sketch is rejected when it cannot filter anything."""
-    lyt = read_sqd_layout_100(str(resources_dir / "siqad_or_gate.sqd"))
+    lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -193,7 +193,7 @@ def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir
 
 
 def test_operational_domain_xor_gate_100_lattice(resources_dir):
-    lyt = read_sqd_layout_100(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
+    lyt = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -222,7 +222,7 @@ def test_operational_domain_xor_gate_100_lattice(resources_dir):
 
 
 def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir):
-    lyt = read_sqd_layout_100(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
+    lyt = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -278,7 +278,7 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir):
 
 
 def test_operational_domain_and_gate_111_lattice(resources_dir):
-    lyt = read_sqd_layout_111(str(resources_dir / "AND_mu_032_111_surface.sqd"))
+    lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -433,18 +433,18 @@ def test_operational_domain():
 
 
 def test_operational_domain_two_bdl_pair_wire():
-    bdl_wire = sidb_100_lattice()
+    bdl_wire = sidb_layout()
 
-    bdl_wire.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
-    bdl_wire.assign_cell_type((2, 0), sidb_technology.cell_type.INPUT)
+    bdl_wire.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.INPUT)
+    bdl_wire.assign_cell_type(lattice_site(2, 0, 0), sidb_technology.cell_type.INPUT)
 
-    bdl_wire.assign_cell_type((6, 0), sidb_technology.cell_type.NORMAL)
-    bdl_wire.assign_cell_type((8, 0), sidb_technology.cell_type.NORMAL)
+    bdl_wire.assign_cell_type(lattice_site(6, 0, 0), sidb_technology.cell_type.NORMAL)
+    bdl_wire.assign_cell_type(lattice_site(8, 0, 0), sidb_technology.cell_type.NORMAL)
 
-    bdl_wire.assign_cell_type((12, 0), sidb_technology.cell_type.OUTPUT)
-    bdl_wire.assign_cell_type((14, 0), sidb_technology.cell_type.OUTPUT)
+    bdl_wire.assign_cell_type(lattice_site(12, 0, 0), sidb_technology.cell_type.OUTPUT)
+    bdl_wire.assign_cell_type(lattice_site(14, 0, 0), sidb_technology.cell_type.OUTPUT)
 
-    bdl_wire.assign_cell_type((18, 0), sidb_technology.cell_type.NORMAL)
+    bdl_wire.assign_cell_type(lattice_site(18, 0, 0), sidb_technology.cell_type.NORMAL)
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT

@@ -606,7 +606,7 @@ class defect_influence_impl
 
             if (params.influence_def == defect_influence_params<cell<Lyt>>::influence_definition::GROUND_STATE_CHANGE)
             {
-                auto bii = sidb::simulation::logic::bdl_input_iterator<Lyt>{
+                auto bii = sidb::simulation::logic::legacy_bdl_input_iterator<Lyt>{
                     lyt_copy, params.operational_params.input_bdl_iterator_params};
 
                 // number of different input combinations

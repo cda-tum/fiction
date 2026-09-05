@@ -14,15 +14,14 @@ import pytest
 
 from mnt.pyfiction import (
     automatic_base_number_detection,
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
     exact_sidb_simulation_engine,
+    lattice,
+    lattice_site,
     quickexact,
     quickexact_params,
     quicksim,
     quicksim_params,
-    sidb_100_lattice,
-    sidb_111_lattice,
+    sidb_layout,
     sidb_simulation_parameters,
     sidb_technology,
     time_to_solution,
@@ -32,9 +31,10 @@ from mnt.pyfiction import (
 )
 
 
-def test_one_sidb_100_lattice():
-    layout = sidb_100_lattice((0, 0))
-    layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
+def test_one_sidb_100_lattice() -> None:
+    """Check time to solution on the Si(100) lattice."""
+    layout = sidb_layout()
+    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
 
     quicksim_parameter = quicksim_params()
     quicksim_parameter.simulation_parameters = sidb_simulation_parameters(3, -0.3)
@@ -43,18 +43,17 @@ def test_one_sidb_100_lattice():
     tts_params.engine = exact_sidb_simulation_engine.QUICKEXACT
     stats = time_to_solution_stats()
 
-    cds = charge_distribution_surface_100(layout)
-
-    time_to_solution(cds, quicksim_parameter, tts_params, stats)
+    time_to_solution(layout, quicksim_parameter, tts_params, stats)
 
     assert stats.acc == 100
     assert stats.time_to_solution > 0.0
     assert stats.mean_single_runtime > 0.0
 
 
-def test_one_sidb_111_lattice():
-    layout = sidb_111_lattice((0, 0))
-    layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
+def test_one_sidb_111_lattice() -> None:
+    """Check time to solution on the Si(111) lattice."""
+    layout = sidb_layout(lattice.si_111_1x1())
+    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
 
     quicksim_parameter = quicksim_params()
     quicksim_parameter.simulation_parameters = sidb_simulation_parameters(3, -0.3)
@@ -63,26 +62,25 @@ def test_one_sidb_111_lattice():
     tts_params.engine = exact_sidb_simulation_engine.QUICKEXACT
     stats = time_to_solution_stats()
 
-    cds = charge_distribution_surface_111(layout)
-
-    time_to_solution(cds, quicksim_parameter, tts_params, stats)
+    time_to_solution(layout, quicksim_parameter, tts_params, stats)
 
     assert stats.acc == 100
     assert stats.time_to_solution > 0.0
     assert stats.mean_single_runtime > 0.0
 
 
-def test_time_to_solution_with_simulation_results():
-    layout = sidb_100_lattice((0, 0))
+def test_time_to_solution_with_simulation_results() -> None:
+    """Check time to solution from exact and heuristic results."""
+    layout = sidb_layout()
 
     # Assign SiDBs to the layout
-    layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((1, 6, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((3, 6, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((5, 6, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((10, 6, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((15, 6, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((18, 6, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(1, 3, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(3, 3, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(5, 3, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(10, 3, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(15, 3, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(18, 3, 0), sidb_technology.cell_type.NORMAL)
 
     # Define simulation parameters
     params = sidb_simulation_parameters(2, -0.32)

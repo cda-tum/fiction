@@ -16,11 +16,8 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
-
-#include <string>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -38,32 +35,33 @@ namespace pyfiction
 namespace detail
 {
 
-template <typename Lyt>
-void physical_population_stability_impl(nanobind::module_& m, const std::string& lattice)
+/**
+ * Registers the population stability information and the analysis on `sidb_layout`.
+ *
+ * @param m The module.
+ */
+inline void physical_population_stability_functions(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
-    py::class_<fiction::sidb::simulation::analysis::population_stability_information<Lyt>>(
-        m, fmt::format("population_stability_information_{}", lattice).c_str(),
-        DOC(fiction_sidb_simulation_analysis_population_stability_information))
+    using fiction::sidb::simulation::analysis::population_stability_information;
+
+    py::class_<population_stability_information>(m, "population_stability_information",
+                                                 DOC(fiction_sidb_simulation_analysis_population_stability_information))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("critical_cell",
-                &fiction::sidb::simulation::analysis::population_stability_information<Lyt>::critical_cell,
+        .def_rw("critical_cell", &population_stability_information::critical_cell,
                 DOC(fiction_sidb_simulation_analysis_population_stability_information_critical_cell))
-        .def_rw("transition_potentials",
-                &fiction::sidb::simulation::analysis::population_stability_information<Lyt>::transition_potentials,
+        .def_rw("transition_potentials", &population_stability_information::transition_potentials,
                 DOC(fiction_sidb_simulation_analysis_population_stability_information_transition_potentials))
         .def_rw(
             "distance_corresponding_to_potential",
-            &fiction::sidb::simulation::analysis::population_stability_information<
-                Lyt>::distance_corresponding_to_potential,
+            &population_stability_information::distance_corresponding_to_potential,
             DOC(fiction_sidb_simulation_analysis_population_stability_information_distance_corresponding_to_potential))
-        .def_rw("system_energy",
-                &fiction::sidb::simulation::analysis::population_stability_information<Lyt>::system_energy,
+        .def_rw("system_energy", &population_stability_information::system_energy,
                 DOC(fiction_sidb_simulation_analysis_population_stability_information_system_energy));
 
-    m.def(fmt::format("physical_population_stability_{}", lattice).c_str(),
-          &fiction::sidb::simulation::analysis::physical_population_stability<Lyt>, py::arg("lyt"),
+    m.def("physical_population_stability", &fiction::sidb::simulation::analysis::physical_population_stability,
+          py::arg("lyt"),
           py::arg("params") = fiction::sidb::simulation::analysis::physical_population_stability_params{},
           DOC(fiction_sidb_simulation_analysis_physical_population_stability));
 }
@@ -102,8 +100,7 @@ void physical_population_stability(nanobind::module_& m)
             DOC(fiction_sidb_simulation_analysis_physical_population_stability_params_precision_for_distance_corresponding_to_potential));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::physical_population_stability_impl<py_sidb_100_lattice>(m, "100");
-    detail::physical_population_stability_impl<py_sidb_111_lattice>(m, "111");
+    detail::physical_population_stability_functions(m);
 }
 
 }  // namespace pyfiction
