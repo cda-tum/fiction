@@ -74,7 +74,7 @@ void bdl_input_iterator(nanobind::module_& m)
             "__next__",
             [](bdl_input_iterator& self) -> layout
             {
-                if (self >= ((uint64_t{1} << self.num_input_pairs()) - 1))
+                if (self >= (uint64_t{1} << self.num_input_pairs()))
                 {
                     throw py::stop_iteration();
                 }

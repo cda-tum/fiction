@@ -87,7 +87,7 @@ template <typename TT>
  * @return The ratio of operational parameter points.
  */
 template <typename Lyt, typename TT>
-    requires(is_cell_level_layout_v<Lyt>)
+    requires(is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt>)
 [[nodiscard]] double operational_domain_ratio(const Lyt& lyt, const std::vector<TT>& spec, const parameter_point& pp,
                                               const operational_domain_ratio_params& params = {}) noexcept
 {

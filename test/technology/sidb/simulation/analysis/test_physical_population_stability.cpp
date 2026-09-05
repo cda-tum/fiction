@@ -55,6 +55,10 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
             population_stability_detail.transition_potentials.at(transition_type::NEUTRAL_TO_POSITIVE).second));
         CHECK(std::isinf(
             population_stability_detail.transition_potentials.at(transition_type::POSITIVE_TO_NEUTRAL).second));
+        CHECK(std::isinf(
+            population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_POSITIVE)));
+        CHECK(std::isinf(
+            population_stability_detail.distance_corresponding_to_potential.at(transition_type::POSITIVE_TO_NEUTRAL)));
 
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEGATIVE_TO_NEUTRAL),

@@ -37,12 +37,18 @@ namespace fiction::sidb::simulation::analysis
  * @param lyt The layout.
  * @param cd The charge distribution whose validity is checked.
  * @param params Parameters; the sweep dimensions and the engine that determines the excited-state number.
- * @return The parameter points where `cd` is physically valid, each with its excited-state number.
+ * @return The parameter points where `cd` is physically valid, each with its excited-state number; empty if `cd`
+ * does not cover the layout's SiDBs in raster order.
  */
 [[nodiscard]] inline domain<logic::parameter_point, uint64_t>
 physically_valid_parameters(const layout& lyt, const charge_distribution& cd,
                             const logic::operational_domain_params& params = {}) noexcept
 {
+    if (lyt.sidbs() != cd.sites())
+    {
+        return {};
+    }
+
     logic::operational_domain_stats st{};
 
     logic::detail::operational_domain_impl<tt, logic::operational_domain> p{lyt, params, st};

@@ -200,8 +200,11 @@ class physical_population_stability_impl
             for (const auto& [transition, cell_and_potential] : info.transition_potentials)
             {
                 info.distance_corresponding_to_potential[transition] =
-                    model::potential_to_distance_conversion(cell_and_potential.second, params.sim_params,
-                                                            params.precision_for_distance_corresponding_to_potential);
+                    std::isinf(cell_and_potential.second) ?
+                        cell_and_potential.second :
+                        model::potential_to_distance_conversion(
+                            cell_and_potential.second, params.sim_params,
+                            params.precision_for_distance_corresponding_to_potential);
 
                 if (cell_and_potential.second < minimum_potential_difference)
                 {

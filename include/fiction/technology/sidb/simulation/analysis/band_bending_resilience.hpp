@@ -96,7 +96,7 @@ band_bending_resilience(const layout& lyt, const std::vector<TT>& spec,
 
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
     {
-        const auto pop_stability = physical_population_stability(lyt, params.assess_population_stability_params);
+        const auto pop_stability = physical_population_stability(*bii, params.assess_population_stability_params);
 
         if (pop_stability.empty())
         {
@@ -136,7 +136,7 @@ band_bending_resilience(const layout& lyt, const std::vector<TT>& spec,
  * @return The minimum potential difference over all input patterns.
  */
 template <typename Lyt, typename TT>
-    requires(is_cell_level_layout_v<Lyt>)
+    requires(is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt>)
 [[nodiscard]] double
 band_bending_resilience(const Lyt& lyt, const std::vector<TT>& spec, const band_bending_resilience_params& params = {},
                         const std::optional<transition_type> transition_type = std::nullopt) noexcept
