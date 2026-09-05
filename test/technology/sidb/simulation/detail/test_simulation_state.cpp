@@ -28,6 +28,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <set>
 #include <vector>
 
@@ -201,5 +202,19 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
         CHECK(state.index_base() == 2);
         CHECK(!state.three_state_sidbs().empty());
         CHECK(state.three_state_sidbs().size() + state.two_state_sidbs().size() == 3);
+        CHECK(state.max_charge_index() == (uint64_t{1} << state.two_state_sidbs().size()) - 1);
+    }
+    SECTION("large charge indices saturate")
+    {
+        layout large{};
+        for (int32_t x = 0; x < 64; ++x)
+        {
+            large.assign_cell_type({x, 0, 0}, sidb_technology::cell_type::NORMAL);
+        }
+
+        const potential_landscape      large_landscape{large, simulation_parameters{2, -0.32}};
+        const detail::simulation_state state{large_landscape, charge_state::NEGATIVE};
+
+        CHECK(state.max_charge_index() == std::numeric_limits<uint64_t>::max());
     }
 }

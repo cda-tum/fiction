@@ -17,6 +17,10 @@ from mnt.pyfiction import (
     check_simulation_results_for_equivalence,
     lattice,
     lattice_site,
+    quickexact,
+    quickexact_params,
+    sidb_100_lattice,
+    sidb_111_lattice,
     sidb_charge_state,
     sidb_layout,
     sidb_simulation_result,
@@ -28,7 +32,13 @@ from mnt.pyfiction import (
     "lat",
     [pytest.param(lattice.si_100_2x1(), id="100"), pytest.param(lattice.si_111_1x1(), id="111")],
 )
-def test_two_sidbs(lat):
+def test_two_sidbs(lat: lattice) -> None:
+    """Equivalence compares charge states on both non-template lattices.
+
+    Args:
+        lat: Lattice to test.
+    """
+
     layout = sidb_layout(lat)
     layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
     layout.assign_cell_type(lattice_site(0, 1, 1), sidb_technology.cell_type.NORMAL)
@@ -52,3 +62,22 @@ def test_two_sidbs(lat):
     second_result.charge_distributions = [charge_distribution(layout), other]
 
     assert not check_simulation_results_for_equivalence(first_result, second_result)
+
+
+@pytest.mark.parametrize(
+    "layout",
+    [pytest.param(sidb_100_lattice(), id="100"), pytest.param(sidb_111_lattice(), id="111")],
+)
+def test_legacy_results(layout: sidb_100_lattice | sidb_111_lattice) -> None:
+    """Equivalence accepts transitional simulation results.
+
+    Args:
+        layout: Cell-level layout to test.
+    """
+
+    layout.assign_cell_type((0, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((2, 0, 0), sidb_technology.cell_type.NORMAL)
+
+    result = quickexact(layout, quickexact_params())
+
+    assert check_simulation_results_for_equivalence(result, result)

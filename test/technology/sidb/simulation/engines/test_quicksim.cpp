@@ -98,7 +98,7 @@ TEST_CASE("Single SiDB QuickSim simulation", "[quicksim]")
     CHECK(!checked_result(simulation_results).charge_distributions.empty());
 }
 
-static void check_for_absence_of_positive_charges(const result& simulation_results) noexcept
+static void check_for_absence_of_positive_charges(const result& simulation_results)
 {
     REQUIRE(!simulation_results.charge_distributions.empty());
 
@@ -209,14 +209,14 @@ TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs with var
 
     lyt.assign_cell_type({15, -1, 1}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({17, -1, 1}, sidb_technology::cell_type::NORMAL);
-    ;
+
     const simulation_parameters params{2, -0.32};
 
     quicksim_params qs_params{.sim_params = params};
 
     REQUIRE(qs_params.sim_params.mu_minus == -0.32);
 
-    const auto check_charge_configuration = [](const result& simulation_results) noexcept
+    const auto check_charge_configuration = [](const result& simulation_results)
     {
         REQUIRE(!simulation_results.charge_distributions.empty());
 
@@ -317,7 +317,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with varying threa
 
     REQUIRE(qs_params.sim_params.mu_minus == -0.32);
 
-    const auto check_charge_configuration = [](const result& simulation_results) noexcept
+    const auto check_charge_configuration = [](const result& simulation_results)
     {
         REQUIRE(!simulation_results.charge_distributions.empty());
 
@@ -412,7 +412,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01 and vary
 
     REQUIRE(qs_params.sim_params.mu_minus == -0.28);
 
-    const auto check_charge_configuration = [](const result& sim_results) noexcept
+    const auto check_charge_configuration = [](const result& sim_results)
     {
         REQUIRE(!sim_results.charge_distributions.empty());
 
@@ -506,7 +506,7 @@ TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread counts", 
 
     REQUIRE(qs_params.sim_params.mu_minus == -0.25);
 
-    const auto check_charge_configuration = [](const result& sim_result) noexcept
+    const auto check_charge_configuration = [](const result& sim_result)
     {
         REQUIRE(!sim_result.charge_distributions.empty());
 
@@ -611,7 +611,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]
     REQUIRE(qs_params.sim_params.mu_minus == -0.32);
 
     // lambda function to check charge configurations
-    const auto check_charge_configuration = [](const result& sim_results) noexcept
+    const auto check_charge_configuration = [](const result& sim_results)
     {
         REQUIRE(!sim_results.charge_distributions.empty());
 
@@ -724,7 +724,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all negative
 
     REQUIRE(qs_params.sim_params.mu_minus == -0.32);
 
-    const auto check_charge_configuration = [](const result& simulation_results) noexcept
+    const auto check_charge_configuration = [](const result& simulation_results)
     {
         REQUIRE(!simulation_results.charge_distributions.empty());
 

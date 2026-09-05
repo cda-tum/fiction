@@ -136,7 +136,7 @@ class ground_state_space_impl
     /**
      * Constructor. Invokes the algorithm with the given parameters on the given layout.
      *
-     * @param lyt Layout to construct the *Ground State Space* of.
+     * @param land Potential landscape to construct the *Ground State Space* of.
      * @param parameters The parameters that *Ground State Space* will use throughout the construction.
      */
     ground_state_space_impl(const potential_landscape& land, const ground_state_space_params parameters) noexcept :
@@ -235,8 +235,7 @@ class ground_state_space_impl
      *
      * @param c Cluster to add to the clst if it is a singleton, otherwise this function is called recursively on
      * each of its children.
-     * @param local_potential_bound_containers Charge distribution surface objects containing information on the initial
-     * minimum and maximum electrostatic potential.
+     * @param land Potential landscape that supplies the initial electrostatic potentials.
      * @return The clst that contains only singleton clusters, one for each SiDB in the layout.
      */
     [[nodiscard]] static clustering get_initial_clustering(const cluster_ptr&         c,

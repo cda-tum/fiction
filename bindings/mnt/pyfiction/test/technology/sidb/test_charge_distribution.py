@@ -10,10 +10,18 @@
 
 from __future__ import annotations
 
+import pytest
+
 from mnt.pyfiction import charge_distribution, lattice_site, sidb_charge_state, sidb_layout, sidb_technology
 
 
 def three_sidbs() -> sidb_layout:
+    """Creates a three-SiDB layout.
+
+    Returns:
+        The populated layout.
+    """
+
     layout = sidb_layout()
     layout.assign_cell_type(lattice_site(3, 1, 0), sidb_technology.cell_type.NORMAL)
     layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
@@ -21,7 +29,9 @@ def three_sidbs() -> sidb_layout:
     return layout
 
 
-def test_default_state():
+def test_default_state() -> None:
+    """A distribution starts with the requested state and zero energy."""
+
     layout = three_sidbs()
     cd = charge_distribution(layout)
 
@@ -42,7 +52,9 @@ def test_default_state():
     assert cd.index_of(lattice_site(1, 0, 0)) is None
 
 
-def test_empty_distribution():
+def test_empty_distribution() -> None:
+    """A default-constructed distribution is empty."""
+
     cd = charge_distribution()
 
     assert cd.empty()
@@ -50,7 +62,9 @@ def test_empty_distribution():
     assert cd.get_charge_state(lattice_site(0, 0, 0)) == sidb_charge_state.NONE
 
 
-def test_assignment_by_site_and_by_index():
+def test_assignment_by_site_and_by_index() -> None:
+    """Charge states can be assigned by site and raster index."""
+
     layout = three_sidbs()
     cd = charge_distribution(layout, sidb_charge_state.NEUTRAL)
 
@@ -67,7 +81,9 @@ def test_assignment_by_site_and_by_index():
     assert cd.num_negative_sidbs() == 3
 
 
-def test_charge_index():
+def test_charge_index() -> None:
+    """Charge indices encode the assigned states in the requested base."""
+
     cd = charge_distribution(three_sidbs())
     assert cd.charge_index(2) == 0
     assert cd.charge_index(3) == 0
@@ -80,14 +96,21 @@ def test_charge_index():
     assert cd.charge_index(3) == 2 * 9 + 1
 
 
-def test_equality_and_hash():
+def test_equality_and_mutability() -> None:
+    """Mutable distributions compare by value and remain unhashable."""
+
     layout = three_sidbs()
     a = charge_distribution(layout)
     b = charge_distribution(layout)
 
     assert a == b
     assert a.same_charge_states(b)
-    assert hash(a) == hash(b)
+
+    with pytest.raises(TypeError):
+        hash(a)
+
+    with pytest.raises(TypeError):
+        dict.fromkeys([a])
 
     b.assign_energy(1.0)
     assert a != b
@@ -97,4 +120,5 @@ def test_equality_and_hash():
     b.assign_charge_state_by_index(1, sidb_charge_state.NEUTRAL)
     assert not a.same_charge_states(b)
 
-    assert len({a, b, charge_distribution(layout)}) == 2
+    a.assign_energy(2.0)
+    assert a.energy() == 2.0

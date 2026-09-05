@@ -26,7 +26,6 @@
 #include <algorithm>
 #include <bitset>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -293,10 +292,9 @@ class simulation_state
         return charge_distribution_state;
     }
     /**
-     * The current charge distribution with its energy and the charge index recomputed in the plain base of the
-     * landscape's parameters, as consumers of a simulation result expect.
+     * The current charge distribution with its energy.
      *
-     * @return A copy of the charge states and the energy.
+     * @return A constant reference to the stored charge distribution.
      */
     [[nodiscard]] const charge_distribution& current() const noexcept
     {
@@ -993,7 +991,19 @@ class simulation_state
      */
     [[nodiscard]] static uint64_t max_index(const uint8_t base, const std::size_t digits) noexcept
     {
-        return static_cast<uint64_t>(std::pow(static_cast<double>(base), static_cast<double>(digits))) - 1;
+        uint64_t result = 1;
+
+        for (std::size_t digit = 0; digit < digits; ++digit)
+        {
+            if (result > std::numeric_limits<uint64_t>::max() / base)
+            {
+                return std::numeric_limits<uint64_t>::max();
+            }
+
+            result *= base;
+        }
+
+        return result - 1;
     }
     /**
      * Switches to a base-3 sublayout index over the SiDBs that can be positively charged.
@@ -1013,7 +1023,7 @@ class simulation_state
         }
         else
         {
-            maximum_charge_index           = max_index(3, num_sites);
+            maximum_charge_index           = max_index(2, num_sites - three_state_sidb_indices.size());
             maximum_sublayout_charge_index = max_index(3, three_state_sidb_indices.size());
         }
 

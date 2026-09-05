@@ -42,6 +42,7 @@
 #include <phmap.h>
 #endif
 
+#include <array>
 #include <cstdint>
 #include <iterator>
 #include <limits>
@@ -453,6 +454,8 @@ static bool verify_ground_state_space_stats(const charge_distribution&          
 
 TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[ground-state-space]")
 {
+    const std::array lattices{lattice::si_100_2x1(), lattice::si_111_1x1()};
+
     const auto& verify_layout = [](const layout& lyt)
     {
         const result&                     qe_res   = quickexact(lyt);
@@ -474,49 +477,61 @@ TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[ground-state
 
     SECTION("Layout 1 (4 DBs)")
     {
-        layout lyt{lattice::si_111_1x1()};
-        lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 2, 0}, sidb_technology::cell_type::NORMAL);
+        for (const auto& lat : lattices)
+        {
+            layout lyt{lat};
+            lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({2, 2, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({3, 2, 0}, sidb_technology::cell_type::NORMAL);
 
-        verify_layout(lyt);
+            verify_layout(lyt);
+        }
     }
 
     SECTION("Layout 2 (4 DBs)")
     {
-        layout lyt{lattice::si_111_1x1()};
-        lyt.assign_cell_type({2, 0, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 0, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 1, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 1, 0}, sidb_technology::cell_type::NORMAL);
+        for (const auto& lat : lattices)
+        {
+            layout lyt{lat};
+            lyt.assign_cell_type({2, 0, 1}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({4, 0, 1}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({3, 1, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({4, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-        verify_layout(lyt);
+            verify_layout(lyt);
+        }
     }
 
     SECTION("Layout 3 (4 DBs)")
     {
-        layout lyt{lattice::si_111_1x1()};
-        lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({1, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::NORMAL);
+        for (const auto& lat : lattices)
+        {
+            layout lyt{lat};
+            lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({1, 2, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::NORMAL);
 
-        verify_layout(lyt);
+            verify_layout(lyt);
+        }
     }
 
     SECTION("Layout 4 (7 DBs)")
     {
-        layout lyt{lattice::si_111_1x1()};
-        lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({0, 1, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({0, 1, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({0, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::NORMAL);
+        for (const auto& lat : lattices)
+        {
+            layout lyt{lat};
+            lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({0, 1, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({0, 1, 1}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({0, 2, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::NORMAL);
 
-        verify_layout(lyt);
+            verify_layout(lyt);
+        }
     }
 }
 
