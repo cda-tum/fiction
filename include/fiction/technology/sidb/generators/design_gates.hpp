@@ -201,7 +201,7 @@ class design_gates_impl
      *
      * @return The operational gates.
      */
-    [[nodiscard]] std::vector<layout> run_automatic_exhaustive_gate_designer() const noexcept
+    [[nodiscard]] std::vector<layout> run_automatic_exhaustive_gate_designer() const
     {
         const mockturtle::stopwatch stop{stats.time_total};
 
@@ -327,7 +327,7 @@ class design_gates_impl
      *
      * @return The operational gates, or the pruned candidates in `PRUNING_ONLY` mode.
      */
-    [[nodiscard]] std::vector<layout> run_quickcell() noexcept
+    [[nodiscard]] std::vector<layout> run_quickcell()
     {
         const mockturtle::stopwatch stop{stats.time_total};
 
@@ -444,7 +444,7 @@ class design_gates_impl
      * @param done The stop flag.
      */
     template <typename Items, typename Fn>
-    void for_each_in_parallel(const Items& items, const Fn& fn, std::atomic<bool>& done) const noexcept
+    void for_each_in_parallel(const Items& items, const Fn& fn, std::atomic<bool>& done) const
     {
         const std::size_t num_threads = std::max(std::min(number_of_threads, items.size()), std::size_t{1});
         const std::size_t chunk_size  = (items.size() + num_threads - 1) / num_threads;

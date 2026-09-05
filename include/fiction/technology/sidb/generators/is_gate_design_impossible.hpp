@@ -66,7 +66,7 @@ struct is_gate_design_impossible_params
  */
 template <typename TT>
 [[nodiscard]] bool is_gate_design_impossible(const layout& skeleton_with_defects, const std::vector<TT>& spec,
-                                             const is_gate_design_impossible_params& params = {}) noexcept
+                                             const is_gate_design_impossible_params& params = {})
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
@@ -122,7 +122,7 @@ template <typename TT>
 template <typename Lyt, typename TT>
     requires(is_cell_level_layout_v<Lyt>)
 [[nodiscard]] bool is_gate_design_impossible(const Lyt& skeleton_with_defects, const std::vector<TT>& spec,
-                                             const is_gate_design_impossible_params& params = {}) noexcept
+                                             const is_gate_design_impossible_params& params = {})
 {
     return is_gate_design_impossible(to_sidb_layout(skeleton_with_defects), spec, params);
 }
