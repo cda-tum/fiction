@@ -20,18 +20,17 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/layouts/bounding_box.hpp>                     // bounding box
 #include <fiction/physical_design/apply_gate_library.hpp>       // layout conversion to cell-level
 #include <fiction/physical_design/exact.hpp>                    // SMT-based physical design of FCN layouts
+#include <fiction/physical_design/surface_analysis.hpp>         // SiDB surface analysis
 #include <fiction/synthesis/technology_mapping_library.hpp>     // pre-defined gate types for technology mapping
 #include <fiction/technology/fcn/area.hpp>                      // area requirement calculations
 #include <fiction/technology/sidb/bestagon_library.hpp>         // a pre-defined SiDB gate library
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>       // reader for SiDB layouts including surface scan data
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>  // reader for simulated SiDB surfaces
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>      // writer for SiQAD files (physical simulation)
+#include <fiction/technology/sidb/layout.hpp>                   // SiDB layouts over a crystal lattice
 #include <fiction/technology/sidb/model/defect.hpp>             // SiDB defect classes
-#include <fiction/technology/sidb/surface_analysis.hpp>         // SiDB surface analysis
-#include <fiction/technology/sidb/surfaces/defect_surface.hpp>  // H-Si(100) 2x1 surface model
 #include <fiction/technology/sidb/technology.hpp>               // cell implementations
 #include <fiction/types.hpp>                                    // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
@@ -66,7 +65,6 @@ using namespace fiction::physical_design;
 using namespace fiction::sidb;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
-using namespace fiction::sidb::surfaces;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
@@ -137,19 +135,14 @@ int main()  // NOLINT
     assert(read_genlib_result == lorina::return_code::success);
     const mockturtle::tech_library<2> gate_lib{gates};
 
-    // parameterize the H-Si(100) 2x1 surface to ignore certain defect types
-    const defect_surface_params surface_params{std::unordered_set<defect_type>{defect_type::DB}};
-
-    // sidb_defect_surface<cell_lyt> surface_lattice{surface_params};
-
     // read surface scan lattice data
-    const auto surface_lattice = read_surface_defects<cell_lyt>(
-        "../../experiments/defect_aware_physical_design/py_test_surface.txt", "py_test_surface");
+    const auto surface_lattice =
+        read_surface_defects("../../experiments/defect_aware_physical_design/py_test_surface.txt", "py_test_surface");
     // read_sqd_layout(surface_lattice, surface_data_path);
 
     const auto lattice_tiling = gate_lyt{{11, 30}};  // our surface data is 12 x 31 Bestagon tiles
     //    const auto lattice_tiling = gate_lyt{{12, 17}};  // our surface data is 13 x 18 Bestagon tiles
-    const auto black_list = surface_analysis<bestagon_library>(lattice_tiling, surface_lattice);
+    const auto black_list = surface_analysis<bestagon_library, gate_lyt, cell_lyt>(lattice_tiling, surface_lattice);
 
     // parameters for SMT-based physical design
     exact_physical_design_params exact_params{};
@@ -206,17 +199,13 @@ int main()  // NOLINT
             const auto cp_tp = critical_path_length_and_throughput(*gate_level_layout);
 
             // apply gate library
-            const auto dot_accurate_layout =
-                apply_gate_library_to_defective_surface<defect_surface<cell_lyt>, bestagon_library>(*gate_level_layout,
-                                                                                                    surface_lattice);
+            const auto dot_accurate_layout = apply_gate_library_to_defective_surface<cell_lyt, bestagon_library>(
+                *gate_level_layout, surface_lattice);
 
-            // determine bounding box
-            const auto bb = bounding_box_2d<cell_lyt>(dot_accurate_layout);
-
-            // compute area
+            // compute area (the bounding box covers SiDBs and defects)
             area_stats                   area_stats{};
             area_params<sidb_technology> area_ps{};
-            area(bb, area_ps, &area_stats);
+            area(dot_accurate_layout, area_ps, &area_stats);
 
             // write a SiQAD simulation file
             write_sqd_layout(dot_accurate_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
