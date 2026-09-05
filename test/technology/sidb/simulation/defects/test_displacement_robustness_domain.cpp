@@ -33,6 +33,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <limits>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -108,6 +109,31 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
         CHECK(robustness_domain.operational_values.size() <
               static_cast<std::size_t>(std::pow(9, lyt.num_cells() - params.fixed_sidbs.size())));
         check_identical_information_of_stats_and_domain(robustness_domain, stats);
+    }
+
+    SECTION("displacement variation exceeds the lattice-site range")
+    {
+        params.displacement_variations = {std::numeric_limits<uint64_t>::max(), 0};
+
+        CHECK_THROWS_AS(determine_displacement_robustness_domain(lyt, std::vector<tt>{create_and_tt()}, params),
+                        std::out_of_range);
+    }
+
+    SECTION("displaced site exceeds the lattice-site range")
+    {
+        layout     boundary_lyt{lyt.get_lattice()};
+        const auto se       = lyt.bounding_box().second;
+        const auto x_offset = int64_t{std::numeric_limits<int32_t>::max()} - se.x;
+
+        lyt.foreach_cell([&lyt, &boundary_lyt, x_offset](const auto& c)
+                         { boundary_lyt.assign_cell_type({int64_t{c.x} + x_offset, c.y, c.z}, lyt.get_cell_type(c)); });
+
+        params.displacement_variations = {1, 0};
+        params.fixed_sidbs.clear();
+
+        CHECK_THROWS_AS(
+            determine_displacement_robustness_domain(boundary_lyt, std::vector<tt>{create_and_tt()}, params),
+            std::out_of_range);
     }
 }
 

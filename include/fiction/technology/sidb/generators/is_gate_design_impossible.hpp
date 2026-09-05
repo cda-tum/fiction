@@ -34,6 +34,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <stdexcept>
 #include <vector>
 
 namespace fiction::sidb::generators
@@ -60,15 +61,21 @@ struct is_gate_design_impossible_params
  *
  * @tparam TT Truth table type.
  * @param skeleton_with_defects The skeleton, including the defects of the surface it sits on.
- * @param spec The Boolean function(s) to implement.
+ * @param spec The Boolean function(s) to implement; must not be empty.
  * @param params Parameters.
  * @return `true` if no gate can be designed on the skeleton.
+ * @throws std::invalid_argument if `spec` is empty.
  */
 template <typename TT>
 [[nodiscard]] bool is_gate_design_impossible(const layout& skeleton_with_defects, const std::vector<TT>& spec,
                                              const is_gate_design_impossible_params& params = {})
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    if (spec.empty())
+    {
+        throw std::invalid_argument{"spec must not be empty"};
+    }
 
     assert(skeleton_with_defects.num_pis() > 0 && "lyt needs input cells");
     assert(skeleton_with_defects.num_pos() > 0 && "lyt needs output cells");
@@ -115,9 +122,10 @@ template <typename TT>
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param skeleton_with_defects The skeleton with defects.
- * @param spec The Boolean function(s) to implement.
+ * @param spec The Boolean function(s) to implement; must not be empty.
  * @param params Parameters.
  * @return `true` if no gate can be designed on the skeleton.
+ * @throws std::invalid_argument if `spec` is empty.
  */
 template <typename Lyt, typename TT>
     requires(is_cell_level_layout_v<Lyt>)

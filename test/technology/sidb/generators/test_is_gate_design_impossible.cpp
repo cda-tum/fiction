@@ -25,6 +25,7 @@
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -32,6 +33,11 @@ using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::model;
 using namespace fiction::synthesis;
+
+TEST_CASE("Reject an empty gate specification", "[is-gate-design-impossible]")
+{
+    CHECK_THROWS_AS(is_gate_design_impossible(layout{}, std::vector<tt>{}), std::invalid_argument);
+}
 
 TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-design-impossible]")
 {

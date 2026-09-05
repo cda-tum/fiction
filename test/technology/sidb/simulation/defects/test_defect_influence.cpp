@@ -37,6 +37,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <stdexcept>
 #include <tuple>
@@ -62,12 +63,46 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
         CHECK_THROWS_AS(defect_influence_grid_search(layout{}, params, 0), std::invalid_argument);
     }
 
+    SECTION("empty specification")
+    {
+        CHECK_THROWS_AS(defect_influence_grid_search(layout{}, std::vector<tt>{}, params), std::invalid_argument);
+    }
+
     SECTION("empty layout")
     {
         const auto domain = defect_influence_grid_search(layout{}, params);
         const auto value  = domain.contains({0, 0});
 
         CHECK(value == std::optional{std::tuple{defect_influence_status::NON_INFLUENTIAL}});
+    }
+
+    SECTION("existing defect")
+    {
+        auto lyt = layout{};
+        lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_defect({1, 0}, defect{defect_type::DB, -1, 5.6, 5.0});
+
+        const auto domain = defect_influence_grid_search(
+            lyt,
+            defect_influence_params{.defect                   = defect{defect_type::DB, -1, 5.6, 5.0},
+                                    .additional_scanning_area = {1, 0},
+                                    .influence_def = defect_influence_params::influence_definition::GROUND_STATE_CHANGE,
+                                    .number_of_threads = 1});
+
+        CHECK(domain.contains({1, 0}) == std::optional{std::tuple{defect_influence_status::NON_INFLUENTIAL}});
+    }
+
+    SECTION("maximum lattice boundary")
+    {
+        auto lyt = layout{};
+        lyt.assign_cell_type({std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max(), 1},
+                             sidb_technology::cell_type::NORMAL);
+
+        auto boundary_params                     = params;
+        boundary_params.additional_scanning_area = {1, 1};
+        const auto domain                        = defect_influence_grid_search(lyt, boundary_params);
+
+        CHECK(domain.size() == 4);
     }
 }
 

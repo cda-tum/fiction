@@ -34,6 +34,7 @@
 #include <mutex>
 #include <random>
 #include <set>
+#include <stdexcept>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -95,7 +96,7 @@ struct displacement_robustness_domain_params
      */
     double percentage_of_analyzed_displaced_layouts{1.0};
     /**
-     * Maximum displacement in columns and rows.
+     * Maximum displacement in columns and rows; the displaced sites must remain representable.
      */
     std::pair<uint64_t, uint64_t> displacement_variations = {1, 0};
     /**
@@ -166,6 +167,15 @@ class displacement_robustness_domain_impl
             truth_table{spec},
             generator(rd())
     {
+        constexpr auto max_column_displacement = uint64_t{std::numeric_limits<uint32_t>::max()};
+        constexpr auto max_row_displacement    = (uint64_t{2} * max_column_displacement) + 1;
+
+        if (params.displacement_variations.first > max_column_displacement ||
+            params.displacement_variations.second > max_row_displacement)
+        {
+            throw std::out_of_range{"displacement variation exceeds the lattice-site range"};
+        }
+
         assert((logic::is_operational(layout_to_analyze, truth_table, params.operational_params).first ==
                 logic::operational_status::OPERATIONAL) &&
                "The given layout is not a valid SiDB layout for the given Boolean function");
@@ -350,8 +360,8 @@ class displacement_robustness_domain_impl
         std::vector<std::vector<lattice_site>> all{};
         all.reserve(layout_to_analyze.num_cells());
 
-        const auto dx = static_cast<int32_t>(params.displacement_variations.first);
-        const auto dy = static_cast<int32_t>(params.displacement_variations.second);
+        const auto dx = static_cast<int64_t>(params.displacement_variations.first);
+        const auto dy = static_cast<int64_t>(params.displacement_variations.second);
 
         layout_to_analyze.foreach_cell(
             [&](const auto& c)
@@ -364,8 +374,10 @@ class displacement_robustness_domain_impl
 
                 const auto row = row_of(c);
 
-                auto min_row = row - dy;
-                auto max_row = row + dy;
+                const auto min_x   = int64_t{c.x} - dx;
+                const auto max_x   = int64_t{c.x} + dx;
+                auto       min_row = row - dy;
+                auto       max_row = row + dy;
 
                 if (params.dimer_policy ==
                         displacement_robustness_domain_params::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
@@ -375,7 +387,17 @@ class displacement_robustness_domain_impl
                     max_row = (int64_t{2} * c.y) + 1;
                 }
 
-                all.push_back(sites_in_area(site_at_row(c.x - dx, min_row), site_at_row(c.x + dx, max_row)));
+                constexpr auto min_lattice_row = int64_t{2} * std::numeric_limits<int32_t>::min();
+                constexpr auto max_lattice_row = (int64_t{2} * std::numeric_limits<int32_t>::max()) + 1;
+
+                if (!std::in_range<int32_t>(min_x) || !std::in_range<int32_t>(max_x) || min_row < min_lattice_row ||
+                    max_row > max_lattice_row)
+                {
+                    throw std::out_of_range{"displaced SiDB exceeds the lattice-site range"};
+                }
+
+                all.push_back(sites_in_area(site_at_row(static_cast<int32_t>(min_x), min_row),
+                                            site_at_row(static_cast<int32_t>(max_x), max_row)));
             });
 
         return all;
@@ -464,6 +486,7 @@ class displacement_robustness_domain_impl
  * @param params Parameters.
  * @param stats Statistics.
  * @return The displacement robustness domain.
+ * @throws std::out_of_range if a displacement exceeds the lattice-site range.
  */
 template <typename TT>
 [[nodiscard]] displacement_robustness_domain
@@ -496,6 +519,7 @@ determine_displacement_robustness_domain(const layout& lyt, const std::vector<TT
  * @param params Parameters.
  * @param fabrication_error_rate Share of the SiDBs that are displaced.
  * @return The probability.
+ * @throws std::out_of_range if a displacement exceeds the lattice-site range.
  */
 template <typename TT>
 [[nodiscard]] double

@@ -42,6 +42,7 @@
 #include <mutex>
 #include <optional>
 #include <random>
+#include <stdexcept>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -82,7 +83,7 @@ struct design_gates_params
          */
         AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
         /**
-         * Place canvas SiDBs at random until an operational gate is found.
+         * Place canvas SiDBs at random until an operational gate is found or the attempt limit is reached.
          */
         RANDOM,
         /**
@@ -106,6 +107,10 @@ struct design_gates_params
      * Number of canvas SiDBs.
      */
     std::size_t number_of_canvas_sidbs = 1;
+    /**
+     * Maximum number of layouts evaluated by random gate design across all threads.
+     */
+    std::size_t maximal_random_design_attempts = 1'000'000;
     /**
      * When to stop.
      */
@@ -266,16 +271,23 @@ class design_gates_impl
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
 
-        std::mutex        mutex{};
-        std::atomic<bool> gate_layout_is_found(false);
+        std::mutex         mutex{};
+        std::atomic<bool>  gate_layout_is_found(false);
+        std::atomic_size_t attempt_counter{0};
 
         for (std::size_t z = 0; z < num_threads; ++z)
         {
             threads.emplace_back(
-                [this, &gate_layout_is_found, &mutex, &parameter, &randomly_designed_gate_layouts]
+                [this, &gate_layout_is_found, &attempt_counter, &mutex, &parameter, &randomly_designed_gate_layouts]
                 {
                     while (!gate_layout_is_found)
                     {
+                        if (attempt_counter.fetch_add(1, std::memory_order_relaxed) >=
+                            params.maximal_random_design_attempts)
+                        {
+                            break;
+                        }
+
                         auto result_lyt = generate_random_layout(parameter, skeleton_layout);
 
                         if (!result_lyt.has_value())
@@ -646,10 +658,11 @@ class design_gates_impl
  *
  * @tparam TT Truth table type.
  * @param skeleton The skeleton with its input and output wires.
- * @param spec The Boolean function(s) to implement.
+ * @param spec The Boolean function(s) to implement; must not be empty.
  * @param params Parameters.
  * @param stats Statistics.
  * @return The designed gates.
+ * @throws std::invalid_argument if `spec` is empty.
  */
 template <typename TT>
 [[nodiscard]] std::vector<layout> design_gates(const layout& skeleton, const std::vector<TT>& spec,
@@ -658,9 +671,13 @@ template <typename TT>
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
+    if (spec.empty())
+    {
+        throw std::invalid_argument{"spec must not be empty"};
+    }
+
     assert(skeleton.num_pis() > 0 && "skeleton needs input cells");
     assert(skeleton.num_pos() > 0 && "skeleton needs output cells");
-    assert(!spec.empty());
     assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
                                       { return a.num_vars() != b.num_vars(); }) == spec.end());
 
@@ -696,10 +713,11 @@ template <typename TT>
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param skeleton The skeleton.
- * @param spec The Boolean function(s) to implement.
+ * @param spec The Boolean function(s) to implement; must not be empty.
  * @param params Parameters.
  * @param stats Statistics.
  * @return The designed gates.
+ * @throws std::invalid_argument if `spec` is empty.
  */
 template <typename Lyt, typename TT>
     requires(is_cell_level_layout_v<Lyt>)

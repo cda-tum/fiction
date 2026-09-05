@@ -84,6 +84,8 @@ void design_gates(nanobind::module_& m)
         .def_rw("canvas", &design_gates_params::canvas, DOC(fiction_sidb_generators_design_gates_params_canvas))
         .def_rw("number_of_canvas_sidbs", &design_gates_params::number_of_canvas_sidbs,
                 DOC(fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs))
+        .def_rw("maximal_random_design_attempts", &design_gates_params::maximal_random_design_attempts,
+                DOC(fiction_sidb_generators_design_gates_params_maximal_random_design_attempts))
         .def_rw("termination_cond", &design_gates_params::termination_cond,
                 DOC(fiction_sidb_generators_design_gates_params_termination_condition));
 

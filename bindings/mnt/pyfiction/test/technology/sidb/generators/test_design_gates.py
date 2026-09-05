@@ -94,6 +94,7 @@ def test_siqad_and_gate_skeleton_100():
 
     assert params.operational_params.simulation_parameters.mu_minus == -0.28
     assert params.number_of_canvas_sidbs == 1
+    assert params.maximal_random_design_attempts == 1_000_000
     assert params.canvas[0] == lattice_site(4, 4, 0)
     assert params.canvas[1] == lattice_site(14, 5, 1)
 

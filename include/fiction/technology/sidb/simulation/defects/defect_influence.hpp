@@ -38,6 +38,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <limits>
 #include <optional>
 #include <random>
 #include <stdexcept>
@@ -151,13 +152,13 @@ class defect_influence_impl
     /**
      * Constructor.
      *
-     * @param lyt The layout to analyze; it must not hold defects of its own for the contour trace.
+     * @param lyt The layout to analyze.
      * @param ps Parameters.
      * @param st Statistics.
      */
     defect_influence_impl(const layout& lyt, const defect_influence_params& ps, defect_influence_stats& st) :
             layout_to_analyze{lyt},
-            base_layout{without_defects(lyt)},
+            base_layout{lyt},
             params{ps},
             stats{st}
     {
@@ -328,7 +329,7 @@ class defect_influence_impl
      */
     const layout layout_to_analyze;
     /**
-     * The layout without any defects; the ground state comparison places the defect itself.
+     * The layout before placing the candidate defect.
      */
     const layout base_layout;
     /**
@@ -361,33 +362,21 @@ class defect_influence_impl
      */
     std::atomic<std::size_t> num_evaluated_defect_positions{0};
     /**
-     * Returns a copy of a layout without its defects.
-     *
-     * @param lyt The layout.
-     * @return The layout without defects.
-     */
-    [[nodiscard]] static layout without_defects(const layout& lyt)
-    {
-        auto copy = lyt;
-
-        for (const auto& [s, d] : lyt.defects())
-        {
-            copy.assign_defect(s, model::defect{model::defect_type::NONE});
-        }
-
-        return copy;
-    }
-    /**
      * Extends the layout's bounding box by the additional scanning area.
      */
     void determine_scanning_area() noexcept
     {
         const auto [nw, se] = layout_to_analyze.bounding_box();
 
-        nw_x   = nw.x - params.additional_scanning_area.first;
-        se_x   = se.x + params.additional_scanning_area.first;
-        nw_row = row_of(nw) - params.additional_scanning_area.second;
-        se_row = row_of(se) + params.additional_scanning_area.second;
+        constexpr auto min_x   = int64_t{std::numeric_limits<int32_t>::min()};
+        constexpr auto max_x   = int64_t{std::numeric_limits<int32_t>::max()};
+        constexpr auto min_row = int64_t{2} * std::numeric_limits<int32_t>::min();
+        constexpr auto max_row = (int64_t{2} * std::numeric_limits<int32_t>::max()) + 1;
+
+        nw_x   = static_cast<int32_t>(std::clamp(int64_t{nw.x} - params.additional_scanning_area.first, min_x, max_x));
+        se_x   = static_cast<int32_t>(std::clamp(int64_t{se.x} + params.additional_scanning_area.first, min_x, max_x));
+        nw_row = std::clamp(row_of(nw) - params.additional_scanning_area.second, min_row, max_row);
+        se_row = std::clamp(row_of(se) + params.additional_scanning_area.second, min_row, max_row);
     }
     /**
      * All positions of the scanning area in raster order.
@@ -497,8 +486,9 @@ class defect_influence_impl
             return defect_influence_status::INFLUENTIAL;
         };
 
-        // a defect cannot sit on an SiDB
-        if (!layout_to_analyze.is_empty_cell(defect_cell))
+        // a new defect cannot sit on an SiDB or replace an existing defect
+        if (!layout_to_analyze.is_empty_cell(defect_cell) ||
+            layout_to_analyze.get_defect(defect_cell).type != model::defect_type::NONE)
         {
             return non_influential();
         }
@@ -543,11 +533,11 @@ class defect_influence_impl
     /**
      * Compares the ground states of a layout with and without the defect.
      *
-     * @param lyt_without_defect The layout without the defect.
+     * @param lyt_without_candidate The layout without the candidate defect.
      * @param defect_pos The defect position.
      * @return Whether the defect changes the ground state.
      */
-    [[nodiscard]] defect_influence_status does_defect_influence_groundstate(const layout&       lyt_without_defect,
+    [[nodiscard]] defect_influence_status does_defect_influence_groundstate(const layout&       lyt_without_candidate,
                                                                             const lattice_site& defect_pos)
     {
         if (layout_to_analyze.is_empty())
@@ -555,7 +545,7 @@ class defect_influence_impl
             return defect_influence_status::NON_INFLUENTIAL;
         }
 
-        if (lyt_without_defect.get_cell_type(defect_pos) != sidb_technology::cell_type::EMPTY)
+        if (lyt_without_candidate.get_cell_type(defect_pos) != sidb_technology::cell_type::EMPTY)
         {
             return defect_influence_status::NON_INFLUENTIAL;
         }
@@ -564,9 +554,9 @@ class defect_influence_impl
             .sim_params            = params.operational_params.sim_params,
             .base_number_detection = engines::quickexact_params::automatic_base_number_detection::OFF};
 
-        const auto ground_states = engines::quickexact(lyt_without_defect, qe_params).groundstates();
+        const auto ground_states = engines::quickexact(lyt_without_candidate, qe_params).groundstates();
 
-        auto lyt_defect = lyt_without_defect;
+        auto lyt_defect = lyt_without_candidate;
         lyt_defect.assign_defect(defect_pos, params.defect);
 
         if (analysis::can_positive_charges_occur(lyt_defect, params.operational_params.sim_params))
@@ -738,6 +728,7 @@ class defect_influence_impl
  * @param stats Statistics.
  * @return The defect influence domain.
  * @throws std::invalid_argument if `step_size` is zero.
+ * @throws std::invalid_argument if `spec` is empty.
  */
 template <typename TT>
 [[nodiscard]] defect_influence_domain
@@ -745,6 +736,11 @@ defect_influence_grid_search(const layout& lyt, const std::vector<TT>& spec, con
                              const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    if (spec.empty())
+    {
+        throw std::invalid_argument{"spec must not be empty"};
+    }
 
     defect_influence_stats        st{};
     detail::defect_influence_impl p{lyt, params, st};
@@ -796,6 +792,7 @@ defect_influence_grid_search(const layout& lyt, const std::vector<TT>& spec, con
  * @param params Parameters.
  * @param stats Statistics.
  * @return The defect influence domain.
+ * @throws std::invalid_argument if `spec` is empty.
  */
 template <typename TT>
 [[nodiscard]] defect_influence_domain
@@ -803,6 +800,11 @@ defect_influence_random_sampling(const layout& lyt, const std::vector<TT>& spec,
                                  const defect_influence_params& params = {}, defect_influence_stats* stats = nullptr)
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    if (spec.empty())
+    {
+        throw std::invalid_argument{"spec must not be empty"};
+    }
 
     defect_influence_stats        st{};
     detail::defect_influence_impl p{lyt, params, st};
@@ -846,12 +848,13 @@ defect_influence_random_sampling(const layout& lyt, const std::size_t samples,
  * evaluations than a grid search.
  *
  * @tparam TT Truth table type.
- * @param lyt The gate layout; it must not hold defects of its own.
+ * @param lyt The gate layout.
  * @param spec The Boolean function(s) it implements.
  * @param samples Number of starting rows to try.
  * @param params Parameters.
  * @param stats Statistics.
  * @return The defect influence domain.
+ * @throws std::invalid_argument if `spec` is empty.
  */
 template <typename TT>
 [[nodiscard]] defect_influence_domain
@@ -859,6 +862,11 @@ defect_influence_quicktrace(const layout& lyt, const std::vector<TT>& spec, cons
                             const defect_influence_params& params = {}, defect_influence_stats* stats = nullptr)
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    if (spec.empty())
+    {
+        throw std::invalid_argument{"spec must not be empty"};
+    }
 
     defect_influence_stats        st{};
     detail::defect_influence_impl p{lyt, params, st};
@@ -876,7 +884,7 @@ defect_influence_quicktrace(const layout& lyt, const std::vector<TT>& spec, cons
  * *QuickTrace* without a specification: traces the contour of the region in which a defect changes the ground state
  * of an SiDB layout.
  *
- * @param lyt The layout; it must not hold defects of its own.
+ * @param lyt The layout.
  * @param samples Number of starting rows to try.
  * @param params Parameters; the influence definition has to be `GROUND_STATE_CHANGE`.
  * @param stats Statistics.

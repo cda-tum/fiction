@@ -68,6 +68,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Their parameters use `lattice_site` for canvases, scan areas, and fixed SiDBs
   - Defect-influence and displacement-robustness domains are non-template types
   - Gate designers retain cell-level overloads while the remaining consumers migrate
+  - Random gate design stops after `maximal_random_design_attempts` candidate layouts
+  - Gate-design and defect-influence APIs reject empty specifications
   - `on_the_fly_gate_library` measures the distance between a defect and the gate's SiDBs on the surface's
     lattice
 
