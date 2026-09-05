@@ -46,7 +46,7 @@ TEST_CASE("Reject charge distributions from another layout", "[determine-physica
     layout other{};
     other.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    CHECK(physically_valid_parameters(lyt, charge_distribution{other}).size() == 0u);
+    CHECK(physically_valid_parameters(lyt, charge_distribution{other}).empty());
 }
 
 TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 input combination",
