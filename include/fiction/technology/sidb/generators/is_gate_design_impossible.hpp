@@ -54,19 +54,6 @@ struct is_gate_design_impossible_params
     sidb::simulation::logic::bdl_input_iterator_params bdl_iterator_params{};
 };
 /**
- * This function evaluates whether it is impossible to design an SiDB gate for a given truth table and a given skeleton
- * with atomic defects. It determines the possible charge states at the output BDL pairs. Atomic defects can cause a BDL
- * pair to be neutrally charged only. Thus, the BDL pair would not work as intended.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT The truth table type.
- * @param skeleton_with_defects An SiDB skeleton layout with atomic defects.
- * @param spec A vector of truth tables (each truth table is representing one output) representing the gate's intended
- * functionality.
- * @param params Parameters to determine if the gate design is impossible.
- * @return `true` if gate design is impossible, `false` otherwise.
- */
-/**
  * Checks whether a gate can be designed on a skeleton with defects at all: if the charged defects push one SiDB
  * of an output BDL pair past its neutral transition threshold for any input pattern, that SiDB can never be
  * negatively charged, the pair loses its BDL property, and no canvas can fix that.

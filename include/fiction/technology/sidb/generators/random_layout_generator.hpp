@@ -135,15 +135,33 @@ namespace detail
     const auto cell_type =
         skeleton.has_value() ? sidb_technology::cell_type::LOGIC : sidb_technology::cell_type::NORMAL;
 
-    for (uint64_t attempt = 0; lyt.num_cells() < number_of_sidbs_of_final_layout && attempt < params.maximal_attempts;
-         ++attempt)
+    uint64_t attempt = 0;
+    while (attempt < params.maximal_attempts)
     {
+        if (lyt.num_cells() == number_of_sidbs_of_final_layout)
+        {
+            if (params.positive_sidbs != generate_random_layout_params::positive_charges::MAY_OCCUR ||
+                simulation::analysis::can_positive_charges_occur(lyt, params.sim_params))
+            {
+                return lyt;
+            }
+
+            if (params.number_of_sidbs == 0)
+            {
+                return std::nullopt;
+            }
+
+            lyt = skeleton.value_or(layout{});
+            continue;
+        }
+
         const auto random_site = random_site_in_area(params.coordinate_pair.first, params.coordinate_pair.second,
                                                      detail::random_generator());
+        ++attempt;
 
         // a defect occupies or affects the site
         if (sidbs_affected_by_defects.contains(random_site) ||
-            lyt.get_defect(random_site).type != model::defect_type::NONE)
+            lyt.get_defect(random_site).type != model::defect_type::NONE || !lyt.is_empty_cell(random_site))
         {
             continue;
         }
@@ -157,13 +175,9 @@ namespace detail
         }
     }
 
-    if (params.positive_sidbs == generate_random_layout_params::positive_charges::MAY_OCCUR &&
-        !simulation::analysis::can_positive_charges_occur(lyt, params.sim_params))
-    {
-        return generate_random_layout(params, skeleton);
-    }
-
-    if (lyt.num_cells() == number_of_sidbs_of_final_layout)
+    if (lyt.num_cells() == number_of_sidbs_of_final_layout &&
+        (params.positive_sidbs != generate_random_layout_params::positive_charges::MAY_OCCUR ||
+         simulation::analysis::can_positive_charges_occur(lyt, params.sim_params)))
     {
         return lyt;
     }

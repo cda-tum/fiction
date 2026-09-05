@@ -125,7 +125,7 @@ int main()  // NOLINT
 
         // Log the simulation results
         simulation_exp(gate, lyt.num_cells(), clearance_grid_search.defect_position.x,
-                       clearance_grid_search.defect_position.y, clearance_grid_search.defect_clearance_distance,
+                       row_of(clearance_grid_search.defect_position), clearance_grid_search.defect_clearance_distance,
                        grid_stats.num_evaluated_defect_positions, clearance_random.defect_clearance_distance,
                        random_stats.num_evaluated_defect_positions, clearance_quicktrace.defect_clearance_distance,
                        quicktrace_stats.num_evaluated_defect_positions);

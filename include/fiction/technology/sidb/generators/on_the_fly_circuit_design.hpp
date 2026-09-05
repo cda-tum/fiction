@@ -263,7 +263,7 @@ template <typename CellLyt, typename GateLyt>
         return to_sidb_layout(
             physical_design::apply_parameterized_gate_library<CellLyt, sidb::on_the_fly_gate_library, GateLyt,
                                                               sidb::on_the_fly_gate_library_params>(
-                *gate_lyt, params.sidb_on_the_fly_gate_library_parameters));
+                gate_lyt, params.sidb_on_the_fly_gate_library_parameters));
     }
 
     // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the

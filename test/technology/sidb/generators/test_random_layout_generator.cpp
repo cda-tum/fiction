@@ -28,6 +28,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -171,6 +172,41 @@ TEST_CASE("Random SiDB layout generation", "[random-sidb-layout-generator]")
                     CHECK(cell.z <= 1);
                 });
         }
+    }
+
+    SECTION("preserves cells of a skeleton")
+    {
+        const auto corners = std::pair{lattice_site{0, 0}, lattice_site{1, 0}};
+
+        constexpr uint64_t seed      = 1;
+        auto&              generator = fiction::sidb::generators::detail::random_generator();
+        generator.seed(seed);
+        const auto first_random_site = random_site_in_area(corners.first, corners.second, generator);
+        generator.seed(seed);
+
+        auto skeleton = layout{};
+        skeleton.assign_cell_type(first_random_site, sidb_technology::cell_type::INPUT);
+
+        const generate_random_layout_params params{.coordinate_pair  = corners,
+                                                   .number_of_sidbs  = 1,
+                                                   .maximal_attempts = 10'000};
+
+        const auto result_lyt = generate_random_layout(params, skeleton);
+        REQUIRE(result_lyt.has_value());
+        CHECK(result_lyt->num_cells() == 2);
+        CHECK(result_lyt->num_pis() == 1);
+        CHECK(result_lyt->get_cell_type(first_random_site) == sidb_technology::cell_type::INPUT);
+    }
+
+    SECTION("bounds attempts when positive charges must occur")
+    {
+        const generate_random_layout_params params{.coordinate_pair = {{0, 0}, {0, 0}},
+                                                   .number_of_sidbs = 1,
+                                                   .positive_sidbs =
+                                                       generate_random_layout_params::positive_charges::MAY_OCCUR,
+                                                   .maximal_attempts = 2};
+
+        CHECK(!generate_random_layout(params).has_value());
     }
 }
 

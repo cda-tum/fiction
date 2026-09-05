@@ -411,10 +411,9 @@ class on_the_fly_gate_library
             }
             if constexpr (mockturtle::has_is_xor_v<GateLyt>)
             {
-                const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
-
                 if (lyt.is_xor(n))
                 {
+                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
 
                     if (defect_surface.has_value())
                     {
@@ -566,11 +565,8 @@ class on_the_fly_gate_library
             skeleton_with_defects_copy.assign_cell_type(l_cell, sidb::sidb_technology::cell_type::LOGIC);
         }
 
-        const auto status = sidb::simulation::logic::is_operational(
-                                skeleton_with_defects_copy, truth_table,
-                                sidb::simulation::logic::is_operational_params{
-                                    .sim_params = parameters.design_gate_params.operational_params.sim_params,
-                                    .sim_engine = parameters.design_gate_params.operational_params.sim_engine})
+        const auto status = sidb::simulation::logic::is_operational(skeleton_with_defects_copy, truth_table,
+                                                                    parameters.design_gate_params.operational_params)
                                 .first;
 
         return status == sidb::simulation::logic::operational_status::OPERATIONAL;
