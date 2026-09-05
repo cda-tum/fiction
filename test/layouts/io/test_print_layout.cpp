@@ -267,7 +267,7 @@ TEST_CASE("layout which is sidb_defect_surface and charge distribution surface b
 {
     const defect_surface<sidb_cell_clk_lyt_siqad> sidb_layout{{2, 2}};
 
-    const lattice<lattice_100, defect_surface<sidb_cell_clk_lyt_siqad>> lat{sidb_layout};
+    const surfaces::lattice<lattice_100, defect_surface<sidb_cell_clk_lyt_siqad>> lat{sidb_layout};
 
     const charge_distribution_surface layout{lat};
 
@@ -573,8 +573,8 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 
     SECTION("crop_layout option activated")
     {
-        print_sidb_layout(print_stream, lattice<lattice_100, defect_surface<sidb_cell_clk_lyt_siqad>>{cl}, false, true,
-                          true);
+        print_sidb_layout(print_stream, surfaces::lattice<lattice_100, defect_surface<sidb_cell_clk_lyt_siqad>>{cl},
+                          false, true, true);
 
         constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
                                              " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -590,8 +590,8 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 
     SECTION("crop_layout option deactivated")
     {
-        print_sidb_layout(print_stream, lattice<lattice_100, defect_surface<sidb_cell_clk_lyt_siqad>>{cl}, false, false,
-                          true);
+        print_sidb_layout(print_stream, surfaces::lattice<lattice_100, defect_surface<sidb_cell_clk_lyt_siqad>>{cl},
+                          false, false, true);
 
         constexpr const char* layout_print = " ⊞  ·  ·  ·  · \n"
                                              " ·  ⊡  ·  ·  ⊟ \n";
@@ -718,7 +718,7 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::siqad", "
                                              "\n"
                                              "\n";
 
-        const lattice<lattice_111, decltype(lyt)> lattice_lyt{lyt};
+        const surfaces::lattice<lattice_111, decltype(lyt)> lattice_lyt{lyt};
 
         std::stringstream print_stream{};
 
@@ -741,7 +741,7 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::siqad", "
                                              "\n"
                                              "\n";
 
-        const lattice<lattice_111, decltype(lyt)> lattice_lyt{lyt};
+        const surfaces::lattice<lattice_111, decltype(lyt)> lattice_lyt{lyt};
 
         std::stringstream print_stream{};
 
@@ -779,7 +779,7 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::offset co
                                              "\n"
                                              "\n";
 
-        const lattice<lattice_111, decltype(lyt)> lattice_lyt{lyt};
+        const surfaces::lattice<lattice_111, decltype(lyt)> lattice_lyt{lyt};
 
         std::stringstream print_stream{};
 
@@ -802,7 +802,7 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::offset co
                                              "\n"
                                              "\n";
 
-        const lattice<lattice_111, decltype(lyt)> lattice_lyt{lyt};
+        const surfaces::lattice<lattice_111, decltype(lyt)> lattice_lyt{lyt};
 
         std::stringstream print_stream{};
 

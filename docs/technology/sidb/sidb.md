@@ -39,14 +39,6 @@ surfaces/surfaces
 
 ::::
 
-## SiDB Defect Analysis
-
-**Header:** `fiction/technology/sidb/surface_analysis.hpp`
-
-```{doxygenfunction} fiction::sidb::surface_analysis
-
-```
-
 (bestagon)=
 
 ## SiDB Bestagon Library
