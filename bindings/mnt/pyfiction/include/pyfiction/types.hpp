@@ -31,6 +31,9 @@
 #include <fiction/technology/qca/technology.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
+#include <mockturtle/networks/aig.hpp>
+#include <mockturtle/networks/mig.hpp>
+#include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/names_view.hpp>
 
 namespace pyfiction
@@ -41,9 +44,14 @@ namespace pyfiction
  */
 using py_tt = kitty::dynamic_truth_table;
 /**
- * Logic network.
+ * Logic networks. `py_logic_network` is the technology network every physical design and verification
+ * binding takes; the other three are read, mapped, converted, and written, and reach physical design
+ * through `convert_network`.
  */
 using py_logic_network = mockturtle::names_view<fiction::networks::technology_network>;
+using py_aig_network   = mockturtle::names_view<mockturtle::aig_network>;
+using py_xag_network   = mockturtle::names_view<mockturtle::xag_network>;
+using py_mig_network   = mockturtle::names_view<mockturtle::mig_network>;
 /**
  * Coordinates.
  */

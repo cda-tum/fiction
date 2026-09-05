@@ -18,12 +18,8 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/io/layout_drawers.hpp>
-#include <fiction/networks/io/dot_drawers.hpp>
 #include <fiction/traits.hpp>
 
-#include <mockturtle/io/write_dot.hpp>
-
-#include <string>
 #include <string_view>
 
 #include <nanobind/nanobind.h>
@@ -66,17 +62,6 @@ void write_dot_layout(nanobind::module_& m)
         py::arg("layout"), py::arg("filename"), DOC(fiction_layouts_io_write_dot_layout));
 }
 
-template <typename Ntk>
-void write_dot_network(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def(
-        "write_dot_network", [](const Ntk& ntk, const std::string_view& filename)
-        { mockturtle::write_dot(ntk, std::string{filename}, fiction::networks::io::technology_dot_drawer<Ntk>{}); },
-        py::arg("network"), py::arg("filename"));
-}
-
 }  // namespace detail
 
 void layout_drawers(nanobind::module_& m)
@@ -84,8 +69,6 @@ void layout_drawers(nanobind::module_& m)
     detail::write_dot_layout<py_cartesian_gate_layout>(m);
     detail::write_dot_layout<py_shifted_cartesian_gate_layout>(m);
     detail::write_dot_layout<py_hexagonal_gate_layout>(m);
-
-    detail::write_dot_network<py_logic_network>(m);
 }
 
 }  // namespace pyfiction
