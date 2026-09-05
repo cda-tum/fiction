@@ -1,0 +1,71 @@
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
+"""Tests of the ``fiction`` entry point: one-shot commands, scripts, exit codes, and the console script."""
+
+from __future__ import annotations
+
+import json
+import subprocess  # ruff: ignore[suspicious-subprocess-import] -- the console script is exercised as a process on purpose
+import sys
+from pathlib import Path
+
+import pytest
+
+from mnt.pyfiction import __version__
+from mnt.pyfiction.cli import main
+
+
+def test_commands_succeed() -> None:
+    assert main(["-c", "version; version"]) == 0
+
+
+def test_failing_command_returns_one() -> None:
+    assert main(["-c", "version; frobnicate"]) == 1
+
+
+def test_script_file(tmp_path: Path) -> None:
+    script = tmp_path / "run.fs"
+    script.write_text("version\n# a comment\n\nversion\n", encoding="utf-8")
+    assert main(["-f", str(script)]) == 0
+
+
+def test_missing_script_returns_two(tmp_path: Path) -> None:
+    assert main(["-f", str(tmp_path / "missing.fs")]) == 2
+
+
+def test_log_is_written_on_failure(tmp_path: Path) -> None:
+    log = tmp_path / "log.json"
+    assert main(["-l", str(log), "-c", "version; ortho"]) == 1
+    entries = json.loads(log.read_text(encoding="utf-8"))
+    assert [entry["status"] for entry in entries] == ["ok", "error"]
+
+
+def test_version_flag(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as exit_info:
+        main(["--version"])
+    assert exit_info.value.code == 0
+    assert __version__ in capsys.readouterr().out
+
+
+def test_module_runs_as_a_process() -> None:
+    result = subprocess.run(
+        [sys.executable, "-m", "mnt.pyfiction.cli", "-c", "version"], check=False, capture_output=True, text=True
+    )
+    assert result.returncode == 0, result.stderr
+    assert __version__ in result.stdout
+
+
+def test_console_script_is_installed() -> None:
+    scripts = Path(sys.executable).parent
+    script = scripts / ("fiction.exe" if sys.platform == "win32" else "fiction")
+    if not script.exists():
+        pytest.skip("the environment has no console script; the package is not installed")
+    result = subprocess.run([str(script), "-c", "version"], check=False, capture_output=True, text=True)  # ruff: ignore[subprocess-without-shell-equals-true]
+    assert result.returncode == 0, result.stderr
+    assert __version__ in result.stdout
