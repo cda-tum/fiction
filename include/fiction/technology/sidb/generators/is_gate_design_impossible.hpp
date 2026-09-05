@@ -19,7 +19,6 @@
 #pragma once
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"

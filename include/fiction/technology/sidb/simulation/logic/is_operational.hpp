@@ -224,15 +224,15 @@ class is_operational_impl
      * @param params Parameters.
      */
     is_operational_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params) :
-            layout_{lyt},
-            truth_table_{spec},
-            parameters_{params},
-            output_bdl_pairs_{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
-                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
-            bii_{lyt, params.input_bdl_iterator_params},
-            input_bdl_wires_{
+            sidb_layout{lyt},
+            truth_table{spec},
+            parameters{params},
+            output_bdl_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
+            bii{lyt, params.input_bdl_iterator_params},
+            input_bdl_wires{
                 detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT)},
-            output_bdl_wires_{
+            output_bdl_wires{
                 detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT)}
     {}
     /**
@@ -249,15 +249,15 @@ class is_operational_impl
     is_operational_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
                         const std::vector<bdl_wire>& input_wires, const std::vector<bdl_wire>& output_wires,
                         const bool initialize_bii = true) :
-            layout_{lyt},
-            truth_table_{spec},
-            parameters_{params},
-            output_bdl_pairs_{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
-                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
-            bii_{initialize_bii ? bdl_input_iterator{lyt, params.input_bdl_iterator_params, input_wires} :
-                                  bdl_input_iterator{layout{}}},
-            input_bdl_wires_{input_wires},
-            output_bdl_wires_{output_wires}
+            sidb_layout{lyt},
+            truth_table{spec},
+            parameters{params},
+            output_bdl_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
+            bii{initialize_bii ? bdl_input_iterator{lyt, params.input_bdl_iterator_params, input_wires} :
+                                 bdl_input_iterator{layout{}}},
+            input_bdl_wires{input_wires},
+            output_bdl_wires{output_wires}
     {}
     /**
      * Takes the wires and the canvas of `lyt` from the caller.
@@ -271,16 +271,16 @@ class is_operational_impl
      */
     is_operational_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
                         const std::vector<bdl_wire>& input_wires, const std::vector<bdl_wire>& output_wires,
-                        const layout& c_lyt) :
-            layout_{lyt},
-            truth_table_{spec},
-            parameters_{params},
-            output_bdl_pairs_{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
-                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
-            bii_{lyt, params.input_bdl_iterator_params, input_wires},
-            input_bdl_wires_{input_wires},
-            output_bdl_wires_{output_wires},
-            canvas_lyt_{c_lyt}
+                        layout c_lyt) :
+            sidb_layout{lyt},
+            truth_table{spec},
+            parameters{params},
+            output_bdl_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
+            bii{lyt, params.input_bdl_iterator_params, input_wires},
+            input_bdl_wires{input_wires},
+            output_bdl_wires{output_wires},
+            canvas_lyt{std::move(c_lyt)}
     {}
     /**
      * Detects the wires of `lyt` and takes the canvas from the caller.
@@ -291,18 +291,18 @@ class is_operational_impl
      * @param c_lyt The canvas.
      */
     is_operational_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-                        const layout& c_lyt) :
-            layout_{lyt},
-            truth_table_{spec},
-            parameters_{params},
-            output_bdl_pairs_{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
-                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
-            bii_{lyt, params.input_bdl_iterator_params},
-            input_bdl_wires_{
+                        layout c_lyt) :
+            sidb_layout{lyt},
+            truth_table{spec},
+            parameters{params},
+            output_bdl_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
+            bii{lyt, params.input_bdl_iterator_params},
+            input_bdl_wires{
                 detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT)},
-            output_bdl_wires_{
+            output_bdl_wires{
                 detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT)},
-            canvas_lyt_{c_lyt}
+            canvas_lyt{std::move(c_lyt)}
     {}
     /**
      * Takes one layout per input pattern instead of applying the patterns itself.
@@ -316,17 +316,17 @@ class is_operational_impl
      */
     is_operational_impl(const std::vector<layout>& input_pattern_lyts, const std::vector<TT>& spec,
                         const is_operational_params& params, const std::vector<bdl_wire>& input_wires,
-                        const std::vector<bdl_wire>& output_wires, const layout& c_lyt) :
-            truth_table_{spec},
-            parameters_{params},
-            output_bdl_pairs_{detect_bdl_pairs(input_pattern_lyts.front(), sidb_technology::cell_type::OUTPUT,
-                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
+                        const std::vector<bdl_wire>& output_wires, layout c_lyt) :
+            truth_table{spec},
+            parameters{params},
+            output_bdl_pairs{detect_bdl_pairs(input_pattern_lyts.front(), sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             // the input pattern layouts make the iterator redundant
-            bii_{layout{}},
-            input_bdl_wires_{input_wires},
-            output_bdl_wires_{output_wires},
-            canvas_lyt_{c_lyt},
-            input_pattern_layouts_{&input_pattern_lyts}
+            bii{layout{}},
+            input_bdl_wires{input_wires},
+            output_bdl_wires{output_wires},
+            canvas_lyt{std::move(c_lyt)},
+            input_pattern_layouts{&input_pattern_lyts}
     {}
     /**
      * Runs the pruning filters for one input pattern: positive charges, physical infeasibility of the expected I/O
@@ -339,9 +339,9 @@ class is_operational_impl
     {
         const auto& lyt_with_input_pattern = layout_with_input_pattern(input_pattern);
 
-        const potential_landscape land{lyt_with_input_pattern, parameters_.sim_params};
+        const potential_landscape land{lyt_with_input_pattern, parameters.sim_params};
 
-        if (parameters_.sim_params.base == 2 && analysis::can_positive_charges_occur(land))
+        if (parameters.sim_params.base == 2 && analysis::can_positive_charges_occur(land))
         {
             return layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES;
         }
@@ -349,13 +349,12 @@ class is_operational_impl
         simulation::detail::simulation_state state{land, model::charge_state::NEGATIVE};
 
         set_charge_distribution_of_input_pins(state, input_pattern);
-        set_charge_distribution_of_output_pins(state, synthesis::evaluate_output(truth_table_, input_pattern));
+        set_charge_distribution_of_output_pins(state, synthesis::evaluate_output(truth_table, input_pattern));
 
         if (const auto physical_validity = is_physical_validity_feasible(state); physical_validity.has_value())
         {
-            if (const auto output_index = synthesis::evaluate_output(truth_table_, input_pattern);
-                is_io_signal_unstable(state, truth_table_.front().num_bits(), input_pattern, output_index,
-                                      *physical_validity))
+            if (const auto output_index = synthesis::evaluate_output(truth_table, input_pattern); is_io_signal_unstable(
+                    state, truth_table.front().num_bits(), input_pattern, output_index, *physical_validity))
             {
                 return layout_invalidity_reason::IO_INSTABILITY;
             }
@@ -372,9 +371,9 @@ class is_operational_impl
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason> run() noexcept
     {
-        if (canvas_filtering_applicable_)
+        if (canvas_filtering_applicable)
         {
-            for (auto i = 0u; i < truth_table_.front().num_bits(); ++i)
+            for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
                 if (is_layout_invalid(i))
                 {
@@ -385,31 +384,31 @@ class is_operational_impl
 
         // if the layout is not discarded during the three filtering steps, it is considered operational.
         // This is only an approximation.
-        if (parameters_.strategy_to_analyze_operational_status ==
+        if (parameters.strategy_to_analyze_operational_status ==
                 is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
-            canvas_filtering_applicable_)
+            canvas_filtering_applicable)
         {
             return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
         }
 
-        if (parameters_.strategy_to_analyze_operational_status ==
+        if (parameters.strategy_to_analyze_operational_status ==
                 is_operational_params::operational_analysis_strategy::SIMULATION_ONLY ||
-            parameters_.strategy_to_analyze_operational_status ==
+            parameters.strategy_to_analyze_operational_status ==
                 is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION ||
-            !canvas_filtering_applicable_)
+            !canvas_filtering_applicable)
         {
-            for (auto i = 0u; i < truth_table_.front().num_bits(); ++i)
+            for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
                 const auto& lyt_with_input_pattern = layout_with_input_pattern(i);
 
                 // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
-                if (parameters_.sim_params.base == 2 &&
-                    analysis::can_positive_charges_occur(lyt_with_input_pattern, parameters_.sim_params))
+                if (parameters.sim_params.base == 2 &&
+                    analysis::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params))
                 {
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
                 }
 
-                ++simulator_invocations_;
+                ++simulator_invocations;
 
                 const auto simulation_results = physical_simulation_of_layout(lyt_with_input_pattern);
 
@@ -430,7 +429,7 @@ class is_operational_impl
                     }
                     if (op_status == operational_status::NON_OPERATIONAL &&
                         non_op_reason == non_operationality_reason::KINKS &&
-                        parameters_.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+                        parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
                     {
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::KINKS};
                     }
@@ -451,12 +450,12 @@ class is_operational_impl
     [[nodiscard]] std::pair<operational_status, non_operationality_reason>
     verify_logic_match_of_cd(const charge_distribution& cd, const uint64_t input_pattern) const noexcept
     {
-        assert(!output_bdl_pairs_.empty() && "No output cell provided.");
+        assert(!output_bdl_pairs.empty() && "No output cell provided.");
 
-        for (std::size_t output = 0; output < output_bdl_pairs_.size(); ++output)
+        for (std::size_t output = 0; output < output_bdl_pairs.size(); ++output)
         {
-            const auto upper = cd.get_charge_state(output_bdl_pairs_[output].upper);
-            const auto lower = cd.get_charge_state(output_bdl_pairs_[output].lower);
+            const auto upper = cd.get_charge_state(output_bdl_pairs[output].upper);
+            const auto lower = cd.get_charge_state(output_bdl_pairs[output].lower);
 
             // if the output charge states are equal, the layout is not operational
             if (lower == upper)
@@ -464,24 +463,24 @@ class is_operational_impl
                 return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
             }
 
-            if (kitty::get_bit(truth_table_[output], input_pattern))
+            if (kitty::get_bit(truth_table[output], input_pattern))
             {
-                if (!encodes_bit_one(cd, output_bdl_pairs_[output], output_bdl_wires_[output].port))
+                if (!encodes_bit_one(cd, output_bdl_pairs[output], output_bdl_wires[output].port))
                 {
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                 }
             }
-            else if (!encodes_bit_zero(cd, output_bdl_pairs_[output], output_bdl_wires_[output].port))
+            else if (!encodes_bit_zero(cd, output_bdl_pairs[output], output_bdl_wires[output].port))
             {
                 return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
             }
         }
 
-        if (parameters_.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+        if (parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
         {
-            assert(!input_bdl_wires_.empty() && "No input wires provided.");
-            assert(!output_bdl_wires_.empty() && "No output wires provided.");
-            assert((truth_table_.size() == output_bdl_wires_.size()) &&
+            assert(!input_bdl_wires.empty() && "No input wires provided.");
+            assert(!output_bdl_wires.empty() && "No output wires provided.");
+            assert((truth_table.size() == output_bdl_wires.size()) &&
                    "Number of truth tables and output BDL wires don't not match");
 
             if (check_existence_of_kinks_in_input_wires(cd, input_pattern) ||
@@ -501,19 +500,19 @@ class is_operational_impl
     [[nodiscard]] std::vector<std::pair<uint64_t, non_operationality_reason>>
     determine_non_operational_input_patterns_and_non_operationality_reason() noexcept
     {
-        assert((truth_table_.size() == output_bdl_wires_.size()) &&
+        assert((truth_table.size() == output_bdl_wires.size()) &&
                "Number of truth tables and output BDL pairs does not match");
 
         std::vector<std::pair<uint64_t, non_operationality_reason>> non_operational{};
 
-        for (auto i = 0u; i < truth_table_.front().num_bits(); ++i)
+        for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
         {
-            ++simulator_invocations_;
+            ++simulator_invocations;
 
             const auto& lyt_with_input_pattern = layout_with_input_pattern(i);
 
-            if (parameters_.sim_params.base == 2 &&
-                analysis::can_positive_charges_occur(lyt_with_input_pattern, parameters_.sim_params))
+            if (parameters.sim_params.base == 2 &&
+                analysis::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params))
             {
                 non_operational.emplace_back(i, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES);
                 continue;
@@ -546,7 +545,7 @@ class is_operational_impl
      */
     [[nodiscard]] std::size_t get_number_of_simulator_invocations() const noexcept
     {
-        return simulator_invocations_;
+        return simulator_invocations;
     }
     /**
      * Enumerates the charge states of the canvas SiDBs, with the remaining SiDBs' charges fixed as set in `state`,
@@ -558,15 +557,15 @@ class is_operational_impl
     [[nodiscard]] std::optional<double>
     is_physical_validity_feasible(simulation::detail::simulation_state& state) noexcept
     {
-        assert(!canvas_lyt_.is_empty() && "The canvas layout must not be empty.");
+        assert(!canvas_lyt.is_empty() && "The canvas layout must not be empty.");
 
         const auto& lyt = state.landscape().get_layout();
 
         // the canvas SiDBs by their index in the layout; the first one is the dependent SiDB
         std::vector<std::size_t> canvas{};
-        canvas.reserve(canvas_lyt_.num_cells());
+        canvas.reserve(canvas_lyt.num_cells());
 
-        for (const auto& site : canvas_lyt_.sidbs())
+        for (const auto& site : canvas_lyt.sidbs())
         {
             const auto index = lyt.index_of(site);
             assert(index.has_value() && "canvas SiDB is not part of the layout");
@@ -585,8 +584,9 @@ class is_operational_impl
             for (std::size_t j = 0; j < num_free; ++j)
             {
                 state.assign_charge_state_by_index(canvas[j + 1],
-                                                   ((canvas_index >> j) & 1) == 0 ? model::charge_state::NEGATIVE :
-                                                                                    model::charge_state::NEUTRAL,
+                                                   ((canvas_index >> j) & uint64_t{1}) == 0 ?
+                                                       model::charge_state::NEGATIVE :
+                                                       model::charge_state::NEUTRAL,
                                                    simulation::detail::charge_index_mode::KEEP_CHARGE_INDEX);
             }
 
@@ -631,11 +631,11 @@ class is_operational_impl
 
         const auto& lyt = state.landscape().get_layout();
 
-        const auto number_of_input_wires = input_bdl_wires_.size();
+        const auto number_of_input_wires = input_bdl_wires.size();
 
         for (std::size_t i = 0; i < number_of_input_wires; ++i)
         {
-            const auto& wire = input_bdl_wires_[number_of_input_wires - 1 - i];
+            const auto& wire = input_bdl_wires[number_of_input_wires - 1 - i];
             const bool  forward =
                 wire.port.dir == fcn::port_direction::SOUTH || wire.port.dir == fcn::port_direction::EAST;
             const bool bit_set = (current_input_index & (uint64_t{1} << i)) != 0;
@@ -668,9 +668,9 @@ class is_operational_impl
     {
         const auto& lyt = state.landscape().get_layout();
 
-        for (std::size_t i = 0; i < output_bdl_wires_.size(); ++i)
+        for (std::size_t i = 0; i < output_bdl_wires.size(); ++i)
         {
-            const auto& wire    = output_bdl_wires_[i];
+            const auto& wire    = output_bdl_wires[i];
             const bool  forward = wire.port.dir == fcn::port_direction::SOUTH ||
                                   wire.port.dir == fcn::port_direction::EAST ||
                                   wire.port.dir == fcn::port_direction::NONE;
@@ -710,7 +710,7 @@ class is_operational_impl
                                              const uint64_t logical_correct_output_pattern,
                                              const double   minimal_energy_of_physically_valid_layout) noexcept
     {
-        const uint64_t max_output_pattern_index{uint64_t{1} << output_bdl_wires_.size()};
+        const uint64_t max_output_pattern_index{uint64_t{1} << output_bdl_wires.size()};
 
         for (uint64_t kink_states_input = 0; kink_states_input < max_input_pattern_index; ++kink_states_input)
         {
@@ -740,51 +740,51 @@ class is_operational_impl
     /**
      * The layout to check.
      */
-    const layout layout_{};
+    const layout sidb_layout{};
     /**
      * The Boolean function(s) to implement.
      */
-    const std::vector<TT>& truth_table_;
+    const std::vector<TT>& truth_table;
     /**
      * Parameters.
      */
-    const is_operational_params& parameters_;
+    const is_operational_params& parameters;
     /**
      * The output BDL pairs.
      */
-    std::vector<bdl_pair<lattice_site>> output_bdl_pairs_;
+    std::vector<bdl_pair<lattice_site>> output_bdl_pairs;
     /**
      * Iterator over the input patterns.
      */
-    bdl_input_iterator bii_;
+    bdl_input_iterator bii;
     /**
      * The input BDL wires.
      */
-    std::vector<bdl_wire> input_bdl_wires_;
+    std::vector<bdl_wire> input_bdl_wires;
     /**
      * The output BDL wires.
      */
-    std::vector<bdl_wire> output_bdl_wires_;
+    std::vector<bdl_wire> output_bdl_wires;
     /**
      * Number of simulator invocations.
      */
-    std::size_t simulator_invocations_{0};
+    std::size_t simulator_invocations{0};
     /**
      * The canvas.
      */
-    layout canvas_lyt_{};
+    layout canvas_lyt{};
     /**
      * Whether the pruning filters apply: a canvas is given, the strategy asks for filtering, and kinks are rejected.
      */
-    const bool canvas_filtering_applicable_{!canvas_lyt_.is_empty() &&
-                                            parameters_.strategy_to_analyze_operational_status !=
-                                                is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
-                                            parameters_.op_condition ==
-                                                is_operational_params::operational_condition::REJECT_KINKS};
+    const bool canvas_filtering_applicable{!canvas_lyt.is_empty() &&
+                                           parameters.strategy_to_analyze_operational_status !=
+                                               is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
+                                           parameters.op_condition ==
+                                               is_operational_params::operational_condition::REJECT_KINKS};
     /**
      * Caller-supplied layouts, one per input pattern, or `nullptr`.
      */
-    const std::vector<layout>* input_pattern_layouts_{nullptr};
+    const std::vector<layout>* input_pattern_layouts{nullptr};
     /**
      * Assigns a charge state to the SiDB at `site` without touching the charge index.
      *
@@ -809,16 +809,16 @@ class is_operational_impl
      */
     [[nodiscard]] const layout& layout_with_input_pattern(const uint64_t input_pattern) noexcept
     {
-        if (input_pattern_layouts_ != nullptr)
+        if (input_pattern_layouts != nullptr)
         {
-            assert(input_pattern < input_pattern_layouts_->size() && "input pattern out of range");
+            assert(input_pattern < input_pattern_layouts->size() && "input pattern out of range");
 
-            return (*input_pattern_layouts_)[input_pattern];
+            return (*input_pattern_layouts)[input_pattern];
         }
 
-        bii_ = input_pattern;
+        bii = input_pattern;
 
-        return *bii_;
+        return *bii;
     }
     /**
      * Simulates the layout with the configured engine.
@@ -828,32 +828,31 @@ class is_operational_impl
      */
     [[nodiscard]] result physical_simulation_of_layout(const layout& lyt_with_input_pattern) const noexcept
     {
-        if (parameters_.sim_engine == engine::EXGS)
+        if (parameters.sim_engine == engine::EXGS)
         {
-            return engines::exhaustive_ground_state_simulation(lyt_with_input_pattern, parameters_.sim_params);
+            return engines::exhaustive_ground_state_simulation(lyt_with_input_pattern, parameters.sim_params);
         }
-        if (parameters_.sim_engine == engine::QUICKEXACT)
+        if (parameters.sim_engine == engine::QUICKEXACT)
         {
             const engines::quickexact_params qe_params{
-                .sim_params = parameters_.sim_params,
-                .base_number_detection =
-                    engines::quickexact_params::automatic_base_number_detection::OFF};
+                .sim_params            = parameters.sim_params,
+                .base_number_detection = engines::quickexact_params::automatic_base_number_detection::OFF};
 
             return engines::quickexact(lyt_with_input_pattern, qe_params);
         }
 #if (FICTION_ALGLIB_ENABLED)
-        if (parameters_.sim_engine == engine::CLUSTERCOMPLETE)
+        if (parameters.sim_engine == engine::CLUSTERCOMPLETE)
         {
-            const engines::clustercomplete_params cc_params{.sim_params = parameters_.sim_params};
+            const engines::clustercomplete_params cc_params{.sim_params = parameters.sim_params};
 
             return engines::clustercomplete(lyt_with_input_pattern, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED
-        if (parameters_.sim_engine == engine::QUICKSIM)
+        if (parameters.sim_engine == engine::QUICKSIM)
         {
-            assert(parameters_.sim_params.base == 2 && "QuickSim does not support base-3 simulation");
+            assert(parameters.sim_params.base == 2 && "QuickSim does not support base-3 simulation");
 
-            const engines::quicksim_params qs_params{.sim_params      = parameters_.sim_params,
+            const engines::quicksim_params qs_params{.sim_params      = parameters.sim_params,
                                                      .iteration_steps = 500,
                                                      .alpha           = 0.6};
 
@@ -879,7 +878,7 @@ class is_operational_impl
     [[nodiscard]] bool check_existence_of_kinks_in_input_wires(const charge_distribution& cd,
                                                                const uint64_t current_input_index) const noexcept
     {
-        return std::ranges::any_of(input_bdl_wires_ | std::views::reverse,
+        return std::ranges::any_of(input_bdl_wires | std::views::reverse,
                                    [this, &cd, &current_input_index, i = 0u](const auto& wire) mutable
                                    {
                                        const auto current_bit_set = (current_input_index & (uint64_t{1} << i++)) != 0;
@@ -909,18 +908,18 @@ class is_operational_impl
     [[nodiscard]] bool check_existence_of_kinks_in_output_wires(const charge_distribution& cd,
                                                                 const uint64_t current_input_index) const noexcept
     {
-        for (std::size_t i = 0; i < output_bdl_wires_.size(); ++i)
+        for (std::size_t i = 0; i < output_bdl_wires.size(); ++i)
         {
-            for (const auto& bdl : output_bdl_wires_[i].pairs)
+            for (const auto& bdl : output_bdl_wires[i].pairs)
             {
-                if (kitty::get_bit(truth_table_[i], current_input_index))
+                if (kitty::get_bit(truth_table[i], current_input_index))
                 {
-                    if (!encodes_bit_one(cd, bdl, output_bdl_wires_[i].port))
+                    if (!encodes_bit_one(cd, bdl, output_bdl_wires[i].port))
                     {
                         return true;
                     }
                 }
-                else if (!encodes_bit_zero(cd, bdl, output_bdl_wires_[i].port))
+                else if (!encodes_bit_zero(cd, bdl, output_bdl_wires[i].port))
                 {
                     return true;
                 }

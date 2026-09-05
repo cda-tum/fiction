@@ -26,8 +26,10 @@
 #include "fiction/technology/sidb/simulation/analysis/energy_distribution.hpp"
 #include "fiction/technology/sidb/simulation/domain.hpp"
 #include "fiction/technology/sidb/simulation/engine.hpp"
+#include "fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/engines/quicksim.hpp"
+#include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
@@ -478,45 +480,47 @@ class operational_domain_impl
 {
   public:
     /**
-     * Standard constructor. Initializes the lyt, the truth table, the parameters and the statistics. Also
-     * detects the output BDL pair, which is necessary for the operational domain computation. The lyt must
+     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also
+     * detects the output BDL pair, which is necessary for the operational domain computation. The layout must
      * have exactly one output BDL pair.
      *
-     * @param lyt SiDB cell-level lyt to be evaluated.
-     * @param tt Expected Boolean function of the lyt given as a multi-output truth table.
+     * @param source_layout SiDB cell-level layout to be evaluated.
+     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
-    operational_domain_impl(const layout& lyt, const std::vector<TT>& tt, const operational_domain_params& ps,
+    operational_domain_impl(const layout& source_layout, const std::vector<TT>& tt, const operational_domain_params& ps,
                             operational_domain_stats& st) noexcept :
-            lyt_{lyt},
+            sidb_layout{source_layout},
             truth_table{tt},
             params{ps},
             stats{st},
             output_bdl_pairs{
-                detect_bdl_pairs(lyt_, sidb::sidb_technology::cell_type::OUTPUT,
+                detect_bdl_pairs(source_layout, sidb::sidb_technology::cell_type::OUTPUT,
                                  ps.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             num_dimensions{params.sweep_dimensions.size()},
-            input_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+            input_bdl_wires{detect_bdl_wires(source_layout,
+                                             params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                                              bdl_wire_selection::INPUT)},
-            output_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+            output_bdl_wires{detect_bdl_wires(source_layout,
+                                              params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                                               bdl_wire_selection::OUTPUT)},
             input_pattern_layouts{generate_bdl_input_pattern_layouts(
-                lyt, params.operational_params.input_bdl_iterator_params, input_bdl_wires)}
+                source_layout, params.operational_params.input_bdl_iterator_params, input_bdl_wires)}
     {
         // the public entry points reject a `FILTER_ONLY` request on a layout without `LOGIC` cells, so this may only
         // be empty for the strategies that do not need a canvas
-        const auto logic_cells = lyt.cells_of_type(sidb_technology::cell_type::LOGIC);
+        const auto logic_cells = source_layout.cells_of_type(sidb_technology::cell_type::LOGIC);
 
         assert(((params.operational_params.strategy_to_analyze_operational_status !=
                  is_operational_params::operational_analysis_strategy::FILTER_ONLY) ||
                 (logic_cells.size() > 0)) &&
-               "No logic cells found in the lyt_");
+               "No logic cells found in the layout");
 
         // the canvas layout is created which is defined by the logic cells. The cell type matches the one the
         // `is_operational` entry points assign to the canvases they build themselves; the canvas is only ever used to
         // construct a `charge_distribution_surface`, which reads positions and charges, so the two behave identically
-        canvas_lyt.set_lattice(lyt.get_lattice());
+        canvas_lyt.set_lattice(source_layout.get_lattice());
 
         for (const auto& c : logic_cells)
         {
@@ -557,14 +561,15 @@ class operational_domain_impl
     /**
      * Additional Constructor. Initializes the layout, the parameters and the statistics.
      *
-     * @param lyt SiDB layout to be evaluated.
+     * @param source_layout SiDB layout to be evaluated.
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
+    // The implementation stores a reference to the caller-owned layout.
     // NOLINTNEXTLINE(modernize-pass-by-value)
-    operational_domain_impl(const layout& lyt, const operational_domain_params& ps,
+    operational_domain_impl(const layout& source_layout, const operational_domain_params& ps,
                             operational_domain_stats& st) noexcept :
-            lyt_{lyt},
+            sidb_layout{source_layout},
             truth_table{std::vector<TT>{}},
             params{ps},
             stats{st},
@@ -1058,7 +1063,7 @@ class operational_domain_impl
      * which the given CDS is physically valid, it is determined whether the CDS is the ground state or the n-th excited
      * state.
      *
-     * @param lyt SiDB layout that is simulated and compared to the given CDS.
+     * @param cd Charge distribution to evaluate.
      * @return All physically valid physical parameters and the excited state number.
      */
     [[nodiscard]] sidb::simulation::domain<parameter_point, uint64_t>
@@ -1135,16 +1140,16 @@ class operational_domain_impl
                     {
                         // perform an exact ground state simulation
                         sim_results = sidb::simulation::engines::quickexact(
-                            lyt_,
-                            sidb::simulation::engines::quickexact_params{
-                                .sim_params            = sim_params,
-                                .base_number_detection = sidb::simulation::engines::quickexact_params::
-                                    automatic_base_number_detection::OFF});
+                            sidb_layout, sidb::simulation::engines::quickexact_params{
+                                             .sim_params            = sim_params,
+                                             .base_number_detection = sidb::simulation::engines::quickexact_params::
+                                                 automatic_base_number_detection::OFF});
                     }
                     else if (params.operational_params.sim_engine == engine::EXGS)
                     {
                         // perform an exhaustive ground state simulation
-                        sim_results = sidb::simulation::engines::exhaustive_ground_state_simulation(lyt_, sim_params);
+                        sim_results =
+                            sidb::simulation::engines::exhaustive_ground_state_simulation(sidb_layout, sim_params);
                     }
                     else if (params.operational_params.sim_engine == engine::QUICKSIM)
                     {
@@ -1153,7 +1158,7 @@ class operational_domain_impl
                                                                                    .iteration_steps = 500,
                                                                                    .alpha           = 0.6};
 
-                        if (const auto qs_result = sidb::simulation::engines::quicksim(lyt_, qs_params);
+                        if (const auto qs_result = sidb::simulation::engines::quicksim(sidb_layout, qs_params);
                             qs_result.has_value())
                         {
                             sim_results = qs_result.value();
@@ -1172,7 +1177,7 @@ class operational_domain_impl
                         sidb::simulation::analysis::calculate_energy_distribution(sim_results.charge_distributions);
 
                     const auto degeneracy_of_layout_energy =
-                        energy_dist.degeneracy(potential_landscape{lyt_, sim_params}.energy(cd));
+                        energy_dist.degeneracy(potential_landscape{sidb_layout, sim_params}.energy(cd));
 
                     if (!degeneracy_of_layout_energy.has_value())
                     {
@@ -1208,7 +1213,7 @@ class operational_domain_impl
     /**
      * The SiDB layout to investigate.
      */
-    const layout& lyt_;
+    const layout& sidb_layout;
     /**
      * The logical specification of the layout.
      */
@@ -1537,7 +1542,7 @@ class operational_domain_impl
             set_dimension_value(sim_params, param_point.get_parameters().at(d), d);
         }
 
-        if (potential_landscape{lyt_, sim_params}.is_physically_valid(cd))
+        if (potential_landscape{sidb_layout, sim_params}.is_physically_valid(cd))
         {
             return operational();
         }

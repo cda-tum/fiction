@@ -59,7 +59,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -80,7 +80,10 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
 
     SECTION("Operational domain with one parameter point")
     {
-        const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
+        const auto z_dimension = operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
+                                                                .min       = -0.32,
+                                                                .max       = -0.32,
+                                                                .step      = 0.01};
 
         op_domain_params.sweep_dimensions.push_back(z_dimension);
 
@@ -183,7 +186,10 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
     op_domain_params.sweep_dimensions[1].max  = 6.0;
     op_domain_params.sweep_dimensions[1].step = 0.1;
 
-    const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
+    const auto z_dimension = operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
+                                                            .min       = -0.32,
+                                                            .max       = -0.32,
+                                                            .step      = 0.01};
 
     SECTION("semi-operational domain")
     {

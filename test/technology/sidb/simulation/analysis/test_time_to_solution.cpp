@@ -174,7 +174,7 @@ TEST_CASE("time-to-solution test with simulation results", "[time-to-solution]")
         {
             if (const auto simulation_result = quicksim(lyt, qs_params); simulation_result.has_value())
             {
-                simulation_results_quicksim.push_back(simulation_result.value());
+                simulation_results_quicksim.push_back(*simulation_result);
             }
         }
 

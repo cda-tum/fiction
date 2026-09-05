@@ -16,12 +16,10 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -52,7 +50,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
 {
     const auto or_gate = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
 
-    const layout lat{or_gate};
+    const auto& lat = or_gate;
 
     auto op_params = is_operational_params{
         .sim_params = simulation_parameters{2, -0.32},
@@ -139,7 +137,7 @@ TEST_CASE("SiQAD NAND gate", "[is-operational]")
 {
     const auto nand_gate = to_sidb_layout(blueprints::siqad_nand_gate<sidb_cell_clk_lyt_siqad>());
 
-    const layout lat{nand_gate};
+    const auto& lat = nand_gate;
 
     auto op_params = is_operational_params{
         .sim_params = simulation_parameters{2, -0.28},
@@ -204,7 +202,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operat
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     CHECK(is_operational(lat, std::vector<tt>{create_and_tt()}, is_operational_params{simulation_parameters{2, -0.28}})
               .first == operational_status::OPERATIONAL);
@@ -257,7 +255,7 @@ TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 
     CHECK(lyt.num_cells() == 29);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     CHECK(is_operational(lat, create_crossing_wire_tt(),
                          is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT})
@@ -388,7 +386,7 @@ TEST_CASE("Not working diagonal Wire", "[is-operational]")
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     CHECK(is_operational(lat, std::vector<tt>{create_id_tt()},
                          is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT})
@@ -487,8 +485,6 @@ TEST_CASE("BDL wire", "[is-operational]")
 
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
-
-    const layout lat{lyt};
 
     simulation_parameters sim_params{};
 
@@ -591,7 +587,7 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
 
     CHECK(lyt.num_cells() == 29);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     SECTION("without predetermined wires")
     {
@@ -641,7 +637,7 @@ TEST_CASE("is operational check for Bestagon double wire", "[is-operational], [q
 
     CHECK(lyt.num_cells() == 30);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     CHECK(is_operational(lat, create_double_wire_tt(),
                          is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT})
@@ -657,7 +653,7 @@ TEST_CASE("is operational check for Bestagon half adder", "[is-operational], [qu
 
     CHECK(lyt.num_cells() == 26);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     CHECK(is_operational(lat, create_half_adder_tt(),
                          is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT})

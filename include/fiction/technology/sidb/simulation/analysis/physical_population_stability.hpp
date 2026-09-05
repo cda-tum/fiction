@@ -122,8 +122,8 @@ class physical_population_stability_impl
      * @param parameters Parameters.
      */
     physical_population_stability_impl(const layout& lyt, const physical_population_stability_params& parameters) :
-            layout_{lyt},
-            params_{parameters}
+            layout{lyt},
+            params{parameters}
     {}
     /**
      * Simulates the layout with *QuickExact* and analyzes every physically valid charge distribution, ordered by
@@ -133,11 +133,11 @@ class physical_population_stability_impl
      */
     [[nodiscard]] std::vector<population_stability_information> run() noexcept
     {
-        const engines::quickexact_params quickexact_parameters{.sim_params = params_.sim_params};
+        const engines::quickexact_params quickexact_parameters{.sim_params = params.sim_params};
 
-        auto simulation_results = engines::quickexact(layout_, quickexact_parameters);
+        auto simulation_results = engines::quickexact(layout, quickexact_parameters);
 
-        const potential_landscape land{layout_, params_.sim_params};
+        const potential_landscape land{layout, params.sim_params};
 
         // ascending energy, distinct charge distributions only
         std::ranges::stable_sort(simulation_results.charge_distributions,
@@ -150,7 +150,7 @@ class physical_population_stability_impl
 
         for (const auto& cd : simulation_results.charge_distributions)
         {
-            if (!seen.insert(cd.charge_index(params_.sim_params.base)).second)
+            if (!seen.insert(cd.charge_index(params.sim_params.base)).second)
             {
                 continue;
             }
@@ -200,8 +200,8 @@ class physical_population_stability_impl
             for (const auto& [transition, cell_and_potential] : info.transition_potentials)
             {
                 info.distance_corresponding_to_potential[transition] =
-                    model::potential_to_distance_conversion(cell_and_potential.second, params_.sim_params,
-                                                            params_.precision_for_distance_corresponding_to_potential);
+                    model::potential_to_distance_conversion(cell_and_potential.second, params.sim_params,
+                                                            params.precision_for_distance_corresponding_to_potential);
 
                 if (cell_and_potential.second < minimum_potential_difference)
                 {
@@ -220,11 +220,11 @@ class physical_population_stability_impl
     /**
      * The layout to analyze.
      */
-    const layout& layout_;
+    const layout& layout;
     /**
      * Parameters.
      */
-    const physical_population_stability_params& params_;
+    const physical_population_stability_params& params;
     /**
      * Records the negative-to-neutral transition of a negatively charged SiDB if it is the closest so far.
      *
@@ -235,7 +235,7 @@ class physical_population_stability_impl
     void handle_negative_charges(const double local_potential, const lattice_site& c,
                                  population_stability_information& info) const noexcept
     {
-        const auto required = std::abs(-local_potential + params_.sim_params.mu_minus);
+        const auto required = std::abs(-local_potential + params.sim_params.mu_minus);
 
         if (required < info.transition_potentials.at(transition_type::NEGATIVE_TO_NEUTRAL).second)
         {
@@ -253,8 +253,8 @@ class physical_population_stability_impl
     void handle_neutral_charges(const double local_potential, const lattice_site& c,
                                 population_stability_information& info) const noexcept
     {
-        const auto to_negative = std::abs(-local_potential + params_.sim_params.mu_minus);
-        const auto to_positive = std::abs(-local_potential + params_.sim_params.mu_plus());
+        const auto to_negative = std::abs(-local_potential + params.sim_params.mu_minus);
+        const auto to_positive = std::abs(-local_potential + params.sim_params.mu_plus());
 
         if (to_negative < to_positive &&
             to_negative < info.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second)
@@ -277,7 +277,7 @@ class physical_population_stability_impl
     void handle_positive_charges(const double local_potential, const lattice_site& c,
                                  population_stability_information& info) const noexcept
     {
-        const auto required = std::abs(-local_potential + params_.sim_params.mu_plus());
+        const auto required = std::abs(-local_potential + params.sim_params.mu_plus());
 
         if (required < info.transition_potentials.at(transition_type::POSITIVE_TO_NEUTRAL).second)
         {

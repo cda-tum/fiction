@@ -24,11 +24,8 @@
 
 #include <functional>
 #include <optional>
-#include <string>
-#include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/operators.h>
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
@@ -56,9 +53,13 @@ void detect_bdl_pairs(nanobind::module_& m)
         .def_ro("type", &bdl_pair_t::type, DOC(fiction_sidb_simulation_logic_bdl_pair_type))
         .def_ro("upper", &bdl_pair_t::upper, DOC(fiction_sidb_simulation_logic_bdl_pair_upper))
         .def_ro("lower", &bdl_pair_t::lower, DOC(fiction_sidb_simulation_logic_bdl_pair_lower))
-        .def(py::self == py::self, DOC(fiction_sidb_simulation_logic_bdl_pair_operator_eq))
-        .def(py::self != py::self)
-        .def(py::self < py::self, DOC(fiction_sidb_simulation_logic_bdl_pair_operator_lt))
+        .def(
+            "__eq__", [](const bdl_pair_t& lhs, const bdl_pair_t& rhs) { return lhs == rhs; },
+            DOC(fiction_sidb_simulation_logic_bdl_pair_operator_eq))
+        .def("__ne__", [](const bdl_pair_t& lhs, const bdl_pair_t& rhs) { return lhs != rhs; })
+        .def(
+            "__lt__", [](const bdl_pair_t& lhs, const bdl_pair_t& rhs) { return lhs < rhs; },
+            DOC(fiction_sidb_simulation_logic_bdl_pair_operator_lt))
         .def("__hash__", [](const bdl_pair_t& p)
              { return std::hash<lattice_site>{}(p.upper) ^ (std::hash<lattice_site>{}(p.lower) << 1U); })
         .def("__repr__", [](const bdl_pair_t& p) { return "bdl_pair(" + p.upper.str() + ", " + p.lower.str() + ")"; });

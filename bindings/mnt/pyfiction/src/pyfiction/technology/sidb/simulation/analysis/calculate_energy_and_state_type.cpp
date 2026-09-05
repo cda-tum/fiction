@@ -18,8 +18,6 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/technology/sidb/charge_distribution.hpp>
-#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp>
 
 #include <nanobind/nanobind.h>

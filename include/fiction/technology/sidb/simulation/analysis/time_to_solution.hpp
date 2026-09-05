@@ -157,7 +157,7 @@ inline void time_to_solution_for_given_simulation_results(const result&         
     st.acc                  = acc * 100;
     st.mean_single_runtime  = single_runtime_heuristic_average;
 
-    if (ps)
+    if (ps != nullptr)
     {
         st.algorithm = (*ps).algorithm;
         *ps          = st;
@@ -187,7 +187,7 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
         st.mean_single_runtime  = 0.0;
         st.algorithm            = engine_name(tts_params.engine);
 
-        if (ps)
+        if (ps != nullptr)
         {
             *ps = st;
         }
@@ -199,10 +199,9 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
 
     if (tts_params.engine == exact_engine::QUICKEXACT)
     {
-        const engines::quickexact_params params{
-            .sim_params = qs_params.sim_params,
-            .base_number_detection =
-                engines::quickexact_params::automatic_base_number_detection::OFF};
+        const engines::quickexact_params params{.sim_params = qs_params.sim_params,
+                                                .base_number_detection =
+                                                    engines::quickexact_params::automatic_base_number_detection::OFF};
 
         st.algorithm      = engine_name(exact_engine::QUICKEXACT);
         simulation_result = engines::quickexact(lyt, params);
@@ -236,7 +235,7 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
     time_to_solution_for_given_simulation_results(simulation_result, simulation_results_quicksim,
                                                   tts_params.confidence_level, &st);
 
-    if (ps)
+    if (ps != nullptr)
     {
         *ps = st;
     }

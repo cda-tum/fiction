@@ -15,7 +15,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -144,9 +143,9 @@ TEST_CASE("Output BDL wire from west to east", "[detect-bdl-wires]")
     CHECK(output_bdl_wire.port.dir == port_direction::cardinal::EAST);
     REQUIRE(output_bdl_wire.first_bdl_pair.has_value());
     REQUIRE(output_bdl_wire.last_bdl_pair.has_value());
-    CHECK(output_bdl_wire.first_bdl_pair.value() ==
+    CHECK(output_bdl_wire.first_bdl_pair ==
           bdl_pair{sidb_technology::cell_type::NORMAL, lattice_site{0, 0, 0}, lattice_site{2, 0, 0}});
-    CHECK(output_bdl_wire.last_bdl_pair.value() ==
+    CHECK(output_bdl_wire.last_bdl_pair ==
           bdl_pair{sidb_technology::cell_type::OUTPUT, lattice_site{18, 0, 0}, lattice_site{20, 0, 0}});
 }
 
@@ -175,9 +174,9 @@ TEST_CASE("BDL wire from west to east", "[detect-bdl-wires]")
     CHECK(input_bdl_wire.port.dir == port_direction::cardinal::EAST);
     REQUIRE(input_bdl_wire.first_bdl_pair.has_value());
     REQUIRE(input_bdl_wire.last_bdl_pair.has_value());
-    CHECK(input_bdl_wire.first_bdl_pair.value() ==
+    CHECK(input_bdl_wire.first_bdl_pair ==
           bdl_pair{sidb_technology::cell_type::INPUT, lattice_site{0, 0, 0}, lattice_site{2, 0, 0}});
-    CHECK(input_bdl_wire.last_bdl_pair.value() ==
+    CHECK(input_bdl_wire.last_bdl_pair ==
           bdl_pair{sidb_technology::cell_type::OUTPUT, lattice_site{18, 0, 0}, lattice_site{20, 0, 0}});
 
     const auto output_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
@@ -186,9 +185,9 @@ TEST_CASE("BDL wire from west to east", "[detect-bdl-wires]")
     CHECK(output_bdl_wire.port.dir == port_direction::cardinal::EAST);
     REQUIRE(output_bdl_wire.first_bdl_pair.has_value());
     REQUIRE(output_bdl_wire.last_bdl_pair.has_value());
-    CHECK(output_bdl_wire.first_bdl_pair.value() ==
+    CHECK(output_bdl_wire.first_bdl_pair ==
           bdl_pair{sidb_technology::cell_type::INPUT, lattice_site{0, 0, 0}, lattice_site{2, 0, 0}});
-    CHECK(output_bdl_wire.last_bdl_pair.value() ==
+    CHECK(output_bdl_wire.last_bdl_pair ==
           bdl_pair{sidb_technology::cell_type::OUTPUT, lattice_site{18, 0, 0}, lattice_site{20, 0, 0}});
 }
 
@@ -208,7 +207,7 @@ TEST_CASE("BDL wire bottom to up", "[detect-bdl-wires]")
     lyt.assign_cell_type({0, 18, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({0, 19, 0}, sidb_technology::cell_type::INPUT);
 
-    const detect_bdl_wires_params params{5.0};
+    const detect_bdl_wires_params params{.threshold_bdl_interdistance = 5.0};
 
     const auto all_bdl_wires = detect_bdl_wires(lyt, params);
     REQUIRE(all_bdl_wires.size() == 1);
@@ -216,9 +215,9 @@ TEST_CASE("BDL wire bottom to up", "[detect-bdl-wires]")
 
     REQUIRE(all_bdl_wires.front().first_bdl_pair.has_value());
     REQUIRE(all_bdl_wires.front().last_bdl_pair.has_value());
-    CHECK(all_bdl_wires.front().first_bdl_pair.value() ==
+    CHECK(all_bdl_wires.front().first_bdl_pair ==
           bdl_pair{sidb_technology::cell_type::INPUT, lattice_site{0, 18, 0}, lattice_site{0, 19, 0}});
-    CHECK(all_bdl_wires.front().last_bdl_pair.value() ==
+    CHECK(all_bdl_wires.front().last_bdl_pair ==
           bdl_pair{sidb_technology::cell_type::OUTPUT, lattice_site{0, 0, 0}, lattice_site{0, 1, 0}});
 }
 
@@ -469,7 +468,7 @@ TEST_CASE("Determine I/O wires of 111-AND gate", "[detect-bdl-wires]")
 {
     const auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>(), lattice::si_111_1x1());
 
-    const detect_bdl_wires_params params{2.0};
+    const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.0};
 
     SECTION("Determine all wires")
     {
@@ -535,7 +534,8 @@ TEST_CASE("special cases", "[detect-bdl-wires]")
         lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::NORMAL);
         lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-        const detect_bdl_wires_params params{2.5, detect_bdl_pairs_params{0.5}};
+        const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.5,
+                                             .bdl_pairs_params = detect_bdl_pairs_params{.minimum_distance = 0.5}};
 
         const auto input_wire = detect_bdl_wires(lyt, params, bdl_wire_selection::INPUT);
 
@@ -569,7 +569,8 @@ TEST_CASE("special cases", "[detect-bdl-wires]")
         lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::INPUT);
 
-        const detect_bdl_wires_params params{2.5, detect_bdl_pairs_params{0.5}};
+        const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.5,
+                                             .bdl_pairs_params = detect_bdl_pairs_params{.minimum_distance = 0.5}};
 
         const auto input_wire = detect_bdl_wires(lyt, params, bdl_wire_selection::INPUT);
 
@@ -603,7 +604,8 @@ TEST_CASE("special cases", "[detect-bdl-wires]")
         lyt.assign_cell_type({18, 1, 0}, sidb_technology::cell_type::NORMAL);
         lyt.assign_cell_type({20, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-        const detect_bdl_wires_params params{2.5, detect_bdl_pairs_params{0.5}};
+        const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.5,
+                                             .bdl_pairs_params = detect_bdl_pairs_params{.minimum_distance = 0.5}};
 
         const auto input_wire = detect_bdl_wires(lyt, params, bdl_wire_selection::INPUT);
 
@@ -637,7 +639,8 @@ TEST_CASE("special cases", "[detect-bdl-wires]")
         lyt.assign_cell_type({18, -1, 1}, sidb_technology::cell_type::NORMAL);
         lyt.assign_cell_type({20, -1, 1}, sidb_technology::cell_type::NORMAL);
 
-        const detect_bdl_wires_params params{3.0, detect_bdl_pairs_params{0.5}};
+        const detect_bdl_wires_params params{.threshold_bdl_interdistance = 3.0,
+                                             .bdl_pairs_params = detect_bdl_pairs_params{.minimum_distance = 0.5}};
 
         const auto input_wire = detect_bdl_wires(lyt, params, bdl_wire_selection::INPUT);
 

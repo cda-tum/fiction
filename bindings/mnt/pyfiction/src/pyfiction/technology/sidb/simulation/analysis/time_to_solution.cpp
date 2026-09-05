@@ -15,12 +15,10 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/time_to_solution.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <sstream>
 
