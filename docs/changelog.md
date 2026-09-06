@@ -14,15 +14,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
   - Added synchronized C++/Python tabs and code copy buttons.
   - Added `llms.txt`, `llms-full.txt`, and Markdown exports of documentation pages.
 
 - Python bindings:
 
+  - Added directory-based test markers, including `pytest -m simulation`.
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
 
+- Tooling:
+
+  - Added EditorConfig settings that match the repository's formatters.
+
 ### Changed
+
+- Continuous integration:
+  - PyPI releases now use trusted publishing instead of an API token.
+  - Renovate now waits three days for dated dependency releases before updating.
 
 - Documentation:
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.

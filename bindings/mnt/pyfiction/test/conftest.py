@@ -6,7 +6,7 @@
 #
 # Licensed under the MIT License
 
-"""Fixtures shared across the pyfiction test suite."""
+"""Fixtures and directory markers shared across the pyfiction test suite."""
 
 from __future__ import annotations
 
@@ -17,6 +17,35 @@ import pytest
 from mnt.pyfiction import read_technology_network, technology_network
 
 RESOURCES_DIR = Path(__file__).resolve().parent / "resources"
+pytest_plugins = ["pytester"]
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Apply ancestor-directory markers before pytest evaluates marker expressions.
+
+    Args:
+        items: Collected tests, including tests outside this suite.
+    """
+    test_dir = Path(__file__).resolve().parent
+    marked_dirs = {
+        "layouts",
+        "networks",
+        "physical_design",
+        "synthesis",
+        "verification",
+        "fcn",
+        "inml",
+        "sidb",
+        "simulation",
+        "io",
+        "generators",
+    }
+    for item in items:
+        if item.path.is_relative_to(test_dir):
+            for directory in item.path.relative_to(test_dir).parent.parts:
+                if directory in marked_dirs:
+                    item.add_marker(getattr(pytest.mark, directory))
 
 
 @pytest.fixture
