@@ -276,7 +276,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB parameter sweeps now reject non-finite ranges, invalid steps, and unrepresentable point counts.
     Operational-domain ratios also reject malformed seeds and fewer than two sweep dimensions.
   - Population-stability analysis now distinguishes complete charge distributions beyond the charge-index range.
-  - Gate-design counts exclude occupied and defective canvas sites.
+  - Gate design enumerates and counts only empty, defect-free canvas sites.
   - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
 
 - Continuous integration:
