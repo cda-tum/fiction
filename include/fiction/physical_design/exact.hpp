@@ -42,10 +42,6 @@
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/names_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
-
 #include <z3++.h>
 #include <z3_api.h>
 
@@ -3033,16 +3029,6 @@ class exact_impl
 
             const auto ti_list = std::make_shared<std::vector<thread_info>>(ps.num_threads);
 
-#if (PROGRESS_BARS)
-            mockturtle::progress_bar thread_bar("[i] examining layout aspect ratios using {} threads");
-            thread_bar(ps.num_threads);
-
-            auto post_toggle = false;
-
-            mockturtle::progress_bar post_bar(
-                "[i] some layout has been found; waiting for threads examining smaller aspect ratios to terminate");
-#endif
-
             for (auto i = 0u; i < ps.num_threads; ++i)
             {
                 fut[i] = std::async(std::launch::async, &exact_impl::explore_asynchronously, this, i, ti_list);
@@ -3053,15 +3039,6 @@ class exact_impl
             for (auto& f : fut)
             {
                 f.wait();
-
-#if (PROGRESS_BARS)
-                if (!post_toggle)
-                {
-                    thread_bar.done();
-                    post_bar(true);
-                    post_toggle = true;
-                }
-#endif
             }
 
             // extract the layout from the futures. Every future is consumed, even when no result was found:
@@ -3116,13 +3093,6 @@ class exact_impl
         for (; ari <= upper_bound; ++ari)  // <= to prevent overflow
         {
 
-#if (PROGRESS_BARS)
-            // `progress_bar::operator()` is non-const, so `bar` cannot be declared `const`; clang-tidy does not
-            // recognize the variadic call below as a mutating use
-            // NOLINTNEXTLINE(misc-const-correctness)
-            mockturtle::progress_bar bar("[i] examining layout aspect ratios: {:>2} × {:<2}");
-#endif
-
             auto ar = *ari;
 
             // log the examination of a new aspect ratio
@@ -3132,10 +3102,6 @@ class exact_impl
             {
                 continue;
             }
-
-#if (PROGRESS_BARS)
-            bar(ar.x + 1, ar.y + 1);
-#endif
 
             handler.update(ar);
 

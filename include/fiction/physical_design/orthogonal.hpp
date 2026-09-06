@@ -42,10 +42,6 @@
 #include <ostream>
 #include <vector>
 
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
-
 namespace fiction::physical_design
 {
 
@@ -140,14 +136,8 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
     coloring_container<Ntk> ctn{ntk};
     mockturtle::topo_view   rtv{ntk};
 
-#if (PROGRESS_BARS)
-    // initialize a progress bar
-    mockturtle::progress_bar bar{static_cast<uint32_t>(ctn.color_ntk.num_gates()),
-                                 "[i] determining relative positions: |{0}|"};
-#endif
-
     rtv.foreach_gate_reverse(
-        [&](const auto& n, [[maybe_unused]] const auto i)
+        [&](const auto& n)
         {
             const auto finc = networks::fanin_edges(ctn.color_ntk, n);
 
@@ -172,11 +162,6 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
             {
                 ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, ctn.color_south);
             }
-
-#if (PROGRESS_BARS)
-            // update progress
-            bar(i);
-#endif
         });
 
     return ctn;
@@ -241,14 +226,9 @@ template <typename Lyt, typename Ntk>
 aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn,
                                         const uint32_t                 num_multi_output_nodes) noexcept
 {
-#if (PROGRESS_BARS)
-    // initialize a progress bar
-    mockturtle::progress_bar bar{static_cast<uint32_t>(ctn.color_ntk.size()), "[i] determining layout size: |{0}|"};
-#endif
-
     uint64_t x = 0ull, y = ctn.color_ntk.num_pis() - 1;
     ctn.color_ntk.foreach_node(
-        [&](const auto& n, [[maybe_unused]] const auto i)
+        [&](const auto& n)
         {
             if (!ctn.color_ntk.is_constant(n))
             {
@@ -289,11 +269,6 @@ aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn,
                     }
                 }
             }
-
-#if (PROGRESS_BARS)
-            // update progress
-            bar(i);
-#endif
         });
 
     // for multi-output nodes, add another row
@@ -506,14 +481,8 @@ class orthogonal_impl
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         tile<Lyt> latest_pos{1, 0};
 
-#if (PROGRESS_BARS)
-        // initialize a progress bar
-        // NOLINTNEXTLINE(misc-const-correctness): bar(i) is called via a non-const operator() in the lambda below
-        mockturtle::progress_bar bar{ctn.color_ntk.size(), "[i] arranging layout: |{0}|"};
-#endif
-
         ctn.color_ntk.foreach_node(
-            [&](const auto& n, [[maybe_unused]] const auto i)
+            [&](const auto& n)
             {
                 // do not place constants
                 if (!ctn.color_ntk.is_constant(n))
@@ -642,11 +611,6 @@ class orthogonal_impl
                         ++latest_pos.y;
                     }
                 }
-
-#if (PROGRESS_BARS)
-                // update progress
-                bar(i);
-#endif
             });
 
         // place outputs after the main algorithm to handle possible multi-output or unordered nodes

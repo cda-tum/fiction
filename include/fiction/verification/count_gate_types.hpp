@@ -23,10 +23,6 @@
 
 #include <ostream>
 
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
-
 namespace fiction::verification
 {
 
@@ -93,18 +89,9 @@ class count_gate_types_impl
 
     void run()
     {
-#if (PROGRESS_BARS)
-        // initialize a progress bar
-        mockturtle::progress_bar bar{static_cast<uint32_t>(ntk.size()), "[i] counting gate types: |{0}|"};
-#endif
         ntk.foreach_node(
-            [&, this](const auto& n, [[maybe_unused]] auto i)
+            [&, this](const auto& n)
             {
-#if (PROGRESS_BARS)
-                // update progress
-                bar(i);
-#endif
-
                 if (!ntk.is_constant(n))
                 {
                     if constexpr (fiction::has_is_fanout_v<Ntk>)
