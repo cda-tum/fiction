@@ -14546,6 +14546,39 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_io_detail_parse_sqd_integer =
+R"doc(Parses an integer without trailing non-whitespace characters.
+
+Args:
+    text: Numeric XML attribute.
+
+Returns:
+    The parsed integer.
+
+Raises:
+    sqd_parsing_error: if the number has trailing characters.
+    std::invalid_argument: if the text is not an integer.
+    std::out_of_range: if the integer exceeds the int64_t range.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_parse_sqd_number =
+R"doc(Parses a finite SQD number without trailing non-whitespace characters.
+
+Args:
+    text: Numeric XML text or attribute.
+
+Returns:
+    The parsed number.
+
+Raises:
+    sqd_parsing_error: if the number is missing, non-finite, or has
+                       trailing characters.
+    std::invalid_argument: if the text is not numeric.
+    std::out_of_range: if the number exceeds the range of a double.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_dimer_to_cell =
@@ -14569,52 +14602,32 @@ static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_lyt = R"d
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_max_cell_pos = R"doc(The maximum position of a cell in the layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_parse_db_dot =
-R"doc(Parses the <type> attribute of a <dbdot> element from the SQD file and
-returns the corresponding cell type.
-
-
-
-Parses a <dbdot> element from the SQD file and adds the respective dot
+R"doc(Parses a <dbdot> element from the SQD file and adds the respective dot
 to the layout.
 
 Args:
-    db_dot: The <dbdot> element. db_dot: The <dbdot> element.
-
-Returns:
-    The cell type specified by the <dbdot> element. If non is
-    specified, the cell type is assumed to be normal.
+    db_dot: The <dbdot> element.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_parse_defect =
-R"doc(Parses a <val> attribute of a <type_label> element of a <property_map>
-element from the SQD file and converts it to the respective SiDB
-defect type.
-
-
-
-Parses a <defect> element from the SQD file and adds the respective
+R"doc(Parses a <defect> element from the SQD file and adds the respective
 defect to the layout if it implements the has_assign_sidb_defect
-function..
+function.
 
 Args:
-    label: The <type_label> element's <val> attribute. label: The
-           <defect> element.
-
-Returns:
-    The SiDB defect type corresponding to the given label.
+    defect: The <defect> element.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_parse_lat_type =
-R"doc(Parses a <latcoord> element from the SQD file and returns its
-specified cell position.
+R"doc(Checks that the SQD lattice matches the target cell-level layout.
 
 Args:
-    latcoord: The <latcoord> element.
+    name: Lattice reconstruction name.
 
-Returns:
-    The cell position specified by the <latcoord> element.
+Raises:
+    sqd_parsing_error: if the lattice is unknown or does not match.
 
 )doc";
 
@@ -14761,24 +14774,6 @@ Raises:
     std::invalid_argument: if a geometry component is not numeric.
     std::out_of_range: if a geometry component exceeds the range of a
                        double.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice_number =
-R"doc(Parses a finite lattice number without trailing non-whitespace
-characters.
-
-Args:
-    text: Numeric XML text or attribute.
-
-Returns:
-    The parsed number.
-
-Raises:
-    sqd_parsing_error: if the number is missing, non-finite, or has
-                       trailing characters.
-    std::invalid_argument: if the text is not numeric.
-    std::out_of_range: if the number exceeds the range of a double.
 
 )doc";
 
@@ -15426,6 +15421,9 @@ Args:
 Returns:
     Distance between `source` and `target` (unit: nm).
 
+Raises:
+    std::out_of_range: if either basis index is not 0 or 1.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_nm_position =
@@ -15436,6 +15434,9 @@ Args:
 
 Returns:
     The `(x, y)` position of `s` (unit: nm).
+
+Raises:
+    std::out_of_range: if the basis index is not 0 or 1.
 
 )doc";
 
@@ -27349,9 +27350,34 @@ static const char *mkd_doc_fmt_formatter_parse_5 = R"doc()doc";
 
 static const char *mkd_doc_formatter = R"doc(`fmt` formatter for lattice sites, printing `(x,y,z)`.)doc";
 
-static const char *mkd_doc_formatter_format = R"doc()doc";
+static const char *mkd_doc_formatter_format =
+R"doc(Writes a lattice site as `(x,y,z)`.
 
-static const char *mkd_doc_formatter_parse = R"doc()doc";
+Args:
+    s: Lattice site.
+    ctx: Format output context.
+
+Template Args:
+    FormatContext: Format output context type.
+
+Returns:
+    Iterator past the formatted site.
+
+)doc";
+
+static const char *mkd_doc_formatter_parse =
+R"doc(Parses an empty lattice-site format specification.
+
+Args:
+    ctx: Format parse context.
+
+Template Args:
+    ParseContext: Format parse context type.
+
+Returns:
+    Iterator to the end of the specification.
+
+)doc";
 
 static const char *mkd_doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
 
