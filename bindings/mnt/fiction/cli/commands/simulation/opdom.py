@@ -112,6 +112,7 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
     samples = next((n for n in (args.random_sampling, args.flood_fill, args.contour_tracing) if n is not None), None)
 
     params = operational_domain_params()
+    params.on_progress = session.report_progress
     params.operational_params.sim_engine = ENGINES[args.engine]
     parameters = _apply_physical(params.operational_params.simulation_parameters, args)
     if args.sketch:

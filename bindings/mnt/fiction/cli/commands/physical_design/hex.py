@@ -58,6 +58,7 @@ def hex_command(session: Session, args: argparse.Namespace) -> Result:
         else hexagonalization_io_pin_extension_mode.EXTEND
     )
     params = hexagonalization_params()
+    params.on_progress = session.report_progress
     if args.extend_inputs:
         params.input_pin_extension = mode
     if args.extend_outputs:

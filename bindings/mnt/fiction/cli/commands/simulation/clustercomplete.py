@@ -51,6 +51,7 @@ def clustercomplete_command(session: Session, args: argparse.Namespace) -> Resul
     """
     layout = _active_sidb_layout(session)
     params = pyfiction.clustercomplete_params()
+    params.on_progress = session.report_progress
     parameters = _apply_physical(params.simulation_parameters, args)
     params.global_potential = args.global_potential
     params.validity_witness_partitioning_max_cluster_size_gss = args.witness_limit

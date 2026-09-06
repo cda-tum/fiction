@@ -83,6 +83,7 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
     than two inputs.
     """
     params = graph_oriented_layout_design_params()
+    params.on_progress = session.report_progress
     params.num_vertex_expansions = args.expansions
     params.mode = getattr(gold_effort_mode, args.effort.upper())
     params.cost = getattr(gold_cost_objective, args.cost.upper())

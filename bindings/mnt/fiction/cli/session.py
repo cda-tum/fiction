@@ -486,11 +486,11 @@ class Session:
         remaining = width - cell_len("   ".join(parts))
         for slot, index in enumerate(shown):
             store = stores[index]
-            if store.active is not None and remaining > len(" · "):
+            if store.active is not None and remaining > len(" Â· "):
                 name = Text(" ".join(element_name(store.current()).split()))
                 name.truncate(min(20, remaining - 3), overflow="ellipsis")
                 if name.plain:
-                    parts[slot] += " · " + name.plain
+                    parts[slot] += " Â· " + name.plain
                     remaining -= name.cell_len + 3
         text = Text("   ".join(parts) if parts else "no elements in store")
         text.truncate(width, overflow="ellipsis")
