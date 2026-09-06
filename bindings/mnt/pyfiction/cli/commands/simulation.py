@@ -174,6 +174,7 @@ def quickexact_command(session: Session, args: argparse.Namespace) -> Result:
     params = quickexact_params()
     parameters = _apply_physical(params.simulation_parameters, args)
     params.global_potential = args.global_potential
+    params.on_progress = session.report_progress
     parameters["global_potential"] = args.global_potential
     return _store_result(session, layout, quickexact(layout, params), parameters)
 
@@ -198,6 +199,7 @@ def quicksim_command(session: Session, args: argparse.Namespace) -> Result:
     parameters = _apply_physical(params.simulation_parameters, args)
     params.iteration_steps = args.iterations
     params.alpha = args.alpha
+    params.on_progress = session.report_progress
     parameters.update(iterations=args.iterations, alpha=args.alpha)
     return _store_result(session, layout, quicksim(layout, params), parameters)
 
@@ -228,6 +230,7 @@ def clustercomplete_command(session: Session, args: argparse.Namespace) -> Resul
     params.num_overlapping_witnesses_limit_gss = args.overlap_limit
     if args.report_stats:
         params.report_gss_stats = pyfiction.ground_state_space_reporting.ON
+    params.on_progress = session.report_progress
     parameters.update(
         global_potential=args.global_potential,
         witness_partitioning_limit=args.witness_limit,
@@ -275,6 +278,7 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
     params.confidence_level = args.confidence
     params.max_temperature = args.max_temperature
     params.operational_params.sim_engine = ENGINES[args.engine]
+    params.on_progress = session.report_progress
     parameters = _apply_physical(params.operational_params.simulation_parameters, args)
     stats = critical_temperature_stats()
     if args.gate_based:
@@ -359,6 +363,7 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
         params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
         params.operational_params.op_condition = operational_condition.REJECT_KINKS
     params.sweep_dimensions = _sweep_dimensions(args)
+    params.on_progress = session.report_progress
 
     stats = operational_domain_stats()
     if args.random_sampling is not None:

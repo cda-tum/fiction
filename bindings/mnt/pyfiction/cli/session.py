@@ -18,12 +18,24 @@ import os
 import shutil
 import tempfile
 import time
+from collections.abc import Callable
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from rich.console import Console
+from rich.console import Console, RenderableType
 from rich.markup import escape
+from rich.progress import (
+    BarColumn,
+    Progress,
+    ProgressColumn,
+    SpinnerColumn,
+    Task,
+    TaskID,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
 from rich.text import Text
 
 from mnt.pyfiction import convert_network, technology_network
@@ -33,9 +45,14 @@ from .registry import REGISTRY
 from .stores import CellEntry, GateLayout, Network, Store, describe, element_name, one_line
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from mnt.pyfiction import dynamic_truth_table
 
     from .registry import Result
+
+ProgressCallback = Callable[[str, int, int], None]
+"""What an algorithm's ``on_progress`` parameter accepts: the task name, the completed count, and the total."""
 
 MAX_SCRIPT_DEPTH = 16
 """How deeply scripts may ``source`` one another before the session refuses, so a script that sources itself stops."""
@@ -159,6 +176,70 @@ def json_value(value: object) -> object:
     return str(value)
 
 
+def ignore_progress(task: str, done: int, total: int) -> None:
+    """Discard a progress report; the callback in effect while no command runs.
+
+    Args:
+        task: The name of the task the algorithm works on.
+        done: The number of completed work items.
+        total: The number of work items, or ``0`` if unknown.
+    """
+
+
+class TaskBarColumn(BarColumn):
+    """Render the bar of a task, and nothing for a spinner."""
+
+    def __call__(self, task: Task) -> RenderableType:
+        """Render the bar of a task.
+
+        Args:
+            task: The task to render.
+
+        Returns:
+            The bar, or an empty text for the spinner.
+        """
+        if task.fields.get("spinner"):
+            return Text("")
+        return super().__call__(task)
+
+
+class CountColumn(ProgressColumn):
+    """Render ``done/total`` of a task, only ``done`` while the total is unknown, and nothing for a spinner."""
+
+    def render(self, task: Task) -> Text:  # ruff: ignore[no-self-use] -- rich calls the column's render method
+        """Render the count of a task.
+
+        Args:
+            task: The task to render.
+
+        Returns:
+            The count, right-aligned.
+        """
+        if task.fields.get("spinner"):
+            return Text("")
+        completed = int(task.completed)
+        if task.total is None:
+            return Text(f"{completed}", style="progress.download")
+        return Text(f"{completed}/{int(task.total)}", style="progress.download")
+
+
+class RemainingColumn(TimeRemainingColumn):
+    """Render the time remaining of a task, and nothing while its total is unknown."""
+
+    def render(self, task: Task) -> Text:
+        """Render the time remaining of a task.
+
+        Args:
+            task: The task to render.
+
+        Returns:
+            The estimate, or an empty text without a total.
+        """
+        if task.total is None:
+            return Text("")
+        return super().render(task)
+
+
 class Session:
     """The state of one shell session.
 
@@ -171,6 +252,8 @@ class Session:
         gate_layouts: The gate-level layout store.
         cell_layouts: The cell-level layout store.
         running: Cleared by ``quit``; the interactive loop stops when it is ``False``.
+        report_progress: The callback to hand to an algorithm's ``on_progress`` parameter. While a
+            command runs, it renders the algorithm's tasks as progress bars.
     """
 
     def __init__(
@@ -195,6 +278,7 @@ class Session:
         self.gate_layouts: Store[GateLayout] = Store("gate-level layout")
         self.cell_layouts: Store[CellEntry] = Store("cell-level layout")
         self.running = True
+        self.report_progress: ProgressCallback = ignore_progress
         self.log_path = log_path
         self.log: list[dict[str, object]] = []
         self._script_depth = 0
@@ -314,7 +398,8 @@ class Session:
         entry["args"] = {key: json_value(value) for key, value in vars(args).items()}
         if long_operation:
             self.info(f"{name}: running…")
-        return cmd.run(self, args)
+        with self.progress(name):
+            return cmd.run(self, args)
 
     def run_script(self, path: Path) -> bool:
         """Run the commands in a file, one line at a time, stopping at the first failure or at ``quit``.
@@ -418,6 +503,58 @@ class Session:
         if delete:
             self._to_delete.append(path)
         return path
+
+    @contextlib.contextmanager
+    def progress(self, label: str) -> Iterator[ProgressCallback]:
+        """Show a spinner for a running command and a bar for every task its algorithms report.
+
+        The display is transient and only rendered on a terminal; when the output is piped or
+        recorded, no display is started and the reports are dropped. While the context is open,
+        :attr:`report_progress` is the callback that feeds the bars, so commands hand it to the
+        algorithms they run.
+
+        Args:
+            label: The name of the command, shown next to the spinner.
+
+        Yields:
+            The callback to hand to an ``on_progress`` parameter.
+        """
+        if self.quiet or not self.console.is_terminal:
+            # older rich versions print a newline when a disabled display stops, so start none at all
+            yield ignore_progress
+            return
+
+        display = Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            TaskBarColumn(),
+            CountColumn(),
+            TimeElapsedColumn(),
+            RemainingColumn(),
+            console=self.console,
+            transient=True,
+        )
+        bars: dict[str, TaskID] = {}
+        counts: dict[str, int] = {}
+
+        def report(task: str, done: int, total: int) -> None:
+            bar = bars.get(task)
+            if bar is None:
+                bar = bars[task] = display.add_task(task, total=total or None)
+            elif done < counts[task]:
+                # the algorithm restarted the task, e.g., for another optimization pass
+                display.reset(bar, total=total or None)
+            counts[task] = done
+            display.update(bar, completed=done, total=total or None, refresh=True)
+
+        previous = self.report_progress
+        self.report_progress = report
+        try:
+            with display:
+                display.add_task(label, total=None, spinner=True)
+                yield report
+        finally:
+            self.report_progress = previous
 
     def error(self, message: str) -> None:
         """Print an error message.

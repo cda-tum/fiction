@@ -10,17 +10,22 @@
 
 from __future__ import annotations
 
+import io
 from typing import TYPE_CHECKING
 
 import pytest
+from rich.console import Console
 
 from mnt.pyfiction import orthogonal, orthogonal_stats
+from mnt.pyfiction.cli import Session
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import REGISTRY, STORE_FLAGS, Category
-from mnt.pyfiction.cli.session import stats_to_dict, tokenize
+from mnt.pyfiction.cli.session import ignore_progress, stats_to_dict, tokenize
 from mnt.pyfiction.cli.stores import Store
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from mnt.pyfiction import technology_network
 
     from .conftest import Shell
@@ -144,3 +149,45 @@ def test_script_depth_limit(shell: Shell, tmp_path_factory: pytest.TempPathFacto
     script.write_text(f"source {script}\n", encoding="utf-8")
     output = shell.fails(f"source {script}")
     assert "deeper than" in output
+
+
+def test_progress_shows_on_terminal(resource: Callable[[str], str]) -> None:
+    """On a terminal, a running command shows its spinner and the tasks its algorithm reports."""
+    buffer = io.StringIO()
+    console = Console(file=buffer, width=100, force_terminal=True, color_system=None)
+    session = Session(console=console)
+    try:
+        assert session.execute(f"read {resource('mux21.v')}; ortho")
+    finally:
+        session.close()
+    assert "ortho" in buffer.getvalue()
+    assert "placing gates" in buffer.getvalue()
+    assert session.report_progress is ignore_progress
+
+
+def test_progress_is_silent_without_terminal(mux21_shell: Shell) -> None:
+    """Without a terminal, the progress display writes nothing."""
+    assert not mux21_shell.ok("ortho")
+
+
+def test_progress_resets_a_restarted_task() -> None:
+    """A task whose count drops is shown from the start again instead of counting backwards."""
+    buffer = io.StringIO()
+    session = Session(console=Console(file=buffer, width=100, force_terminal=True, color_system=None))
+    with session.progress("optimize") as report:
+        report("gate relocations", 0, 4)
+        report("gate relocations", 4, 4)
+        report("gate relocations", 0, 3)
+        report("gate relocations", 3, 3)
+        report("wire paths", 7, 0)
+    session.close()
+    assert "gate relocations" in buffer.getvalue()
+    assert "wire paths" in buffer.getvalue()
+
+
+def test_progress_reports_are_dropped_without_terminal(shell: Shell) -> None:
+    """Without a terminal, the callback handed to the algorithms discards the reports."""
+    with shell.session.progress("optimize") as report:
+        report("gate relocations", 0, 4)
+        report("gate relocations", 4, 4)
+    assert not shell.output

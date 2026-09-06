@@ -187,6 +187,7 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
         raise CommandError(msg)
     topology = "shifted_cartesian" if args.topolinano else args.topology
     params = _exact_parameters(args, _clocking_scheme(args.scheme, topology))
+    params.on_progress = session.report_progress
     native_topology = {"odd_column_cartesian": "shifted_cartesian", "even_row_hex": "hexagonal"}.get(topology, topology)
     design = getattr(pyfiction, f"exact_{native_topology}")
     if args.synchronization_elements and topology != "cartesian":
@@ -265,6 +266,7 @@ def ortho(session: Session, args: argparse.Namespace) -> Result:
     """
     network = session.as_technology_network(session.networks.current())
     params = orthogonal_params()
+    params.on_progress = session.report_progress
     params.number_of_clock_phases = num_clks.THREE if args.clock_phases == THREE_CLOCK_PHASES else num_clks.FOUR
     stats = orthogonal_stats()
     topology = "hexagonal" if args.topology == "even_row_hex" else args.topology
@@ -332,6 +334,7 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
     timeout = _seconds_to_ms(args.timeout)
     if timeout is not None:
         params.timeout = timeout
+    params.on_progress = session.report_progress
 
     network = session.as_technology_network(session.networks.current())
     stats = graph_oriented_layout_design_stats()
@@ -371,6 +374,7 @@ def hex_command(session: Session, args: argparse.Namespace) -> Result:
         params.input_pin_extension = mode
     if args.extend_outputs:
         params.output_pin_extension = mode
+    params.on_progress = session.report_progress
     stats = hexagonalization_stats()
     hexagonal = hexagonalization(layout, params, stats)
     session.gate_layouts.add(hexagonal)
@@ -399,6 +403,7 @@ def optimize(session: Session, args: argparse.Namespace) -> Result:
         wiring_params = wiring_reduction_params()
         if timeout is not None:
             wiring_params.timeout = timeout
+        wiring_params.on_progress = session.report_progress
         stats = wiring_reduction_stats()
         wiring_reduction(layout, wiring_params, stats)
     else:
@@ -408,6 +413,7 @@ def optimize(session: Session, args: argparse.Namespace) -> Result:
             params.max_gate_relocations = args.max_relocations
         if timeout is not None:
             params.timeout = timeout
+        params.on_progress = session.report_progress
         stats = post_layout_optimization_stats()
         post_layout_optimization(layout, params, stats)
     session.gate_layouts.add(layout)
