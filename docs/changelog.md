@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
+  - `utils::progress_callback` and `utils::progress_reporter` let long-running algorithms report
+    their progress through an `on_progress` member of their parameters: `exact`, `orthogonal`,
+    `graph_oriented_layout_design`, `hexagonalization`, `post_layout_optimization`,
+    `wiring_reduction`, the four SiDB simulation engines, `critical_temperature`,
+    `operational_domain`, `time_to_solution`, `design_gates`, the random layout generators,
+    `defect_influence`, and `displacement_robustness_domain`
 
 - Code quality:
 
@@ -50,6 +56,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `ortho -n 3|4` sets the number of clock phases, `random --type` produces XAGs, MIGs, and
     technology networks, `map` regains its six short gate flags, and `cell -l` accepts `QCA ONE`,
     `SIM7_MOL`, and the other spellings the C++ shell took.
+  - Every command shows a spinner with its elapsed time, and the physical design and SiDB
+    simulation commands add a progress bar per task of their algorithm; nothing is shown when
+    quiet mode is enabled or the output is not a terminal.
 
 - Dependencies:
 
@@ -102,6 +111,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and MIGs as well as technology networks
   - `print_sidb_layout` exposes `lat_color` and `crop_layout`, and `write_dot_network` and
     `write_dot_layout` expose `indexes` and `clock_colors`
+  - The parameters of the algorithms that report progress accept a Python callable as
+    `on_progress`, and `exhaustive_ground_state_simulation` takes it as an argument. These
+    algorithms release the GIL while they run.
 
 - Tooling:
 
@@ -132,6 +144,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `surface_analysis` and `surface_black_list` live in `physical_design/surface_analysis.hpp` and namespace
     `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
     SiDB header dependency
+  - `graph_oriented_layout_design`, `post_layout_optimization`, and `wiring_reduction` are no longer
+    `noexcept`, so an exception of a progress callback propagates to the caller
 
 - Build system:
 
@@ -338,6 +352,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - **Breaking:** `FICTION_CLI`, `FICTION_ABC`, `ABC_ROOT`, the `deploy` preset, and the `alice`
     dependency are gone with the C++ command-line interface.
+  - **Breaking:** `FICTION_PROGRESS_BARS` and mockturtle's progress bars on `std::cout`; the
+    `on_progress` callbacks replace them.
 - CLI:
 
   - **Breaking:** The C++ command-line interface and `shortcuts.fs`. Use the Python `fiction` shell.
