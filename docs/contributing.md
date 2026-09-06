@@ -44,6 +44,7 @@ Nevertheless, please try to follow the guidelines below as well as you can to he
 - Document your code thoroughly and write readable code.
 - Keep your code clean. Remove any debug statements, left-over comments, or code unrelated to your contribution.
 - Follow the style and conventions used throughout the project.
+- Enable EditorConfig support in your editor to apply the repository's indentation, line endings, and final-newline settings. The formatter hooks check the full style.
 - Run `clang-format` and `clang-tidy` to check your code for style and linting errors before committing.
 - We recommend installing [prek](https://prek.j178.dev/) and running `prek install` once so that formatting and linting checks run automatically before every commit.
 
@@ -98,6 +99,31 @@ When working with CodeRabbit:
 
 `.coderabbit.yaml` in the repository root configures which paths are reviewed and what CodeRabbit should not comment on. Update it rather than repeating the same correction by hand.
 
+## Publishing to PyPI
+
+The `CD` workflow publishes `mnt.pyfiction` when a GitHub release is published.
+The `publish-to-pypi` job downloads the source distribution and wheels from the build jobs
+and authenticates through [PyPI trusted publishing](https://docs.pypi.org/trusted-publishers/using-a-publisher/).
+The job uses the `pypi` GitHub environment and requires `id-token: write` permission.
+A manual workflow run builds the distributions but skips publishing.
+
+The GitHub trusted publisher on the
+[project's Publishing page](https://pypi.org/manage/project/mnt.pyfiction/settings/publishing/)
+uses these values:
+
+| Field | Value |
+| --- | --- |
+| Owner | `cda-tum` |
+| Repository name | `fiction` |
+| Workflow name | `cd.yml` |
+| Environment name | `pypi` |
+
+The workflow name is the filename, without `.github/workflows/`.
+Configure any required reviewers or release-tag restrictions on the `pypi` GitHub environment.
+After the next release, verify that `Deploy to PyPI` succeeds and that the release files
+and their attestations appear on PyPI. Then revoke the old deployment token on PyPI and
+remove the `PYPI_DEPLOY_TOKEN` GitHub secret if no other workflow uses that token.
+
 ## AI-Assisted Contributions
 
 Contributions written with the help of an AI agent are welcome, under two conditions.
@@ -141,3 +167,15 @@ are passed to Sphinx. Read the Docs uses the same non-interactive build.
 The docs dependency group requires Python 3.12 or newer. `uv.lock` records the
 versions used by local and hosted builds. HTML builds also produce `llms.txt`,
 `llms-full.txt`, and a Markdown copy of each page alongside its HTML file.
+
+### Citing Publications
+
+Add publication metadata to `docs/references.bib` and preserve existing citation keys.
+Use MyST citation roles such as `` {cite:p}`fiction` `` in documentation pages.
+The {doc}`publications` page renders the bibliography and provides a BibTeX download;
+keep algorithm and experiment links beside their citations. Run
+`prek run bibtex-tidy --all-files` to format entries and fields consistently.
+
+HTML pages include OpenGraph titles, descriptions, canonical URLs, and the project logo.
+Write a clear opening paragraph for each page's generated description. Keep the default
+image in `docs/_static/mnt_social.png` aligned with the project logo.
