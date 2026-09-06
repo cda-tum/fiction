@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Added QCA SVG regression tests for colors, detail modes, tile labels, and file output.
 
+- Continuous integration:
+
+  - Added Python source coverage, including package-root modules, and separate C++ checks.
+
 - Documentation:
 
   - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
@@ -31,10 +35,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Continuous integration:
+  - Reusable workflows now use GitHub's self-repository reference syntax.
+  - Clang-Tidy skips Python-only changes in the bindings tree.
   - PyPI releases now use trusted publishing instead of an API token.
   - Renovate now waits three days for dated dependency releases before updating.
 
 - Documentation:
+  - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
 
@@ -176,6 +183,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
+
+- Continuous integration:
+
+  - Canceled CI runs now stop optional summary jobs.
 
 - Documentation:
 
