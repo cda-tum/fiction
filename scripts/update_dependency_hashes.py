@@ -42,6 +42,7 @@ DEPENDENCIES = [
     ("CATCH2", "Catch2"),
     ("PARALLEL_HASHMAP", "parallel-hashmap"),
     ("TINYXML2", "tinyxml2"),
+    ("FMT", "fmt"),
 ]
 
 DOWNLOAD_CHUNK_SIZE = 1 << 16

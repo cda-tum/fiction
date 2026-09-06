@@ -116,6 +116,35 @@ FetchContent_Declare(
   URL_HASH SHA256=${TINYXML2_SHA256})
 FetchContent_MakeAvailable(tinyxml2)
 
+# fmt
+#
+# mockturtle bundles fmt 11.0.2 and creates a header-only `fmt` target unless
+# one exists. That copy does not compile with clang 20, so fiction fetches a
+# release and defines the target first; mockturtle and lorina then link this
+# one.
+set(FMT_VERSION
+    12.1.0
+    CACHE STRING "fmt version")
+if(NOT DEFINED FMT_URL)
+  set(FMT_URL
+      https://github.com/fmtlib/fmt/archive/refs/tags/${FMT_VERSION}.tar.gz)
+endif()
+if(NOT DEFINED FMT_SHA256)
+  set(FMT_SHA256
+      ea7de4299689e12b6dddd392f9896f08fb0777ac7168897a244a6d6085043fea)
+endif()
+# `SOURCE_SUBDIR` names a directory without a CMakeLists.txt, so the archive is
+# only populated; fmt's own CMake would build a library and install rules
+FetchContent_Declare(
+  fmt
+  URL ${FMT_URL}
+  URL_HASH SHA256=${FMT_SHA256}
+  SOURCE_SUBDIR headers-only)
+FetchContent_MakeAvailable(fmt)
+add_library(fmt INTERFACE)
+target_include_directories(fmt SYSTEM INTERFACE ${fmt_SOURCE_DIR}/include)
+target_compile_definitions(fmt INTERFACE FMT_HEADER_ONLY)
+
 # mockturtle
 #
 # The one dependency still fetched as a clone. mockturtle carries
