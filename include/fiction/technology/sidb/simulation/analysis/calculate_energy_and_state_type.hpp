@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Labels charge distributions as ground or excited states with their energies.
+ * @brief Labels simulated energy levels by their encoded logic.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author OpenAI (Codex)
@@ -53,30 +53,16 @@ enum class state_type : uint8_t
      */
     ACCEPTED,
     /**
-     * A state is rejected if the charge distributiion does not encode the desired logic. Moreover, if kinks are
+     * A state is rejected if the charge distribution does not encode the desired logic. Moreover, if kinks are
      * rejected, a charge distribution that encodes the logic, but does show kinks, is rejected.
      */
     REJECTED
 };
 /**
- *  Data type to collect electrostatic potential energies (in eV) of charge distributions with corresponding state types
- * (i.e., `true` = transparent, `false` = erroneous).
+ * Electrostatic potential energies (in eV) paired with their accepted or rejected state types.
  */
 using energy_and_state_type = std::vector<std::pair<double, state_type>>;
 
-/**
- * This function takes in an SiDB energy distribution. For each charge distribution, the state type is determined (i.e.
- * erroneous, transparent) while kinks are accepted, meaning a state with kinks is considered transparent.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT The type of the truth table specifying the gate behavior.
- * @param energy_dist Energy distribution.
- * @param valid_charge_distributions Physically valid charge distributions.
- * @param output_bdl_pairs Output BDL pairs.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param input_index The index of the current input configuration.
- * @return Electrostatic potential energy of all charge distributions with state type.
- */
 /**
  * Labels every energy level of an energy distribution by whether the physically valid charge distributions at that
  * level encode the expected output for the given input pattern (`ACCEPTED`) or not (`REJECTED`). Kinks in the
