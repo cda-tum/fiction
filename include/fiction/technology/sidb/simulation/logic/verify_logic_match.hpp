@@ -13,6 +13,7 @@
  * @brief Checks a charge distribution against the logic expected for an input pattern.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -47,12 +48,13 @@ namespace fiction::sidb::simulation::logic
  * @param input_wires The input BDL wires of `lyt`.
  * @param output_wires The output BDL wires of `lyt`.
  * @return The operational status.
+ * @throws std::out_of_range if validation encounters an invalid lattice basis index.
  */
 template <typename TT>
 [[nodiscard]] operational_status
 verify_logic_match(const layout& lyt, const charge_distribution& cd, const is_operational_params& params,
                    const std::vector<TT>& spec, const uint64_t input_pattern, const std::vector<bdl_wire>& input_wires,
-                   const std::vector<bdl_wire>& output_wires) noexcept
+                   const std::vector<bdl_wire>& output_wires)
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 

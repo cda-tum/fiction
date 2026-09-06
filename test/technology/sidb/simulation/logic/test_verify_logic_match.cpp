@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/technology/sidb/simulation/logic/verify_logic_match.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -21,14 +22,18 @@
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
+#include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/verify_logic_match.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -139,4 +144,18 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
                                      output_wires) == operational_status::NON_OPERATIONAL);
         }
     }
+}
+
+TEST_CASE("Logic matching propagates invalid lattice basis errors",
+          "[does-charge-distribution-match-logic-for-given-input-pattern]")
+{
+    layout       lyt{};
+    lattice_site invalid{};
+    invalid.z = 2;
+    lyt.assign_cell_type(invalid, sidb_technology::cell_type::NORMAL);
+    is_operational_params params{};
+    params.sim_params.base = 2;
+
+    CHECK_THROWS_AS(verify_logic_match(lyt, charge_distribution{lyt}, params, std::vector{create_id_tt()}, 0, {}, {}),
+                    std::out_of_range);
 }

@@ -13,6 +13,7 @@
  * @brief Labels charge distributions as ground or excited states with their energies.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -147,6 +148,7 @@ calculate_energy_and_state_type_with_kinks_accepted(const energy_distribution&  
  * @param input_bdl_wires The input BDL wires of `lyt`.
  * @param output_bdl_wires The output BDL wires of `lyt`.
  * @return The energies with their state types.
+ * @throws std::out_of_range if logic validation encounters an invalid lattice basis index.
  */
 template <typename TT>
 [[nodiscard]] energy_and_state_type
@@ -154,7 +156,7 @@ calculate_energy_and_state_type_with_kinks_rejected(const layout& lyt, const ene
                                                     const std::vector<charge_distribution>& valid_charge_distributions,
                                                     const std::vector<TT>& spec, const uint64_t input_index,
                                                     const std::vector<logic::bdl_wire>& input_bdl_wires,
-                                                    const std::vector<logic::bdl_wire>& output_bdl_wires) noexcept
+                                                    const std::vector<logic::bdl_wire>& output_bdl_wires)
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 

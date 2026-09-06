@@ -34,6 +34,7 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/surfaces/defect_surface.hpp>
+#include <fiction/technology/sidb/surfaces/lattice.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -72,7 +73,7 @@ class throwing_clone_layout : public sidb_100_cell_clk_lyt_siqad
      *
      * @throws std::runtime_error for every clone request.
      */
-    [[nodiscard]] throwing_clone_layout clone() const
+    [[nodiscard]] static throwing_clone_layout clone()
     {
         throw std::runtime_error{"layout clone failed"};
     }

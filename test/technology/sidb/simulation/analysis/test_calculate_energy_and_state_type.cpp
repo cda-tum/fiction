@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -23,6 +24,9 @@
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
+#include <fiction/technology/sidb/charge_distribution.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
@@ -33,6 +37,7 @@
 
 #include <limits>
 #include <set>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -100,4 +105,19 @@ TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
 
     CHECK_THAT(fourth_excited.first, Catch::Matchers::WithinAbs(1.2976, 0.0001));
     CHECK(fourth_excited.second == state_type::REJECTED);
+}
+
+TEST_CASE("Energy labeling propagates invalid lattice basis errors", "[calculate-energy-and-state-type]")
+{
+    layout       lyt{};
+    lattice_site invalid{};
+    invalid.z = 2;
+    lyt.assign_cell_type(invalid, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    const std::vector distributions{charge_distribution{lyt}};
+    const auto        energies = calculate_energy_distribution(distributions);
+
+    CHECK_THROWS_AS(calculate_energy_and_state_type_with_kinks_rejected(lyt, energies, distributions,
+                                                                        std::vector{create_id_tt()}, 0, {}, {}),
+                    std::out_of_range);
 }
