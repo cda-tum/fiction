@@ -17808,8 +17808,10 @@ desired logic. Moreover, if kinks are rejected, a charge distribution
 that encodes the logic, but does show kinks, is rejected.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution =
-R"doc(This function determines the time-to-solution (TTS) and the accuracy
-(acc) of the *QuickSim* algorithm.
+R"doc(Determines the time-to-solution (TTS) and accuracy of *QuickSim*.
+Every attempt contributes to the accuracy and mean runtime. Failed
+attempts use elapsed wall time; successful attempts retain the engine
+runtime.
 
 Args:
     lyt: Layout that is used for the simulation.
@@ -17827,7 +17829,9 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_for
 R"doc(This function calculates the Time-to-Solution (TTS) by analyzing the
 simulation results of a heuristic algorithm in comparison to those of
 an exact algorithm. It provides further statistical metrics, including
-the accuracy of the heuristic algorithm, and individual runtimes.
+the accuracy of the heuristic algorithm, and individual runtimes. An
+empty sample yields zero accuracy, zero mean heuristic runtime, and
+infinite time-to-solution.
 
 Args:
     results_exact: Simulation results of the exact algorithm.
@@ -17846,11 +17850,11 @@ Args:
         (time_to_solution, acc, single runtime) are to be stored.
 
 Template Args:
-    Lyt: SiDB ell-level layout type.
+    Lyt: SiDB cell-level layout type.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params = R"doc(Parameters for measuring heuristic accuracy and time-to-solution.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_confidence_level =
 R"doc(The confidence level represents the probability that the confidence
@@ -17880,7 +17884,9 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_sta
 R"doc(Exact simulation algorithm used to simulate the ground state as
 reference.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats_mean_single_runtime = R"doc(Average single simulation runtime in seconds.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats_mean_single_runtime =
+R"doc(Average runtime of all heuristic attempts in seconds, including failed
+attempts.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats_report =
 R"doc(Print the results to the given output stream.
