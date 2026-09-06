@@ -38,7 +38,7 @@ jobs:
         # bound the wait instead, and retry the transient failures that bounding surfaces
         run: |
           timeout 10m sudo -E apt-get update -o Acquire::Retries=3
-          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 cmake libreadline-dev libtbb-dev python3-dev
+          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 cmake libtbb-dev python3-dev
 
       - name: Install nanobind
         # the ci-tidy preset builds the Python bindings, which need nanobind's CMake package
