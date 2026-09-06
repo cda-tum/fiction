@@ -118,10 +118,20 @@
     enabled: true,
     automerge: true
   },
+  minimumReleaseAge: "3 days",
   schedule: [
     "every weekend"
   ],
   packageRules: [
+    {
+      // These datasources provide no release timestamps, so requiring one
+      // would prevent their updates indefinitely.
+      matchDatasources: [
+        "git-refs",
+        "github-runners"
+      ],
+      minimumReleaseAgeBehaviour: "timestamp-optional"
+    },
     {
       matchManagers: [
         "github-actions"
