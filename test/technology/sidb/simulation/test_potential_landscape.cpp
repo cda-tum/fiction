@@ -178,3 +178,23 @@ TEST_CASE("Potential-landscape input boundaries", "[potential-landscape]")
         }
     }
 }
+
+TEST_CASE("Potential landscapes reject invalid basis indices without pair interactions", "[potential-landscape]")
+{
+    layout       lyt{};
+    lattice_site invalid{};
+    invalid.z = 2;
+    SECTION("one SiDB")
+    {
+        lyt.assign_cell_type(invalid, sidb_technology::cell_type::NORMAL);
+    }
+    SECTION("one charged defect")
+    {
+        lyt.assign_defect(invalid, defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});
+    }
+    SECTION("one neutral defect")
+    {
+        lyt.assign_defect(invalid, defect{defect_type::SILOXANE, 0});
+    }
+    CHECK_THROWS_AS(potential_landscape{lyt}, std::out_of_range);
+}

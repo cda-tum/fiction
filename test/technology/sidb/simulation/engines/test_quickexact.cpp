@@ -1891,7 +1891,6 @@ TEST_CASE("QuickExact propagates invalid lattice-basis errors", "[quickexact]")
     layout       lyt{};
     lattice_site invalid{1, 0, 0};
     invalid.z = 2;
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type(invalid, sidb_technology::cell_type::NORMAL);
     CHECK_THROWS_AS(quickexact(lyt), std::out_of_range);
 }

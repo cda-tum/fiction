@@ -56,6 +56,9 @@ TEST_CASE("Coordinate to site", "[cell-level-layout-conversion]")
     lattice_site invalid{};
     invalid.z = 2;
     CHECK_THROWS_AS(to_cube(invalid), std::out_of_range);
+    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt>(invalid), std::out_of_range);
+    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt_cube>(invalid), std::out_of_range);
+    CHECK_THROWS_AS(to_cell<sidb_100_cell_clk_lyt_siqad>(invalid), std::out_of_range);
 }
 
 TEST_CASE("Lattice of a layout type", "[cell-level-layout-conversion]")

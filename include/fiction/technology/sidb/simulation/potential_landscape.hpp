@@ -83,6 +83,7 @@ class potential_landscape
      * @param local_external_potential External potential per site (unit: V). A site holding a defect shifts the
      * potential at that defect; a site holding an SiDB shifts the potential at that SiDB.
      * @param global_external_potential External potential applied to every SiDB (unit: V).
+     * @throws std::out_of_range if a SiDB or defect site has an invalid lattice basis index.
      */
     explicit potential_landscape(const layout&                       lyt,
                                  const model::simulation_parameters& params = model::simulation_parameters{},
@@ -102,6 +103,7 @@ class potential_landscape
 
         for (std::size_t i = 0; i < num_sites; ++i)
         {
+            static_cast<void>(lyt.get_lattice().nm_position((*site_storage)[i]));
             for (std::size_t j = i + 1; j < num_sites; ++j)
             {
                 const auto d   = lyt.get_lattice().nm_distance((*site_storage)[i], (*site_storage)[j]);
@@ -116,6 +118,7 @@ class potential_landscape
 
         for (const auto& [s, d] : lyt.defects())
         {
+            static_cast<void>(lyt.get_lattice().nm_position(s));
             if (model::is_charged_defect_type(d) && !lyt.index_of(s).has_value())
             {
                 charged_defects.emplace_back(s, d);

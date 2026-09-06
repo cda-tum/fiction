@@ -82,6 +82,10 @@ template <typename CellLyt>
 {
     if constexpr (has_siqad_coord_v<CellLyt>)
     {
+        if (s.z > 1)
+        {
+            throw std::out_of_range("Invalid lattice basis index");
+        }
         return {s.x, s.y, s.z};
     }
     else
