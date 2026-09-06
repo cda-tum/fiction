@@ -31,6 +31,7 @@
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
+#include <fiction/traits.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -302,9 +303,12 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 
     SECTION("High-efficiency mode, return first, multithreading")
     {
-        params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
-        params.return_first = true;
-        const auto layout   = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+        params.seed                                = 42;
+        params.randomize_tiles_to_skip_between_pis = true;
+        params.tiles_to_skip_between_pis           = 3;
+        params.mode                                = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+        params.return_first                        = true;
+        const auto layout                          = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, *layout);
     }
