@@ -3029,8 +3029,6 @@ class exact_impl
      */
     [[nodiscard]] std::optional<Lyt> run_asynchronously()
     {
-        std::cout << "You have called an unstable beta feature that might crash.\n";
-
         Lyt layout{{}, scheme};
 
         {
