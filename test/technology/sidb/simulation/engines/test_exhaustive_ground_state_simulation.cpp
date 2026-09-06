@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
+ * @author Anthropic (Claude)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -21,6 +22,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -368,4 +370,24 @@ TEST_CASE("7 SiDB layout", "[exhaustive-ground-state-simulation]")
     const auto simulation_results = exhaustive_ground_state_simulation(lyt, params);
 
     CHECK(simulation_results.charge_distributions.size() == 1);
+}
+
+TEST_CASE("ExGS reports progress", "[exhaustive-ground-state-simulation]")
+{
+    layout lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    progress_recorder rec{};
+
+    const auto simulation_results =
+        exhaustive_ground_state_simulation(lyt, simulation_parameters{2, -0.32}, rec.callback());
+
+    CHECK(simulation_results.charge_distributions.size() == 1);
+
+    // three SiDBs in base 2 have eight charge configurations
+    CHECK(rec.is_consistent("charge configurations"));
+    CHECK(rec.final_count("charge configurations") == 8);
 }

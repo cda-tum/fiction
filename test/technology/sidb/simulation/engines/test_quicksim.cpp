@@ -20,6 +20,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -1123,4 +1124,27 @@ TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quicksim]")
 
         REQUIRE(!simulation_results_timeout_100.has_value());
     }
+}
+
+TEST_CASE("QuickSim reports progress", "[quicksim]")
+{
+    layout lyt{};
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    progress_recorder rec{};
+
+    quicksim_params qs_params{.sim_params      = simulation_parameters{2, -0.32},
+                              .iteration_steps = 10,
+                              .number_threads  = 2};
+    qs_params.on_progress = rec.callback();
+
+    const auto simulation_results = quicksim(lyt, qs_params);
+
+    REQUIRE(simulation_results.has_value());
+
+    // every thread runs its share of the iterations
+    CHECK(rec.is_consistent("iterations"));
+    CHECK(rec.final_count("iterations") == 10);
 }

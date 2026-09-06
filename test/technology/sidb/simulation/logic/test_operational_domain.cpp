@@ -20,6 +20,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -2176,5 +2177,52 @@ TEST_CASE("Concurrent operational-domain sampling matches grid results", "[opera
                 REQUIRE(expected.has_value());
                 CHECK(*expected == value);
             });
+    }
+}
+
+TEST_CASE("Operational domain reports progress", "[operational-domain]")
+{
+    const auto lyt = blueprints::siqad_or_gate();
+
+    progress_recorder rec{};
+
+    operational_domain_stats  stats{};
+    operational_domain_params params{};
+
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 7, .max = 8, .step = 0.25},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.5, .max = 6, .step = 0.25}};
+
+    params.operational_params.sim_params.mu_minus                                                   = -0.28;
+    params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
+    params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
+    params.on_progress                     = rec.callback();
+
+    SECTION("grid search")
+    {
+        const auto op_domain = operational_domain_grid_search(lyt, std::vector{create_or_tt()}, params, &stats);
+
+        CHECK(op_domain.size() == 15);
+        CHECK(rec.is_consistent("parameter points"));
+        CHECK(rec.final_count("parameter points") == stats.num_evaluated_parameter_combinations);
+        CHECK(rec.reports_of("parameter points").back().total == 15);
+    }
+
+    SECTION("random sampling")
+    {
+        const auto op_domain = operational_domain_random_sampling(lyt, std::vector{create_or_tt()}, 5, params, &stats);
+
+        CHECK(rec.is_consistent("parameter points"));
+        CHECK(rec.final_count("parameter points") == stats.num_evaluated_parameter_combinations);
+        CHECK(rec.reports_of("parameter points").back().total == op_domain.size());
+    }
+
+    SECTION("flood fill")
+    {
+        const auto op_domain = operational_domain_flood_fill(lyt, std::vector{create_or_tt()}, 1, params, &stats);
+
+        // the number of points to evaluate is unknown in advance
+        CHECK(rec.is_consistent("parameter points"));
+        CHECK(rec.final_count("parameter points") == stats.num_evaluated_parameter_combinations);
+        CHECK(rec.reports_of("parameter points").back().total == 0);
     }
 }

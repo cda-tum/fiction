@@ -21,6 +21,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -1888,4 +1889,33 @@ TEST_CASE("QuickExact propagates invalid lattice-basis errors", "[quickexact]")
     invalid.z = 2;
     lyt.assign_sidb(invalid, dot_tag::NORMAL);
     CHECK_THROWS_AS(quickexact(lyt), std::out_of_range);
+}
+
+TEST_CASE("QuickExact reports progress", "[quickexact]")
+{
+    layout lyt{};
+    lyt.assign_cell_type({-2, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::NORMAL);
+
+    progress_recorder rec{};
+
+    quickexact_params params{.base_number_detection = quickexact_params::automatic_base_number_detection::OFF};
+    params.on_progress = rec.callback();
+
+    SECTION("two-state simulation")
+    {
+        params.sim_params = simulation_parameters{2, -0.32};
+    }
+    SECTION("three-state simulation")
+    {
+        params.sim_params = simulation_parameters{3, -0.32};
+    }
+
+    const auto simulation_results = quickexact(lyt, params);
+
+    CHECK(!simulation_results.charge_distributions.empty());
+    CHECK(rec.is_consistent("charge configurations"));
+    CHECK(rec.final_count("charge configurations") > 0);
 }

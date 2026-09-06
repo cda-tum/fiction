@@ -21,6 +21,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -959,3 +960,45 @@ TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact", "[crit
     }
 }
 #endif
+
+TEST_CASE("Critical temperature reports progress", "[critical-temperature]")
+{
+    progress_recorder rec{};
+
+    critical_temperature_params params{};
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.operational_params.sim_engine = engine::QUICKEXACT;
+    params.on_progress                   = rec.callback();
+
+    SECTION("gate-based")
+    {
+        const layout lat{blueprints::siqad_and_gate()};
+
+        critical_temperature_stats stats{};
+
+        const auto ct = critical_temperature_gate_based(lat, std::vector<tt>{create_and_tt()}, params, &stats);
+
+        CHECK(ct > 0.0);
+
+        // one step per input pattern of the two-input gate
+        CHECK(rec.is_consistent("input patterns"));
+        CHECK(rec.final_count("input patterns") == 4);
+    }
+
+    SECTION("non-gate-based")
+    {
+        layout lyt{};
+        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+        critical_temperature_stats stats{};
+
+        const auto ct = critical_temperature_non_gate_based(lyt, params, &stats);
+
+        CHECK(ct > 0.0);
+
+        // the physical simulation engine reports through the callback
+        CHECK(rec.is_consistent("charge configurations"));
+    }
+}
