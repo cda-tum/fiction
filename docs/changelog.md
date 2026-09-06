@@ -163,6 +163,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Algorithms:
+
+  - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
+
 - Documentation:
 
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
