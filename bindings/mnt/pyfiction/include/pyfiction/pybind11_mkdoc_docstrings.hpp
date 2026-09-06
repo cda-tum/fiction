@@ -19378,6 +19378,9 @@ Args:
 Returns:
     Simulation results.
 
+Raises:
+    std::out_of_range: if a site has an invalid lattice basis index.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_clustercomplete_2 =
@@ -21578,6 +21581,9 @@ Args:
 Returns:
     The physically valid charge distributions.
 
+Raises:
+    std::out_of_range: if a site has an invalid lattice basis index.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_exhaustive_ground_state_simulation_2 =
@@ -21629,6 +21635,9 @@ Args:
 Returns:
     The pruned cluster hierarchy with statistics, or an empty result
     for an empty layout.
+
+Raises:
+    std::out_of_range: if a site has an invalid lattice basis index.
 
 )doc";
 
@@ -21736,6 +21745,9 @@ Returns:
     Simulation result: every physically valid charge distribution of
     `lyt`.
 
+Raises:
+    std::out_of_range: if a site has an invalid lattice basis index.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_2 =
@@ -21805,6 +21817,9 @@ Returns:
     The physically valid charge distributions found, or `std::nullopt`
     if the layout is empty, holds charged defects, the iteration count
     is zero, the timeout was hit, or no valid distribution was found.
+
+Raises:
+    std::out_of_range: if a site has an invalid lattice basis index.
 
 )doc";
 
@@ -25577,6 +25592,10 @@ Args:
                               SiDB.
     global_external_potential: External potential applied to every
                                SiDB (unit: V).
+
+Raises:
+    std::out_of_range: if a SiDB or defect site has an invalid lattice
+                       basis index.
 
 )doc";
 

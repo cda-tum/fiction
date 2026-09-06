@@ -195,7 +195,7 @@ void time_to_solution(const Lyt& lyt, const sidb::simulation::engines::quicksim_
  * heuristic algorithm, and individual runtimes. An empty sample yields zero accuracy, zero mean heuristic runtime,
  * and infinite time-to-solution.
  *
- * @tparam Lyt SiDB ell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  * @param results_exact Simulation results of the exact algorithm.
  * @param results_heuristic Simulation of the heuristic for which the TTS is determined.
  * @param confidence_level Confidence level for the TTS computation. The confidence level represents the probability
