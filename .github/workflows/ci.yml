@@ -29,7 +29,7 @@ jobs:
     name: 🔍 Change
     permissions:
       contents: read # required to check out the repository
-    uses: ./.github/workflows/change-detection.yml
+    uses: $/.github/workflows/change-detection.yml
 
   # One job per OS and compiler, each building and testing Debug and Release. The caller job's
   # name is the group its checks appear under, so it stays a short label and deliberately does
@@ -64,7 +64,7 @@ jobs:
             compiler: clang++-19
           - runs-on: ubuntu-24.04-arm
             compiler: clang++-20
-    uses: ./.github/workflows/cpp-tests-ubuntu.yml
+    uses: $/.github/workflows/cpp-tests-ubuntu.yml
     with:
       runs-on: ${{ matrix.runs-on }}
       compiler: ${{ matrix.compiler }}
@@ -81,7 +81,7 @@ jobs:
         include:
           - runs-on: macos-15
             compiler: clang++
-    uses: ./.github/workflows/cpp-tests-macos.yml
+    uses: $/.github/workflows/cpp-tests-macos.yml
     with:
       runs-on: ${{ matrix.runs-on }}
       compiler: ${{ matrix.compiler }}
@@ -100,7 +100,7 @@ jobs:
             toolset: v143
           - runs-on: windows-2025
             toolset: ClangCL
-    uses: ./.github/workflows/cpp-tests-windows.yml
+    uses: $/.github/workflows/cpp-tests-windows.yml
     with:
       runs-on: ${{ matrix.runs-on }}
       toolset: ${{ matrix.toolset }}
@@ -111,7 +111,7 @@ jobs:
       contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
-    uses: ./.github/workflows/cpp-experiments.yml
+    uses: $/.github/workflows/cpp-experiments.yml
 
   cpp-linter:
     name: 🚨 Lint
@@ -120,7 +120,7 @@ jobs:
       pull-requests: write # required to post/update the clang-tidy thread comment on the PR
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-cpp-linter)
-    uses: ./.github/workflows/cpp-linter.yml
+    uses: $/.github/workflows/cpp-linter.yml
 
   cpp-coverage:
     name: ☂️ Coverage
@@ -128,7 +128,7 @@ jobs:
       contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
-    uses: ./.github/workflows/cpp-coverage.yml
+    uses: $/.github/workflows/cpp-coverage.yml
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -140,7 +140,7 @@ jobs:
       security-events: write # required to upload the SARIF results
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-codeql)
-    uses: ./.github/workflows/codeql.yml
+    uses: $/.github/workflows/codeql.yml
 
   python-linter:
     name: 🐍 Lint
@@ -148,7 +148,7 @@ jobs:
       contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-python-linter)
-    uses: ./.github/workflows/python-linter.yml
+    uses: $/.github/workflows/python-linter.yml
 
   # Regenerates the docstring header and fails if the committed one differs. It cannot commit
   # the regeneration itself; `docstrings.yml` explains why.
@@ -158,7 +158,7 @@ jobs:
       contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-docstrings)
-    uses: ./.github/workflows/docstrings.yml
+    uses: $/.github/workflows/docstrings.yml
 
   # `nox -s tests` across every supported interpreter and `nox -s minimums` on Python 3.10, both
   # building the extension from source outside the wheel jobs' `cibuildwheel` path. The caller
@@ -174,7 +174,7 @@ jobs:
       fail-fast: false
       matrix:
         runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-2025]
-    uses: ./.github/workflows/python-tests.yml
+    uses: $/.github/workflows/python-tests.yml
     with:
       runs-on: ${{ matrix.runs-on }}
 
@@ -194,7 +194,7 @@ jobs:
       contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-packaging)
-    uses: ./.github/workflows/packaging-sdist.yml
+    uses: $/.github/workflows/packaging-sdist.yml
 
   # `[tool.cibuildwheel] test-command` runs the suite against the built wheel on every
   # interpreter, which is where the abi3 wheel meets one newer than it compiled against.
@@ -208,7 +208,7 @@ jobs:
       fail-fast: false
       matrix:
         runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-2025]
-    uses: ./.github/workflows/packaging-wheels.yml
+    uses: $/.github/workflows/packaging-wheels.yml
     with:
       runs-on: ${{ matrix.runs-on }}
 
@@ -221,7 +221,7 @@ jobs:
       id-token: write # required by actions/attest-build-provenance to mint the attestation
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-docker)
-    uses: ./.github/workflows/docker.yml
+    uses: $/.github/workflows/docker.yml
 
   zizmor:
     name: 🌈 Zizmor
@@ -230,7 +230,7 @@ jobs:
       security-events: write # required to upload results to the code scanning API
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-workflows)
-    uses: ./.github/workflows/zizmor.yml
+    uses: $/.github/workflows/zizmor.yml
 
   # The next five jobs exist so the README can show one badge per platform again. Each
   # collapses a group into a single check run with a fixed name, which is what
