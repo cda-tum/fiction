@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Simon Hofmann (simon1hofmann)
+ * @author Anthropic (Claude)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -22,6 +23,7 @@
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -825,6 +827,36 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
         // PO names
         CHECK(layout->get_output_name(0) == "f");
     }
+}
+
+TEST_CASE("Exact physical design reports progress", "[exact]")
+{
+    const auto ntk = blueprints::and_or_network<technology_network>();
+
+    progress_recorder rec{};
+
+    auto params        = twoddwave(configuration());
+    params.on_progress = rec.callback();
+
+    SECTION("single-threaded")
+    {
+        params.num_threads = 1;
+    }
+    SECTION("multi-threaded")
+    {
+        params.num_threads = 2;
+    }
+
+    exact_physical_design_stats stats{};
+
+    const auto layout = exact<cart_gate_clk_lyt>(ntk, params, &stats);
+
+    REQUIRE(layout.has_value());
+    check_eq(ntk, *layout);
+
+    // the number of aspect ratios is unknown in advance
+    CHECK(rec.is_consistent("aspect ratios"));
+    CHECK(rec.final_count("aspect ratios") == stats.num_aspect_ratios);
 }
 
 #else  // FICTION_Z3_SOLVER

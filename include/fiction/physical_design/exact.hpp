@@ -32,6 +32,7 @@
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <kitty/operations.hpp>
@@ -157,6 +158,10 @@ struct exact_physical_design_params
      * Technology-specific constraints that are only to be added for a certain target technology.
      */
     technology_constraints technology_specifics = technology_constraints::NONE;
+    /**
+     * Callback that receives the number of examined aspect ratios.
+     */
+    utils::progress_callback on_progress{};
 };
 /**
  * Statistics.
@@ -191,6 +196,7 @@ class exact_impl
                exact_physical_design_stats& st, const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
+            progress{ps.on_progress, "aspect ratios"},
             scheme{*layouts::clocking::get_scheme<Lyt>(ps.scheme)},
             black_list{sbl}
     {
@@ -237,6 +243,10 @@ class exact_impl
      * Statistics.
      */
     exact_physical_design_stats& pst;
+    /**
+     * Reports the examined aspect ratios. Their number is not bounded in advance, so the total stays unknown.
+     */
+    utils::progress_reporter progress;
     /**
      * The utilized clocking scheme.
      */
@@ -2923,6 +2933,8 @@ class exact_impl
                 pst.num_aspect_ratios++;
             }
 
+            progress.advance();
+
             if ((ar.x + 1) * (ar.y + 1) > ps.upper_bound_area || (ar.x >= ps.upper_bound_x && ar.y >= ps.upper_bound_y))
             {
                 return std::nullopt;
@@ -3081,7 +3093,7 @@ class exact_impl
      *
      * @return A placed and routed gate-level layout or std::nullopt in case a timeout or an upper bound was reached.
      */
-    [[nodiscard]] std::optional<Lyt> run_synchronously() noexcept
+    [[nodiscard]] std::optional<Lyt> run_synchronously()
     {
         Lyt layout{{}, scheme};
 
@@ -3092,11 +3104,11 @@ class exact_impl
 
         for (; ari <= upper_bound; ++ari)  // <= to prevent overflow
         {
-
             auto ar = *ari;
 
             // log the examination of a new aspect ratio
             pst.num_aspect_ratios++;
+            progress.advance();
 
             if (handler.skippable(ar))
             {

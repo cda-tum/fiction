@@ -20,6 +20,7 @@
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -578,4 +579,36 @@ TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-ori
     };
     CHECK(pi_positions(required_value(layouts[0])) == pi_positions(required_value(layouts[2])));
     CHECK(pi_positions(required_value(layouts[1])) == pi_positions(required_value(layouts[3])));
+}
+
+TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layout-design]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    const auto ntk    = blueprints::mux21_network<technology_network>();
+
+    progress_recorder rec{};
+
+    graph_oriented_layout_design_params params{};
+    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+    params.return_first = true;
+    params.on_progress  = rec.callback();
+
+    SECTION("single-threaded")
+    {
+        params.enable_multithreading = false;
+    }
+    SECTION("multi-threaded")
+    {
+        params.enable_multithreading = true;
+    }
+
+    const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params);
+
+    REQUIRE(layout.has_value());
+    check_eq(ntk, *layout);
+
+    // the number of expansions is unknown in advance
+    CHECK(rec.is_consistent("expansions"));
+    CHECK(rec.final_count("expansions") > 0);
+    CHECK(rec.reports_of("expansions").back().total == 0);
 }

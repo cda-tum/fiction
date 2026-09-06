@@ -27,6 +27,7 @@
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -55,6 +56,10 @@ struct wiring_reduction_params
      * at every algorithm step and the functional correctness has to be ensured by completing essential algorithm steps.
      */
     uint64_t timeout = std::numeric_limits<uint64_t>::max();
+    /**
+     * Callback that receives the number of wire paths processed so far.
+     */
+    utils::progress_callback on_progress{};
 };
 
 /**
@@ -1119,6 +1124,9 @@ class wiring_reduction_impl
             timeout_limit_is_reached = (elapsed_ms >= params.timeout);
         };
 
+        // the number of paths to process is not known in advance, so the total stays unknown
+        utils::progress_reporter progress{ps.on_progress, "wire paths"};
+
         // perform wiring reduction iteratively until no further wires can be deleted
         while (found_wires && !timeout_limit_reached)
         {
@@ -1159,6 +1167,8 @@ class wiring_reduction_impl
                     // update the list of wires to delete based on the current path
                     update_to_delete_list<Lyt, wiring_reduction_layout_type<coordinate<Lyt>>>(wiring_reduction_lyt,
                                                                                               possible_path, to_delete);
+
+                    progress.advance();
 
                     // update the remaining timeout after processing the path
                     update_timeout();
@@ -1253,7 +1263,7 @@ class wiring_reduction_impl
  * @param pst Statistics.
  */
 template <typename Lyt>
-void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_reduction_stats* pst = nullptr) noexcept
+void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_reduction_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");

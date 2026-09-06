@@ -14,6 +14,7 @@
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author Anthropic (Claude)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -21,6 +22,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -318,4 +320,25 @@ TEST_CASE("PI and PO border validation", "[post_layout_optimization]")
                 CHECK((layout.is_at_eastern_border(tile) || layout.is_at_southern_border(tile)));
             });
     }
+}
+
+TEST_CASE("Post-layout optimization reports progress", "[post_layout_optimization]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+
+    const auto ntk    = blueprints::mux21_network<technology_network>();
+    const auto layout = orthogonal<gate_layout>(ntk);
+
+    progress_recorder               rec{};
+    post_layout_optimization_params params{};
+    params.on_progress = rec.callback();
+
+    post_layout_optimization<gate_layout>(layout, params);
+
+    check_eq(ntk, layout);
+
+    // every optimization pass restarts the relocation count
+    CHECK(rec.is_consistent("gate relocations"));
+    // the nested wiring reduction reports through the same callback
+    CHECK(rec.is_consistent("wire paths"));
 }
