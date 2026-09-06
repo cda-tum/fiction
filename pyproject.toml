@@ -163,6 +163,19 @@ addopts = [
 ]
 log_level = "INFO"
 testpaths = ["bindings/mnt/pyfiction/test"]
+markers = [
+    "layouts: layout data structures and layout I/O",
+    "networks: logic networks",
+    "physical_design: placement, routing, and optimization",
+    "synthesis: logic synthesis",
+    "verification: layout and circuit verification",
+    "fcn: technology-independent FCN operations",
+    "inml: iNML operations",
+    "sidb: SiDB operations",
+    "simulation: SiDB simulation engines and analysis",
+    "io: input and output formats across modules",
+    "generators: SiDB layout and gate generation",
+]
 
 
 [tool.coverage.run]
@@ -355,6 +368,8 @@ docs = [
     "sphinx-copybutton>=0.5.2",
     "sphinx-autobuild>=2025.8.25",
     "sphinx-llm>=1.0.0",
+    "sphinxcontrib-bibtex>=2.6.5",
+    "sphinxext-opengraph>=0.13.0",
 ]
 test = [
     "pytest>=9.0.1",

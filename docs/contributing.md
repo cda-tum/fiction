@@ -68,6 +68,19 @@ Nevertheless, please try to follow the guidelines below as well as you can to he
 
 - If your PR gets a "Changes requested" review, you will need to address the feedback and update your PR by pushing to the same branch. You don't need to close the PR and open a new one. Respond to review comments on the PR (e.g., with "done 👍"). Be sure to re-request review once you have made changes after a code review so that maintainers know that the requests have been addressed.
 
+## Selecting Python Tests
+
+Tests inherit markers from their directories. Run `pytest -m simulation` to select
+SiDB simulation tests, or `uvx nox -s tests-3.12 -- -m simulation` to build the bindings
+and run that selection in an isolated environment. Use `pytest --markers` to list
+the available groups.
+
+Markers include `layouts`, `networks`, `physical_design`, `synthesis`, `verification`,
+`fcn`, `inml`, `sidb`, `simulation`, `io`, and `generators`. Nested tests inherit every
+matching ancestor marker: `pytest -m "sidb and io"` selects SiDB I/O tests, including
+simulation I/O. New files in those directories need no marker annotations. Running
+without `-m` executes the full suite.
+
 ## Python Coverage
 
 Run the test suite with coverage on one supported Python version:
@@ -101,6 +114,31 @@ When working with CodeRabbit:
 - **Avoid force-pushing or squashing locally while a review is open.** It detaches existing comments from their lines. Maintainers squash on merge.
 
 `.coderabbit.yaml` in the repository root configures which paths are reviewed and what CodeRabbit should not comment on. Update it rather than repeating the same correction by hand.
+
+## Publishing to PyPI
+
+The `CD` workflow publishes `mnt.pyfiction` when a GitHub release is published.
+The `publish-to-pypi` job downloads the source distribution and wheels from the build jobs
+and authenticates through [PyPI trusted publishing](https://docs.pypi.org/trusted-publishers/using-a-publisher/).
+The job uses the `pypi` GitHub environment and requires `id-token: write` permission.
+A manual workflow run builds the distributions but skips publishing.
+
+The GitHub trusted publisher on the
+[project's Publishing page](https://pypi.org/manage/project/mnt.pyfiction/settings/publishing/)
+uses these values:
+
+| Field | Value |
+| --- | --- |
+| Owner | `cda-tum` |
+| Repository name | `fiction` |
+| Workflow name | `cd.yml` |
+| Environment name | `pypi` |
+
+The workflow name is the filename, without `.github/workflows/`.
+Configure any required reviewers or release-tag restrictions on the `pypi` GitHub environment.
+After the next release, verify that `Deploy to PyPI` succeeds and that the release files
+and their attestations appear on PyPI. Then revoke the old deployment token on PyPI and
+remove the `PYPI_DEPLOY_TOKEN` GitHub secret if no other workflow uses that token.
 
 ## AI-Assisted Contributions
 
@@ -145,3 +183,15 @@ are passed to Sphinx. Read the Docs uses the same non-interactive build.
 The docs dependency group requires Python 3.12 or newer. `uv.lock` records the
 versions used by local and hosted builds. HTML builds also produce `llms.txt`,
 `llms-full.txt`, and a Markdown copy of each page alongside its HTML file.
+
+### Citing Publications
+
+Add publication metadata to `docs/references.bib` and preserve existing citation keys.
+Use MyST citation roles such as `` {cite:p}`fiction` `` in documentation pages.
+The {doc}`publications` page renders the bibliography and provides a BibTeX download;
+keep algorithm and experiment links beside their citations. Run
+`prek run bibtex-tidy --all-files` to format entries and fields consistently.
+
+HTML pages include OpenGraph titles, descriptions, canonical URLs, and the project logo.
+Write a clear opening paragraph for each page's generated description. Keep the default
+image in `docs/_static/mnt_social.png` aligned with the project logo.
