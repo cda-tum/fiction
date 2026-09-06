@@ -13,6 +13,7 @@
  * @brief Detects the SiDB pairs that jointly encode one Binary-dot Logic value.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -205,7 +206,7 @@ struct detect_bdl_pairs_params
  */
 [[nodiscard]] inline std::vector<bdl_pair<lattice_site>>
 detect_bdl_pairs(const layout& lyt, const std::optional<sidb_technology::cell_type>& type = std::nullopt,
-                 const detect_bdl_pairs_params& params = {}) noexcept
+                 const detect_bdl_pairs_params& params = {})
 {
     assert(params.minimum_distance <= params.maximum_distance);
 
@@ -318,7 +319,7 @@ template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
 std::vector<bdl_pair<cell<Lyt>>>
 detect_bdl_pairs(const Lyt& lyt, const std::optional<typename fiction::technology<Lyt>::cell_type>& type = std::nullopt,
-                 const detect_bdl_pairs_params& params = {}) noexcept
+                 const detect_bdl_pairs_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

@@ -2094,3 +2094,11 @@ TEST_CASE("Operational-domain sweeps reject non-finite and oversized ranges", "[
     CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params),
                     std::invalid_argument);
 }
+
+TEST_CASE("Operational-domain flood fill requires two dimensions", "[operational-domain]")
+{
+    operational_domain_params params{};
+    params.sweep_dimensions = {{sweep_parameter::EPSILON_R, 5.0, 5.1, 0.1}};
+    CHECK_THROWS_AS(operational_domain_flood_fill(layout{}, std::vector<tt>{create_id_tt()}, 0, params),
+                    std::invalid_argument);
+}

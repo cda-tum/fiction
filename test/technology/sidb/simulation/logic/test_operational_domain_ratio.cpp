@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -32,6 +33,8 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <limits>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -79,6 +82,18 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
     op_domain_params.sweep_dimensions[1].min  = 5.0;
     op_domain_params.sweep_dimensions[1].max  = 5.0;
     op_domain_params.sweep_dimensions[1].step = 0.1;
+
+    SECTION("Off-grid seeds map to the next grid point")
+    {
+        op_domain_params.sweep_dimensions[0].max = 5.6;
+        op_domain_params.sweep_dimensions[1].max = 5.1;
+        const operational_domain_ratio_params params{op_domain_params};
+        const auto                            off_grid =
+            operational_domain_ratio(lat, std::vector<tt>{create_id_tt()}, parameter_point{{5.55, 5.05}}, params);
+        const auto on_grid =
+            operational_domain_ratio(lat, std::vector<tt>{create_id_tt()}, parameter_point{{5.6, 5.1}}, params);
+        CHECK_THAT(off_grid, Catch::Matchers::WithinAbs(on_grid, ERROR_MARGIN));
+    }
 
     SECTION("Operational domain with one parameter point")
     {
@@ -150,15 +165,15 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
     operational_domain_ratio_params op_ratio_params{op_domain_params};
 
     // pruning and simulation to determine the operational status of the layout
-    const auto op_domain_ratio_pruning_and_simulation = operational_domain_ratio(
-        lyt, std::vector<tt>{create_nand_tt()}, parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
+    const auto op_domain_ratio_pruning_and_simulation =
+        operational_domain_ratio(lyt, std::vector<tt>{create_nand_tt()}, parameter_point({5.6, 5.0}), op_ratio_params);
 
     // only pruning to determine the operational status of the layout
     op_ratio_params.op_domain_params.operational_params.strategy_to_analyze_operational_status =
         is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-    const auto op_domain_ratio_only_pruning = operational_domain_ratio(
-        lyt, std::vector<tt>{create_nand_tt()}, parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
+    const auto op_domain_ratio_only_pruning =
+        operational_domain_ratio(lyt, std::vector<tt>{create_nand_tt()}, parameter_point({5.6, 5.0}), op_ratio_params);
 
     CHECK_THAT(op_domain_ratio_pruning_and_simulation, Catch::Matchers::WithinAbs(0.11918914799573235, ERROR_MARGIN));
 
@@ -238,3 +253,36 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
     }
 }
 #endif
+
+TEST_CASE("Operational-domain ratios reject invalid sweep steps", "[compute-operational-ratio]")
+{
+    operational_domain_ratio_params params{};
+    params.op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R, 5.0, 5.1, 0.0}};
+    CHECK_THROWS_AS(operational_domain_ratio(layout{}, std::vector<tt>{create_id_tt()}, parameter_point{{5.0}}, params),
+                    std::invalid_argument);
+}
+
+TEST_CASE("Operational-domain ratios reject malformed seeds", "[compute-operational-ratio]")
+{
+    operational_domain_ratio_params params{};
+    params.op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R, 5.0, 6.0, 1.0},
+                                                {sweep_parameter::LAMBDA_TF, 5.0, 6.0, 1.0}};
+    const auto nan                           = std::numeric_limits<double>::quiet_NaN();
+    const auto inf                           = std::numeric_limits<double>::infinity();
+    for (const auto& seed : std::vector<std::vector<double>>{{},
+                                                             {5.0},
+                                                             {5.0, 5.0, 5.0},
+                                                             {nan, 5.0},
+                                                             {5.0, inf},
+                                                             {-inf, 5.0},
+                                                             {4.9, 5.0},
+                                                             {5.0, 6.1}})
+    {
+        CHECK_THROWS_AS(
+            operational_domain_ratio(layout{}, std::vector<tt>{create_id_tt()}, parameter_point{seed}, params),
+            std::invalid_argument);
+    }
+    params.op_domain_params.sweep_dimensions.resize(1);
+    CHECK_THROWS_AS(operational_domain_ratio(layout{}, std::vector<tt>{create_id_tt()}, parameter_point{{5.0}}, params),
+                    std::invalid_argument);
+}

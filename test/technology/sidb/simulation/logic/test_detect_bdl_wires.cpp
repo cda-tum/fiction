@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -26,6 +27,8 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
+
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::fcn;
@@ -665,4 +668,14 @@ TEST_CASE("special cases", "[detect-bdl-wires]")
         CHECK(wire.last_bdl_pair ==
               bdl_pair{sidb_technology::cell_type::NORMAL, lattice_site{18, -1, 1}, lattice_site{20, -1, 1}});
     }
+}
+
+TEST_CASE("BDL wire detection propagates invalid lattice-basis errors", "[detect-bdl-wires]")
+{
+    layout       lyt{};
+    lattice_site invalid{1, 0, 0};
+    invalid.z = 2;
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type(invalid, sidb_technology::cell_type::INPUT);
+    CHECK_THROWS_AS(detect_bdl_wires(lyt), std::out_of_range);
 }

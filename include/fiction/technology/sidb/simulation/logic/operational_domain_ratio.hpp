@@ -13,6 +13,7 @@
  * @brief Fraction of a parameter neighborhood in which a layout stays operational.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -56,10 +57,12 @@ struct operational_domain_ratio_params
  * @param params Parameters.
  * @param pp The specific parameter point around which the operational ratio is computed.
  * @return The ratio of operational parameter points to the total number of parameter points in the parameter space.
+ * @throws std::invalid_argument if the sweep has fewer than two dimensions, a range is invalid, or the seed is
+ * non-finite, outside the grid, or has the wrong dimension count.
  */
 template <typename TT>
 [[nodiscard]] double operational_domain_ratio(const layout& lyt, const std::vector<TT>& spec, const parameter_point& pp,
-                                              const operational_domain_ratio_params& params = {}) noexcept
+                                              const operational_domain_ratio_params& params = {})
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
@@ -89,7 +92,7 @@ template <typename TT>
 template <typename Lyt, typename TT>
     requires(is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt>)
 [[nodiscard]] double operational_domain_ratio(const Lyt& lyt, const std::vector<TT>& spec, const parameter_point& pp,
-                                              const operational_domain_ratio_params& params = {}) noexcept
+                                              const operational_domain_ratio_params& params = {})
 {
     return operational_domain_ratio(to_sidb_layout(lyt), spec, pp, params);
 }

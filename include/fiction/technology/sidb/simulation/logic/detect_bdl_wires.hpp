@@ -13,6 +13,7 @@
  * @brief Links BDL pairs into the input, output, and internal wires of a layout.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -418,7 +419,7 @@ class detect_bdl_wires_impl
      */
     [[nodiscard]] std::optional<bdl_pair<lattice_site>>
     find_bdl_neighbor_above(const bdl_pair<lattice_site>&           given,
-                            const std::set<bdl_pair<lattice_site>>& bdl_pairs) const noexcept
+                            const std::set<bdl_pair<lattice_site>>& bdl_pairs) const
     {
         const auto it = std::ranges::find_if(
             bdl_pairs,
@@ -445,7 +446,7 @@ class detect_bdl_wires_impl
      */
     [[nodiscard]] std::optional<bdl_pair<lattice_site>>
     find_bdl_neighbor_below(const bdl_pair<lattice_site>&           given,
-                            const std::set<bdl_pair<lattice_site>>& bdl_pairs) const noexcept
+                            const std::set<bdl_pair<lattice_site>>& bdl_pairs) const
     {
         const auto it = std::ranges::find_if(
             bdl_pairs,
@@ -526,7 +527,7 @@ class detect_bdl_wires_impl
      * @param lyt The layout.
      * @return All BDL pairs.
      */
-    [[nodiscard]] std::set<bdl_pair<lattice_site>> aggregate_bdl_pairs(const layout& lyt) const noexcept
+    [[nodiscard]] std::set<bdl_pair<lattice_site>> aggregate_bdl_pairs(const layout& lyt) const
     {
         std::set<bdl_pair<lattice_site>> bdl_pairs{};
 
@@ -554,7 +555,7 @@ class detect_bdl_wires_impl
  */
 [[nodiscard]] inline std::vector<bdl_wire>
 detect_bdl_wires(const layout& lyt, const detect_bdl_wires_params& params = {},
-                 const bdl_wire_selection wire_selection = bdl_wire_selection::ALL) noexcept
+                 const bdl_wire_selection wire_selection = bdl_wire_selection::ALL)
 {
     const detail::detect_bdl_wires_impl p{lyt, params};
 
@@ -920,7 +921,7 @@ class legacy_detect_bdl_wires_impl
      * Once a wire is fully constructed, all BDL pairs belonging to that wire are removed from the initial collection.
      * The function then proceeds to detect the next wire using any remaining BDL pairs.
      */
-    void detect_bdl_wires() noexcept
+    void detect_bdl_wires()
     {
         auto bdl_pairs = aggregate_bdl_pairs();
 
@@ -1045,7 +1046,7 @@ class legacy_detect_bdl_wires_impl
      */
     [[nodiscard]] std::optional<bdl_pair<cell<Lyt>>>
     find_bdl_neighbor_above(const bdl_pair<cell<Lyt>>& given_bdl, const std::set<bdl_pair<cell<Lyt>>>& bdl_pairs,
-                            const double inter_bdl_distance) const noexcept
+                            const double inter_bdl_distance) const
     {
         const auto it = std::ranges::find_if(
             bdl_pairs,
@@ -1082,7 +1083,7 @@ class legacy_detect_bdl_wires_impl
      */
     [[nodiscard]] std::optional<bdl_pair<cell<Lyt>>>
     find_bdl_neighbor_below(const bdl_pair<cell<Lyt>>& given_bdl, const std::set<bdl_pair<cell<Lyt>>>& bdl_pairs,
-                            const double inter_bdl_distance) const noexcept
+                            const double inter_bdl_distance) const
     {
         const auto it = std::ranges::find_if(
             bdl_pairs,
@@ -1188,7 +1189,7 @@ class legacy_detect_bdl_wires_impl
      * @tparam Lyt SiDB cell-level layout type.
      * @return A set of BDL pairs containing all pairs of the specified types.
      */
-    [[nodiscard]] std::set<bdl_pair<cell<Lyt>>> aggregate_bdl_pairs() const noexcept
+    [[nodiscard]] std::set<bdl_pair<cell<Lyt>>> aggregate_bdl_pairs() const
     {
         // Collect BDL pairs of each type
         const auto all_input_bdls  = detect_bdl_pairs(layout, Lyt::cell_type::INPUT, params.bdl_pairs_params);
@@ -1224,7 +1225,7 @@ template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
 [[nodiscard]] std::vector<legacy_bdl_wire<Lyt>>
 detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
-                 const bdl_wire_selection wire_selection = bdl_wire_selection::ALL) noexcept
+                 const bdl_wire_selection wire_selection = bdl_wire_selection::ALL)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

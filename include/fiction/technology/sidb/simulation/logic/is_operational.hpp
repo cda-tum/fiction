@@ -335,7 +335,7 @@ class is_operational_impl
      * @param input_pattern The input pattern.
      * @return The reason the layout is invalid, or `std::nullopt` if the filters accept it.
      */
-    [[nodiscard]] std::optional<layout_invalidity_reason> is_layout_invalid(const uint64_t input_pattern) 
+    [[nodiscard]] std::optional<layout_invalidity_reason> is_layout_invalid(const uint64_t input_pattern)
     {
         const auto& lyt_with_input_pattern = layout_with_input_pattern(input_pattern);
 
@@ -369,7 +369,7 @@ class is_operational_impl
      *
      * @return The status and, if non-operational, the reason.
      */
-    [[nodiscard]] std::pair<operational_status, non_operationality_reason> run() 
+    [[nodiscard]] std::pair<operational_status, non_operationality_reason> run()
     {
         if (parameters.sim_engine == engine::QUICKSIM && sidb_layout.num_charged_defects() > 0)
         {
@@ -510,7 +510,7 @@ class is_operational_impl
      * @return The non-operational input patterns and the reason for each.
      */
     [[nodiscard]] std::vector<std::pair<uint64_t, non_operationality_reason>>
-    determine_non_operational_input_patterns_and_non_operationality_reason() 
+    determine_non_operational_input_patterns_and_non_operationality_reason()
     {
         std::vector<std::pair<uint64_t, non_operationality_reason>> non_operational{};
 
@@ -573,8 +573,7 @@ class is_operational_impl
      * @param state Simulation state over the layout with the current input pattern; the canvas charges are varied.
      * @return The minimum energy, or `std::nullopt` if no configuration is physically valid.
      */
-    [[nodiscard]] std::optional<double>
-    is_physical_validity_feasible(simulation::detail::simulation_state& state) noexcept
+    [[nodiscard]] std::optional<double> is_physical_validity_feasible(simulation::detail::simulation_state& state)
     {
         assert(!canvas_lyt.is_empty() && "The canvas layout must not be empty.");
 
@@ -643,7 +642,7 @@ class is_operational_impl
      * @param current_input_index The input pattern.
      */
     void set_charge_distribution_of_input_pins(simulation::detail::simulation_state& state,
-                                               const uint64_t                        current_input_index) const noexcept
+                                               const uint64_t                        current_input_index) const
     {
         state.assign_all_charge_states(model::charge_state::NEGATIVE,
                                        simulation::detail::charge_index_mode::KEEP_CHARGE_INDEX);
@@ -683,7 +682,7 @@ class is_operational_impl
      * @param output_wire_index The output pattern.
      */
     void set_charge_distribution_of_output_pins(simulation::detail::simulation_state& state,
-                                                const uint64_t                        output_wire_index) const noexcept
+                                                const uint64_t                        output_wire_index) const
     {
         const auto& lyt = state.landscape().get_layout();
 
@@ -727,7 +726,7 @@ class is_operational_impl
     [[nodiscard]] bool is_io_signal_unstable(simulation::detail::simulation_state& state,
                                              const uint64_t max_input_pattern_index, const uint64_t input_pattern,
                                              const uint64_t logical_correct_output_pattern,
-                                             const double   minimal_energy_of_physically_valid_layout) noexcept
+                                             const double   minimal_energy_of_physically_valid_layout)
     {
         const uint64_t max_output_pattern_index{uint64_t{1} << output_bdl_wires.size()};
 
@@ -823,7 +822,7 @@ class is_operational_impl
      * @param cs The charge state.
      */
     static void assign(simulation::detail::simulation_state& state, const layout& lyt, const lattice_site& site,
-                       const model::charge_state cs) noexcept
+                       const model::charge_state cs)
     {
         if (const auto index = lyt.index_of(site); index.has_value())
         {
@@ -855,7 +854,7 @@ class is_operational_impl
      * @param lyt_with_input_pattern The layout to simulate.
      * @return The simulation result; empty if the engine found no valid configuration.
      */
-    [[nodiscard]] result physical_simulation_of_layout(const layout& lyt_with_input_pattern) const 
+    [[nodiscard]] result physical_simulation_of_layout(const layout& lyt_with_input_pattern) const
     {
         if (parameters.sim_engine == engine::EXGS)
         {
@@ -1140,8 +1139,8 @@ template <typename TT>
  * @return The operational status and the number of simulator invocations.
  */
 template <typename TT>
-[[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params = {}) 
+[[nodiscard]] std::pair<operational_status, std::size_t> is_operational(const layout& lyt, const std::vector<TT>& spec,
+                                                                        const is_operational_params& params = {})
 {
     detail::check_arguments(lyt, spec);
 
@@ -1167,7 +1166,7 @@ template <typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>
 is_operational(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
                const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire,
-               const std::optional<layout>& canvas_lyt = std::nullopt) 
+               const std::optional<layout>& canvas_lyt = std::nullopt)
 {
     detail::check_arguments(lyt, spec);
 
@@ -1234,7 +1233,7 @@ is_operational(const std::vector<layout>& input_pattern_layouts, const std::vect
  */
 template <typename TT>
 [[nodiscard]] std::set<uint64_t> operational_input_patterns(const layout& lyt, const std::vector<TT>& spec,
-                                                            const is_operational_params& params = {}) 
+                                                            const is_operational_params& params = {})
 {
     detail::check_arguments(lyt, spec);
 
@@ -1258,7 +1257,7 @@ template <typename TT>
 [[nodiscard]] std::set<uint64_t>
 operational_input_patterns(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
                            const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire,
-                           const std::optional<layout>& canvas_lyt = std::nullopt) 
+                           const std::optional<layout>& canvas_lyt = std::nullopt)
 {
     detail::check_arguments(lyt, spec);
 
@@ -1283,9 +1282,9 @@ operational_input_patterns(const layout& lyt, const std::vector<TT>& spec, const
  * @return The kink-induced non-operational input patterns.
  */
 template <typename TT>
-[[nodiscard]] std::set<uint64_t>
-kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector<TT>& spec,
-                                            const is_operational_params& params = {}) 
+[[nodiscard]] std::set<uint64_t> kink_induced_non_operational_input_patterns(const layout&                lyt,
+                                                                             const std::vector<TT>&       spec,
+                                                                             const is_operational_params& params = {})
 {
     detail::check_arguments(lyt, spec);
 
@@ -1312,7 +1311,7 @@ template <typename TT>
 [[nodiscard]] std::set<uint64_t> kink_induced_non_operational_input_patterns(
     const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
     const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire,
-    const std::optional<layout>& canvas_lyt = std::nullopt) 
+    const std::optional<layout>& canvas_lyt = std::nullopt)
 {
     detail::check_arguments(lyt, spec);
 
@@ -1342,7 +1341,7 @@ template <typename TT>
  */
 template <typename TT>
 [[nodiscard]] bool is_kink_induced_non_operational(const layout& lyt, const std::vector<TT>& spec,
-                                                   const is_operational_params& params = {}) 
+                                                   const is_operational_params& params = {})
 {
     detail::check_arguments(lyt, spec);
 
@@ -1373,7 +1372,7 @@ template <typename TT>
                                                    const is_operational_params& params,
                                                    const std::vector<bdl_wire>& input_bdl_wire,
                                                    const std::vector<bdl_wire>& output_bdl_wire,
-                                                   const std::optional<layout>& canvas_lyt = std::nullopt) 
+                                                   const std::optional<layout>& canvas_lyt = std::nullopt)
 {
     detail::check_arguments(lyt, spec);
 
@@ -1418,8 +1417,8 @@ template <typename TT>
  */
 template <typename Lyt, typename TT>
     requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {}) 
+[[nodiscard]] std::pair<operational_status, std::size_t> is_operational(const Lyt& lyt, const std::vector<TT>& spec,
+                                                                        const is_operational_params& params = {})
 {
     return is_operational(to_sidb_layout(lyt), spec, params);
 }
@@ -1436,7 +1435,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 template <typename Lyt, typename TT>
     requires(is_cell_level_layout_v<Lyt>)
 [[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
-                                                            const is_operational_params& params = {}) 
+                                                            const is_operational_params& params = {})
 {
     return operational_input_patterns(to_sidb_layout(lyt), spec, params);
 }
@@ -1452,9 +1451,9 @@ template <typename Lyt, typename TT>
  */
 template <typename Lyt, typename TT>
     requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::set<uint64_t>
-kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
-                                            const is_operational_params& params = {}) 
+[[nodiscard]] std::set<uint64_t> kink_induced_non_operational_input_patterns(const Lyt&                   lyt,
+                                                                             const std::vector<TT>&       spec,
+                                                                             const is_operational_params& params = {})
 {
     return kink_induced_non_operational_input_patterns(to_sidb_layout(lyt), spec, params);
 }
@@ -1471,7 +1470,7 @@ kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT
 template <typename Lyt, typename TT>
     requires(is_cell_level_layout_v<Lyt>)
 [[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
-                                                   const is_operational_params& params = {}) 
+                                                   const is_operational_params& params = {})
 {
     return is_kink_induced_non_operational(to_sidb_layout(lyt), spec, params);
 }

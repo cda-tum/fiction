@@ -131,7 +131,7 @@ class physical_population_stability_impl
      *
      * @return The population stability information, one entry per distinct charge distribution.
      */
-    [[nodiscard]] std::vector<population_stability_information> run() 
+    [[nodiscard]] std::vector<population_stability_information> run()
     {
         const engines::quickexact_params quickexact_parameters{.sim_params = params.sim_params};
 
@@ -302,7 +302,7 @@ class physical_population_stability_impl
  * @return The population stability information, one entry per distinct charge distribution.
  */
 [[nodiscard]] inline std::vector<population_stability_information>
-physical_population_stability(const layout& lyt, const physical_population_stability_params& params) 
+physical_population_stability(const layout& lyt, const physical_population_stability_params& params)
 {
     detail::physical_population_stability_impl p{lyt, params};
 

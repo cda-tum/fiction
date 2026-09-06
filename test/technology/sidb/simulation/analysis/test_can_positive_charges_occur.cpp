@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -22,6 +23,8 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp>
 #include <fiction/technology/sidb/technology.hpp>
+
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -87,4 +90,13 @@ TEST_CASE("Y-shaped SiDB OR gate with input 01, using siqad coordinates", "[can-
         const simulation_parameters params{2, -0.32, 1, 10};
         CHECK(can_positive_charges_occur(lyt, params));
     }
+}
+
+TEST_CASE("Positive-charge analysis propagates invalid lattice-basis errors", "[can-positive-charges-occur]")
+{
+    layout       lyt{};
+    lattice_site invalid{};
+    invalid.z = 2;
+    lyt.assign_cell_type(invalid, sidb_technology::cell_type::NORMAL);
+    CHECK_THROWS_AS(can_positive_charges_occur(lyt, {}), std::out_of_range);
 }

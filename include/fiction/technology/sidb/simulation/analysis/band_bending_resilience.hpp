@@ -62,10 +62,9 @@ struct band_bending_resilience_params
  * @return The minimum potential difference over all input patterns.
  */
 template <typename TT>
-[[nodiscard]] double
-band_bending_resilience(const layout& lyt, const std::vector<TT>& spec,
-                        const band_bending_resilience_params& params          = {},
-                        const std::optional<transition_type>  transition_type = std::nullopt) noexcept
+[[nodiscard]] double band_bending_resilience(const layout& lyt, const std::vector<TT>& spec,
+                                             const band_bending_resilience_params& params          = {},
+                                             const std::optional<transition_type>  transition_type = std::nullopt)
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
@@ -123,9 +122,9 @@ band_bending_resilience(const layout& lyt, const std::vector<TT>& spec,
  */
 template <typename Lyt, typename TT>
     requires(is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt>)
-[[nodiscard]] double
-band_bending_resilience(const Lyt& lyt, const std::vector<TT>& spec, const band_bending_resilience_params& params = {},
-                        const std::optional<transition_type> transition_type = std::nullopt) noexcept
+[[nodiscard]] double band_bending_resilience(const Lyt& lyt, const std::vector<TT>& spec,
+                                             const band_bending_resilience_params& params          = {},
+                                             const std::optional<transition_type>  transition_type = std::nullopt)
 {
     return band_bending_resilience(to_sidb_layout(lyt), spec, params, transition_type);
 }

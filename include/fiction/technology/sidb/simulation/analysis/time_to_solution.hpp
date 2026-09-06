@@ -195,8 +195,7 @@ inline void time_to_solution_for_given_simulation_results(const result&         
  * @param ps Statistics.
  */
 inline void time_to_solution(const layout& lyt, const engines::quicksim_params& qs_params,
-                             const time_to_solution_params& tts_params = {},
-                             time_to_solution_stats*        ps         = nullptr) 
+                             const time_to_solution_params& tts_params = {}, time_to_solution_stats* ps = nullptr)
 {
     time_to_solution_stats st{};
 
@@ -278,7 +277,7 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
 template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
 void time_to_solution(const Lyt& lyt, const engines::quicksim_params& qs_params,
-                      const time_to_solution_params& tts_params = {}, time_to_solution_stats* ps = nullptr) 
+                      const time_to_solution_params& tts_params = {}, time_to_solution_stats* ps = nullptr)
 {
     time_to_solution(to_sidb_layout(lyt), qs_params, tts_params, ps);
 }

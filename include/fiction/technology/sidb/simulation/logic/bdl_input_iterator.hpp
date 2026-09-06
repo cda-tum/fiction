@@ -13,6 +13,7 @@
  * @brief Iterates a BDL layout over all of its input patterns.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -88,7 +89,7 @@ class bdl_input_iterator
      * @param source_layout The layout to iterate over.
      * @param ps Parameters for the BDL pair and wire detection and the input encoding.
      */
-    explicit bdl_input_iterator(const layout& source_layout, const bdl_input_iterator_params& ps = {}) noexcept :
+    explicit bdl_input_iterator(const layout& source_layout, const bdl_input_iterator_params& ps = {}) :
             bdl_input_iterator{source_layout, ps,
                                detect_bdl_wires(source_layout, ps.bdl_wire_params, bdl_wire_selection::INPUT)}
     {}
@@ -100,7 +101,7 @@ class bdl_input_iterator
      * @param source_input_wires The input wires of `source_layout`.
      */
     bdl_input_iterator(const layout& source_layout, const bdl_input_iterator_params& ps,
-                       const std::vector<bdl_wire>& source_input_wires) noexcept :
+                       const std::vector<bdl_wire>& source_input_wires) :
             sidb_layout{source_layout},
             input_pairs{detect_bdl_pairs(source_layout, sidb_technology::cell_type::INPUT,
                                          ps.bdl_wire_params.bdl_pairs_params)},
@@ -337,7 +338,7 @@ class bdl_input_iterator
      *
      * @return One pair per wire.
      */
-    [[nodiscard]] std::vector<bdl_pair<lattice_site>> determine_last_bdl_for_each_wire() const noexcept
+    [[nodiscard]] std::vector<bdl_pair<lattice_site>> determine_last_bdl_for_each_wire() const
     {
         const auto& lat = sidb_layout.get_lattice();
 
@@ -371,7 +372,7 @@ class bdl_input_iterator
      *
      * @return One flag per input pair.
      */
-    [[nodiscard]] std::vector<bool> determine_upper_input_closer_to_wire_end() const noexcept
+    [[nodiscard]] std::vector<bool> determine_upper_input_closer_to_wire_end() const
     {
         const auto& lat = sidb_layout.get_lattice();
 
@@ -458,9 +459,9 @@ class bdl_input_iterator
  * @param input_wires The input wires of `lyt`.
  * @return One layout per input pattern.
  */
-[[nodiscard]] inline std::vector<layout>
-generate_bdl_input_pattern_layouts(const layout& lyt, const bdl_input_iterator_params& ps,
-                                   const std::vector<bdl_wire>& input_wires) noexcept
+[[nodiscard]] inline std::vector<layout> generate_bdl_input_pattern_layouts(const layout&                    lyt,
+                                                                            const bdl_input_iterator_params& ps,
+                                                                            const std::vector<bdl_wire>& input_wires)
 {
     bdl_input_iterator bii{lyt, ps, input_wires};
 
@@ -491,8 +492,8 @@ generate_bdl_input_pattern_layouts(const layout& lyt, const bdl_input_iterator_p
  * @param ps Parameters for the BDL detection and the input encoding.
  * @return One layout per input pattern.
  */
-[[nodiscard]] inline std::vector<layout>
-generate_bdl_input_pattern_layouts(const layout& lyt, const bdl_input_iterator_params& ps = {}) noexcept
+[[nodiscard]] inline std::vector<layout> generate_bdl_input_pattern_layouts(const layout&                    lyt,
+                                                                            const bdl_input_iterator_params& ps = {})
 {
     return generate_bdl_input_pattern_layouts(lyt, ps,
                                               detect_bdl_wires(lyt, ps.bdl_wire_params, bdl_wire_selection::INPUT));
@@ -845,7 +846,7 @@ class legacy_bdl_input_iterator
      *
      * @note Assumes that `input_bdl_wires` and `last_bdl_for_each_wire` are accessible within the scope.
      */
-    [[nodiscard]] std::vector<bdl_pair<cell<Lyt>>> determine_last_bdl_for_each_wire() noexcept
+    [[nodiscard]] std::vector<bdl_pair<cell<Lyt>>> determine_last_bdl_for_each_wire()
     {
         std::vector<bdl_pair<cell<Lyt>>> end_bdls{};
         end_bdls.reserve(input_bdl_wires.size());
@@ -896,7 +897,7 @@ class legacy_bdl_input_iterator
      *
      * @return One flag per input BDL pair, indexed like `input_pairs`.
      */
-    [[nodiscard]] std::vector<bool> determine_upper_input_closer_to_wire_end() const noexcept
+    [[nodiscard]] std::vector<bool> determine_upper_input_closer_to_wire_end() const
     {
         std::vector<bool> upper_is_closer{};
         upper_is_closer.reserve(num_inputs);
@@ -1021,7 +1022,7 @@ template <typename Lyt>
 template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
 [[nodiscard]] std::vector<Lyt> generate_bdl_input_pattern_layouts(const Lyt&                       lyt,
-                                                                  const bdl_input_iterator_params& ps = {}) noexcept
+                                                                  const bdl_input_iterator_params& ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1041,9 +1042,8 @@ template <typename Lyt>
  */
 template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::vector<Lyt>
-generate_bdl_input_pattern_layouts(const Lyt& lyt, const bdl_input_iterator_params& ps,
-                                   const std::vector<legacy_bdl_wire<Lyt>>& input_wires) noexcept
+[[nodiscard]] std::vector<Lyt> generate_bdl_input_pattern_layouts(const Lyt& lyt, const bdl_input_iterator_params& ps,
+                                                                  const std::vector<legacy_bdl_wire<Lyt>>& input_wires)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

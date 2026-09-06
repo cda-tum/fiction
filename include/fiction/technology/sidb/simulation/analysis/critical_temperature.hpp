@@ -203,7 +203,7 @@ class critical_temperature_impl
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      */
     template <typename TT>
-    void gate_based_simulation(const std::vector<TT>& spec) 
+    void gate_based_simulation(const std::vector<TT>& spec)
     {
         const mockturtle::stopwatch stop{stats.time_total};
         if (sidb_layout.is_empty())
@@ -311,7 +311,7 @@ class critical_temperature_impl
     /**
      * *Gate-based Critical Temperature* Simulation of a SiDB layout for a given Boolean function.
      */
-    void non_gate_based_simulation() 
+    void non_gate_based_simulation()
     {
         const mockturtle::stopwatch stop{stats.time_total};
         result                      simulation_results{};
@@ -567,7 +567,7 @@ class critical_temperature_impl
      * @param lyt_with_input_pattern The SiDB layout with a given input combination applied.
      * @return Simulation results.
      */
-    [[nodiscard]] result physical_simulation_of_layout(const layout& lyt_with_input_pattern) 
+    [[nodiscard]] result physical_simulation_of_layout(const layout& lyt_with_input_pattern)
     {
         if (params.operational_params.sim_engine == engine::EXGS)
         {

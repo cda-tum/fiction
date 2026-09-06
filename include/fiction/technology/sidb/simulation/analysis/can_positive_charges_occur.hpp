@@ -40,7 +40,7 @@ namespace fiction::sidb::simulation::analysis
  * @param land The potential landscape of the layout under the parameters to check.
  * @return `true` if at least one SiDB can be positively charged, `false` otherwise.
  */
-[[nodiscard]] inline bool can_positive_charges_occur(const potential_landscape& land) 
+[[nodiscard]] inline bool can_positive_charges_occur(const potential_landscape& land)
 {
     const auto local_potentials =
         land.local_internal_potentials(charge_distribution{land.sites(), model::charge_state::NEGATIVE});
@@ -64,9 +64,9 @@ namespace fiction::sidb::simulation::analysis
  * @param lyt The layout to check.
  * @param sim_params The physical parameters.
  * @return `true` if at least one SiDB can be positively charged, `false` otherwise.
+ * @throws std::out_of_range if a SiDB or defect site has an invalid lattice basis index.
  */
-[[nodiscard]] inline bool can_positive_charges_occur(const layout&                       lyt,
-                                                     const model::simulation_parameters& sim_params) 
+[[nodiscard]] inline bool can_positive_charges_occur(const layout& lyt, const model::simulation_parameters& sim_params)
 {
     return can_positive_charges_occur(potential_landscape{lyt, sim_params});
 }
@@ -80,7 +80,7 @@ namespace fiction::sidb::simulation::analysis
  */
 template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] bool can_positive_charges_occur(const Lyt& lyt, const model::simulation_parameters& sim_params) 
+[[nodiscard]] bool can_positive_charges_occur(const Lyt& lyt, const model::simulation_parameters& sim_params)
 {
     return can_positive_charges_occur(to_sidb_layout(lyt), sim_params);
 }
