@@ -241,7 +241,7 @@ jobs:
   # optional summaries stop when the workflow is canceled.
   #
   # None of them belong in `required-checks-pass`. They restate jobs the guard already
-  # covers, and branch protection has exactly one required context by design.
+  # covers, and CI exposes one required context for branch protection.
   cpp-tests-ubuntu-badge:
     name: 🐧 Ubuntu
     if: ${{ !cancelled() }}
