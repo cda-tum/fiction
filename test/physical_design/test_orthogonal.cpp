@@ -25,19 +25,21 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
+#include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
+#include <fiction/technology/qca/technology.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/names_view.hpp>
-
-#include <type_traits>
 
 using namespace fiction;
 using namespace fiction::layouts;

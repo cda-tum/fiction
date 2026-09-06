@@ -418,9 +418,9 @@ template <typename HexLyt, typename CartLyt>
 class hexagonalization_impl
 {
   public:
-    hexagonalization_impl(const CartLyt& lyt, const hexagonalization_params& p, hexagonalization_stats* st = nullptr) :
+    hexagonalization_impl(const CartLyt& lyt, hexagonalization_params p, hexagonalization_stats* st = nullptr) :
             layout(lyt),
-            ps(p),
+            ps(std::move(p)),
             pst(st)
     {}
 
@@ -554,7 +554,7 @@ class hexagonalization_impl
             }
 
             // process internal nodes by iterating diagonally over the Cartesian layout
-            utils::progress_reporter progress{ps.on_progress, "diagonals", layout_width + layout_height - 1};
+            utils::progress_reporter diagonal_progress{ps.on_progress, "diagonals", layout_width + layout_height - 1};
 
             for (uint64_t k = 0; k < layout_width + layout_height - 1; ++k)
             {
@@ -637,7 +637,7 @@ class hexagonalization_impl
                     }
                 }
 
-                progress.advance();
+                diagonal_progress.advance();
             }
 
             // map primary outputs to hex layout
@@ -807,7 +807,7 @@ class hexagonalization_impl
                 using cost = physical_design::path_finding::unit_cost_functor<decltype(layout_obstruct), uint8_t>;
 
                 // for each routing objective, find a path and route it
-                utils::progress_reporter progress{ps.on_progress, "input pins", objectives.size()};
+                utils::progress_reporter input_progress{ps.on_progress, "input pins", objectives.size()};
 
                 for (const auto& obj : objectives)
                 {
@@ -865,7 +865,7 @@ class hexagonalization_impl
                                         obj.source, obj.target, crossings ? "enabled" : "disabled"));
                     }
 
-                    progress.advance();
+                    input_progress.advance();
                 }
             }
 
@@ -925,7 +925,7 @@ class hexagonalization_impl
                 using cost = physical_design::path_finding::unit_cost_functor<decltype(layout_obstruct), uint8_t>;
 
                 // for each routing objective, find a path and route it
-                utils::progress_reporter progress{ps.on_progress, "output pins", objectives.size()};
+                utils::progress_reporter output_progress{ps.on_progress, "output pins", objectives.size()};
 
                 for (const auto& obj : objectives)
                 {
@@ -1000,7 +1000,7 @@ class hexagonalization_impl
                                         obj.target, obj.source, crossings ? "enabled" : "disabled"));
                     }
 
-                    progress.advance();
+                    output_progress.advance();
                 }
             }
 

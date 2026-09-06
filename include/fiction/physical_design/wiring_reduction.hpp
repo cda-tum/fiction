@@ -1086,9 +1086,9 @@ template <typename Lyt>
 class wiring_reduction_impl
 {
   public:
-    wiring_reduction_impl(const Lyt& lyt, const wiring_reduction_params& p, wiring_reduction_stats& st) :
+    wiring_reduction_impl(const Lyt& lyt, wiring_reduction_params p, wiring_reduction_stats& st) :
             plyt{lyt},
-            ps{p},
+            ps{std::move(p)},
             pst{st},
             start{std::chrono::high_resolution_clock::now()}
     {}

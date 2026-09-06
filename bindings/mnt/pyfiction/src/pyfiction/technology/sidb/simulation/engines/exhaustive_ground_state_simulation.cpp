@@ -19,7 +19,6 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/utils/progress.hpp>
 
 #include <nanobind/nanobind.h>

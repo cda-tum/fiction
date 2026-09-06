@@ -51,6 +51,9 @@
 #include <stdexcept>
 #include <vector>
 
+// The tests dereference optionals right after REQUIRE(x.has_value()), which the check does not model.
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
@@ -612,3 +615,5 @@ TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layo
     CHECK(rec.final_count("expansions") > 0);
     CHECK(rec.reports_of("expansions").back().total == 0);
 }
+
+// NOLINTEND(bugprone-unchecked-optional-access)

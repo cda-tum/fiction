@@ -23,6 +23,7 @@
 #include <chrono>
 #include <cstddef>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -65,8 +66,7 @@ void let_throttle_pass()
 
 bool is_monotone(const std::vector<record>& records)
 {
-    return std::is_sorted(records.cbegin(), records.cend(),
-                          [](const auto& lhs, const auto& rhs) { return lhs.first < rhs.first; });
+    return std::ranges::is_sorted(records, [](const auto& lhs, const auto& rhs) { return lhs.first < rhs.first; });
 }
 
 }  // namespace

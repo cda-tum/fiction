@@ -354,6 +354,7 @@ TEST_CASE("Random SiDB layout generation reports progress", "[random-sidb-layout
         const auto result_lyt = generate_random_layout(params);
 
         REQUIRE(result_lyt.has_value());
+        // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the access
         CHECK(result_lyt->num_cells() == 5);
 
         CHECK(rec.is_consistent("placed SiDBs"));
@@ -367,6 +368,7 @@ TEST_CASE("Random SiDB layout generation reports progress", "[random-sidb-layout
         const auto result_lyts = generate_multiple_random_layouts(params);
 
         REQUIRE(result_lyts.has_value());
+        // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the access
         CHECK(result_lyts->size() == 3);
 
         CHECK(rec.is_consistent("layouts"));

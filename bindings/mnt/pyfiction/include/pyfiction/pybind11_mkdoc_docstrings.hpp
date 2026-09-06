@@ -10164,7 +10164,9 @@ static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_pi_
 R"doc(Enum indicating if primary inputs (PIs) can be placed at the top or
 left.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_pi_placement_rng = R"doc(Random engine for this search space graph's PI spacing.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_pi_placement_rng =
+R"doc(Random engine for this search space graph's PI spacing. It is seeded
+from the parameters before use.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_to_hex =
 R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
