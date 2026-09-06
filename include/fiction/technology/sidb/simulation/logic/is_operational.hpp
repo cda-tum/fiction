@@ -199,7 +199,7 @@ enum class layout_invalidity_reason : uint8_t
      */
     PHYSICAL_INFEASIBILITY,
     /**
-     * A wrong I/O assignment is energetically preferred.
+     * The I/O topology is invalid or a wrong I/O assignment is energetically preferred.
      */
     IO_INSTABILITY,
 };
@@ -329,14 +329,19 @@ class is_operational_impl
             input_pattern_layouts{&input_pattern_lyts}
     {}
     /**
-     * Runs the pruning filters for one input pattern: positive charges, physical infeasibility of the expected I/O
-     * charge states, and I/O instability.
+     * Rejects an invalid I/O topology, then runs the pruning filters for one input pattern: positive charges,
+     * physical infeasibility of the expected I/O charge states, and I/O instability.
      *
      * @param input_pattern The input pattern.
      * @return The reason the layout is invalid, or `std::nullopt` if the filters accept it.
      */
     [[nodiscard]] std::optional<layout_invalidity_reason> is_layout_invalid(const uint64_t input_pattern)
     {
+        if (!has_valid_bdl_configuration())
+        {
+            return layout_invalidity_reason::IO_INSTABILITY;
+        }
+
         const auto& lyt_with_input_pattern = layout_with_input_pattern(input_pattern);
 
         const potential_landscape land{lyt_with_input_pattern, parameters.sim_params};
@@ -810,8 +815,9 @@ class is_operational_impl
      */
     [[nodiscard]] bool has_valid_bdl_configuration() const noexcept
     {
-        return (input_pattern_layouts != nullptr || bii.is_valid()) && output_bdl_pairs.size() == truth_table.size() &&
-               output_bdl_wires.size() == truth_table.size();
+        return (input_pattern_layouts != nullptr || bii.is_valid()) &&
+               input_bdl_wires.size() == truth_table.front().num_vars() &&
+               output_bdl_pairs.size() == truth_table.size() && output_bdl_wires.size() == truth_table.size();
     }
     /**
      * Assigns a charge state to the SiDB at `site` without touching the charge index.

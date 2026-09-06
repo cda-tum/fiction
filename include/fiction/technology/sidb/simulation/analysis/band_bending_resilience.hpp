@@ -59,7 +59,8 @@ struct band_bending_resilience_params
  * @param spec The Boolean function(s) the gate implements; determines the number of input patterns.
  * @param params Parameters.
  * @param transition_type The transition to consider; all transitions if omitted.
- * @return The minimum potential difference over all input patterns.
+ * @return The minimum potential difference over all input patterns, or infinity if the input wires cannot represent
+ * the specification or no charge transition exists.
  */
 template <typename TT>
 [[nodiscard]] double band_bending_resilience(const layout& lyt, const std::vector<TT>& spec,
@@ -76,6 +77,11 @@ template <typename TT>
                                       { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     logic::bdl_input_iterator bii{lyt, params.bdl_iterator_params};
+
+    if (!bii.is_valid() || bii.num_input_pairs() != spec.front().num_vars())
+    {
+        return std::numeric_limits<double>::infinity();
+    }
 
     double minimal_pop_stability_for_all_inputs = std::numeric_limits<double>::infinity();
 

@@ -236,6 +236,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Ground State Space reports multiset limits using the potential landscape's charge base.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
+  - Operational checks and gate pruning now reject mismatched input counts; band-bending resilience rejects unusable inputs.
+  - Gate design now propagates worker exceptions to the caller and sets simulation parameters before launching workers.
   - SiDB simulation engines and their consumers now propagate errors from checked charge and potential operations.
   - Time-to-solution now counts failed QuickSim attempts and their elapsed runtime, and handles empty samples.
   - ClusterComplete now assigns distinct queue indices to workers without initial work.

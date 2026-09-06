@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Benjamin Hien (hibenj)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -52,6 +53,52 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::sidb::surfaces;
 using namespace fiction::synthesis;
+
+namespace
+{
+
+/**
+ * A supported cell-level layout whose clone operation fails.
+ */
+class throwing_clone_layout : public sidb_100_cell_clk_lyt_siqad
+{
+  public:
+    /**
+     * Inherits the cell-level layout constructors.
+     */
+    using sidb_100_cell_clk_lyt_siqad::sidb_100_cell_clk_lyt_siqad;
+    /**
+     * Reports a failed layout clone.
+     *
+     * @throws std::runtime_error for every clone request.
+     */
+    [[nodiscard]] throwing_clone_layout clone() const
+    {
+        throw std::runtime_error{"layout clone failed"};
+    }
+};
+
+}  // namespace
+
+TEST_CASE("Gate design propagates worker failures", "[design-sidb-gates]")
+{
+    const auto lyt = blueprints::two_input_one_output_skeleton_west_west<throwing_clone_layout>();
+    design_gates_params<cell<throwing_clone_layout>> params{};
+    params.canvas                 = {{27, 6, 0}, {28, 6, 0}};
+    params.number_of_canvas_sidbs = 1;
+
+    for (const auto mode :
+         {decltype(params)::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+          decltype(params)::design_gates_mode::QUICKCELL, decltype(params)::design_gates_mode::PRUNING_ONLY,
+          decltype(params)::design_gates_mode::RANDOM})
+    {
+        params.design_mode = mode;
+        CHECK_THROWS_AS(design_gates(lyt, std::vector{create_and_tt()}, params), std::runtime_error);
+    }
+
+    params.design_mode = decltype(params)::design_gates_mode::RANDOM;
+    CHECK_THROWS_AS(design_gates(lyt, std::vector{create_id_tt()}, params), std::invalid_argument);
+}
 
 TEST_CASE("Design AND gate with skeleton, where one input wire and the output wire are orientated to the east.",
           "[design-sidb-gates]")

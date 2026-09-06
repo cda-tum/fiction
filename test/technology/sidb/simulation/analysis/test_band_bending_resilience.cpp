@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -23,12 +24,16 @@
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
+#include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <cmath>
 #include <vector>
 
 using namespace fiction;
@@ -39,6 +44,23 @@ using namespace fiction::synthesis;
 using namespace fiction::utils::math;
 
 using test_layout = sidb_cell_clk_lyt_siqad;
+
+TEST_CASE("Band bending resilience rejects unusable input wires", "[band-bending-resilience]")
+{
+    layout lyt{};
+    for (const auto x : {0, 2, 6, 8})
+    {
+        lyt.assign_cell_type({x, 0, 0}, sidb_technology::cell_type::INPUT);
+    }
+    for (const auto x : {20, 22})
+    {
+        lyt.assign_cell_type({x, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    }
+
+    const simulation::logic::bdl_input_iterator bii{lyt};
+    REQUIRE_FALSE(bii.is_valid());
+    CHECK(std::isinf(band_bending_resilience(lyt, std::vector{create_and_tt()})));
+}
 
 TEST_CASE("Single SiDB", "[band-bending-resilience]")
 {

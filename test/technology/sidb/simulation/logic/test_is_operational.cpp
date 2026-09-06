@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -675,6 +676,17 @@ TEST_CASE("is operational check for Bestagon half adder", "[is-operational], [qu
               .first == operational_status::NON_OPERATIONAL);
 }
 #endif
+
+TEST_CASE("Operational checks reject a mismatched input count before simulation", "[is-operational]")
+{
+    const auto                  lyt = to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>());
+    const is_operational_params params{.sim_params = simulation_parameters{3, -0.32}};
+
+    const auto [status, calls] = is_operational(lyt, std::vector{create_id_tt()}, params);
+
+    CHECK(status == operational_status::NON_OPERATIONAL);
+    CHECK(calls == 0);
+}
 
 TEST_CASE("Pre-generated input pattern layouts match the layout-based overload", "[is-operational]")
 {

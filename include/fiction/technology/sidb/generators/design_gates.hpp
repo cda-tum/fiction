@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <atomic>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <future>
@@ -42,6 +43,7 @@
 #include <mutex>
 #include <optional>
 #include <random>
+#include <stdexcept>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -170,6 +172,12 @@ struct design_gates_stats
 namespace detail
 {
 
+/**
+ * Implementation of SiDB gate design with parallel pruning and simulation.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ */
 template <typename Lyt, typename TT>
 class design_gates_impl
 {
@@ -182,6 +190,7 @@ class design_gates_impl
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters and settings for the gate designer.
      * @param st Statistics for the gate design process.
+     * @throws std::invalid_argument if the input wire count differs from the specification.
      */
     design_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec, const design_gates_params<cell<Lyt>>& ps,
                       design_gates_stats& st) :
@@ -200,6 +209,11 @@ class design_gates_impl
             number_of_output_wires{output_bdl_wires.size()},
             all_canvas_layouts{determine_all_possible_canvas_layouts()}
     {
+        if (number_of_input_wires != truth_table.front().num_vars())
+        {
+            throw std::invalid_argument{"input wire count must match the specification"};
+        }
+
         stats.number_of_layouts = all_canvas_layouts.size();
         stats.sim_engine        = params.operational_params.sim_engine;
     }
@@ -264,16 +278,16 @@ class design_gates_impl
             }
         };
 
-        const std::size_t num_threads = std::min(number_of_threads, all_combinations.size());
+        const std::size_t num_threads = std::max(std::min(number_of_threads, all_combinations.size()), std::size_t{1});
 
         const std::size_t chunk_size = (all_combinations.size() + num_threads - 1) / num_threads;  // Ceiling division
 
-        std::vector<std::future<void>> threads{};
-        threads.reserve(num_threads);
+        std::vector<std::future<void>> workers{};
+        workers.reserve(num_threads);
 
         for (std::size_t i = 0; i < num_threads; ++i)
         {
-            threads.emplace_back(std::async(
+            workers.emplace_back(std::async(
                 std::launch::async,
                 [i, chunk_size, &all_combinations, &add_combination_to_layout_and_check_operation, &solution_found,
                  this]()
@@ -294,12 +308,9 @@ class design_gates_impl
                 }));
         }
 
-        for (auto& thread : threads)
+        for (auto& worker : workers)
         {
-            if (thread.valid())
-            {
-                thread.get();
-            }
+            worker.get();
         }
 
         return designed_gate_layouts;
@@ -316,91 +327,101 @@ class design_gates_impl
     {
         std::vector<Lyt> randomly_designed_gate_layouts = {};
 
+        if (all_canvas_layouts.empty())
+        {
+            return randomly_designed_gate_layouts;
+        }
+
         // Allow positive charges here, as a layout that displays positive charges without inputs may not exhibit them
         // once inputs are applied.
         const generate_random_layout_params<cell<Lyt>> parameter{
             params.canvas, params.number_of_canvas_sidbs,
             generate_random_layout_params<cell<Lyt>>::positive_charges::ALLOWED};
 
-        const auto num_threads = std::min(number_of_threads, all_canvas_layouts.size());
+        const auto num_threads = std::max(std::min(number_of_threads, all_canvas_layouts.size()), std::size_t{1});
 
         std::mutex mutex_to_protect_designed_gate_layouts{};  // used to control access to shared resources
 
         std::atomic<bool> gate_layout_is_found(false);
 
-        std::vector<std::future<void>> threads{};
-        threads.reserve(num_threads);
+        std::vector<std::future<void>> workers{};
+        workers.reserve(num_threads);
 
-        for (uint64_t z = 0u; z < num_threads; z++)
+        try
         {
-            threads.emplace_back(std::async(
-                std::launch::async,
-                [this, &gate_layout_is_found, &mutex_to_protect_designed_gate_layouts, &parameter,
-                 &randomly_designed_gate_layouts]
-                {
-                    try
+            for (uint64_t z = 0u; z < num_threads; z++)
+            {
+                workers.emplace_back(std::async(
+                    std::launch::async,
+                    [this, &gate_layout_is_found, &mutex_to_protect_designed_gate_layouts, &parameter,
+                     &randomly_designed_gate_layouts]
                     {
-                        while (!gate_layout_is_found)
+                        try
                         {
-                            auto result_lyt = generate_random_layout<Lyt>(parameter, skeleton_layout);
-
-                            if (!result_lyt.has_value())
+                            while (!gate_layout_is_found)
                             {
-                                continue;
-                            }
+                                auto result_lyt = generate_random_layout<Lyt>(parameter, skeleton_layout);
 
-                            if constexpr (has_get_sidb_defect_v<Lyt>)
-                            {
-                                result_lyt.value().foreach_sidb_defect(
-                                    [&result_lyt](const auto& cd)
-                                    {
-                                        if (sidb::model::is_neutrally_charged_defect(cd.second))
-                                        {
-                                            result_lyt.value().assign_defect(
-                                                cd.first, sidb::model::defect{sidb::model::defect_type::NONE});
-                                        }
-                                    });
-                            }
-
-                            if (const auto [status, sim_calls] = sidb::simulation::logic::is_operational(
-                                    to_sidb_layout(result_lyt.value()), truth_table, params.operational_params, input_bdl_wires,
-                                    output_bdl_wires);
-                                status == sidb::simulation::logic::operational_status::OPERATIONAL)
-                            {
-                                const std::scoped_lock lock{mutex_to_protect_designed_gate_layouts};
+                                if (!result_lyt.has_value())
+                                {
+                                    continue;
+                                }
 
                                 if constexpr (has_get_sidb_defect_v<Lyt>)
                                 {
-                                    skeleton_layout.foreach_sidb_defect(
+                                    result_lyt.value().foreach_sidb_defect(
                                         [&result_lyt](const auto& cd)
                                         {
                                             if (sidb::model::is_neutrally_charged_defect(cd.second))
                                             {
-                                                result_lyt.value().assign_defect(cd.first, cd.second);
+                                                result_lyt.value().assign_defect(
+                                                    cd.first, sidb::model::defect{sidb::model::defect_type::NONE});
                                             }
                                         });
                                 }
 
-                                randomly_designed_gate_layouts.push_back(result_lyt.value());
-                                gate_layout_is_found = true;
-                                break;
+                                if (const auto [status, sim_calls] = sidb::simulation::logic::is_operational(
+                                        to_sidb_layout(result_lyt.value()), truth_table, params.operational_params,
+                                        input_bdl_wires, output_bdl_wires);
+                                    status == sidb::simulation::logic::operational_status::OPERATIONAL)
+                                {
+                                    const std::scoped_lock lock{mutex_to_protect_designed_gate_layouts};
+
+                                    if constexpr (has_get_sidb_defect_v<Lyt>)
+                                    {
+                                        skeleton_layout.foreach_sidb_defect(
+                                            [&result_lyt](const auto& cd)
+                                            {
+                                                if (sidb::model::is_neutrally_charged_defect(cd.second))
+                                                {
+                                                    result_lyt.value().assign_defect(cd.first, cd.second);
+                                                }
+                                            });
+                                    }
+
+                                    randomly_designed_gate_layouts.push_back(result_lyt.value());
+                                    gate_layout_is_found = true;
+                                    break;
+                                }
                             }
                         }
-                    }
-                    catch (...)
-                    {
-                        gate_layout_is_found = true;
-                        throw;
-                    }
-                }));
+                        catch (...)
+                        {
+                            gate_layout_is_found = true;
+                            throw;
+                        }
+                    }));
+            }
+        }
+        catch (...)
+        {
+            gate_layout_is_found = true;
+            throw;
         }
 
-        for (auto& thread : threads)
+        for (auto& worker : workers)
         {
-            if (thread.valid())
-            {
-                thread.get();
-            }
+            worker.get();
         }
 
         return randomly_designed_gate_layouts;
@@ -449,7 +470,7 @@ class design_gates_impl
 
         gate_layouts.reserve(gate_candidates.size());
 
-        const std::size_t num_threads = std::min(number_of_threads, gate_candidates.size());
+        const std::size_t num_threads = std::max(std::min(number_of_threads, gate_candidates.size()), std::size_t{1});
 
         const std::size_t chunk_size = (gate_candidates.size() + num_threads - 1) / num_threads;  // Ceiling division
 
@@ -483,12 +504,12 @@ class design_gates_impl
             }
         };
 
-        std::vector<std::future<void>> threads;
-        threads.reserve(num_threads);
+        std::vector<std::future<void>> workers;
+        workers.reserve(num_threads);
 
         for (std::size_t i = 0; i < num_threads; ++i)
         {
-            threads.emplace_back(
+            workers.emplace_back(
                 std::async(std::launch::async,
                            [this, i, chunk_size, &gate_candidates, &check_operational_status, &gate_design_found]()
                            {
@@ -509,12 +530,9 @@ class design_gates_impl
                            }));
         }
 
-        for (auto& thread : threads)
+        for (auto& worker : workers)
         {
-            if (thread.valid())
-            {
-                thread.get();
-            }
+            worker.get();
         }
 
         return gate_layouts;
@@ -657,15 +675,16 @@ class design_gates_impl
 
         gate_candidate.reserve(all_canvas_layouts.size());
 
-        const std::size_t num_threads = std::min(number_of_threads, all_canvas_layouts.size());
-        const std::size_t chunk_size  = (all_canvas_layouts.size() + num_threads - 1) / num_threads;
+        const std::size_t num_threads =
+            std::max(std::min(number_of_threads, all_canvas_layouts.size()), std::size_t{1});
+        const std::size_t chunk_size = (all_canvas_layouts.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::future<void>> threads{};
-        threads.reserve(num_threads);
+        std::vector<std::future<void>> workers{};
+        workers.reserve(num_threads);
 
         for (std::size_t i = 0; i < num_threads; ++i)
         {
-            threads.emplace_back(std::async(std::launch::async,
+            workers.emplace_back(std::async(std::launch::async,
                                             [i, chunk_size, this, &conduct_pruning_steps]()
                                             {
                                                 const std::size_t start_index = i * chunk_size;
@@ -679,12 +698,9 @@ class design_gates_impl
                                             }));
         }
 
-        for (auto& thread : threads)
+        for (auto& worker : workers)
         {
-            if (thread.valid())
-            {
-                thread.get();
-            }
+            worker.get();
         }
 
         return gate_candidate;
@@ -696,7 +712,7 @@ class design_gates_impl
      *
      * @return A vector containing all possible gate layouts generated from the combinations.
      */
-    [[nodiscard]] std::vector<Lyt> determine_all_possible_canvas_layouts() const noexcept
+    [[nodiscard]] std::vector<Lyt> determine_all_possible_canvas_layouts() const
     {
         const auto all_combinations =
             fiction::utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
@@ -705,7 +721,7 @@ class design_gates_impl
         std::vector<Lyt> designed_gate_layouts = {};
         designed_gate_layouts.reserve(all_combinations.size());
 
-        const auto add_cell_combination_to_layout = [this, &designed_gate_layouts](const auto& combination) noexcept
+        const auto add_cell_combination_to_layout = [this, &designed_gate_layouts](const auto& combination)
         {
             const auto layout_with_added_cells = design_canvas_layout(combination);
             if (!layout_with_added_cells.has_value())
@@ -729,7 +745,7 @@ class design_gates_impl
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return A copy of the original layout (`skeleton_layout`) with SiDB cells added at specified indices.
      */
-    [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) const noexcept
+    [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) const
     {
         auto lyt_copy = skeleton_layout.clone();
 
@@ -759,7 +775,7 @@ class design_gates_impl
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return An SiDB cell-level layout consisting of canvas SidBs.
      */
-    [[nodiscard]] std::optional<Lyt> design_canvas_layout(const std::vector<std::size_t>& cell_indices) const noexcept
+    [[nodiscard]] std::optional<Lyt> design_canvas_layout(const std::vector<std::size_t>& cell_indices) const
     {
         Lyt lyt{};
 
@@ -836,6 +852,8 @@ class design_gates_impl
  * 4. If the layout is `non-operational`, the process is repeated from the first step until an operational layout is
  * found.
  *
+ * Exceptions escaping worker operations propagate to the caller after all started workers finish.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT The type of the truth table specifying the gate behavior.
  * @param skeleton The skeleton layout used for gate design.
@@ -843,6 +861,7 @@ class design_gates_impl
  * @param params Parameters for the *SiDB Gate Designer*.
  * @param stats Statistics.
  * @return A vector of designed SiDB gate layouts.
+ * @throws std::invalid_argument if the input wire count differs from the specification.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::vector<Lyt> design_gates(const Lyt& skeleton, const std::vector<TT>& spec,

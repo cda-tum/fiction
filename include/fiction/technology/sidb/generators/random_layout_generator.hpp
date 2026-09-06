@@ -13,6 +13,7 @@
  * @brief Generates SiDB layouts with randomly placed dots under placement constraints.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -100,6 +101,8 @@ struct generate_random_layout_params
  * Generates a layout featuring a random arrangement of SiDBs. These randomly placed dots can be incorporated into an
  * existing layout skeleton that may be optionally provided.
  *
+ * Exceptions from cloning the supplied skeleton propagate to the caller.
+ *
  * @tparam Lyt SiDB cell-level SiDB layout type.
  * @param params The parameters for generating the random layout.
  * @param skeleton Optional layout to which random dots are added.
@@ -108,7 +111,7 @@ struct generate_random_layout_params
  */
 template <typename Lyt>
 [[nodiscard]] std::optional<Lyt> generate_random_layout(const generate_random_layout_params<coordinate<Lyt>>& params,
-                                                        const std::optional<Lyt>& skeleton = std::nullopt) noexcept
+                                                        const std::optional<Lyt>& skeleton = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -195,6 +198,8 @@ template <typename Lyt>
  * Generates multiple random layouts featuring a random arrangement of SiDBs. These randomly placed dots can be
  * incorporated into an existing layout skeleton that may be optionally provided.
  *
+ * Exceptions from cloning the supplied skeleton propagate to the caller.
+ *
  * @tparam Lyt SiDB cell-level SiDB layout type.
  * @param params The parameters for generating the random SiDB layouts.
  * @param skeleton Optional layout to which random dots are added.
@@ -203,7 +208,7 @@ template <typename Lyt>
 template <typename Lyt>
 [[nodiscard]] std::optional<std::vector<Lyt>>
 generate_multiple_random_layouts(const generate_random_layout_params<coordinate<Lyt>>& params,
-                                 const std::optional<Lyt>&                             skeleton = std::nullopt) noexcept
+                                 const std::optional<Lyt>&                             skeleton = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
