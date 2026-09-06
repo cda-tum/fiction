@@ -173,7 +173,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Continuous integration:
 
-  - Canceled CI runs now stop summary jobs so newer commits can start.
+  - Canceled CI runs now stop optional summary jobs.
 
 - Documentation:
 

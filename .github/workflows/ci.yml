@@ -237,8 +237,8 @@ jobs:
   # `img.shields.io/github/check-runs/…?nameFilter=` needs: it matches the check run's name
   # exactly, and the jobs above carry their matrix entry in theirs
   # (`🐧 Test (ubuntu-24.04, g++-13) / 🐧 ubuntu-24.04 g++-13`), leaving nothing fixed to
-  # point at. Like `🚦 Check`, they report failed and skipped dependencies. `!cancelled()`
-  # lets canceled runs release their concurrency slot without waiting for a summary runner.
+  # point at. They report failed and skipped dependencies. `!cancelled()` lets these
+  # optional summaries stop when the workflow is canceled.
   #
   # None of them belong in `required-checks-pass`. They restate jobs the guard already
   # covers, and branch protection has exactly one required context by design.
@@ -325,11 +325,11 @@ jobs:
             && 'codeql' || '' }}
           jobs: ${{ toJSON(needs) }}
 
-  # Branch protection needs a result even when dependencies fail or skip. `!cancelled()`
-  # overrides the implicit success condition while allowing canceled workflows to stop.
+  # This required check uses `always()` to report failed and canceled dependencies.
+  # GitHub accepts skipped required jobs, so the guard must run after cancellation.
   required-checks-pass:
     name: 🚦 Check
-    if: ${{ !cancelled() }}
+    if: always()
     needs:
       - change-detection
       - cpp-tests-ubuntu
