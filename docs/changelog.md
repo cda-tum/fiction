@@ -109,6 +109,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+
 - Algorithms:
   - `convert_network` maps a technology network's inverters to `create_not` on a target without
     `create_node`, so AIG, XAG, and MIG conversions keep the inverters they used to lose
@@ -132,6 +133,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `surface_analysis` and `surface_black_list` live in `physical_design/surface_analysis.hpp` and namespace
     `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
     SiDB header dependency
+
+- Build system:
+
+  - The Docker image installs the `mnt.pyfiction` wheel and starts the Python `fiction` shell.
 
 - CLI:
   - **Breaking:** SiDB commands use `sidb::layout` and simulation results. `read --sqd` reads the lattice
@@ -325,8 +330,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+- Build system:
+
+  - **Breaking:** `FICTION_CLI`, `FICTION_ABC`, `ABC_ROOT`, the `deploy` preset, and the `alice`
+    dependency are gone with the C++ command-line interface.
 - CLI:
 
+  - **Breaking:** The C++ command-line interface and `shortcuts.fs`. Use the Python `fiction` shell.
   - `akers`, together with `miginvopt` and `miginvprop`. The truth table store now feeds the
     gate-based SiDB simulations, `temp -g` and `opdom`, alone.
   - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
