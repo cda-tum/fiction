@@ -47,6 +47,7 @@
 #include <cstdint>
 #include <functional>
 #include <future>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -55,6 +56,18 @@ using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::qca;
+
+/**
+ * @brief Accesses an optional after a Catch2 assertion established that it contains a value.
+ * @tparam T Contained value type.
+ * @param optional Optional value guarded by a preceding `REQUIRE`.
+ * @return Reference to the contained value.
+ */
+template <typename T>
+const T& required_value(const std::optional<T>& optional)
+{
+    return optional.value();  // NOLINT(bugprone-unchecked-optional-access) Catch2 REQUIRE guards each call.
+}
 
 template <typename Lyt, typename Ntk>
 void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
@@ -67,7 +80,7 @@ void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
     const auto layout = graph_oriented_layout_design<Lyt>(ntk, params, &stats);
     REQUIRE(layout.has_value());
 
-    check_eq(ntk, layout.value());
+    check_eq(ntk, required_value(layout));
 }
 
 template <typename Lyt>
@@ -115,7 +128,7 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
 
-        CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout.value()));
+        CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(required_value(layout)));
     };
 
     check(blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>());
@@ -136,7 +149,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 
     SECTION("Verbose mode with timeout")
@@ -147,7 +160,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 
     SECTION("High-effort mode")
@@ -157,7 +170,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 
     SECTION("Highest-effort mode")
@@ -166,7 +179,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 
     SECTION("Maximum-effort mode")
@@ -175,7 +188,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 
     SECTION("Maximum-effort mode with random seed")
@@ -185,7 +198,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 
     SECTION("More vertex expansions (num_vertex_expansions = 8)")
@@ -195,7 +208,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 
     SECTION("Straight inverters")
@@ -210,16 +223,17 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         {
             const auto layout = graph_oriented_layout_design<gate_layout>(network, params, &stats);
             REQUIRE(layout.has_value());
-            check_eq(network, layout.value());
+            const auto& checked_layout = required_value(layout);
+            check_eq(network, checked_layout);
 
-            layout.value().foreach_gate(
-                [&layout](const auto& gate)
+            checked_layout.foreach_gate(
+                [&checked_layout](const auto& gate)
                 {
-                    if (layout.value().is_inv(gate))
+                    if (checked_layout.is_inv(gate))
                     {
-                        const auto layout_tile = layout.value().get_tile(gate);
-                        const auto fanin       = layout.value().incoming_data_flow(layout_tile).front();
-                        const auto fanout      = layout.value().outgoing_data_flow(layout_tile).front();
+                        const auto layout_tile = checked_layout.get_tile(gate);
+                        const auto fanin       = checked_layout.incoming_data_flow(layout_tile).front();
+                        const auto fanout      = checked_layout.outgoing_data_flow(layout_tile).front();
 
                         const bool vertical_straight_inverter = (fanin.x == layout_tile.x && layout_tile.x == fanout.x);
                         const bool horizontal_straight_inverter =
@@ -240,7 +254,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 
     SECTION("Timeout limit reached")
@@ -260,8 +274,9 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
-        CHECK(layout.value().z() == 0);
+        const auto& checked_layout = required_value(layout);
+        check_eq(ntk, checked_layout);
+        CHECK(checked_layout.z() == 0);
     }
 
     SECTION("Randomize skip tiles PI placement")
@@ -273,7 +288,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 
     SECTION("Randomize skip tiles PI placement with zero value")
@@ -285,7 +300,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 }
 
@@ -304,7 +319,7 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
         params.mode       = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 
     SECTION("High-efficiency mode, return first, multithreading")
@@ -316,7 +331,7 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
         params.return_first                        = true;
         const auto layout                          = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 
     SECTION("Maximum-effort mode with seed and multithreading")
@@ -325,7 +340,7 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
         params.seed       = 12345;
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 }
 
@@ -353,7 +368,7 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
         REQUIRE(layout.has_value());
-        check_eq(ntk, layout.value());
+        check_eq(ntk, required_value(layout));
     }
 }
 
@@ -377,7 +392,7 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
 
             const auto layout_opt = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
             REQUIRE(layout_opt.has_value());
-            const auto& lyt = layout_opt.value();
+            const auto& lyt = required_value(layout_opt);
             check_eq(ntk, lyt);
 
             // collect PI coordinates along top (y=0) and left (x=0)
@@ -438,7 +453,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
     const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats, custom_cost_objective);
 
     REQUIRE(layout.has_value());
-    check_eq(ntk, layout.value());
+    check_eq(ntk, required_value(layout));
 
     // high-effort mode
     params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
@@ -447,7 +462,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
         graph_oriented_layout_design<gate_layout>(ntk, params, &stats, custom_cost_objective);
 
     REQUIRE(layout_high_effort.has_value());
-    check_eq(ntk, layout_high_effort.value());
+    check_eq(ntk, required_value(layout_high_effort));
 
     // maximum-effort mode
     params.mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
@@ -457,7 +472,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
         graph_oriented_layout_design<gate_layout>(ntk, params, &stats, custom_cost_objective);
 
     REQUIRE(layout_maximum_effort.has_value());
-    check_eq(ntk, layout_maximum_effort.value());
+    check_eq(ntk, required_value(layout_maximum_effort));
 }
 
 TEST_CASE("Name conservation after graph-oriented layout design", "[graph-oriented-layout-design]")
@@ -477,15 +492,16 @@ TEST_CASE("Name conservation after graph-oriented layout design", "[graph-orient
     REQUIRE(layout.has_value());
 
     // network name
-    CHECK(layout.value().get_layout_name() == "maj");
+    const auto& checked_layout = required_value(layout);
+    CHECK(checked_layout.get_layout_name() == "maj");
 
     // PI names
-    CHECK(layout.value().get_name(layout.value().pi_at(0)) == "a");  // first PI
-    CHECK(layout.value().get_name(layout.value().pi_at(1)) == "b");  // second PI
-    CHECK(layout.value().get_name(layout.value().pi_at(2)) == "c");  // third PI
+    CHECK(checked_layout.get_name(checked_layout.pi_at(0)) == "a");  // first PI
+    CHECK(checked_layout.get_name(checked_layout.pi_at(1)) == "b");  // second PI
+    CHECK(checked_layout.get_name(checked_layout.pi_at(2)) == "c");  // third PI
 
     // PO names
-    CHECK(layout.value().get_output_name(0) == "f");
+    CHECK(checked_layout.get_output_name(0) == "f");
 }
 
 TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
@@ -549,7 +565,7 @@ TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-ori
     for (const auto& lyt : layouts)
     {
         REQUIRE(lyt.has_value());
-        check_eq(ntk, lyt.value());
+        check_eq(ntk, required_value(lyt));
     }
 
     /**
@@ -561,6 +577,6 @@ TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-ori
         lyt.foreach_pi([&](const auto& pi) { positions.push_back(lyt.get_tile(pi)); });
         return positions;
     };
-    CHECK(pi_positions(layouts[0].value()) == pi_positions(layouts[2].value()));
-    CHECK(pi_positions(layouts[1].value()) == pi_positions(layouts[3].value()));
+    CHECK(pi_positions(required_value(layouts[0])) == pi_positions(required_value(layouts[2])));
+    CHECK(pi_positions(required_value(layouts[1])) == pi_positions(required_value(layouts[3])));
 }

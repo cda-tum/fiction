@@ -31,6 +31,7 @@
 
 #include <array>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <string>
@@ -142,6 +143,6 @@ try
 }
 catch (const std::exception& exception)
 {
-    fmt::print("Critical Temperature Domain Bestagon failed: {}\n", exception.what());
+    std::fprintf(stderr, "Critical Temperature Domain Bestagon failed: %s\n", exception.what());
     return EXIT_FAILURE;
 }

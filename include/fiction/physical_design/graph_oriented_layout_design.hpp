@@ -502,7 +502,7 @@ struct search_space_graph
     /**
      * Random engine for this search space graph's PI spacing.
      */
-    std::mt19937 pi_placement_rng{};  // NOLINT(cert-msc32-c) Seeded from the invocation parameters before first use.
+    std::mt19937 pi_placement_rng{};  // NOLINT(cert-msc51-cpp) Seeded from the invocation parameters before first use.
     /**
      * Flag indicating if this graph's frontier is active.
      */
