@@ -40,12 +40,21 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
+    "sphinxcontrib.bibtex",
+    "sphinxext.opengraph",
     "nanobind_autodoc",
 ]
 source_suffix = [".md"]
 exclude_patterns = ["_build", "doxyxml", "**/AGENTS.md", "AGENTS.md"]
 myst_enable_extensions = ["amsmath", "colon_fence", "deflist", "dollarmath", "substitution"]
 myst_heading_anchors = 3
+
+bibtex_bibfiles = ["references.bib"]
+bibtex_default_style = "unsrt"
+
+ogp_site_url = os.environ.get("READTHEDOCS_CANONICAL_URL", "https://fiction.readthedocs.io/en/latest/")
+ogp_image = "_static/mnt_social.png"
+ogp_image_alt = "Munich Nanotech Toolkit logo"
 
 breathe_projects = {"fiction": "doxyxml/xml"}
 breathe_default_project = "fiction"
