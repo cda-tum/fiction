@@ -313,13 +313,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Gate design enumerates, counts, and randomly samples only empty, defect-free canvas sites.
   - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
 
+- CLI:
+  - SiDB store descriptions and statistics handle the full column range without integer overflow
+
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
   - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
   - Change detection now allows five minutes for runner setup and file comparisons.
-
-- CLI:
-  - SiDB store descriptions and statistics handle the full column range without integer overflow
 
 - Data structures:
   - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.

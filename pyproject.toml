@@ -334,6 +334,7 @@ required-imports = ["from __future__ import annotations"]
 "bindings/mnt/pyfiction/test/__init__.py" = ["non-empty-init-module"]
 # standalone scripts run by path, not modules anything imports, so an `__init__.py` would be wrong
 ".github/scripts/**" = ["implicit-namespace-package"]
+".github/scripts/test_cpp_linter_files.py" = ["assert"]  # a test suite asserts
 "experiments/**" = [
     "T20", # an experiment reports on stdout, as the C++ experiments do
     "implicit-namespace-package",
