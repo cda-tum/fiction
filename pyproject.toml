@@ -103,7 +103,6 @@ sdist.exclude = [
     "/.github",
     "/benchmarks",
     "/bib",
-    "/cli",
     "/docs",
     "/experiments",
     "/test",
@@ -117,7 +116,6 @@ sdist.exclude = [
 [tool.scikit-build.cmake.define]
 MOCKTURTLE_EXAMPLES = "OFF"
 FICTION_PROGRESS_BARS = "OFF"
-FICTION_CLI = "OFF"
 FICTION_TEST = "OFF"
 FICTION_EXPERIMENTS = "OFF"
 FICTION_ENABLE_IPO = "OFF"
@@ -154,7 +152,6 @@ git-only = [
     "/.github",
     "/benchmarks",
     "/bib",
-    "/cli",
     "/docs",
     "/experiments",
     "/test",
