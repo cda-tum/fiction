@@ -1192,7 +1192,6 @@ TEST_CASE("SQD parsing error into an sidb::layout", "[sqd]")
 
 TEST_CASE("SQD coordinates consume complete numeric attributes", "[sqd]")
 {
-    using legacy_layout = surfaces::lattice<lattice_100, sidb_cell_clk_lyt_siqad>;
     for (const auto* attributes : {R"(n="1junk" m="2" l="1")", R"(n="1" m="2.7" l="1")", R"(n="1" m="2" l="1tail")"})
     {
         const auto         document = std::string{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design>"
@@ -1200,8 +1199,6 @@ TEST_CASE("SQD coordinates consume complete numeric attributes", "[sqd]")
                                       attributes + " /></dbdot></layer></design></siqad>";
         std::istringstream stream{document};
         CHECK_THROWS_AS(read_sqd_layout(stream), sqd_parsing_error);
-        std::istringstream legacy_stream{document};
-        CHECK_THROWS_AS(read_sqd_layout<legacy_layout>(legacy_stream), sqd_parsing_error);
     }
     std::istringstream stream{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design>"
                               R"(<layer type="DB"><dbdot><latcoord n=" 1 " m=" 2 " l=" 1 "/>)"

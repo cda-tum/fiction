@@ -88,6 +88,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
     SiDB header dependency
 
+- CLI:
+  - **Breaking:** SiDB commands use `sidb::layout` and simulation results. `read --sqd` reads the lattice
+    from the file; `--lattice_orientation` is removed
+  - `print`, `show`, and statistics use stored ground states; `sqd` exports geometry and defects
+
 - Continuous integration:
   - Reusable workflows now use GitHub's self-repository reference syntax.
   - Clang-Tidy skips Python-only changes in the bindings tree.
@@ -119,12 +124,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - I/O:
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
     `charge_distribution`
-
-- **Breaking:** The CLI's cell-layout store holds `sidb::layout` and `sidb::simulation::result` for SiDB layouts.
-  `read --sqd` parses any SQD file into an `sidb::layout`; the file names its lattice, so the
-  `--lattice_orientation` option is gone. `cell` with the Bestagon library yields an `sidb::layout`.
-  _QuickExact_, _QuickSim_, and _ClusterComplete_ store their `result`, which `print`, `show`, `sqd`, and the
-  store statistics render with its ground state. `temp` and `opdom` accept both types
 
 - **Breaking:** Restructured `include/fiction/` so that the directory a header lives in tells
   you what the header is about, and introduced nested namespaces mirroring that tree
@@ -319,6 +318,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
   - Change detection now allows five minutes for runner setup and file comparisons.
 
+- CLI:
+  - SiDB store descriptions and statistics handle the full column range without integer overflow
+
 - Data structures:
   - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.
   - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
@@ -343,7 +345,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB circuit experiments now reject missing placement and equivalence results before reporting.
   - The Bestagon experiment converts placed SiDB cells to `sidb::layout` before SQD export and reports input parsing
     or equivalence-checking failures.
-  - The Bestagon critical-temperature domain experiment records the default temperature for each kink policy.
+  - The Bestagon critical-temperature domain experiment removes a redundant calculation while preserving its
+    kink-rejection policy and reported temperatures.
   - The library walkthrough writes QCA layouts only in QCADesigner and SVG formats.
 
 - I/O:

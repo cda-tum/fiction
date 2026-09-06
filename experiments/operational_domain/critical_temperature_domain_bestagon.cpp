@@ -47,7 +47,12 @@ using namespace fiction::synthesis;
 // This script analyzes the critical temperature within the operational domain of the Bestagon gates. It calculates
 // the operational domain at various temperatures relative to the total operational domain at 0 K.
 
-int main()  // NOLINT
+/**
+ * Runs the Bestagon critical-temperature domain experiment with its fixed kink-rejection policy.
+ *
+ * @return `EXIT_SUCCESS` after recording all gates.
+ */
+int main()
 {
     experiments::experiment<std::string, uint64_t, double, double, double, double> opdomain_exp{
         "Critical Temperature Domain Bestagon",
@@ -105,8 +110,9 @@ int main()  // NOLINT
             operational_domain_stats op_domain_stats_gs{};
             std::string              gate_name = gate;
 
-            op_domain_params.operational_params.op_condition = cond;
-            const auto ct_default                            = critical_temperature_gate_based(
+            op_domain_params.operational_params.op_condition =
+                is_operational_params::operational_condition::REJECT_KINKS;
+            const auto ct_default = critical_temperature_gate_based(
                 lyt, truth_table,
                 critical_temperature_params{.operational_params = op_domain_params.operational_params});
 

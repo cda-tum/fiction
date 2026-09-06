@@ -264,7 +264,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
 
 TEST_CASE("Displaced layouts retain their name and stationary defects", "[displacement-robustness-domain]")
 {
-    auto lyt = to_sidb_layout(blueprints::bdl_wire<sidb_cell_clk_lyt_siqad>());
+    auto lyt = blueprints::bdl_wire();
     lyt.set_layout_name("defective wire");
     lyt.assign_defect({20, 20, 0}, defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});
 
