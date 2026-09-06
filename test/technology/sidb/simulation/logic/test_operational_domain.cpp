@@ -2144,7 +2144,7 @@ TEST_CASE("Flood fill propagates a worker's storage failure", "[operational-doma
 
 TEST_CASE("Concurrent operational-domain sampling matches grid results", "[operational-domain]")
 {
-    const layout              lat{to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>())};
+    const layout              lat{blueprints::siqad_and_gate()};
     operational_domain_params params{};
     params.number_of_threads             = 1;
     params.operational_params.sim_params = simulation_parameters{2, -0.32};
