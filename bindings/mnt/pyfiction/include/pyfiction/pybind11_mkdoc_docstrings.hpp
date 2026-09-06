@@ -19905,7 +19905,7 @@ exponential runtime, but it scales a lot better than ExGS due to its
 effective search-space pruning.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_get_engine =
-R"doc(Returns a simulation engine by name.
+R"doc(Returns a simulation engine by case-insensitive name.
 
 Args:
     name: Name of the desired SiDB simulation engine.

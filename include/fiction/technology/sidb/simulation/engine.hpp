@@ -175,7 +175,7 @@ template <typename EngineType>
     }
 }
 /**
- * Returns a simulation engine by name.
+ * Returns a simulation engine by case-insensitive name.
  *
  * @param name Name of the desired SiDB simulation engine.
  * @return SiDB simulation engine that matches the given `name`, or `std::nullopt` if no simulation engine by the given
@@ -191,7 +191,8 @@ template <typename EngineType>
                                                                          {"QUICKSIM", engine::QUICKSIM}};
 
     std::string upper_name{name};
-    std::ranges::transform(upper_name, upper_name.begin(), ::toupper);
+    std::ranges::transform(upper_name, upper_name.begin(),
+                           [](const unsigned char c) { return static_cast<char>(std::toupper(c)); });
 
     if (const auto it = engine_lookup.find(upper_name); it != engine_lookup.cend())
     {
