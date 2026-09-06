@@ -26,6 +26,7 @@
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/technology.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -88,6 +89,10 @@ struct defect_influence_params
      * Number of threads to use.
      */
     std::size_t number_of_threads{std::max(std::size_t{std::thread::hardware_concurrency()}, std::size_t{1})};
+    /**
+     * Callback that receives the number of evaluated defect positions or, for *QuickTrace*, contour points.
+     */
+    utils::progress_callback on_progress{};
 };
 
 /**
@@ -188,7 +193,9 @@ class defect_influence_impl
 
         const auto positions = all_positions();
 
-        run_in_parallel(positions.size(),
+        utils::progress_reporter progress{params.on_progress, "defect positions", positions.size()};
+
+        run_in_parallel(positions.size(), progress,
                         [this, &positions, step_size, &spec](const std::size_t i)
                         {
                             const auto& p = positions[i];
@@ -222,7 +229,9 @@ class defect_influence_impl
 
         const auto num = std::min(positions.size(), samples);
 
-        run_in_parallel(num,
+        utils::progress_reporter progress{params.on_progress, "defect positions", num};
+
+        run_in_parallel(num, progress,
                         [this, &positions, &spec](const std::size_t i) { is_defect_influential(spec, positions[i]); });
 
         log_stats();
@@ -259,6 +268,9 @@ class defect_influence_impl
         };
 
         std::unordered_set<lattice_site> starting_points{};
+
+        // the contour length is not known in advance, so the total stays unknown
+        utils::progress_reporter progress{params.on_progress, "contour points"};
 
         for (std::size_t sample = 0; sample < samples; ++sample)
         {
@@ -303,6 +315,7 @@ class defect_influence_impl
             while (next_point != contour_starting_point)
             {
                 const auto status = is_defect_influential(spec, next_point);
+                progress.advance();
 
                 if (status == defect_influence_status::INFLUENTIAL)
                 {
@@ -400,10 +413,11 @@ class defect_influence_impl
      *
      * @tparam Fn Callable type.
      * @param n Number of indices.
+     * @param progress The reporter to advance after each processed index.
      * @param fn The function to run.
      */
     template <typename Fn>
-    void run_in_parallel(const std::size_t n, const Fn& fn) const
+    void run_in_parallel(const std::size_t n, utils::progress_reporter& progress, const Fn& fn) const
     {
         const auto number_of_threads =
             std::max(std::min(std::max(params.number_of_threads, std::size_t{1}), n), std::size_t{1});
@@ -423,11 +437,12 @@ class defect_influence_impl
             }
 
             threads.emplace_back(std::async(std::launch::async,
-                                            [start, end, &fn]
+                                            [start, end, &fn, &progress]
                                             {
                                                 for (auto i = start; i < end; ++i)
                                                 {
                                                     fn(i);
+                                                    progress.advance();
                                                 }
                                             }));
         }

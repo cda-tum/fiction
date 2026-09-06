@@ -23,6 +23,7 @@
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp"
 #include "fiction/technology/sidb/technology.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <cstdint>
 #include <optional>
@@ -85,6 +86,10 @@ struct generate_random_layout_params
      * Maximum number of generation attempts for multiple layouts.
      */
     uint64_t maximal_attempts_for_multiple_layouts = 1'000'000;
+    /**
+     * Callback that receives the number of placed SiDBs and, for multiple layouts, the number of generated layouts.
+     */
+    utils::progress_callback on_progress{};
 };
 
 namespace detail
@@ -132,6 +137,8 @@ namespace detail
 
     const auto tag = skeleton.has_value() ? dot_tag::LOGIC : dot_tag::NORMAL;
 
+    utils::progress_reporter progress{params.on_progress, "placed SiDBs", params.number_of_sidbs};
+
     uint64_t attempt = 0;
     while (attempt < params.maximal_attempts)
     {
@@ -149,6 +156,7 @@ namespace detail
             }
 
             lyt = skeleton.value_or(layout{});
+            progress.reset(params.number_of_sidbs);
             continue;
         }
 
@@ -169,6 +177,10 @@ namespace detail
             simulation::analysis::can_positive_charges_occur(lyt, params.sim_params))
         {
             lyt.assign_sidb(random_site, dot_tag::EMPTY);
+        }
+        else
+        {
+            progress.advance();
         }
     }
 
@@ -197,6 +209,8 @@ generate_multiple_random_layouts(const generate_random_layout_params& params,
 
     std::unordered_set<layout> seen{};
 
+    utils::progress_reporter progress{params.on_progress, "layouts", params.number_of_unique_generated_layouts};
+
     for (uint64_t unsuccessful = 0; unique_lyts.size() < params.number_of_unique_generated_layouts &&
                                     unsuccessful < params.maximal_attempts_for_multiple_layouts;)
     {
@@ -204,6 +218,7 @@ generate_multiple_random_layouts(const generate_random_layout_params& params,
             random_lyt.has_value() && seen.insert(*random_lyt).second)
         {
             unique_lyts.push_back(std::move(*random_lyt));
+            progress.advance();
             continue;
         }
 
