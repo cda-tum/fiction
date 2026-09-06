@@ -22,6 +22,8 @@
 #include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 // These headers register nanobind type casters without exposing directly referenced symbols.
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
@@ -53,14 +55,16 @@ void quickexact(nanobind::module_& m)
         .def_rw("local_external_potential", &quickexact_params::local_external_potential,
                 DOC(fiction_sidb_simulation_engines_quickexact_params_local_external_potential))
         .def_rw("global_potential", &quickexact_params::global_potential,
-                DOC(fiction_sidb_simulation_engines_quickexact_params_global_potential));
+                DOC(fiction_sidb_simulation_engines_quickexact_params_global_potential))
+        .def_rw("on_progress", &quickexact_params::on_progress,
+                DOC(fiction_sidb_simulation_engines_quickexact_params_on_progress));
 
     // NOLINTNEXTLINE(misc-const-correctness)
     fiction::sidb::simulation::result (*const quickexact_pointer)(
         const fiction::sidb::layout&, const quickexact_params&) = &fiction::sidb::simulation::engines::quickexact;
 
     m.def("quickexact", quickexact_pointer, py::arg("lyt"), py::arg("params") = quickexact_params{},
-          DOC(fiction_sidb_simulation_engines_quickexact));
+          py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_quickexact));
 }
 
 }  // namespace pyfiction

@@ -29,11 +29,13 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/map.h>            // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
@@ -64,6 +66,7 @@ inline void critical_temperature_functions(nanobind::module_& m)
            critical_temperature_stats* stats)
         { return fiction::sidb::simulation::analysis::critical_temperature_gate_based(lyt, spec, params, stats); },
         py::arg("lyt"), py::arg("spec"), py::arg("params") = critical_temperature_params{}, py::arg("stats") = nullptr,
+        py::call_guard<py::gil_scoped_release>(),
         DOC(fiction_sidb_simulation_analysis_critical_temperature_gate_based));
     m.def(
         "critical_temperature_gate_based",
@@ -77,12 +80,14 @@ inline void critical_temperature_functions(nanobind::module_& m)
         },
         py::arg("input_pattern_layouts"), py::arg("spec"), py::arg("params"), py::arg("output_bdl_pairs"),
         py::arg("input_bdl_wires"), py::arg("output_bdl_wires"), py::arg("stats") = nullptr,
+        py::call_guard<py::gil_scoped_release>(),
         DOC(fiction_sidb_simulation_analysis_critical_temperature_gate_based_2));
     m.def(
         "critical_temperature_non_gate_based",
         [](const layout& lyt, const critical_temperature_params& params, critical_temperature_stats* stats)
         { return fiction::sidb::simulation::analysis::critical_temperature_non_gate_based(lyt, params, stats); },
         py::arg("lyt"), py::arg("params") = critical_temperature_params{}, py::arg("stats") = nullptr,
+        py::call_guard<py::gil_scoped_release>(),
         DOC(fiction_sidb_simulation_analysis_critical_temperature_non_gate_based));
 }
 
@@ -133,7 +138,9 @@ void critical_temperature(nanobind::module_& m)
         .def_rw("confidence_level", &fiction::sidb::simulation::analysis::critical_temperature_params::confidence_level,
                 DOC(fiction_sidb_simulation_analysis_critical_temperature_params_confidence_level))
         .def_rw("max_temperature", &fiction::sidb::simulation::analysis::critical_temperature_params::max_temperature,
-                DOC(fiction_sidb_simulation_analysis_critical_temperature_params_max_temperature));
+                DOC(fiction_sidb_simulation_analysis_critical_temperature_params_max_temperature))
+        .def_rw("on_progress", &fiction::sidb::simulation::analysis::critical_temperature_params::on_progress,
+                DOC(fiction_sidb_simulation_analysis_critical_temperature_params_on_progress));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

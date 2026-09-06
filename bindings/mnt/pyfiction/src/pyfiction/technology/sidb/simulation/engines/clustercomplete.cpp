@@ -24,6 +24,8 @@
 #include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
@@ -68,7 +70,9 @@ void clustercomplete(nanobind::module_& m)
         .def_rw("available_threads", &clustercomplete_params::available_threads,
                 DOC(fiction_sidb_simulation_engines_clustercomplete_params_available_threads))
         .def_rw("report_gss_stats", &clustercomplete_params::report_gss_stats,
-                DOC(fiction_sidb_simulation_engines_clustercomplete_params_report_gss_stats));
+                DOC(fiction_sidb_simulation_engines_clustercomplete_params_report_gss_stats))
+        .def_rw("on_progress", &clustercomplete_params::on_progress,
+                DOC(fiction_sidb_simulation_engines_clustercomplete_params_on_progress));
 
     // NOLINTNEXTLINE(misc-const-correctness)
     fiction::sidb::simulation::result (*const clustercomplete_pointer)(const fiction::sidb::layout&,
@@ -76,7 +80,7 @@ void clustercomplete(nanobind::module_& m)
         &fiction::sidb::simulation::engines::clustercomplete;
 
     m.def("clustercomplete", clustercomplete_pointer, py::arg("lyt"), py::arg("params") = clustercomplete_params{},
-          DOC(fiction_sidb_simulation_engines_clustercomplete));
+          py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_clustercomplete));
 }
 
 }  // namespace pyfiction

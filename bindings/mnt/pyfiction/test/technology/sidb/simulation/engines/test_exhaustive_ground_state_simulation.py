@@ -67,3 +67,29 @@ def test_perturber_and_sidb_pair_111() -> None:
     assert groundstate[0].get_charge_state(lattice_site(1, 0, 0)) == sidb_charge_state.NEUTRAL
     assert groundstate[0].get_charge_state(lattice_site(2, 0, 0)) == sidb_charge_state.NEUTRAL
     assert groundstate[0].get_charge_state(lattice_site(3, 0, 0)) == sidb_charge_state.NEGATIVE
+
+
+def test_exgs_reports_progress() -> None:
+    """Every charge configuration is counted, and the callback may be omitted or ``None``."""
+
+    layout = sidb_layout()
+    layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(4, 0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(6, 0, 1), sidb_technology.cell_type.NORMAL)
+
+    params = sidb_simulation_parameters()
+    params.base = 2
+
+    reports: list[tuple[str, int, int]] = []
+
+    result = exhaustive_ground_state_simulation(
+        layout, params, lambda task, done, total: reports.append((task, done, total))
+    )
+
+    assert len(result.charge_distributions) == 1
+    # three SiDBs in base 2 have eight charge configurations
+    assert reports[0] == ("charge configurations", 0, 8)
+    assert reports[-1] == ("charge configurations", 8, 8)
+
+    silent = exhaustive_ground_state_simulation(layout, params, None)
+    assert len(silent.charge_distributions) == 1
