@@ -29,7 +29,8 @@ flag_management:
           threshold: 0.5%
     - name: python
       paths:
-        - bindings/mnt/pyfiction/**/*.py
+        # A directory prefix includes package-root modules as well as nested modules.
+        - bindings/mnt/pyfiction/
       statuses:
         - type: project
           target: auto

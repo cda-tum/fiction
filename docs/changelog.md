@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Continuous integration:
 
-  - Added Python source coverage reports and separate C++ and Python coverage checks.
+  - Added Python source coverage, including package-root modules, and separate C++ checks.
 
 - Documentation:
 
