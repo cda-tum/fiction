@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/physical_design/graph_oriented_layout_design.hpp`.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -38,7 +39,9 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <future>
 #include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -496,4 +499,54 @@ TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout
     params.return_first = true;
 
     CHECK_THROWS_AS(graph_oriented_layout_design<gate_layout>(ntk, params, &stats), std::invalid_argument);
+}
+
+TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-oriented-layout-design]")
+{
+    /**
+     * Cartesian gate layout used to compare seeded PI placement.
+     */
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    const auto ntk    = blueprints::mux21_network<technology_network>();
+
+    const auto layouts =
+        std::async(std::launch::async,
+                   [&ntk]
+                   {
+                       graph_oriented_layout_design_params params{};
+                       params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+                       params.return_first = true;
+                       params.seed         = 42;
+
+                       const auto zero_reference = graph_oriented_layout_design<gate_layout>(ntk, params);
+                       params.randomize_tiles_to_skip_between_pis = true;
+                       params.tiles_to_skip_between_pis           = 3;
+                       const auto first_seeded          = graph_oriented_layout_design<gate_layout>(ntk, params);
+                       params.tiles_to_skip_between_pis = 0;
+                       params.seed                      = 7;
+                       const auto zero_after            = graph_oriented_layout_design<gate_layout>(ntk, params);
+                       params.tiles_to_skip_between_pis = 3;
+                       params.seed                      = 42;
+                       const auto repeated_seeded       = graph_oriented_layout_design<gate_layout>(ntk, params);
+                       return std::array{zero_reference, first_seeded, zero_after, repeated_seeded};
+                   })
+            .get();
+
+    for (const auto& lyt : layouts)
+    {
+        REQUIRE(lyt.has_value());
+        check_eq(ntk, *lyt);
+    }
+
+    /**
+     * Collects PI positions in the network's input order.
+     */
+    const auto pi_positions = [](const gate_layout& lyt)
+    {
+        std::vector<tile<gate_layout>> positions{};
+        lyt.foreach_pi([&](const auto& pi) { positions.push_back(lyt.get_tile(pi)); });
+        return positions;
+    };
+    CHECK(pi_positions(*layouts[0]) == pi_positions(*layouts[2]));
+    CHECK(pi_positions(*layouts[1]) == pi_positions(*layouts[3]));
 }

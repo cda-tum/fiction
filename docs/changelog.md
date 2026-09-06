@@ -296,6 +296,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Canvas filtering now rejects SiDBs missing from the simulation state's layout.
   - Ground State Space reports multiset limits using the potential landscape's charge base.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
+  - GOLD now applies each invocation's seed and PI-spacing limit independently
   - Operational checks and gate pruning now reject mismatched input counts; band-bending resilience rejects unusable inputs.
   - Gate design now propagates worker exceptions to the caller and sets simulation parameters before launching workers.
   - SiDB simulation, logic matching, and energy labeling now propagate errors from checked charge and potential operations.
