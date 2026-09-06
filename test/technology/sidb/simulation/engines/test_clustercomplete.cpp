@@ -23,6 +23,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
@@ -1817,6 +1818,37 @@ TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[clustercomp
 
         CHECK(ground_state.front().get_charge_state({23, 29, 1}) == charge_state::NEGATIVE);
     }
+}
+
+TEST_CASE("ClusterComplete reports progress", "[clustercomplete]")
+{
+    layout lyt{};
+    lyt.assign_cell_type({2, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 1, 1}, sidb_technology::cell_type::NORMAL);
+
+    progress_recorder rec{};
+
+    clustercomplete_params params{.sim_params = simulation_parameters{2}};
+    params.on_progress = rec.callback();
+
+    SECTION("single-threaded")
+    {
+        params.available_threads = 1;
+    }
+    SECTION("multi-threaded")
+    {
+        params.available_threads = 2;
+    }
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    CHECK(simulation_results.charge_distributions.size() == 1);
+
+    // the number of compositions is unknown in advance; a layout this small may need no unfolding at all
+    CHECK(rec.is_consistent("compositions"));
+    CHECK(rec.reports_of("compositions").back().total == 0);
 }
 
 #else  // FICTION_ALGLIB_ENABLED
