@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Continuous integration:
   - PyPI releases now use trusted publishing instead of an API token.
+  - Renovate now waits three days for dated dependency releases before updating.
 
 - Documentation:
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
