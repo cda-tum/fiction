@@ -41,6 +41,7 @@
 #include <iostream>
 #include <optional>
 #include <ostream>
+#include <utility>
 #include <vector>
 
 namespace fiction::physical_design
@@ -444,9 +445,9 @@ class orthogonal_impl
      * @param st The statistics object to record execution details.
      */
     orthogonal_impl(const mockturtle::names_view<networks::technology_network>& src,
-                    const orthogonal_physical_design_params& p, orthogonal_physical_design_stats& st) :
+                    orthogonal_physical_design_params p, orthogonal_physical_design_stats& st) :
             ntk{mockturtle::fanout_view{src}},
-            ps{p},
+            ps{std::move(p)},
             pst{st}
     {}
 

@@ -70,7 +70,7 @@ class progress_reporter
     {
         if (on_progress)
         {
-            const std::lock_guard lock{mutex};
+            const std::scoped_lock lock{mutex};
             report_locked(0);
         }
     }
@@ -81,7 +81,7 @@ class progress_reporter
     {
         if (on_progress)
         {
-            const std::lock_guard lock{mutex};
+            const std::scoped_lock lock{mutex};
 
             try
             {
@@ -118,7 +118,7 @@ class progress_reporter
             return;
         }
 
-        const std::lock_guard lock{mutex};
+        const std::scoped_lock lock{mutex};
 
         // another thread may have reported in the meantime
         if (done < next_report.load(std::memory_order_relaxed))
@@ -147,7 +147,7 @@ class progress_reporter
             return;
         }
 
-        const std::lock_guard lock{mutex};
+        const std::scoped_lock lock{mutex};
 
         total_items = total;
         step        = step_for(total);
@@ -168,7 +168,7 @@ class progress_reporter
             return;
         }
 
-        const std::lock_guard lock{mutex};
+        const std::scoped_lock lock{mutex};
 
         count.store(0, std::memory_order_relaxed);
         total_items = total;

@@ -441,10 +441,10 @@ template <typename Lyt>
 class post_layout_optimization_impl
 {
   public:
-    post_layout_optimization_impl(const Lyt& lyt, const post_layout_optimization_params& p,
+    post_layout_optimization_impl(const Lyt& lyt, post_layout_optimization_params p,
                                   post_layout_optimization_stats& st) :
             plyt{lyt},
-            ps{p},
+            ps{std::move(p)},
             pst{st},
             start{std::chrono::high_resolution_clock::now()}
     {

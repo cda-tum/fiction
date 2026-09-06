@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
 #include <mutex>
 #include <string>
 #include <string_view>
@@ -53,8 +54,8 @@ class progress_recorder
     {
         return [this](const std::string_view task, const std::size_t done, const std::size_t total)
         {
-            const std::lock_guard lock{mutex};
-            reports.push_back({std::string{task}, done, total});
+            const std::scoped_lock lock{mutex};
+            reports.push_back({.task = std::string{task}, .done = done, .total = total});
         };
     }
     /**
@@ -66,8 +67,7 @@ class progress_recorder
     [[nodiscard]] std::vector<progress_record> reports_of(const std::string_view task) const
     {
         std::vector<progress_record> filtered{};
-        std::copy_if(reports.cbegin(), reports.cend(), std::back_inserter(filtered),
-                     [&task](const auto& r) { return r.task == task; });
+        std::ranges::copy_if(reports, std::back_inserter(filtered), [&task](const auto& r) { return r.task == task; });
         return filtered;
     }
     /**

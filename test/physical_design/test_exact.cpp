@@ -852,6 +852,7 @@ TEST_CASE("Exact physical design reports progress", "[exact]")
     const auto layout = exact<cart_gate_clk_lyt>(ntk, params, &stats);
 
     REQUIRE(layout.has_value());
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the access
     check_eq(ntk, *layout);
 
     // the number of aspect ratios is unknown in advance

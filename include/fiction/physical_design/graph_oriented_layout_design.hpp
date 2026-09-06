@@ -504,7 +504,7 @@ struct search_space_graph
      */
     pi_locations pi_locs = pi_locations::TOP_AND_LEFT;
     /**
-     * Random engine for this search space graph's PI spacing.
+     * Random engine for this search space graph's PI spacing. It is seeded from the parameters before use.
      */
     std::mt19937 pi_placement_rng{};  // NOLINT(cert-msc32-c, cert-msc51-cpp) Seeded before first use.
     /**
@@ -864,6 +864,13 @@ class graph_oriented_layout_design_impl
                 struct worker_joiner
                 {
                     std::vector<std::future<std::optional<Lyt>>>& pool;
+
+                    explicit worker_joiner(std::vector<std::future<std::optional<Lyt>>>& p) noexcept : pool{p} {}
+
+                    worker_joiner(const worker_joiner&)            = delete;
+                    worker_joiner(worker_joiner&&)                 = delete;
+                    worker_joiner& operator=(const worker_joiner&) = delete;
+                    worker_joiner& operator=(worker_joiner&&)      = delete;
 
                     ~worker_joiner()
                     {

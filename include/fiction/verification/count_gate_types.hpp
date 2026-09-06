@@ -21,6 +21,8 @@
 
 #include <mockturtle/traits.hpp>
 
+#include <cstdint>
+#include <iostream>
 #include <ostream>
 
 namespace fiction::verification
