@@ -70,6 +70,19 @@
     },
     {
       customType: "regex",
+      description: "Update the fmt revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "set\\(FMT_VERSION\\s+(?<currentValue>[0-9.]+)"
+      ],
+      depNameTemplate: "fmtlib/fmt",
+      packageNameTemplate: "fmtlib/fmt",
+      datasourceTemplate: "github-tags",
+    },
+    {
+      customType: "regex",
       description: "Update the tinyxml2 revision pinned for CMake FetchContent",
       managerFilePatterns: [
         "cmake/Dependencies.cmake"
