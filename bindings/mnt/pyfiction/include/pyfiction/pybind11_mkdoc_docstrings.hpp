@@ -14421,18 +14421,17 @@ Template Args:
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_canvas_layouts = R"doc(All canvas layouts: one per combination of canvas SiDBs.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_sidbs_in_canvas = R"doc(All sites of the canvas.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_available_sidbs_in_canvas = R"doc(Empty, defect-free sites of the canvas.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_design_canvas_layout =
 R"doc(Builds the canvas layout of a combination: its canvas SiDBs plus the
-skeleton's own logic cells. A combination that puts an SiDB onto a
-defect yields no layout.
+skeleton's own logic cells.
 
 Args:
     cell_indices: Indices into the canvas sites.
 
 Returns:
-    The canvas layout, or `std::nullopt`.
+    The canvas layout.
 
 )doc";
 
@@ -28280,6 +28279,10 @@ Args:
 Returns:
     A vector of vectors representing all possible combinations of
     distributing k entities on n positions.
+
+Raises:
+    std::length_error: if the number of combinations exceeds the
+                       vector's capacity.
 
 )doc";
 
