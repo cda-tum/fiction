@@ -1708,7 +1708,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
 TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]")
 {
-    const auto layout = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>(), lattice::si_111_1x1());
+    const auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>(), lattice::si_111_1x1());
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;
@@ -1725,7 +1725,7 @@ TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]")
     SECTION("grid_search")
     {
         const auto op_domain =
-            operational_domain_grid_search(layout, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
+            operational_domain_grid_search(lyt, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 4);
@@ -1741,7 +1741,7 @@ TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]")
     }
     SECTION("random_sampling")
     {
-        const auto op_domain = operational_domain_random_sampling(layout, std::vector{create_and_tt()}, 100,
+        const auto op_domain = operational_domain_random_sampling(lyt, std::vector{create_and_tt()}, 100,
                                                                   op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
@@ -1760,8 +1760,8 @@ TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]")
     {
         SECTION("one random sample")
         {
-            const auto op_domain = operational_domain_flood_fill(layout, std::vector{create_and_tt()}, 1,
-                                                                 op_domain_params, &op_domain_stats);
+            const auto op_domain =
+                operational_domain_flood_fill(lyt, std::vector{create_and_tt()}, 1, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (10 steps in each dimension)
             CHECK(op_domain.size() == 4);
@@ -1778,7 +1778,7 @@ TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]")
     }
     SECTION("contour_tracing")
     {
-        const auto op_domain = operational_domain_contour_tracing(layout, std::vector{create_and_tt()}, 1,
+        const auto op_domain = operational_domain_contour_tracing(lyt, std::vector{create_and_tt()}, 1,
                                                                   op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
@@ -1797,7 +1797,7 @@ TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]")
 
 TEST_CASE("AND gate with Bestagon shape and kink states at default physical parameters", "[operational-domain]")
 {
-    const auto layout = to_sidb_layout(blueprints::and_gate_with_kink_states<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = to_sidb_layout(blueprints::and_gate_with_kink_states<sidb_cell_clk_lyt_siqad>());
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;
@@ -1814,7 +1814,7 @@ TEST_CASE("AND gate with Bestagon shape and kink states at default physical para
     SECTION("grid_search, allow kinks")
     {
         const auto op_domain =
-            operational_domain_grid_search(layout, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
+            operational_domain_grid_search(lyt, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 36);
@@ -1829,7 +1829,7 @@ TEST_CASE("AND gate with Bestagon shape and kink states at default physical para
         op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
         const auto op_domain =
-            operational_domain_grid_search(layout, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
+            operational_domain_grid_search(lyt, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 36);
@@ -1844,7 +1844,7 @@ TEST_CASE("Grid search to determine the operational domain. The operational stat
           "simulation and the efficient but approximate method of pruning only.",
           "[operational-domain]")
 {
-    const auto layout = to_sidb_layout(blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = to_sidb_layout(blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>());
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;
@@ -1863,7 +1863,7 @@ TEST_CASE("Grid search to determine the operational domain. The operational stat
     SECTION("grid search, determine operational status with physical simulation")
     {
         const auto op_domain =
-            operational_domain_grid_search(layout, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
+            operational_domain_grid_search(lyt, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 36);
@@ -1879,7 +1879,7 @@ TEST_CASE("Grid search to determine the operational domain. The operational stat
             is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
         const auto op_domain =
-            operational_domain_grid_search(layout, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
+            operational_domain_grid_search(lyt, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 36);

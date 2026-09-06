@@ -74,14 +74,17 @@ struct detect_bdl_wires_params
 };
 
 /**
- * A BDL wire is a chain of BDL pairs. Its port direction follows from the positions of its input and output pairs;
- * a wire with fewer than two pairs or without input and output pairs has no port. The first and last pairs are
- * the input and output pairs where present, and otherwise the pairs at the ends of the chain.
+ * A BDL wire is a chain of BDL pairs. Wires with fewer than two pairs or only NORMAL pairs have no port;
+ * direction updates leave their end pairs unchanged. The vector constructor initializes the end pairs from
+ * the first and last supplied pairs. Adding only NORMAL pairs to a default-constructed wire leaves both unset.
+ *
+ * For other wires, input and output pairs form the endpoints where present. An input-only wire ends at the
+ * farthest pair from its input; an output-only wire starts at the farthest pair from its output.
  */
 struct bdl_wire
 {
     /**
-     * The BDL pairs of the wire, sorted.
+     * The BDL pairs of the wire.
      */
     std::vector<bdl_pair<lattice_site>> pairs{};
     /**

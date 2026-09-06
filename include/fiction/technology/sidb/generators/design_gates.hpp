@@ -468,8 +468,6 @@ class design_gates_impl
 
         std::mutex mutex_to_protect_gate_designs{};
 
-        gate_layouts.reserve(gate_candidates.size());
-
         const std::size_t num_threads = std::max(std::min(number_of_threads, gate_candidates.size()), std::size_t{1});
 
         const std::size_t chunk_size = (gate_candidates.size() + num_threads - 1) / num_threads;  // Ceiling division

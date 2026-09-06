@@ -47,12 +47,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `write_sidb_layout_svg`
   - Exposed `charge_distribution`, `potential_landscape`, charge transition thresholds,
     and `sidb_simulation_result`; simulation engines and consumers accept the new types
-  - `bdl_pair`, `bdl_wire`, `bdl_input_iterator`, `population_stability_information`, and the
-    `sidb_layout` versions of `detect_bdl_pairs`, `detect_bdl_wires`, `generate_bdl_input_pattern_layouts`,
-    `is_operational` and its pattern queries, the operational and critical temperature domain algorithms,
-    `operational_domain_ratio`, `critical_temperature_gate_based`, `critical_temperature_non_gate_based`,
-    `time_to_solution`, `physical_population_stability`, `physically_valid_parameters`,
-    `can_positive_charges_occur`, and `calculate_energy_and_state_type_with_kinks_*`
+  - Exposed lattice-based BDL types, wire detection, and input-pattern generation
+  - Exposed lattice-based logic checks, parameter domains, critical-temperature analysis,
+    time-to-solution estimates, and population-stability analysis
 
 - Tooling:
 
