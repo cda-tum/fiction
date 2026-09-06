@@ -18,6 +18,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
 
+- Tooling:
+
+  - Added EditorConfig settings that match the repository's formatters.
+
 ### Changed
 
 - Continuous integration:
@@ -178,6 +182,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     reading past the parameter vector
   - `write_sqd_sim_result` accepts the `sidb_simulation_result_100` and `_111` results
     Python produces; it was bound for a result type Python cannot construct
+
+- Tooling:
+
+  - Git checkouts and formatting hooks enforce LF without rewriting license-only files to
+    CRLF on Windows.
 
 ## v0.8.0 - 2026-09-02
 
