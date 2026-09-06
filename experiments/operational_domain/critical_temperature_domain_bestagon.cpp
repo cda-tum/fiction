@@ -143,6 +143,8 @@ try
 }
 catch (const std::exception& exception)
 {
-    std::fprintf(stderr, "Critical Temperature Domain Bestagon failed: %s\n", exception.what());
+    static_cast<void>(std::fputs("Critical Temperature Domain Bestagon failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
     return EXIT_FAILURE;
 }
