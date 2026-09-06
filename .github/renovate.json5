@@ -82,24 +82,10 @@
       datasourceTemplate: "github-tags",
     },
     {
-      // alice and mockturtle are pinned to a commit SHA that tracks the head
-      // of a branch (rather than a release tag), so these use the git-refs
-      // datasource against that branch instead of github-tags. mockturtle is
-      // still fetched as a clone, so its manager matches GIT_TAG.
-      customType: "regex",
-      description: "Update the alice revision pinned for CMake FetchContent",
-      managerFilePatterns: [
-        "cmake/Dependencies.cmake"
-      ],
-      matchStrings: [
-        "set\\(ALICE_REV\\s+(?<currentDigest>[0-9a-f]{40})"
-      ],
-      depNameTemplate: "marcelwa/alice",
-      packageNameTemplate: "https://github.com/marcelwa/alice",
-      currentValueTemplate: "master",
-      datasourceTemplate: "git-refs",
-    },
-    {
+      // mockturtle is pinned to a commit SHA that tracks the head of a branch
+      // (rather than a release tag), so this uses the git-refs datasource
+      // against that branch instead of github-tags. It is fetched as a clone,
+      // so its manager matches GIT_TAG.
       customType: "regex",
       description: "Update the mockturtle revision pinned for CMake FetchContent",
       managerFilePatterns: [

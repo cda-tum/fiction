@@ -1,5 +1,5 @@
 # Prevent CMake from finding a system-installed fmt package to avoid version conflicts.
-# We use the bundled fmt version from alice/mockturtle submodules.
+# We use the bundled fmt version from mockturtle.
 set(CMAKE_DISABLE_FIND_PACKAGE_fmt TRUE)
 
 # Include Dependencies (FetchContent) configuration
@@ -16,13 +16,6 @@ set(FICTION_SECTION_FLAGS
 ################################################################################
 # Fetched Dependencies (Managed via FetchContent in Dependencies.cmake)
 ################################################################################
-
-# alice
-target_link_system_libraries(libfiction INTERFACE
-    $<BUILD_INTERFACE:alice>
-    $<INSTALL_INTERFACE:fiction::alice>
-)
-install(DIRECTORY ${alice_SOURCE_DIR}/include/ DESTINATION include)
 
 # mockturtle
 target_link_system_libraries(libfiction INTERFACE

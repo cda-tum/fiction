@@ -116,29 +116,6 @@ FetchContent_Declare(
   URL_HASH SHA256=${TINYXML2_SHA256})
 FetchContent_MakeAvailable(tinyxml2)
 
-# alice
-set(ALICE_REV
-    6b7f941ca44f38226f5e2545224fa1194940cd73
-    CACHE STRING "alice revision -- head of the master branch")
-if(NOT DEFINED ALICE_URL)
-  set(ALICE_URL https://github.com/marcelwa/alice/archive/${ALICE_REV}.tar.gz)
-endif()
-if(NOT DEFINED ALICE_SHA256)
-  set(ALICE_SHA256
-      38709e50db916639c4baf7b2a7e56449baa65d6b17e6616d62439853e65163d2)
-endif()
-set(ALICE_EXAMPLES
-    OFF
-    CACHE BOOL "" FORCE)
-set(ALICE_TEST
-    OFF
-    CACHE BOOL "" FORCE)
-FetchContent_Declare(
-  alice
-  URL ${ALICE_URL}
-  URL_HASH SHA256=${ALICE_SHA256})
-FetchContent_MakeAvailable(alice)
-
 # mockturtle
 #
 # The one dependency still fetched as a clone. mockturtle carries
