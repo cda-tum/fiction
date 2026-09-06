@@ -57,7 +57,7 @@ Nevertheless, please try to follow the guidelines below as well as you can to he
 - Whenever a PR is created or updated, the `CI` workflow runs. Its `🔍 Change` job classifies your diff and skips the jobs your changes cannot affect, so a documentation-only PR does not pay for the C++ matrix. `🚦 Check` aggregates every job and is the one status that has to be green. Here are some tips for finding the cause of certain failures:
 
   - If any of the `🐧 Test`, `🍎 Test`, `🪟 Test`, `🧪 Experiments`, or `🐳 Docker` checks fail, this most likely indicates build errors or test failures in the C++ part of the code base. Look through the respective logs on GitHub for any error or failure messages.
-  - If the `☂️ Coverage` check fails, this means that your changes are not appropriately covered by tests or that the overall project coverage decreased too much. Ensure that you include tests for all your changes in the PR.
+  - If `☂️ Coverage` or `🐍 Coverage` fails, inspect the job log for a build, test, report, or upload error. Codecov's separate project and patch statuses enforce coverage targets; add tests when those statuses report insufficient coverage.
   - If a `🐍 Packaging` check fails, this indicates an error in the Python part of the code base. `cibuildwheel` runs the `pyfiction` test suite against every wheel it builds, so a failing test shows up here. Look through the respective logs on GitHub for any error or failure messages.
   - If the `📝 CodeQL` check fails, this indicates a security vulnerability in the code base. Look through the respective logs on GitHub for any error or failure messages.
   - If `🚨 Lint` comments on your PR with a list of suggestions/warnings, `clang-tidy` raised them when checking the C++ part of your changes for warnings or style guideline violations. The individual messages frequently provide helpful suggestions on how to fix the warnings.
@@ -80,6 +80,22 @@ Markers include `layouts`, `networks`, `physical_design`, `synthesis`, `verifica
 matching ancestor marker: `pytest -m "sidb and io"` selects SiDB I/O tests, including
 simulation I/O. New files in those directories need no marker annotations. Running
 without `-m` executes the full suite.
+
+## Python Coverage
+
+Run the test suite with coverage on one supported Python version:
+
+```sh
+uvx nox -s tests-3.12 -- --cov --cov-config=pyproject.toml --cov-report=term-missing --cov-report=xml
+```
+
+Coverage measures the Python source in `mnt.pyfiction`, including Python subprocesses.
+The report excludes the embedded test package and typing-only statements. Compiled C++
+binding code is not measured by `pytest-cov`.
+
+CI combines reports from the supported Python versions and platforms under Codecov's
+`python` flag. The `cpp` flag measures C++ headers. Each flag has its own project and
+patch status; Python project coverage is compared with the measured base revision.
 
 ## Code Review
 
