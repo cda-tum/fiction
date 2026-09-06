@@ -118,17 +118,12 @@ TEST_CASE("Layout conversion rejects unrepresentable cells", "[cell-level-layout
     CHECK_THROWS_AS(to_cell_level_layout<sidb_cell_clk_lyt_cube>(lyt), std::out_of_range);
 }
 
-TEST_CASE("SiDB layout conversion preserves represented bounds", "[cell-level-layout-conversion]")
+TEST_CASE("SiDB layout conversion preserves cell bounds", "[cell-level-layout-conversion]")
 {
     layout lyt{};
     lyt.assign_sidb({2, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_defect({4, 2, 0}, defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});
 
     const auto cells = to_cell_level_layout<sidb_cell_clk_lyt>(lyt);
     CHECK(cells.x() == 2);
     CHECK(cells.y() == 3);
-
-    const auto surface = to_cell_level_layout<surfaces::defect_surface<sidb_cell_clk_lyt>>(lyt);
-    CHECK(surface.x() == 4);
-    CHECK(surface.y() == 4);
 }

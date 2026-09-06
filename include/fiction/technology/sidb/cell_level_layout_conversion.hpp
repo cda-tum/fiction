@@ -132,11 +132,6 @@ template <typename CellLyt>
 
     lyt.foreach_dot([&extend_bounds](const auto& s) { extend_bounds(to_cell<CellLyt>(s)); });
 
-    if constexpr (is_sidb_defect_surface_v<CellLyt>)
-    {
-        lyt.foreach_defect([&extend_bounds](const auto& sd) { extend_bounds(to_cell<CellLyt>(sd.first)); });
-    }
-
     CellLyt result{bounds};
 
     if constexpr (has_set_layout_name_v<CellLyt>)

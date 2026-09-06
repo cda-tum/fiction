@@ -334,7 +334,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     allocation failure, and moving a defect from an empty site leaves the target unchanged
   - Moving a defect now preserves its target when the site arguments refer to stored defects.
   - Corrected the SiDB pointer aliases in `types.hpp` and checked their target types.
-  - SiDB-to-cell-level conversion preserves bounds from converted cells and retained defects.
+  - SiDB-to-cell-level conversion preserves bounds from converted cells.
 
 - Documentation:
 
