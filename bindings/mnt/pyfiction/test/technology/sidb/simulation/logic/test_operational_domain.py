@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from mnt.pyfiction import (
@@ -40,6 +42,9 @@ from mnt.pyfiction import (
     sidb_technology,
     sweep_parameter,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @pytest.fixture
@@ -221,7 +226,8 @@ def test_operational_domain_xor_gate_100_lattice(resources_dir):
     assert stats_contour_tracing.num_operational_parameter_combinations > 0
 
 
-def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir):
+def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir: Path) -> None:
+    """Critical-temperature searches agree on every evaluated XOR parameter point."""
     lyt = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
     params = operational_domain_params()
@@ -255,8 +261,11 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir):
         params,
         stats_contour_tracing,
     )
-    assert ct_domain_contour[parameter_point([5.6, 5.0])][0] == operational_status.OPERATIONAL
-    assert ct_domain_contour[parameter_point([5.6, 5.0])][1] > 30
+    assert len(ct_domain_contour) > 0
+    for point, (status, temperature) in ct_domain_contour.items():
+        expected_status, expected_temperature = ct_domain_grid[point]
+        assert status == expected_status
+        assert temperature == pytest.approx(expected_temperature)
     assert stats_contour_tracing.num_operational_parameter_combinations > 0
 
     params.sweep_dimensions = [

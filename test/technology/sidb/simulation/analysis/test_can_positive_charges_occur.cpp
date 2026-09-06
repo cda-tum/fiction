@@ -98,5 +98,5 @@ TEST_CASE("Positive-charge analysis propagates invalid lattice-basis errors", "[
     lattice_site invalid{};
     invalid.z = 2;
     lyt.assign_cell_type(invalid, sidb_technology::cell_type::NORMAL);
-    CHECK_THROWS_AS(can_positive_charges_occur(lyt, {}), std::out_of_range);
+    CHECK_THROWS_AS(can_positive_charges_occur(lyt, simulation_parameters{}), std::out_of_range);
 }

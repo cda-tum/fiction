@@ -247,8 +247,7 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
     for (uint64_t i = 0; i < tts_params.repetitions; ++i)
     {
         mockturtle::stopwatch<>::duration elapsed{};
-        auto                              heuristic = mockturtle::call_with_stopwatch(
-            elapsed, [&] { return engines::quicksim(lyt, qs_params); });
+        auto heuristic = mockturtle::call_with_stopwatch(elapsed, [&] { return engines::quicksim(lyt, qs_params); });
         if (!heuristic)
         {
             heuristic.emplace();
