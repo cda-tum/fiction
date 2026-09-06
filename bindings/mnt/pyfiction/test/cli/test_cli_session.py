@@ -15,7 +15,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction import orthogonal, orthogonal_stats
-from mnt.pyfiction.cli.registry import REGISTRY, Category, CommandError
+from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.registry import REGISTRY, Category
 from mnt.pyfiction.cli.session import stats_to_dict, tokenize
 from mnt.pyfiction.cli.stores import Store
 

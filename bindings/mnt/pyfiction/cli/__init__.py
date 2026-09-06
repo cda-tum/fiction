@@ -15,7 +15,7 @@ in-process, which is how the test suite drives it.
 from __future__ import annotations
 
 from .app import main
-from .registry import CommandError
+from .errors import CommandError
 from .session import Session
 
 __all__ = ["CommandError", "Session", "main"]

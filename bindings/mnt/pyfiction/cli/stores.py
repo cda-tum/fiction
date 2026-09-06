@@ -37,7 +37,7 @@ from mnt.pyfiction import (
     xag_network,
 )
 
-from .registry import CommandError
+from .errors import CommandError
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

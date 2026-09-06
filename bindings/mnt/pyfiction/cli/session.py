@@ -25,7 +25,8 @@ from rich.markup import escape
 
 from mnt.pyfiction import convert_network, technology_network
 
-from .registry import REGISTRY, CommandError, HelpRequested
+from .errors import CommandError, HelpRequested
+from .registry import REGISTRY
 from .stores import CellEntry, GateLayout, Network, Store
 
 if TYPE_CHECKING:

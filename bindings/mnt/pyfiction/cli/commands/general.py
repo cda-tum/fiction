@@ -32,11 +32,11 @@ from mnt.pyfiction import (
     write_qca_layout_svg_params,
     write_sidb_layout_svg,
 )
+from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import (
     REGISTRY,
     STORE_FLAGS,
     Category,
-    CommandError,
     command,
     one_store,
     selected_stores,

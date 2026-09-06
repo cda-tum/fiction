@@ -38,7 +38,8 @@ from mnt.pyfiction import (
     wiring_reduction_params,
     wiring_reduction_stats,
 )
-from mnt.pyfiction.cli.registry import Category, CommandError, command
+from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.session import stats_to_dict
 from mnt.pyfiction.cli.stores import TOPOLOGIES, describe
 

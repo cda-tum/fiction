@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -21,7 +22,6 @@ from prompt_toolkit.history import FileHistory
 
 from mnt.pyfiction import __version__
 
-from . import commands  # ruff: ignore[unused-import] -- importing the package registers every command
 from .registry import REGISTRY
 from .session import Session
 
@@ -29,6 +29,9 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
 
     from prompt_toolkit.completion import CompleteEvent
+
+# importing the commands package registers every command with the registry
+importlib.import_module(".commands", __package__)
 
 HISTORY_FILE = Path.home() / ".fiction_history"
 """Where the interactive shell keeps the command history between sessions."""

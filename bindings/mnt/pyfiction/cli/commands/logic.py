@@ -56,7 +56,8 @@ from mnt.pyfiction import (
     technology_network,
     write_aiger,
 )
-from mnt.pyfiction.cli.registry import Category, CommandError, command, one_store, store_flags
+from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.registry import Category, command, one_store, store_flags
 from mnt.pyfiction.cli.session import stats_to_dict
 from mnt.pyfiction.cli.stores import describe
 

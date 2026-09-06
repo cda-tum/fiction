@@ -25,7 +25,8 @@ from mnt.pyfiction import (
     shifted_cartesian_gate_layout,
     sidb_layout,
 )
-from mnt.pyfiction.cli.registry import Category, CommandError, command
+from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.stores import TECHNOLOGIES, TOPOLOGIES, CellEntry, describe
 
 if TYPE_CHECKING:

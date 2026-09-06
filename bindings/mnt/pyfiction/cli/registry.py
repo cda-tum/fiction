@@ -19,17 +19,19 @@ import argparse
 import inspect
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, NoReturn
+from typing import TYPE_CHECKING, Any, NoReturn
+
+from .errors import CommandError, HelpRequested
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
     from _typeshed import SupportsWrite
 
-    from .session import Session
-
     Result = dict[str, object] | None
-    Runner = Callable[[Session, argparse.Namespace], Result]
+    # the first argument is the session; it is not named here so that the session module can import the
+    # registry without creating an import cycle
+    Runner = Callable[[Any, argparse.Namespace], Result]
 
 
 class Category(Enum):
@@ -42,27 +44,6 @@ class Category(Enum):
     TECHNOLOGY = "Technology"
     SIMULATION = "Simulation"
     VERIFICATION = "Verification"
-
-
-class CommandError(Exception):
-    """A failure the shell reports and recovers from: a usage error, an empty store, a wrong layout type."""
-
-
-class HelpRequested(SystemExit):
-    """Raised by :class:`Parser` in place of ``sys.exit`` once ``-h`` has produced the help text.
-
-    ``argparse`` ends a help request with ``sys.exit``. This carries the text to the session instead,
-    which prints it and treats the command as done.
-    """
-
-    def __init__(self, text: str) -> None:
-        """Store the help text.
-
-        Args:
-            text: The formatted help text.
-        """
-        super().__init__(0)
-        self.text = text
 
 
 class Parser(argparse.ArgumentParser):

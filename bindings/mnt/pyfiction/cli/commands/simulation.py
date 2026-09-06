@@ -39,7 +39,8 @@ from mnt.pyfiction import (
     write_operational_domain,
     write_operational_domain_params,
 )
-from mnt.pyfiction.cli.registry import Category, CommandError, command
+from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.session import stats_to_dict
 from mnt.pyfiction.cli.stores import TECHNOLOGIES, CellEntry, describe
 

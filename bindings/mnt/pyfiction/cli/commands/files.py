@@ -46,7 +46,8 @@ from mnt.pyfiction import (
     write_sqd_layout,
     write_verilog,
 )
-from mnt.pyfiction.cli.registry import Category, CommandError, command
+from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.stores import CellEntry, describe
 
 from .general import write_svg
