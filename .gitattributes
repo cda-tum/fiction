@@ -1,3 +1,5 @@
+* text=auto eol=lf
+
 benchmarks/* linguist-vendored
 benchmarks/TOY/* linguist-vendored
 benchmarks/ISCAS89/* linguist-vendored
