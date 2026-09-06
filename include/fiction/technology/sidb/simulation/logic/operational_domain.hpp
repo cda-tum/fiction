@@ -1553,14 +1553,14 @@ class operational_domain_impl
     }
     /**
      * Generates unique random `step_points` in the stored parameter range. The number of generated points is at most
-     * equal to `samples`.
+     * equal to `samples`. Each call owns its random number generator.
      *
      * @param samples Maximum number of random `step_point`s to generate.
      * @return A vector of unique random `step_point`s in the stored parameter range of size at most equal to `samples`.
      */
     [[nodiscard]] std::vector<step_point> generate_random_step_points(const std::size_t samples) const noexcept
     {
-        static std::mt19937_64 generator{std::random_device{}()};
+        std::mt19937_64 generator{std::random_device{}()};
 
         // instantiate distributions
         std::vector<std::uniform_int_distribution<std::size_t>> distributions{};

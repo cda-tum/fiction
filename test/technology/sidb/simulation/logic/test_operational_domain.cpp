@@ -40,8 +40,11 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <array>
+#include <barrier>
 #include <cstddef>
 #include <functional>
+#include <future>
 #include <limits>
 #include <optional>
 #include <stdexcept>
@@ -2101,4 +2104,41 @@ TEST_CASE("Operational-domain flood fill requires two dimensions", "[operational
     params.sweep_dimensions = {{sweep_parameter::EPSILON_R, 5.0, 5.1, 0.1}};
     CHECK_THROWS_AS(operational_domain_flood_fill(layout{}, std::vector<tt>{create_id_tt()}, 0, params),
                     std::invalid_argument);
+}
+
+TEST_CASE("Concurrent operational-domain sampling matches grid results", "[operational-domain]")
+{
+    const layout              lat{to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>())};
+    operational_domain_params params{};
+    params.number_of_threads             = 1;
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.operational_params.sim_engine = engine::QUICKEXACT;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
+    const auto reference    = operational_domain_grid_search(lat, std::vector{create_and_tt()}, params);
+
+    std::barrier                                   start{4};
+    std::array<std::future<operational_domain>, 4> calls{};
+    for (auto& call : calls)
+    {
+        call = std::async(std::launch::async,
+                          [&]
+                          {
+                              start.arrive_and_wait();
+                              return operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 64, params);
+                          });
+    }
+    for (auto& call : calls)
+    {
+        const auto sampled = call.get();
+        CHECK_FALSE(sampled.empty());
+        CHECK(sampled.size() <= reference.size());
+        sampled.for_each(
+            [&](const auto& point, const auto& value)
+            {
+                const auto expected = reference.contains(point);
+                REQUIRE(expected.has_value());
+                CHECK(*expected == value);
+            });
+    }
 }
