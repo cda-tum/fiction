@@ -14303,7 +14303,10 @@ R"doc(Designs SiDB gates on a skeleton: canvas SiDBs are placed in the
 canvas area so that the skeleton's input and output wires implement
 the given Boolean function(s). The design mode chooses between
 simulating every combination of canvas SiDBs, *QuickCell*'s pruning
-followed by simulation, random placement, and pruning only.
+followed by simulation, random placement, and pruning only. Worker
+exceptions propagate to the caller after all started workers finish.
+Random placement samples at most `maximal_random_design_attempts`
+candidates without enumerating canvas layouts.
 
 Args:
     skeleton: The skeleton with its input and output wires.
@@ -14318,7 +14321,8 @@ Returns:
     The designed gates.
 
 Raises:
-    std::invalid_argument: if `spec` is empty.
+    std::invalid_argument: if `spec` is empty or the input wire count
+                           differs from the specification.
 
 )doc";
 
@@ -14387,7 +14391,7 @@ static const char *mkd_doc_fiction_sidb_generators_design_gates_params_terminati
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_stats = R"doc(Statistics of the gate designers.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts = R"doc(Number of canvas layouts.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts = R"doc(Number of canvas layouts, saturated at `std::size_t`'s maximum.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_first_pruning = R"doc(Number of canvas layouts that survived the first pruning filter.)doc";
 
@@ -14442,6 +14446,10 @@ Args:
     ps: Parameters.
     st: Statistics.
 
+Raises:
+    std::invalid_argument: if the input wire count differs from the
+                           specification.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_determine_all_possible_canvas_layouts =
@@ -14455,7 +14463,8 @@ Returns:
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_for_each_in_parallel =
 R"doc(Runs `fn` on every item on the configured number of threads; stops
 early once `done` is set and the termination condition asks for the
-first solution only.
+first solution only. Worker exceptions propagate after all started
+workers finish.
 
 Args:
     items: The items.
@@ -17003,7 +17012,9 @@ Template Args:
     TT: Truth table type.
 
 Returns:
-    The minimum potential difference over all input patterns.
+    The minimum potential difference over all input patterns, or
+    infinity if the input wires cannot represent the specification or
+    no charge transition exists.
 
 )doc";
 
@@ -17050,26 +17061,13 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_accepted =
-R"doc(This function takes in an SiDB energy distribution. For each charge
-distribution, the state type is determined (i.e. erroneous,
-transparent) while kinks are accepted, meaning a state with kinks is
-considered transparent.
-
-
-
-Labels every energy level of an energy distribution by whether the
+R"doc(Labels every energy level of an energy distribution by whether the
 physically valid charge distributions at that level encode the
 expected output for the given input pattern (`ACCEPTED`) or not
 (`REJECTED`). Kinks in the wires are tolerated: only the output BDL
 pairs are inspected.
 
 Args:
-    energy_dist: Energy distribution.
-    valid_charge_distributions: Physically valid charge distributions.
-    output_bdl_pairs: Output BDL pairs.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    input_index: The index of the current input configuration.
     energy_dist: The energy distribution of the charge distributions.
     valid_charge_distributions: The physically valid charge
                                 distributions.
@@ -17079,14 +17077,10 @@ Args:
                  simulated for.
 
 Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: The type of the truth table specifying the gate behavior. TT:
-        Truth table type.
+    TT: Truth table type.
 
 Returns:
-    Electrostatic potential energy of all charge distributions with
-    state type. The energies with their state types, ascending by
-    energy.
+    The energies with their state types, ascending by energy.
 
 )doc";
 
@@ -17112,6 +17106,10 @@ Template Args:
 
 Returns:
     The energies with their state types.
+
+Raises:
+    std::out_of_range: if logic validation encounters an invalid
+                       lattice basis index.
 
 )doc";
 
@@ -17854,7 +17852,7 @@ R"doc(A state is accepted if the charge distribution encodes the desired
 logic.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_state_type_REJECTED =
-R"doc(A state is rejected if the charge distributiion does not encode the
+R"doc(A state is rejected if the charge distribution does not encode the
 desired logic. Moreover, if kinks are rejected, a charge distribution
 that encodes the logic, but does show kinks, is rejected.)doc";
 
@@ -17863,6 +17861,9 @@ R"doc(Computes the time-to-solution (TTS) of *QuickSim* for a layout: the
 layout is simulated once with the exact engine of the parameters and
 `tts_params.repetitions` times with *QuickSim*, and the runs are
 combined with `time_to_solution_for_given_simulation_results`.
+
+Failed attempts contribute elapsed wall time; successful attempts
+retain the engine runtime.
 
 Args:
     lyt: The layout to simulate.
@@ -17892,7 +17893,8 @@ R"doc(Computes the time-to-solution (TTS) of *QuickSim* from an exact result
 and a series of heuristic results: the accuracy is the share of
 heuristic runs that found the ground state, and TTS is the mean
 heuristic runtime scaled to reach the given confidence level, `t ·
-log(1 - c) / log(1 - acc)`.
+log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy, zero
+mean heuristic runtime, and infinite time-to-solution.
 
 Args:
     results_exact: The result of an exact engine, which provides the
@@ -17903,7 +17905,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params = R"doc(Parameters for measuring heuristic accuracy and time-to-solution.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_confidence_level =
 R"doc(The confidence level represents the probability that the confidence
@@ -17933,7 +17935,9 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_sta
 R"doc(Exact simulation algorithm used to simulate the ground state as
 reference.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats_mean_single_runtime = R"doc(Average single simulation runtime in seconds.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats_mean_single_runtime =
+R"doc(Average runtime of all heuristic attempts in seconds, including failed
+attempts.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats_report =
 R"doc(Print the results to the given output stream.
@@ -18298,6 +18302,8 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_generator = R"doc(Random generator for the sampling.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_grid_search =
 R"doc(Evaluates every position of the scanning area whose column and row are
 multiples of the step size.
@@ -18498,7 +18504,8 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_determine_displacemen
 R"doc(Determines the displacement robustness domain of an SiDB gate: every
 SiDB that is not fixed is displaced by up to the configured number of
 columns and rows, and every resulting layout is checked for
-operability.
+operability. Displaced layouts retain the layout name and the defects
+at their original positions.
 
 Args:
     lyt: The operational gate layout.
@@ -22783,11 +22790,15 @@ R"doc(The upper SiDB of the pair. Upper and lower are defined relative to
 each other via the `operator<` overload.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire =
-R"doc(A BDL wire is a chain of BDL pairs. Its port direction follows from
-the positions of its input and output pairs; a wire with fewer than
-two pairs or without input and output pairs has no port. The first and
-last pairs are the input and output pairs where present, and otherwise
-the pairs at the ends of the chain.)doc";
+R"doc(A BDL wire is a chain of BDL pairs. Wires with fewer than two pairs or
+only NORMAL pairs have no port; direction updates leave their end
+pairs unchanged. The vector constructor initializes the end pairs from
+the first and last supplied pairs. Adding only NORMAL pairs to a
+default-constructed wire leaves both unset.
+
+For other wires, input and output pairs form the endpoints where
+present. An input-only wire ends at the farthest pair from its input;
+an output-only wire starts at the farthest pair from its output.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_add_bdl_pair =
 R"doc(Adds a BDL pair to the wire, keeps the pairs sorted, and updates the
@@ -22858,7 +22869,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_pairs = R"doc(The BDL pairs of the wire, sorted.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_pairs = R"doc(The BDL pairs of the wire.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_port = R"doc(Port direction of the wire.)doc";
 
@@ -23466,9 +23477,9 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_layout_invalid =
-R"doc(Runs the pruning filters for one input pattern: positive charges,
-physical infeasibility of the expected I/O charge states, and I/O
-instability.
+R"doc(Rejects an invalid I/O topology, then runs the pruning filters for one
+input pattern: positive charges, physical infeasibility of the
+expected I/O charge states, and I/O instability.
 
 Args:
     input_pattern: The input pattern.
@@ -23658,7 +23669,9 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason = R"doc(Reasons why a layout is invalid before any simulation ran.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason_IO_INSTABILITY = R"doc(A wrong I/O assignment is energetically preferred.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason_IO_INSTABILITY =
+R"doc(The I/O topology is invalid or a wrong I/O assignment is energetically
+preferred.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason_PHYSICAL_INFEASIBILITY =
 R"doc(No physically valid charge distribution exists for the expected input
@@ -23954,7 +23967,8 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_generate_random_step_points =
 R"doc(Generates unique random `step_points` in the stored parameter range.
-The number of generated points is at most equal to `samples`.
+The number of generated points is at most equal to `samples`. Each
+call owns its random number generator.
 
 Args:
     samples: Maximum number of random `step_point`s to generate.
@@ -25912,6 +25926,10 @@ Template Args:
 Returns:
     The operational status.
 
+Raises:
+    std::out_of_range: if validation encounters an invalid lattice
+                       basis index.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape =
@@ -26654,6 +26672,10 @@ Template Args:
 
 Returns:
     The cell-level layout.
+
+Raises:
+    std::out_of_range: if a cell or a retained defect cannot be
+                       represented by the target coordinate type.
 
 )doc";
 
@@ -28200,7 +28222,8 @@ Args:
     k: The number of items to choose from n.
 
 Returns:
-    The binomial coefficient :math:`\binom{n}{k}`.
+    The binomial coefficient :math:`\binom{n}{k}`, saturated at
+    `uint64_t`'s maximum.
 
 )doc";
 
