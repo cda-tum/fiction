@@ -859,6 +859,24 @@ class graph_oriented_layout_design_impl
                 // separate mutexes for better concurrency
                 std::mutex update_best_layout_mutex{};
 
+                // the workers reference the mutex, the best layout, and the progress reporter, so every exit path
+                // of this round has to wait for them before those objects are destroyed
+                struct worker_joiner
+                {
+                    std::vector<std::future<std::optional<Lyt>>>& pool;
+
+                    ~worker_joiner()
+                    {
+                        for (auto& f : pool)
+                        {
+                            if (f.valid())
+                            {
+                                f.wait();
+                            }
+                        }
+                    }
+                } const join_workers{futures_pool};
+
                 // reuse futures pool to avoid allocation overhead
                 futures_pool.clear();
                 futures_pool.reserve(ssg_vec.size());
