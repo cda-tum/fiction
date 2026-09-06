@@ -26,6 +26,7 @@
 #include "fiction/physical_design/placement_utils.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -94,6 +95,10 @@ struct hexagonalization_params
      * Output extension mode. Defaults to none
      */
     io_pin_extension_mode output_pin_extension = io_pin_extension_mode::NONE;
+    /**
+     * Callback that receives the progress of the gate mapping and the pin extension.
+     */
+    utils::progress_callback on_progress{};
 };
 
 /**
@@ -549,6 +554,8 @@ class hexagonalization_impl
             }
 
             // process internal nodes by iterating diagonally over the Cartesian layout
+            utils::progress_reporter progress{ps.on_progress, "diagonals", layout_width + layout_height - 1};
+
             for (uint64_t k = 0; k < layout_width + layout_height - 1; ++k)
             {
                 for (uint64_t x = 0; x <= k; ++x)
@@ -629,6 +636,8 @@ class hexagonalization_impl
                         }
                     }
                 }
+
+                progress.advance();
             }
 
             // map primary outputs to hex layout
@@ -798,6 +807,8 @@ class hexagonalization_impl
                 using cost = physical_design::path_finding::unit_cost_functor<decltype(layout_obstruct), uint8_t>;
 
                 // for each routing objective, find a path and route it
+                utils::progress_reporter progress{ps.on_progress, "input pins", objectives.size()};
+
                 for (const auto& obj : objectives)
                 {
                     auto target        = obj.target;
@@ -853,6 +864,8 @@ class hexagonalization_impl
                                         "tile {} was not possible with crossings {}",
                                         obj.source, obj.target, crossings ? "enabled" : "disabled"));
                     }
+
+                    progress.advance();
                 }
             }
 
@@ -912,6 +925,8 @@ class hexagonalization_impl
                 using cost = physical_design::path_finding::unit_cost_functor<decltype(layout_obstruct), uint8_t>;
 
                 // for each routing objective, find a path and route it
+                utils::progress_reporter progress{ps.on_progress, "output pins", objectives.size()};
+
                 for (const auto& obj : objectives)
                 {
                     auto source        = obj.source;
@@ -984,6 +999,8 @@ class hexagonalization_impl
                                         "at tile {} was not possible with crossings {}",
                                         obj.target, obj.source, crossings ? "enabled" : "disabled"));
                     }
+
+                    progress.advance();
                 }
             }
 

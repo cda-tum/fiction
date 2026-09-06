@@ -25,6 +25,7 @@
 #include "fiction/physical_design/placement_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -54,6 +55,10 @@ struct orthogonal_physical_design_params
      * Number of clock phases to use. 3 and 4 are supported.
      */
     layouts::clocking::num_clks number_of_clock_phases = layouts::clocking::num_clks::FOUR;
+    /**
+     * Callback that receives the progress of the gate placement.
+     */
+    utils::progress_callback on_progress{};
 };
 
 struct orthogonal_physical_design_stats
@@ -481,6 +486,8 @@ class orthogonal_impl
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         tile<Lyt> latest_pos{1, 0};
 
+        utils::progress_reporter progress{ps.on_progress, "placing gates", ctn.color_ntk.size()};
+
         ctn.color_ntk.foreach_node(
             [&](const auto& n)
             {
@@ -611,6 +618,8 @@ class orthogonal_impl
                         ++latest_pos.y;
                     }
                 }
+
+                progress.advance();
             });
 
         // place outputs after the main algorithm to handle possible multi-output or unordered nodes
