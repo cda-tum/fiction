@@ -66,6 +66,8 @@ lcov.info
 .coverage
 .coverage.*
 coverage.xml
+coverage-*.xml
+coverage-reports/
 
 # Python
 __pycache__

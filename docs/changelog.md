@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Continuous integration:
+
+  - Added Python source coverage, including package-root modules, and separate C++ checks.
+
 - Documentation:
 
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
@@ -24,7 +28,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Continuous integration:
+  - Clang-Tidy skips Python-only changes in the bindings tree.
+
 - Documentation:
+  - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
 
@@ -162,6 +170,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `energy_between_ground_state_and_first_erroneous`, the member it always exposed
 
 ### Fixed
+
+- Continuous integration:
+
+  - Canceled CI runs now stop summary jobs so newer commits can start.
 
 - Documentation:
 
