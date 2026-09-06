@@ -14,6 +14,7 @@
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #if (FICTION_ALGLIB_ENABLED)
@@ -82,8 +83,10 @@ TEST_CASE("ClusterComplete simulation of a single SiDB", "[clustercomplete]")
 
     clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32}};
 
-    SECTION("Multiple threads")
+    SECTION("More threads than initial work items")
     {
+        params.available_threads = 4;
+
         const auto simulation_results = clustercomplete(lyt, params);
 
         REQUIRE(simulation_results.charge_distributions.size() == 1);

@@ -996,7 +996,7 @@ class clustercomplete_impl
         }
 
         // initialize each worker that did not get initial work as thieves
-        for (uint64_t thread_ix = 0; thread_ix < available_threads - num_threads_with_initial_work; ++thread_ix)
+        for (uint64_t thread_ix = num_threads_with_initial_work; thread_ix < available_threads; ++thread_ix)
         {
             workers.emplace_back(std::make_unique<worker>(thread_ix, landscape.num_sidbs(), workers));
         }

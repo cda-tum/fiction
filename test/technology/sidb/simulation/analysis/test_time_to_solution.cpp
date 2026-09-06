@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_template_test_macros.hpp>
@@ -27,15 +28,18 @@
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <limits>
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
@@ -272,4 +276,46 @@ TEMPLATE_TEST_CASE("time-to-solution test with fewer negatively charged SiDBs in
 
         CHECK(tts_stats_quicksim.time_to_solution < 10.0);
     }
+}
+
+TEST_CASE("Time-to-solution counts failed and absent heuristic attempts", "[time-to-solution]")
+{
+    sidb_100_cell_clk_lyt_siqad lyt{};
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    const quicksim_params qs_params{.sim_params      = simulation_parameters{2, -0.32},
+                                    .iteration_steps = 1,
+                                    .number_threads  = 1,
+                                    .timeout         = 0};
+    REQUIRE_FALSE(quicksim(lyt, qs_params).has_value());
+
+    time_to_solution_stats stats{};
+    time_to_solution(lyt, qs_params, time_to_solution_params{.repetitions = 3}, &stats);
+    CHECK(std::isinf(stats.time_to_solution));
+    CHECK_THAT(stats.acc, Catch::Matchers::WithinAbs(0.0, 1e-12));
+    CHECK(stats.mean_single_runtime > 0.0);
+
+    time_to_solution(lyt, qs_params, time_to_solution_params{.repetitions = 0}, &stats);
+    CHECK(std::isinf(stats.time_to_solution));
+    CHECK_THAT(stats.acc, Catch::Matchers::WithinAbs(0.0, 1e-12));
+    CHECK_THAT(stats.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 1e-12));
+    CHECK(stats.algorithm == "QuickExact");
+}
+
+TEST_CASE("Time-to-solution averages successful and failed runtimes", "[time-to-solution]")
+{
+    sidb_100_cell_clk_lyt_siqad lyt{};
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    const auto exact              = quickexact(lyt);
+    auto       successful         = exact;
+    successful.simulation_runtime = std::chrono::seconds{2};
+    legacy_result<sidb_100_cell_clk_lyt_siqad> failed{};
+    failed.simulation_runtime = std::chrono::seconds{6};
+
+    time_to_solution_stats stats{};
+    time_to_solution_for_given_simulation_results(exact, std::vector{successful, failed}, 0.997, &stats);
+    CHECK_THAT(stats.acc, Catch::Matchers::WithinAbs(50.0, 1e-12));
+    CHECK_THAT(stats.mean_single_runtime, Catch::Matchers::WithinAbs(4.0, 1e-12));
+    CHECK_THAT(stats.time_to_solution, Catch::Matchers::WithinAbs(4.0 * std::log(0.003) / std::log(0.5), 1e-12));
 }

@@ -229,6 +229,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
   - SiDB simulation engines and their consumers now propagate errors from checked charge and potential operations.
+  - Time-to-solution now counts failed QuickSim attempts and their elapsed runtime, and handles empty samples.
+  - ClusterComplete now assigns distinct queue indices to workers without initial work.
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
