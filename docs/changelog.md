@@ -180,7 +180,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
-  - Lattice sites now reject invalid basis indices in construction and geometry queries.
+  - Lattice sites now reject invalid basis indices in construction, geometry queries, and cube conversion.
   - SiDB row conversion and area iteration now handle coordinate limits without signed overflow;
     defect influence clips to representable sites, and cube conversion rejects rows outside its range
   - Lattice-site construction and arithmetic now reject coordinate overflow; cell insertion preserves the layout on

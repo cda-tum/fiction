@@ -12,6 +12,7 @@
  * @file
  * @brief Tests for `fiction/technology/sidb/cell_level_layout_conversion.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -53,6 +54,9 @@ TEST_CASE("Coordinate to site", "[cell-level-layout-conversion]")
     CHECK(to_cube(site_at_row(0, max_coordinate)) == coords::cube{0, max_coordinate});
     CHECK_THROWS_AS(to_cube(lattice_site{0, min_coordinate, 0}), std::out_of_range);
     CHECK_THROWS_AS(to_cube(lattice_site{0, max_coordinate, 1}), std::out_of_range);
+    lattice_site invalid{};
+    invalid.z = 2;
+    CHECK_THROWS_AS(to_cube(invalid), std::out_of_range);
 }
 
 TEST_CASE("Lattice of a layout type", "[cell-level-layout-conversion]")

@@ -12,6 +12,7 @@
  * @file
  * @brief Conversion between Cartesian SiDB cell-level layouts and `sidb::layout`, the boundary to physical design.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -54,10 +55,14 @@ template <typename Coordinate>
  *
  * @param s Lattice site.
  * @return Cube coordinate at column `x` and single-SiDB row `2 * y + z`.
- * @throws std::out_of_range if the row exceeds the cube coordinate range.
+ * @throws std::out_of_range if the basis index is invalid or the row exceeds the cube coordinate range.
  */
 [[nodiscard]] constexpr layouts::coords::cube to_cube(const lattice_site& s)
 {
+    if (s.z > 1)
+    {
+        throw std::out_of_range("Invalid lattice basis index");
+    }
     if (!std::in_range<int32_t>(row_of(s)))
     {
         throw std::out_of_range("Lattice-site row exceeds the cube coordinate range");
