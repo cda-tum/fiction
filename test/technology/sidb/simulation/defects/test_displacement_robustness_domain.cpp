@@ -25,6 +25,7 @@
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/simulation/defects/displacement_robustness_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/types.hpp>
