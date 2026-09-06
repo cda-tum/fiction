@@ -11,7 +11,7 @@
 /**
  * @file
  * @brief Tests for SiDB simulation engine name lookup.
- * @author OpenAI Codex
+ * @author Marcel Walter (marcelwa)
  */
 
 #include <catch2/catch_test_macros.hpp>
