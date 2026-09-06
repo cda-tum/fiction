@@ -276,6 +276,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB parameter sweeps now reject non-finite ranges, invalid steps, and unrepresentable point counts.
     Operational-domain ratios also reject malformed seeds and fewer than two sweep dimensions.
   - Population-stability analysis now distinguishes complete charge distributions beyond the charge-index range.
+  - Gate-design counts exclude occupied and defective canvas sites.
+  - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
@@ -294,6 +296,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     allocation failure, and moving a defect from an empty site leaves the target unchanged
   - Moving a defect now preserves its target when the site arguments refer to stored defects.
   - Corrected the SiDB pointer aliases in `types.hpp` and checked their target types.
+  - SiDB-to-cell-level conversion preserves bounds from converted cells and retained defects.
 
 - Documentation:
 

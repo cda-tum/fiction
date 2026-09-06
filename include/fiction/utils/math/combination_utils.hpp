@@ -13,6 +13,7 @@
  * @brief Enumerates all ways of distributing k entities over n positions.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
