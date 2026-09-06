@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -35,8 +36,11 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <array>
+#include <barrier>
 #include <cmath>
 #include <cstdint>
+#include <future>
 #include <limits>
 #include <optional>
 #include <stdexcept>
@@ -482,5 +486,41 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
         CHECK(clearance_result.defect_position == site_at_row(12, 9));
 
         CHECK_THAT(clearance_result.defect_clearance_distance, Catch::Matchers::WithinAbs(2.8999201713, ERROR_MARGIN));
+    }
+}
+
+TEST_CASE("Concurrent defect-influence sampling matches grid results", "[defect-influence]")
+{
+    layout lyt{};
+    lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+    const defect_influence_params params{.defect                   = defect{defect_type::DB, -1, 5.6, 5.0},
+                                         .additional_scanning_area = {1, 1},
+                                         .influence_def =
+                                             defect_influence_params::influence_definition::GROUND_STATE_CHANGE,
+                                         .number_of_threads = 1};
+    const auto                    reference = defect_influence_grid_search(lyt, params);
+
+    std::barrier                                        start{4};
+    std::array<std::future<defect_influence_domain>, 4> calls{};
+    for (auto& call : calls)
+    {
+        call = std::async(std::launch::async,
+                          [&]
+                          {
+                              start.arrive_and_wait();
+                              return defect_influence_random_sampling(lyt, reference.size(), params);
+                          });
+    }
+    for (auto& call : calls)
+    {
+        const auto sampled = call.get();
+        CHECK(sampled.size() == reference.size());
+        sampled.for_each(
+            [&](const auto& point, const auto& value)
+            {
+                const auto expected = reference.contains(point);
+                REQUIRE(expected.has_value());
+                CHECK(*expected == value);
+            });
     }
 }

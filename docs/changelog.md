@@ -269,7 +269,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - ClusterComplete now assigns distinct queue indices to workers without initial work.
   - Simulation comparison and output now validate distribution sites. Ground State Space uses the landscape's physical parameters.
   - Parallel SiDB consumers now propagate worker errors and reject QuickSim with charged defects.
-  - Concurrent operational-domain searches now use independent random number generators.
+  - Concurrent operational-domain and defect-influence searches now use independent random number generators.
   - Binomial coefficients avoid intermediate overflow and saturate at the `uint64_t` limit
   - Displacement analysis retains layout names and stationary defects
   - Defect influence compares complete ground-state charge vectors

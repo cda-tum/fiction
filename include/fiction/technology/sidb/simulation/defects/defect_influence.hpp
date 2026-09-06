@@ -361,7 +361,7 @@ class defect_influence_impl
     /**
      * Random generator for the sampling.
      */
-    inline static std::mt19937_64 generator{std::random_device{}()};
+    std::mt19937_64 generator{std::random_device{}()};
     /**
      * Number of simulator invocations.
      */
