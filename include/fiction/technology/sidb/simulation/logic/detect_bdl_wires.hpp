@@ -560,7 +560,4 @@ detect_bdl_wires(const layout& lyt, const detect_bdl_wires_params& params = {},
     return p.filter_wires(wire_selection);
 }
 
-namespace detail
-{}  // namespace detail
-
 }  // namespace fiction::sidb::simulation::logic

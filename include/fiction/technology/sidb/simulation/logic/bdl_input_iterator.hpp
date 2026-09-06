@@ -496,9 +496,6 @@ class bdl_input_iterator
                                               detect_bdl_wires(lyt, ps.bdl_wire_params, bdl_wire_selection::INPUT));
 }
 
-namespace detail
-{}  // namespace detail
-
 }  // namespace fiction::sidb::simulation::logic
 // make the input iterators compatible with STL iterator categories
 namespace std

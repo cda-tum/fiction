@@ -40,7 +40,6 @@
 
 using namespace fiction;
 using namespace fiction::sidb;
-using namespace fiction::sidb;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;

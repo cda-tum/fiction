@@ -136,7 +136,5 @@ int main()
         }
     }
 
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-
     return EXIT_SUCCESS;
 }
