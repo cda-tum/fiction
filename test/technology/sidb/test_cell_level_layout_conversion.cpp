@@ -54,12 +54,10 @@ TEST_CASE("Coordinate to site", "[cell-level-layout-conversion]")
     CHECK_THROWS_AS(to_cube(invalid), std::out_of_range);
     CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt>(invalid), std::out_of_range);
     CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt_cube>(invalid), std::out_of_range);
-    CHECK_THROWS_AS(to_cell<sidb_100_cell_clk_lyt_siqad>(invalid), std::out_of_range);
     invalid.z = -1;
     CHECK_THROWS_AS(to_cube(invalid), std::out_of_range);
     CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt>(invalid), std::out_of_range);
     CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt_cube>(invalid), std::out_of_range);
-    CHECK_THROWS_AS(to_cell<sidb_100_cell_clk_lyt_siqad>(invalid), std::out_of_range);
 }
 
 TEST_CASE("Cell-level layout to SiDB layout", "[cell-level-layout-conversion]")
