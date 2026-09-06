@@ -1,6 +1,6 @@
 FROM ubuntu:26.04
 
-# Optional argument to run the "make" command in parallel with the specified NUMBER_OF_JOBS
+# Optional argument to run the build in parallel with the specified NUMBER_OF_JOBS
 ARG NUMBER_OF_JOBS=4
 
 # Unified metadata labels for DockerHub and the Open Container Initiative (OCI)
@@ -15,10 +15,10 @@ LABEL maintainer="Marcel Walter <marcel.walter@tum.de>" \
       org.opencontainers.image.vendor="Chair for Design Automation, Technical University of Munich (TUM)"
 
 
-# Configure apt and install required packages
+# Configure apt and install the toolchain the wheel build needs
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    make cmake gcc g++ ccache mold git python3 python3-dev python3-pip python3-venv libreadline-dev xdg-utils libtbb-dev && \
+    cmake ninja-build gcc g++ mold git python3 python3-dev python3-pip python3-venv libtbb-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Set up a non-root user for security and create a working directory
@@ -28,28 +28,26 @@ WORKDIR /app
 # Switch to non-root user
 USER appuser
 
-# Create a Python virtual environment and install necessary Python packages
+# Create a Python virtual environment; the Z3 wheel provides the solver the build links against
 RUN python3 -m venv venv && \
     . venv/bin/activate && \
-    pip install --upgrade --no-cache-dir pip setuptools && \
+    pip install --upgrade --no-cache-dir pip && \
     pip install --no-cache-dir z3-solver==4.14.1
 
 # Add the virtual environment to the PATH
 ENV PATH="/app/venv/bin:$PATH"
 
-# Clone fiction's repository including submodules (in case a local copy is not available)
-# RUN git clone --recursive https://github.com/cda-tum/fiction.git
-
-# Copy the local fiction repository to the container (preferred for development and CI)
+# Copy the local fiction repository to the container (preferred for development and CI); `.git` comes along
+# because the wheel takes its version from the tags
 COPY --chown=appuser:appuser . fiction/
 
-# Build fiction
-RUN . venv/bin/activate \
-    && cmake -S fiction --preset deploy \
-      -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold \
-    && cmake --build fiction/build --config Release -j${NUMBER_OF_JOBS}
+# Build and install the `mnt.pyfiction` wheel, which carries the `fiction` command-line interface. pip builds
+# in an isolated environment without the Z3 wheel, so `Z3_ROOT` points the build at the one installed above
+ENV CMAKE_BUILD_PARALLEL_LEVEL=${NUMBER_OF_JOBS}
+RUN Z3_ROOT="$(python3 -c 'import os, z3; print(os.path.dirname(z3.__file__))')" \
+    pip install --no-cache-dir ./fiction
 
 
 WORKDIR /app/fiction
 # Automatically start fiction when started in interactive mode
-CMD ["build/cli/fiction"]
+CMD ["fiction"]

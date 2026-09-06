@@ -77,6 +77,3 @@
 **/*.tar.*
 **/*.7z
 **/*.rar
-
-# Git files
-**/.git
