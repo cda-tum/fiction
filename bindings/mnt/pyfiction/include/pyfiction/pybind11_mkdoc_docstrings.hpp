@@ -24528,7 +24528,8 @@ Returns:
     Cube coordinate at column `x` and single-SiDB row `2 * y + z`.
 
 Raises:
-    std::out_of_range: if the row exceeds the cube coordinate range.
+    std::out_of_range: if the basis index is invalid or the row
+                       exceeds the cube coordinate range.
 
 )doc";
 
