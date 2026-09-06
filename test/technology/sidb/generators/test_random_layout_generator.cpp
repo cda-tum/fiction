@@ -14,9 +14,12 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
+ * @author Anthropic (Claude)
  */
 
 #include <catch2/catch_test_macros.hpp>
+
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/technology/sidb/generators/random_layout_generator.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -338,3 +341,37 @@ TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-gen
 }
 
 // NOLINTEND(bugprone-unchecked-optional-access)
+
+TEST_CASE("Random SiDB layout generation reports progress", "[random-sidb-layout-generator]")
+{
+    progress_recorder rec{};
+
+    generate_random_layout_params params{.coordinate_pair = {{1, 1, 0}, {5, 7, 1}}, .number_of_sidbs = 5};
+    params.on_progress = rec.callback();
+
+    SECTION("single layout")
+    {
+        const auto result_lyt = generate_random_layout(params);
+
+        REQUIRE(result_lyt.has_value());
+        CHECK(result_lyt->num_cells() == 5);
+
+        CHECK(rec.is_consistent("placed SiDBs"));
+        CHECK(rec.final_count("placed SiDBs") == 5);
+    }
+
+    SECTION("multiple layouts")
+    {
+        params.number_of_unique_generated_layouts = 3;
+
+        const auto result_lyts = generate_multiple_random_layouts(params);
+
+        REQUIRE(result_lyts.has_value());
+        CHECK(result_lyts->size() == 3);
+
+        CHECK(rec.is_consistent("layouts"));
+        CHECK(rec.final_count("layouts") == 3);
+        // each layout reports its own placement
+        CHECK(rec.is_consistent("placed SiDBs"));
+    }
+}
