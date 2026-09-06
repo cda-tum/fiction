@@ -430,7 +430,7 @@ class displacement_robustness_domain_impl
 
         for (const auto& cell_displacements : combinations)
         {
-            if (num_generated >= max_generated || (num_generated == 1 && max_generated == 1))
+            if (num_generated >= max_generated)
             {
                 break;
             }

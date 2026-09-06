@@ -80,7 +80,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Their parameters use `lattice_site` for canvases, scan areas, and fixed SiDBs
   - Defect-influence and displacement-robustness domains are non-template types
   - Gate designers retain cell-level overloads while the remaining consumers migrate
-  - Random gate design stops after `maximal_random_design_attempts` candidate layouts
+  - Random gate design samples at most `maximal_random_design_attempts` candidates without enumerating
+    canvas layouts; candidate counts saturate at the largest representable value
   - Gate-design and defect-influence APIs reject empty specifications
   - `on_the_fly_gate_library` measures the distance between a defect and the gate's SiDBs on the surface's
     lattice
@@ -270,6 +271,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Simulation comparison and output now validate distribution sites. Ground State Space uses the landscape's physical parameters.
   - Parallel SiDB consumers now propagate worker errors and reject QuickSim with charged defects.
   - Concurrent operational-domain searches now use independent random number generators.
+  - Binomial coefficients avoid intermediate overflow and saturate at the `uint64_t` limit
   - Displacement analysis retains layout names and stationary defects
   - Defect influence compares complete ground-state charge vectors
   - SiDB parameter sweeps now reject non-finite ranges, invalid steps, and unrepresentable point counts.
