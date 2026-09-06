@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -41,10 +42,11 @@ namespace fiction::sidb::simulation::engines
  * @param lyt Layout to simulate.
  * @param params Physical parameters.
  * @return The physically valid charge distributions.
+ * @throws std::out_of_range if a site has an invalid lattice basis index.
  */
 [[nodiscard]] inline result
 exhaustive_ground_state_simulation(const layout&                       lyt,
-                                   const model::simulation_parameters& params = model::simulation_parameters{}) noexcept
+                                   const model::simulation_parameters& params = model::simulation_parameters{})
 {
     result simulation_result{};
     simulation_result.algorithm_name = "ExGS";
@@ -97,7 +99,7 @@ template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
 [[nodiscard]] legacy_result<Lyt>
 exhaustive_ground_state_simulation(const Lyt&                          lyt,
-                                   const model::simulation_parameters& params = model::simulation_parameters{}) noexcept
+                                   const model::simulation_parameters& params = model::simulation_parameters{})
 {
     return to_legacy_result(exhaustive_ground_state_simulation(to_sidb_layout(lyt), params), lyt);
 }

@@ -228,6 +228,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
+  - SiDB simulation engines and their consumers now propagate errors from checked charge and potential operations.
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.

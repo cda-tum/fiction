@@ -14,6 +14,7 @@
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -127,7 +128,7 @@ class clustercomplete_impl
      * @param lyt Layout to simulate.
      * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
      */
-    clustercomplete_impl(const layout& lyt, const clustercomplete_params& params) noexcept :
+    clustercomplete_impl(const layout& lyt, const clustercomplete_params& params) :
             available_threads{std::max(uint64_t{1}, params.available_threads)},
             landscape{lyt, params.sim_params, params.local_external_potential, params.global_potential},
             mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
@@ -142,7 +143,7 @@ class clustercomplete_impl
      * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
      * @return Results of the exact simulation.
      */
-    [[nodiscard]] result run(const clustercomplete_params& params) noexcept
+    [[nodiscard]] result run(const clustercomplete_params& params)
     {
         sim_result.sim_params     = params.sim_params;
         sim_result.lyt            = landscape.get_layout();
@@ -392,7 +393,7 @@ class clustercomplete_impl
      * @param cl_state A clustering state consisting of only singleton clusters along with associated charge
      * states that make up a charge distribution that conforms to the *population stability* criterion.
      */
-    void add_if_configuration_stability_is_met(const clustering_state& cl_state) noexcept
+    void add_if_configuration_stability_is_met(const clustering_state& cl_state)
     {
         charge_distribution cd{landscape.sites(), sidb::model::charge_state::NEGATIVE};
         std::vector<double> local_internal_potential(landscape.num_sidbs(), 0.0);
@@ -549,7 +550,7 @@ class clustercomplete_impl
      * @param cl_state A clustering state that holds a specific combination of multiset charge configurations as
      * projector states of which the respectively associated clusters form a clustering in the cluster hierarchy.
      */
-    void add_physically_valid_charge_configurations(clustering_state& cl_state) noexcept
+    void add_physically_valid_charge_configurations(clustering_state& cl_state)
     {
         // check for pruning
         if (!meets_population_stability_criterion(cl_state))
@@ -595,7 +596,7 @@ class clustercomplete_impl
      * @param top_cluster The top cluster that is returned by the *Ground State Space construction; it contains the
      * entire cluster hierarchy construct.
      */
-    void collect_physically_valid_charge_distributions_single_threaded(const cluster_ptr& top_cluster) noexcept
+    void collect_physically_valid_charge_distributions_single_threaded(const cluster_ptr& top_cluster)
     {
         for (const cluster_charge_state& ccs : top_cluster->charge_space)
         {
@@ -1025,7 +1026,7 @@ class clustercomplete_impl
      * not required.
      */
     [[nodiscard]] bool add_physically_valid_charge_configurations(worker&                         w,
-                                                                  const charge_space_composition& composition) noexcept
+                                                                  const charge_space_composition& composition)
     {
         // check for pruning
         if (!meets_population_stability_criterion(w.cl_state))
@@ -1075,9 +1076,8 @@ class clustercomplete_impl
      * @return `false` if and only if the queue of this worker is found to be completely empty and thus backtracking is
      * not required.
      */
-    // NOLINTNEXTLINE(bugprone-exception-escape): std::get is safely guarded
     [[nodiscard]] bool unfold_all_compositions(worker& w, const std::vector<charge_space_composition>& compositions,
-                                               const typename worker_queue::mole informant) noexcept
+                                               const typename worker_queue::mole informant)
     {
         if (compositions.empty())
         {
@@ -1114,7 +1114,7 @@ class clustercomplete_impl
      * @param composition The composition to unfold.
      * @return `false` if and only if there is no need for backtracking after this return.
      */
-    bool unfold_composition(worker& w, const charge_space_composition& composition) noexcept
+    bool unfold_composition(worker& w, const charge_space_composition& composition)
     {
         // specialize parent to a specific composition of its children
         add_composition(w.cl_state, composition);
@@ -1158,8 +1158,9 @@ class clustercomplete_impl
  * @param lyt Layout to simulate.
  * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
  * @return Simulation results.
+ * @throws std::out_of_range if a site has an invalid lattice basis index.
  */
-[[nodiscard]] inline result clustercomplete(const layout& lyt, const clustercomplete_params& params = {}) noexcept
+[[nodiscard]] inline result clustercomplete(const layout& lyt, const clustercomplete_params& params = {})
 {
     return detail::clustercomplete_impl{lyt, params}.run(params);
 }
@@ -1176,7 +1177,7 @@ class clustercomplete_impl
  */
 template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] legacy_result<Lyt> clustercomplete(const Lyt& lyt, const clustercomplete_params& params = {}) noexcept
+[[nodiscard]] legacy_result<Lyt> clustercomplete(const Lyt& lyt, const clustercomplete_params& params = {})
 {
     return to_legacy_result(clustercomplete(to_sidb_layout(lyt), params), lyt);
 }

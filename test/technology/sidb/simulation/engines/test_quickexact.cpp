@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -39,6 +40,7 @@
 #include <any>
 #include <cstdint>
 #include <set>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -1883,3 +1885,13 @@ TEST_CASE("QuickExact AND gate simulation of Si-111 surface", "[quickexact]")
     }
 }
 #endif
+
+TEST_CASE("QuickExact propagates invalid lattice-basis errors", "[quickexact]")
+{
+    layout       lyt{};
+    lattice_site invalid{1, 0, 0};
+    invalid.z = 2;
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type(invalid, sidb_technology::cell_type::NORMAL);
+    CHECK_THROWS_AS(quickexact(lyt), std::out_of_range);
+}

@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -192,7 +193,7 @@ class critical_temperature_impl
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      */
     template <typename TT>
-    void gate_based_simulation(const std::vector<TT>& spec) noexcept
+    void gate_based_simulation(const std::vector<TT>& spec)
     {
         mockturtle::stopwatch stop{stats.time_total};
         if (layout.is_empty())
@@ -299,7 +300,7 @@ class critical_temperature_impl
     /**
      * *Gate-based Critical Temperature* Simulation of a SiDB layout for a given Boolean function.
      */
-    void non_gate_based_simulation() noexcept
+    void non_gate_based_simulation()
     {
         mockturtle::stopwatch                stop{stats.time_total};
         sidb::simulation::legacy_result<Lyt> simulation_results{};
@@ -551,8 +552,7 @@ class critical_temperature_impl
      * @param lyt_with_input_pattern The SiDB layout with a given input combination applied.
      * @return Simulation results.
      */
-    [[nodiscard]] sidb::simulation::legacy_result<Lyt>
-    physical_simulation_of_layout(const Lyt& lyt_with_input_pattern) noexcept
+    [[nodiscard]] sidb::simulation::legacy_result<Lyt> physical_simulation_of_layout(const Lyt& lyt_with_input_pattern)
     {
         if (params.operational_params.sim_engine == engine::EXGS)
         {

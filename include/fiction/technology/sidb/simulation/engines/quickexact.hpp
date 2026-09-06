@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -108,7 +109,7 @@ class quickexact_impl
      *
      * @return The physically valid charge distributions of the layout.
      */
-    [[nodiscard]] result run() noexcept
+    [[nodiscard]] result run()
     {
         sim_result.algorithm_name = "QuickExact";
         sim_result.sim_params     = params.sim_params;
@@ -223,7 +224,7 @@ class quickexact_impl
      *
      * @param base_number Whether positively charged SiDBs can occur.
      */
-    void simulate_without_preassigned_negative_sidbs(const required_simulation_base_number base_number) noexcept
+    void simulate_without_preassigned_negative_sidbs(const required_simulation_base_number base_number)
     {
         const auto& sites = *landscape.sites();
 
@@ -301,7 +302,7 @@ class quickexact_impl
      *
      * @param reduced_state State over the reduced layout.
      */
-    void two_state_simulation(simulation::detail::simulation_state& reduced_state) noexcept
+    void two_state_simulation(simulation::detail::simulation_state& reduced_state)
     {
         reduced_state.assign_base_number(2);
 
@@ -330,7 +331,7 @@ class quickexact_impl
      *
      * @param reduced_state State over the reduced layout.
      */
-    void three_state_simulation(simulation::detail::simulation_state& reduced_state) noexcept
+    void three_state_simulation(simulation::detail::simulation_state& reduced_state)
     {
         reduced_state.assign_all_charge_states(model::charge_state::NEGATIVE);
         reduced_state.update_after_charge_change();
@@ -406,8 +407,9 @@ class quickexact_impl
  * @param lyt Layout to simulate.
  * @param params Parameter required for the simulation.
  * @return Simulation result: every physically valid charge distribution of `lyt`.
+ * @throws std::out_of_range if a site has an invalid lattice basis index.
  */
-[[nodiscard]] inline result quickexact(const layout& lyt, const quickexact_params& params = {}) noexcept
+[[nodiscard]] inline result quickexact(const layout& lyt, const quickexact_params& params = {})
 {
     detail::quickexact_impl p{lyt, params};
 
@@ -426,7 +428,7 @@ class quickexact_impl
  */
 template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] legacy_result<Lyt> quickexact(const Lyt& lyt, const quickexact_params& params = {}) noexcept
+[[nodiscard]] legacy_result<Lyt> quickexact(const Lyt& lyt, const quickexact_params& params = {})
 {
     return to_legacy_result(quickexact(to_sidb_layout(lyt), params), lyt);
 }

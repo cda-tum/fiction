@@ -14,6 +14,7 @@
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -139,7 +140,7 @@ class ground_state_space_impl
      * @param land Potential landscape to construct the *Ground State Space* of.
      * @param parameters The parameters that *Ground State Space* will use throughout the construction.
      */
-    ground_state_space_impl(const potential_landscape& land, const ground_state_space_params parameters) noexcept :
+    ground_state_space_impl(const potential_landscape& land, const ground_state_space_params parameters) :
             params{parameters},
             top_cluster{to_cluster(cluster_hierarchy(land.get_layout()))},
             clst{get_initial_clustering(top_cluster, land)},
@@ -238,8 +239,7 @@ class ground_state_space_impl
      * @param land Potential landscape that supplies the initial electrostatic potentials.
      * @return The clst that contains only singleton clusters, one for each SiDB in the layout.
      */
-    [[nodiscard]] static clustering get_initial_clustering(const cluster_ptr&         c,
-                                                           const potential_landscape& land) noexcept
+    [[nodiscard]] static clustering get_initial_clustering(const cluster_ptr& c, const potential_landscape& land)
     {
         clustering clst{};
 
@@ -1199,8 +1199,8 @@ class ground_state_space_impl
  * @param params Parameters of the pruning.
  * @return The pruned cluster hierarchy with statistics, or an empty result for an empty layout.
  */
-[[nodiscard]] inline ground_state_space_results
-ground_state_space(const potential_landscape& land, const ground_state_space_params& params = {}) noexcept
+[[nodiscard]] inline ground_state_space_results ground_state_space(const potential_landscape&       land,
+                                                                   const ground_state_space_params& params = {})
 {
     if (land.num_sidbs() == 0)
     {
@@ -1217,9 +1217,10 @@ ground_state_space(const potential_landscape& land, const ground_state_space_par
  * @param lyt Layout to simulate.
  * @param params Parameters of the pruning; `params.sim_params` sets the physical model.
  * @return The pruned cluster hierarchy with statistics, or an empty result for an empty layout.
+ * @throws std::out_of_range if a site has an invalid lattice basis index.
  */
-[[nodiscard]] inline ground_state_space_results
-ground_state_space(const layout& lyt, const ground_state_space_params& params = {}) noexcept
+[[nodiscard]] inline ground_state_space_results ground_state_space(const layout&                    lyt,
+                                                                   const ground_state_space_params& params = {})
 {
     if (lyt.num_cells() == 0)
     {

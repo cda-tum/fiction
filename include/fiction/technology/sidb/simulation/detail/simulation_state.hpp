@@ -14,6 +14,7 @@
  * enumeration over one potential landscape.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -246,9 +247,8 @@ class simulation_state
      * @param cs Charge state.
      * @param index_mode Whether to recompute the charge index.
      */
-    void
-    assign_charge_state_by_index(const std::size_t i, const model::charge_state cs,
-                                 const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
+    void assign_charge_state_by_index(const std::size_t i, const model::charge_state cs,
+                                      const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX)
     {
         charge_distribution_state.assign_charge_state_by_index(i, cs);
 
@@ -309,7 +309,7 @@ class simulation_state
      * @param history_mode Whether to apply only the recorded flips or to recompute from scratch.
      */
     void update_local_internal_potential(
-        const charge_distribution_history history_mode = charge_distribution_history::NEGLECT) noexcept
+        const charge_distribution_history history_mode = charge_distribution_history::NEGLECT)
     {
         if (history_mode == charge_distribution_history::NEGLECT)
         {
@@ -373,7 +373,7 @@ class simulation_state
      * @param i Index of the SiDB.
      * @return Local potential (unit: V).
      */
-    [[nodiscard]] double local_potential(const std::size_t i) const noexcept
+    [[nodiscard]] double local_potential(const std::size_t i) const
     {
         return internal_potential_values[i] + landscape_ptr->local_external_potential(i);
     }
@@ -402,7 +402,7 @@ class simulation_state
     /**
      * Recomputes the energy from the current charge states and local internal potentials.
      */
-    void recompute_energy() noexcept
+    void recompute_energy()
     {
         if (selected_energy_model == energy_model::INTERNAL_ONLY)
         {
@@ -439,10 +439,10 @@ class simulation_state
      * @param energy_mode Whether to recompute the energy.
      * @param history_mode Whether to apply only the recorded flips to the potentials.
      */
-    void update_after_charge_change(
-        const dependent_cell_mode         dep_cell     = dependent_cell_mode::FIXED,
-        const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history history_mode = charge_distribution_history::NEGLECT) noexcept
+    void
+    update_after_charge_change(const dependent_cell_mode         dep_cell     = dependent_cell_mode::FIXED,
+                               const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
+                               const charge_distribution_history history_mode = charge_distribution_history::NEGLECT)
     {
         update_local_internal_potential(history_mode);
 
@@ -460,7 +460,7 @@ class simulation_state
     /**
      * Recomputes the validity flag: population stability of every SiDB, then configuration stability.
      */
-    void validity_check() noexcept
+    void validity_check()
     {
         physically_valid = landscape_ptr->is_population_stable(charge_distribution_state, internal_potential_values) &&
                            landscape_ptr->is_configuration_stable(charge_distribution_state, internal_potential_values);
@@ -479,7 +479,7 @@ class simulation_state
      *
      * @return `true` iff configuration stable.
      */
-    [[nodiscard]] bool is_configuration_stable() const noexcept
+    [[nodiscard]] bool is_configuration_stable() const
     {
         return landscape_ptr->is_configuration_stable(charge_distribution_state, internal_potential_values);
     }
@@ -585,8 +585,8 @@ class simulation_state
      * @param index Charge index, at most `max_charge_index()`.
      * @param mode Whether to decode the index into charge states.
      */
-    void assign_charge_index(const uint64_t index, const charge_distribution_mode mode =
-                                                       charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION) noexcept
+    void assign_charge_index(const uint64_t                 index,
+                             const charge_distribution_mode mode = charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION)
     {
         assert(index <= maximum_charge_index && "charge index is too large");
 
@@ -604,10 +604,10 @@ class simulation_state
      * @param energy_mode Whether to recompute the energy.
      * @param history_mode Whether to apply only the recorded flips to the potentials.
      */
-    void increase_charge_index_by_one(
-        const dependent_cell_mode         dep_cell     = dependent_cell_mode::FIXED,
-        const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history history_mode = charge_distribution_history::NEGLECT) noexcept
+    void
+    increase_charge_index_by_one(const dependent_cell_mode         dep_cell     = dependent_cell_mode::FIXED,
+                                 const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
+                                 const charge_distribution_history history_mode = charge_distribution_history::NEGLECT)
     {
         if (charge_index_value >= maximum_charge_index)
         {
@@ -637,7 +637,7 @@ class simulation_state
     void increase_charge_index_of_sub_layout_by_one(
         const dependent_cell_mode         dep_cell     = dependent_cell_mode::FIXED,
         const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history history_mode = charge_distribution_history::NEGLECT) noexcept
+        const charge_distribution_history history_mode = charge_distribution_history::NEGLECT)
     {
         if (sublayout_charge_index >= maximum_sublayout_charge_index)
         {
@@ -660,7 +660,7 @@ class simulation_state
     /**
      * Resets the sublayout charge index to zero and decodes it with the flips recorded.
      */
-    void reset_charge_index_sub_layout() noexcept
+    void reset_charge_index_sub_layout()
     {
         sublayout_charge_index = 0;
 
@@ -689,7 +689,7 @@ class simulation_state
         const uint64_t current_gray_code, const uint64_t previous_gray_code,
         const dependent_cell_mode         dep_cell     = dependent_cell_mode::FIXED,
         const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history history_mode = charge_distribution_history::NEGLECT) noexcept
+        const charge_distribution_history history_mode = charge_distribution_history::NEGLECT)
     {
         if (current_gray_code <= maximum_charge_index)
         {
@@ -739,7 +739,7 @@ class simulation_state
      *
      * @return `true` iff some SiDB other than the dependent one can be positively charged.
      */
-    [[nodiscard]] bool is_three_state_simulation_required() noexcept
+    [[nodiscard]] bool is_three_state_simulation_required()
     {
         update_after_charge_change();
 
@@ -823,7 +823,7 @@ class simulation_state
      *
      * @return Indices of the SiDBs that have to be negatively charged.
      */
-    [[nodiscard]] std::vector<std::size_t> negative_sidb_detection() const noexcept
+    [[nodiscard]] std::vector<std::size_t> negative_sidb_detection() const
     {
         std::vector<std::size_t> negative{};
         negative.reserve(num_sites);
@@ -846,7 +846,7 @@ class simulation_state
      * @param alpha Fraction of the maximal distance a candidate has to keep from the negative SiDBs.
      * @param negative_indices Indices of the negative SiDBs; the chosen SiDB is appended.
      */
-    void adjacent_search(const double alpha, std::vector<std::size_t>& negative_indices) noexcept
+    void adjacent_search(const double alpha, std::vector<std::size_t>& negative_indices)
     {
         double     dist_max     = 0.0;
         const auto reserve_size = num_sites - negative_indices.size();
@@ -1008,7 +1008,7 @@ class simulation_state
     /**
      * Switches to a base-3 sublayout index over the SiDBs that can be positively charged.
      */
-    void assign_base_number_to_three() noexcept
+    void assign_base_number_to_three()
     {
         simulation_base   = 3;
         charge_index_base = 2;
@@ -1036,7 +1036,7 @@ class simulation_state
      * Sets the dependent SiDB to the charge state its local potential dictates and updates the potentials of the
      * others incrementally.
      */
-    void update_charge_state_of_dependent_cell() noexcept
+    void update_charge_state_of_dependent_cell()
     {
         if (!dependent_sidb.has_value())
         {
@@ -1088,7 +1088,7 @@ class simulation_state
     /**
      * Flips the one SiDB in which two Gray codes differ and records it for the incremental potential update.
      */
-    void gray_code_to_charge_distribution(const uint64_t new_gray_code, const uint64_t old_gray_code) noexcept
+    void gray_code_to_charge_distribution(const uint64_t new_gray_code, const uint64_t old_gray_code)
     {
         gray_code_history = {-1, 0};
 
@@ -1121,8 +1121,7 @@ class simulation_state
     /**
      * Decodes the charge index into charge states, skipping the dependent SiDB.
      */
-    void index_to_charge_distribution(
-        const charge_index_recomputation mode = charge_index_recomputation::FROM_SCRATCH) noexcept
+    void index_to_charge_distribution(const charge_index_recomputation mode = charge_index_recomputation::FROM_SCRATCH)
     {
         // a charge index of zero corresponds to a layout with all SiDBs set to negative
         if (charge_index_value == 0)
@@ -1167,7 +1166,7 @@ class simulation_state
      * Decodes the sublayout index (base 3) and the layout index (base 2) into charge states and records every SiDB
      * that flipped, as QuickExact's incremental potential update needs.
      */
-    void index_to_charge_distribution_tracked() noexcept
+    void index_to_charge_distribution_tracked()
     {
         assert(num_sites > 1 && "There must be multiple SiDBs");
 

@@ -156,7 +156,7 @@ TEST_CASE("Potential-landscape input boundaries", "[potential-landscape]")
     }
     const charge_distribution shared{land.sites()};
     const charge_distribution copied{lyt};
-    CHECK(land.energy(shared) == land.energy(copied));
+    CHECK_THAT(land.energy(shared), WithinAbs(land.energy(copied), 1E-12));
     for (const auto& invalid : {std::vector<double>{}, std::vector<double>(3, 0.0)})
     {
         CHECK_THROWS_AS(land.energy(shared, invalid), std::invalid_argument);

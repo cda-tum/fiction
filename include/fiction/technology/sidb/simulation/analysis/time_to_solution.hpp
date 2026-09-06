@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Simon Hofmann (simon1hofmann)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -110,7 +111,7 @@ struct time_to_solution_stats
  */
 template <typename Lyt>
 void time_to_solution(const Lyt& lyt, const sidb::simulation::engines::quicksim_params& qs_params,
-                      const time_to_solution_params& tts_params = {}, time_to_solution_stats* ps = nullptr) noexcept
+                      const time_to_solution_params& tts_params = {}, time_to_solution_stats* ps = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

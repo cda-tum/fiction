@@ -13,6 +13,7 @@
  * @brief Robustness of an SiDB layout against fabrication displacement of its dots.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -174,7 +175,7 @@ class displacement_robustness_domain_impl
      */
     displacement_robustness_domain_impl(const Lyt& lyt, const std::vector<TT>& spec,
                                         const displacement_robustness_domain_params<cell<Lyt>>& ps,
-                                        displacement_robustness_domain_stats&                   st) noexcept :
+                                        displacement_robustness_domain_stats&                   st) :
             layout{lyt},
             params{ps},
             stats{st},
@@ -200,7 +201,7 @@ class displacement_robustness_domain_impl
      * This function calculates the robustness domain of the SiDB layout based on the provided truth table specification
      * and displacement robustness computation parameters.
      */
-    displacement_robustness_domain<Lyt> determine_robustness_domain() noexcept
+    displacement_robustness_domain<Lyt> determine_robustness_domain()
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -221,7 +222,7 @@ class displacement_robustness_domain_impl
         std::mutex mutex_to_protect_displacement_robustness_domain{};
 
         const auto check_operational_status =
-            [this, &mutex_to_protect_displacement_robustness_domain, &domain](const Lyt& lyt) noexcept
+            [this, &mutex_to_protect_displacement_robustness_domain, &domain](const Lyt& lyt)
         {
             const auto op_status = sidb::simulation::logic::is_operational(lyt, truth_table, params.operational_params);
             {

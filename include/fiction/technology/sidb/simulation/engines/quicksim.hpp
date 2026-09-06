@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -83,9 +84,9 @@ struct quicksim_params
  * @param ps *QuickSim* parameters.
  * @return The physically valid charge distributions found, or `std::nullopt` if the layout is empty, holds charged
  * defects, the iteration count is zero, the timeout was hit, or no valid distribution was found.
+ * @throws std::out_of_range if a site has an invalid lattice basis index.
  */
-[[nodiscard]] inline std::optional<result> quicksim(const layout&          lyt,
-                                                    const quicksim_params& ps = quicksim_params{}) noexcept
+[[nodiscard]] inline std::optional<result> quicksim(const layout& lyt, const quicksim_params& ps = quicksim_params{})
 {
     if (ps.iteration_steps == 0 || lyt.num_cells() == 0 || lyt.num_charged_defects() > 0)
     {
@@ -274,8 +275,7 @@ struct quicksim_params
  */
 template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::optional<legacy_result<Lyt>> quicksim(const Lyt&             lyt,
-                                                         const quicksim_params& ps = quicksim_params{}) noexcept
+[[nodiscard]] std::optional<legacy_result<Lyt>> quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{})
 {
     if (const auto res = quicksim(to_sidb_layout(lyt), ps); res.has_value())
     {

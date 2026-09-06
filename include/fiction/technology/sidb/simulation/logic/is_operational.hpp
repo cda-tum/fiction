@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Benjamin Hien (hibenj)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -401,7 +402,7 @@ class is_operational_impl
      * @return Pair with the first element indicating the operational status (either `OPERATIONAL` or `NON_OPERATIONAL`)
      * and the second element indicating the reason if it is non-operational.
      */
-    [[nodiscard]] std::pair<operational_status, non_operationality_reason> run() noexcept
+    [[nodiscard]] std::pair<operational_status, non_operationality_reason> run()
     {
         if (canvas_filtering_applicable)
         {
@@ -567,7 +568,7 @@ class is_operational_impl
      * layout is non-operational (`non_operationality_reason`) for the given input pattern.
      */
     [[nodiscard]] std::vector<std::pair<uint64_t, non_operationality_reason>>
-    determine_non_operational_input_patterns_and_non_operationality_reason() noexcept
+    determine_non_operational_input_patterns_and_non_operationality_reason()
     {
         assert((truth_table.size() == output_bdl_wires.size()) &&
                "Number of truth tables and output BDL pairs does not match");
@@ -1034,8 +1035,7 @@ class is_operational_impl
      * @param lyt_with_input_pattern The SiDB layout with a given input combination applied.
      * @return Simulation results.
      */
-    [[nodiscard]] sidb::simulation::legacy_result<Lyt>
-    physical_simulation_of_layout(const Lyt& lyt_with_input_pattern) noexcept
+    [[nodiscard]] sidb::simulation::legacy_result<Lyt> physical_simulation_of_layout(const Lyt& lyt_with_input_pattern)
     {
         if (parameters.sim_engine == engine::EXGS)
         {
@@ -1218,8 +1218,8 @@ class is_operational_impl
  * the number of input combinations tested.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {}) noexcept
+[[nodiscard]] std::pair<operational_status, std::size_t> is_operational(const Lyt& lyt, const std::vector<TT>& spec,
+                                                                        const is_operational_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1283,7 +1283,7 @@ template <typename Lyt, typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>
 is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
                const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
-               const std::optional<Lyt>& canvas_lyt = std::nullopt) noexcept
+               const std::optional<Lyt>& canvas_lyt = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1425,7 +1425,7 @@ is_operational(const std::vector<Lyt>& input_pattern_layouts, const std::vector<
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
-                                                            const is_operational_params& params = {}) noexcept
+                                                            const is_operational_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1473,11 +1473,11 @@ template <typename Lyt, typename TT>
  * @return The count of operational input combinations.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::set<uint64_t>
-operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-                           const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
-                           const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
-                           const std::optional<Lyt>&         canvas_lyt = std::nullopt) noexcept
+[[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
+                                                            const is_operational_params&      params,
+                                                            const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
+                                                            const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
+                                                            const std::optional<Lyt>&         canvas_lyt = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1552,9 +1552,9 @@ operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is
  * @return The input combinations where kinks induce the SiDB layout to become non-operational.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::set<uint64_t>
-kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
-                                            const is_operational_params& params = {}) noexcept
+[[nodiscard]] std::set<uint64_t> kink_induced_non_operational_input_patterns(const Lyt&                   lyt,
+                                                                             const std::vector<TT>&       spec,
+                                                                             const is_operational_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1610,7 +1610,7 @@ template <typename Lyt, typename TT>
 [[nodiscard]] std::set<uint64_t> kink_induced_non_operational_input_patterns(
     const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
     const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
-    const std::optional<Lyt>& canvas_lyt = std::nullopt) noexcept
+    const std::optional<Lyt>& canvas_lyt = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1684,7 +1684,7 @@ template <typename Lyt, typename TT>
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
-                                                   const is_operational_params& params = {}) noexcept
+                                                   const is_operational_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1732,7 +1732,7 @@ template <typename Lyt, typename TT>
                                                    const is_operational_params&      params,
                                                    const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
                                                    const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
-                                                   const std::optional<Lyt>&         canvas_lyt = std::nullopt) noexcept
+                                                   const std::optional<Lyt>&         canvas_lyt = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

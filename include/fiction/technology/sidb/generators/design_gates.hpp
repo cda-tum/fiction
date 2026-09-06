@@ -13,6 +13,7 @@
  * @brief Designs SiDB gate implementations for a given Boolean function and skeleton.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -215,7 +216,7 @@ class design_gates_impl
      *
      * @return A vector of designed SiDB gate layouts.
      */
-    [[nodiscard]] std::vector<Lyt> run_automatic_exhaustive_gate_designer() const noexcept
+    [[nodiscard]] std::vector<Lyt> run_automatic_exhaustive_gate_designer() const
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -240,7 +241,7 @@ class design_gates_impl
 
         const auto add_combination_to_layout_and_check_operation = [this, &mutex_to_protect_designed_gate_layouts,
                                                                     &designed_gate_layouts,
-                                                                    &solution_found](const auto& combination) noexcept
+                                                                    &solution_found](const auto& combination)
         {
             // canvas SiDBs are added to the skeleton
             const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
@@ -311,7 +312,7 @@ class design_gates_impl
      *
      * @return A vector of designed SiDB gate layouts.
      */
-    [[nodiscard]] std::vector<Lyt> run_random_design() const noexcept
+    [[nodiscard]] std::vector<Lyt> run_random_design() const
     {
         std::vector<Lyt> randomly_designed_gate_layouts = {};
 
@@ -401,7 +402,7 @@ class design_gates_impl
      *
      * @return A vector of designed SiDB gate layouts.
      */
-    [[nodiscard]] std::vector<Lyt> run_quickcell() noexcept
+    [[nodiscard]] std::vector<Lyt> run_quickcell()
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -449,7 +450,7 @@ class design_gates_impl
         std::atomic<bool> gate_design_found = false;
 
         const auto check_operational_status =
-            [this, &gate_layouts, &mutex_to_protect_gate_designs, &gate_design_found](const auto& candidate) noexcept
+            [this, &gate_layouts, &mutex_to_protect_gate_designs, &gate_design_found](const auto& candidate)
         {
             // Early exit if a solution is found and only the first solution is required
             if (gate_design_found && (params.termination_cond ==
@@ -844,7 +845,7 @@ class design_gates_impl
 template <typename Lyt, typename TT>
 [[nodiscard]] std::vector<Lyt> design_gates(const Lyt& skeleton, const std::vector<TT>& spec,
                                             const design_gates_params<cell<Lyt>>& params = {},
-                                            design_gates_stats*                   stats  = nullptr) noexcept
+                                            design_gates_stats*                   stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

@@ -13,6 +13,7 @@
  * @brief Agglomerative SiDB clustering and the cluster hierarchy the engines build on it.
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -133,9 +134,9 @@ struct binary_cluster_hierarchy_node
  * @param lyt The layout to create a cluster hierarchy of.
  * @param linkage_method The agglomerative clustering linking heuristic that is used by ALGLIB.
  */
-[[nodiscard]] inline binary_cluster_hierarchy_node cluster_hierarchy(
-    const layout&                    lyt,
-    cluster_hierarchy_linkage_method linkage_method = cluster_hierarchy_linkage_method::MINIMUM_VARIANCE) noexcept
+[[nodiscard]] inline binary_cluster_hierarchy_node
+cluster_hierarchy(const layout&                    lyt,
+                  cluster_hierarchy_linkage_method linkage_method = cluster_hierarchy_linkage_method::MINIMUM_VARIANCE)
 {
     // no clusterizer call required for <= 1 SiDBs
     if (lyt.num_cells() == 0)
