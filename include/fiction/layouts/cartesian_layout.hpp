@@ -86,9 +86,7 @@ class cartesian_layout
      *
      * @param ar Highest possible position in the layout.
      */
-    explicit cartesian_layout(const aspect_ratio& ar = {}) :
-            strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))}
-    {}
+    explicit cartesian_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
     /**
      * Copy constructor from another layout's storage.
      *
@@ -169,7 +167,7 @@ class cartesian_layout
      */
     void resize(const aspect_ratio& ar) noexcept
     {
-        strg->dimension = initialize_dimension(ar);
+        strg->dimension = ar;
     }
 
 #pragma endregion
@@ -828,14 +826,10 @@ class cartesian_layout
 #pragma endregion
 
   private:
-    storage strg;
-    /*
-     * Initializer for a cartesian layout dimension.
+    /**
+     * Shared storage for the Cartesian layout dimensions.
      */
-    constexpr OffsetCoordinateType initialize_dimension(const OffsetCoordinateType& coord) const
-    {
-        return coord;
-    }
+    storage strg;
 };
 
 }  // namespace fiction::layouts
