@@ -43,6 +43,10 @@ exclude: "^vendors/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind
 # than 9 so that `ruff-check` at 8 lints the header in the same pass. Its `types_or` is what
 # makes it disjoint from `nb-clean`, which also sits at 7 and takes `types: [text]`, so both
 # would otherwise receive the same notebooks.
+#
+# Every formatter uses LF. `mixed-line-ending` enforces that policy before the language
+# formatters run. `license-tools` ignores whitespace-only differences because it otherwise
+# rewrites a license-only file with the host newline and changes LF back to CRLF on Windows.
 
 repos:
   # Standard hooks
@@ -70,6 +74,7 @@ repos:
       - id: end-of-file-fixer
         priority: 1
       - id: mixed-line-ending
+        args: ["--fix=lf"]
         priority: 2
       - id: trailing-whitespace
         priority: 3
@@ -85,7 +90,7 @@ repos:
 
   # Format and lint documentation with MyST support.
   - repo: https://github.com/rvben/rumdl-pre-commit
-    rev: v0.2.64
+    rev: v0.2.66
     hooks:
       - id: rumdl
         files: ^docs/.*\.md$
@@ -136,14 +141,14 @@ repos:
 
   # Ensure uv lock file is up-to-date
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.7
+    rev: 0.12.10
     hooks:
       - id: uv-lock
         priority: 0
 
   # Python linting using ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.5
+    rev: v0.16.6
     hooks:
       - id: ruff-format
         priority: 6
@@ -217,7 +222,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.08.29
+    rev: 2026.09.04
     hooks:
       - id: validate-pyproject
         priority: 0
