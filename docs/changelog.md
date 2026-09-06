@@ -85,12 +85,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Gate-design and defect-influence APIs reject empty specifications
   - `on_the_fly_gate_library` measures the distance between a defect and the gate's SiDBs on the surface's
     lattice
-
-- Physical design:
-
-  - `apply_gate_library_to_defective_surface` and `apply_parameterized_gate_library_to_defective_surface`
-    take the defective surface as a `sidb::layout` and return one that carries its defects. The cell-level
-    layout to place gates on is their first template argument
   - `surface_analysis` and `surface_black_list` live in `physical_design/surface_analysis.hpp` and namespace
     `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
     SiDB header dependency
@@ -113,6 +107,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
+
+- Gate libraries:
+  - `apply_gate_library_to_defective_surface` and `apply_parameterized_gate_library_to_defective_surface`
+    take the defective surface as a `sidb::layout` and return one that carries its defects. The cell-level
+    layout to place gates on is their first template argument
 
 - I/O:
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
