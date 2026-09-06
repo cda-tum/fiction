@@ -25,8 +25,6 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
-#include <cstdint>
-#include <set>
 
 namespace fiction::sidb::simulation
 {

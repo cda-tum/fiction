@@ -32,6 +32,7 @@
 #include <array>
 #include <cstdint>
 #include <cstdlib>
+#include <exception>
 #include <string>
 #include <utility>
 #include <vector>
@@ -50,9 +51,10 @@ using namespace fiction::synthesis;
 /**
  * Runs the Bestagon critical-temperature domain experiment with its fixed kink-rejection policy.
  *
- * @return `EXIT_SUCCESS` after recording all gates.
+ * @return `EXIT_SUCCESS` after recording all gates, or `EXIT_FAILURE` if the experiment raises an exception.
  */
 int main()
+try
 {
     experiments::experiment<std::string, uint64_t, double, double, double, double> opdomain_exp{
         "Critical Temperature Domain Bestagon",
@@ -137,4 +139,9 @@ int main()
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    fmt::print("Critical Temperature Domain Bestagon failed: {}\n", exception.what());
+    return EXIT_FAILURE;
 }
