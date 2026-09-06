@@ -12,27 +12,28 @@
  * @file
  * @brief Python bindings for `fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <nanobind/nanobind.h>
 
 namespace pyfiction
 {
 
+/**
+ * Registers charge-distribution equivalence checking.
+ *
+ * @param m Target Python module.
+ */
 void check_simulation_results_for_equivalence(nanobind::module_& m)
 {
-    namespace py = nanobind;
-
     m.def("check_simulation_results_for_equivalence",
-          static_cast<bool (*)(fiction::sidb::simulation::result, fiction::sidb::simulation::result)>(
-              &fiction::sidb::simulation::check_simulation_results_for_equivalence),
-          py::arg("result1"), py::arg("result2"),
-          DOC(fiction_sidb_simulation_check_simulation_results_for_equivalence));
+          &fiction::sidb::simulation::check_simulation_results_for_equivalence, nanobind::arg("result1"),
+          nanobind::arg("result2"), DOC(fiction_sidb_simulation_check_simulation_results_for_equivalence));
 }
 
 }  // namespace pyfiction
