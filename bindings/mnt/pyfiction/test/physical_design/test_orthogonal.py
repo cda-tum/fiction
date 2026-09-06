@@ -36,3 +36,21 @@ def test_orthogonal_with_stats(mux21):
     layout = orthogonal(mux21, statistics=stats)
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
+
+
+def test_orthogonal_reports_progress(mux21):
+    params = orthogonal_params()
+    assert params.on_progress is None
+
+    reports = []
+    params.on_progress = lambda task, done, total: reports.append((task, done, total))
+
+    layout = orthogonal(mux21, params)
+
+    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert params.on_progress is not None
+
+    placements = [(done, total) for task, done, total in reports if task == "placing gates"]
+    assert placements[0][0] == 0
+    assert placements == sorted(placements)
+    assert placements[-1][0] == placements[-1][1] > 0

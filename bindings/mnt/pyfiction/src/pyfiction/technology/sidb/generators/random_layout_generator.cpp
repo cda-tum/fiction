@@ -23,9 +23,11 @@
 #include <optional>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>      // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -67,19 +69,23 @@ void random_layout_generator(nanobind::module_& m)
                 DOC(fiction_sidb_generators_generate_random_layout_params_number_of_unique_generated_layouts))
         .def_rw("maximal_attempts_for_multiple_layouts",
                 &generate_random_layout_params::maximal_attempts_for_multiple_layouts,
-                DOC(fiction_sidb_generators_generate_random_layout_params_maximal_attempts_for_multiple_layouts));
+                DOC(fiction_sidb_generators_generate_random_layout_params_maximal_attempts_for_multiple_layouts))
+        .def_rw("on_progress", &generate_random_layout_params::on_progress,
+                DOC(fiction_sidb_generators_generate_random_layout_params_on_progress));
 
     m.def(
         "generate_random_sidb_layout",
         [](const generate_random_layout_params& params, const std::optional<layout>& skeleton)
         { return fiction::sidb::generators::generate_random_layout(params, skeleton); }, py::arg("params"),
-        py::arg("lyt_skeleton") = std::nullopt, DOC(fiction_sidb_generators_generate_random_layout));
+        py::arg("lyt_skeleton") = std::nullopt, py::call_guard<py::gil_scoped_release>(),
+        DOC(fiction_sidb_generators_generate_random_layout));
 
     m.def(
         "generate_multiple_random_sidb_layouts",
         [](const generate_random_layout_params& params, const std::optional<layout>& skeleton)
         { return fiction::sidb::generators::generate_multiple_random_layouts(params, skeleton); }, py::arg("params"),
-        py::arg("lyt_skeleton") = std::nullopt, DOC(fiction_sidb_generators_generate_multiple_random_layouts));
+        py::arg("lyt_skeleton") = std::nullopt, py::call_guard<py::gil_scoped_release>(),
+        DOC(fiction_sidb_generators_generate_multiple_random_layouts));
 }
 
 }  // namespace pyfiction

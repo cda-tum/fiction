@@ -23,15 +23,16 @@
 #include <sstream>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/chrono.h>      // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/function.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/chrono.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>   // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -63,7 +64,9 @@ void hexagonalization(nanobind::module_& m)
         .def_rw("input_pin_extension", &fiction::physical_design::hexagonalization_params::input_pin_extension,
                 DOC(fiction_physical_design_hexagonalization_params_input_pin_extension))
         .def_rw("output_pin_extension", &fiction::physical_design::hexagonalization_params::output_pin_extension,
-                DOC(fiction_physical_design_hexagonalization_params_output_pin_extension));
+                DOC(fiction_physical_design_hexagonalization_params_output_pin_extension))
+        .def_rw("on_progress", &fiction::physical_design::hexagonalization_params::on_progress,
+                DOC(fiction_physical_design_hexagonalization_params_on_progress));
 
     py::class_<fiction::physical_design::hexagonalization_stats>(m, "hexagonalization_stats",
                                                                  DOC(fiction_physical_design_hexagonalization_stats))
@@ -93,7 +96,8 @@ void hexagonalization(nanobind::module_& m)
     m.def("hexagonalization",
           &fiction::physical_design::hexagonalization<py_hexagonal_gate_layout, py_cartesian_gate_layout>,
           py::arg("layout"), py::arg("parameters") = fiction::physical_design::hexagonalization_params{},
-          py::arg("statistics") = nullptr, DOC(fiction_physical_design_hexagonalization));
+          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          DOC(fiction_physical_design_hexagonalization));
 }
 
 }  // namespace pyfiction
