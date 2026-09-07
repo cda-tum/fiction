@@ -1044,7 +1044,7 @@ void check_arguments([[maybe_unused]] const layout& lyt, [[maybe_unused]] const 
 }
 /**
  * Builds the implementation for a layout with optional wires and canvas: the canvas defaults to the layout's logic
- * cells.
+ * dots.
  *
  * @tparam TT Truth table type.
  * @param lyt The layout.

@@ -212,8 +212,8 @@ class critical_temperature_impl
             return;
         }
 
-        assert((input_pattern_layouts != nullptr || sidb_layout.num_pis() > 0) && "gate needs input cells");
-        assert(sidb_layout.num_pos() > 0 && "gate needs output cells");
+        assert((input_pattern_layouts != nullptr || sidb_layout.num_pis() > 0) && "gate needs input dots");
+        assert(sidb_layout.num_pos() > 0 && "gate needs output dots");
 
         if (sidb_layout.num_dots() > 1)
         {
@@ -501,7 +501,7 @@ class critical_temperature_impl
     }
 
     /**
-     * SiDB cell-level layout.
+     * SiDB layout.
      */
     layout sidb_layout;
     /**

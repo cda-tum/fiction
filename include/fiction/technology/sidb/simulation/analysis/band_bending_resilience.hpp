@@ -68,8 +68,8 @@ template <typename TT>
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
-    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
+    assert(lyt.num_pis() > 0 && "skeleton needs input dots");
+    assert(lyt.num_pos() > 0 && "skeleton needs output dots");
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
     assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)

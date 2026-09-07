@@ -49,8 +49,8 @@ inline void physical_population_stability_functions(nanobind::module_& m)
     py::class_<population_stability_information>(m, "population_stability_information",
                                                  DOC(fiction_sidb_simulation_analysis_population_stability_information))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("critical_cell", &population_stability_information::critical_cell,
-                DOC(fiction_sidb_simulation_analysis_population_stability_information_critical_cell))
+        .def_rw("critical_dot", &population_stability_information::critical_dot,
+                DOC(fiction_sidb_simulation_analysis_population_stability_information_critical_dot))
         .def_rw("transition_potentials", &population_stability_information::transition_potentials,
                 DOC(fiction_sidb_simulation_analysis_population_stability_information_transition_potentials))
         .def_rw(

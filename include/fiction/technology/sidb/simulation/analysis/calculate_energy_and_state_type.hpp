@@ -84,7 +84,7 @@ calculate_energy_and_state_type_with_kinks_accepted(const energy_distribution&  
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    assert(!output_bdl_pairs.empty() && "No output cell provided.");
+    assert(!output_bdl_pairs.empty() && "No output dot provided.");
     assert((spec.size() == output_bdl_pairs.size()) && "Number of truth tables and output BDL pairs does not match");
 
     energy_and_state_type est{};

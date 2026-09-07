@@ -75,7 +75,7 @@ struct population_stability_information
     /**
      * SiDB with the minimum potential difference to any charge transition threshold.
      */
-    lattice_site critical_cell{};
+    lattice_site critical_dot{};
     /**
      * For each transition type, the SiDB closest to it and the required potential difference (unit: V).
      */
@@ -197,19 +197,19 @@ class physical_population_stability_impl
 
             auto minimum_potential_difference = std::numeric_limits<double>::infinity();
 
-            for (const auto& [transition, cell_and_potential] : info.transition_potentials)
+            for (const auto& [transition, dot_and_potential] : info.transition_potentials)
             {
                 info.distance_corresponding_to_potential[transition] =
-                    std::isinf(cell_and_potential.second) ?
-                        cell_and_potential.second :
+                    std::isinf(dot_and_potential.second) ?
+                        dot_and_potential.second :
                         model::potential_to_distance_conversion(
-                            cell_and_potential.second, params.sim_params,
+                            dot_and_potential.second, params.sim_params,
                             params.precision_for_distance_corresponding_to_potential);
 
-                if (cell_and_potential.second < minimum_potential_difference)
+                if (dot_and_potential.second < minimum_potential_difference)
                 {
-                    info.critical_cell           = cell_and_potential.first;
-                    minimum_potential_difference = cell_and_potential.second;
+                    info.critical_dot            = dot_and_potential.first;
+                    minimum_potential_difference = dot_and_potential.second;
                 }
             }
 

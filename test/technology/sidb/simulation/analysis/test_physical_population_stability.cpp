@@ -45,7 +45,7 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 1);
         const auto& population_stability_detail = result[0];
-        CHECK(population_stability_detail.critical_cell == lattice_site{1, 1, 0});
+        CHECK(population_stability_detail.critical_dot == lattice_site{1, 1, 0});
         REQUIRE(population_stability_detail.transition_potentials.size() == 4);
         CHECK(population_stability_detail.transition_potentials.at(transition_type::NEGATIVE_TO_NEUTRAL).first ==
               lattice_site{1, 1, 0});
@@ -100,7 +100,7 @@ TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-populatio
     SECTION("Ground state")
     {
         const auto& population_stability_detail = result[0];
-        CHECK(population_stability_detail.critical_cell == lattice_site{2, 1, 0});
+        CHECK(population_stability_detail.critical_dot == lattice_site{2, 1, 0});
         CHECK(population_stability_detail.transition_potentials.at(transition_type::POSITIVE_TO_NEUTRAL).first ==
               lattice_site{1, 1, 0});
         CHECK(population_stability_detail.transition_potentials.at(transition_type::NEGATIVE_TO_NEUTRAL).first ==
@@ -117,7 +117,7 @@ TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-populatio
     SECTION("1st excited state")
     {
         const auto& population_stability_detail = result[1];
-        CHECK(population_stability_detail.critical_cell == lattice_site{2, 1, 0});
+        CHECK(population_stability_detail.critical_dot == lattice_site{2, 1, 0});
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEGATIVE_TO_NEUTRAL),
             Catch::Matchers::WithinAbs(0.94, 1e-5));
@@ -126,7 +126,7 @@ TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-populatio
     SECTION("2nd excited state")
     {
         const auto& population_stability_detail = result[2];
-        CHECK(population_stability_detail.critical_cell == lattice_site{1, 1, 1});
+        CHECK(population_stability_detail.critical_dot == lattice_site{1, 1, 1});
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
             Catch::Matchers::WithinAbs(1.01, 1e-5));
@@ -175,7 +175,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 8);
         const auto& population_stability_detail = result.at(0);
-        CHECK(population_stability_detail.critical_cell == lattice_site{2, 1, 0});
+        CHECK(population_stability_detail.critical_dot == lattice_site{2, 1, 0});
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
             Catch::Matchers::WithinAbs(4.79, 1e-5));
@@ -188,7 +188,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 2);
         const auto& population_stability_detail = result[0];
-        CHECK(population_stability_detail.critical_cell == lattice_site{14, 5, 0});
+        CHECK(population_stability_detail.critical_dot == lattice_site{14, 5, 0});
         CHECK(population_stability_detail.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second <
               0.026);
         REQUIRE_THAT(
@@ -204,7 +204,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 4);
         const auto& population_stability_detail = result[0];
-        CHECK(population_stability_detail.critical_cell == lattice_site{32, 18, 0});
+        CHECK(population_stability_detail.critical_dot == lattice_site{32, 18, 0});
         CHECK(population_stability_detail.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second <
               0.041);
         REQUIRE_THAT(
@@ -220,7 +220,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 8);
         const auto& population_stability_detail = result[0];
-        CHECK(population_stability_detail.critical_cell == lattice_site{19, 8, 0});
+        CHECK(population_stability_detail.critical_dot == lattice_site{19, 8, 0});
         CHECK(population_stability_detail.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second < 0.02);
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
@@ -235,7 +235,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 2);
         const auto& population_stability_detail = result[0];
-        CHECK(population_stability_detail.critical_cell == lattice_site{14, 5, 0});
+        CHECK(population_stability_detail.critical_dot == lattice_site{14, 5, 0});
         CHECK(population_stability_detail.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second <
               0.026);
         REQUIRE_THAT(
@@ -295,7 +295,7 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
         const auto result = physical_population_stability(lat, params);
         REQUIRE(result.size() == 20);
         const auto& population_stability_detail = result[0];
-        CHECK(population_stability_detail.critical_cell == site_at_row(14, 18));
+        CHECK(population_stability_detail.critical_dot == site_at_row(14, 18));
         CHECK(population_stability_detail.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second < 0.01);
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),

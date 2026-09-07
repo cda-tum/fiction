@@ -28,6 +28,7 @@ def test_three_sidbs_100_lattice() -> None:
     params.simulation_parameters.mu_minus = -0.25
     result = physical_population_stability(layout, params)
     assert len(result) == 5
+    assert result[0].critical_dot in layout.sidbs()
     assert result[0].system_energy <= result[1].system_energy
     assert result[1].system_energy <= result[2].system_energy
 
@@ -46,6 +47,7 @@ def test_three_sidbs_111_lattice() -> None:
     params.simulation_parameters.mu_minus = -0.25
     result = physical_population_stability(layout, params)
     assert len(result) == 5
+    assert result[0].critical_dot in layout.sidbs()
     assert result[0].system_energy <= result[1].system_energy
     assert result[1].system_energy <= result[2].system_energy
 

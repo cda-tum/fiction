@@ -76,6 +76,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - Population-stability results expose the critical dot as `critical_dot` in C++ and Python.
   - SiDB layouts use dot operations and `dot_tag` for dot roles. `assign_sidb` defaults to the
     `NORMAL` tag. Lattice-site constructors
     take `int32_t` coordinates and an `int8_t` basis index.
