@@ -71,7 +71,7 @@ def test_read_unparsable_file_reports_the_parser(shell: Shell, tmp_path: Path) -
 def test_read_sqd_and_fqca(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:
     shell.ok(f"read {resource('siqad_or_gate.sqd')}")
     entry = shell.session.cell_layouts.current()
-    assert entry.layout.num_cells() > 0
+    assert entry.layout.num_dots() > 0
     assert shell.session.log[-1]["result"]["cell_layout"]["technology"] == "SiDB"  # type: ignore[index]
     fqca = tmp_path / "gate.fqca"
     shell.ok(f"read {resource('mux21.v')}; ortho; cell; write {fqca}; clear -c; read {fqca}")

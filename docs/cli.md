@@ -313,7 +313,7 @@ fill and contour tracing follow the operational region and need at least two, an
 tracing collects the boundary surface. `-s` computes the _operational domain sketch_, which judges every point by
 filtering alone instead of by simulation: dramatically faster, never rejecting an operational point, but
 reporting some non-operational points as operational. The sketch implies kink rejection and needs a layout with
-`LOGIC` cells for the filters to enumerate; it pairs best with grid search and random sampling. `-o` writes only
+`LOGIC` dots for the filters to enumerate; it pairs best with grid search and random sampling. `-o` writes only
 the operational points, and `--engine` chooses the simulator.
 
 ## Scripting
@@ -358,8 +358,8 @@ holds a list with one object per command:
 - a network by `name`, `type`, `inputs`, `outputs`, `gates`, and `depth`
 - a gate-level layout by `name`, `topology`, `clocking`, `size` (`x`, `y`, `area`), `inputs`, `outputs`, `gates`,
   `wires`, `crossings`, `critical_path`, and `throughput`
-- a cell-level layout by `name`, `technology`, `size`, `inputs`, `outputs`, and `cells`; an SiDB layout adds
-  `lattice` and `defects`, and a simulated one a `simulation` object with `engine`, `stable_states`,
+- a cell-level layout by `name`, `technology`, `size`, `inputs`, `outputs`, and `cells`; an SiDB layout uses
+  `dots` for its count and adds `lattice` and `defects`, and a simulated one a `simulation` object with `engine`, `stable_states`,
   `ground_state_energy_ev`, and `runtime_s`
 
 Algorithm statistics appear under `stats` with the attribute names of the bindings' `*_stats` classes; durations

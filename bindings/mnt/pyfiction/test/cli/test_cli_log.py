@@ -85,3 +85,13 @@ def test_log_survives_values_json_cannot_encode(shell: Shell) -> None:
     shell.session.log.append({"command": "x", "result": {"value": object()}})
     shell.session.log_path = None
     shell.session.close()
+
+
+def test_sidb_statistics_use_dots(shell: Shell, resource: Callable[[str], str]) -> None:
+    """SiDB store output and JSON describe dots under the shared cell-layout store."""
+    shell.ok(f"read {resource('siqad_or_gate.sqd')}")
+    description = shell.session.log[-1]["result"]["cell_layout"]  # type: ignore[index]
+    assert description["dots"] == shell.session.cell_layouts.current().layout.num_dots()
+    assert "cells" not in description
+    assert "dots:" in shell.ok("store -c")
+    assert "dots" in shell.ok("ps -c")

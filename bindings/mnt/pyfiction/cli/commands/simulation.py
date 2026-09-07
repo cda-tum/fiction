@@ -247,7 +247,7 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
     stats = critical_temperature_stats()
     if args.gate_based:
         if layout.num_pis() == 0 or layout.num_pos() == 0:
-            msg = "gate-based simulation needs a layout with input and output cells"
+            msg = "gate-based simulation needs a layout with input and output dots"
             raise CommandError(msg)
         spec = [session.truth_tables.current()]
         temperature = critical_temperature_gate_based(layout, spec, params, stats)

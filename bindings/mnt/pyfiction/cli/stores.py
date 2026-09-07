@@ -276,7 +276,7 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
         entry: The store element.
 
     Returns:
-        Name, technology, size, I/O and cell counts; for SiDB layouts the lattice and defect count;
+        Name, technology, size, I/O and dot or cell counts; for SiDB layouts the lattice and defect count;
         and a ``simulation`` section once simulated.
     """
     layout = entry.layout
@@ -298,9 +298,11 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
         description["size"] = {"x": layout.x() + 1, "y": layout.y() + 1, "z": layout.z() + 1, "area": layout.area()}
     description["inputs"] = layout.num_pis()
     description["outputs"] = layout.num_pos()
-    description["cells"] = layout.num_cells()
     if isinstance(layout, sidb_layout):
+        description["dots"] = layout.num_dots()
         description["defects"] = layout.num_defects()
+    else:
+        description["cells"] = layout.num_cells()
     if entry.result is not None:
         description["simulation"] = describe_simulation(entry)
     return description
@@ -389,7 +391,7 @@ def one_line(description: dict[str, object]) -> str:
         parts.append(f"I/O: {description['inputs']}/{description['outputs']}")
     parts.extend(
         f"{key}: {description[key]}"
-        for key in ("gates", "wires", "crossings", "depth", "cells", "vars", "hex")
+        for key in ("gates", "wires", "crossings", "depth", "dots", "cells", "vars", "hex")
         if key in description
     )
     if "critical_path" in description:
