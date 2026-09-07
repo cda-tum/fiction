@@ -988,9 +988,9 @@ TEST_CASE("Critical temperature reports progress", "[critical-temperature]")
     SECTION("non-gate-based")
     {
         layout lyt{};
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
 
         critical_temperature_stats stats{};
 

@@ -1129,9 +1129,9 @@ TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quicksim]")
 TEST_CASE("QuickSim reports progress", "[quicksim]")
 {
     layout lyt{};
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
 
     progress_recorder rec{};
 
