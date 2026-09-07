@@ -22817,7 +22817,7 @@ R"doc(A Binary-dot Logic (BDL) pair is a pair of SiDBs that are close to
 each other and, thus, most likely share a charge.
 
 Template Args:
-    CellType: Cell type.)doc";
+    CellType: Coordinate type.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_pair_bdl_pair = R"doc(Standard constructor for empty BDL pairs.)doc";
 
