@@ -53,7 +53,9 @@ def test_read_directory(shell: Shell, tmp_path: Path, resource: Callable[[str], 
     shell.ok(f"read {tmp_path} --sort")
     names = [shell.session.networks.items[i] for i in range(2)]
     assert [n.num_gates() for n in names] == sorted(n.num_gates() for n in names)
-    assert "no network files" in shell.fails(f"read {tmp_path / 'empty'}") or True
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    assert "no network files" in shell.fails(f"read {empty}")
 
 
 def test_read_missing_and_unknown_files(shell: Shell, tmp_path: Path) -> None:
