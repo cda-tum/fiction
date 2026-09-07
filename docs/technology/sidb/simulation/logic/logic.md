@@ -310,7 +310,7 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::detect_bdl_pairs(const layout& lyt, const std::optional<sidb_technology::cell_type>& type = std::nullopt, const detect_bdl_pairs_params& params = {})
+```{doxygenfunction} fiction::sidb::simulation::logic::detect_bdl_pairs(const layout& lyt, const std::optional<dot_tag>& type = std::nullopt, const detect_bdl_pairs_params& params = {})
 
 ```
 
