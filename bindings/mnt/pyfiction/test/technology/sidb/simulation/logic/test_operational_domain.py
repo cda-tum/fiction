@@ -49,7 +49,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def wire_with_canvas() -> sidb_layout:
-    """A BDL wire with two LOGIC cells, so that the sketch has a canvas to enumerate.
+    """A BDL wire with two LOGIC dots, so that the sketch has a canvas to enumerate.
 
     Returns:
         The wire layout.
@@ -180,7 +180,7 @@ def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir
         operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.1, 0.1),
     ]
 
-    # the layout has no LOGIC cells, so there is no canvas for the filtering steps to enumerate
+    # the layout has no LOGIC dots, so there is no canvas for the filtering steps to enumerate
     with pytest.raises(ValueError, match="requires a canvas"):
         operational_domain_grid_search(lyt, [create_or_tt()], params)
 
