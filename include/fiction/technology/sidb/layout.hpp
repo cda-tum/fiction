@@ -51,7 +51,7 @@ class layout
      */
     using dot_tag = sidb::dot_tag;
     /**
-     * The cell technology this layout implements, so that `fiction::technology<layout>` names `sidb_technology`.
+     * The technology bridge this layout exposes, so that `fiction::technology<layout>` names `sidb_technology`.
      */
     using technology = sidb_technology;
     /**
