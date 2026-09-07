@@ -28,6 +28,7 @@
 #include <fmt/format.h>
 
 #include <ostream>
+#include <stdexcept>
 
 namespace fiction::sidb::io
 {

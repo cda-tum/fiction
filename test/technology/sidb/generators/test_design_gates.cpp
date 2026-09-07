@@ -39,6 +39,7 @@
 
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <stdexcept>
 #include <thread>
 #include <vector>
 

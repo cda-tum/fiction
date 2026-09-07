@@ -17,6 +17,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
@@ -27,12 +28,15 @@
 #include <fiction/utils/stl/stl_utils.hpp>
 #include <fiction/utils/version_info.hpp>
 
+#include <fmt/format.h>
+
 #include <any>
 #include <chrono>
 #include <cstdint>
 #include <ctime>
 #include <numbers>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
