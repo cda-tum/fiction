@@ -97,10 +97,6 @@ Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Benc
 
 ```
 
-```{doxygenfunction} fiction::layouts::io::print_sidb_layout
-
-```
-
 ```{doxygenfunction} fiction::layouts::io::print_layout
 
 ```
