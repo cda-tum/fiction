@@ -17521,7 +17521,7 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temp
 R"doc(Pre-detected output BDL wires, or `nullptr` if they are to be detected
 here. Not owned by this object.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_sidb_layout = R"doc(SiDB cell-level layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_sidb_layout = R"doc(SiDB layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_stats = R"doc(Statistics.)doc";
 
@@ -17836,7 +17836,7 @@ every transition type, the SiDB that is closest to that transition and
 the potential change it would take, plus the distance an SiDB would
 have to be placed at to induce that potential change.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_critical_cell =
+static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_critical_dot =
 R"doc(SiDB with the minimum potential difference to any charge transition
 threshold.)doc";
 
@@ -23041,9 +23041,9 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection = R"
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection_ALL = R"doc(Select all BDL wires.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection_INPUT = R"doc(Select only BDL wires that start with input cells.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection_INPUT = R"doc(Select only BDL wires that start with input dots.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection_OUTPUT = R"doc(Select only BDL wires that end with output cells.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection_OUTPUT = R"doc(Select only BDL wires that end with output dots.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_update_direction =
 R"doc(Determines the port direction of the wire from the positions of its
@@ -23122,8 +23122,8 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Flood fill
-                           and contour tracing additionally require at
+                           layout without `LOGIC` dots. Flood fill and
+                           contour tracing additionally require at
                            least two sweep dimensions; grid search and
                            random sampling accept any number.
 
@@ -23206,8 +23206,8 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Flood fill
-                           and contour tracing additionally require at
+                           layout without `LOGIC` dots. Flood fill and
+                           contour tracing additionally require at
                            least two sweep dimensions; grid search and
                            random sampling accept any number.
 
@@ -23290,7 +23290,7 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Any number of
+                           layout without `LOGIC` dots. Any number of
                            sweep dimensions is accepted.
 
 )doc";
@@ -23364,7 +23364,7 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Any number of
+                           layout without `LOGIC` dots. Any number of
                            sweep dimensions is accepted.
 
 )doc";
@@ -23390,14 +23390,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_canvas_of =
-R"doc(Collects the logic cells of a layout into a canvas layout on the same
+R"doc(Collects the logic dots of a layout into a canvas layout on the same
 lattice.
 
 Args:
     lyt: The layout.
 
 Returns:
-    A layout holding only the logic cells of `lyt`.
+    A layout holding only the logic dots of `lyt`.
 
 )doc";
 
@@ -23769,10 +23769,6 @@ R"doc(Runs the operational check.
 Returns:
     The status and, if non-operational, the reason.
 
-Raises:
-    std::invalid_argument: if QuickSim is selected for charged
-                           defects.
-
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_set_charge_distribution_of_input_pins =
@@ -23982,7 +23978,7 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bd
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_make_impl =
 R"doc(Builds the implementation for a layout with optional wires and canvas:
-the canvas defaults to the layout's logic cells.
+the canvas defaults to the layout's logic dots.
 
 Args:
     lyt: The layout.
@@ -23990,7 +23986,7 @@ Args:
     params: Parameters.
     input_wires: The input wires, or `std::nullopt` to detect them.
     output_wires: The output wires, or `std::nullopt` to detect them.
-    canvas_lyt: The canvas, or `std::nullopt` to use the logic cells.
+    canvas_lyt: The canvas, or `std::nullopt` to use the logic dots.
 
 Template Args:
     TT: Truth table type.
@@ -24028,7 +24024,7 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_canvas_lyt = R"doc(This layout consists of the canvas cells of the layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_canvas_lyt = R"doc(This layout consists of the canvas dots of the layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_contour_tracing =
 R"doc(Performs contour tracing to determine the operational domain. The
@@ -24350,7 +24346,7 @@ is necessary for the operational domain computation. The layout must
 have exactly one output BDL pair.
 
 Args:
-    source_layout: SiDB cell-level layout to be evaluated.
+    source_layout: SiDB layout to be evaluated.
     tt: Expected Boolean function of the layout given as a multi-
         output truth table.
     ps: Parameters for the operational domain computation.
@@ -24557,11 +24553,11 @@ The sketch, i.e., `operational_analysis_strategy::FILTER_ONLY`,
 determines the operational status by filtering alone. It has two
 preconditions: the filtering steps are only defined when kinks are
 rejected, and they enumerate the charge configurations of the canvas,
-which the layout's `LOGIC` cells define. If either is unmet, the
-sketch evaluates nothing and silently falls back to a full simulation
-of the entire parameter space. Since that is the exhaustive cost the
-sketch exists to avoid, an unmet precondition is rejected instead of
-being absorbed.
+which the layout's `LOGIC` dots define. If either is unmet, the sketch
+evaluates nothing and silently falls back to a full simulation of the
+entire parameter space. Since that is the exhaustive cost the sketch
+exists to avoid, an unmet precondition is rejected instead of being
+absorbed.
 
 Args:
     lyt: The layout the operational domain is computed for.
@@ -24819,7 +24815,7 @@ R"doc(Determines whether an SiDB layout implements the given Boolean
 function(s). Every input pattern is applied to the input BDL pairs,
 the ground states are simulated with the configured engine, and the
 charge states of the output BDL pairs are compared with the expected
-truth-table entries. If the layout carries logic cells, they form the
+truth-table entries. If the layout carries logic dots, they form the
 canvas of the pruning filters that run before any simulation whenever
 the parameters ask for filtering and reject kinks.
 
@@ -24846,7 +24842,7 @@ Args:
     params: Parameters.
     input_bdl_wire: The input BDL wires of `lyt`.
     output_bdl_wire: The output BDL wires of `lyt`.
-    canvas_lyt: The canvas; defaults to the logic cells of `lyt`.
+    canvas_lyt: The canvas; defaults to the logic dots of `lyt`.
 
 Template Args:
     TT: Truth table type.
@@ -24867,7 +24863,7 @@ Args:
     params: Parameters.
     input_bdl_wire: The input BDL wires.
     output_bdl_wire: The output BDL wires.
-    canvas_lyt: The canvas; defaults to the logic cells of the first
+    canvas_lyt: The canvas; defaults to the logic dots of the first
                 layout.
 
 Template Args:
@@ -24925,9 +24921,9 @@ possible that the layout is non-operational, but the filtering
 strategies do not detect it. Sweeping a parameter space this way is
 called the operational domain sketch. The filtering steps are only
 defined when kinks are rejected, and they enumerate the charge
-configurations of the canvas that the layout's `LOGIC` cells define,
-so this setting is only effective with `REJECT_KINKS` on a layout that
-has such cells.
+configurations of the canvas that the layout's `LOGIC` dots define, so
+this setting is only effective with `REJECT_KINKS` on a layout that
+has such dots.
 - `FILTER_THEN_SIMULATION`: Before a physical simulation is conducted,
   the algorithm checks if filtering
 strategies have detected whether the layout is non-operational. This
@@ -24942,7 +24938,7 @@ operational domain sketch.
 Note:
     This is an extremely fast approximation that may sometimes lead to
     false positives. It requires `REJECT_KINKS` and a layout with
-    `LOGIC` cells; without either, no filter step runs.)doc";
+    `LOGIC` dots; without either, no filter step runs.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION =
 R"doc(Before a physical simulation is conducted, the algorithm checks if
@@ -25543,8 +25539,8 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Flood fill
-                           and contour tracing additionally require at
+                           layout without `LOGIC` dots. Flood fill and
+                           contour tracing additionally require at
                            least two sweep dimensions; grid search and
                            random sampling accept any number.
 
@@ -25624,8 +25620,8 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Flood fill
-                           and contour tracing additionally require at
+                           layout without `LOGIC` dots. Flood fill and
+                           contour tracing additionally require at
                            least two sweep dimensions; grid search and
                            random sampling accept any number.
 
@@ -25710,7 +25706,7 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Any number of
+                           layout without `LOGIC` dots. Any number of
                            sweep dimensions is accepted.
 
 )doc";
@@ -25803,7 +25799,7 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Any number of
+                           layout without `LOGIC` dots. Any number of
                            sweep dimensions is accepted.
 
 )doc";
