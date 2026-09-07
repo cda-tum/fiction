@@ -84,7 +84,7 @@ struct lattice_site
      * @param x_coord Steps along the first lattice vector.
      * @param y_coord Steps along the second lattice vector.
      */
-    constexpr lattice_site(const int32_t x_coord, const int32_t y_coord) noexcept : lattice_site{x_coord, y_coord, 0} {}
+    constexpr lattice_site(const int32_t x_coord, const int32_t y_coord) noexcept : x{x_coord}, y{y_coord} {}
     /**
      * Compares two sites for equality.
      *
@@ -121,12 +121,12 @@ struct lattice_site
     [[nodiscard]] constexpr lattice_site operator+(const lattice_site& other) const
     {
         const auto result_x = int64_t{x} + other.x;
-        const auto result_y = (int64_t{y} + other.y) + (z & other.z);
+        const auto result_y = (int64_t{y} + other.y) + static_cast<int64_t>(z == 1 && other.z == 1);
         if (!std::in_range<int32_t>(result_x) || !std::in_range<int32_t>(result_y))
         {
             throw std::out_of_range("Coordinate exceeds the lattice-site range");
         }
-        return {static_cast<int32_t>(result_x), static_cast<int32_t>(result_y), static_cast<int8_t>(z ^ other.z)};
+        return {static_cast<int32_t>(result_x), static_cast<int32_t>(result_y), static_cast<int8_t>(z != other.z)};
     }
     /**
      * Subtracts another site from this one, borrowing from the previous unit cell along the second lattice vector when
@@ -144,7 +144,7 @@ struct lattice_site
         {
             throw std::out_of_range("Coordinate exceeds the lattice-site range");
         }
-        return {static_cast<int32_t>(result_x), static_cast<int32_t>(result_y), static_cast<int8_t>(z ^ other.z)};
+        return {static_cast<int32_t>(result_x), static_cast<int32_t>(result_y), static_cast<int8_t>(z != other.z)};
     }
     /**
      * Returns a string representation of the form `"(x,y,z)"`.
@@ -300,7 +300,7 @@ struct lattice
      */
     [[nodiscard]] vector nm_position(const lattice_site& s) const
     {
-        const auto b = basis.at(s.z);
+        const auto b = basis.at(static_cast<std::size_t>(s.z));
 
         return {((s.x * a1.first) + (s.y * a2.first) + b.first) * 0.1,
                 ((s.x * a1.second) + (s.y * a2.second) + b.second) * 0.1};

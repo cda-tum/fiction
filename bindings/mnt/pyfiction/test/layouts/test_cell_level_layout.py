@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_technology
+from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_dot_tag, sidb_technology
 
 
 def test_qca_technology():
@@ -36,13 +36,12 @@ def test_inml_technology():
 
 
 def test_sidb_technology():
-    sidb = sidb_technology
-
-    assert str(sidb.cell_type.EMPTY) == "cell_type.EMPTY"
-    assert str(sidb.cell_type.NORMAL) == "cell_type.NORMAL"
-    assert str(sidb.cell_type.INPUT) == "cell_type.INPUT"
-    assert str(sidb.cell_type.OUTPUT) == "cell_type.OUTPUT"
-    assert str(sidb.cell_type.LOGIC) == "cell_type.LOGIC"
+    assert sidb_technology.cell_type is sidb_dot_tag
+    assert str(sidb_dot_tag.EMPTY) == "sidb_dot_tag.EMPTY"
+    assert str(sidb_dot_tag.NORMAL) == "sidb_dot_tag.NORMAL"
+    assert str(sidb_dot_tag.INPUT) == "sidb_dot_tag.INPUT"
+    assert str(sidb_dot_tag.OUTPUT) == "sidb_dot_tag.OUTPUT"
+    assert str(sidb_dot_tag.LOGIC) == "sidb_dot_tag.LOGIC"
 
 
 def test_qca_cell_layout_inheritance():
