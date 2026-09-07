@@ -155,8 +155,8 @@ struct is_operational_params
     /**
      * Strategy to determine whether a layout is operational or non-operational.
      */
-    operational_analysis_strategy strategy_to_analyze_operational_status =
-        operational_analysis_strategy::SIMULATION_ONLY;
+    operational_analysis_strategy strategy_to_analyze_operational_status{
+        operational_analysis_strategy::SIMULATION_ONLY};
 };
 
 namespace detail

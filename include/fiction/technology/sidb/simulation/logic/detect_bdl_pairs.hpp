@@ -187,14 +187,14 @@ struct detect_bdl_pairs_params
 };
 
 /**
- * Detects the BDL pairs of an SiDB layout. All SiDBs of the given type are collected and uniquely paired up by
- * distance: the pairwise distances are sorted, and the closest unpaired SiDBs within the distance window
- * `[params.minimum_distance, params.maximum_distance]` (defaults: 0.75 nm and 1.5 nm) form a pair. The lower bound
+ * Detects the BDL pairs of an SiDB layout. Dots with the given tag are uniquely paired in increasing distance.
+ * The closest unpaired dots within `[params.minimum_distance, params.maximum_distance]` (defaults of 0.75 nm
+ * and 1.5 nm) form a pair. The lower bound
  * keeps, e.g., the SiDBs of an atomic wire from being paired; the upper bound prevents unlikely pairings and bounds
  * the work. Distances follow the layout's lattice. The pairs are returned sorted.
  *
  * @param lyt The layout to detect BDL pairs in.
- * @param type Optional SiDB type to restrict the detection to (`INPUT`, `OUTPUT`, `NORMAL`, ...). If omitted, the
+ * @param type Optional dot tag to restrict the detection to (`INPUT`, `OUTPUT`, `NORMAL`, ...). If omitted, the
  * BDL pairs of the input, output, and normal SiDBs are detected and returned in that order.
  * @param params Parameters for the BDL pair detection.
  * @return The detected BDL pairs.

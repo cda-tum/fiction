@@ -144,8 +144,8 @@ Setting `strategy_to_analyze_operational_status` to `FILTER_ONLY` computes the _
 domain sketch_: each parameter point is classified by filtering alone, without physical simulation.
 This is dramatically faster and never rejects a point that is operational, but it does report some
 non-operational points as operational. The sketch requires `REJECT_KINKS` and a layout with
-`LOGIC` cells, since the filtering steps enumerate the charge configurations of the canvas those
-cells define; without either, it is rejected with `std::invalid_argument`.
+`LOGIC` dots, since the filtering steps enumerate the charge configurations of the canvas those
+dots define; without either, it is rejected with `std::invalid_argument`.
 
 The sketch combines with any of the four strategies, but pairs best with the exhaustive ones. Grid
 search and random sampling place their samples independently of the result, so the sketch simply makes
@@ -261,7 +261,7 @@ curve; in three or more, where the boundary is a surface, it collects the bounda
 
 Setting `strategy_to_analyze_operational_status` to `FILTER_ONLY` computes the _operational
 domain sketch_, which classifies each parameter point by filtering alone instead of by physical
-simulation. It requires `REJECT_KINKS` and a layout with `LOGIC` cells; without either, the
+simulation. It requires `REJECT_KINKS` and a layout with `LOGIC` dots; without either, the
 call raises `ValueError`. The sketch pairs best with grid search and random sampling — see the
 C++ tab for why combining it with flood fill or contour tracing needs a much higher sample count.
 
