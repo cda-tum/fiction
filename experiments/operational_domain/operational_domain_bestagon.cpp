@@ -195,7 +195,7 @@ int main()  // NOLINT
 
         opdomain_exp(
             // Benchmark
-            gate, lyt.num_cells(),
+            gate, lyt.num_dots(),
 
             // Grid Search
             op_domain_stats_gs.num_evaluated_parameter_combinations, operational_percentage_gs,

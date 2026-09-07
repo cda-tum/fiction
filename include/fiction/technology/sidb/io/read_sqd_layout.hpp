@@ -108,18 +108,18 @@ namespace detail
 /**
  * Parses the `<type>` element of a `<dbdot>`; a missing element means a normal SiDB.
  *
- * @param dot_type The element, or `nullptr`.
- * @return The cell type.
+ * @param tag_element The element, or `nullptr`.
+ * @return The dot tag.
  */
-inline sidb::sidb_technology::cell_type parse_dot_type(const tinyxml2::XMLElement* dot_type)
+inline sidb::dot_tag parse_dot_tag(const tinyxml2::XMLElement* tag_element)
 {
     // if no dot type is given, assume normal dot
-    if (dot_type == nullptr)
+    if (tag_element == nullptr)
     {
-        return sidb::sidb_technology::cell_type::NORMAL;
+        return sidb::dot_tag::NORMAL;
     }
 
-    const auto* const type = dot_type->GetText();
+    const auto* const type = tag_element->GetText();
 
     if (type == nullptr)
     {
@@ -128,19 +128,19 @@ inline sidb::sidb_technology::cell_type parse_dot_type(const tinyxml2::XMLElemen
 
     if (std::string{type} == "input")
     {
-        return sidb::sidb_technology::cell_type::INPUT;
+        return sidb::dot_tag::INPUT;
     }
     if (std::string{type} == "output")
     {
-        return sidb::sidb_technology::cell_type::OUTPUT;
+        return sidb::dot_tag::OUTPUT;
     }
     if (std::string{type} == "normal")
     {
-        return sidb::sidb_technology::cell_type::NORMAL;
+        return sidb::dot_tag::NORMAL;
     }
     if (std::string{type} == "logic")
     {
-        return sidb::sidb_technology::cell_type::LOGIC;
+        return sidb::dot_tag::LOGIC;
     }
 
     throw sqd_parsing_error("Error parsing SQD file: invalid dot type");
@@ -425,7 +425,7 @@ class sqd_reader
             throw sqd_parsing_error("Error parsing SQD file: no element 'latcoord' in element 'dbdot'");
         }
 
-        lyt.assign_sidb(parse_latcoord(latcoord), parse_dot_type(db_dot->FirstChildElement("type")));
+        lyt.assign_sidb(parse_latcoord(latcoord), parse_dot_tag(db_dot->FirstChildElement("type")));
     }
     /**
      * Reads a defect with finite, non-negative Coulomb material parameters.

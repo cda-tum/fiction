@@ -132,7 +132,7 @@ try
             const auto delta_ct = max_ct - min_ct;
 
             // Benchmark and save
-            opdomain_exp(gate_name, lyt.num_cells(), min_ct, ct_default, max_ct, delta_ct);
+            opdomain_exp(gate_name, lyt.num_dots(), min_ct, ct_default, max_ct, delta_ct);
             opdomain_exp.save();
             opdomain_exp.table();
         }

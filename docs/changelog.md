@@ -92,6 +92,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** SiDB commands use `sidb::layout` and simulation results. `read --sqd` reads the lattice
     from the file; `--lattice_orientation` is removed
   - `print`, `show`, and statistics use stored ground states; `sqd` exports geometry and defects
+  - SiDB shell descriptions and JSON statistics report dot counts as `dots`.
 
 - Continuous integration:
   - Reusable workflows now use GitHub's self-repository reference syntax.

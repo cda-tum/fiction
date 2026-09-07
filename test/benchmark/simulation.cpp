@@ -43,45 +43,45 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
     // crossing bestagon gate
     layout lyt{};
 
-    lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({36, 1, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({38, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 12, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 11, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 12, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 11, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 9, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 16, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 13, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({18, 9, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 13, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 13, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 13, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 8, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 8, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({6, 18, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({8, 17, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({2, 19, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
 
     BENCHMARK("QuickExact")
     {

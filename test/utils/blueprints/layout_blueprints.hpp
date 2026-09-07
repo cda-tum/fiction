@@ -945,20 +945,20 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
     lyt.set_layout_name("BDL wire");
 
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({3, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 0, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 0, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 0, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 0, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({18, 0, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({20, 0, 0}, fiction::sidb::dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({24, 0, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -972,22 +972,22 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({20, 0, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({18, 1, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({20, 0, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({18, 1, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({4, 2, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 3, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 2, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 3, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 3, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 2, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 3, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 2, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 7, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({10, 6, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({10, 7, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({10, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({10, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1001,22 +1001,22 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({16, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({14, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({16, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({14, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({4, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 2, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({6, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({10, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 5, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({8, 6, 1}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({8, 5, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({8, 6, 1}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({8, 8, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({8, 8, 1}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1030,25 +1030,25 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({20, 0, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({18, 1, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({20, 0, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({18, 1, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({4, 2, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 3, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 2, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 3, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({16, 2, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 3, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({16, 2, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 3, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, 4, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({10, 5, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_dot_tag({10, 4, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({10, 5, 1}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_cell_type({10, 8, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 9, 1}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({10, 8, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({10, 9, 1}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({10, 12, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({10, 12, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1063,34 +1063,34 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({23, 9, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 11, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 9, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({19, 8, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_dot_tag({23, 9, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({18, 11, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({18, 9, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({19, 8, 0}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_cell_type({20, 14, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 13, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1107,36 +1107,36 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{fiction::sidb::lattice::si_111_1x1()};
 
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({1, 1, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({1, 1, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({25, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({23, 1, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({25, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({23, 1, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({4, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({21, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({21, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({5, 5, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 5, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({5, 5, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({19, 5, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({17, 8, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 8, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({17, 8, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 8, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({9, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({15, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({9, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({15, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({13, 17, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({16, 18, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({10, 18, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_dot_tag({13, 17, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({16, 18, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({10, 18, 0}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_cell_type({15, 21, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({17, 23, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({15, 21, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({17, 23, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({19, 25, 1}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({21, 27, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({19, 25, 1}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({21, 27, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({23, 29, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({23, 29, 1}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1145,36 +1145,36 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{fiction::sidb::lattice::si_111_1x1()};
 
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({1, -2, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({1, -2, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({25, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({23, -2, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({25, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({23, -2, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({4, -4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({21, -4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, -4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({21, -4, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({5, -6, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, -6, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({5, -6, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({19, -6, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({17, -8, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, -8, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({17, -8, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, -8, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({9, -10, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({15, -10, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({9, -10, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({15, -10, 1}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({13, -17, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({16, -18, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({10, -18, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_dot_tag({13, -17, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({16, -18, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({10, -18, 0}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_cell_type({15, -22, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({17, -23, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({15, -22, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({17, -23, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({19, -26, 1}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({21, -27, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({19, -26, 1}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({21, -27, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({23, -30, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({23, -30, 1}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1189,47 +1189,47 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({20, 8, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({14, 9, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 9, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({14, 11, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({20, 12, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({24, 13, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({16, 13, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_dot_tag({20, 8, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({14, 9, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({18, 9, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({14, 11, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({20, 12, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({24, 13, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({16, 13, 1}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1239,44 +1239,44 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({19, 7, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({16, 10, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({17, 12, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_dot_tag({19, 7, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({16, 10, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({17, 12, 0}, fiction::sidb::dot_tag::LOGIC);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({0, 20, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 20, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 20, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({38, 20, 0}, fiction::sidb::dot_tag::INPUT);
 
     return lyt;
 }
@@ -1292,37 +1292,37 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({19, 8, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({23, 9, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 9, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 11, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_dot_tag({19, 8, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({23, 9, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({18, 9, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({18, 11, 1}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_cell_type({19, 13, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 14, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1338,34 +1338,34 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 7, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 6, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({19, 7, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({18, 6, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({21, 11, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({17, 11, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 13, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_dot_tag({21, 11, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({17, 11, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({18, 13, 0}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1382,39 +1382,39 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1429,39 +1429,39 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({0, 20, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 20, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 20, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({38, 20, 0}, fiction::sidb::dot_tag::INPUT);
 
     return lyt;
 }
@@ -1478,32 +1478,32 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // output wire
-    lyt.assign_cell_type({19, 13, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 14, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1513,38 +1513,38 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas
-    lyt.assign_cell_type({15, 7, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 8, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({17, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 11, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({15, 7, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({19, 8, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({17, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 11, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // output wire
-    lyt.assign_cell_type({19, 13, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 14, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1558,37 +1558,37 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({19, 7, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({17, 11, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({21, 10, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_dot_tag({19, 7, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({17, 11, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_dot_tag({21, 10, 0}, fiction::sidb::dot_tag::LOGIC);
 
     // output wire
-    lyt.assign_cell_type({19, 13, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 14, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1602,28 +1602,28 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // first input wire
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // second input wire
-    lyt.assign_cell_type({0, 15, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 14, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({6, 13, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 12, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 11, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 10, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 15, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 14, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({6, 13, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 12, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 11, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 10, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // output wire
-    lyt.assign_cell_type({26, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({28, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 3, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({34, 2, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({26, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({28, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({32, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({34, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({38, 1, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({38, 1, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1640,52 +1640,52 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
     // left SiDBs
-    lyt.assign_cell_type({14, 7, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 9, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({11, 11, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 12, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 7, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({10, 9, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({11, 11, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 12, 1}, fiction::sidb::dot_tag::NORMAL);
 
     // right SiDBs
-    lyt.assign_cell_type({24, 7, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({28, 9, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({27, 11, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 12, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({24, 7, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({28, 9, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({27, 11, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 12, 1}, fiction::sidb::dot_tag::NORMAL);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1702,45 +1702,45 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({17, 8, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({17, 12, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 13, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({17, 8, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({17, 12, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 13, 1}, fiction::sidb::dot_tag::NORMAL);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1754,34 +1754,34 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({4, 9, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({1, 9, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({4, 9, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({1, 9, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({14, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({16, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({14, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_dot_tag({16, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({28, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({28, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({19, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({19, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({11, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({11, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({36, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({39, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({36, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({39, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({44, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({47, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({44, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({47, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({22, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({22, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 2, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_cell_type({52, 9, 1}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({55, 9, 1}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({52, 9, 1}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_dot_tag({55, 9, 1}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({60, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({60, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }

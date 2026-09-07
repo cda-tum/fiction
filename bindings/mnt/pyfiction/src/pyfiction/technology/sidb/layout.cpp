@@ -49,21 +49,18 @@ void layout(nanobind::module_& m)
     using fiction::sidb::layout;
 
     /**
-     * SiDB cell technology.
+     * Cartesian SiDB technology bridge.
      */
     const py::class_<fiction::sidb::sidb_technology> tech(m, "sidb_technology", DOC(fiction_sidb_sidb_technology));
 
-    py::enum_<fiction::sidb::sidb_technology::cell_type>(tech, "cell_type", DOC(fiction_sidb_sidb_technology_cell_type))
-        .value("EMPTY", fiction::sidb::sidb_technology::cell_type::EMPTY,
-               DOC(fiction_sidb_sidb_technology_cell_type_EMPTY))
-        .value("NORMAL", fiction::sidb::sidb_technology::cell_type::NORMAL,
-               DOC(fiction_sidb_sidb_technology_cell_type_NORMAL))
-        .value("INPUT", fiction::sidb::sidb_technology::cell_type::INPUT,
-               DOC(fiction_sidb_sidb_technology_cell_type_INPUT))
-        .value("OUTPUT", fiction::sidb::sidb_technology::cell_type::OUTPUT,
-               DOC(fiction_sidb_sidb_technology_cell_type_OUTPUT))
-        .value("LOGIC", fiction::sidb::sidb_technology::cell_type::LOGIC,
-               DOC(fiction_sidb_sidb_technology_cell_type_LOGIC));
+    const auto tags = py::enum_<fiction::sidb::dot_tag>(m, "sidb_dot_tag", DOC(fiction_sidb_dot_tag))
+                          .value("EMPTY", fiction::sidb::dot_tag::EMPTY, DOC(fiction_sidb_dot_tag_EMPTY))
+                          .value("NORMAL", fiction::sidb::dot_tag::NORMAL, DOC(fiction_sidb_dot_tag_NORMAL))
+                          .value("INPUT", fiction::sidb::dot_tag::INPUT, DOC(fiction_sidb_dot_tag_INPUT))
+                          .value("OUTPUT", fiction::sidb::dot_tag::OUTPUT, DOC(fiction_sidb_dot_tag_OUTPUT))
+                          .value("LOGIC", fiction::sidb::dot_tag::LOGIC, DOC(fiction_sidb_dot_tag_LOGIC));
+
+    tech.attr("cell_type") = tags;
 
     py::class_<layout>(m, "sidb_layout", DOC(fiction_sidb_layout))
         .def(py::init<>(), DOC(fiction_sidb_layout_layout))

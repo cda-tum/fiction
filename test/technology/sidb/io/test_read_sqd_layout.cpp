@@ -66,9 +66,9 @@ TEST_CASE("Read empty SQD layout", "[sqd]")
 
     CHECK(lyt.get_lattice() == sidb::lattice::si_100_2x1());
     CHECK(lyt.is_empty());
-    CHECK(lyt.num_cells() == 0);
+    CHECK(lyt.num_dots() == 0);
     CHECK(lyt.num_defects() == 0);
-    CHECK(lyt.is_empty_cell({0, 0, 0}));
+    CHECK(lyt.is_empty_site({0, 0, 0}));
 }
 
 TEST_CASE("Read single-dot SQD layout", "[sqd]")
@@ -114,8 +114,8 @@ TEST_CASE("Read single-dot SQD layout", "[sqd]")
     const auto lyt = read_sqd_layout(layout_stream);
 
     CHECK(lyt.get_lattice().name == "Si(111) 1x1");
-    CHECK(lyt.num_cells() == 1);
-    CHECK(lyt.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::NORMAL);
+    CHECK(lyt.num_dots() == 1);
+    CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::NORMAL);
     CHECK(lyt.bounding_box() == std::pair{lattice_site{0, 0, 0}, lattice_site{0, 0, 0}});
 }
 
@@ -171,16 +171,16 @@ TEST_CASE("Read multi-dot SQD layout", "[sqd]")
     const auto lyt = read_sqd_layout(layout_stream);
 
     CHECK(lyt.get_lattice() == sidb::lattice::si_100_2x1());
-    CHECK(lyt.num_cells() == 4);
+    CHECK(lyt.num_dots() == 4);
     CHECK(lyt.bounding_box() == std::pair{lattice_site{0, 0, 0}, lattice_site{2, 2, 1}});
 
-    CHECK(lyt.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::NORMAL);
-    CHECK(lyt.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::NORMAL);
-    CHECK(lyt.get_cell_type({2, 2, 0}) == sidb_technology::cell_type::NORMAL);
-    CHECK(lyt.get_cell_type({2, 2, 1}) == sidb_technology::cell_type::NORMAL);
+    CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::NORMAL);
+    CHECK(lyt.get_dot_tag({0, 0, 1}) == dot_tag::NORMAL);
+    CHECK(lyt.get_dot_tag({2, 2, 0}) == dot_tag::NORMAL);
+    CHECK(lyt.get_dot_tag({2, 2, 1}) == dot_tag::NORMAL);
 }
 
-TEST_CASE("Read multi-dot SQD layout with cell type definitions", "[sqd]")
+TEST_CASE("Read multi-dot SQD layout with dot tag definitions", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -239,18 +239,18 @@ TEST_CASE("Read multi-dot SQD layout with cell type definitions", "[sqd]")
 
     const auto lyt = read_sqd_layout(layout_stream);
 
-    CHECK(lyt.num_cells() == 5);
+    CHECK(lyt.num_dots() == 5);
     CHECK(lyt.num_pis() == 1);
     CHECK(lyt.num_pos() == 1);
 
-    CHECK(lyt.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::INPUT);
-    CHECK(lyt.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::OUTPUT);
-    CHECK(lyt.get_cell_type({2, 2, 0}) == sidb_technology::cell_type::NORMAL);
-    CHECK(lyt.get_cell_type({2, 2, 1}) == sidb_technology::cell_type::NORMAL);
-    CHECK(lyt.get_cell_type({1, 1, 1}) == sidb_technology::cell_type::LOGIC);
+    CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
+    CHECK(lyt.get_dot_tag({0, 0, 1}) == dot_tag::OUTPUT);
+    CHECK(lyt.get_dot_tag({2, 2, 0}) == dot_tag::NORMAL);
+    CHECK(lyt.get_dot_tag({2, 2, 1}) == dot_tag::NORMAL);
+    CHECK(lyt.get_dot_tag({1, 1, 1}) == dot_tag::LOGIC);
 }
 
-TEST_CASE("Read multi-dot SQD layout with cell type definitions, Si-111", "[sqd]")
+TEST_CASE("Read multi-dot SQD layout with dot tag definitions, Si-111", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -306,12 +306,12 @@ TEST_CASE("Read multi-dot SQD layout with cell type definitions, Si-111", "[sqd]
     const auto lyt = read_sqd_layout(layout_stream);
 
     CHECK(lyt.get_lattice() == sidb::lattice::si_111_1x1());
-    CHECK(lyt.num_cells() == 4);
+    CHECK(lyt.num_dots() == 4);
 
-    CHECK(lyt.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::INPUT);
-    CHECK(lyt.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::OUTPUT);
-    CHECK(lyt.get_cell_type({2, 2, 0}) == sidb_technology::cell_type::NORMAL);
-    CHECK(lyt.get_cell_type({2, 2, 1}) == sidb_technology::cell_type::NORMAL);
+    CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
+    CHECK(lyt.get_dot_tag({0, 0, 1}) == dot_tag::OUTPUT);
+    CHECK(lyt.get_dot_tag({2, 2, 0}) == dot_tag::NORMAL);
+    CHECK(lyt.get_dot_tag({2, 2, 1}) == dot_tag::NORMAL);
 }
 
 TEST_CASE("Read single defect SQD layout", "[sqd]")
@@ -529,13 +529,13 @@ TEST_CASE("Read multi-dot SQD layout with multi-cell defect", "[sqd]")
 
     const auto lyt = read_sqd_layout(layout_stream);
 
-    CHECK(lyt.num_cells() == 4);
+    CHECK(lyt.num_dots() == 4);
     CHECK(lyt.bounding_box() == std::pair{lattice_site{0, 0, 0}, lattice_site{5, 2, 1}});
 
-    CHECK(lyt.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::NORMAL);
-    CHECK(lyt.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::NORMAL);
-    CHECK(lyt.get_cell_type({2, 2, 0}) == sidb_technology::cell_type::NORMAL);
-    CHECK(lyt.get_cell_type({2, 2, 1}) == sidb_technology::cell_type::NORMAL);
+    CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::NORMAL);
+    CHECK(lyt.get_dot_tag({0, 0, 1}) == dot_tag::NORMAL);
+    CHECK(lyt.get_dot_tag({2, 2, 0}) == dot_tag::NORMAL);
+    CHECK(lyt.get_dot_tag({2, 2, 1}) == dot_tag::NORMAL);
 
     const std::unordered_set<lattice_site> defect_positions{{5, 2, 0}, {5, 2, 1}, {4, 2, 0}, {4, 2, 1}};
 

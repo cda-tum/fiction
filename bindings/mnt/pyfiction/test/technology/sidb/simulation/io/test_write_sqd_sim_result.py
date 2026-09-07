@@ -16,6 +16,7 @@ from mnt.pyfiction import (
     lattice_site,
     quickexact,
     quickexact_params,
+    sidb_dot_tag,
     sidb_layout,
     write_sqd_sim_result,
 )

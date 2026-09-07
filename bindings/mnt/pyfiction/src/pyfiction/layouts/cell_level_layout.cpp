@@ -85,9 +85,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
      */
     const py::class_<Technology> tech(m, fmt::format("{}_technology", tech_name).c_str());
 
-    py::enum_<typename Technology::cell_type> cell_type(
-        std::is_same_v<Technology, fiction::sidb::sidb_technology> ? py::handle{m} : py::handle{tech},
-        std::is_same_v<Technology, fiction::sidb::sidb_technology> ? "sidb_dot_tag" : "cell_type");
+    py::enum_<typename Technology::cell_type> cell_type(tech, "cell_type");
 
     cell_type.value("EMPTY", Technology::cell_type::EMPTY);
     if constexpr (std::is_same_v<Technology, fiction::qca::mol_qca_technology>)

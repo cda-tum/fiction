@@ -136,7 +136,7 @@ int main()  // NOLINT
 
         opdomain_exp(
             // Benchmark
-            gate, lyt.num_cells(),
+            gate, lyt.num_dots(),
 
             // Operational Domain (determine the operation status by simulation)
             op_domain_stats_grid_search.num_operational_parameter_combinations,

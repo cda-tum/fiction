@@ -14,8 +14,6 @@ from mnt.pyfiction import (
     lattice,
     lattice_site,
     read_sqd_layout,
-    read_sqd_layout_100,
-    read_sqd_layout_111,
     sidb_dot_tag,
     write_sqd_layout,
 )

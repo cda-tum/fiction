@@ -67,7 +67,7 @@ TEST_CASE("Write empty SQD layout", "[sqd]")
 TEST_CASE("Write single-dot SQD layout", "[sqd]")
 {
     sidb::layout lyt{};
-    lyt.assign_cell_type(site_at_row(1, 2), sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag(site_at_row(1, 2), dot_tag::NORMAL);
 
     std::stringstream layout_stream{};
 
@@ -76,18 +76,18 @@ TEST_CASE("Write single-dot SQD layout", "[sqd]")
     const auto read_layout = read_sqd_layout(layout_stream);
 
     CHECK(read_layout == lyt);
-    CHECK(read_layout.num_cells() == 1);
-    CHECK(read_layout.get_cell_type({1, 1, 0}) == sidb_technology::cell_type::NORMAL);
+    CHECK(read_layout.num_dots() == 1);
+    CHECK(read_layout.get_dot_tag({1, 1, 0}) == dot_tag::NORMAL);
 }
 
 TEST_CASE("Write multi-dot SQD layout", "[sqd]")
 {
     sidb::layout lyt{};
-    lyt.assign_cell_type(site_at_row(0, 0), sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type(site_at_row(1, 1), sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type(site_at_row(0, 2), sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type(site_at_row(0, 3), sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type(site_at_row(4, 4), sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag(site_at_row(0, 0), dot_tag::NORMAL);
+    lyt.assign_dot_tag(site_at_row(1, 1), dot_tag::NORMAL);
+    lyt.assign_dot_tag(site_at_row(0, 2), dot_tag::NORMAL);
+    lyt.assign_dot_tag(site_at_row(0, 3), dot_tag::NORMAL);
+    lyt.assign_dot_tag(site_at_row(4, 4), dot_tag::NORMAL);
 
     std::stringstream layout_stream{};
 
@@ -96,19 +96,19 @@ TEST_CASE("Write multi-dot SQD layout", "[sqd]")
     const auto read_layout = read_sqd_layout(layout_stream);
 
     CHECK(read_layout == lyt);
-    CHECK(read_layout.num_cells() == 5);
+    CHECK(read_layout.num_dots() == 5);
     CHECK(read_layout.bounding_box() == std::pair{lattice_site{0, 0, 0}, lattice_site{4, 2, 0}});
 }
 
 TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
 {
     sidb::layout lyt{};
-    lyt.assign_cell_type(site_at_row(0, 0), sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type(site_at_row(1, 1), sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type(site_at_row(0, 2), sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type(site_at_row(0, 3), sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type(site_at_row(4, 4), sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type(site_at_row(4, 6), sidb_technology::cell_type::LOGIC);
+    lyt.assign_dot_tag(site_at_row(0, 0), dot_tag::INPUT);
+    lyt.assign_dot_tag(site_at_row(1, 1), dot_tag::OUTPUT);
+    lyt.assign_dot_tag(site_at_row(0, 2), dot_tag::NORMAL);
+    lyt.assign_dot_tag(site_at_row(0, 3), dot_tag::OUTPUT);
+    lyt.assign_dot_tag(site_at_row(4, 4), dot_tag::INPUT);
+    lyt.assign_dot_tag(site_at_row(4, 6), dot_tag::LOGIC);
 
     std::stringstream layout_stream{};
 
@@ -119,7 +119,7 @@ TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
     CHECK(read_layout == lyt);
     CHECK(read_layout.num_pis() == 2);
     CHECK(read_layout.num_pos() == 2);
-    CHECK(read_layout.get_cell_type({4, 3, 0}) == sidb_technology::cell_type::LOGIC);
+    CHECK(read_layout.get_dot_tag({4, 3, 0}) == dot_tag::LOGIC);
 }
 
 TEST_CASE("Write Bestagon SQD layout", "[sqd]")
@@ -140,7 +140,7 @@ TEST_CASE("Write Bestagon SQD layout", "[sqd]")
     const auto read_layout = read_sqd_layout(layout_stream, "Bestagon");
 
     CHECK(read_layout == lyt);
-    CHECK(read_layout.num_cells() == c_layout.num_cells());
+    CHECK(read_layout.num_dots() == c_layout.num_dots());
     CHECK(read_layout.num_pis() == c_layout.num_pis());
     CHECK(read_layout.num_pos() == c_layout.num_pos());
 }

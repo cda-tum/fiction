@@ -19,7 +19,6 @@ from mnt.pyfiction import (
     sidb_charge_state,
     sidb_dot_tag,
     sidb_layout,
-    sidb_technology,
     write_sidb_layout_svg_params,
     write_sidb_layout_svg_to_string,
 )
@@ -27,16 +26,16 @@ from mnt.pyfiction import (
 
 @pytest.fixture
 def four_sidb_layout() -> sidb_layout:
-    """A four-SiDB layout covering the cell types the SVG writer draws.
+    """A four-SiDB layout covering the dot tags the SVG writer draws.
 
     Returns:
         The layout on the H-Si(100) 2x1 lattice.
     """
     lyt = sidb_layout()
-    lyt.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(1, 0, 1), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(1, 0, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(3, 1, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(3, 1, 1), sidb_dot_tag.NORMAL)
     return lyt
 
 

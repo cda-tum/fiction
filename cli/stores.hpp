@@ -179,9 +179,9 @@ template <typename T>
         }
     }
 
-    return fmt::format("{} (SiDB on {}) - {} × {}, I/O: {}/{}, SiDBs: {}, defects: {}{}", lyt.get_layout_name(),
-                       lattice, int64_t{se.x} - nw.x + 1, sidb::row_of(se) - sidb::row_of(nw) + 1, lyt.num_pis(),
-                       lyt.num_pos(), lyt.num_cells(), lyt.num_defects(), simulation);
+    return fmt::format("{} (SiDB on {}) - {} × {}, I/O: {}/{}, dots: {}, defects: {}{}", lyt.get_layout_name(), lattice,
+                       int64_t{se.x} - nw.x + 1, sidb::row_of(se) - sidb::row_of(nw) + 1, lyt.num_pis(), lyt.num_pos(),
+                       lyt.num_dots(), lyt.num_defects(), simulation);
 }
 /**
  * JSON statistics of an SiDB store element, mirroring `describe_sidb`.
@@ -201,7 +201,7 @@ template <typename T>
                      {"lattice", lyt.get_lattice().name},
                      {"inputs", lyt.num_pis()},
                      {"outputs", lyt.num_pos()},
-                     {tech_cell_name<sidb::sidb_technology>, lyt.num_cells()},
+                     {"dots", lyt.num_dots()},
                      {"defects", lyt.num_defects()},
                      {"layout",
                       {{"x-size", int64_t{se.x} - nw.x + 1},
