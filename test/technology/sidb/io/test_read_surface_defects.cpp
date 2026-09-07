@@ -12,7 +12,6 @@
  * @file
  * @brief Tests for `fiction/technology/sidb/io/read_surface_defects.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>

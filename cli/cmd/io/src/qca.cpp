@@ -12,7 +12,6 @@
  * @file
  * @brief Implements the `qca` command.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include "cmd/io/include/qca.hpp"

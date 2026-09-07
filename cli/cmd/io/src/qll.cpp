@@ -13,7 +13,6 @@
  * @brief Implements the `qll` command.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
- * @author OpenAI (Codex)
  */
 
 #include "cmd/io/include/qll.hpp"

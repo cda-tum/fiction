@@ -14,7 +14,6 @@
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include <catch2/benchmark/catch_benchmark.hpp>

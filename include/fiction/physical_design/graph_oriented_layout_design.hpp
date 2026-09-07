@@ -13,7 +13,6 @@
  * @brief Physical design by A* search over a graph of partial layouts.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

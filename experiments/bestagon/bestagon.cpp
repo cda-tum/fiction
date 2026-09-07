@@ -13,7 +13,6 @@
  * @brief Exact physical design of the Bestagon SiDB gate library's benchmark set.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
- * @author OpenAI (Codex)
  */
 
 #if (FICTION_Z3_SOLVER)

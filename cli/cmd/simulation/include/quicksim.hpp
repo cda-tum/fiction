@@ -12,7 +12,6 @@
  * @file
  * @brief Declares the `quicksim` command, which runs *QuickSim* on the current layout.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

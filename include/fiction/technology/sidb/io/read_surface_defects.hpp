@@ -13,7 +13,6 @@
  * @brief Reader for defective SiDB surfaces in a plain-text index format.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
- * @author OpenAI (Codex)
  */
 
 #pragma once

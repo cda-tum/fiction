@@ -14,7 +14,6 @@
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)
- * @author OpenAI (Codex)
  */
 
 #pragma once

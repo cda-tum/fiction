@@ -15,7 +15,6 @@
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)
- * @author OpenAI (Codex)
  */
 
 #pragma once

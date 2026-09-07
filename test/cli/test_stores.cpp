@@ -11,7 +11,6 @@
 /**
  * @file
  * @brief Tests SiDB CLI store descriptions and statistics.
- * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>

@@ -13,7 +13,6 @@
  * @brief Python bindings for `fiction/physical_design/exact.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
- * @author OpenAI (Codex)
  */
 
 #if (FICTION_Z3_SOLVER)

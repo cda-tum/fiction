@@ -13,7 +13,6 @@
  * @brief Tests for `fiction/technology/sidb/simulation/engines/quicksim.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>

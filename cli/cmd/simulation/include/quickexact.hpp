@@ -12,7 +12,6 @@
  * @file
  * @brief Declares the `quickexact` command, which runs *QuickExact* on the current layout.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

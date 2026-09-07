@@ -12,7 +12,6 @@
  * @file
  * @brief Declares the `clustercomplete` command, which runs *ClusterComplete* on the current layout.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #if (FICTION_ALGLIB_ENABLED)

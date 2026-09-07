@@ -12,7 +12,6 @@
  * @file
  * @brief Implements the `qcc` command.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include "cmd/io/include/qcc.hpp"

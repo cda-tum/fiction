@@ -13,7 +13,6 @@
  * @brief Critical temperature of the SiQAD gates.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include "fiction_experiments.hpp"

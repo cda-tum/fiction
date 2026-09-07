@@ -15,7 +15,6 @@ defaults:
 
 env:
   Z3_VERSION: 4.14.1
-  LINT_IGNORE: "build-*|libs/*|vendors/*|docs/*|benchmarks/*|bib/*|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp|bindings/mnt/pyfiction/include/pyfiction/documentation.hpp"
 
 jobs:
   clangtidy:
@@ -41,12 +40,12 @@ jobs:
           timeout 10m sudo -E apt-get update -o Acquire::Retries=3
           timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 cmake libreadline-dev libtbb-dev python3-dev
 
-      - name: Install Python dependencies
+      - name: Install nanobind
         # the ci-tidy preset builds the Python bindings, which need nanobind's CMake package
         # config discoverable via `python -m nanobind --cmake_dir` (see
         # bindings/mnt/pyfiction/CMakeLists.txt); unlike the previous pybind11-based bindings,
         # this isn't fetched by CMake and must be pip-installed ahead of time
-        run: python3 -m pip install --break-system-packages --disable-pip-version-check "nanobind~=3.0.0" "pytest>=9.0.1"
+        run: python3 -m pip install --break-system-packages --disable-pip-version-check "nanobind~=3.0.0"
 
       - name: Setup Z3 Solver
         id: z3
@@ -63,21 +62,6 @@ jobs:
         # translation unit, and a unity build collapses them
         run: cmake -S . --preset ci-tidy
 
-      - name: Select pull-request sources locally
-        if: github.event_name == 'pull_request'
-        id: sources
-        env:
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          PR_CHANGED_FILES: ${{ runner.temp }}/cpp-linter-changed-files
-        # GitHub omits large diffs and individual file patches. Select the same changed
-        # files from the local merge base while retaining whole-file diagnostics.
-        run: |
-          python3 -m pytest -q -o addopts= .github/scripts/test_cpp_linter_files.py
-          merge_base="$(git merge-base "$PR_BASE_SHA" "$PR_HEAD_SHA")"
-          git diff --name-only -z --diff-filter=ACMRTUXB "$merge_base" "$PR_HEAD_SHA" > "$PR_CHANGED_FILES"
-          python3 .github/scripts/cpp_linter_files.py
-
       - name: Run clang-tidy
         id: linter
         uses: cpp-linter/cpp-linter-action@cab1143a2c149bc41e85b070a9de81716974c18f # v2.21.0
@@ -89,11 +73,7 @@ jobs:
           database: "build-ci-tidy"
           step-summary: true
           thread-comments: ${{ ((github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) && 'update') || 'false' }}
-          files-changed-only: ${{ github.event_name != 'pull_request' }}
-          lines-changed-only: false
-          tidy-review: false
-          format-review: false
-          ignore: ${{ steps.sources.outputs.ignore || env.LINT_IGNORE }}
+          ignore: "build-*|libs/*|vendors/*|docs/*|benchmarks/*|bib/*|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp|bindings/mnt/pyfiction/include/pyfiction/documentation.hpp"
           version: "21"
 
       - if: steps.linter.outputs.checks-failed > 0

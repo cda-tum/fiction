@@ -14,7 +14,6 @@
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)
- * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_template_test_macros.hpp>

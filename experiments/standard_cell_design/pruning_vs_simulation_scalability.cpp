@@ -13,7 +13,6 @@
  * @brief Scalability of *QuickCell*'s pruning against full simulation.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include "fiction_experiments.hpp"

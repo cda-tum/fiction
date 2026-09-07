@@ -13,7 +13,6 @@
  * @brief Tests for `fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
- * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
