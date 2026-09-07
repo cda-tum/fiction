@@ -65,6 +65,12 @@ TEST_CASE("Lattice sites", "[lattice]")
         for (const int8_t basis_site : {int8_t{-1}, int8_t{2}, std::numeric_limits<int8_t>::max()})
         {
             CHECK_THROWS_AS((lattice_site{0, 0, basis_site}), std::out_of_range);
+            lattice_site invalid{};
+            invalid.z = basis_site;
+            CHECK_THROWS_AS(invalid + lattice_site{}, std::out_of_range);
+            CHECK_THROWS_AS(lattice_site{} + invalid, std::out_of_range);
+            CHECK_THROWS_AS(invalid - lattice_site{}, std::out_of_range);
+            CHECK_THROWS_AS(lattice_site{} - invalid, std::out_of_range);
         }
         lattice_site invalid{};
         invalid.z      = -1;

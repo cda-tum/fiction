@@ -116,13 +116,14 @@ struct lattice_site
      *
      * @param other Site to add.
      * @return Sum of both sites.
-     * @throws std::out_of_range if a result coordinate exceeds the lattice-site range.
+     * @throws std::out_of_range if a basis index is invalid or a result coordinate exceeds the lattice-site range.
      */
     [[nodiscard]] constexpr lattice_site operator+(const lattice_site& other) const
     {
         const auto result_x = int64_t{x} + other.x;
         const auto result_y = (int64_t{y} + other.y) + static_cast<int64_t>(z == 1 && other.z == 1);
-        if (!std::in_range<int32_t>(result_x) || !std::in_range<int32_t>(result_y))
+        if (z < 0 || z > 1 || other.z < 0 || other.z > 1 || !std::in_range<int32_t>(result_x) ||
+            !std::in_range<int32_t>(result_y))
         {
             throw std::out_of_range("Coordinate exceeds the lattice-site range");
         }
@@ -134,13 +135,14 @@ struct lattice_site
      *
      * @param other Site to subtract.
      * @return Difference of both sites.
-     * @throws std::out_of_range if a result coordinate exceeds the lattice-site range.
+     * @throws std::out_of_range if a basis index is invalid or a result coordinate exceeds the lattice-site range.
      */
     [[nodiscard]] constexpr lattice_site operator-(const lattice_site& other) const
     {
         const auto result_x = int64_t{x} - other.x;
         const auto result_y = (int64_t{y} - other.y) - static_cast<int64_t>(z == 0 && other.z != 0);
-        if (!std::in_range<int32_t>(result_x) || !std::in_range<int32_t>(result_y))
+        if (z < 0 || z > 1 || other.z < 0 || other.z > 1 || !std::in_range<int32_t>(result_x) ||
+            !std::in_range<int32_t>(result_y))
         {
             throw std::out_of_range("Coordinate exceeds the lattice-site range");
         }
