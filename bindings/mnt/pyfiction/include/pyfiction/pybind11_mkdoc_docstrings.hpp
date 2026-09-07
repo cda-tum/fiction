@@ -15305,9 +15305,8 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_print_sidb_layout_2 =
-R"doc(Prints an `sidb::layout` as a lattice picture of its cell types. See
-the overload with a charge distribution pointer for the picture's
-layout.
+R"doc(Prints an `sidb::layout` as a lattice picture of its dot tags. See the
+overload with a charge distribution pointer for the picture's layout.
 
 Args:
     os: Output stream to print into.
@@ -19419,7 +19418,7 @@ R"doc(Number of threads to make available to *ClusterComplete* for the
 unfolding stage.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_clustercomplete_params_global_potential =
-R"doc(Global external electrostatic potential. Value is applied on each cell
+R"doc(Global external electrostatic potential. Value is applied to each dot
 in the layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_clustercomplete_params_ground_state_space_reporting =
