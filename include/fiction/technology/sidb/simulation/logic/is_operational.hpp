@@ -400,9 +400,18 @@ class is_operational_impl
      *
      * @return Pair with the first element indicating the operational status (either `OPERATIONAL` or `NON_OPERATIONAL`)
      * and the second element indicating the reason if it is non-operational.
+     * @throws std::invalid_argument if QuickSim is selected for charged defects.
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason> run()
     {
+        if constexpr (is_sidb_defect_surface_v<Lyt>)
+        {
+            if (parameters.sim_engine == engine::QUICKSIM && layout.num_charged_defects() > 0)
+            {
+                throw std::invalid_argument("QuickSim does not support charged defects");
+            }
+        }
+
         if (canvas_filtering_applicable)
         {
             // number of different input combinations
@@ -491,6 +500,7 @@ class is_operational_impl
      * @param input_pattern Input pattern represented by the position of perturbers.
      * @return Pair with the first element indicating the operational status (either `OPERATIONAL` or `NON_OPERATIONAL`)
      * and the second element indicating the reason if it is non-operational.
+     * @throws std::invalid_argument if QuickSim is selected for charged defects.
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason>
     verify_logic_match_of_cds(const sidb::surfaces::charge_distribution_surface<Lyt>& given_cds,

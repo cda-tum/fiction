@@ -48,6 +48,7 @@
 #include <cstdlib>
 #include <deque>
 #include <functional>
+#include <future>
 #include <iterator>
 #include <limits>
 #include <mutex>
@@ -431,6 +432,13 @@ void validate_operational_domain_params(const Lyt& lyt, const operational_domain
                                         const std::size_t      min_sweep_dimensions = 1,
                                         const std::string_view algorithm_name       = "The operational domain")
 {
+    if constexpr (is_sidb_defect_surface_v<Lyt>)
+    {
+        if (params.operational_params.sim_engine == engine::QUICKSIM && lyt.num_charged_defects() > 0)
+        {
+            throw std::invalid_argument("QuickSim does not support charged defects");
+        }
+    }
     if (params.sweep_dimensions.size() < min_sweep_dimensions)
     {
         throw std::invalid_argument(
@@ -1068,10 +1076,10 @@ class operational_domain_impl
         // calculate the size of each slice
         const auto slice_size = (all_index_combinations.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::thread> threads{};
+        // launch threads, each with its own slice of random step points
+        std::vector<std::future<void>> threads{};
         threads.reserve(num_threads);
 
-        // launch threads, each with its own slice of random step points
         for (auto i = 0ul; i < num_threads; ++i)
         {
             const auto start = i * slice_size;
@@ -1083,22 +1091,23 @@ class operational_domain_impl
             }
 
             threads.emplace_back(
-                [this, &lyt, start, end, &all_index_combinations]
-                {
-                    for (auto it = all_index_combinations.cbegin() + static_cast<int64_t>(start);
-                         it != all_index_combinations.cbegin() + static_cast<int64_t>(end); ++it)
-                    {
-                        is_step_point_suitable(lyt, step_point{*it});  // construct a step_point
-                    }
-                });
+                std::async(std::launch::async,
+                           [this, &lyt, start, end, &all_index_combinations]
+                           {
+                               for (auto it = all_index_combinations.cbegin() + static_cast<int64_t>(start);
+                                    it != all_index_combinations.cbegin() + static_cast<int64_t>(end); ++it)
+                               {
+                                   is_step_point_suitable(lyt, step_point{*it});  // construct a step_point
+                               }
+                           }));
         }
 
         // wait for all threads to complete
         for (auto& thread : threads)
         {
-            if (thread.joinable())
+            if (thread.valid())
             {
-                thread.join();
+                thread.get();
             }
         }
 
@@ -1491,7 +1500,7 @@ class operational_domain_impl
      * @param sp Step point to be investigated.
      * @return The operational status of the layout under the given simulation parameters.
      */
-    operational_status is_step_point_suitable(Lyt lyt, const step_point& sp) noexcept
+    operational_status is_step_point_suitable(Lyt lyt, const step_point& sp)
     {
         // if the point has already been sampled, return the stored operational status
         if (const auto op_value = op_domain.contains(to_parameter_point(sp)); op_value.has_value())
@@ -1610,10 +1619,10 @@ class operational_domain_impl
         // calculate the size of each slice
         const auto slice_size = (step_points.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::thread> threads{};
+        // launch threads, each with its own slice of random step points
+        std::vector<std::future<void>> threads{};
         threads.reserve(num_threads);
 
-        // launch threads, each with its own slice of random step points
         for (auto i = 0ul; i < num_threads; ++i)
         {
             const auto start = i * slice_size;
@@ -1624,19 +1633,20 @@ class operational_domain_impl
                 break;  // no more work to distribute
             }
 
-            threads.emplace_back(
+            threads.emplace_back(std::async(
+                std::launch::async,
                 [this, start, end, &step_points]
                 {
                     std::ranges::for_each(std::ranges::subrange{step_points.cbegin() + static_cast<int64_t>(start),
                                                                 step_points.cbegin() + static_cast<int64_t>(end)},
                                           [this](const auto& sp) { is_step_point_operational(sp); });
-                });
+                }));
         }
 
         // wait for all threads to complete
         for (auto& thread : threads)
         {
-            thread.join();
+            thread.get();
         }
     }
     /**

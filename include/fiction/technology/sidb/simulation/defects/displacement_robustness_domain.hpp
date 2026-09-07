@@ -30,6 +30,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <future>
 #include <limits>
 #include <mutex>
 #include <random>
@@ -239,10 +240,10 @@ class displacement_robustness_domain_impl
         // calculate the size of each slice
         const auto slice_size = (layouts.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::thread> threads{};
+        // launch threads, each with its own slice of random step points
+        std::vector<std::future<void>> threads{};
         threads.reserve(num_threads);
 
-        // launch threads, each with its own slice of random step points
         for (auto i = 0ul; i < num_threads; ++i)
         {
             const auto start = i * slice_size;
@@ -253,23 +254,23 @@ class displacement_robustness_domain_impl
                 break;  // no more work to distribute
             }
 
-            threads.emplace_back(
-                [start, end, &layouts, &check_operational_status]
-                {
-                    for (auto it = layouts.cbegin() + static_cast<int64_t>(start);
-                         it != layouts.cbegin() + static_cast<int64_t>(end); ++it)
-                    {
-                        check_operational_status(*it);
-                    }
-                });
+            threads.emplace_back(std::async(std::launch::async,
+                                            [start, end, &layouts, &check_operational_status]
+                                            {
+                                                for (auto it = layouts.cbegin() + static_cast<int64_t>(start);
+                                                     it != layouts.cbegin() + static_cast<int64_t>(end); ++it)
+                                                {
+                                                    check_operational_status(*it);
+                                                }
+                                            }));
         }
 
         // wait for all threads to complete
         for (auto& thread : threads)
         {
-            if (thread.joinable())
+            if (thread.valid())
             {
-                thread.join();
+                thread.get();
             }
         }
 

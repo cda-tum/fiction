@@ -39,6 +39,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <future>
 #include <iostream>
 #include <mutex>
 #include <optional>
@@ -268,12 +269,13 @@ class design_gates_impl
 
         const std::size_t chunk_size = (all_combinations.size() + num_threads - 1) / num_threads;  // Ceiling division
 
-        std::vector<std::thread> threads{};
+        std::vector<std::future<void>> threads{};
         threads.reserve(num_threads);
 
         for (std::size_t i = 0; i < num_threads; ++i)
         {
-            threads.emplace_back(
+            threads.emplace_back(std::async(
+                std::launch::async,
                 [i, chunk_size, &all_combinations, &add_combination_to_layout_and_check_operation, &solution_found,
                  this]()
                 {
@@ -290,14 +292,14 @@ class design_gates_impl
                         }
                         add_combination_to_layout_and_check_operation(all_combinations[j]);
                     }
-                });
+                }));
         }
 
         for (auto& thread : threads)
         {
-            if (thread.joinable())
+            if (thread.valid())
             {
-                thread.join();
+                thread.get();
             }
         }
 
@@ -323,73 +325,82 @@ class design_gates_impl
 
         const auto num_threads = std::min(number_of_threads, all_canvas_layouts.size());
 
-        std::vector<std::thread> threads{};
-        threads.reserve(num_threads);
-
         std::mutex mutex_to_protect_designed_gate_layouts{};  // used to control access to shared resources
 
         std::atomic<bool> gate_layout_is_found(false);
 
+        std::vector<std::future<void>> threads{};
+        threads.reserve(num_threads);
+
         for (uint64_t z = 0u; z < num_threads; z++)
         {
-            threads.emplace_back(
+            threads.emplace_back(std::async(
+                std::launch::async,
                 [this, &gate_layout_is_found, &mutex_to_protect_designed_gate_layouts, &parameter,
                  &randomly_designed_gate_layouts]
                 {
-                    while (!gate_layout_is_found)
+                    try
                     {
-                        auto result_lyt = generate_random_layout<Lyt>(parameter, skeleton_layout);
-
-                        if (!result_lyt.has_value())
+                        while (!gate_layout_is_found)
                         {
-                            continue;
-                        }
+                            auto result_lyt = generate_random_layout<Lyt>(parameter, skeleton_layout);
 
-                        if constexpr (has_get_sidb_defect_v<Lyt>)
-                        {
-                            result_lyt.value().foreach_sidb_defect(
-                                [&result_lyt](const auto& cd)
-                                {
-                                    if (sidb::model::is_neutrally_charged_defect(cd.second))
-                                    {
-                                        result_lyt.value().assign_defect(
-                                            cd.first, sidb::model::defect{sidb::model::defect_type::NONE});
-                                    }
-                                });
-                        }
-
-                        if (const auto [status, sim_calls] = sidb::simulation::logic::is_operational(
-                                result_lyt.value(), truth_table, params.operational_params, input_bdl_wires,
-                                output_bdl_wires);
-                            status == sidb::simulation::logic::operational_status::OPERATIONAL)
-                        {
-                            const std::scoped_lock lock{mutex_to_protect_designed_gate_layouts};
+                            if (!result_lyt.has_value())
+                            {
+                                continue;
+                            }
 
                             if constexpr (has_get_sidb_defect_v<Lyt>)
                             {
-                                skeleton_layout.foreach_sidb_defect(
+                                result_lyt.value().foreach_sidb_defect(
                                     [&result_lyt](const auto& cd)
                                     {
                                         if (sidb::model::is_neutrally_charged_defect(cd.second))
                                         {
-                                            result_lyt.value().assign_defect(cd.first, cd.second);
+                                            result_lyt.value().assign_defect(
+                                                cd.first, sidb::model::defect{sidb::model::defect_type::NONE});
                                         }
                                     });
                             }
 
-                            randomly_designed_gate_layouts.push_back(result_lyt.value());
-                            gate_layout_is_found = true;
-                            break;
+                            if (const auto [status, sim_calls] = sidb::simulation::logic::is_operational(
+                                    result_lyt.value(), truth_table, params.operational_params, input_bdl_wires,
+                                    output_bdl_wires);
+                                status == sidb::simulation::logic::operational_status::OPERATIONAL)
+                            {
+                                const std::scoped_lock lock{mutex_to_protect_designed_gate_layouts};
+
+                                if constexpr (has_get_sidb_defect_v<Lyt>)
+                                {
+                                    skeleton_layout.foreach_sidb_defect(
+                                        [&result_lyt](const auto& cd)
+                                        {
+                                            if (sidb::model::is_neutrally_charged_defect(cd.second))
+                                            {
+                                                result_lyt.value().assign_defect(cd.first, cd.second);
+                                            }
+                                        });
+                                }
+
+                                randomly_designed_gate_layouts.push_back(result_lyt.value());
+                                gate_layout_is_found = true;
+                                break;
+                            }
                         }
                     }
-                });
+                    catch (...)
+                    {
+                        gate_layout_is_found = true;
+                        throw;
+                    }
+                }));
         }
 
         for (auto& thread : threads)
         {
-            if (thread.joinable())
+            if (thread.valid())
             {
-                thread.join();
+                thread.get();
             }
         }
 
@@ -443,9 +454,6 @@ class design_gates_impl
 
         const std::size_t chunk_size = (gate_candidates.size() + num_threads - 1) / num_threads;  // Ceiling division
 
-        std::vector<std::thread> threads;
-        threads.reserve(num_threads);
-
         std::atomic<bool> gate_design_found = false;
 
         const auto check_operational_status =
@@ -475,33 +483,37 @@ class design_gates_impl
             }
         };
 
+        std::vector<std::future<void>> threads;
+        threads.reserve(num_threads);
+
         for (std::size_t i = 0; i < num_threads; ++i)
         {
             threads.emplace_back(
-                [this, i, chunk_size, &gate_candidates, &check_operational_status, &gate_design_found]()
-                {
-                    const std::size_t start_index = i * chunk_size;
-                    const std::size_t end_index   = std::min(start_index + chunk_size, gate_candidates.size());
+                std::async(std::launch::async,
+                           [this, i, chunk_size, &gate_candidates, &check_operational_status, &gate_design_found]()
+                           {
+                               const std::size_t start_index = i * chunk_size;
+                               const std::size_t end_index = std::min(start_index + chunk_size, gate_candidates.size());
 
-                    for (std::size_t j = start_index; j < end_index; ++j)
-                    {
-                        if (gate_design_found &&
-                            (params.termination_cond ==
-                             design_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
-                        {
-                            return;
-                        }
+                               for (std::size_t j = start_index; j < end_index; ++j)
+                               {
+                                   if (gate_design_found &&
+                                       (params.termination_cond ==
+                                        design_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+                                   {
+                                       return;
+                                   }
 
-                        check_operational_status(gate_candidates[j]);
-                    }
-                });
+                                   check_operational_status(gate_candidates[j]);
+                               }
+                           }));
         }
 
         for (auto& thread : threads)
         {
-            if (thread.joinable())
+            if (thread.valid())
             {
-                thread.join();
+                thread.get();
             }
         }
 
@@ -573,7 +585,7 @@ class design_gates_impl
      *
      * @return A vector containing the valid gate candidates that were not pruned.
      */
-    [[nodiscard]] std::vector<Lyt> run_pruning() noexcept
+    [[nodiscard]] std::vector<Lyt> run_pruning()
     {
         std::vector<Lyt> gate_candidate = {};
 
@@ -658,29 +670,30 @@ class design_gates_impl
         const std::size_t num_threads = std::min(number_of_threads, all_canvas_layouts.size());
         const std::size_t chunk_size  = (all_canvas_layouts.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::thread> threads{};
+        std::vector<std::future<void>> threads{};
         threads.reserve(num_threads);
 
         for (std::size_t i = 0; i < num_threads; ++i)
         {
-            threads.emplace_back(
-                [i, chunk_size, this, &conduct_pruning_steps]()
-                {
-                    const std::size_t start_index = i * chunk_size;
-                    const std::size_t end_index   = std::min(start_index + chunk_size, all_canvas_layouts.size());
+            threads.emplace_back(std::async(std::launch::async,
+                                            [i, chunk_size, this, &conduct_pruning_steps]()
+                                            {
+                                                const std::size_t start_index = i * chunk_size;
+                                                const std::size_t end_index =
+                                                    std::min(start_index + chunk_size, all_canvas_layouts.size());
 
-                    for (std::size_t j = start_index; j < end_index; ++j)
-                    {
-                        conduct_pruning_steps(all_canvas_layouts[j]);
-                    }
-                });
+                                                for (std::size_t j = start_index; j < end_index; ++j)
+                                                {
+                                                    conduct_pruning_steps(all_canvas_layouts[j]);
+                                                }
+                                            }));
         }
 
         for (auto& thread : threads)
         {
-            if (thread.joinable())
+            if (thread.valid())
             {
-                thread.join();
+                thread.get();
             }
         }
 

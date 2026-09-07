@@ -2170,3 +2170,14 @@ TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 8281);
     }
 }
+
+TEST_CASE("Operational domain rejects QuickSim with charged defects", "[operational-domain]")
+{
+    surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad> lyt{};
+    lyt.assign_defect({0, 0}, defect{defect_type::DB, -1});
+    operational_domain_params params{};
+    params.operational_params.sim_engine = engine::QUICKSIM;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1}};
+    CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params),
+                    std::invalid_argument);
+}
