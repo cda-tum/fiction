@@ -12,7 +12,6 @@
  * @file
  * @brief Real-world area requirements of a cell-level layout in nm².
  * @author Marcel Walter (marcelwa)
- * @author Claude Fable 5.1 (via Claude Code)
  */
 
 #pragma once
