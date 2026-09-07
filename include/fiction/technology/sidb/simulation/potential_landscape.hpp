@@ -13,7 +13,6 @@
  * @brief The static electrostatics of an SiDB layout under one set of physical parameters.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
- * @author OpenAI (Codex)
  */
 
 #pragma once

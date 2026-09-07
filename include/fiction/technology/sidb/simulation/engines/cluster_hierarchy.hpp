@@ -13,7 +13,6 @@
  * @brief Agglomerative SiDB clustering and the cluster hierarchy the engines build on it.
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

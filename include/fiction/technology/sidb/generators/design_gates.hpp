@@ -13,7 +13,6 @@
  * @brief Designs SiDB gate implementations for a given Boolean function and skeleton.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

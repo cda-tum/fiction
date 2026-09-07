@@ -13,7 +13,6 @@
  * @brief The unified result type every SiDB simulation algorithm returns.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
- * @author OpenAI (Codex)
  */
 
 #pragma once

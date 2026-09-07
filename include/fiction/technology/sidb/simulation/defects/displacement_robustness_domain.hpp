@@ -13,7 +13,6 @@
  * @brief Robustness of an SiDB layout against fabrication displacement of its dots.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

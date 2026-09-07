@@ -13,7 +13,6 @@
  * @brief The charge states of the SiDBs of one layout plus the electrostatic potential energy they yield.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
- * @author OpenAI (Codex)
  */
 
 #pragma once

@@ -15,7 +15,6 @@
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Simon Hofmann (simon1hofmann)
- * @author OpenAI (Codex)
  */
 
 #pragma once

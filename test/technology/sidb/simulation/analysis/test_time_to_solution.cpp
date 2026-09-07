@@ -14,7 +14,6 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
- * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_template_test_macros.hpp>

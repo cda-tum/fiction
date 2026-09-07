@@ -12,7 +12,6 @@
  * @file
  * @brief Tests for `fiction/technology/sidb/simulation/potential_landscape.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>

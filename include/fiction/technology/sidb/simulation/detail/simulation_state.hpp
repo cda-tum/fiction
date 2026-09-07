@@ -14,7 +14,6 @@
  * enumeration over one potential landscape.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

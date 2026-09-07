@@ -13,7 +13,6 @@
  * @brief Potential margin each SiDB has before its charge state flips.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

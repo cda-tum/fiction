@@ -14,7 +14,6 @@
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #if (FICTION_ALGLIB_ENABLED)

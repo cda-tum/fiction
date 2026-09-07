@@ -12,7 +12,6 @@
  * @file
  * @brief Python bindings for `fiction/technology/sidb/charge_distribution.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
