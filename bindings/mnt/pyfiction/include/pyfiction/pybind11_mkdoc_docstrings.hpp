@@ -15543,8 +15543,8 @@ Returns:
     Sum of both sites.
 
 Raises:
-    std::out_of_range: if a result coordinate exceeds the lattice-site
-                       range.
+    std::out_of_range: if a basis index is invalid or a result
+                       coordinate exceeds the lattice-site range.
 
 )doc";
 
@@ -15582,8 +15582,8 @@ Returns:
     Difference of both sites.
 
 Raises:
-    std::out_of_range: if a result coordinate exceeds the lattice-site
-                       range.
+    std::out_of_range: if a basis index is invalid or a result
+                       coordinate exceeds the lattice-site range.
 
 )doc";
 
