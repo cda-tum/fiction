@@ -146,8 +146,7 @@ struct bdl_wire
      * @param t The SiDB type to look for.
      * @return The first BDL pair of type `t`, or `std::nullopt` if the wire has none.
      */
-    [[nodiscard]] std::optional<bdl_pair<lattice_site>>
-    find_bdl_pair_by_type(const sidb_technology::cell_type t) const noexcept
+    [[nodiscard]] std::optional<bdl_pair<lattice_site>> find_bdl_pair_by_type(const dot_tag t) const noexcept
     {
         const auto it = std::ranges::find_if(pairs, [t](const auto& bdl) { return bdl.type == t; });
 
@@ -195,22 +194,22 @@ struct bdl_wire
         }
 
         // a wire without input or output cells does not have a port
-        if (std::ranges::all_of(pairs, [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::NORMAL; }))
+        if (std::ranges::all_of(pairs, [](const auto& bdl) { return bdl.type == dot_tag::NORMAL; }))
         {
             port.dir = fcn::port_direction::NONE;
             return;
         }
 
         const auto input_exists =
-            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::INPUT; });
+            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == dot_tag::INPUT; });
         const auto output_exists =
-            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::OUTPUT; });
+            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == dot_tag::OUTPUT; });
 
         // input and output cells are present
         if (input_exists && output_exists)
         {
-            const auto input_pair  = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT);
-            const auto output_pair = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT);
+            const auto input_pair  = find_bdl_pair_by_type(dot_tag::INPUT);
+            const auto output_pair = find_bdl_pair_by_type(dot_tag::OUTPUT);
 
             if (!input_pair.has_value() || !output_pair.has_value())
             {
@@ -250,7 +249,7 @@ struct bdl_wire
         // only input cells are present
         else if (input_exists)
         {
-            const auto input_pair = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT);
+            const auto input_pair = find_bdl_pair_by_type(dot_tag::INPUT);
 
             if (!input_pair.has_value())
             {
@@ -287,7 +286,7 @@ struct bdl_wire
         // only output cells are present
         else
         {
-            const auto output_pair = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT);
+            const auto output_pair = find_bdl_pair_by_type(dot_tag::OUTPUT);
 
             if (!output_pair.has_value())
             {
@@ -386,11 +385,11 @@ class detect_bdl_wires_impl
         {
             case bdl_wire_selection::INPUT:
             {
-                return filter_wires_by_type(sidb_technology::cell_type::INPUT);
+                return filter_wires_by_type(dot_tag::INPUT);
             }
             case bdl_wire_selection::OUTPUT:
             {
-                return filter_wires_by_type(sidb_technology::cell_type::OUTPUT);
+                return filter_wires_by_type(dot_tag::OUTPUT);
             }
             default:
             {
@@ -473,21 +472,21 @@ class detect_bdl_wires_impl
      * @param type The SiDB type to filter by.
      * @return The filtered wires.
      */
-    [[nodiscard]] std::vector<bdl_wire> filter_wires_by_type(const sidb_technology::cell_type type) const noexcept
+    [[nodiscard]] std::vector<bdl_wire> filter_wires_by_type(const dot_tag type) const noexcept
     {
         std::vector<bdl_wire> filtered_wires{};
 
         std::optional<std::size_t> wire_length_of_the_first_wire{};
 
-        std::optional<sidb_technology::cell_type> filtered_out_type{};
+        std::optional<dot_tag> filtered_out_type{};
 
-        if (type == sidb_technology::cell_type::INPUT)
+        if (type == dot_tag::INPUT)
         {
-            filtered_out_type = sidb_technology::cell_type::OUTPUT;
+            filtered_out_type = dot_tag::OUTPUT;
         }
-        else if (type == sidb_technology::cell_type::OUTPUT)
+        else if (type == dot_tag::OUTPUT)
         {
-            filtered_out_type = sidb_technology::cell_type::INPUT;
+            filtered_out_type = dot_tag::INPUT;
         }
 
         for (const auto& wire : bdl_wires)
@@ -533,8 +532,7 @@ class detect_bdl_wires_impl
     {
         std::set<bdl_pair<lattice_site>> bdl_pairs{};
 
-        for (const auto type : {sidb_technology::cell_type::INPUT, sidb_technology::cell_type::OUTPUT,
-                                sidb_technology::cell_type::NORMAL})
+        for (const auto type : {dot_tag::INPUT, dot_tag::OUTPUT, dot_tag::NORMAL})
         {
             const auto pairs = detect_bdl_pairs(lyt, type, params.bdl_pairs_params);
             bdl_pairs.insert(pairs.cbegin(), pairs.cend());

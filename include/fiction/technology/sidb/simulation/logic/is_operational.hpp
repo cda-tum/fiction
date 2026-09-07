@@ -227,7 +227,7 @@ class is_operational_impl
             sidb_layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+            output_bdl_pairs{detect_bdl_pairs(lyt, dot_tag::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             bii{lyt, params.input_bdl_iterator_params},
             input_bdl_wires{
@@ -252,7 +252,7 @@ class is_operational_impl
             sidb_layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+            output_bdl_pairs{detect_bdl_pairs(lyt, dot_tag::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             bii{initialize_bii ? bdl_input_iterator{lyt, params.input_bdl_iterator_params, input_wires} :
                                  bdl_input_iterator{layout{}}},
@@ -275,7 +275,7 @@ class is_operational_impl
             sidb_layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+            output_bdl_pairs{detect_bdl_pairs(lyt, dot_tag::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             bii{lyt, params.input_bdl_iterator_params, input_wires},
             input_bdl_wires{input_wires},
@@ -295,7 +295,7 @@ class is_operational_impl
             sidb_layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+            output_bdl_pairs{detect_bdl_pairs(lyt, dot_tag::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             bii{lyt, params.input_bdl_iterator_params},
             input_bdl_wires{
@@ -319,7 +319,7 @@ class is_operational_impl
                         const std::vector<bdl_wire>& output_wires, layout c_lyt) :
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs{detect_bdl_pairs(input_pattern_lyts.front(), sidb_technology::cell_type::OUTPUT,
+            output_bdl_pairs{detect_bdl_pairs(input_pattern_lyts.front(), dot_tag::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             // the input pattern layouts make the iterator redundant
             bii{layout{}},
@@ -586,7 +586,7 @@ class is_operational_impl
 
         // the canvas SiDBs by their index in the layout; the first one is the dependent SiDB
         std::vector<std::size_t> canvas{};
-        canvas.reserve(canvas_lyt.num_cells());
+        canvas.reserve(canvas_lyt.num_dots());
 
         for (const auto& site : canvas_lyt.sidbs())
         {
@@ -595,7 +595,7 @@ class is_operational_impl
             canvas.push_back(*index);
         }
 
-        state.assign_dependent_cell(canvas.front());
+        state.assign_dependent_dot(canvas.front());
 
         auto min_energy = std::numeric_limits<double>::infinity();
 
@@ -613,7 +613,7 @@ class is_operational_impl
                                                    simulation::detail::charge_index_mode::KEEP_CHARGE_INDEX);
             }
 
-            state.update_after_charge_change(simulation::detail::dependent_cell_mode::VARIABLE,
+            state.update_after_charge_change(simulation::detail::dependent_dot_mode::VARIABLE,
                                              simulation::detail::energy_calculation::KEEP_OLD_ENERGY_VALUE);
 
             if (state.is_physically_valid())
@@ -668,7 +668,7 @@ class is_operational_impl
 
             for (const auto& bdl : wire.pairs)
             {
-                if (bdl.type == sidb_technology::cell_type::INPUT)
+                if (bdl.type == dot_tag::INPUT)
                 {
                     continue;
                 }
@@ -705,7 +705,7 @@ class is_operational_impl
             {
                 // input pairs on an output wire keep the charge the input pattern gave them
                 if (bit_set && wire.port.dir != fcn::port_direction::SOUTH &&
-                    wire.port.dir != fcn::port_direction::EAST && bdl.type == sidb_technology::cell_type::INPUT)
+                    wire.port.dir != fcn::port_direction::EAST && bdl.type == dot_tag::INPUT)
                 {
                     continue;
                 }
@@ -920,7 +920,7 @@ class is_operational_impl
                                        return std::ranges::any_of(wire.pairs,
                                                                   [this, &cd, current_bit_set, &wire](const auto& bdl)
                                                                   {
-                                                                      if (bdl.type == sidb_technology::cell_type::INPUT)
+                                                                      if (bdl.type == dot_tag::INPUT)
                                                                       {
                                                                           return false;
                                                                       }
@@ -1016,9 +1016,9 @@ class is_operational_impl
 {
     layout canvas{lyt.get_lattice()};
 
-    for (const auto& c : lyt.cells_of_type(sidb_technology::cell_type::LOGIC))
+    for (const auto& c : lyt.dots_with_tag(dot_tag::LOGIC))
     {
-        canvas.assign_cell_type(c, sidb_technology::cell_type::LOGIC);
+        canvas.assign_dot_tag(c, dot_tag::LOGIC);
     }
 
     return canvas;

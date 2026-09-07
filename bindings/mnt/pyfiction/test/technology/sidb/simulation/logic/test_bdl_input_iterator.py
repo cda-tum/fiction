@@ -14,8 +14,8 @@ from mnt.pyfiction import (
     bdl_input_iterator,
     lattice,
     lattice_site,
+    sidb_dot_tag,
     sidb_layout,
-    sidb_technology,
 )
 
 
@@ -28,17 +28,17 @@ def bdl_wire() -> sidb_layout:
     """
     layout = sidb_layout()
 
-    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.INPUT)
-    layout.assign_cell_type(lattice_site(2, 0, 0), sidb_technology.cell_type.INPUT)
+    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
+    layout.assign_dot_tag(lattice_site(2, 0, 0), sidb_dot_tag.INPUT)
 
-    layout.assign_cell_type(lattice_site(6, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(8, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(6, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(8, 0, 0), sidb_dot_tag.NORMAL)
 
-    layout.assign_cell_type(lattice_site(12, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(14, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(12, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(14, 0, 0), sidb_dot_tag.NORMAL)
 
-    layout.assign_cell_type(lattice_site(18, 0, 0), sidb_technology.cell_type.OUTPUT)
-    layout.assign_cell_type(lattice_site(20, 0, 0), sidb_technology.cell_type.OUTPUT)
+    layout.assign_dot_tag(lattice_site(18, 0, 0), sidb_dot_tag.OUTPUT)
+    layout.assign_dot_tag(lattice_site(20, 0, 0), sidb_dot_tag.OUTPUT)
     return layout
 
 
@@ -64,19 +64,19 @@ def test_iteration_empty_layout() -> None:
 
     assert bii.num_input_pairs() == 0
     assert bii == 0
-    assert bii.get_layout().num_cells() == 0
+    assert bii.get_layout().num_dots() == 0
 
     bii += 1
 
     assert bii.num_input_pairs() == 0
     assert bii == 1
-    assert bii.get_layout().num_cells() == 0
+    assert bii.get_layout().num_dots() == 0
 
     bii -= 1
 
     assert bii.num_input_pairs() == 0
     assert bii == 0
-    assert bii.get_layout().num_cells() == 0
+    assert bii.get_layout().num_dots() == 0
 
 
 def test_manual_bdl_wire_iteration(bdl_wire: sidb_layout) -> None:
@@ -88,42 +88,42 @@ def test_manual_bdl_wire_iteration(bdl_wire: sidb_layout) -> None:
     layout = bdl_wire
     bii = bdl_input_iterator(layout)
 
-    assert bii.get_layout().num_cells() == 7  # 2 inputs (1 already deleted for input pattern 0), 4 normal, 2 outputs
+    assert bii.get_layout().num_dots() == 7  # 2 inputs (1 already deleted for input pattern 0), 4 normal, 2 outputs
     assert bii.num_input_pairs() == 1
     assert bii == 0
 
     lyt0 = bii.get_layout()
 
-    assert lyt0.get_cell_type(lattice_site(0, 0, 0)) == sidb_technology.cell_type.INPUT
-    assert lyt0.get_cell_type(lattice_site(2, 0, 0)) == sidb_technology.cell_type.EMPTY
+    assert lyt0.get_dot_tag(lattice_site(0, 0, 0)) == sidb_dot_tag.INPUT
+    assert lyt0.get_dot_tag(lattice_site(2, 0, 0)) == sidb_dot_tag.EMPTY
 
     bii += 1
 
     lyt1 = bii.get_layout()
 
-    assert lyt1.get_cell_type(lattice_site(0, 0, 0)) == sidb_technology.cell_type.EMPTY
-    assert lyt1.get_cell_type(lattice_site(2, 0, 0)) == sidb_technology.cell_type.INPUT
+    assert lyt1.get_dot_tag(lattice_site(0, 0, 0)) == sidb_dot_tag.EMPTY
+    assert lyt1.get_dot_tag(lattice_site(2, 0, 0)) == sidb_dot_tag.INPUT
 
     bii += 1
 
     lyt2 = bii.get_layout()
 
-    assert lyt2.get_cell_type(lattice_site(0, 0, 0)) == sidb_technology.cell_type.INPUT
-    assert lyt2.get_cell_type(lattice_site(2, 0, 0)) == sidb_technology.cell_type.EMPTY
+    assert lyt2.get_dot_tag(lattice_site(0, 0, 0)) == sidb_dot_tag.INPUT
+    assert lyt2.get_dot_tag(lattice_site(2, 0, 0)) == sidb_dot_tag.EMPTY
 
     bii -= 1
 
     lyt1 = bii.get_layout()
 
-    assert lyt1.get_cell_type(lattice_site(0, 0, 0)) == sidb_technology.cell_type.EMPTY
-    assert lyt1.get_cell_type(lattice_site(2, 0, 0)) == sidb_technology.cell_type.INPUT
+    assert lyt1.get_dot_tag(lattice_site(0, 0, 0)) == sidb_dot_tag.EMPTY
+    assert lyt1.get_dot_tag(lattice_site(2, 0, 0)) == sidb_dot_tag.INPUT
 
     bii -= 1
 
     lyt0 = bii.get_layout()
 
-    assert lyt0.get_cell_type(lattice_site(0, 0, 0)) == sidb_technology.cell_type.INPUT
-    assert lyt0.get_cell_type(lattice_site(2, 0, 0)) == sidb_technology.cell_type.EMPTY
+    assert lyt0.get_dot_tag(lattice_site(0, 0, 0)) == sidb_dot_tag.INPUT
+    assert lyt0.get_dot_tag(lattice_site(2, 0, 0)) == sidb_dot_tag.EMPTY
 
 
 def test_automatic_bdl_wire_iteration(bdl_wire: sidb_layout) -> None:
@@ -142,33 +142,33 @@ def test_automatic_bdl_wire_iteration(bdl_wire: sidb_layout) -> None:
 
     for index, lyt in enumerate(input_pattern_layouts):
         if index == 0:
-            assert lyt.get_cell_type(lattice_site(0, 0, 0)) == sidb_technology.cell_type.INPUT
-            assert lyt.get_cell_type(lattice_site(2, 0, 0)) == sidb_technology.cell_type.EMPTY
+            assert lyt.get_dot_tag(lattice_site(0, 0, 0)) == sidb_dot_tag.INPUT
+            assert lyt.get_dot_tag(lattice_site(2, 0, 0)) == sidb_dot_tag.EMPTY
         elif index == 1:
-            assert lyt.get_cell_type(lattice_site(0, 0, 0)) == sidb_technology.cell_type.EMPTY
-            assert lyt.get_cell_type(lattice_site(2, 0, 0)) == sidb_technology.cell_type.INPUT
+            assert lyt.get_dot_tag(lattice_site(0, 0, 0)) == sidb_dot_tag.EMPTY
+            assert lyt.get_dot_tag(lattice_site(2, 0, 0)) == sidb_dot_tag.INPUT
 
 
 def test_automatic_siqad_and_gate_iteration() -> None:
     """Check automatic iteration over all SiQAD AND-gate input patterns."""
     layout = sidb_layout(lattice.si_100_2x1(), "AND gate")
 
-    layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.INPUT)
-    layout.assign_cell_type(lattice_site(2, 1, 1), sidb_technology.cell_type.INPUT)
+    layout.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
+    layout.assign_dot_tag(lattice_site(2, 1, 1), sidb_dot_tag.INPUT)
 
-    layout.assign_cell_type(lattice_site(20, 0, 1), sidb_technology.cell_type.INPUT)
-    layout.assign_cell_type(lattice_site(18, 1, 1), sidb_technology.cell_type.INPUT)
+    layout.assign_dot_tag(lattice_site(20, 0, 1), sidb_dot_tag.INPUT)
+    layout.assign_dot_tag(lattice_site(18, 1, 1), sidb_dot_tag.INPUT)
 
-    layout.assign_cell_type(lattice_site(4, 2, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(6, 3, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(4, 2, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(6, 3, 1), sidb_dot_tag.NORMAL)
 
-    layout.assign_cell_type(lattice_site(14, 3, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(16, 2, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(14, 3, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(16, 2, 1), sidb_dot_tag.NORMAL)
 
-    layout.assign_cell_type(lattice_site(10, 3, 0), sidb_technology.cell_type.OUTPUT)
-    layout.assign_cell_type(lattice_site(10, 3, 1), sidb_technology.cell_type.OUTPUT)
+    layout.assign_dot_tag(lattice_site(10, 3, 0), sidb_dot_tag.OUTPUT)
+    layout.assign_dot_tag(lattice_site(10, 3, 1), sidb_dot_tag.OUTPUT)
 
-    layout.assign_cell_type(lattice_site(10, 9, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
 
     bii = bdl_input_iterator(layout)
 
@@ -177,29 +177,29 @@ def test_automatic_siqad_and_gate_iteration() -> None:
 
     for index, lyt in enumerate(input_pattern_layouts):
         if index == 0:
-            assert lyt.get_cell_type(lattice_site(0, 0, 1)) == sidb_technology.cell_type.INPUT
-            assert lyt.get_cell_type(lattice_site(2, 1, 1)) == sidb_technology.cell_type.EMPTY
+            assert lyt.get_dot_tag(lattice_site(0, 0, 1)) == sidb_dot_tag.INPUT
+            assert lyt.get_dot_tag(lattice_site(2, 1, 1)) == sidb_dot_tag.EMPTY
 
-            assert lyt.get_cell_type(lattice_site(20, 0, 1)) == sidb_technology.cell_type.INPUT
-            assert lyt.get_cell_type(lattice_site(18, 1, 1)) == sidb_technology.cell_type.EMPTY
+            assert lyt.get_dot_tag(lattice_site(20, 0, 1)) == sidb_dot_tag.INPUT
+            assert lyt.get_dot_tag(lattice_site(18, 1, 1)) == sidb_dot_tag.EMPTY
 
         elif index == 1:
-            assert lyt.get_cell_type(lattice_site(0, 0, 1)) == sidb_technology.cell_type.INPUT
-            assert lyt.get_cell_type(lattice_site(2, 1, 1)) == sidb_technology.cell_type.EMPTY
+            assert lyt.get_dot_tag(lattice_site(0, 0, 1)) == sidb_dot_tag.INPUT
+            assert lyt.get_dot_tag(lattice_site(2, 1, 1)) == sidb_dot_tag.EMPTY
 
-            assert lyt.get_cell_type(lattice_site(20, 0, 1)) == sidb_technology.cell_type.EMPTY
-            assert lyt.get_cell_type(lattice_site(18, 1, 1)) == sidb_technology.cell_type.INPUT
+            assert lyt.get_dot_tag(lattice_site(20, 0, 1)) == sidb_dot_tag.EMPTY
+            assert lyt.get_dot_tag(lattice_site(18, 1, 1)) == sidb_dot_tag.INPUT
 
         elif index == 2:
-            assert lyt.get_cell_type(lattice_site(0, 0, 1)) == sidb_technology.cell_type.EMPTY
-            assert lyt.get_cell_type(lattice_site(2, 1, 1)) == sidb_technology.cell_type.INPUT
+            assert lyt.get_dot_tag(lattice_site(0, 0, 1)) == sidb_dot_tag.EMPTY
+            assert lyt.get_dot_tag(lattice_site(2, 1, 1)) == sidb_dot_tag.INPUT
 
-            assert lyt.get_cell_type(lattice_site(20, 0, 1)) == sidb_technology.cell_type.INPUT
-            assert lyt.get_cell_type(lattice_site(18, 1, 1)) == sidb_technology.cell_type.EMPTY
+            assert lyt.get_dot_tag(lattice_site(20, 0, 1)) == sidb_dot_tag.INPUT
+            assert lyt.get_dot_tag(lattice_site(18, 1, 1)) == sidb_dot_tag.EMPTY
 
         elif index == 3:
-            assert lyt.get_cell_type(lattice_site(0, 0, 1)) == sidb_technology.cell_type.EMPTY
-            assert lyt.get_cell_type(lattice_site(2, 1, 1)) == sidb_technology.cell_type.INPUT
+            assert lyt.get_dot_tag(lattice_site(0, 0, 1)) == sidb_dot_tag.EMPTY
+            assert lyt.get_dot_tag(lattice_site(2, 1, 1)) == sidb_dot_tag.INPUT
 
-            assert lyt.get_cell_type(lattice_site(20, 0, 1)) == sidb_technology.cell_type.EMPTY
-            assert lyt.get_cell_type(lattice_site(18, 1, 1)) == sidb_technology.cell_type.INPUT
+            assert lyt.get_dot_tag(lattice_site(20, 0, 1)) == sidb_dot_tag.EMPTY
+            assert lyt.get_dot_tag(lattice_site(18, 1, 1)) == sidb_dot_tag.INPUT

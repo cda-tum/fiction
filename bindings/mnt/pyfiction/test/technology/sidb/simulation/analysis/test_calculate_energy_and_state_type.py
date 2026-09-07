@@ -22,7 +22,7 @@ from mnt.pyfiction import (
     occupation_probability_gate_based,
     quickexact,
     read_sqd_layout,
-    sidb_technology,
+    sidb_dot_tag,
     state_type,
 )
 
@@ -55,7 +55,7 @@ def test_calculate_energy_and_state_type(resources_dir: Path) -> None:
     input_iterator += 1
     layout_with_inputs = input_iterator.get_layout()
 
-    output_bdl_pairs = detect_bdl_pairs(layout_with_inputs, sidb_technology.cell_type.OUTPUT)
+    output_bdl_pairs = detect_bdl_pairs(layout_with_inputs, sidb_dot_tag.OUTPUT)
     assert len(output_bdl_pairs) == 1
 
     charge_distributions = quickexact(layout_with_inputs).charge_distributions

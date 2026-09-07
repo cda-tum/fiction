@@ -45,10 +45,10 @@ using namespace fiction::sidb::simulation::logic;
 TEST_CASE("Reject charge distributions from another layout", "[determine-physically-valid-parameters]")
 {
     layout lyt{};
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
 
     layout other{};
-    other.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
+    other.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
 
     CHECK(physically_valid_parameters(lyt, charge_distribution{other}).empty());
 }
@@ -59,14 +59,14 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
 
     layout lyt{lattice::si_100_2x1(), "AND gate"};
 
-    lyt.assign_cell_type({-2, -1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 0, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 7, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({-2, -1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({0, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({2, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({10, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 7, 1}, dot_tag::NORMAL);
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -144,8 +144,8 @@ TEST_CASE(
 {
     auto bestagon_and = to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>());
 
-    bestagon_and.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
-    bestagon_and.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
+    bestagon_and.assign_dot_tag({36, 1, 0}, dot_tag::EMPTY);
+    bestagon_and.assign_dot_tag({0, 0, 0}, dot_tag::EMPTY);
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -282,7 +282,7 @@ TEST_CASE(
 TEST_CASE("Physical-validity sweep boundaries", "[physically-valid-parameters]")
 {
     layout lyt{};
-    lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
     const charge_distribution cd{lyt};
     operational_domain_params params{};
     for (const auto& range : std::vector<operational_domain_value_range>{

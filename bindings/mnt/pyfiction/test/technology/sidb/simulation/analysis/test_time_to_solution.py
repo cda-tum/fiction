@@ -21,9 +21,9 @@ from mnt.pyfiction import (
     quickexact_params,
     quicksim,
     quicksim_params,
+    sidb_dot_tag,
     sidb_layout,
     sidb_simulation_parameters,
-    sidb_technology,
     time_to_solution,
     time_to_solution_for_given_simulation_results,
     time_to_solution_params,
@@ -34,7 +34,7 @@ from mnt.pyfiction import (
 def test_one_sidb_100_lattice() -> None:
     """Check time to solution on the Si(100) lattice."""
     layout = sidb_layout()
-    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
 
     quicksim_parameter = quicksim_params()
     quicksim_parameter.simulation_parameters = sidb_simulation_parameters(3, -0.3)
@@ -53,7 +53,7 @@ def test_one_sidb_100_lattice() -> None:
 def test_one_sidb_111_lattice() -> None:
     """Check time to solution on the Si(111) lattice."""
     layout = sidb_layout(lattice.si_111_1x1())
-    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
 
     quicksim_parameter = quicksim_params()
     quicksim_parameter.simulation_parameters = sidb_simulation_parameters(3, -0.3)
@@ -74,13 +74,13 @@ def test_time_to_solution_with_simulation_results() -> None:
     layout = sidb_layout()
 
     # Assign SiDBs to the layout
-    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(1, 3, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(3, 3, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(5, 3, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(10, 3, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(15, 3, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(18, 3, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(1, 3, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(3, 3, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(5, 3, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(10, 3, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(15, 3, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(18, 3, 0), sidb_dot_tag.NORMAL)
 
     # Define simulation parameters
     params = sidb_simulation_parameters(2, -0.32)

@@ -59,10 +59,10 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("No physically valid charge distribution could be found")
     {
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({6, 1, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({8, 1, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({6, 1, 0}, dot_tag::OUTPUT);
+        lyt.assign_dot_tag({8, 1, 0}, dot_tag::OUTPUT);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKSIM;
@@ -105,26 +105,26 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Not working diagonal wire where positively charged SiDBs can occur")
     {
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
 
         // canvas SiDB
-        lyt.assign_cell_type({14, 6, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 6, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({15, 6, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({14, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({14, 6, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({15, 6, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKEXACT;
@@ -150,11 +150,11 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("four SiDBs with two valid charge distributions, QuickExact")
     {
-        lyt.assign_cell_type({0, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 2}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({0, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({2, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({4, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({2, 2}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKEXACT;
@@ -184,22 +184,22 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Y-shaped SiQAD AND gate")
     {
-        lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);
+        lyt.assign_dot_tag({0, 0, 1}, dot_tag::INPUT);
+        lyt.assign_dot_tag({2, 1, 1}, dot_tag::INPUT);
 
-        lyt.assign_cell_type({20, 0, 1}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({18, 1, 1}, sidb_technology::cell_type::INPUT);
+        lyt.assign_dot_tag({20, 0, 1}, dot_tag::INPUT);
+        lyt.assign_dot_tag({18, 1, 1}, dot_tag::INPUT);
 
-        lyt.assign_cell_type({4, 2, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({6, 3, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({4, 2, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({6, 3, 1}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({14, 3, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({16, 2, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({14, 3, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({16, 2, 1}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({10, 6, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({10, 7, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_dot_tag({10, 6, 0}, dot_tag::OUTPUT);
+        lyt.assign_dot_tag({10, 7, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({10, 9, 1}, dot_tag::NORMAL);
 
         sim_params.mu_minus = -0.28;
 
@@ -260,34 +260,34 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Bestagon AND gate, QuickExact")
     {
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_dot_tag({36, 1, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_dot_tag({38, 0, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
 
-        lyt.assign_cell_type({23, 9, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({18, 11, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({19, 8, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({23, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({18, 11, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({18, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({19, 8, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({20, 14, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({19, 13, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({20, 14, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({19, 13, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
+        lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKEXACT;
@@ -346,34 +346,34 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Bestagon AND gate, QuickSim")
     {
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_dot_tag({36, 1, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_dot_tag({38, 0, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
 
-        lyt.assign_cell_type({23, 9, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({18, 11, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({19, 8, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({23, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({18, 11, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({18, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({19, 8, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({20, 14, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({19, 13, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({20, 14, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({19, 13, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
+        lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKSIM;
@@ -399,33 +399,33 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Bestagon FO2 gate")
     {
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_cell_type({21, 11, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({17, 11, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({18, 13, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({19, 7, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({21, 11, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({17, 11, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({18, 13, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({19, 7, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({18, 6, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({18, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({12, 16, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({14, 15, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_dot_tag({8, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_dot_tag({6, 18, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({2, 19, 0}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKEXACT;
@@ -514,27 +514,27 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("SiQAD OR gate")
     {
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({26, 0, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({26, 0, 0}, dot_tag::INPUT);
 
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({24, 1, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({24, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({20, 2, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({20, 2, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({18, 3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({18, 3, 0}, dot_tag::NORMAL);
 
         // three canvas SiDBs
-        lyt.assign_cell_type({12, 6, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 7, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({15, 11, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({12, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({12, 7, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({15, 11, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({18, 13, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({20, 14, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_dot_tag({18, 13, 0}, dot_tag::OUTPUT);
+        lyt.assign_dot_tag({20, 14, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
 
         sim_params.mu_minus = -0.25;
 
@@ -586,24 +586,24 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Not working diagonal Wire")
     {
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
 
         // canvas SiDB
-        lyt.assign_cell_type({14, 6, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({14, 6, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKEXACT;
@@ -637,16 +637,16 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("nine SiDBs, QuickSim, non-gate-based")
     {
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({9, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({3, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({9, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({3, 1, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({6, 1, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({9, 1, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 1, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({3, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({6, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({9, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({12, 1, 1}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKSIM;
@@ -701,7 +701,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
             const auto output_wires = detect_bdl_wires(
                 lat, params.operational_params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT);
             const auto output_pairs =
-                detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT,
+                detect_bdl_pairs(lat, dot_tag::OUTPUT,
                                  params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
 
             const auto input_pattern_layouts = generate_bdl_input_pattern_layouts(
@@ -731,9 +731,8 @@ TEST_CASE("Pre-generated input pattern layouts reject mismatched BDL data", "[cr
                                                bdl_wire_selection::INPUT);
     const auto output_wires = detect_bdl_wires(lat, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                                                bdl_wire_selection::OUTPUT);
-    const auto output_pairs =
-        detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT,
-                         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
+    const auto output_pairs = detect_bdl_pairs(
+        lat, dot_tag::OUTPUT, params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
 
     const auto input_pattern_layouts =
         generate_bdl_input_pattern_layouts(lat, params.operational_params.input_bdl_iterator_params, input_wires);
@@ -769,45 +768,45 @@ TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical-temperat
 {
     layout lyt{};
 
-    lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({36, 1, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({38, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 12, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 11, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 12, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 11, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 9, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 16, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 13, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({18, 9, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 13, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 13, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 13, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 8, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 8, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({6, 18, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({8, 17, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({2, 19, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
 
     critical_temperature_params params{};
     const simulation_parameters sim_params{2, -0.32, 5.6, 5.0};

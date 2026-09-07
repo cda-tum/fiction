@@ -35,7 +35,7 @@ using namespace fiction::sidb::simulation::analysis;
 TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 {
     layout lyt{};
-    lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({1, 1, 0}, dot_tag::NORMAL);
 
     SECTION("Precision of distance_corresponding_to_potential is two")
     {
@@ -84,9 +84,9 @@ TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-populatio
     layout lyt{};
 
     constexpr auto params = physical_population_stability_params{};
-    lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({1, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({2, 1, 0}, dot_tag::NORMAL);
 
     const auto result = physical_population_stability(lyt, params);
     REQUIRE(result.size() == 3);
@@ -139,34 +139,34 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     constexpr auto params = physical_population_stability_params{};
 
-    lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({36, 1, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({38, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({23, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 11, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 8, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({23, 9, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({18, 11, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({18, 9, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({19, 8, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({20, 14, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 13, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({20, 14, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({19, 13, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
 
     const layout lat{lyt};
 
@@ -183,8 +183,8 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     SECTION("input 00")
     {
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_dot_tag({36, 1, 0}, dot_tag::EMPTY);
+        lyt.assign_dot_tag({2, 1, 0}, dot_tag::EMPTY);
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 2);
         const auto& population_stability_detail = result[0];
@@ -198,8 +198,8 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     SECTION("input 01")
     {
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_dot_tag({36, 1, 0}, dot_tag::EMPTY);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::EMPTY);
 
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 4);
@@ -214,8 +214,8 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     SECTION("input 10")
     {
-        lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_dot_tag({38, 0, 0}, dot_tag::EMPTY);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::EMPTY);
 
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 8);
@@ -229,8 +229,8 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     SECTION("input 11")
     {
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_dot_tag({36, 1, 0}, dot_tag::EMPTY);
+        lyt.assign_dot_tag({2, 1, 0}, dot_tag::EMPTY);
 
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 2);
@@ -251,44 +251,44 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
         layout lyt{};
 
         constexpr auto params = physical_population_stability_params{};
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_dot_tag({36, 1, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({20, 12, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 11, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({20, 12, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({14, 11, 1}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({14, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({14, 9, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({14, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({12, 16, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({24, 13, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({18, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({24, 13, 1}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({16, 13, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({16, 13, 1}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({20, 8, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({20, 8, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_dot_tag({6, 18, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
+        lyt.assign_dot_tag({8, 17, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({2, 19, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
 
-        CHECK(lyt.num_cells() == 27);
+        CHECK(lyt.num_dots() == 27);
 
         const auto& lat = lyt;
 

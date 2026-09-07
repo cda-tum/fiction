@@ -48,8 +48,8 @@ void detect_bdl_pairs(nanobind::module_& m)
 
     py::class_<bdl_pair_t>(m, "bdl_pair", DOC(fiction_sidb_simulation_logic_bdl_pair))
         .def(py::init<>(), DOC(fiction_sidb_simulation_logic_bdl_pair_bdl_pair))
-        .def(py::init<fiction::sidb::sidb_technology::cell_type, lattice_site, lattice_site>(), py::arg("t"),
-             py::arg("u"), py::arg("l"), DOC(fiction_sidb_simulation_logic_bdl_pair_bdl_pair_2))
+        .def(py::init<fiction::sidb::dot_tag, lattice_site, lattice_site>(), py::arg("t"), py::arg("u"), py::arg("l"),
+             DOC(fiction_sidb_simulation_logic_bdl_pair_bdl_pair_2))
         .def_ro("type", &bdl_pair_t::type, DOC(fiction_sidb_simulation_logic_bdl_pair_type))
         .def_ro("upper", &bdl_pair_t::upper, DOC(fiction_sidb_simulation_logic_bdl_pair_upper))
         .def_ro("lower", &bdl_pair_t::lower, DOC(fiction_sidb_simulation_logic_bdl_pair_lower))
@@ -74,7 +74,7 @@ void detect_bdl_pairs(nanobind::module_& m)
 
     m.def(
         "detect_bdl_pairs",
-        [](const layout& lyt, const std::optional<fiction::sidb::sidb_technology::cell_type>& type,
+        [](const layout& lyt, const std::optional<fiction::sidb::dot_tag>& type,
            const fiction::sidb::simulation::logic::detect_bdl_pairs_params& params)
         { return fiction::sidb::simulation::logic::detect_bdl_pairs(lyt, type, params); },
         py::arg("lyt"), py::arg("type") = std::nullopt,

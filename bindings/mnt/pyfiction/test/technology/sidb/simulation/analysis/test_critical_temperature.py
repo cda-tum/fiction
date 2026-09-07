@@ -30,10 +30,10 @@ from mnt.pyfiction import (
     lattice,
     lattice_site,
     read_sqd_layout,
+    sidb_dot_tag,
     sidb_layout,
     sidb_simulation_engine,
     sidb_simulation_parameters,
-    sidb_technology,
 )
 
 if TYPE_CHECKING:
@@ -51,9 +51,9 @@ def test_perturber_and_sidb_pair(lat: lattice) -> None:
         lat: Lattice used for the test layout.
     """
     layout = sidb_layout(lat)
-    layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(4, 0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(6, 0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
 
     params = critical_temperature_params()
 
@@ -142,22 +142,22 @@ def test_critical_temperature_with_input_pattern_layouts() -> None:
     """Compare pre-generated input layouts with the layout-based overload."""
     lyt = sidb_layout()
 
-    lyt.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type(lattice_site(2, 1, 1), sidb_technology.cell_type.INPUT)
+    lyt.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
+    lyt.assign_dot_tag(lattice_site(2, 1, 1), sidb_dot_tag.INPUT)
 
-    lyt.assign_cell_type(lattice_site(20, 0, 1), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type(lattice_site(19, 1, 1), sidb_technology.cell_type.INPUT)
+    lyt.assign_dot_tag(lattice_site(20, 0, 1), sidb_dot_tag.INPUT)
+    lyt.assign_dot_tag(lattice_site(19, 1, 1), sidb_dot_tag.INPUT)
 
-    lyt.assign_cell_type(lattice_site(4, 2, 1), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(6, 3, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(4, 2, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(6, 3, 1), sidb_dot_tag.NORMAL)
 
-    lyt.assign_cell_type(lattice_site(14, 3, 1), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(16, 2, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(14, 3, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(16, 2, 1), sidb_dot_tag.NORMAL)
 
-    lyt.assign_cell_type(lattice_site(10, 6, 0), sidb_technology.cell_type.OUTPUT)
-    lyt.assign_cell_type(lattice_site(10, 7, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_dot_tag(lattice_site(10, 6, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_dot_tag(lattice_site(10, 7, 0), sidb_dot_tag.OUTPUT)
 
-    lyt.assign_cell_type(lattice_site(10, 9, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
 
     params = critical_temperature_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -165,7 +165,7 @@ def test_critical_temperature_with_input_pattern_layouts() -> None:
 
     input_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
     output_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
-    output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology.cell_type.OUTPUT, detect_bdl_pairs_params())
+    output_bdl_pairs = detect_bdl_pairs(lyt, sidb_dot_tag.OUTPUT, detect_bdl_pairs_params())
 
     input_pattern_layouts = generate_bdl_input_pattern_layouts(
         lyt,

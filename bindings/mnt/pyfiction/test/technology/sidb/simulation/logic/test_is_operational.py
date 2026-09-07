@@ -27,31 +27,31 @@ from mnt.pyfiction import (
     operational_input_patterns,
     operational_status,
     read_sqd_layout,
+    sidb_dot_tag,
     sidb_layout,
     sidb_simulation_parameters,
-    sidb_technology,
 )
 
 
 def test_is_operational():
     lyt = sidb_layout()
 
-    lyt.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type(lattice_site(2, 1, 1), sidb_technology.cell_type.INPUT)
+    lyt.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
+    lyt.assign_dot_tag(lattice_site(2, 1, 1), sidb_dot_tag.INPUT)
 
-    lyt.assign_cell_type(lattice_site(20, 0, 1), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type(lattice_site(19, 1, 1), sidb_technology.cell_type.INPUT)
+    lyt.assign_dot_tag(lattice_site(20, 0, 1), sidb_dot_tag.INPUT)
+    lyt.assign_dot_tag(lattice_site(19, 1, 1), sidb_dot_tag.INPUT)
 
-    lyt.assign_cell_type(lattice_site(4, 2, 1), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(6, 3, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(4, 2, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(6, 3, 1), sidb_dot_tag.NORMAL)
 
-    lyt.assign_cell_type(lattice_site(14, 3, 1), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(16, 2, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(14, 3, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(16, 2, 1), sidb_dot_tag.NORMAL)
 
-    lyt.assign_cell_type(lattice_site(10, 6, 0), sidb_technology.cell_type.OUTPUT)
-    lyt.assign_cell_type(lattice_site(10, 7, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_dot_tag(lattice_site(10, 6, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_dot_tag(lattice_site(10, 7, 0), sidb_dot_tag.OUTPUT)
 
-    lyt.assign_cell_type(lattice_site(10, 9, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
 
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
@@ -80,8 +80,8 @@ def test_is_operational():
 
     # pre-determined I/O pins and canvas layout
     canvas_lyt = sidb_layout()
-    canvas_lyt.assign_cell_type(lattice_site(4, 2, 1), sidb_technology.cell_type.LOGIC)
-    canvas_lyt.assign_cell_type(lattice_site(6, 3, 1), sidb_technology.cell_type.LOGIC)
+    canvas_lyt.assign_dot_tag(lattice_site(4, 2, 1), sidb_dot_tag.LOGIC)
+    canvas_lyt.assign_dot_tag(lattice_site(6, 3, 1), sidb_dot_tag.LOGIC)
     [op_status, _evaluated_input_combinations] = is_operational(
         lyt,
         [create_and_tt()],
@@ -101,22 +101,22 @@ def and_gate_with_bdl_wires():
     """
     lyt = sidb_layout()
 
-    lyt.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type(lattice_site(2, 1, 1), sidb_technology.cell_type.INPUT)
+    lyt.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
+    lyt.assign_dot_tag(lattice_site(2, 1, 1), sidb_dot_tag.INPUT)
 
-    lyt.assign_cell_type(lattice_site(20, 0, 1), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type(lattice_site(19, 1, 1), sidb_technology.cell_type.INPUT)
+    lyt.assign_dot_tag(lattice_site(20, 0, 1), sidb_dot_tag.INPUT)
+    lyt.assign_dot_tag(lattice_site(19, 1, 1), sidb_dot_tag.INPUT)
 
-    lyt.assign_cell_type(lattice_site(4, 2, 1), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(6, 3, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(4, 2, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(6, 3, 1), sidb_dot_tag.NORMAL)
 
-    lyt.assign_cell_type(lattice_site(14, 3, 1), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(16, 2, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(14, 3, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(16, 2, 1), sidb_dot_tag.NORMAL)
 
-    lyt.assign_cell_type(lattice_site(10, 6, 0), sidb_technology.cell_type.OUTPUT)
-    lyt.assign_cell_type(lattice_site(10, 7, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_dot_tag(lattice_site(10, 6, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_dot_tag(lattice_site(10, 7, 0), sidb_dot_tag.OUTPUT)
 
-    lyt.assign_cell_type(lattice_site(10, 9, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
 
     return (
         lyt,

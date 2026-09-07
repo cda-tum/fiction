@@ -256,7 +256,7 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
 
         const auto& and_lat = and_gate;
 
-        REQUIRE(and_lat.num_cells_of_type(sidb_technology::cell_type::LOGIC) > 0);
+        REQUIRE(and_lat.num_dots_with_tag(dot_tag::LOGIC) > 0);
 
         operational_domain_params sketch_params{};
         sketch_params.operational_params.strategy_to_analyze_operational_status =
@@ -663,20 +663,20 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({3, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({24, 0, 0}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -1416,20 +1416,20 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
 
     layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({3, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({24, 0, 0}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -1498,20 +1498,20 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
 
     layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({3, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({24, 0, 0}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -1604,22 +1604,22 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     layout lyt{lattice::si_100_2x1(), "AND gate"};
 
-    lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 1}, dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 1}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({20, 0, 1}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({18, 1, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({20, 0, 1}, dot_tag::INPUT);
+    lyt.assign_dot_tag({18, 1, 1}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({4, 2, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 3, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 3, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 3, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 3, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 7, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({10, 6, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({10, 7, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({10, 9, 1}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -2007,16 +2007,16 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
 
 TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]")
 {
-    auto lyt = sidb_cell_clk_lyt_siqad{};
+    layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({14, 0, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({18, 0, 0}, dot_tag::NORMAL);
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;

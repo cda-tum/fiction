@@ -55,7 +55,7 @@ TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
     // set input index 1
     bii = 1;
 
-    const auto output_bdls = detect_bdl_pairs(*bii, sidb_technology::cell_type::OUTPUT);
+    const auto output_bdls = detect_bdl_pairs(*bii, dot_tag::OUTPUT);
 
     const auto simulation_results = quickexact(*bii);
 
@@ -111,8 +111,8 @@ TEST_CASE("Energy labeling propagates invalid lattice basis errors", "[calculate
     layout       lyt{};
     lattice_site invalid{};
     invalid.z = 2;
-    lyt.assign_cell_type(invalid, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag(invalid, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({2, 0, 0}, dot_tag::OUTPUT);
     const std::vector distributions{charge_distribution{lyt}};
     const auto        energies = calculate_energy_distribution(distributions);
 

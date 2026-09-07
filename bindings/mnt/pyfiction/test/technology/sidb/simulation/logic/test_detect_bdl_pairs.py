@@ -15,8 +15,8 @@ from mnt.pyfiction import (
     detect_bdl_pairs_params,
     lattice,
     lattice_site,
+    sidb_dot_tag,
     sidb_layout,
-    sidb_technology,
 )
 
 
@@ -27,22 +27,22 @@ from mnt.pyfiction import (
 def test_detect_bdl_pairs(lat):
     lyt = sidb_layout(lat)
 
-    lyt.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type(lattice_site(1, 0, 0), sidb_technology.cell_type.INPUT)
+    lyt.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
+    lyt.assign_dot_tag(lattice_site(1, 0, 0), sidb_dot_tag.INPUT)
 
-    lyt.assign_cell_type(lattice_site(2, 0, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(3, 0, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(4, 0, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(5, 0, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(4, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(5, 0, 0), sidb_dot_tag.NORMAL)
 
-    lyt.assign_cell_type(lattice_site(6, 0, 0), sidb_technology.cell_type.OUTPUT)
-    lyt.assign_cell_type(lattice_site(7, 0, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_dot_tag(lattice_site(6, 0, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_dot_tag(lattice_site(7, 0, 0), sidb_dot_tag.OUTPUT)
 
     params = detect_bdl_pairs_params()
 
-    input_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology.cell_type.INPUT, params)
-    output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology.cell_type.OUTPUT, params)
-    normal_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology.cell_type.NORMAL, params)
+    input_bdl_pairs = detect_bdl_pairs(lyt, sidb_dot_tag.INPUT, params)
+    output_bdl_pairs = detect_bdl_pairs(lyt, sidb_dot_tag.OUTPUT, params)
+    normal_bdl_pairs = detect_bdl_pairs(lyt, sidb_dot_tag.NORMAL, params)
 
     assert len(input_bdl_pairs) == 0
     assert len(output_bdl_pairs) == 0

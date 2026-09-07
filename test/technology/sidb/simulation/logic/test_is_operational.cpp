@@ -181,8 +181,8 @@ TEST_CASE("SiQAD NAND gate", "[is-operational]")
         detect_bdl_wires(lat, detect_bdl_wires_params{.threshold_bdl_interdistance = 2.0}, bdl_wire_selection::OUTPUT);
 
     layout canvas_lyt{};
-    canvas_lyt.assign_cell_type({10, 4, 1}, sidb_technology::cell_type::NORMAL);
-    canvas_lyt.assign_cell_type({10, 5, 1}, sidb_technology::cell_type::NORMAL);
+    canvas_lyt.assign_dot_tag({10, 4, 1}, dot_tag::NORMAL);
+    canvas_lyt.assign_dot_tag({10, 5, 1}, dot_tag::NORMAL);
 
     SECTION("use pre-determined I/O pins")
     {
@@ -197,22 +197,22 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operat
 
     layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 1}, dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 1}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({20, 0, 1}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({19, 1, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({20, 0, 1}, dot_tag::INPUT);
+    lyt.assign_dot_tag({19, 1, 1}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({4, 2, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 3, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 3, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 3, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 3, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 7, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({10, 6, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({10, 7, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({10, 9, 1}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -265,7 +265,7 @@ TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 {
     const auto lyt = to_sidb_layout(blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>());
 
-    CHECK(lyt.num_cells() == 29);
+    CHECK(lyt.num_dots() == 29);
 
     const auto& lat = lyt;
 
@@ -285,7 +285,7 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
 
     SECTION("Without defects")
     {
-        CHECK(lyt.num_cells() == 23);
+        CHECK(lyt.num_dots() == 23);
 
         CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
                              is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT})
@@ -379,24 +379,24 @@ TEST_CASE("Not working diagonal Wire", "[is-operational]")
 
     layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
 
     // canvas SiDB
-    lyt.assign_cell_type({14, 6, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 6, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -483,20 +483,20 @@ TEST_CASE("BDL wire", "[is-operational]")
 
     layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({3, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({24, 0, 0}, dot_tag::NORMAL);
 
     simulation_parameters sim_params{};
 
@@ -512,27 +512,27 @@ TEST_CASE("Special wire that cannot be pruned, but is non-operational when kinks
     layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({11, 7, 0}, sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({13, 13, 0}, sidb_technology::cell_type::LOGIC);
+    lyt.assign_dot_tag({11, 7, 0}, dot_tag::LOGIC);
+    lyt.assign_dot_tag({13, 13, 0}, dot_tag::LOGIC);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 16, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({8, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({6, 18, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({2, 19, 0}, dot_tag::NORMAL);
 
     simulation_parameters sim_params{};
 
@@ -597,7 +597,7 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
 {
     const auto lyt = to_sidb_layout(blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>());
 
-    CHECK(lyt.num_cells() == 29);
+    CHECK(lyt.num_dots() == 29);
 
     const auto& lat = lyt;
 
@@ -647,7 +647,7 @@ TEST_CASE("is operational check for Bestagon double wire", "[is-operational], [q
 {
     const auto lyt = to_sidb_layout(blueprints::bestagon_double_wire<sidb_cell_clk_lyt_siqad>());
 
-    CHECK(lyt.num_cells() == 30);
+    CHECK(lyt.num_dots() == 30);
 
     const auto& lat = lyt;
 
@@ -663,7 +663,7 @@ TEST_CASE("is operational check for Bestagon half adder", "[is-operational], [qu
 {
     const auto lyt = to_sidb_layout(blueprints::bestagon_ha<sidb_cell_clk_lyt_siqad>());
 
-    CHECK(lyt.num_cells() == 26);
+    CHECK(lyt.num_dots() == 26);
 
     const auto& lat = lyt;
 
@@ -785,27 +785,27 @@ TEST_CASE("Both is_operational entry points apply the same canvas rule", "[is-op
     layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({11, 7, 0}, sidb_technology::cell_type::LOGIC);
-    lyt.assign_cell_type({13, 13, 0}, sidb_technology::cell_type::LOGIC);
+    lyt.assign_dot_tag({11, 7, 0}, dot_tag::LOGIC);
+    lyt.assign_dot_tag({13, 13, 0}, dot_tag::LOGIC);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 16, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({8, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({6, 18, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({2, 19, 0}, dot_tag::NORMAL);
 
     const auto spec = std::vector<tt>{create_id_tt()};
 

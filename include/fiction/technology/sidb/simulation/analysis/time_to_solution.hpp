@@ -199,7 +199,7 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
 {
     time_to_solution_stats st{};
 
-    if (lyt.num_cells() == 0)
+    if (lyt.num_dots() == 0)
     {
         st.single_runtime_exact = 0.0;
         st.time_to_solution     = std::numeric_limits<double>::infinity();

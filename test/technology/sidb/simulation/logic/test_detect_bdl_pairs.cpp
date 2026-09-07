@@ -32,7 +32,7 @@ TEST_CASE("Empty layout BDL detection", "[detect-bdl-pairs]")
 {
     const layout lyt{};
 
-    const auto result = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL);
+    const auto result = detect_bdl_pairs(lyt, dot_tag::NORMAL);
 
     CHECK(result.empty());
 }
@@ -41,20 +41,20 @@ TEST_CASE("BDL wire", "[detect-bdl-pairs]")
 {
     layout lyt{lattice::si_100_2x1(), "Atomic wire"};
 
-    lyt.assign_cell_type({-1, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({-1, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({3, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({24, 0, 0}, dot_tag::NORMAL);
 
     detect_bdl_pairs_params params{};
 
@@ -63,9 +63,9 @@ TEST_CASE("BDL wire", "[detect-bdl-pairs]")
 
     const auto& lat = lyt;
 
-    const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
-    const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
-    const auto normal_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::NORMAL, params);
+    const auto input_bdl_pairs  = detect_bdl_pairs(lat, dot_tag::INPUT, params);
+    const auto output_bdl_pairs = detect_bdl_pairs(lat, dot_tag::OUTPUT, params);
+    const auto normal_bdl_pairs = detect_bdl_pairs(lat, dot_tag::NORMAL, params);
 
     const auto all_bdl_pairs = detect_bdl_pairs(lat, std::nullopt, params);
 
@@ -79,16 +79,16 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
 {
     layout lyt{lattice::si_100_2x1(), "Atomic wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({1, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({3, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({6, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({7, 0, 0}, dot_tag::OUTPUT);
 
     detect_bdl_pairs_params params{};
 
@@ -96,9 +96,9 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
 
     SECTION("default minimum distance")
     {
-        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
-        const auto normal_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::NORMAL, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, dot_tag::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, dot_tag::OUTPUT, params);
+        const auto normal_bdl_pairs = detect_bdl_pairs(lat, dot_tag::NORMAL, params);
 
         REQUIRE(input_bdl_pairs.empty());
         REQUIRE(output_bdl_pairs.empty());
@@ -107,11 +107,11 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
         const auto& normal_pair1 = normal_bdl_pairs[0];
         const auto& normal_pair2 = normal_bdl_pairs[1];
 
-        CHECK(normal_pair1.type == sidb_technology::cell_type::NORMAL);
+        CHECK(normal_pair1.type == dot_tag::NORMAL);
         CHECK((normal_pair1.upper == lattice_site{2, 0, 0} || normal_pair1.upper == lattice_site{3, 0, 0}));
         CHECK((normal_pair1.lower == lattice_site{4, 0, 0} || normal_pair1.lower == lattice_site{5, 0, 0}));
 
-        CHECK(normal_pair2.type == sidb_technology::cell_type::NORMAL);
+        CHECK(normal_pair2.type == dot_tag::NORMAL);
         CHECK((normal_pair2.upper == lattice_site{2, 0, 0} || normal_pair2.upper == lattice_site{3, 0, 0}));
         CHECK((normal_pair2.lower == lattice_site{4, 0, 0} || normal_pair2.lower == lattice_site{5, 0, 0}));
     }
@@ -119,9 +119,9 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
     {
         params.minimum_distance = 0.5;
 
-        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
-        const auto normal_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::NORMAL, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, dot_tag::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, dot_tag::OUTPUT, params);
+        const auto normal_bdl_pairs = detect_bdl_pairs(lat, dot_tag::NORMAL, params);
 
         REQUIRE(input_bdl_pairs.empty());
         REQUIRE(output_bdl_pairs.empty());
@@ -130,11 +130,11 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
         const auto& normal_pair1 = normal_bdl_pairs[0];
         const auto& normal_pair2 = normal_bdl_pairs[1];
 
-        CHECK(normal_pair1.type == sidb_technology::cell_type::NORMAL);
+        CHECK(normal_pair1.type == dot_tag::NORMAL);
         CHECK((normal_pair1.upper == lattice_site{2, 0, 0} || normal_pair1.upper == lattice_site{3, 0, 0}));
         CHECK((normal_pair1.lower == lattice_site{4, 0, 0} || normal_pair1.lower == lattice_site{5, 0, 0}));
 
-        CHECK(normal_pair2.type == sidb_technology::cell_type::NORMAL);
+        CHECK(normal_pair2.type == dot_tag::NORMAL);
         CHECK((normal_pair2.upper == lattice_site{2, 0, 0} || normal_pair2.upper == lattice_site{3, 0, 0}));
         CHECK((normal_pair2.lower == lattice_site{4, 0, 0} || normal_pair2.lower == lattice_site{5, 0, 0}));
     }
@@ -142,9 +142,9 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
     {
         params.minimum_distance = 0;
 
-        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
-        const auto normal_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::NORMAL, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, dot_tag::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, dot_tag::OUTPUT, params);
+        const auto normal_bdl_pairs = detect_bdl_pairs(lat, dot_tag::NORMAL, params);
 
         REQUIRE(input_bdl_pairs.size() == 1);
         REQUIRE(output_bdl_pairs.size() == 1);
@@ -156,19 +156,19 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
         const auto& normal_pair1 = normal_bdl_pairs[0];
         const auto& normal_pair2 = normal_bdl_pairs[1];
 
-        CHECK(input_pair.type == sidb_technology::cell_type::INPUT);
+        CHECK(input_pair.type == dot_tag::INPUT);
         CHECK(input_pair.upper == lattice_site{0, 0, 0});
         CHECK(input_pair.lower == lattice_site{1, 0, 0});
 
-        CHECK(output_pair.type == sidb_technology::cell_type::OUTPUT);
+        CHECK(output_pair.type == dot_tag::OUTPUT);
         CHECK(output_pair.upper == lattice_site{6, 0, 0});
         CHECK(output_pair.lower == lattice_site{7, 0, 0});
 
-        CHECK(normal_pair1.type == sidb_technology::cell_type::NORMAL);
+        CHECK(normal_pair1.type == dot_tag::NORMAL);
         CHECK((normal_pair1.upper == lattice_site{2, 0, 0} || normal_pair1.upper == lattice_site{4, 0, 0}));
         CHECK((normal_pair1.lower == lattice_site{3, 0, 0} || normal_pair1.lower == lattice_site{5, 0, 0}));
 
-        CHECK(normal_pair2.type == sidb_technology::cell_type::NORMAL);
+        CHECK(normal_pair2.type == dot_tag::NORMAL);
         CHECK((normal_pair2.upper == lattice_site{2, 0, 0} || normal_pair2.upper == lattice_site{4, 0, 0}));
         CHECK((normal_pair2.lower == lattice_site{3, 0, 0} || normal_pair2.lower == lattice_site{5, 0, 0}));
     }
@@ -178,17 +178,17 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
 {
     layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
 
     detect_bdl_pairs_params params{};
     // set default minimum distance to 0 for testing
@@ -198,8 +198,8 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
 
     SECTION("default maximum distance")
     {
-        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, dot_tag::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, dot_tag::OUTPUT, params);
 
         REQUIRE(input_bdl_pairs.size() == 1);
         REQUIRE(output_bdl_pairs.size() == 1);
@@ -207,11 +207,11 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
         const auto& input_pair  = input_bdl_pairs.front();
         const auto& output_pair = output_bdl_pairs.front();
 
-        CHECK(input_pair.type == sidb_technology::cell_type::INPUT);
+        CHECK(input_pair.type == dot_tag::INPUT);
         CHECK(input_pair.upper == lattice_site{0, 0, 0});
         CHECK(input_pair.lower == lattice_site{2, 0, 0});
 
-        CHECK(output_pair.type == sidb_technology::cell_type::OUTPUT);
+        CHECK(output_pair.type == dot_tag::OUTPUT);
         CHECK(output_pair.upper == lattice_site{18, 0, 0});
         CHECK(output_pair.lower == lattice_site{20, 0, 0});
     }
@@ -219,8 +219,8 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
     {
         params.maximum_distance = 1;
 
-        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, dot_tag::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, dot_tag::OUTPUT, params);
 
         REQUIRE(input_bdl_pairs.size() == 1);
         REQUIRE(output_bdl_pairs.size() == 1);
@@ -228,11 +228,11 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
         const auto& input_pair  = input_bdl_pairs.front();
         const auto& output_pair = output_bdl_pairs.front();
 
-        CHECK(input_pair.type == sidb_technology::cell_type::INPUT);
+        CHECK(input_pair.type == dot_tag::INPUT);
         CHECK(input_pair.upper == lattice_site{0, 0, 0});
         CHECK(input_pair.lower == lattice_site{2, 0, 0});
 
-        CHECK(output_pair.type == sidb_technology::cell_type::OUTPUT);
+        CHECK(output_pair.type == dot_tag::OUTPUT);
         CHECK(output_pair.upper == lattice_site{18, 0, 0});
         CHECK(output_pair.lower == lattice_site{20, 0, 0});
     }
@@ -240,8 +240,8 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
     {
         params.maximum_distance = 0.5;
 
-        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, dot_tag::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, dot_tag::OUTPUT, params);
 
         // the maximum distance is too small to detect any BDL pairs
         REQUIRE(input_bdl_pairs.empty());
@@ -253,27 +253,27 @@ TEST_CASE("SiQAD's AND gate BDL detection", "[detect-bdl-pairs]")
 {
     layout lyt{lattice::si_100_2x1(), "AND gate"};
 
-    lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({0, 0, 1}, dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 1, 1}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({20, 0, 1}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({18, 1, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({20, 0, 1}, dot_tag::INPUT);
+    lyt.assign_dot_tag({18, 1, 1}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({4, 2, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 3, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 3, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 3, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 3, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 7, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({10, 6, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({10, 7, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({10, 9, 1}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
-    const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT);
-    const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT);
+    const auto input_bdl_pairs  = detect_bdl_pairs(lat, dot_tag::INPUT);
+    const auto output_bdl_pairs = detect_bdl_pairs(lat, dot_tag::OUTPUT);
 
     REQUIRE(input_bdl_pairs.size() == 2);
     REQUIRE(output_bdl_pairs.size() == 1);
@@ -282,15 +282,15 @@ TEST_CASE("SiQAD's AND gate BDL detection", "[detect-bdl-pairs]")
     const auto& input_pair2 = input_bdl_pairs[1];
     const auto& output_pair = output_bdl_pairs.front();
 
-    CHECK(input_pair1.type == sidb_technology::cell_type::INPUT);
+    CHECK(input_pair1.type == dot_tag::INPUT);
     CHECK((input_pair1.upper == lattice_site{20, 0, 1} || input_pair1.upper == lattice_site{0, 0, 1}));
     CHECK((input_pair1.lower == lattice_site{18, 1, 1} || input_pair1.lower == lattice_site{2, 1, 1}));
 
-    CHECK(input_pair2.type == sidb_technology::cell_type::INPUT);
+    CHECK(input_pair2.type == dot_tag::INPUT);
     CHECK((input_pair2.upper == lattice_site{20, 0, 1} || input_pair2.upper == lattice_site{0, 0, 1}));
     CHECK((input_pair2.lower == lattice_site{18, 1, 1} || input_pair2.lower == lattice_site{2, 1, 1}));
 
-    CHECK(output_pair.type == sidb_technology::cell_type::OUTPUT);
+    CHECK(output_pair.type == dot_tag::OUTPUT);
     CHECK(output_pair.upper == lattice_site{10, 6, 0});
     CHECK(output_pair.lower == lattice_site{10, 7, 0});
 }
@@ -299,43 +299,43 @@ TEST_CASE("Bestagon fan-out BDL detection", "[detect-bdl-pairs]")
 {
     layout lyt{lattice::si_100_2x1(), "Fan-out"};
 
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({4, 2, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 4, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({10, 4, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 6, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 6, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({20, 7, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({21, 8, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({20, 7, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({21, 8, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({19, 12, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({23, 12, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 14, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({19, 12, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({23, 12, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 14, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({16, 16, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 17, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({16, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({14, 17, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({28, 17, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({28, 17, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, 18, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({8, 19, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({10, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({8, 19, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({34, 19, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_dot_tag({34, 19, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({4, 20, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({38, 20, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 20, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({38, 20, 0}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
     SECTION("Detect different BDL pair types")
     {
-        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT);
-        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, dot_tag::INPUT);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, dot_tag::OUTPUT);
 
         REQUIRE(input_bdl_pairs.size() == 1);
         REQUIRE(output_bdl_pairs.size() == 2);
@@ -344,15 +344,15 @@ TEST_CASE("Bestagon fan-out BDL detection", "[detect-bdl-pairs]")
         const auto& output_pair1 = output_bdl_pairs[0];
         const auto& output_pair2 = output_bdl_pairs[1];
 
-        CHECK(input_pair.type == sidb_technology::cell_type::INPUT);
+        CHECK(input_pair.type == dot_tag::INPUT);
         CHECK(input_pair.upper == lattice_site{2, 1, 0});
         CHECK(input_pair.lower == lattice_site{4, 2, 0});
 
-        CHECK(output_pair1.type == sidb_technology::cell_type::OUTPUT);
+        CHECK(output_pair1.type == dot_tag::OUTPUT);
         CHECK((output_pair1.upper == lattice_site{10, 18, 0} || output_pair1.upper == lattice_site{32, 18, 0}));
         CHECK((output_pair1.lower == lattice_site{8, 19, 0} || output_pair1.lower == lattice_site{34, 19, 0}));
 
-        CHECK(output_pair2.type == sidb_technology::cell_type::OUTPUT);
+        CHECK(output_pair2.type == dot_tag::OUTPUT);
         CHECK((output_pair2.upper == lattice_site{10, 18, 0} || output_pair2.upper == lattice_site{32, 18, 0}));
         CHECK((output_pair2.lower == lattice_site{8, 19, 0} || output_pair2.lower == lattice_site{34, 19, 0}));
     }

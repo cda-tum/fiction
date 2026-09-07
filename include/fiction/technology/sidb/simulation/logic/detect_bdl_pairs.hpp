@@ -37,7 +37,7 @@ namespace fiction::sidb::simulation::logic
 /**
  * A Binary-dot Logic (BDL) pair is a pair of SiDBs that are close to each other and, thus, most likely share a charge.
  *
- * @tparam CellType Cell type.
+ * @tparam CellType Coordinate type.
  */
 template <typename CellType>
 struct bdl_pair
@@ -46,7 +46,7 @@ struct bdl_pair
      * The type of the SiDBs in the pair. BDL SiDBs must be of the same type. They can either be normal, input, or
      * output SiDBs.
      */
-    sidb::sidb_technology::cell_type type{};
+    sidb::dot_tag type{};
     /**
      * The upper SiDB of the pair. Upper and lower are defined relative to each other via the `operator<` overload.
      */
@@ -66,11 +66,7 @@ struct bdl_pair
      * @param u The upper SiDB of the pair.
      * @param l The lower SiDB of the pair.
      */
-    bdl_pair(const sidb::sidb_technology::cell_type t, const CellType& u, const CellType& l) noexcept :
-            type{t},
-            upper{u},
-            lower{l}
-    {}
+    bdl_pair(const sidb::dot_tag t, const CellType& u, const CellType& l) noexcept : type{t}, upper{u}, lower{l} {}
 
     /**
      * Equality operator. Also provides `operator!=` via `= default`.
@@ -204,7 +200,7 @@ struct detect_bdl_pairs_params
  * @return The detected BDL pairs.
  */
 [[nodiscard]] inline std::vector<bdl_pair<lattice_site>>
-detect_bdl_pairs(const layout& lyt, const std::optional<sidb_technology::cell_type>& type = std::nullopt,
+detect_bdl_pairs(const layout& lyt, const std::optional<dot_tag>& type = std::nullopt,
                  const detect_bdl_pairs_params& params = {})
 {
     assert(params.minimum_distance <= params.maximum_distance);
@@ -212,9 +208,9 @@ detect_bdl_pairs(const layout& lyt, const std::optional<sidb_technology::cell_ty
     // in case no type is given, detect BDL pairs for all types
     if (!type.has_value())
     {
-        const auto input_bdls  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdls = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
-        const auto normal_bdls = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL, params);
+        const auto input_bdls  = detect_bdl_pairs(lyt, dot_tag::INPUT, params);
+        const auto output_bdls = detect_bdl_pairs(lyt, dot_tag::OUTPUT, params);
+        const auto normal_bdls = detect_bdl_pairs(lyt, dot_tag::NORMAL, params);
 
         std::vector<bdl_pair<lattice_site>> all_bdls{};
         all_bdls.reserve(input_bdls.size() + output_bdls.size() + normal_bdls.size());
@@ -226,7 +222,7 @@ detect_bdl_pairs(const layout& lyt, const std::optional<sidb_technology::cell_ty
         return all_bdls;
     }
 
-    const auto dots = lyt.cells_of_type(*type);
+    const auto dots = lyt.dots_with_tag(*type);
 
     /**
      * A pair of SiDBs together with their distance (unit: nm).
@@ -284,11 +280,11 @@ detect_bdl_pairs(const layout& lyt, const std::optional<sidb_technology::cell_ty
         // a BDL pair has been detected (swap SiDBs if necessary)
         if (candidate.sidb1 > candidate.sidb2)
         {
-            bdl_pairs.emplace_back(lyt.get_cell_type(candidate.sidb1), candidate.sidb2, candidate.sidb1);
+            bdl_pairs.emplace_back(lyt.get_dot_tag(candidate.sidb1), candidate.sidb2, candidate.sidb1);
         }
         else
         {
-            bdl_pairs.emplace_back(lyt.get_cell_type(candidate.sidb1), candidate.sidb1, candidate.sidb2);
+            bdl_pairs.emplace_back(lyt.get_dot_tag(candidate.sidb1), candidate.sidb1, candidate.sidb2);
         }
 
         paired_dots.insert(candidate.sidb1);

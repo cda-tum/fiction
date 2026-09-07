@@ -179,7 +179,7 @@ class critical_temperature_impl
                               const std::vector<logic::bdl_pair<lattice_site>>& output_pairs,
                               const std::vector<logic::bdl_wire>&               input_wires,
                               const std::vector<logic::bdl_wire>&               output_wires) :
-            // a shallow copy, so that the `is_empty()`, `num_pos()` and `num_cells()` guards keep working
+            // a shallow copy, so that the `is_empty()`, `num_pos()` and `num_dots()` guards keep working
             sidb_layout{input_pattern_lyts.front()},
             params{ps},
             stats{st},
@@ -215,7 +215,7 @@ class critical_temperature_impl
         assert((input_pattern_layouts != nullptr || sidb_layout.num_pis() > 0) && "gate needs input cells");
         assert(sidb_layout.num_pos() > 0 && "gate needs output cells");
 
-        if (sidb_layout.num_cells() > 1)
+        if (sidb_layout.num_dots() > 1)
         {
             // the BDL detection results are taken from the caller when it supplied them, and determined here
             // otherwise. None of them depend on the simulation parameters
@@ -223,7 +223,7 @@ class critical_temperature_impl
                 pre_detected_output_bdl_pairs != nullptr ?
                     std::vector<logic::bdl_pair<lattice_site>>{} :
                     sidb::simulation::logic::detect_bdl_pairs(
-                        sidb_layout, sidb::sidb_technology::cell_type::OUTPUT,
+                        sidb_layout, sidb::dot_tag::OUTPUT,
                         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
 
             const auto& output_bdl_pairs =

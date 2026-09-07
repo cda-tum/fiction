@@ -151,7 +151,7 @@ TEST_CASE("Logic matching propagates invalid lattice basis errors",
     layout       lyt{};
     lattice_site invalid{};
     invalid.z = 2;
-    lyt.assign_cell_type(invalid, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag(invalid, dot_tag::NORMAL);
     is_operational_params params{};
     params.sim_params.base = 2;
 

@@ -102,8 +102,7 @@ class bdl_input_iterator
     bdl_input_iterator(const layout& source_layout, const bdl_input_iterator_params& ps,
                        const std::vector<bdl_wire>& source_input_wires) :
             sidb_layout{source_layout},
-            input_pairs{detect_bdl_pairs(source_layout, sidb_technology::cell_type::INPUT,
-                                         ps.bdl_wire_params.bdl_pairs_params)},
+            input_pairs{detect_bdl_pairs(source_layout, dot_tag::INPUT, ps.bdl_wire_params.bdl_pairs_params)},
             detected_input_wires{source_input_wires},
             last_bdl_for_each_wire{determine_last_bdl_for_each_wire()},
             upper_input_closer_to_wire_end{determine_upper_input_closer_to_wire_end()},
@@ -346,8 +345,8 @@ class bdl_input_iterator
 
         for (const auto& wire : detected_input_wires)
         {
-            const auto start = std::ranges::find_if(wire.pairs, [](const auto& bdl)
-                                                    { return bdl.type == sidb_technology::cell_type::INPUT; });
+            const auto start =
+                std::ranges::find_if(wire.pairs, [](const auto& bdl) { return bdl.type == dot_tag::INPUT; });
 
             if (start == wire.pairs.cend())
             {
@@ -417,13 +416,13 @@ class bdl_input_iterator
             {
                 if (upper_input_closer_to_wire_end[i])
                 {
-                    sidb_layout.assign_cell_type(input_i.lower, sidb_technology::cell_type::EMPTY);
-                    sidb_layout.assign_cell_type(input_i.upper, sidb_technology::cell_type::INPUT);
+                    sidb_layout.assign_dot_tag(input_i.lower, dot_tag::EMPTY);
+                    sidb_layout.assign_dot_tag(input_i.upper, dot_tag::INPUT);
                 }
                 else
                 {
-                    sidb_layout.assign_cell_type(input_i.lower, sidb_technology::cell_type::INPUT);
-                    sidb_layout.assign_cell_type(input_i.upper, sidb_technology::cell_type::EMPTY);
+                    sidb_layout.assign_dot_tag(input_i.lower, dot_tag::INPUT);
+                    sidb_layout.assign_dot_tag(input_i.upper, dot_tag::EMPTY);
                 }
             }
             else if (params.input_bdl_config ==
@@ -431,19 +430,19 @@ class bdl_input_iterator
             {
                 if (upper_input_closer_to_wire_end[i])
                 {
-                    sidb_layout.assign_cell_type(input_i.lower, sidb_technology::cell_type::INPUT);
-                    sidb_layout.assign_cell_type(input_i.upper, sidb_technology::cell_type::EMPTY);
+                    sidb_layout.assign_dot_tag(input_i.lower, dot_tag::INPUT);
+                    sidb_layout.assign_dot_tag(input_i.upper, dot_tag::EMPTY);
                 }
                 else
                 {
-                    sidb_layout.assign_cell_type(input_i.lower, sidb_technology::cell_type::EMPTY);
-                    sidb_layout.assign_cell_type(input_i.upper, sidb_technology::cell_type::INPUT);
+                    sidb_layout.assign_dot_tag(input_i.lower, dot_tag::EMPTY);
+                    sidb_layout.assign_dot_tag(input_i.upper, dot_tag::INPUT);
                 }
             }
             else
             {
-                sidb_layout.assign_cell_type(input_i.upper, sidb_technology::cell_type::EMPTY);
-                sidb_layout.assign_cell_type(input_i.lower, sidb_technology::cell_type::EMPTY);
+                sidb_layout.assign_dot_tag(input_i.upper, dot_tag::EMPTY);
+                sidb_layout.assign_dot_tag(input_i.lower, dot_tag::EMPTY);
             }
         }
     }

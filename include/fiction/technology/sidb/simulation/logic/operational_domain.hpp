@@ -478,7 +478,7 @@ inline void validate_operational_domain_params(const layout& lyt, const operatio
             throw std::invalid_argument("The operational domain sketch requires that kinks are rejected: the "
                                         "filtering steps are only defined for 'REJECT_KINKS'");
         }
-        if (lyt.num_cells_of_type(sidb_technology::cell_type::LOGIC) == 0)
+        if (lyt.num_dots_with_tag(dot_tag::LOGIC) == 0)
         {
             throw std::invalid_argument("The operational domain sketch requires a canvas: the layout has no 'LOGIC' "
                                         "cells for the filtering steps to enumerate");
@@ -512,7 +512,7 @@ class operational_domain_impl
             params{ps},
             stats{st},
             output_bdl_pairs{
-                detect_bdl_pairs(source_layout, sidb::sidb_technology::cell_type::OUTPUT,
+                detect_bdl_pairs(source_layout, sidb::dot_tag::OUTPUT,
                                  ps.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             num_dimensions{params.sweep_dimensions.size()},
             input_bdl_wires{detect_bdl_wires(source_layout,
@@ -526,21 +526,21 @@ class operational_domain_impl
     {
         // the public entry points reject a `FILTER_ONLY` request on a layout without `LOGIC` cells, so this may only
         // be empty for the strategies that do not need a canvas
-        const auto logic_cells = source_layout.cells_of_type(sidb_technology::cell_type::LOGIC);
+        const auto logic_cells = source_layout.dots_with_tag(dot_tag::LOGIC);
 
         assert(((params.operational_params.strategy_to_analyze_operational_status !=
                  is_operational_params::operational_analysis_strategy::FILTER_ONLY) ||
                 (logic_cells.size() > 0)) &&
                "No logic cells found in the layout");
 
-        // the canvas layout is created which is defined by the logic cells. The cell type matches the one the
+        // the canvas layout is created which is defined by the logic cells. The dot tag matches the one the
         // `is_operational` entry points assign to the canvases they build themselves; the canvas is only ever used to
         // construct a `charge_distribution_surface`, which reads positions and charges, so the two behave identically
         canvas_lyt.set_lattice(source_layout.get_lattice());
 
         for (const auto& c : logic_cells)
         {
-            canvas_lyt.assign_cell_type(c, sidb_technology::cell_type::LOGIC);
+            canvas_lyt.assign_dot_tag(c, dot_tag::LOGIC);
         }
 
         initialize_sweep();

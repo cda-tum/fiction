@@ -101,11 +101,11 @@ TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to-solution
     SECTION("layout with seven SiDBs placed")
     {
         // layout should not have positively charged SiDBs since QuickSim is a two-state simulator at the moment.
-        lyt.assign_cell_type({1, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({10, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({3, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({5, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({10, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({12, 3, 0}, dot_tag::NORMAL);
 
         constexpr simulation_parameters params{2, -0.30};
         const quicksim_params           qs_params{.sim_params = params};
@@ -168,12 +168,12 @@ TEST_CASE("time-to-solution test with simulation results", "[time-to-solution]")
 
     SECTION("layout with seven SiDBs placed")
     {
-        lyt.assign_cell_type({1, 6, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 6, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 6, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({7, 6, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({10, 6, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 6, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({1, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({3, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({5, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({7, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({10, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({12, 6, 0}, dot_tag::NORMAL);
 
         constexpr simulation_parameters params{3, -0.32};
         const quicksim_params           qs_params{.sim_params = params};
@@ -215,12 +215,12 @@ TEST_CASE("time-to-solution test with fewer negatively charged SiDBs in the layo
 
     SECTION("layout with six SiDBs placed, large µ-value")
     {
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({0, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({6, 3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({3, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({0, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({3, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({6, 3, 0}, dot_tag::NORMAL);
 
         constexpr simulation_parameters params{2, -0.05};
         const quicksim_params           qs_params{.sim_params = params};
@@ -236,8 +236,8 @@ TEST_CASE("time-to-solution test with fewer negatively charged SiDBs in the layo
 TEST_CASE("Time-to-solution counts failed and absent heuristic attempts", "[time-to-solution]")
 {
     layout lyt{};
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
 
     const quicksim_params qs_params{.sim_params      = simulation_parameters{2, -0.32},
                                     .iteration_steps = 1,
@@ -261,7 +261,7 @@ TEST_CASE("Time-to-solution counts failed and absent heuristic attempts", "[time
 TEST_CASE("Time-to-solution averages successful and failed runtimes", "[time-to-solution]")
 {
     layout lyt{};
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
     const auto exact              = quickexact(lyt);
     auto       successful         = exact;
     successful.simulation_runtime = std::chrono::seconds{2};
