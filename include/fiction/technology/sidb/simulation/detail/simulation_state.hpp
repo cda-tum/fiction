@@ -41,7 +41,7 @@ namespace fiction::sidb::simulation::detail
 /**
  * Whether the dependent SiDB adapts its charge state to the other SiDBs after a change.
  */
-enum class dependent_cell_mode : uint8_t
+enum class dependent_dot_mode : uint8_t
 {
     /**
      * The dependent SiDB keeps its charge state.
@@ -434,20 +434,20 @@ class simulation_state
     /**
      * Updates potentials, the dependent SiDB, the energy, and the validity after charge states changed.
      *
-     * @param dep_cell Whether the dependent SiDB adapts its charge state.
+     * @param dep_dot Whether the dependent SiDB adapts its charge state.
      * @param energy_mode Whether to recompute the energy.
      * @param history_mode Whether to apply only the recorded flips to the potentials.
      */
     void
-    update_after_charge_change(const dependent_cell_mode         dep_cell     = dependent_cell_mode::FIXED,
+    update_after_charge_change(const dependent_dot_mode          dep_dot      = dependent_dot_mode::FIXED,
                                const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
                                const charge_distribution_history history_mode = charge_distribution_history::NEGLECT)
     {
         update_local_internal_potential(history_mode);
 
-        if (dep_cell == dependent_cell_mode::VARIABLE)
+        if (dep_dot == dependent_dot_mode::VARIABLE)
         {
-            update_charge_state_of_dependent_cell();
+            update_charge_state_of_dependent_dot();
         }
         if (energy_mode == energy_calculation::UPDATE_ENERGY)
         {
@@ -599,12 +599,12 @@ class simulation_state
     /**
      * Steps the charge index up by one and decodes it.
      *
-     * @param dep_cell Whether the dependent SiDB adapts its charge state.
+     * @param dep_dot Whether the dependent SiDB adapts its charge state.
      * @param energy_mode Whether to recompute the energy.
      * @param history_mode Whether to apply only the recorded flips to the potentials.
      */
     void
-    increase_charge_index_by_one(const dependent_cell_mode         dep_cell     = dependent_cell_mode::FIXED,
+    increase_charge_index_by_one(const dependent_dot_mode          dep_dot      = dependent_dot_mode::FIXED,
                                  const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
                                  const charge_distribution_history history_mode = charge_distribution_history::NEGLECT)
     {
@@ -624,17 +624,17 @@ class simulation_state
             index_to_charge_distribution(charge_index_recomputation::IGNORE_LEADING_ZEROES);
         }
 
-        update_after_charge_change(dep_cell, energy_mode, history_mode);
+        update_after_charge_change(dep_dot, energy_mode, history_mode);
     }
     /**
      * Steps the sublayout charge index up by one and decodes it.
      *
-     * @param dep_cell Whether the dependent SiDB adapts its charge state.
+     * @param dep_dot Whether the dependent SiDB adapts its charge state.
      * @param energy_mode Whether to recompute the energy.
      * @param history_mode Whether to apply only the recorded flips to the potentials.
      */
     void increase_charge_index_of_sub_layout_by_one(
-        const dependent_cell_mode         dep_cell     = dependent_cell_mode::FIXED,
+        const dependent_dot_mode          dep_dot      = dependent_dot_mode::FIXED,
         const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history history_mode = charge_distribution_history::NEGLECT)
     {
@@ -654,7 +654,7 @@ class simulation_state
             index_to_charge_distribution(charge_index_recomputation::IGNORE_LEADING_ZEROES);
         }
 
-        update_after_charge_change(dep_cell, energy_mode, history_mode);
+        update_after_charge_change(dep_dot, energy_mode, history_mode);
     }
     /**
      * Resets the sublayout charge index to zero and decodes it with the flips recorded.
@@ -672,7 +672,7 @@ class simulation_state
             index_to_charge_distribution();
         }
 
-        update_after_charge_change(dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
+        update_after_charge_change(dependent_dot_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
                                    charge_distribution_history::CONSIDER);
     }
     /**
@@ -680,13 +680,13 @@ class simulation_state
      *
      * @param current_gray_code New charge index.
      * @param previous_gray_code Previous charge index.
-     * @param dep_cell Whether the dependent SiDB adapts its charge state.
+     * @param dep_dot Whether the dependent SiDB adapts its charge state.
      * @param energy_mode Whether to recompute the energy.
      * @param history_mode Whether to apply only the recorded flip to the potentials.
      */
     void assign_charge_index_by_gray_code(
         const uint64_t current_gray_code, const uint64_t previous_gray_code,
-        const dependent_cell_mode         dep_cell     = dependent_cell_mode::FIXED,
+        const dependent_dot_mode          dep_dot      = dependent_dot_mode::FIXED,
         const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history history_mode = charge_distribution_history::NEGLECT)
     {
@@ -694,7 +694,7 @@ class simulation_state
         {
             charge_index_value = current_gray_code;
             gray_code_to_charge_distribution(current_gray_code, previous_gray_code);
-            update_after_charge_change(dep_cell, energy_mode, history_mode);
+            update_after_charge_change(dep_dot, energy_mode, history_mode);
         }
     }
 
@@ -705,9 +705,9 @@ class simulation_state
      *
      * @param i Index of the dependent SiDB.
      */
-    void assign_dependent_cell(const std::size_t i) noexcept
+    void assign_dependent_dot(const std::size_t i) noexcept
     {
-        assert(i < num_sites && "dependent cell is not part of the layout");
+        assert(i < num_sites && "dependent dot is not part of the layout");
 
         dependent_sidb       = i;
         maximum_charge_index = max_index(simulation_base, num_sites - 1);
@@ -717,7 +717,7 @@ class simulation_state
      *
      * @return Index of the dependent SiDB.
      */
-    [[nodiscard]] std::optional<std::size_t> dependent_cell() const noexcept
+    [[nodiscard]] std::optional<std::size_t> dependent_dot() const noexcept
     {
         return dependent_sidb;
     }
@@ -1035,17 +1035,17 @@ class simulation_state
      * Sets the dependent SiDB to the charge state its local potential dictates and updates the potentials of the
      * others incrementally.
      */
-    void update_charge_state_of_dependent_cell()
+    void update_charge_state_of_dependent_dot()
     {
         if (!dependent_sidb.has_value())
         {
             return;
         }
 
-        const auto  d            = *dependent_sidb;
-        const auto  loc_pot_cell = -internal_potential_values[d];
-        const auto& t            = landscape_ptr->effective_charge_transition_thresholds(d);
-        const auto  current      = charge_distribution_state.charge_states()[d];
+        const auto  d           = *dependent_sidb;
+        const auto  loc_pot_dot = -internal_potential_values[d];
+        const auto& t           = landscape_ptr->effective_charge_transition_thresholds(d);
+        const auto  current     = charge_distribution_state.charge_states()[d];
 
         const auto switch_to = [&](const model::charge_state cs)
         {
@@ -1063,14 +1063,14 @@ class simulation_state
             charge_distribution_state.assign_charge_state_by_index(d, cs);
         };
 
-        if (loc_pot_cell < t[static_cast<std::size_t>(charge_transition_threshold_bounds::NEGATIVE_UPPER_BOUND)])
+        if (loc_pot_dot < t[static_cast<std::size_t>(charge_transition_threshold_bounds::NEGATIVE_UPPER_BOUND)])
         {
             if (current != model::charge_state::NEGATIVE)
             {
                 switch_to(model::charge_state::NEGATIVE);
             }
         }
-        else if (loc_pot_cell > t[static_cast<std::size_t>(charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
+        else if (loc_pot_dot > t[static_cast<std::size_t>(charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
         {
             // the dependent SiDB can only be positively charged in a three-state simulation
             if ((charge_index_base == 3 || !three_state_sidb_indices.empty()) &&

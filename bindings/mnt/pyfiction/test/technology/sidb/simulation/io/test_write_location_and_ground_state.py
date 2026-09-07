@@ -16,8 +16,8 @@ from mnt.pyfiction import (
     lattice_site,
     quickexact,
     quickexact_params,
+    sidb_dot_tag,
     sidb_layout,
-    sidb_technology,
     write_location_and_ground_state,
 )
 
@@ -33,8 +33,8 @@ def test_write_location_and_ground_state(tmp_path: Path) -> None:
     """
 
     layout = sidb_layout()
-    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(2, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
 
     result = quickexact(layout, quickexact_params())
     assert result.charge_distributions

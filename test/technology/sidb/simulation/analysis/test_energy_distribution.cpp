@@ -57,7 +57,7 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
     SECTION("one layout with one SiDB placed")
     {
         layout lyt{};
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
 
         const potential_landscape              land{lyt};
         const std::vector<charge_distribution> all_cds{land.evaluate(charge_distribution{lyt, charge_state::NEUTRAL})};
@@ -70,9 +70,9 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
     SECTION("several layouts")
     {
         layout lyt{};
-        lyt.assign_cell_type({10, 5, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({11, 5, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 5, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({10, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({11, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({12, 5, 0}, dot_tag::NORMAL);
 
         const potential_landscape land{lyt, simulation_parameters{}};
 

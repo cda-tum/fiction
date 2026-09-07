@@ -293,15 +293,15 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
 
     layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({11, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({13, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({11, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({13, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({17, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({17, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({19, 0, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 
@@ -357,9 +357,9 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 
     layout lyt{};
 
-    lyt.assign_cell_type({5, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{3, -0.32};
 

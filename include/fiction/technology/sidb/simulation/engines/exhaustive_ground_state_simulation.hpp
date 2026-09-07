@@ -52,7 +52,7 @@ exhaustive_ground_state_simulation(const layout&                       lyt,
     simulation_result.sim_params     = params;
     simulation_result.lyt            = lyt;
 
-    if (lyt.num_cells() == 0)
+    if (lyt.num_dots() == 0)
     {
         return simulation_result;
     }

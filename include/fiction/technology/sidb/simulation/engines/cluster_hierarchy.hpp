@@ -138,17 +138,17 @@ cluster_hierarchy(const layout&                    lyt,
                   cluster_hierarchy_linkage_method linkage_method = cluster_hierarchy_linkage_method::MINIMUM_VARIANCE)
 {
     // no clusterizer call required for <= 1 SiDBs
-    if (lyt.num_cells() == 0)
+    if (lyt.num_dots() == 0)
     {
         return binary_cluster_hierarchy_node{{}, {nullptr, nullptr}};
     }
 
-    if (lyt.num_cells() == 1)
+    if (lyt.num_dots() == 1)
     {
         return binary_cluster_hierarchy_node{{0}, {nullptr, nullptr}};
     }
 
-    const auto num_sidbs = lyt.num_cells();
+    const auto num_sidbs = lyt.num_dots();
 
     alglib::real_2d_array d{};
     d.setlength(static_cast<alglib::ae_int_t>(num_sidbs), 2);

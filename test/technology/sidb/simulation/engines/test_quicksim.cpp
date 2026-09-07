@@ -86,7 +86,7 @@ TEST_CASE("Single SiDB QuickSim simulation", "[quicksim]")
 {
     layout lyt{};
 
-    lyt.assign_cell_type({1, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
 
     const quicksim_params qs_params{.sim_params = simulation_parameters{2, -0.30}};
 
@@ -117,15 +117,15 @@ TEST_CASE("QuickSim simulation of several SiDBs with varying thread counts", "[q
 {
     layout lyt{};
 
-    lyt.assign_cell_type({1, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({3, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({3, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({6, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({7, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({6, 10, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 10, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 10, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({7, 10, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.30};
 
@@ -193,22 +193,22 @@ TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs with var
 {
     layout lyt{};
 
-    lyt.assign_cell_type({-13, -1, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({-13, -1, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({-9, -1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({-7, -1, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({-9, -1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({-7, -1, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({-3, -1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({-1, -1, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({-3, -1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({-1, -1, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({3, -1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({5, -1, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({3, -1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({5, -1, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({9, -1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({11, -1, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({9, -1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({11, -1, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({15, -1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({17, -1, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({15, -1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({17, -1, 1}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 
@@ -301,15 +301,15 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with varying threa
 {
     layout lyt{};
 
-    lyt.assign_cell_type({-11, -2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({-10, -1, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({-4, -1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({-11, -2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({-10, -1, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({-4, -1, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({-3, -2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({-7, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({-3, -2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({-7, 0, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({-7, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({-7, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({-7, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({-7, 3, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 
@@ -395,16 +395,16 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01 and vary
 {
     layout lyt{};
 
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 5, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({10, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 8, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 1, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.28};
 
@@ -497,8 +497,8 @@ TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread counts", 
 {
     layout lyt{};
 
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 2, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.25};
 
@@ -583,25 +583,25 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]
     layout lyt{};
 
     // design random SiDB layout
-    lyt.assign_cell_type({11, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({37, 8, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({11, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({37, 8, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({17, 6, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({37, 19, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({17, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({37, 19, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({0, 17, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({0, 17, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({39, 10, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({22, 19, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({39, 10, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({22, 19, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({5, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({17, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({5, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({17, 2, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({27, 13, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({27, 16, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({27, 13, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({27, 16, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 10, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({8, 10, 1}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 
@@ -619,7 +619,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]
 
         const auto& charge_lyt_first = sim_results.charge_distributions.front();
 
-        charge_lyt_first.foreach_cell(
+        charge_lyt_first.foreach_dot(
             [&](const auto& cell)
             {
                 if (cell != lattice_site{5, 3, 0})
@@ -698,25 +698,25 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all negative
 {
     layout lyt{};
 
-    lyt.assign_cell_type({26, 10, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({23, 19, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({26, 10, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({23, 19, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({0, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({38, 10, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({38, 10, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({11, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({13, 2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({11, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({13, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({40, 19, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 9, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({40, 19, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 9, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({19, 16, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 8, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({19, 16, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({5, 8, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 15, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({39, 9, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({8, 15, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({39, 9, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({30, 15, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({30, 15, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 
@@ -802,10 +802,10 @@ TEST_CASE("Edge case with four SiDBs", "[quicksim]")
 {
     layout lyt{};
 
-    lyt.assign_cell_type({0, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({3, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({3, 0, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({3, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({3, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
 
     quicksim_params qs_params{};
 
@@ -828,16 +828,16 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01", "[ExGS
 {
     layout lyt{};
 
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 5, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({10, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 8, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 1, 0}, dot_tag::NORMAL);
 
     simulation_parameters params{2, -0.28};
 
@@ -993,18 +993,18 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01", "[ExGS
 TEST_CASE("QuickSim gate simulation on the Si-111 surface", "[quicksim]")
 {
     layout lyt{lattice::si_111_1x1()};
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({2, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({5, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4, 8, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 10, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 8, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 10, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4, 14, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 14, 0}, dot_tag::NORMAL);
 
     const quicksim_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
 
@@ -1072,8 +1072,8 @@ TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quicksim]")
     SECTION("10 input applied")
     {
         auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({23, 1, 1}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::EMPTY);
+        lyt.assign_dot_tag({23, 1, 1}, dot_tag::EMPTY);
 
         const quicksim_params params{.sim_params      = simulation_parameters{2, -0.32, 5.6, 5},
                                      .iteration_steps = 3000,

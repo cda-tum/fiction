@@ -87,7 +87,7 @@ struct quicksim_params
  */
 [[nodiscard]] inline std::optional<result> quicksim(const layout& lyt, const quicksim_params& ps = quicksim_params{})
 {
-    if (ps.iteration_steps == 0 || lyt.num_cells() == 0 || lyt.num_charged_defects() > 0)
+    if (ps.iteration_steps == 0 || lyt.num_dots() == 0 || lyt.num_charged_defects() > 0)
     {
         return std::nullopt;
     }

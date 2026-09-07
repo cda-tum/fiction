@@ -17,8 +17,8 @@ from mnt.pyfiction import (
     lattice,
     lattice_site,
     sidb_charge_state,
+    sidb_dot_tag,
     sidb_layout,
-    sidb_technology,
 )
 
 
@@ -26,9 +26,9 @@ def test_three_sidbs() -> None:
     """ClusterComplete simulates a three-SiDB layout."""
 
     layout = sidb_layout()
-    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(1, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(2, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
 
     params = clustercomplete_params()
     params.simulation_parameters.base = 2
@@ -66,10 +66,10 @@ def test_perturber_and_sidb_pair_111() -> None:
     """ClusterComplete finds the H-Si(111)-1x1 ground state."""
 
     layout = sidb_layout(lattice.si_111_1x1())
-    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(1, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(2, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(3, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
 
     params = clustercomplete_params()
     params.simulation_parameters.base = 2

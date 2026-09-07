@@ -160,9 +160,9 @@ class quickexact_impl
                         sim_result.charge_distributions.push_back(state.snapshot());
                     }
 
-                    // `dependent_cell_mode::VARIABLE` allows that the charge state of the dependent cell is
+                    // `dependent_dot_mode::VARIABLE` allows that the charge state of the dependent dot is
                     // automatically changed based on the new charge distribution.
-                    state.increase_charge_index_by_one(simulation::detail::dependent_cell_mode::VARIABLE);
+                    state.increase_charge_index_by_one(simulation::detail::dependent_dot_mode::VARIABLE);
                 }
 
                 if (state.is_physically_valid())
@@ -232,7 +232,7 @@ class quickexact_impl
 
         for (const auto i : preassigned_negative_sidbs)
         {
-            reduced.assign_cell_type(sites[i], sidb_technology::cell_type::EMPTY);
+            reduced.assign_dot_tag(sites[i], dot_tag::EMPTY);
             // IMPORTANT: The pre-assigned negatively charged SiDBs (they have to be negatively charged to
             // fulfill the population stability) are considered as negatively charged defects in the layout.
             reduced.assign_defect(sites[i], model::defect{model::defect_type::UNKNOWN, -1, params.sim_params.epsilon_r,
@@ -255,13 +255,13 @@ class quickexact_impl
             reduced_landscape, model::charge_state::NEUTRAL, simulation::detail::simulation_state::energy_model::FULL,
             simulation::detail::simulation_state::index_decoding::TRACKED};
 
-        reduced_state.update_after_charge_change(simulation::detail::dependent_cell_mode::FIXED);
-        reduced_state.assign_dependent_cell(0);
+        reduced_state.update_after_charge_change(simulation::detail::dependent_dot_mode::FIXED);
+        reduced_state.assign_dependent_dot(0);
 
         // Update all local potentials, system energy, and physical validity. The flag is set to
-        // `dependent_cell_mode::VARIABLE` to allow the dependent cell to change its charge state based on the N-1 SiDBs
+        // `dependent_dot_mode::VARIABLE` to allow the dependent dot to change its charge state based on the N-1 SiDBs
         // to fulfill the local population stability at its position.
-        reduced_state.update_after_charge_change(simulation::detail::dependent_cell_mode::VARIABLE);
+        reduced_state.update_after_charge_change(simulation::detail::dependent_dot_mode::VARIABLE);
 
         if (base_number == required_simulation_base_number::TWO)
         {
@@ -312,7 +312,7 @@ class quickexact_impl
         for (gci = 0; gci <= reduced_state.max_charge_index(); ++gci)
         {
             reduced_state.assign_charge_index_by_gray_code(
-                *gci, previous_charge_index, simulation::detail::dependent_cell_mode::VARIABLE,
+                *gci, previous_charge_index, simulation::detail::dependent_dot_mode::VARIABLE,
                 simulation::detail::energy_calculation::KEEP_OLD_ENERGY_VALUE,
                 simulation::detail::charge_distribution_history::CONSIDER);
 
@@ -337,7 +337,7 @@ class quickexact_impl
         // Not executed to detect if 3-state simulation is required, but to detect the SiDBs that could be positively
         // charged (important to speed up the simulation).
         [[maybe_unused]] const auto required = reduced_state.is_three_state_simulation_required();
-        reduced_state.update_after_charge_change(simulation::detail::dependent_cell_mode::VARIABLE);
+        reduced_state.update_after_charge_change(simulation::detail::dependent_dot_mode::VARIABLE);
 
         while (reduced_state.charge_index() < reduced_state.max_charge_index())
         {
@@ -349,7 +349,7 @@ class quickexact_impl
                 }
 
                 reduced_state.increase_charge_index_of_sub_layout_by_one(
-                    simulation::detail::dependent_cell_mode::VARIABLE,
+                    simulation::detail::dependent_dot_mode::VARIABLE,
                     simulation::detail::energy_calculation::KEEP_OLD_ENERGY_VALUE,
                     simulation::detail::charge_distribution_history::CONSIDER);
             }
@@ -364,7 +364,7 @@ class quickexact_impl
                 reduced_state.reset_charge_index_sub_layout();
             }
 
-            reduced_state.increase_charge_index_by_one(simulation::detail::dependent_cell_mode::VARIABLE,
+            reduced_state.increase_charge_index_by_one(simulation::detail::dependent_dot_mode::VARIABLE,
                                                        simulation::detail::energy_calculation::KEEP_OLD_ENERGY_VALUE);
         }
 
@@ -377,7 +377,7 @@ class quickexact_impl
             }
 
             reduced_state.increase_charge_index_of_sub_layout_by_one(
-                simulation::detail::dependent_cell_mode::VARIABLE,
+                simulation::detail::dependent_dot_mode::VARIABLE,
                 simulation::detail::energy_calculation::KEEP_OLD_ENERGY_VALUE,
                 simulation::detail::charge_distribution_history::CONSIDER);
         }

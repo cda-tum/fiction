@@ -54,7 +54,7 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
 
     SECTION("layout with one SiDB placed")
     {
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
 
         const potential_landscape        land{lyt};
         std::vector<charge_distribution> all_cds{};
@@ -68,9 +68,9 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
 
     SECTION("layout with three SiDBs placed")
     {
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({10, 5, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({9, 4, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({10, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({9, 4, 1}, dot_tag::NORMAL);
 
         const potential_landscape        land{lyt};
         std::vector<charge_distribution> all_cds{};

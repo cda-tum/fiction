@@ -23,10 +23,10 @@ from mnt.pyfiction import (
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_charge_state,
+    sidb_dot_tag,
     sidb_layout,
     sidb_simulation_parameters,
     sidb_simulation_result,
-    sidb_technology,
 )
 
 
@@ -43,9 +43,9 @@ def test_three_sidbs(lat: lattice) -> None:
 
     layout = sidb_layout(lat)
 
-    layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(4, 0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(6, 0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
 
     landscape = potential_landscape(layout, sidb_simulation_parameters())
 
@@ -93,8 +93,8 @@ def test_legacy_results(layout: sidb_100_lattice | sidb_111_lattice) -> None:
         layout: Cell-level layout to test.
     """
 
-    layout.assign_cell_type((0, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((2, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag((0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag((2, 0, 0), sidb_dot_tag.NORMAL)
 
     result = quickexact(layout, quickexact_params())
 

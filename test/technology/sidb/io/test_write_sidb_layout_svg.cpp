@@ -750,10 +750,10 @@ TEST_CASE("Generate SVG for an sidb::layout with a charge distribution", "[write
 {
     sidb::layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 0, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({3, 1, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({3, 1, 1}, dot_tag::NORMAL);
 
     sidb::charge_distribution cd{lyt};
     cd.assign_charge_state({0, 0, 0}, charge_state::POSITIVE);

@@ -71,7 +71,7 @@ TEST_CASE("Empty layout Ground State Space construction", "[ground-state-space]"
 TEST_CASE("Ground State Space construction of a single SiDB", "[ground-state-space]")
 {
     layout lyt{};
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
 
     const ground_state_space_results& res = ground_state_space(lyt);
 
@@ -101,8 +101,8 @@ TEST_CASE("Ground State Space construction of two SiDBs directly next to each ot
 {
     layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({0, 0, 1}, dot_tag::NORMAL);
 
     SECTION("Base 2")
     {
@@ -123,14 +123,14 @@ TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-state-spa
 {
     layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 2, 0}, sidb_technology::cell_type::NORMAL);  // neut
-    lyt.assign_cell_type({4, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({2, 2, 0}, dot_tag::NORMAL);  // neut
+    lyt.assign_dot_tag({4, 1, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({0, 7, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 6, 0}, sidb_technology::cell_type::NORMAL);  // neut
-    lyt.assign_cell_type({6, 5, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 8, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 7, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1, 6, 0}, dot_tag::NORMAL);  // neut
+    lyt.assign_dot_tag({6, 5, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 8, 1}, dot_tag::NORMAL);
 
     const ground_state_space_results& gss_res =
         ground_state_space(lyt, ground_state_space_params{.sim_params = simulation_parameters{2}});
@@ -314,23 +314,23 @@ TEST_CASE("Ground state space construction of a 14 DB layout", "[ground-state-sp
 {
     layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({2, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 1, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({0, 7, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 6, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 5, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 8, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 7, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 5, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 8, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 1, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4, 7, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 6, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 5, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 8, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 7, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({5, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({10, 5, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 8, 1}, dot_tag::NORMAL);
 
     const ground_state_space_results& gss_res = ground_state_space(lyt);
 
@@ -354,41 +354,41 @@ TEST_CASE("Ground state space construction of a 28 DB layout", "[ground-state-sp
 {
     layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({2, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 1, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({0, 7, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 6, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 5, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 8, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 7, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 5, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 8, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 1, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4, 7, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 6, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 5, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 8, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 7, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({5, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({10, 5, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 8, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({0 + 8, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2 + 8, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4 + 8, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0 + 8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({2 + 8, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4 + 8, 1, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({0 + 8, 7, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1 + 8, 6, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6 + 8, 5, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4 + 8, 8, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0 + 8, 7, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1 + 8, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6 + 8, 5, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4 + 8, 8, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4 + 8, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6 + 8, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8 + 8, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4 + 8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6 + 8, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8 + 8, 1, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4 + 8, 7, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({5 + 8, 6, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10 + 8, 5, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8 + 8, 8, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4 + 8, 7, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({5 + 8, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({10 + 8, 5, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8 + 8, 8, 1}, dot_tag::NORMAL);
 
     const ground_state_space_results& gss_res = ground_state_space(lyt);
 
@@ -480,10 +480,10 @@ TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[ground-state
         for (const auto& lat : lattices)
         {
             layout lyt{lat};
-            lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({2, 2, 0}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({3, 2, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_dot_tag({1, 1, 0}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({2, 1, 1}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({2, 2, 0}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({3, 2, 0}, dot_tag::NORMAL);
 
             verify_layout(lyt);
         }
@@ -494,10 +494,10 @@ TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[ground-state
         for (const auto& lat : lattices)
         {
             layout lyt{lat};
-            lyt.assign_cell_type({2, 0, 1}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({4, 0, 1}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({3, 1, 0}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({4, 1, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_dot_tag({2, 0, 1}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({4, 0, 1}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({3, 1, 0}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({4, 1, 0}, dot_tag::NORMAL);
 
             verify_layout(lyt);
         }
@@ -508,10 +508,10 @@ TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[ground-state
         for (const auto& lat : lattices)
         {
             layout lyt{lat};
-            lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({1, 2, 0}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({1, 2, 0}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({3, 0, 0}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({4, 2, 0}, dot_tag::NORMAL);
 
             verify_layout(lyt);
         }
@@ -522,13 +522,13 @@ TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[ground-state
         for (const auto& lat : lattices)
         {
             layout lyt{lat};
-            lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({0, 1, 0}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({0, 1, 1}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({0, 2, 0}, sidb_technology::cell_type::NORMAL);
-            lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::NORMAL);
+            lyt.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({0, 1, 0}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({1, 1, 0}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({0, 1, 1}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({0, 2, 0}, dot_tag::NORMAL);
+            lyt.assign_dot_tag({4, 2, 0}, dot_tag::NORMAL);
 
             verify_layout(lyt);
         }

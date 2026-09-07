@@ -18,9 +18,9 @@ from mnt.pyfiction import (
     sidb_charge_state,
     sidb_defect,
     sidb_defect_type,
+    sidb_dot_tag,
     sidb_layout,
     sidb_simulation_parameters,
-    sidb_technology,
 )
 
 
@@ -28,9 +28,9 @@ def test_perturber_and_sidb_pair() -> None:
     """QuickSim finds the H-Si(100)-2x1 ground state."""
 
     layout = sidb_layout()
-    layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(4, 0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(6, 0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
 
     params = quicksim_params()
     params.simulation_parameters = sidb_simulation_parameters()
@@ -65,10 +65,10 @@ def test_perturber_and_sidb_pair_111() -> None:
     """QuickSim finds the H-Si(111)-1x1 ground state and honors its timeout."""
 
     layout = sidb_layout(lattice.si_111_1x1())
-    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(1, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(2, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(3, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
 
     params = quicksim_params()
     params.simulation_parameters = sidb_simulation_parameters()
@@ -104,8 +104,8 @@ def test_charged_defects_are_not_supported() -> None:
     """QuickSim rejects layouts with charged defects."""
 
     layout = sidb_layout()
-    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(4, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(4, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_defect(lattice_site(2, 2, 0), sidb_defect(sidb_defect_type.SI_VACANCY, -1))
 
     assert quicksim(layout) is None

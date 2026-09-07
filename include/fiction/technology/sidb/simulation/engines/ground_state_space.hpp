@@ -1221,7 +1221,7 @@ class ground_state_space_impl
 [[nodiscard]] inline ground_state_space_results ground_state_space(const layout&                    lyt,
                                                                    const ground_state_space_params& params = {})
 {
-    if (lyt.num_cells() == 0)
+    if (lyt.num_dots() == 0)
     {
         return ground_state_space_results{};
     }

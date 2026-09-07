@@ -240,7 +240,7 @@ class charge_distribution
      * @param fn Function to apply.
      */
     template <typename Fn>
-    void foreach_cell(Fn&& fn) const
+    void foreach_dot(Fn&& fn) const
     {
         std::ranges::for_each(sites(), std::forward<Fn>(fn));
     }

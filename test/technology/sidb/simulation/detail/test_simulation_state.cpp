@@ -44,9 +44,9 @@ namespace
 layout three_sidbs()
 {
     layout lyt{};
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
     return lyt;
 }
 
@@ -122,10 +122,10 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
     SECTION("the dependent SiDB follows the others")
     {
         detail::simulation_state state{land, charge_state::NEUTRAL};
-        state.assign_dependent_cell(0);
+        state.assign_dependent_dot(0);
         CHECK(state.max_charge_index() == 3);
 
-        state.update_after_charge_change(detail::dependent_cell_mode::VARIABLE);
+        state.update_after_charge_change(detail::dependent_dot_mode::VARIABLE);
         // the isolated SiDB 0 is negative whatever the others do
         CHECK(state.get_charge_state_by_index(0) == charge_state::NEGATIVE);
 
@@ -135,7 +135,7 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
         for (uint64_t gray = 0; gray <= state.max_charge_index(); ++gray)
         {
             const auto code = gray ^ (gray >> uint64_t{1});
-            state.assign_charge_index_by_gray_code(code, previous, detail::dependent_cell_mode::VARIABLE,
+            state.assign_charge_index_by_gray_code(code, previous, detail::dependent_dot_mode::VARIABLE,
                                                    detail::energy_calculation::KEEP_OLD_ENERGY_VALUE,
                                                    detail::charge_distribution_history::CONSIDER);
             previous = code;
@@ -190,9 +190,9 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
     SECTION("three-state detection")
     {
         layout close{};
-        close.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-        close.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
-        close.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::NORMAL);
+        close.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+        close.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
+        close.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
 
         const potential_landscape dense{close, simulation_parameters{2, -0.32}};
         detail::simulation_state  state{dense, charge_state::NEGATIVE};
@@ -209,7 +209,7 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
         layout large{};
         for (int32_t x = 0; x < 64; ++x)
         {
-            large.assign_cell_type({x, 0, 0}, sidb_technology::cell_type::NORMAL);
+            large.assign_dot_tag({x, 0, 0}, dot_tag::NORMAL);
         }
 
         const potential_landscape      large_landscape{large, simulation_parameters{2, -0.32}};

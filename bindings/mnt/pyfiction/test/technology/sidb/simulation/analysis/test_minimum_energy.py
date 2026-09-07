@@ -19,9 +19,9 @@ from mnt.pyfiction import (
     minimum_energy,
     potential_landscape,
     sidb_charge_state,
+    sidb_dot_tag,
     sidb_layout,
     sidb_simulation_parameters,
-    sidb_technology,
 )
 
 
@@ -32,9 +32,9 @@ from mnt.pyfiction import (
 def test_three_sidbs(lat):
     layout = sidb_layout(lat)
 
-    layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(4, 0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(6, 0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
 
     landscape = potential_landscape(layout, sidb_simulation_parameters())
 

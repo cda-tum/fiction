@@ -144,9 +144,9 @@ TEST_CASE("Print SiDBs with a charge distribution", "[print-sidb-layout]")
 {
     layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 0, 1}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 0, 1}, dot_tag::OUTPUT);
     lyt.assign_defect({6, 0, 1}, defect{defect_type::UNKNOWN, -1});
 
     charge_distribution cd{lyt, charge_state::NEGATIVE};

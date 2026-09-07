@@ -39,8 +39,8 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
     SECTION("degenerate ground state")
     {
         layout lyt{};
-        lyt.assign_cell_type({1, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({3, 3, 0}, dot_tag::NORMAL);
 
         charge_distribution first{lyt};
         first.assign_charge_state({1, 3, 0}, charge_state::NEGATIVE);
@@ -101,15 +101,15 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
     {
         layout lyt{};
 
-        lyt.assign_cell_type({1, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({3, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({4, 3, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({6, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({7, 3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({6, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({7, 3, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({6, 10, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({7, 10, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({6, 10, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({7, 10, 0}, dot_tag::NORMAL);
 
         constexpr simulation_parameters params{2, -0.32};
 

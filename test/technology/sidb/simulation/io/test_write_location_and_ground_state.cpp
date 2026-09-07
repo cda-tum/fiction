@@ -52,10 +52,10 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
 
     SECTION("Output is written to ostream correctly, degenerated GS")
     {
-        lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({5, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({8, 0}, dot_tag::NORMAL);
 
         const simulation_parameters params{2, -0.32};
         const auto                  simulation_results = exhaustive_ground_state_simulation(lyt, params);
@@ -80,9 +80,9 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
 
     SECTION("Output is written to ostream correctly, unique GS")
     {
-        lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({3, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({5, 0}, dot_tag::NORMAL);
 
         const simulation_parameters params{2, -0.32};
         const auto                  simulation_results = exhaustive_ground_state_simulation(lyt, params);

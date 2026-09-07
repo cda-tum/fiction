@@ -123,6 +123,9 @@ TEST_CASE("Cell-level layout to SiDB layout", "[cell-level-layout-conversion]")
 
 TEST_CASE("Cell conversion rejects unrepresentable coordinates", "[cell-level-layout-conversion]")
 {
+    lattice_site invalid{};
+    invalid.z = -1;
+    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt_siqad>(invalid), std::out_of_range);
     constexpr auto max_coordinate = std::numeric_limits<int32_t>::max();
     const auto     boundary       = site_at_row(max_coordinate, max_coordinate);
     CHECK(to_cell<sidb_cell_clk_lyt>(boundary) == coords::offset{max_coordinate, max_coordinate});

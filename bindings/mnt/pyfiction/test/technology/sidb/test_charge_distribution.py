@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import charge_distribution, lattice_site, sidb_charge_state, sidb_layout, sidb_technology
+from mnt.pyfiction import charge_distribution, lattice_site, sidb_charge_state, sidb_dot_tag, sidb_layout
 
 
 def three_sidbs() -> sidb_layout:
@@ -23,9 +23,9 @@ def three_sidbs() -> sidb_layout:
     """
 
     layout = sidb_layout()
-    layout.assign_cell_type(lattice_site(3, 1, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(1, 0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(3, 1, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
     return layout
 
 

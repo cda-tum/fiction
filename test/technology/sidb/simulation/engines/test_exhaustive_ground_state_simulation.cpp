@@ -53,7 +53,7 @@ TEST_CASE("Empty layout ExGS simulation", "[exhaustive-ground-state-simulation]"
 TEST_CASE("Single SiDB ExGS simulation", "[exhaustive-ground-state-simulation]")
 {
     layout lyt{};
-    lyt.assign_cell_type({1, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 
@@ -67,9 +67,9 @@ TEST_CASE("ExGS simulation of a one BDL pair with one perturber", "[exhaustive-g
 {
     layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 
@@ -82,15 +82,15 @@ TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, using siqa
 {
     layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({11, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({13, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({11, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({13, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({17, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({17, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({19, 0, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 
@@ -123,15 +123,15 @@ TEST_CASE("ExGS simulation of a Y-shaped SiDB arrangement", "[exhaustive-ground-
 {
     layout lyt{};
 
-    lyt.assign_cell_type({-11, -2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({-10, -1, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({-4, -1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({-11, -2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({-10, -1, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({-4, -1, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({-3, -2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({-7, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({-3, -2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({-7, 0, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({-7, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({-7, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({-7, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({-7, 3, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 
@@ -156,16 +156,16 @@ TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "[exhausti
 {
     layout lyt{};
 
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 5, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({10, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 8, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({16, 1, 0}, dot_tag::NORMAL);
 
     simulation_parameters params{2, -0.28};
 
@@ -297,17 +297,17 @@ TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "[exhausti
 TEST_CASE("ExGS simulation of positively charged SiDBs", "[exhaustive-ground-state-simulation]")
 {
     layout lyt{};
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({11, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({11, 0, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({11, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({11, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({12, 0, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({18, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({20, 0, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{3, -0.32};
 
@@ -319,18 +319,18 @@ TEST_CASE("ExGS simulation of positively charged SiDBs", "[exhaustive-ground-sta
 TEST_CASE("ExGS gate simulation of Si-111 surface", "[exhaustive-ground-state-simulation]")
 {
     layout lyt{lattice::si_111_1x1()};
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({2, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({6, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({5, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4, 8, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 10, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 8, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({4, 10, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4, 14, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 14, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 
@@ -354,15 +354,15 @@ TEST_CASE("7 SiDB layout", "[exhaustive-ground-state-simulation]")
 {
     layout lyt{};
 
-    lyt.assign_cell_type({-6, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 4, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({-6, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({2, 4, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4, 6, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({4, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({8, 3, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({-8, -3, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({-1, -1, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({0, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({-8, -3, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({-1, -1, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({0, 2, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.25};
 

@@ -148,7 +148,7 @@ class location_and_ground_state_writer
         }
         os << '\n';
 
-        for (std::size_t i = 0; i < sim_result.lyt.num_cells(); ++i)
+        for (std::size_t i = 0; i < sim_result.lyt.num_dots(); ++i)
         {
             const auto pos = sim_result.lyt.get_lattice().nm_position(sim_result.lyt.sidbs()[i]);
             os << fmt::format("{:.3f};{:.3f};", pos.first, pos.second);

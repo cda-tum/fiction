@@ -35,9 +35,9 @@ using namespace fiction::sidb::model;
 TEST_CASE("Charge distribution over a layout", "[charge-distribution]")
 {
     layout lyt{};
-    lyt.assign_cell_type({3, 1, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({3, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1, 0, 1}, dot_tag::NORMAL);
 
     SECTION("default state")
     {
@@ -74,7 +74,7 @@ TEST_CASE("Charge distribution over a layout", "[charge-distribution]")
         CHECK(cd.num_positive_sidbs() == 1);
 
         std::vector<lattice_site> visited{};
-        cd.foreach_cell([&visited](const auto& s) { visited.push_back(s); });
+        cd.foreach_dot([&visited](const auto& s) { visited.push_back(s); });
         CHECK(visited == lyt.sidbs());
 
         cd.assign_all_charge_states(charge_state::NEGATIVE);

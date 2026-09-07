@@ -39,10 +39,10 @@ using namespace fiction::sidb::simulation;
 TEST_CASE("Several tests", "[equivalence-check-for-simulation-results]")
 {
     layout lyt1{};
-    lyt1.assign_cell_type(site_at_row(0, 0), sidb_technology::cell_type::NORMAL);
-    lyt1.assign_cell_type(site_at_row(0, 1), sidb_technology::cell_type::NORMAL);
-    lyt1.assign_cell_type(site_at_row(0, 2), sidb_technology::cell_type::NORMAL);
-    lyt1.assign_cell_type(site_at_row(0, 3), sidb_technology::cell_type::NORMAL);
+    lyt1.assign_dot_tag(site_at_row(0, 0), dot_tag::NORMAL);
+    lyt1.assign_dot_tag(site_at_row(0, 1), dot_tag::NORMAL);
+    lyt1.assign_dot_tag(site_at_row(0, 2), dot_tag::NORMAL);
+    lyt1.assign_dot_tag(site_at_row(0, 3), dot_tag::NORMAL);
 
     const potential_landscape land{lyt1};
 
@@ -85,8 +85,8 @@ TEST_CASE("Several tests", "[equivalence-check-for-simulation-results]")
     SECTION("non-equivalence due to different number of SiDBs")
     {
         auto lyt2 = lyt1;
-        lyt2.assign_cell_type(site_at_row(4, 2), sidb_technology::cell_type::NORMAL);
-        lyt2.assign_cell_type(site_at_row(4, 3), sidb_technology::cell_type::NORMAL);
+        lyt2.assign_dot_tag(site_at_row(4, 2), dot_tag::NORMAL);
+        lyt2.assign_dot_tag(site_at_row(4, 3), dot_tag::NORMAL);
         results2.lyt                  = lyt2;
         results2.charge_distributions = {charge_distribution{lyt2, charge_state::NEUTRAL},
                                          charge_distribution{lyt2, charge_state::NEGATIVE}};
@@ -119,7 +119,7 @@ TEST_CASE("Simulation equivalence beyond the charge-index range", "[equivalence-
     layout                     lyt{};
     for (std::size_t i = 0; i < digits.size(); ++i)
     {
-        lyt.assign_cell_type({i, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({static_cast<int32_t>(i), 0}, dot_tag::NORMAL);
     }
     const charge_distribution zero{lyt};
     auto                      wrapped = zero;
