@@ -51,10 +51,10 @@ using namespace fiction::utils::math;
 
 int main()  // NOLINT
 {
-    const auto all_cells_in_region = sites_in_area(site_at_row(0, 0), site_at_row(10, 10));
+    const auto all_sites_in_region = sites_in_area(site_at_row(0, 0), site_at_row(10, 10));
 
     const auto all_distributions =
-        determine_all_combinations_of_distributing_k_entities_on_n_positions(4, all_cells_in_region.size());
+        determine_all_combinations_of_distributing_k_entities_on_n_positions(4, all_sites_in_region.size());
 
     const auto params = simulation_parameters{3, -0.32};
 
@@ -96,7 +96,7 @@ int main()  // NOLINT
 
                     for (const auto idx : *std::next(all_distributions.cbegin(), static_cast<int64_t>(ix)))
                     {
-                        lyt.assign_cell_type(all_cells_in_region[idx], sidb_technology::cell_type::NORMAL);
+                        lyt.assign_dot_tag(all_sites_in_region[idx], dot_tag::NORMAL);
                     }
 
                     auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);
