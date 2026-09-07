@@ -242,7 +242,7 @@ inline void print_sidb_layout(std::ostream& os, const layout& lyt, const charge_
 }
 
 /**
- * Prints an `sidb::layout` as a lattice picture of its cell types. See the overload with a charge distribution
+ * Prints an `sidb::layout` as a lattice picture of its dot tags. See the overload with a charge distribution
  * pointer for the picture's layout.
  *
  * @param os Output stream to print into.

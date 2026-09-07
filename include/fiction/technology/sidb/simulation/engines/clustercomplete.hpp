@@ -86,7 +86,7 @@ struct clustercomplete_params
      */
     std::unordered_map<lattice_site, double> local_external_potential = {};
     /**
-     * Global external electrostatic potential. Value is applied on each cell in the layout.
+     * Global external electrostatic potential. Value is applied to each dot in the layout.
      */
     double global_potential = 0;
     /**
