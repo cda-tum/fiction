@@ -14,7 +14,6 @@
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author Anthropic (Claude)
  */
 
 #include <catch2/catch_test_macros.hpp>

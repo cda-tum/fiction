@@ -13,7 +13,6 @@
  * @brief Tests for `fiction/physical_design/orthogonal.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
- * @author Anthropic (Claude)
  */
 
 #include <catch2/catch_test_macros.hpp>

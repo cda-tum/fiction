@@ -12,7 +12,6 @@
  * @file
  * @brief A test helper that records the reports of a `fiction::utils::progress_callback`.
  * @author Marcel Walter (marcelwa)
- * @author Anthropic (Claude)
  */
 
 #pragma once
