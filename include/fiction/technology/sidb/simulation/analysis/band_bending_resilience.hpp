@@ -13,7 +13,6 @@
  * @brief Minimum potential that induces a charge transition in an SiDB layout.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

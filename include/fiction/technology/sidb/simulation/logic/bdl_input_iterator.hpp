@@ -13,7 +13,6 @@
  * @brief Iterates a BDL layout over all of its input patterns.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
- * @author OpenAI (Codex)
  */
 
 #pragma once

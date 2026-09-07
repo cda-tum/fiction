@@ -13,7 +13,6 @@
  * @brief Finds the physical parameters under which a charge distribution is valid.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

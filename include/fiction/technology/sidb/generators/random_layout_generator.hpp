@@ -13,7 +13,6 @@
  * @brief Generates SiDB layouts with randomly placed dots under placement constraints.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

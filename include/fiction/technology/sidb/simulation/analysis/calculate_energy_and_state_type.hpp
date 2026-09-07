@@ -13,7 +13,6 @@
  * @brief Labels simulated energy levels by their encoded logic.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

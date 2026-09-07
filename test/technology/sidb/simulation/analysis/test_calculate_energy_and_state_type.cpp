@@ -13,7 +13,6 @@
  * @brief Tests for `fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>

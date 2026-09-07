@@ -13,7 +13,6 @@
  * @brief Tests for `fiction/technology/sidb/simulation/analysis/physically_valid_parameters.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>

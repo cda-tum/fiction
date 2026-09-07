@@ -13,7 +13,6 @@
  * @brief Links BDL pairs into the input, output, and internal wires of a layout.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once
