@@ -12,7 +12,6 @@
  * @file
  * @brief Tests for `fiction/utils/progress.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author Anthropic (Claude)
  */
 
 #include <catch2/catch_test_macros.hpp>
