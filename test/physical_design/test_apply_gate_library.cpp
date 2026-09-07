@@ -94,7 +94,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
         const auto bestagon_and =
             to_sidb_layout(apply_gate_library<sidb_cell_clk_lyt, bestagon_library, hex_even_row_gate_clk_lyt>(layout));
 
-        CHECK(bestagon_and.num_cells() == 18);
+        CHECK(bestagon_and.num_dots() == 18);
 
         sidb::layout surface{sidb::lattice::si_111_1x1()};
         surface.assign_defect(site_at_row(-2, -3), defect{defect_type::DB, -1, 4.1, 1.8});
@@ -134,7 +134,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
             CHECK(is_operational(bestagon_and, std::vector<tt>{create_and_tt()}, design_gate_params.operational_params)
                       .first == operational_status::OPERATIONAL);
 
-            CHECK(bestagon_and.num_cells() == 19);
+            CHECK(bestagon_and.num_dots() == 19);
 
             SECTION("with defects")
             {
