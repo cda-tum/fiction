@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import area, inml_layout, lattice_site, qca_layout, sidb_layout, sidb_technology
+from mnt.pyfiction import area, inml_layout, lattice_site, qca_layout, sidb_dot_tag, sidb_layout
 
 
 def test_qca_area() -> None:
@@ -31,6 +31,6 @@ def test_sidb_area() -> None:
     assert area(lyt) == pytest.approx(0.0, abs=1e-7)
 
     # four columns and four single-SiDB rows
-    lyt.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type(lattice_site(4, 2, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_dot_tag(lattice_site(4, 2, 0), sidb_dot_tag.NORMAL)
     assert area(lyt) == pytest.approx(2.359296, abs=1e-7)
