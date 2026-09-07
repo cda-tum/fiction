@@ -82,7 +82,7 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
     SECTION("existing defect")
     {
         auto lyt = layout{};
-        lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
         lyt.assign_defect({1, 0}, defect{defect_type::DB, -1, 5.6, 5.0});
 
         const auto domain = defect_influence_grid_search(
@@ -98,8 +98,8 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
     SECTION("maximum lattice boundary")
     {
         auto lyt = layout{};
-        lyt.assign_cell_type({std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max(), 1},
-                             sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max(), 1},
+                           dot_tag::NORMAL);
 
         auto boundary_params                     = params;
         boundary_params.additional_scanning_area = {1, 1};
@@ -111,7 +111,7 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
     SECTION("QuickTrace at the maximum lattice column")
     {
         auto lyt = layout{};
-        lyt.assign_cell_type({std::numeric_limits<int32_t>::max(), 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({std::numeric_limits<int32_t>::max(), 0}, dot_tag::NORMAL);
 
         auto boundary_params                     = params;
         boundary_params.additional_scanning_area = {0, 0};
@@ -123,8 +123,8 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
     SECTION("QuickTrace tries every requested sample after an influential left edge")
     {
         auto lyt = layout{};
-        lyt.assign_cell_type(site_at_row(0, 0), sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type(site_at_row(2, 0), sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag(site_at_row(0, 0), dot_tag::NORMAL);
+        lyt.assign_dot_tag(site_at_row(2, 0), dot_tag::NORMAL);
 
         auto contour_params                     = params;
         contour_params.defect                   = defect{defect_type::DB, -1, 5.6, 5.0};
@@ -141,8 +141,8 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
     SECTION("QuickTrace abandons a contour whose backtrack point is occupied")
     {
         auto lyt = layout{};
-        lyt.assign_cell_type(site_at_row(0, 0), sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type(site_at_row(2, 0), sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag(site_at_row(0, 0), dot_tag::NORMAL);
+        lyt.assign_dot_tag(site_at_row(2, 0), dot_tag::NORMAL);
 
         auto contour_params                     = params;
         contour_params.defect                   = defect{defect_type::DB, -1, 5.6, 5.0};
@@ -156,7 +156,7 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
     SECTION("negative additional scanning area")
     {
         auto lyt = layout{};
-        lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
 
         auto invalid_params                     = params;
         invalid_params.additional_scanning_area = {-1, 0};
@@ -331,7 +331,7 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
 
         layout lyt{};
 
-        lyt.assign_cell_type(site_at_row(0, 0), sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag(site_at_row(0, 0), dot_tag::NORMAL);
 
         SECTION("Grid Search")
         {
@@ -356,7 +356,7 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
             .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
 
         layout lyt{};
-        lyt.assign_cell_type(site_at_row(0, 0), sidb_cell_clk_lyt_cube::cell_type::NORMAL);
+        lyt.assign_dot_tag(site_at_row(0, 0), dot_tag::NORMAL);
 
         const auto defect_operational_domain = defect_influence_grid_search(lyt, defect_operational_params);
         const auto defect_clearance          = calculate_defect_clearance(lyt, defect_operational_domain);
@@ -376,7 +376,7 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
             .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
 
         layout lyt{};
-        lyt.assign_cell_type(site_at_row(0, 0), sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag(site_at_row(0, 0), dot_tag::NORMAL);
         const layout lat{lyt};
 
         const auto defect_operational_domain = defect_influence_grid_search(lat, defect_operational_params);
@@ -400,9 +400,9 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
 
         layout lyt{};
 
-        lyt.assign_cell_type(site_at_row(0, 0), sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type(site_at_row(4, 0), sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type(site_at_row(6, 0), sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag(site_at_row(0, 0), dot_tag::NORMAL);
+        lyt.assign_dot_tag(site_at_row(4, 0), dot_tag::NORMAL);
+        lyt.assign_dot_tag(site_at_row(6, 0), dot_tag::NORMAL);
 
         const layout lat{lyt};
 
@@ -426,15 +426,15 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
 
         layout lyt{};
 
-        lyt.assign_cell_type(site_at_row(10, 0), sidb_cell_clk_lyt_cube::cell_type::NORMAL);
-        lyt.assign_cell_type(site_at_row(0, 2), sidb_cell_clk_lyt_cube::cell_type::NORMAL);
-        lyt.assign_cell_type(site_at_row(8, 2), sidb_cell_clk_lyt_cube::cell_type::NORMAL);
+        lyt.assign_dot_tag(site_at_row(10, 0), dot_tag::NORMAL);
+        lyt.assign_dot_tag(site_at_row(0, 2), dot_tag::NORMAL);
+        lyt.assign_dot_tag(site_at_row(8, 2), dot_tag::NORMAL);
 
-        lyt.assign_cell_type(site_at_row(2, 4), sidb_cell_clk_lyt_cube::cell_type::NORMAL);
-        lyt.assign_cell_type(site_at_row(6, 4), sidb_cell_clk_lyt_cube::cell_type::NORMAL);
-        lyt.assign_cell_type(site_at_row(4, 8), sidb_cell_clk_lyt_cube::cell_type::NORMAL);
-        lyt.assign_cell_type(site_at_row(4, 11), sidb_cell_clk_lyt_cube::cell_type::NORMAL);
-        lyt.assign_cell_type(site_at_row(4, 15), sidb_cell_clk_lyt_cube::cell_type::NORMAL);
+        lyt.assign_dot_tag(site_at_row(2, 4), dot_tag::NORMAL);
+        lyt.assign_dot_tag(site_at_row(6, 4), dot_tag::NORMAL);
+        lyt.assign_dot_tag(site_at_row(4, 8), dot_tag::NORMAL);
+        lyt.assign_dot_tag(site_at_row(4, 11), dot_tag::NORMAL);
+        lyt.assign_dot_tag(site_at_row(4, 15), dot_tag::NORMAL);
 
         const layout lat{lyt};
 
@@ -467,15 +467,15 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
 
         layout lyt{};
 
-        lyt.assign_cell_type({10, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({0, 1, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 1, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({10, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({0, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({8, 1, 0}, dot_tag::NORMAL);
 
-        lyt.assign_cell_type({2, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 4, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 5, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 7, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({2, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({4, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({4, 5, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({4, 7, 1}, dot_tag::NORMAL);
 
         const layout lat{lyt};
 
@@ -491,7 +491,7 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
 TEST_CASE("Concurrent defect-influence sampling matches grid results", "[defect-influence]")
 {
     layout lyt{};
-    lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
     const defect_influence_params params{.defect                   = defect{defect_type::DB, -1, 5.6, 5.0},
                                          .additional_scanning_area = {1, 1},
                                          .influence_def =

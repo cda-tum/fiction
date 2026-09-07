@@ -69,7 +69,7 @@ calculate_defect_clearance(const layout& lyt, const defect_influence_domain& def
 
             auto min_distance = std::numeric_limits<double>::infinity();
 
-            lyt.foreach_cell(
+            lyt.foreach_dot(
                 [&](const auto& c)
                 {
                     if (const auto d = lat.nm_distance(c, defect_pos); d < min_distance)

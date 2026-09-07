@@ -496,7 +496,7 @@ class defect_influence_impl
         };
 
         // a new defect cannot sit on an SiDB or replace an existing defect
-        if (!layout_to_analyze.is_empty_cell(defect_cell) ||
+        if (!layout_to_analyze.is_empty_site(defect_cell) ||
             layout_to_analyze.get_defect(defect_cell).type != model::defect_type::NONE)
         {
             return non_influential();
@@ -554,7 +554,7 @@ class defect_influence_impl
             return defect_influence_status::NON_INFLUENTIAL;
         }
 
-        if (lyt_without_candidate.get_cell_type(defect_pos) != sidb_technology::cell_type::EMPTY)
+        if (lyt_without_candidate.get_dot_tag(defect_pos) != dot_tag::EMPTY)
         {
             return defect_influence_status::NON_INFLUENTIAL;
         }
@@ -680,7 +680,7 @@ class defect_influence_impl
 
         const auto add = [this, &neighbors](const int32_t nx, const int64_t nrow)
         {
-            if (const auto s = site_at_row(nx, nrow); layout_to_analyze.is_empty_cell(s))
+            if (const auto s = site_at_row(nx, nrow); layout_to_analyze.is_empty_site(s))
             {
                 neighbors.push_back(s);
             }

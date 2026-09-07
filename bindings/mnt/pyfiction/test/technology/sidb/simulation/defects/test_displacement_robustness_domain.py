@@ -16,31 +16,31 @@ from mnt.pyfiction import (
     displacement_robustness_domain_params,
     displacement_robustness_domain_stats,
     lattice_site,
+    sidb_dot_tag,
     sidb_layout,
     sidb_simulation_parameters,
-    sidb_technology,
 )
 
 
 def test_siqad_and_gate_100_lattice():
     layout = sidb_layout()
 
-    layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.INPUT)
-    layout.assign_cell_type(lattice_site(2, 1, 1), sidb_technology.cell_type.INPUT)
+    layout.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
+    layout.assign_dot_tag(lattice_site(2, 1, 1), sidb_dot_tag.INPUT)
 
-    layout.assign_cell_type(lattice_site(20, 0, 1), sidb_technology.cell_type.INPUT)
-    layout.assign_cell_type(lattice_site(18, 1, 1), sidb_technology.cell_type.INPUT)
+    layout.assign_dot_tag(lattice_site(20, 0, 1), sidb_dot_tag.INPUT)
+    layout.assign_dot_tag(lattice_site(18, 1, 1), sidb_dot_tag.INPUT)
 
-    layout.assign_cell_type(lattice_site(4, 2, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(6, 3, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(4, 2, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(6, 3, 1), sidb_dot_tag.NORMAL)
 
-    layout.assign_cell_type(lattice_site(14, 3, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(16, 2, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(14, 3, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(16, 2, 1), sidb_dot_tag.NORMAL)
 
-    layout.assign_cell_type(lattice_site(10, 6, 0), sidb_technology.cell_type.OUTPUT)
-    layout.assign_cell_type(lattice_site(10, 7, 0), sidb_technology.cell_type.OUTPUT)
+    layout.assign_dot_tag(lattice_site(10, 6, 0), sidb_dot_tag.OUTPUT)
+    layout.assign_dot_tag(lattice_site(10, 7, 0), sidb_dot_tag.OUTPUT)
 
-    layout.assign_cell_type(lattice_site(10, 9, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
 
     params = displacement_robustness_domain_params()
 

@@ -529,7 +529,7 @@ class on_the_fly_gate_library
 
   private:
     /**
-     * Checks whether a predefined Bestagon gate can be used on a skeleton with defects: none of its logic cells may be
+     * Checks whether a predefined Bestagon gate can be used on a skeleton with defects: none of its logic dots may be
      * affected by a defect, and the gate has to be operational with the defects in place.
      *
      * @tparam TT Truth table type.
@@ -550,19 +550,18 @@ class on_the_fly_gate_library
 
         auto skeleton_with_defects_copy = skeleton_with_defects;
 
-        const auto logic_cells = bestagon_lyt.cells_of_type(sidb::sidb_technology::cell_type::LOGIC);
+        const auto logic_dots = bestagon_lyt.dots_with_tag(sidb::dot_tag::LOGIC);
 
-        assert(!logic_cells.empty() && "No Logic cells are found");
+        assert(!logic_dots.empty() && "No logic dots are found");
 
-        if (std::ranges::any_of(logic_cells,
-                                [&](const auto& l_cell) { return sidbs_affected_by_defects.contains(l_cell); }))
+        if (std::ranges::any_of(logic_dots, [&](const auto& dot) { return sidbs_affected_by_defects.contains(dot); }))
         {
             return false;
         }
 
-        for (const auto& l_cell : logic_cells)
+        for (const auto& dot : logic_dots)
         {
-            skeleton_with_defects_copy.assign_cell_type(l_cell, sidb::sidb_technology::cell_type::LOGIC);
+            skeleton_with_defects_copy.assign_dot_tag(dot, sidb::dot_tag::LOGIC);
         }
 
         const auto status = sidb::simulation::logic::is_operational(skeleton_with_defects_copy, truth_table,
@@ -572,7 +571,7 @@ class on_the_fly_gate_library
         return status == sidb::simulation::logic::operational_status::OPERATIONAL;
     }
     /**
-     * Reads the cell types of a designed gate back into a cell list: the tile's sites in raster order become
+     * Reads the dot tags of a designed gate back into a cell list: the tile's sites in raster order become
      * `'x'` (normal), `'i'` (input), `'o'` (output), `'l'` (logic), or `' '` (empty).
      *
      * @param lyt The designed gate; its cells lie within the tile.
@@ -591,24 +590,24 @@ class on_the_fly_gate_library
         {
             for (auto& cell : row)
             {
-                switch (lyt.get_cell_type(sites[cell_index]))
+                switch (lyt.get_dot_tag(sites[cell_index]))
                 {
-                    case sidb::sidb_technology::cell_type::NORMAL:
+                    case sidb::dot_tag::NORMAL:
                     {
                         cell = 'x';
                         break;
                     }
-                    case sidb::sidb_technology::cell_type::INPUT:
+                    case sidb::dot_tag::INPUT:
                     {
                         cell = 'i';
                         break;
                     }
-                    case sidb::sidb_technology::cell_type::OUTPUT:
+                    case sidb::dot_tag::OUTPUT:
                     {
                         cell = 'o';
                         break;
                     }
-                    case sidb::sidb_technology::cell_type::LOGIC:
+                    case sidb::dot_tag::LOGIC:
                     {
                         cell = 'l';
                         break;
@@ -668,7 +667,7 @@ class on_the_fly_gate_library
         return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
     }
     /**
-     * Builds a layout from a cell list: the tile's sites in raster order take the listed cell types.
+     * Builds a layout from a cell list: the tile's sites in raster order take the listed dot tags.
      *
      * @param cell_list The cell list.
      * @return The layout.
@@ -685,9 +684,9 @@ class on_the_fly_gate_library
         {
             for (std::size_t j = 0; j < gate_x_size(); ++j)
             {
-                if (const auto cell = cell_list.at(i).at(j); cell != sidb::sidb_technology::cell_type::EMPTY)
+                if (const auto cell = cell_list.at(i).at(j); cell != sidb::dot_tag::EMPTY)
                 {
-                    lyt.assign_cell_type(sites[counter], cell);
+                    lyt.assign_dot_tag(sites[counter], cell);
                 }
 
                 ++counter;

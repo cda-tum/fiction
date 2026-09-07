@@ -188,8 +188,8 @@ class displacement_robustness_domain_impl
                    "percentage_of_analyzed_displaced_layouts must be between 0.0 and 1.0");
         }
 
-        sidbs_of_the_original_layout.reserve(layout_to_analyze.num_cells());
-        layout_to_analyze.foreach_cell([this](const auto& c) { sidbs_of_the_original_layout.push_back(c); });
+        sidbs_of_the_original_layout.reserve(layout_to_analyze.num_dots());
+        layout_to_analyze.foreach_dot([this](const auto& c) { sidbs_of_the_original_layout.push_back(c); });
     }
     // NOLINTEND(modernize-pass-by-value)
     /**
@@ -360,12 +360,12 @@ class displacement_robustness_domain_impl
     [[nodiscard]] std::vector<std::vector<lattice_site>> calculate_all_possible_displacements_for_each_sidb()
     {
         std::vector<std::vector<lattice_site>> all{};
-        all.reserve(layout_to_analyze.num_cells());
+        all.reserve(layout_to_analyze.num_dots());
 
         const auto dx = static_cast<int64_t>(params.displacement_variations.first);
         const auto dy = static_cast<int64_t>(params.displacement_variations.second);
 
-        layout_to_analyze.foreach_cell(
+        layout_to_analyze.foreach_dot(
             [&](const auto& c)
             {
                 if (params.fixed_sidbs.contains(c))
@@ -443,11 +443,11 @@ class displacement_robustness_domain_impl
 
             for (std::size_t i = 0; i < cell_displacements.size(); ++i)
             {
-                displaced.assign_cell_type(cell_displacements[i],
-                                           layout_to_analyze.get_cell_type(sidbs_of_the_original_layout[i]));
+                displaced.assign_dot_tag(cell_displacements[i],
+                                         layout_to_analyze.get_dot_tag(sidbs_of_the_original_layout[i]));
             }
 
-            if (displaced.num_cells() == layout_to_analyze.num_cells())
+            if (displaced.num_dots() == layout_to_analyze.num_dots())
             {
                 layouts.push_back(std::move(displaced));
             }

@@ -192,7 +192,7 @@ int main()  // NOLINT
             }
 
             sidb_circuits_with_defects(benchmark, mockturtle::to_seconds(st.time_total),
-                                       st.exact_stats.num_aspect_ratios, *eq, result.num_cells());
+                                       st.exact_stats.num_aspect_ratios, *eq, result.num_dots());
 
             sidb_circuits_with_defects.save();
             sidb_circuits_with_defects.table();

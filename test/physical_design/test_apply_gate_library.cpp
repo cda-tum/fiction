@@ -86,18 +86,17 @@ void check_equivalence(const sidb::layout& layout_designed, const std::string& p
 {
     const auto layout_correct = read_sqd_layout(path_layout_correct);
 
-    REQUIRE(layout_designed.num_cells() == layout_correct.num_cells());
+    REQUIRE(layout_designed.num_dots() == layout_correct.num_dots());
 
-    REQUIRE(layout_designed.num_cells_of_type(sidb_technology::cell_type::LOGIC) ==
-            layout_correct.num_cells_of_type(sidb_technology::cell_type::LOGIC));
+    REQUIRE(layout_designed.num_dots_with_tag(dot_tag::LOGIC) == layout_correct.num_dots_with_tag(dot_tag::LOGIC));
 
-    layout_designed.foreach_cell(
+    layout_designed.foreach_dot(
         [&layout_correct, &layout_designed](const auto& c)
         {
             // Gates designed on-the-fly are not necessarily identical each time.
-            if (layout_designed.get_cell_type(c) != sidb_technology::cell_type::LOGIC)
+            if (layout_designed.get_dot_tag(c) != dot_tag::LOGIC)
             {
-                CHECK(layout_designed.get_cell_type(c) == layout_correct.get_cell_type(c));
+                CHECK(layout_designed.get_dot_tag(c) == layout_correct.get_dot_tag(c));
             }
         });
 }
@@ -170,7 +169,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                                      design_gate_params.operational_params)
                           .first == operational_status::OPERATIONAL);
 
-                CHECK(bestagon_and_with_defects.num_cells() == 19);
+                CHECK(bestagon_and_with_defects.num_dots() == 19);
             }
         }
         SECTION("AND gate cannot be designed with one SiDB, exception handling on invalid parameters")
