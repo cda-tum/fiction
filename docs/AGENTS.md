@@ -28,6 +28,15 @@ The `Writing` rules in the root `AGENTS.md` apply here in full. In addition:
   as reStructuredText. Keep prose and C++ directives in MyST.
 - Use rumdl's MyST-aware checks and run `prek run -a` after editing a page.
 
+## Publications
+
+- Keep publication metadata in `docs/references.bib`. Preserve existing citation keys.
+- Cite entries with `{cite:p}` or `{cite:t}` roles. `docs/publications.md` renders the
+  bibliography and provides its BibTeX download.
+- Keep algorithm and experiment links beside the corresponding citations. Related
+  publications do not imply that their methods are implemented in the library.
+- Run `prek run bibtex-tidy --all-files` after changing the bibliography.
+
 ## The changelog
 
 `docs/changelog.md` follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).

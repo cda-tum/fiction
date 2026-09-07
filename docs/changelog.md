@@ -8,13 +8,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Code quality:
+
+  - Added QCA SVG regression tests for colors, detail modes, tile labels, and file output.
+
+- Continuous integration:
+
+  - Added Python source coverage, including package-root modules, and separate C++ checks.
+
 - Data structures:
+
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
     `sidb::layout` stores cells and defects without templates. `to_sidb_layout` converts
     Cartesian cell-level layouts
 
 - Documentation:
 
+  - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
   - Added synchronized C++/Python tabs and code copy buttons.
   - Added `llms.txt`, `llms-full.txt`, and Markdown exports of documentation pages.
@@ -26,14 +36,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Added directory-based test markers, including `pytest -m simulation`.
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
   - `lattice`, `lattice_site`, `sidb_layout` (the lattice-based layout), `read_sqd_layout`,
     `read_surface_defects`, and the `sidb_layout` overloads of `write_sqd_layout` and
     `write_sidb_layout_svg`
 
+- Tooling:
+
+  - Added EditorConfig settings that match the repository's formatters.
+
 ### Changed
 
+- Continuous integration:
+  - Reusable workflows now use GitHub's self-repository reference syntax.
+  - Clang-Tidy skips Python-only changes in the bindings tree.
+  - PyPI releases now use trusted publishing instead of an API token.
+  - Renovate now waits three days for dated dependency releases before updating.
+
 - Documentation:
+  - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
 
@@ -175,6 +197,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+<<<<<<< HEAD
 - Continuous integration:
   - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
   - Change detection now allows five minutes for runner setup and file comparisons.
@@ -186,11 +209,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Lattice-site construction and arithmetic now reject coordinate overflow; cell insertion preserves the layout on
     allocation failure, and moving a defect from an empty site leaves the target unchanged
   - Moving a defect now preserves its target when the site arguments refer to stored defects.
+=======
+- Algorithms:
+
+  - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
+
+- Continuous integration:
+
+  - Canceled CI runs now stop optional summary jobs.
+>>>>>>> origin/main
 
 - Documentation:
 
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
   - Restored Python API entries and method signatures, and formatted generated docstrings.
+
+- I/O:
+
+  - QCA SVG output now uses valid text colors in simple tile mode.
 
 - `types.hpp`: `sidb_111_cell_clk_lyt_siqad_ptr`, `cds_sidb_cell_clk_lyt_cube`,
   `cds_sidb_111_cell_clk_lyt_siqad_ptr`, and `cds_sidb_111_cell_clk_lyt_cube_ptr` pointed at
@@ -212,6 +248,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     reading past the parameter vector
   - `write_sqd_sim_result` accepts the `sidb_simulation_result_100` and `_111` results
     Python produces; it was bound for a result type Python cannot construct
+
+- Tooling:
+
+  - Git checkouts and formatting hooks enforce LF without rewriting license-only files to
+    CRLF on Windows.
 
 ## v0.8.0 - 2026-09-02
 

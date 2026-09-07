@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief SVG writers for QCA and molQCA cell layouts.
  * @author Sophia Kuhn
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
@@ -18,29 +19,24 @@
 
 #pragma once
 
-#include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
-#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
 #include <exception>
 #include <fstream>
 #include <iostream>
-#include <optional>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 
 namespace fiction::qca::io
 {
@@ -792,9 +788,8 @@ class write_qca_layout_svg_impl
             const double x_pos = svg::STARTING_OFFSET_TILE_X + (coord.x * svg::TILE_DISTANCE);
             const double y_pos = svg::STARTING_OFFSET_TILE_Y + (coord.y * svg::TILE_DISTANCE);
 
-            const auto c_descr =
-                fmt::format(fmt::runtime(descr), x_pos, y_pos, tile_colors[czone], cell_descriptions,
-                            ps.simple ? "" : text_colors[czone], ps.simple ? "" : std::to_string(czone + 1));
+            const auto c_descr = fmt::format(fmt::runtime(descr), x_pos, y_pos, tile_colors[czone], cell_descriptions,
+                                             text_colors[czone], ps.simple ? "" : std::to_string(czone + 1));
 
             tile_descriptions << c_descr;
         }
