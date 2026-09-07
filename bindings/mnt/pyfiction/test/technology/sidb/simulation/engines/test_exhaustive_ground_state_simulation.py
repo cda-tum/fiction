@@ -73,9 +73,9 @@ def test_exgs_reports_progress() -> None:
     """Every charge configuration is counted, and the callback may be omitted or ``None``."""
 
     layout = sidb_layout()
-    layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(4, 0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type(lattice_site(6, 0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_dot_tag(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
 
     params = sidb_simulation_parameters()
     params.base = 2

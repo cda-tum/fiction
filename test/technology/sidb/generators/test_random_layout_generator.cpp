@@ -354,7 +354,7 @@ TEST_CASE("Random SiDB layout generation reports progress", "[random-sidb-layout
 
         REQUIRE(result_lyt.has_value());
         // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the access
-        CHECK(result_lyt->num_cells() == 5);
+        CHECK(result_lyt->num_dots() == 5);
 
         CHECK(rec.is_consistent("placed SiDBs"));
         CHECK(rec.final_count("placed SiDBs") == 5);
