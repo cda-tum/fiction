@@ -13957,6 +13957,20 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_dot_tag =
+R"doc(Tags describing the role of a silicon dangling bond. EMPTY denotes an
+unoccupied site.)doc";
+
+static const char *mkd_doc_fiction_sidb_dot_tag_EMPTY = R"doc(Unoccupied lattice site.)doc";
+
+static const char *mkd_doc_fiction_sidb_dot_tag_INPUT = R"doc(Primary input dot.)doc";
+
+static const char *mkd_doc_fiction_sidb_dot_tag_LOGIC = R"doc(Logic dot (e.g., a canvas SiDB).)doc";
+
+static const char *mkd_doc_fiction_sidb_dot_tag_NORMAL = R"doc(Untagged dot.)doc";
+
+static const char *mkd_doc_fiction_sidb_dot_tag_OUTPUT = R"doc(Primary output dot.)doc";
+
 static const char *mkd_doc_fiction_sidb_gate_design_exception =
 R"doc(This exception is thrown when an error occurs during the design of an
 SiDB gate. It provides information about the tile, truth table, and
@@ -14727,7 +14741,7 @@ static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_is = R"doc(Input st
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_lyt = R"doc(Layout being parsed.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_db_dot =
-R"doc(Adds a DB dot at its lattice coordinate with the specified cell type.
+R"doc(Adds a DB dot at its lattice coordinate with the specified dot tag.
 
 Args:
     db_dot: DB-dot element.
@@ -14836,7 +14850,7 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_db_dot =
-R"doc(Appends a DB dot with its lattice coordinate and cell type.
+R"doc(Appends a DB dot with its lattice coordinate and dot tag.
 
 Args:
     design: SQD design buffer.
@@ -15495,20 +15509,16 @@ Sites order in raster order: by `y`, then by `z`, then by `x`.)doc";
 static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site = R"doc(Default constructor. Creates the site `(0, 0, 0)`.)doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site_2 =
-R"doc(Creates the site `(x, y, z)`.
+R"doc(Creates the site `(x, y, z)`. Coordinates must be representable by the
+parameter types before the call.
 
 Args:
     x_coord: Steps along the first lattice vector.
     y_coord: Steps along the second lattice vector.
     basis_site: Basis site, 0 or 1.
 
-Template Args:
-    X: Integral type of `x`.
-    Y: Integral type of `y`.
-    Z: Integral type of `z`.
-
 Raises:
-    std::out_of_range: if a coordinate exceeds the lattice-site range.
+    std::out_of_range: if the basis index is not 0 or 1.
 
 )doc";
 
@@ -15518,13 +15528,6 @@ R"doc(Creates the site `(x, y, 0)`.
 Args:
     x_coord: Steps along the first lattice vector.
     y_coord: Steps along the second lattice vector.
-
-Template Args:
-    X: Integral type of `x`.
-    Y: Integral type of `y`.
-
-Raises:
-    std::out_of_range: if a coordinate exceeds the lattice-site range.
 
 )doc";
 
@@ -15599,11 +15602,11 @@ static const char *mkd_doc_fiction_sidb_lattice_site_y = R"doc(Steps along the s
 static const char *mkd_doc_fiction_sidb_lattice_site_z = R"doc(Basis site within the unit cell, 0 or 1.)doc";
 
 static const char *mkd_doc_fiction_sidb_layout =
-R"doc(An SiDB layout: SiDBs of a given cell type and surface defects placed
-on lattice sites of one H-Si lattice. The layout has value semantics;
-copies are independent.
+R"doc(An SiDB layout: tagged SiDBs and surface defects placed on lattice
+sites of one H-Si lattice. The layout has value semantics; copies are
+independent.
 
-Cells and defects are kept sorted in raster order, so `sidbs()` is the
+Dots and defects are kept sorted in raster order, so `sidbs()` is the
 canonical SiDB order that index-based structures such as charge
 distributions refer to, and every `foreach_*` traversal is
 deterministic.)doc";
@@ -15646,16 +15649,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_layout_assign_cell_type =
-R"doc(Assigns a cell type to a site. Assigning `cell_type::EMPTY` removes
-the SiDB from the site. Allocation failure leaves the cells unchanged.
-
-Args:
-    s: Site.
-    ct: Cell type to assign.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_layout_assign_defect =
 R"doc(Places a surface defect at a site. A defect of type
 `defect_type::NONE` removes the defect from the site.
@@ -15663,6 +15656,16 @@ R"doc(Places a surface defect at a site. A defect of type
 Args:
     s: Site.
     d: Defect to place.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_assign_dot_tag =
+R"doc(Assigns a dot tag to a site. Assigning `dot_tag::EMPTY` removes the
+SiDB from the site. Allocation failure leaves the dots unchanged.
+
+Args:
+    s: Site.
+    tag: Dot tag to assign.
 
 )doc";
 
@@ -15676,21 +15679,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_layout_cell_sites = R"doc(SiDB sites in raster order.)doc";
-
-static const char *mkd_doc_fiction_sidb_layout_cell_types = R"doc(Cell type of the SiDB at the same index in `cell_sites`.)doc";
-
-static const char *mkd_doc_fiction_sidb_layout_cells_of_type =
-R"doc(All sites holding an SiDB of a given cell type, in raster order.
-
-Args:
-    ct: Cell type.
-
-Returns:
-    Sites of type `ct`.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_layout_count_defects = R"doc(Counts the defects satisfying a predicate.)doc";
 
 static const char *mkd_doc_fiction_sidb_layout_defects =
@@ -15701,23 +15689,24 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_layout_for_each_site =
-R"doc(Applies `fn` to every element of `range`, passing the index too if
-`fn` takes it, and stopping early if `fn` returns `false`.
+static const char *mkd_doc_fiction_sidb_layout_dot_sites = R"doc(SiDB sites in raster order.)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_dot_tags = R"doc(Dot tag of the SiDB at the same index in `dot_sites`.)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_dots_with_tag =
+R"doc(All sites holding an SiDB of a given dot tag, in raster order.
+
+Args:
+    tag: Dot tag.
+
+Returns:
+    Sites with tag `tag`.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_layout_foreach_cell =
-R"doc(Applies a function to every SiDB site in raster order. `fn` takes the
-site and optionally its index, and may return `false` to stop the
-traversal.
-
-Args:
-    fn: Function to apply.
-
-Template Args:
-    Fn: Callable on `(const lattice_site&)` or `(const lattice_site&,
-        std::size_t)`.
+static const char *mkd_doc_fiction_sidb_layout_for_each_site =
+R"doc(Applies `fn` to every element of `range`, passing the index too if
+`fn` takes it, and stopping early if `fn` returns `false`.
 
 )doc";
 
@@ -15735,9 +15724,23 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_layout_foreach_dot =
+R"doc(Applies a function to every SiDB site in raster order. `fn` takes the
+site and optionally its index, and may return `false` to stop the
+traversal.
+
+Args:
+    fn: Function to apply.
+
+Template Args:
+    Fn: Callable on `(const lattice_site&)` or `(const lattice_site&,
+        std::size_t)`.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_layout_foreach_pi =
 R"doc(Applies a function to every input SiDB site in raster order. Same
-callable contract as `foreach_cell`.
+callable contract as `foreach_dot`.
 
 Args:
     fn: Function to apply.
@@ -15750,7 +15753,7 @@ Template Args:
 
 static const char *mkd_doc_fiction_sidb_layout_foreach_po =
 R"doc(Applies a function to every output SiDB site in raster order. Same
-callable contract as `foreach_cell`.
+callable contract as `foreach_dot`.
 
 Args:
     fn: Function to apply.
@@ -15758,17 +15761,6 @@ Args:
 Template Args:
     Fn: Callable on `(const lattice_site&)` or `(const lattice_site&,
         std::size_t)`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_layout_get_cell_type =
-R"doc(The cell type at a site.
-
-Args:
-    s: Site.
-
-Returns:
-    Cell type at `s`, `cell_type::EMPTY` if no SiDB is there.
 
 )doc";
 
@@ -15781,6 +15773,17 @@ Args:
 Returns:
     Defect at `s`, or a defect of type `defect_type::NONE` if there is
     none.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_get_dot_tag =
+R"doc(The dot tag at a site.
+
+Args:
+    s: Site.
+
+Returns:
+    Dot tag at `s`, `dot_tag::EMPTY` if no SiDB is there.
 
 )doc";
 
@@ -15819,7 +15822,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_layout_is_empty_cell =
+static const char *mkd_doc_fiction_sidb_layout_is_empty_site =
 R"doc(Whether no SiDB sits at a site.
 
 Args:
@@ -15876,25 +15879,6 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_layout_num_cells =
-R"doc(Number of SiDBs.
-
-Returns:
-    Number of SiDBs.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_layout_num_cells_of_type =
-R"doc(Number of SiDBs of a given cell type.
-
-Args:
-    ct: Cell type.
-
-Returns:
-    Number of SiDBs of type `ct`.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_layout_num_charged_defects =
 R"doc(Number of charged defects.
 
@@ -15908,6 +15892,25 @@ R"doc(Number of surface defects.
 
 Returns:
     Number of defects.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_num_dots =
+R"doc(Number of SiDBs.
+
+Returns:
+    Number of SiDBs.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_num_dots_with_tag =
+R"doc(Number of tagged SiDBs.
+
+Args:
+    tag: Dot tag.
+
+Returns:
+    Number of SiDBs with tag `tag`.
 
 )doc";
 
@@ -16538,18 +16541,6 @@ static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mark_LOGIC = R"doc(
 static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mark_OUTPUT = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mode = R"doc(SiDB cells do not have modes.)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_cell_type = R"doc(Possible types of SiDB cells.)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_cell_type_EMPTY = R"doc(Symbol used for empty SiDB cells.)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_cell_type_INPUT = R"doc(Symbol used for input SiDB cells.)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_cell_type_LOGIC = R"doc(Symbol used for logic SiDB cells (e.g. canvas SiDBs).)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_cell_type_NORMAL = R"doc(Symbol used for normal SiDB cells.)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_cell_type_OUTPUT = R"doc(Symbol used for output SiDB cells.)doc";
 
 static const char *mkd_doc_fiction_sidb_sidb_technology_is_empty_cell =
 R"doc(Checks whether the given cell type is empty.
@@ -27415,7 +27406,7 @@ static const char *mkd_doc_std_hash_5 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_6 = R"doc(Hash for lattice sites.)doc";
 
-static const char *mkd_doc_std_hash_7 = R"doc(Hash for SiDB layouts, over the SiDBs and their cell types.)doc";
+static const char *mkd_doc_std_hash_7 = R"doc(Hash for SiDB layouts, over the SiDBs and their dot tags.)doc";
 
 static const char *mkd_doc_std_hash_8 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
 
@@ -27445,7 +27436,7 @@ R"doc(Args:
     lyt: Layout to hash.
 
 Returns:
-    Hash of the SiDB sites and cell types.
+    Hash of the SiDB sites and dot tags.
 
 )doc";
 
