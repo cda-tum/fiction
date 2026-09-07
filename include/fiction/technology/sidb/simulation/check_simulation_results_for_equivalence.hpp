@@ -154,7 +154,8 @@ template <typename Lyt>
         const auto& cd1 = result1.charge_distributions[i];
         const auto& cd2 = result2.charge_distributions[i];
 
-        if (std::abs(cd1.energy() - cd2.energy()) > fiction::utils::math::ERROR_MARGIN || !cd1.same_charge_states(cd2))
+        if (cd1.sites() != cd2.sites() || std::abs(cd1.energy() - cd2.energy()) > fiction::utils::math::ERROR_MARGIN ||
+            !cd1.same_charge_states(cd2))
         {
             return false;
         }

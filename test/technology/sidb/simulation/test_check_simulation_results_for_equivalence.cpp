@@ -138,3 +138,16 @@ TEST_CASE("Simulation equivalence beyond the charge-index range", "[equivalence-
     reordered.charge_distributions = {zero, zero};
     CHECK(!check_simulation_results_for_equivalence(res, reordered));
 }
+
+TEST_CASE("Simulation equivalence compares distribution sites", "[equivalence-check-for-simulation-results]")
+{
+    layout lyt{};
+    lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
+    layout shifted{};
+    shifted.assign_dot_tag({1, 0}, dot_tag::NORMAL);
+    result first{};
+    first.charge_distributions  = {charge_distribution{lyt}};
+    auto second                 = first;
+    second.charge_distributions = {charge_distribution{shifted}};
+    CHECK(!check_simulation_results_for_equivalence(first, second));
+}

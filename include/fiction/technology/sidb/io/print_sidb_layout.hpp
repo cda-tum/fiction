@@ -86,15 +86,20 @@ inline constexpr auto NO_COLOR = fmt::text_style{};
  *
  * @param os Output stream to print into.
  * @param lyt Layout to print.
- * @param cd Charge distribution over the layout's SiDBs, or `nullptr` to print cell types only.
+ * @param cd Charge distribution over the layout's SiDBs, or `nullptr` to print dot tags only.
  * @param lat_color Whether to color the picture.
  * @param crop_layout Whether to pad the bounding box by two columns and one unit cell instead of printing it tight.
  * @param draw_lattice Whether to print empty lattice sites as dots.
+ * @throws std::invalid_argument if the charge distribution sites differ from the layout.
  * @throws std::out_of_range if padding exceeds the lattice-site coordinate range.
  */
 inline void print_sidb_layout(std::ostream& os, const layout& lyt, const charge_distribution* cd, const bool lat_color,
                               const bool crop_layout, const bool draw_lattice)
 {
+    if (cd != nullptr && cd->sites() != lyt.sidbs())
+    {
+        throw std::invalid_argument("Charge distribution sites do not match the layout");
+    }
     if (lyt.is_empty() && lyt.num_defects() == 0)
     {
         os << "[i] empty layout" << '\n';

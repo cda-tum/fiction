@@ -97,6 +97,17 @@ TEST_CASE("Ground State Space construction of a single SiDB", "[ground-state-spa
               .pot_bounds.get<sidb::simulation::engines::detail::bound_direction::UPPER>(0) == 0.0);
 }
 
+TEST_CASE("Ground State Space uses the landscape physical parameters", "[ground-state-space]")
+{
+    layout lyt{};
+    lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
+    const potential_landscape land{lyt, simulation_parameters{2, -0.32}};
+    const auto                expected = ground_state_space(land);
+    const auto                actual   = ground_state_space(land, {.sim_params = simulation_parameters{3, 0.5}});
+    REQUIRE(expected.top_cluster->charge_space.size() == 1);
+    CHECK(actual.top_cluster->charge_space == expected.top_cluster->charge_space);
+}
+
 TEST_CASE("Ground State Space construction of two SiDBs directly next to each other", "[ground-state-space]")
 {
     layout lyt{};

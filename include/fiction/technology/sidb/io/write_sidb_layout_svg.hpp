@@ -37,6 +37,7 @@
 #include <iostream>
 #include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -436,6 +437,7 @@ class sidb_layout_svg_writer
      * @param stream Output stream.
      * @param p Drawing parameters.
      * @param charges Charge distribution to draw, or `nullptr` to use the default SiDB color.
+     * @throws std::invalid_argument if the charge distribution sites differ from the layout.
      */
     sidb_layout_svg_writer(const layout& layout, std::ostream& stream, const write_sidb_layout_svg_params& p,
                            const charge_distribution* charges = nullptr) :
@@ -444,6 +446,10 @@ class sidb_layout_svg_writer
             ps{p},
             cd{charges}
     {
+        if (cd != nullptr && cd->sites() != lyt.sidbs())
+        {
+            throw std::invalid_argument("Charge distribution sites do not match the layout");
+        }
         if (ps.color_background == write_sidb_layout_svg_params::color_mode::LIGHT)
         {
             background_color = svg::BACKGROUND_COLOR_BRIGHT;
@@ -672,6 +678,7 @@ inline void write_sidb_layout_svg(const layout& lyt, const std::string_view& fil
  *
  * @param lyt Layout to draw.
  * @param cd Charge distribution over the layout's SiDBs.
+ * @throws std::invalid_argument if the charge distribution sites differ from the layout.
  * @param os Output stream to write into.
  * @param ps Drawing parameters.
  */
@@ -687,6 +694,7 @@ inline void write_sidb_layout_svg(const layout& lyt, const charge_distribution& 
  *
  * @param lyt Layout to draw.
  * @param cd Charge distribution over the layout's SiDBs.
+ * @throws std::invalid_argument if the charge distribution sites differ from the layout.
  * @param filename File to write into.
  * @param ps Drawing parameters.
  * @throws std::ofstream::failure if the file cannot be opened.

@@ -143,10 +143,10 @@ class ground_state_space_impl
             params{parameters},
             top_cluster{to_cluster(cluster_hierarchy(land.get_layout()))},
             clst{get_initial_clustering(top_cluster, land)},
-            mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
-                                 -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
-                                 fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_plus(),
-                                 -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_plus()}
+            mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - land.params().mu_minus,
+                                 -fiction::utils::math::ERROR_MARGIN - land.params().mu_minus,
+                                 fiction::utils::math::ERROR_MARGIN - land.params().mu_plus(),
+                                 -fiction::utils::math::ERROR_MARGIN - land.params().mu_plus()}
     {}
     /**
      * The main loop in the *Ground State Space* construction. Charge spaces are updated until a fixed point is reached,
@@ -1193,7 +1193,7 @@ class ground_state_space_impl
  * every cluster charge state that cannot be part of a physically valid charge distribution. *ClusterComplete* unfolds
  * the surviving states into the valid distributions.
  *
- * @param land Potential landscape of the layout to simulate; its parameters set the base of the simulation, and its
+ * @param land Potential landscape of the layout to simulate; its parameters set the physical model, and its
  * external potentials and defects enter the bounds.
  * @param params Parameters of the pruning.
  * @return The pruned cluster hierarchy with statistics, or an empty result for an empty layout.

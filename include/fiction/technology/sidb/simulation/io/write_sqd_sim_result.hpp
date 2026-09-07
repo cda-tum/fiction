@@ -36,6 +36,7 @@
 #include <fstream>
 #include <functional>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <typeindex>
@@ -306,9 +307,18 @@ class sqd_sim_result_writer
 
     /**
      * Writes the complete SiQAD simulation-result document.
+     *
+     * @throws std::invalid_argument if a distribution has different sites from the result layout.
      */
     void run()
     {
+        for (const auto& cd : sim_result.charge_distributions)
+        {
+            if (cd.sites() != sim_result.lyt.sidbs())
+            {
+                throw std::invalid_argument("Charge distribution sites do not match the result layout");
+            }
+        }
         os << siqad::XML_HEADER << siqad::OPEN_SIM_OUT;
 
         write_engine_info();
@@ -464,6 +474,7 @@ void write_sqd_sim_result(const sidb::simulation::legacy_result<Lyt>& sim_result
  * Writes a simulation result as a SiQAD simulation result file to a stream.
  *
  * @param sim_result Result to write.
+ * @throws std::invalid_argument if a distribution has different sites from the result layout.
  * @param os Output stream to write into.
  */
 inline void write_sqd_sim_result(const sidb::simulation::result& sim_result, std::ostream& os)
@@ -476,6 +487,7 @@ inline void write_sqd_sim_result(const sidb::simulation::result& sim_result, std
  * Writes a simulation result as a SiQAD simulation result file.
  *
  * @param sim_result Result to write.
+ * @throws std::invalid_argument if a distribution has different sites from the result layout.
  * @param filename File to write into.
  * @throws std::ofstream::failure if the file cannot be opened.
  */

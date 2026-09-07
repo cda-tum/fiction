@@ -403,3 +403,18 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 
     CHECK(simulation_stream.str() == sim_result_str);
 }
+
+TEST_CASE("test_write_sqd_sim_result rejects mismatched distribution sites", "[sidb-distribution-sites]")
+{
+    layout lyt{};
+    lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
+    layout shifted{};
+    shifted.assign_dot_tag({1, 0}, dot_tag::NORMAL);
+    const charge_distribution cd{shifted};
+    result                    res{};
+    res.lyt                  = lyt;
+    res.charge_distributions = {cd};
+    std::stringstream os{};
+    CHECK_THROWS_AS(write_sqd_sim_result(res, os), std::invalid_argument);
+    CHECK(os.str().empty());
+}

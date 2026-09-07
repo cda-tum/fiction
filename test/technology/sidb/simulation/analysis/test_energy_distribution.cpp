@@ -89,8 +89,10 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
 
         const auto result = calculate_energy_distribution(all_cds);
 
-        // three distinct distributions; the last two have an identical potential energy (degeneracy 2) which is
-        // smaller than the one of the first
+        CHECK(first.energy() == 0.0);
+        CHECK(second.energy() == 0.0);
+        CHECK(third.energy() > 0.0);
+        // The first two distributions form the degenerate ground state.
         const auto ground_state = result.get_nth_state(0);
         REQUIRE(ground_state.has_value());
         if (ground_state.has_value())

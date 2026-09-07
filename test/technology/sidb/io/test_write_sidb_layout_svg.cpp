@@ -778,3 +778,15 @@ TEST_CASE("Generate SVG for an sidb::layout with a charge distribution", "[write
         CHECK(parse_svg_charge_elements(os.str()) == parse_svg_charge_elements(EXPECTED_SVG_DARK_CHARGE_DISTRIBUTION));
     }
 }
+
+TEST_CASE("test_write_sidb_layout_svg rejects mismatched distribution sites", "[sidb-distribution-sites]")
+{
+    layout lyt{};
+    lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
+    layout shifted{};
+    shifted.assign_dot_tag({1, 0}, dot_tag::NORMAL);
+    const charge_distribution cd{shifted};
+    std::stringstream         os{};
+    CHECK_THROWS_AS(write_sidb_layout_svg(lyt, cd, os), std::invalid_argument);
+    CHECK(os.str().empty());
+}

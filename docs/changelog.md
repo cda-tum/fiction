@@ -231,6 +231,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB simulation engines and their consumers now propagate errors from checked charge and potential operations.
   - Time-to-solution now counts failed QuickSim attempts and their elapsed runtime, and handles empty samples.
   - ClusterComplete now assigns distinct queue indices to workers without initial work.
+  - Simulation comparison and output now validate distribution sites. Ground State Space uses the landscape's physical parameters.
+  - Parallel SiDB consumers now propagate worker errors and reject QuickSim with charged defects.
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
