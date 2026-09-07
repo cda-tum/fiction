@@ -151,8 +151,9 @@ def test_script_depth_limit(shell: Shell, tmp_path_factory: pytest.TempPathFacto
     assert "deeper than" in output
 
 
-def test_progress_shows_on_terminal(resource: Callable[[str], str]) -> None:
+def test_progress_shows_on_terminal(resource: Callable[[str], str], monkeypatch: pytest.MonkeyPatch) -> None:
     """On a terminal, a running command shows its spinner and the tasks its algorithm reports."""
+    monkeypatch.setenv("TERM", "xterm")
     buffer = io.StringIO()
     console = Console(file=buffer, width=100, force_terminal=True, color_system=None)
     session = Session(console=console)
@@ -170,8 +171,9 @@ def test_progress_is_silent_without_terminal(mux21_shell: Shell) -> None:
     assert not mux21_shell.ok("ortho")
 
 
-def test_progress_resets_a_restarted_task() -> None:
+def test_progress_resets_a_restarted_task(monkeypatch: pytest.MonkeyPatch) -> None:
     """A task whose count drops is shown from the start again instead of counting backwards."""
+    monkeypatch.setenv("TERM", "xterm")
     buffer = io.StringIO()
     session = Session(console=Console(file=buffer, width=100, force_terminal=True, color_system=None))
     with session.progress("optimize") as report:
