@@ -140,7 +140,7 @@ TEST_CASE("Write Bestagon SQD layout", "[sqd]")
     const auto read_layout = read_sqd_layout(layout_stream, "Bestagon");
 
     CHECK(read_layout == lyt);
-    CHECK(read_layout.num_dots() == c_layout.num_dots());
+    CHECK(read_layout.num_dots() == c_layout.num_cells());
     CHECK(read_layout.num_pis() == c_layout.num_pis());
     CHECK(read_layout.num_pos() == c_layout.num_pos());
 }
