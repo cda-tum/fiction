@@ -48,11 +48,11 @@ enum class bdl_wire_selection : std::uint8_t
      */
     ALL,
     /**
-     * Select only BDL wires that start with input cells.
+     * Select only BDL wires that start with input dots.
      */
     INPUT,
     /**
-     * Select only BDL wires that end with output cells.
+     * Select only BDL wires that end with output dots.
      */
     OUTPUT
 };
@@ -193,7 +193,7 @@ struct bdl_wire
             return;
         }
 
-        // a wire without input or output cells does not have a port
+        // a wire without input or output dots does not have a port
         if (std::ranges::all_of(pairs, [](const auto& bdl) { return bdl.type == dot_tag::NORMAL; }))
         {
             port.dir = fcn::port_direction::NONE;
@@ -205,7 +205,7 @@ struct bdl_wire
         const auto output_exists =
             std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == dot_tag::OUTPUT; });
 
-        // input and output cells are present
+        // input and output dots are present
         if (input_exists && output_exists)
         {
             const auto input_pair  = find_bdl_pair_by_type(dot_tag::INPUT);
@@ -246,7 +246,7 @@ struct bdl_wire
                 }
             }
         }
-        // only input cells are present
+        // only input dots are present
         else if (input_exists)
         {
             const auto input_pair = find_bdl_pair_by_type(dot_tag::INPUT);
@@ -268,7 +268,7 @@ struct bdl_wire
             {
                 port.dir = fcn::port_direction::EAST;
             }
-            // the lower cell of the input BDL pair is below the lower cell of the final BDL pair --> NORTH
+            // the lower dot of the input BDL pair is below the lower dot of the final BDL pair --> NORTH
             else if (input_pair->lower.y > farthest_pair->lower.y)
             {
                 port.dir = fcn::port_direction::NORTH;
@@ -283,7 +283,7 @@ struct bdl_wire
                 port.dir = fcn::port_direction::SOUTH;
             }
         }
-        // only output cells are present
+        // only output dots are present
         else
         {
             const auto output_pair = find_bdl_pair_by_type(dot_tag::OUTPUT);
@@ -305,7 +305,7 @@ struct bdl_wire
             {
                 port.dir = fcn::port_direction::WEST;
             }
-            // the lower cell of the output BDL pair is below the lower cell of the first BDL pair --> SOUTH
+            // the lower dot of the output BDL pair is below the lower dot of the first BDL pair --> SOUTH
             else if (output_pair->lower.y > farthest_pair->lower.y)
             {
                 port.dir = fcn::port_direction::SOUTH;

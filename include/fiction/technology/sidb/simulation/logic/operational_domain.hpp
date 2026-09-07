@@ -445,7 +445,7 @@ namespace detail
  *
  * The sketch, i.e., `operational_analysis_strategy::FILTER_ONLY`, determines the operational status by filtering
  * alone. It has two preconditions: the filtering steps are only defined when kinks are rejected, and they enumerate
- * the charge configurations of the canvas, which the layout's `LOGIC` cells define. If either is unmet, the sketch
+ * the charge configurations of the canvas, which the layout's `LOGIC` dots define. If either is unmet, the sketch
  * evaluates nothing and silently falls back to a full simulation of the entire parameter space. Since that is the
  * exhaustive cost the sketch exists to avoid, an unmet precondition is rejected instead of being absorbed.
  *
@@ -481,7 +481,7 @@ inline void validate_operational_domain_params(const layout& lyt, const operatio
         if (lyt.num_dots_with_tag(dot_tag::LOGIC) == 0)
         {
             throw std::invalid_argument("The operational domain sketch requires a canvas: the layout has no 'LOGIC' "
-                                        "cells for the filtering steps to enumerate");
+                                        "dots for the filtering steps to enumerate");
         }
     }
 
@@ -500,7 +500,7 @@ class operational_domain_impl
      * detects the output BDL pair, which is necessary for the operational domain computation. The layout must
      * have exactly one output BDL pair.
      *
-     * @param source_layout SiDB cell-level layout to be evaluated.
+     * @param source_layout SiDB layout to be evaluated.
      * @param tt Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
@@ -524,21 +524,21 @@ class operational_domain_impl
             input_pattern_layouts{generate_bdl_input_pattern_layouts(
                 source_layout, params.operational_params.input_bdl_iterator_params, input_bdl_wires)}
     {
-        // the public entry points reject a `FILTER_ONLY` request on a layout without `LOGIC` cells, so this may only
+        // the public entry points reject a `FILTER_ONLY` request on a layout without `LOGIC` dots, so this may only
         // be empty for the strategies that do not need a canvas
-        const auto logic_cells = source_layout.dots_with_tag(dot_tag::LOGIC);
+        const auto logic_dots = source_layout.dots_with_tag(dot_tag::LOGIC);
 
         assert(((params.operational_params.strategy_to_analyze_operational_status !=
                  is_operational_params::operational_analysis_strategy::FILTER_ONLY) ||
-                (logic_cells.size() > 0)) &&
-               "No logic cells found in the layout");
+                (logic_dots.size() > 0)) &&
+               "No logic dots found in the layout");
 
-        // the canvas layout is created which is defined by the logic cells. The dot tag matches the one the
+        // the canvas layout is created which is defined by the logic dots. The dot tag matches the one the
         // `is_operational` entry points assign to the canvases they build themselves; the canvas is only ever used to
         // construct a `charge_distribution_surface`, which reads positions and charges, so the two behave identically
         canvas_lyt.set_lattice(source_layout.get_lattice());
 
-        for (const auto& c : logic_cells)
+        for (const auto& c : logic_dots)
         {
             canvas_lyt.assign_dot_tag(c, dot_tag::LOGIC);
         }
@@ -1238,7 +1238,7 @@ class operational_domain_impl
      */
     std::vector<std::vector<double>> values;
     /**
-     * This layout consists of the canvas cells of the layout.
+     * This layout consists of the canvas dots of the layout.
      */
     layout canvas_lyt{};
     /**
@@ -2016,7 +2016,7 @@ class operational_domain_impl
  * @param st Statistics of the process.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells. Any number of sweep
+ * is requested without rejecting kinks or on a layout without `LOGIC` dots. Any number of sweep
  * dimensions is accepted.
  */
 template <typename TT>
@@ -2060,7 +2060,7 @@ template <typename TT>
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells. Any number of sweep
+ * is requested without rejecting kinks or on a layout without `LOGIC` dots. Any number of sweep
  * dimensions is accepted.
  */
 template <typename TT>
@@ -2115,7 +2115,7 @@ template <typename TT>
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells. Flood fill and contour
+ * is requested without rejecting kinks or on a layout without `LOGIC` dots. Flood fill and contour
  * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
  * any number.
  */
@@ -2169,7 +2169,7 @@ operational_domain_flood_fill(const layout& lyt, const std::vector<TT>& spec, co
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells. Flood fill and contour
+ * is requested without rejecting kinks or on a layout without `LOGIC` dots. Flood fill and contour
  * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
  * any number.
  */
@@ -2215,7 +2215,7 @@ template <typename TT>
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells. Any number of sweep
+ * is requested without rejecting kinks or on a layout without `LOGIC` dots. Any number of sweep
  * dimensions is accepted.
  */
 template <typename TT>
@@ -2260,7 +2260,7 @@ critical_temperature_domain_grid_search(const layout& lyt, const std::vector<TT>
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells. Any number of sweep
+ * is requested without rejecting kinks or on a layout without `LOGIC` dots. Any number of sweep
  * dimensions is accepted.
  */
 template <typename TT>
@@ -2311,7 +2311,7 @@ critical_temperature_domain_random_sampling(const layout& lyt, const std::vector
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells. Flood fill and contour
+ * is requested without rejecting kinks or on a layout without `LOGIC` dots. Flood fill and contour
  * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
  * any number.
  */
@@ -2366,7 +2366,7 @@ critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<TT>&
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells. Flood fill and contour
+ * is requested without rejecting kinks or on a layout without `LOGIC` dots. Flood fill and contour
  * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
  * any number.
  */

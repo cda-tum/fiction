@@ -109,7 +109,7 @@ struct is_operational_params
      * approximation. It may be possible that the layout is non-operational, but the filtering strategies do not detect
      * it. Sweeping a parameter space this way is called the operational domain sketch. The filtering steps are only
      * defined when kinks are rejected, and they enumerate the charge configurations of the canvas that the layout's
-     * `LOGIC` cells define, so this setting is only effective with `REJECT_KINKS` on a layout that has such cells.
+     * `LOGIC` dots define, so this setting is only effective with `REJECT_KINKS` on a layout that has such dots.
      * - `FILTER_THEN_SIMULATION`: Before a physical simulation is conducted, the algorithm checks if filtering
      * strategies have detected whether the layout is non-operational. This only provides any runtime benefits if kinks
      * are rejected.
@@ -127,7 +127,7 @@ struct is_operational_params
          * operational domain sketch.
          *
          * @note This is an extremely fast approximation that may sometimes lead to false positives. It requires
-         * `REJECT_KINKS` and a layout with `LOGIC` cells; without either, no filter step runs.
+         * `REJECT_KINKS` and a layout with `LOGIC` dots; without either, no filter step runs.
          */
         FILTER_ONLY,
         /**
@@ -1007,10 +1007,10 @@ class is_operational_impl
 };
 
 /**
- * Collects the logic cells of a layout into a canvas layout on the same lattice.
+ * Collects the logic dots of a layout into a canvas layout on the same lattice.
  *
  * @param lyt The layout.
- * @return A layout holding only the logic cells of `lyt`.
+ * @return A layout holding only the logic dots of `lyt`.
  */
 [[nodiscard]] inline layout canvas_of(const layout& lyt)
 {
@@ -1035,8 +1035,8 @@ void check_arguments([[maybe_unused]] const layout& lyt, [[maybe_unused]] const 
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    assert(lyt.num_pis() > 0 && "lyt needs input cells");
-    assert(lyt.num_pos() > 0 && "lyt needs output cells");
+    assert(lyt.num_pis() > 0 && "lyt needs input dots");
+    assert(lyt.num_pos() > 0 && "lyt needs output dots");
     assert(!spec.empty());
     // all elements in spec must have the same number of variables
     assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
@@ -1052,7 +1052,7 @@ void check_arguments([[maybe_unused]] const layout& lyt, [[maybe_unused]] const 
  * @param params Parameters.
  * @param input_wires The input wires, or `std::nullopt` to detect them.
  * @param output_wires The output wires, or `std::nullopt` to detect them.
- * @param canvas_lyt The canvas, or `std::nullopt` to use the logic cells.
+ * @param canvas_lyt The canvas, or `std::nullopt` to use the logic dots.
  * @return The implementation object.
  */
 template <typename TT>
@@ -1134,7 +1134,7 @@ template <typename TT>
 /**
  * Determines whether an SiDB layout implements the given Boolean function(s). Every input pattern is applied to the
  * input BDL pairs, the ground states are simulated with the configured engine, and the charge states of the output
- * BDL pairs are compared with the expected truth-table entries. If the layout carries logic cells, they form the
+ * BDL pairs are compared with the expected truth-table entries. If the layout carries logic dots, they form the
  * canvas of the pruning filters that run before any simulation whenever the parameters ask for filtering and reject
  * kinks.
  *
@@ -1165,7 +1165,7 @@ template <typename TT>
  * @param params Parameters.
  * @param input_bdl_wire The input BDL wires of `lyt`.
  * @param output_bdl_wire The output BDL wires of `lyt`.
- * @param canvas_lyt The canvas; defaults to the logic cells of `lyt`.
+ * @param canvas_lyt The canvas; defaults to the logic dots of `lyt`.
  * @return The operational status and the number of simulator invocations.
  */
 template <typename TT>
@@ -1192,7 +1192,7 @@ is_operational(const layout& lyt, const std::vector<TT>& spec, const is_operatio
  * @param params Parameters.
  * @param input_bdl_wire The input BDL wires.
  * @param output_bdl_wire The output BDL wires.
- * @param canvas_lyt The canvas; defaults to the logic cells of the first layout.
+ * @param canvas_lyt The canvas; defaults to the logic dots of the first layout.
  * @return The operational status and the number of simulator invocations.
  * @throws std::invalid_argument if `spec` is empty or the number of layouts does not match the number of patterns.
  */
