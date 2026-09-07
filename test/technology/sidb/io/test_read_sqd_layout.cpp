@@ -14,7 +14,6 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
- * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_message.hpp>

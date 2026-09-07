@@ -12,7 +12,6 @@
  * @file
  * @brief Python bindings for `fiction/technology/sidb/lattice.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"

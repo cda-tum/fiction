@@ -13,7 +13,6 @@
  * @brief The H-Si surface lattice as lattice vectors plus a two-site basis, and the lattice sites SiDBs occupy.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
- * @author OpenAI (Codex)
  */
 
 #pragma once
