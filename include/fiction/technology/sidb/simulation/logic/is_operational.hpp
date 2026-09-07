@@ -500,7 +500,6 @@ class is_operational_impl
      * @param input_pattern Input pattern represented by the position of perturbers.
      * @return Pair with the first element indicating the operational status (either `OPERATIONAL` or `NON_OPERATIONAL`)
      * and the second element indicating the reason if it is non-operational.
-     * @throws std::invalid_argument if QuickSim is selected for charged defects.
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason>
     verify_logic_match_of_cds(const sidb::surfaces::charge_distribution_surface<Lyt>& given_cds,

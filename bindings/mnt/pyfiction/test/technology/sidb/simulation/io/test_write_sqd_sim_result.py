@@ -64,8 +64,8 @@ def test_write_legacy_sqd_sim_result(tmp_path: Path, layout: sidb_100_lattice | 
         layout: Cell-level layout to test.
     """
 
-    layout.assign_dot_tag((0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag((2, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_cell_type((0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_cell_type((2, 0, 0), sidb_dot_tag.NORMAL)
 
     result = quickexact(layout, quickexact_params())
     assert result.charge_distributions
