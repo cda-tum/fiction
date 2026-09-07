@@ -142,8 +142,8 @@ struct on_the_fly_gate_library_params
     /**
      * This variable specifies the policy for complex gate design.
      */
-    complex_gate_design_policy using_predefined_crossing_and_double_wire_if_possible =
-        complex_gate_design_policy::USING_PREDEFINED;
+    complex_gate_design_policy using_predefined_crossing_and_double_wire_if_possible{
+        complex_gate_design_policy::USING_PREDEFINED};
     /**
      * This variable specifies the radius in nanometers around the center of the hexagon where atomic defects are
      * incorporated into the gate design.
