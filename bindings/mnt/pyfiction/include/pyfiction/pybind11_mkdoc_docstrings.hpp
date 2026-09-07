@@ -24575,19 +24575,17 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detect_bdl_pairs =
-R"doc(Detects the BDL pairs of an SiDB layout. All SiDBs of the given type
-are collected and uniquely paired up by
-distance: the pairwise distances are sorted, and the closest unpaired
-          SiDBs within the distance window
-`[params.minimum_distance, params.maximum_distance]` (defaults: 0.75
-nm and 1.5 nm) form a pair. The lower bound keeps, e.g., the SiDBs of
-an atomic wire from being paired; the upper bound prevents unlikely
-pairings and bounds the work. Distances follow the layout's lattice.
-The pairs are returned sorted.
+R"doc(Detects the BDL pairs of an SiDB layout. Dots with the given tag are
+uniquely paired in increasing distance. The closest unpaired dots
+within `[params.minimum_distance, params.maximum_distance]` (defaults
+of 0.75 nm and 1.5 nm) form a pair. The lower bound keeps, e.g., the
+SiDBs of an atomic wire from being paired; the upper bound prevents
+unlikely pairings and bounds the work. Distances follow the layout's
+lattice. The pairs are returned sorted.
 
 Args:
     lyt: The layout to detect BDL pairs in.
-    type: Optional SiDB type to restrict the detection to (`INPUT`,
+    type: Optional dot tag to restrict the detection to (`INPUT`,
           `OUTPUT`, `NORMAL`, ...). If omitted, the BDL pairs of the
           input, output, and normal SiDBs are detected and returned in
           that order.
@@ -25761,7 +25759,8 @@ operational.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_sweep_dimensions =
 R"doc(The dimensions to sweep over together with their value ranges, ordered
 by priority. The first dimension is the x dimension, the second
-dimension is the y dimension, etc.)doc";
+dimension is the y dimension, etc. The default sweeps relative
+permittivity and screening distance from 1.0 to 10.0 in steps of 0.1.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_random_sampling =
 R"doc(Computes the operational domain of the given SiDB layout. The
