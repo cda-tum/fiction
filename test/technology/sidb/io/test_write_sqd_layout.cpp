@@ -336,7 +336,7 @@ TEST_CASE("Write and read back an sidb::layout", "[sqd]")
                                     .a2    = {-2.0, 8.0},
                                     .basis = {{{0.0, 0.0}, {1.5, 2.5}}}};
             sidb::layout        lyt{lat};
-            lyt.assign_cell_type({-3, 2, 1}, sidb_technology::cell_type::INPUT);
+            lyt.assign_dot_tag({-3, 2, 1}, dot_tag::INPUT);
             lyt.assign_defect({1, -2, 0}, defect{defect_type::DB});
             std::stringstream stream{};
             write_sqd_layout(lyt, stream);
@@ -347,10 +347,10 @@ TEST_CASE("Write and read back an sidb::layout", "[sqd]")
     {
         sidb::layout lyt{sidb::lattice::si_100_2x1(), "Bestagon"};
 
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({3, -1, 1}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 2, 0}, sidb_technology::cell_type::LOGIC);
-        lyt.assign_cell_type({8, 2, 1}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_dot_tag({3, -1, 1}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({5, 2, 0}, dot_tag::LOGIC);
+        lyt.assign_dot_tag({8, 2, 1}, dot_tag::OUTPUT);
         lyt.assign_defect({2, 1, 0}, defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});
         lyt.assign_defect({4, 1, 1}, defect{defect_type::DB});
 
@@ -366,8 +366,8 @@ TEST_CASE("Write and read back an sidb::layout", "[sqd]")
     {
         sidb::layout lyt{sidb::lattice::si_111_1x1()};
 
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_dot_tag({1, 1, 1}, dot_tag::NORMAL);
 
         std::stringstream layout_stream{};
 

@@ -480,7 +480,7 @@ class sidb_layout_svg_writer
             }
         }
 
-        lyt.foreach_cell(
+        lyt.foreach_dot(
             [&](const auto& s)
             {
                 const auto [x, y] = lyt.get_lattice().nm_position(padded(s));

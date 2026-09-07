@@ -649,10 +649,10 @@ TEST_CASE("Generate SVG for an sidb::layout", "[write-sidb-layout-svg]")
 {
     sidb::layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 0, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({3, 1, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_dot_tag({3, 1, 1}, dot_tag::NORMAL);
 
     SECTION("light mode")
     {
@@ -699,13 +699,13 @@ TEST_CASE("SVG padding rejects unrepresentable lattice sites", "[write-sidb-layo
          {lattice_site{max_coordinate, 0, 0}, lattice_site{0, max_coordinate, 0}, lattice_site{0, max_coordinate, 1}})
     {
         sidb::layout lyt{};
-        lyt.assign_cell_type(site, sidb_technology::cell_type::NORMAL);
+        lyt.assign_dot_tag(site, dot_tag::NORMAL);
         std::stringstream os{};
         CHECK_THROWS_AS(write_sidb_layout_svg(lyt, os), std::out_of_range);
         CHECK(os.str().empty());
     }
     sidb::layout lyt{};
-    lyt.assign_cell_type({max_coordinate - 2, max_coordinate - 2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_dot_tag({max_coordinate - 2, max_coordinate - 2, 1}, dot_tag::NORMAL);
     std::stringstream os{};
     CHECK_NOTHROW(write_sidb_layout_svg(lyt, os));
 }

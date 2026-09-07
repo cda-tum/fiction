@@ -38,7 +38,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Registers SiDB layouts and their cell and defect operations.
+ * @brief Registers SiDB layouts and their dot and defect operations.
  *
  * @param m Python module.
  */
@@ -57,15 +57,15 @@ void layout(nanobind::module_& m)
         .def("get_layout_name", &layout::get_layout_name, DOC(fiction_sidb_layout_get_layout_name))
         .def("set_layout_name", &layout::set_layout_name, py::arg("name"), DOC(fiction_sidb_layout_set_layout_name))
 
-        .def("assign_cell_type", &layout::assign_cell_type, py::arg("site"), py::arg("cell_type"),
-             DOC(fiction_sidb_layout_assign_cell_type))
-        .def("get_cell_type", &layout::get_cell_type, py::arg("site"), DOC(fiction_sidb_layout_get_cell_type))
-        .def("is_empty_cell", &layout::is_empty_cell, py::arg("site"), DOC(fiction_sidb_layout_is_empty_cell))
+        .def("assign_dot_tag", &layout::assign_dot_tag, py::arg("site"), py::arg("dot_tag"),
+             DOC(fiction_sidb_layout_assign_dot_tag))
+        .def("get_dot_tag", &layout::get_dot_tag, py::arg("site"), DOC(fiction_sidb_layout_get_dot_tag))
+        .def("is_empty_site", &layout::is_empty_site, py::arg("site"), DOC(fiction_sidb_layout_is_empty_site))
         .def("is_empty", &layout::is_empty, DOC(fiction_sidb_layout_is_empty))
-        .def("num_cells", &layout::num_cells, DOC(fiction_sidb_layout_num_cells))
-        .def("num_cells_of_type", &layout::num_cells_of_type, py::arg("cell_type"),
-             DOC(fiction_sidb_layout_num_cells_of_type))
-        .def("cells_of_type", &layout::cells_of_type, py::arg("cell_type"), DOC(fiction_sidb_layout_cells_of_type))
+        .def("num_dots", &layout::num_dots, DOC(fiction_sidb_layout_num_dots))
+        .def("num_dots_with_tag", &layout::num_dots_with_tag, py::arg("dot_tag"),
+             DOC(fiction_sidb_layout_num_dots_with_tag))
+        .def("dots_with_tag", &layout::dots_with_tag, py::arg("dot_tag"), DOC(fiction_sidb_layout_dots_with_tag))
         .def("sidbs", &layout::sidbs, DOC(fiction_sidb_layout_sidbs))
         .def("index_of", &layout::index_of, py::arg("site"), DOC(fiction_sidb_layout_index_of))
         .def("num_pis", &layout::num_pis, DOC(fiction_sidb_layout_num_pis))
@@ -73,12 +73,10 @@ void layout(nanobind::module_& m)
         .def("is_pi", &layout::is_pi, py::arg("site"), DOC(fiction_sidb_layout_is_pi))
         .def("is_po", &layout::is_po, py::arg("site"), DOC(fiction_sidb_layout_is_po))
         .def(
-            "pis",
-            [](const layout& lyt) { return lyt.cells_of_type(fiction::sidb::sidb_technology::cell_type::INPUT); },
+            "pis", [](const layout& lyt) { return lyt.dots_with_tag(fiction::sidb::dot_tag::INPUT); },
             DOC(fiction_sidb_layout_foreach_pi))
         .def(
-            "pos",
-            [](const layout& lyt) { return lyt.cells_of_type(fiction::sidb::sidb_technology::cell_type::OUTPUT); },
+            "pos", [](const layout& lyt) { return lyt.dots_with_tag(fiction::sidb::dot_tag::OUTPUT); },
             DOC(fiction_sidb_layout_foreach_po))
 
         .def("assign_defect", &layout::assign_defect, py::arg("site"), py::arg("defect"),

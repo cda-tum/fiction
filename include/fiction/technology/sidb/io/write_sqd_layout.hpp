@@ -503,7 +503,7 @@ class sqd_writer
                << siqad::LATTICE_LAYER << siqad::MISC_LAYER;
 
         design << siqad::OPEN_DB_LAYER;
-        lyt.foreach_cell([this, &design](const auto& s) { write_db_dot(design, s); });
+        lyt.foreach_dot([this, &design](const auto& s) { write_db_dot(design, s); });
         design << siqad::CLOSE_DB_LAYER;
 
         if (lyt.num_defects() > 0)
@@ -529,7 +529,7 @@ class sqd_writer
     std::ostream& os;
 
     /**
-     * Appends a DB dot with its lattice coordinate and cell type.
+     * Appends a DB dot with its lattice coordinate and dot tag.
      *
      * @param design SQD design buffer.
      * @param s Site of the SiDB.
@@ -538,25 +538,25 @@ class sqd_writer
     {
         std::string type_str{};
 
-        switch (lyt.get_cell_type(s))
+        switch (lyt.get_dot_tag(s))
         {
-            case sidb_technology::cell_type::INPUT:
+            case dot_tag::INPUT:
             {
                 type_str = fmt::format(siqad::DOT_TYPE, "input");
                 break;
             }
-            case sidb_technology::cell_type::OUTPUT:
+            case dot_tag::OUTPUT:
             {
                 type_str = fmt::format(siqad::DOT_TYPE, "output");
                 break;
             }
-            case sidb_technology::cell_type::LOGIC:
+            case dot_tag::LOGIC:
             {
                 type_str = fmt::format(siqad::DOT_TYPE, "logic");
                 break;
             }
-            case sidb_technology::cell_type::NORMAL:
-            case sidb_technology::cell_type::EMPTY:
+            case dot_tag::NORMAL:
+            case dot_tag::EMPTY:
             {
                 break;
             }

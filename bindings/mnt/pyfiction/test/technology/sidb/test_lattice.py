@@ -57,6 +57,24 @@ def test_basis_indices() -> None:
         assert site.z == 1
 
 
+def test_coordinate_ranges() -> None:
+    """Python integers cannot wrap into fixed-width lattice coordinates."""
+    for coordinate in (-(2**31) - 1, 2**31, 2**64):
+        with pytest.raises(TypeError):
+            lattice_site(coordinate, 0)
+        with pytest.raises(TypeError):
+            lattice_site(0, coordinate, 1)
+        site = lattice_site(1, 2, 1)
+        with pytest.raises(TypeError):
+            site.x = coordinate
+        with pytest.raises(TypeError):
+            site.y = coordinate
+        assert (site.x, site.y, site.z) == (1, 2, 1)
+    for basis_index in (-129, 128, 256):
+        with pytest.raises(TypeError):
+            lattice_site(0, 0, basis_index)
+
+
 def test_predefined_lattices() -> None:
     """Predefined silicon lattices map sites to nanometer positions."""
     si_100 = lattice.si_100_2x1()

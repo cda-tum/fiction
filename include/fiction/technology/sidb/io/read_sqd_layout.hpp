@@ -40,6 +40,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction::sidb::io
@@ -729,10 +730,14 @@ class sqd_reader
 
         const auto x = parse_sqd_integer(n);
         const auto y = parse_sqd_integer(m);
-        return {x, y, basis_site};
+        if (!std::in_range<int32_t>(x) || !std::in_range<int32_t>(y))
+        {
+            throw sqd_parsing_error("Error parsing SQD file: coordinate exceeds the lattice-site range");
+        }
+        return {static_cast<int32_t>(x), static_cast<int32_t>(y), static_cast<int8_t>(basis_site)};
     }
     /**
-     * Adds a DB dot at its lattice coordinate with the specified cell type.
+     * Adds a DB dot at its lattice coordinate with the specified dot tag.
      *
      * @param db_dot DB-dot element.
      * @throws sqd_parsing_error if the lattice-coordinate element is missing or invalid.
@@ -746,7 +751,7 @@ class sqd_reader
             throw sqd_parsing_error("Error parsing SQD file: no element 'latcoord' in element 'dbdot'");
         }
 
-        lyt.assign_cell_type(parse_latcoord(latcoord), parse_dot_type(db_dot->FirstChildElement("type")));
+        lyt.assign_dot_tag(parse_latcoord(latcoord), parse_dot_type(db_dot->FirstChildElement("type")));
     }
     /**
      * Reads a defect with finite, non-negative Coulomb material parameters.

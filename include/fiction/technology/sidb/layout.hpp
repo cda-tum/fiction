@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief The SiDB layout: cells and surface defects on lattice sites of one H-Si lattice.
+ * @brief The SiDB layout: dots and surface defects on lattice sites of one H-Si lattice.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -37,19 +37,19 @@ namespace fiction::sidb
 {
 
 /**
- * An SiDB layout: SiDBs of a given cell type and surface defects placed on lattice sites of one H-Si lattice. The
+ * An SiDB layout: tagged SiDBs and surface defects placed on lattice sites of one H-Si lattice. The
  * layout has value semantics; copies are independent.
  *
- * Cells and defects are kept sorted in raster order, so `sidbs()` is the canonical SiDB order that index-based
+ * Dots and defects are kept sorted in raster order, so `sidbs()` is the canonical SiDB order that index-based
  * structures such as charge distributions refer to, and every `foreach_*` traversal is deterministic.
  */
 class layout
 {
   public:
     /**
-     * SiDB cell types.
+     * SiDB dot tags.
      */
-    using cell_type = sidb_technology::cell_type;
+    using dot_tag = sidb::dot_tag;
     /**
      * Creates an empty layout on the H-Si(100)-2x1 lattice.
      */
@@ -99,57 +99,57 @@ class layout
         layout_name = name;
     }
 
-    // ------------------------------------------------------------------------------------------------------- cells
+    // ------------------------------------------------------------------------------------------------------- dots
 
     /**
-     * Assigns a cell type to a site. Assigning `cell_type::EMPTY` removes the SiDB from the site.
-     * Allocation failure leaves the cells unchanged.
+     * Assigns a dot tag to a site. Assigning `dot_tag::EMPTY` removes the SiDB from the site.
+     * Allocation failure leaves the dots unchanged.
      *
      * @param s Site.
-     * @param ct Cell type to assign.
+     * @param tag Dot tag to assign.
      */
-    void assign_cell_type(const lattice_site& s, const cell_type ct)
+    void assign_dot_tag(const lattice_site& s, const dot_tag tag)
     {
-        const auto it = std::ranges::lower_bound(cell_sites, s);
-        const auto i  = static_cast<std::size_t>(std::distance(cell_sites.begin(), it));
+        const auto it = std::ranges::lower_bound(dot_sites, s);
+        const auto i  = static_cast<std::size_t>(std::distance(dot_sites.begin(), it));
 
-        if (it != cell_sites.end() && *it == s)
+        if (it != dot_sites.end() && *it == s)
         {
-            if (ct == cell_type::EMPTY)
+            if (tag == dot_tag::EMPTY)
             {
-                cell_sites.erase(it);
-                cell_types.erase(std::next(cell_types.cbegin(), static_cast<std::ptrdiff_t>(i)));
+                dot_sites.erase(it);
+                dot_tags.erase(std::next(dot_tags.cbegin(), static_cast<std::ptrdiff_t>(i)));
             }
             else
             {
-                cell_types[i] = ct;
+                dot_tags[i] = tag;
             }
         }
-        else if (ct != cell_type::EMPTY)
+        else if (tag != dot_tag::EMPTY)
         {
-            const auto inserted = cell_sites.insert(it, s);
+            const auto inserted = dot_sites.insert(it, s);
             try
             {
-                cell_types.insert(std::next(cell_types.cbegin(), static_cast<std::ptrdiff_t>(i)), ct);
+                dot_tags.insert(std::next(dot_tags.cbegin(), static_cast<std::ptrdiff_t>(i)), tag);
             }
             catch (...)
             {
-                cell_sites.erase(inserted);
+                dot_sites.erase(inserted);
                 throw;
             }
         }
     }
     /**
-     * The cell type at a site.
+     * The dot tag at a site.
      *
      * @param s Site.
-     * @return Cell type at `s`, `cell_type::EMPTY` if no SiDB is there.
+     * @return Dot tag at `s`, `dot_tag::EMPTY` if no SiDB is there.
      */
-    [[nodiscard]] cell_type get_cell_type(const lattice_site& s) const noexcept
+    [[nodiscard]] dot_tag get_dot_tag(const lattice_site& s) const noexcept
     {
         const auto i = index_of(s);
 
-        return i.has_value() ? cell_types[*i] : cell_type::EMPTY;
+        return i.has_value() ? dot_tags[*i] : dot_tag::EMPTY;
     }
     /**
      * Whether no SiDB sits at a site.
@@ -157,7 +157,7 @@ class layout
      * @param s Site.
      * @return `true` iff `s` holds no SiDB.
      */
-    [[nodiscard]] bool is_empty_cell(const lattice_site& s) const noexcept
+    [[nodiscard]] bool is_empty_site(const lattice_site& s) const noexcept
     {
         return !index_of(s).has_value();
     }
@@ -168,42 +168,42 @@ class layout
      */
     [[nodiscard]] bool is_empty() const noexcept
     {
-        return cell_sites.empty();
+        return dot_sites.empty();
     }
     /**
      * Number of SiDBs.
      *
      * @return Number of SiDBs.
      */
-    [[nodiscard]] uint64_t num_cells() const noexcept
+    [[nodiscard]] uint64_t num_dots() const noexcept
     {
-        return cell_sites.size();
+        return dot_sites.size();
     }
     /**
-     * Number of SiDBs of a given cell type.
+     * Number of tagged SiDBs.
      *
-     * @param ct Cell type.
-     * @return Number of SiDBs of type `ct`.
+     * @param tag Dot tag.
+     * @return Number of SiDBs with tag `tag`.
      */
-    [[nodiscard]] uint64_t num_cells_of_type(const cell_type ct) const noexcept
+    [[nodiscard]] uint64_t num_dots_with_tag(const dot_tag tag) const noexcept
     {
-        return static_cast<uint64_t>(std::ranges::count(cell_types, ct));
+        return static_cast<uint64_t>(std::ranges::count(dot_tags, tag));
     }
     /**
-     * All sites holding an SiDB of a given cell type, in raster order.
+     * All sites holding an SiDB of a given dot tag, in raster order.
      *
-     * @param ct Cell type.
-     * @return Sites of type `ct`.
+     * @param tag Dot tag.
+     * @return Sites with tag `tag`.
      */
-    [[nodiscard]] std::vector<lattice_site> cells_of_type(const cell_type ct) const
+    [[nodiscard]] std::vector<lattice_site> dots_with_tag(const dot_tag tag) const
     {
         std::vector<lattice_site> result{};
 
-        for (std::size_t i = 0; i < cell_sites.size(); ++i)
+        for (std::size_t i = 0; i < dot_sites.size(); ++i)
         {
-            if (cell_types[i] == ct)
+            if (dot_tags[i] == tag)
             {
-                result.push_back(cell_sites[i]);
+                result.push_back(dot_sites[i]);
             }
         }
 
@@ -217,7 +217,7 @@ class layout
      */
     [[nodiscard]] const std::vector<lattice_site>& sidbs() const noexcept
     {
-        return cell_sites;
+        return dot_sites;
     }
     /**
      * The index of a site in `sidbs()`.
@@ -227,11 +227,11 @@ class layout
      */
     [[nodiscard]] std::optional<std::size_t> index_of(const lattice_site& s) const noexcept
     {
-        const auto it = std::ranges::lower_bound(cell_sites, s);
+        const auto it = std::ranges::lower_bound(dot_sites, s);
 
-        if (it != cell_sites.cend() && *it == s)
+        if (it != dot_sites.cend() && *it == s)
         {
-            return static_cast<std::size_t>(std::distance(cell_sites.cbegin(), it));
+            return static_cast<std::size_t>(std::distance(dot_sites.cbegin(), it));
         }
 
         return std::nullopt;
@@ -244,9 +244,9 @@ class layout
      * @param fn Function to apply.
      */
     template <typename Fn>
-    void foreach_cell(Fn&& fn) const
+    void foreach_dot(Fn&& fn) const
     {
-        for_each_site(cell_sites, std::forward<Fn>(fn));
+        for_each_site(dot_sites, std::forward<Fn>(fn));
     }
     /**
      * Number of input SiDBs.
@@ -255,7 +255,7 @@ class layout
      */
     [[nodiscard]] uint32_t num_pis() const noexcept
     {
-        return static_cast<uint32_t>(num_cells_of_type(cell_type::INPUT));
+        return static_cast<uint32_t>(num_dots_with_tag(dot_tag::INPUT));
     }
     /**
      * Number of output SiDBs.
@@ -264,7 +264,7 @@ class layout
      */
     [[nodiscard]] uint32_t num_pos() const noexcept
     {
-        return static_cast<uint32_t>(num_cells_of_type(cell_type::OUTPUT));
+        return static_cast<uint32_t>(num_dots_with_tag(dot_tag::OUTPUT));
     }
     /**
      * Whether a site holds an input SiDB.
@@ -274,7 +274,7 @@ class layout
      */
     [[nodiscard]] bool is_pi(const lattice_site& s) const noexcept
     {
-        return get_cell_type(s) == cell_type::INPUT;
+        return get_dot_tag(s) == dot_tag::INPUT;
     }
     /**
      * Whether a site holds an output SiDB.
@@ -284,10 +284,10 @@ class layout
      */
     [[nodiscard]] bool is_po(const lattice_site& s) const noexcept
     {
-        return get_cell_type(s) == cell_type::OUTPUT;
+        return get_dot_tag(s) == dot_tag::OUTPUT;
     }
     /**
-     * Applies a function to every input SiDB site in raster order. Same callable contract as `foreach_cell`.
+     * Applies a function to every input SiDB site in raster order. Same callable contract as `foreach_dot`.
      *
      * @tparam Fn Callable on `(const lattice_site&)` or `(const lattice_site&, std::size_t)`.
      * @param fn Function to apply.
@@ -295,10 +295,10 @@ class layout
     template <typename Fn>
     void foreach_pi(Fn&& fn) const
     {
-        for_each_site(cells_of_type(cell_type::INPUT), std::forward<Fn>(fn));
+        for_each_site(dots_with_tag(dot_tag::INPUT), std::forward<Fn>(fn));
     }
     /**
-     * Applies a function to every output SiDB site in raster order. Same callable contract as `foreach_cell`.
+     * Applies a function to every output SiDB site in raster order. Same callable contract as `foreach_dot`.
      *
      * @tparam Fn Callable on `(const lattice_site&)` or `(const lattice_site&, std::size_t)`.
      * @param fn Function to apply.
@@ -306,7 +306,7 @@ class layout
     template <typename Fn>
     void foreach_po(Fn&& fn) const
     {
-        for_each_site(cells_of_type(cell_type::OUTPUT), std::forward<Fn>(fn));
+        for_each_site(dots_with_tag(dot_tag::OUTPUT), std::forward<Fn>(fn));
     }
 
     // ----------------------------------------------------------------------------------------------------- defects
@@ -474,7 +474,7 @@ class layout
             {
                 for (auto x = min_x; x <= max_x; ++x)
                 {
-                    influenced.insert(lattice_site{x, y, s.z});
+                    influenced.insert(lattice_site{static_cast<int32_t>(x), static_cast<int32_t>(y), s.z});
                 }
             }
         }
@@ -514,7 +514,7 @@ class layout
      */
     [[nodiscard]] std::pair<lattice_site, lattice_site> bounding_box() const noexcept
     {
-        if (cell_sites.empty() && surface_defects.empty())
+        if (dot_sites.empty() && surface_defects.empty())
         {
             return {};
         }
@@ -530,7 +530,7 @@ class layout
             max_row = std::max(max_row, row_of(s));
         };
 
-        std::ranges::for_each(cell_sites, extend);
+        std::ranges::for_each(dot_sites, extend);
         std::ranges::for_each(surface_defects, [&](const auto& sd) { extend(sd.first); });
 
         return {site_at_row(min_x, min_row), site_at_row(max_x, max_row)};
@@ -555,11 +555,11 @@ class layout
     /**
      * SiDB sites in raster order.
      */
-    std::vector<lattice_site> cell_sites{};
+    std::vector<lattice_site> dot_sites{};
     /**
-     * Cell type of the SiDB at the same index in `cell_sites`.
+     * Dot tag of the SiDB at the same index in `dot_sites`.
      */
-    std::vector<cell_type> cell_types{};
+    std::vector<dot_tag> dot_tags{};
     /**
      * Defects with their sites in raster order.
      */
@@ -626,24 +626,24 @@ class layout
 namespace std
 {
 /**
- * Hash for SiDB layouts, over the SiDBs and their cell types.
+ * Hash for SiDB layouts, over the SiDBs and their dot tags.
  */
 template <>
 struct hash<fiction::sidb::layout>
 {
     /**
      * @param lyt Layout to hash.
-     * @return Hash of the SiDB sites and cell types.
+     * @return Hash of the SiDB sites and dot tags.
      */
     std::size_t operator()(const fiction::sidb::layout& lyt) const noexcept
     {
-        std::size_t h = lyt.num_cells();
+        std::size_t h = lyt.num_dots();
 
-        lyt.foreach_cell(
+        lyt.foreach_dot(
             [&h, &lyt](const auto& s)
             {
                 h ^= std::hash<fiction::sidb::lattice_site>{}(s) + 0x9e3779b97f4a7c15ULL + (h << 6u) + (h >> 2u);
-                h ^= static_cast<std::size_t>(lyt.get_cell_type(s));
+                h ^= static_cast<std::size_t>(lyt.get_dot_tag(s));
             });
 
         return h;

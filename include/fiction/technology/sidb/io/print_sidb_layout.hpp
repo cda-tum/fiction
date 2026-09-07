@@ -130,13 +130,13 @@ inline void print_sidb_layout(std::ostream& os, const layout& lyt, const bool la
             printed = true;
         }
 
-        if (const auto ct = lyt.get_cell_type(s); ct != sidb_technology::cell_type::EMPTY && !printed)
+        if (const auto ct = lyt.get_dot_tag(s); ct != dot_tag::EMPTY && !printed)
         {
-            if (ct == sidb_technology::cell_type::INPUT)
+            if (ct == dot_tag::INPUT)
             {
                 paint(detail::INPUT_COLOR, " ◯ ");
             }
-            else if (ct == sidb_technology::cell_type::OUTPUT)
+            else if (ct == dot_tag::OUTPUT)
             {
                 paint(detail::OUTPUT_COLOR, " ◯ ");
             }

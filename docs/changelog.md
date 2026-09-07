@@ -19,7 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
-    `sidb::layout` stores cells and defects without templates. `to_sidb_layout` converts
+    `sidb::layout` stores tagged dots and defects without templates. `to_sidb_layout` converts
     Cartesian cell-level layouts
 
 - Documentation:
@@ -53,6 +53,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Clang-Tidy skips Python-only changes in the bindings tree.
   - PyPI releases now use trusted publishing instead of an API token.
   - Renovate now waits three days for dated dependency releases before updating.
+
+- Data structures:
+
+  - SiDB layouts use dot operations and `dot_tag` for dot roles. Lattice-site constructors
+    take `int32_t` coordinates and an `int8_t` basis index.
 
 - Documentation:
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
@@ -197,8 +202,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
-<<<<<<< HEAD
+- Algorithms:
+
+  - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
+
 - Continuous integration:
+  - Canceled CI runs now stop optional summary jobs.
   - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
   - Change detection now allows five minutes for runner setup and file comparisons.
 
@@ -206,18 +215,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Lattice sites now reject invalid basis indices in construction, geometry queries, and cube conversion.
   - SiDB row conversion and area iteration now handle coordinate limits without signed overflow;
     defect influence clips to representable sites, and cube conversion rejects rows outside its range
-  - Lattice-site construction and arithmetic now reject coordinate overflow; cell insertion preserves the layout on
+  - Lattice-site arithmetic now rejects coordinate overflow; dot insertion preserves the layout on
     allocation failure, and moving a defect from an empty site leaves the target unchanged
   - Moving a defect now preserves its target when the site arguments refer to stored defects.
-=======
-- Algorithms:
-
-  - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
-
-- Continuous integration:
-
-  - Canceled CI runs now stop optional summary jobs.
->>>>>>> origin/main
 
 - Documentation:
 

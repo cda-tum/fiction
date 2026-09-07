@@ -1241,11 +1241,11 @@ TEST_CASE("Read SQD layout into an sidb::layout", "[sqd]")
 
     CHECK(lyt.get_layout_name() == "gate");
     CHECK(lyt.get_lattice() == sidb::lattice::si_111_1x1());
-    CHECK(lyt.num_cells() == 4);
-    CHECK(lyt.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::INPUT);
-    CHECK(lyt.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::OUTPUT);
-    CHECK(lyt.get_cell_type({-2, 2, 0}) == sidb_technology::cell_type::LOGIC);
-    CHECK(lyt.get_cell_type({2, 2, 1}) == sidb_technology::cell_type::NORMAL);
+    CHECK(lyt.num_dots() == 4);
+    CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
+    CHECK(lyt.get_dot_tag({0, 0, 1}) == dot_tag::OUTPUT);
+    CHECK(lyt.get_dot_tag({-2, 2, 0}) == dot_tag::LOGIC);
+    CHECK(lyt.get_dot_tag({2, 2, 1}) == dot_tag::NORMAL);
 
     CHECK(lyt.num_defects() == 2);
     CHECK(lyt.get_defect({5, 2, 0}) == defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});

@@ -21,6 +21,7 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <stdexcept>
 #include <string>
 
 #include <nanobind/nanobind.h>
@@ -44,14 +45,21 @@ void lattice(nanobind::module_& m)
 
     py::class_<fiction::sidb::lattice_site>(m, "lattice_site", DOC(fiction_sidb_lattice_site))
         .def(py::init<>(), DOC(fiction_sidb_lattice_site_lattice_site))
-        .def(py::init<int32_t, int32_t, uint8_t>(), py::arg("x"), py::arg("y"), py::arg("z"),
+        .def(py::init<int32_t, int32_t, int8_t>(), py::arg("x"), py::arg("y"), py::arg("z"),
              DOC(fiction_sidb_lattice_site_lattice_site_2))
         .def(py::init<int32_t, int32_t>(), py::arg("x"), py::arg("y"), DOC(fiction_sidb_lattice_site_lattice_site_3))
         .def_rw("x", &fiction::sidb::lattice_site::x, DOC(fiction_sidb_lattice_site_x))
         .def_rw("y", &fiction::sidb::lattice_site::y, DOC(fiction_sidb_lattice_site_y))
         .def_prop_rw(
             "z", [](const fiction::sidb::lattice_site& s) { return s.z; },
-            [](fiction::sidb::lattice_site& s, const int64_t z) { s = {s.x, s.y, z}; },
+            [](fiction::sidb::lattice_site& s, const int64_t z)
+            {
+                if (z != 0 && z != 1)
+                {
+                    throw std::out_of_range("Invalid lattice basis index");
+                }
+                s.z = static_cast<int8_t>(z);
+            },
             DOC(fiction_sidb_lattice_site_z))
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
         .def(py::self == py::self, DOC(fiction_sidb_lattice_site_operator_eq))

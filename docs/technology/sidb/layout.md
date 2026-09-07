@@ -71,6 +71,14 @@ described by setting the vectors directly.
 
 **Header:** `fiction/technology/sidb/layout.hpp`
 
+A dot is one silicon dangling bond. `dot_tag` records its role: `NORMAL`, `INPUT`, `OUTPUT`, or
+`LOGIC`. Assigning `EMPTY` removes the dot. Use `assign_dot_tag`, `get_dot_tag`, `num_dots`, and
+`dots_with_tag` to manage dots; `is_pi` and `is_po` identify primary inputs and outputs.
+Python exposes the tags as `sidb_dot_tag`.
+
+```{doxygenenum} fiction::sidb::dot_tag
+```
+
 ```{doxygenclass} fiction::sidb::layout
 :members:
 ```

@@ -16,7 +16,7 @@ from mnt.pyfiction import (
     read_sqd_layout,
     read_sqd_layout_100,
     read_sqd_layout_111,
-    sidb_technology,
+    sidb_dot_tag,
     write_sqd_layout,
 )
 
@@ -31,13 +31,13 @@ def test_read_write(resources_dir: Path) -> None:
 
 
 def test_read_write_sidb_layout(resources_dir: Path, tmp_path: Path) -> None:
-    """SQD export and import preserve the lattice, name, and cell types."""
+    """SQD export and import preserve the lattice, name, and dot tags."""
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"), "and")
     assert lyt.get_layout_name() == "and"
     assert lyt.get_lattice() == lattice.si_111_1x1()
-    assert lyt.num_cells() > 0
+    assert lyt.num_dots() > 0
 
-    lyt.assign_cell_type(lattice_site(-3, 2, 1), sidb_technology.cell_type.LOGIC)
+    lyt.assign_dot_tag(lattice_site(-3, 2, 1), sidb_dot_tag.LOGIC)
 
     path = tmp_path / "and.sqd"
     write_sqd_layout(lyt, str(path))

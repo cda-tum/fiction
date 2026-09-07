@@ -23,7 +23,6 @@
 #include <array>
 #include <cmath>
 #include <compare>
-#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -56,47 +55,36 @@ struct lattice_site
     /**
      * Basis site within the unit cell, 0 or 1.
      */
-    uint8_t z{0};
+    int8_t z{0};
     /**
      * Default constructor. Creates the site `(0, 0, 0)`.
      */
     constexpr lattice_site() noexcept = default;
     /**
-     * Creates the site `(x, y, z)`.
+     * Creates the site `(x, y, z)`. Coordinates must be representable by the parameter types before the call.
      *
-     * @tparam X Integral type of `x`.
-     * @tparam Y Integral type of `y`.
-     * @tparam Z Integral type of `z`.
      * @param x_coord Steps along the first lattice vector.
      * @param y_coord Steps along the second lattice vector.
      * @param basis_site Basis site, 0 or 1.
-     * @throws std::out_of_range if a coordinate exceeds the lattice-site range.
+     * @throws std::out_of_range if the basis index is not 0 or 1.
      */
-    template <std::integral X, std::integral Y, std::integral Z>
-    constexpr lattice_site(const X x_coord, const Y y_coord, const Z basis_site)
+    constexpr lattice_site(const int32_t x_coord, const int32_t y_coord, const int8_t basis_site) :
+            x{x_coord},
+            y{y_coord},
+            z{basis_site}
     {
-        // Unary plus promotes character and bool coordinates to types accepted by std::in_range.
-        if (!std::in_range<int32_t>(+x_coord) || !std::in_range<int32_t>(+y_coord) ||
-            (basis_site != 0 && basis_site != 1))
+        if (basis_site != 0 && basis_site != 1)
         {
-            throw std::out_of_range("Coordinate exceeds the lattice-site range");
+            throw std::out_of_range("Invalid lattice basis index");
         }
-        x = static_cast<int32_t>(+x_coord);
-        y = static_cast<int32_t>(+y_coord);
-        z = static_cast<uint8_t>(basis_site);
     }
     /**
      * Creates the site `(x, y, 0)`.
      *
-     * @tparam X Integral type of `x`.
-     * @tparam Y Integral type of `y`.
      * @param x_coord Steps along the first lattice vector.
      * @param y_coord Steps along the second lattice vector.
-     * @throws std::out_of_range if a coordinate exceeds the lattice-site range.
      */
-    template <std::integral X, std::integral Y>
-    constexpr lattice_site(const X x_coord, const Y y_coord) : lattice_site{x_coord, y_coord, 0}
-    {}
+    constexpr lattice_site(const int32_t x_coord, const int32_t y_coord) noexcept : lattice_site{x_coord, y_coord, 0} {}
     /**
      * Compares two sites for equality.
      *
@@ -134,7 +122,11 @@ struct lattice_site
     {
         const auto result_x = int64_t{x} + other.x;
         const auto result_y = (int64_t{y} + other.y) + (z & other.z);
-        return {result_x, result_y, z ^ other.z};
+        if (!std::in_range<int32_t>(result_x) || !std::in_range<int32_t>(result_y))
+        {
+            throw std::out_of_range("Coordinate exceeds the lattice-site range");
+        }
+        return {static_cast<int32_t>(result_x), static_cast<int32_t>(result_y), static_cast<int8_t>(z ^ other.z)};
     }
     /**
      * Subtracts another site from this one, borrowing from the previous unit cell along the second lattice vector when
@@ -147,8 +139,12 @@ struct lattice_site
     [[nodiscard]] constexpr lattice_site operator-(const lattice_site& other) const
     {
         const auto result_x = int64_t{x} - other.x;
-        const auto result_y = (int64_t{y} - other.y) - static_cast<int64_t>(z == 0u && other.z != 0u);
-        return {result_x, result_y, z ^ other.z};
+        const auto result_y = (int64_t{y} - other.y) - static_cast<int64_t>(z == 0 && other.z != 0);
+        if (!std::in_range<int32_t>(result_x) || !std::in_range<int32_t>(result_y))
+        {
+            throw std::out_of_range("Coordinate exceeds the lattice-site range");
+        }
+        return {static_cast<int32_t>(result_x), static_cast<int32_t>(result_y), static_cast<int8_t>(z ^ other.z)};
     }
     /**
      * Returns a string representation of the form `"(x,y,z)"`.
@@ -183,7 +179,11 @@ struct lattice_site
 [[nodiscard]] constexpr lattice_site site_at_row(const int32_t x, const int64_t row)
 {
     const auto y = (row / 2) - static_cast<int64_t>(row % 2 < 0);
-    return {x, y, row - (2 * y)};
+    if (!std::in_range<int32_t>(y))
+    {
+        throw std::out_of_range("Row exceeds the lattice-site range");
+    }
+    return {x, static_cast<int32_t>(y), static_cast<int8_t>(row - (2 * y))};
 }
 /**
  * All sites in the rectangle spanned by two corner sites, in raster order (top to bottom, left to right), both corners

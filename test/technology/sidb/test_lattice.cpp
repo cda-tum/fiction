@@ -51,42 +51,23 @@ TEST_CASE("Lattice sites", "[lattice]")
         CHECK(three_arg.x == -3);
         CHECK(three_arg.y == -4);
         CHECK(three_arg.z == 1);
-
-        const uint64_t     ux = 5;
-        const int64_t      iy = -7;
-        const lattice_site mixed{ux, iy, 1u};
-        CHECK(mixed == lattice_site{5, -7, 1});
     }
-    SECTION("construction rejects unrepresentable coordinates")
+    SECTION("coordinate boundaries")
     {
-        constexpr int64_t      min_coordinate = std::numeric_limits<int32_t>::min();
-        constexpr int64_t      max_coordinate = std::numeric_limits<int32_t>::max();
+        constexpr auto         min_coordinate = std::numeric_limits<int32_t>::min();
+        constexpr auto         max_coordinate = std::numeric_limits<int32_t>::max();
         constexpr lattice_site boundary{min_coordinate, max_coordinate, 1};
         CHECK(boundary.x == min_coordinate);
         CHECK(boundary.y == max_coordinate);
-        CHECK(lattice_site{false, char{1}} == lattice_site{0, 1});
-
-        for (const auto coordinate : {min_coordinate - 1, max_coordinate + 1})
-        {
-            CHECK_THROWS_AS((lattice_site{coordinate, 0}), std::out_of_range);
-            CHECK_THROWS_AS((lattice_site{0, coordinate}), std::out_of_range);
-            CHECK_THROWS_AS((lattice_site{coordinate, 0, 1}), std::out_of_range);
-            CHECK_THROWS_AS((lattice_site{0, coordinate, 1}), std::out_of_range);
-        }
-        constexpr auto max_unsigned = std::numeric_limits<uint64_t>::max();
-        CHECK_THROWS_AS((lattice_site{max_unsigned, 0}), std::out_of_range);
-        CHECK_THROWS_AS((lattice_site{0, max_unsigned}), std::out_of_range);
-        CHECK_THROWS_AS((lattice_site{max_unsigned, 0, 1}), std::out_of_range);
-        CHECK_THROWS_AS((lattice_site{0, max_unsigned, 1}), std::out_of_range);
     }
     SECTION("invalid basis indices")
     {
-        for (const auto basis_site : {-1, 2, 256})
+        for (const int8_t basis_site : {int8_t{-1}, int8_t{2}, std::numeric_limits<int8_t>::max()})
         {
             CHECK_THROWS_AS((lattice_site{0, 0, basis_site}), std::out_of_range);
         }
         lattice_site invalid{};
-        invalid.z      = 2;
+        invalid.z      = -1;
         const auto lat = lattice::si_100_2x1();
         CHECK_THROWS_AS(lat.nm_position(invalid), std::out_of_range);
         CHECK_THROWS_AS(lat.nm_distance(invalid, invalid), std::out_of_range);

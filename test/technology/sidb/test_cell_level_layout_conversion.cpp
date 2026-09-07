@@ -78,10 +78,10 @@ TEST_CASE("Cell-level layout to SiDB layout", "[cell-level-layout-conversion]")
 
         CHECK(converted.get_lattice() == lattice::si_100_2x1());
         CHECK(converted.get_layout_name() == "gate");
-        CHECK(converted.num_cells() == 3);
-        CHECK(converted.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::INPUT);
-        CHECK(converted.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::NORMAL);
-        CHECK(converted.get_cell_type({4, 2, 0}) == sidb_technology::cell_type::OUTPUT);
+        CHECK(converted.num_dots() == 3);
+        CHECK(converted.get_dot_tag({0, 0, 0}) == sidb_technology::cell_type::INPUT);
+        CHECK(converted.get_dot_tag({2, 1, 1}) == sidb_technology::cell_type::NORMAL);
+        CHECK(converted.get_dot_tag({4, 2, 0}) == sidb_technology::cell_type::OUTPUT);
         CHECK(converted.num_defects() == 0);
     }
     SECTION("SiQAD coordinates on the 111 lattice")
@@ -112,7 +112,7 @@ TEST_CASE("Cell-level layout to SiDB layout", "[cell-level-layout-conversion]")
 
         const auto converted = to_sidb_layout(lyt);
 
-        CHECK(converted.num_cells() == 1);
+        CHECK(converted.num_dots() == 1);
         CHECK(converted.num_defects() == 1);
         CHECK(converted.get_defect({0, 1, 0}) == defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});
     }

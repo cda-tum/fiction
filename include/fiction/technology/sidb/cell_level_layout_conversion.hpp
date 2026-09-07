@@ -42,7 +42,7 @@ template <typename Coordinate>
 {
     if constexpr (std::is_same_v<Coordinate, layouts::coords::siqad>)
     {
-        return {c.x, c.y, c.z};
+        return {c.x, c.y, static_cast<int8_t>(c.z)};
     }
     else
     {
@@ -58,7 +58,7 @@ template <typename Coordinate>
  */
 [[nodiscard]] constexpr layouts::coords::cube to_cube(const lattice_site& s)
 {
-    if (s.z > 1)
+    if (s.z != 0 && s.z != 1)
     {
         throw std::out_of_range("Invalid lattice basis index");
     }
@@ -106,7 +106,7 @@ template <typename CellLyt>
 
     layout result{lat, lyt.get_layout_name()};
 
-    lyt.foreach_cell([&](const auto& c) { result.assign_cell_type(to_lattice_site(c), lyt.get_cell_type(c)); });
+    lyt.foreach_cell([&](const auto& c) { result.assign_dot_tag(to_lattice_site(c), lyt.get_cell_type(c)); });
 
     if constexpr (is_sidb_defect_surface_v<CellLyt>)
     {

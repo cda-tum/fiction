@@ -8,31 +8,31 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import lattice, lattice_site, sidb_defect, sidb_defect_type, sidb_layout, sidb_technology
+from mnt.pyfiction import lattice, lattice_site, sidb_defect, sidb_defect_type, sidb_dot_tag, sidb_layout
 
 
 def test_empty_layout() -> None:
-    """Empty layouts retain their lattice and name without cells or defects."""
+    """Empty layouts retain their lattice and name without dots or defects."""
     lyt = sidb_layout()
     assert lyt.is_empty()
-    assert lyt.num_cells() == 0
+    assert lyt.num_dots() == 0
     assert lyt.num_defects() == 0
     assert lyt.get_lattice() == lattice.si_100_2x1()
-    assert lyt.get_cell_type(lattice_site(0, 0, 0)) == sidb_technology.cell_type.EMPTY
+    assert lyt.get_dot_tag(lattice_site(0, 0, 0)) == sidb_dot_tag.EMPTY
 
     named = sidb_layout(lattice.si_111_1x1(), "named")
     assert named.get_lattice() == lattice.si_111_1x1()
     assert named.get_layout_name() == "named"
 
 
-def test_cells() -> None:
-    """Cell types determine layout traversal, terminals, bounds, and equality."""
+def test_dot_tags() -> None:
+    """Dot tags determine layout traversal, terminals, bounds, and equality."""
     lyt = sidb_layout()
-    lyt.assign_cell_type(lattice_site(3, 1, 0), sidb_technology.cell_type.OUTPUT)
-    lyt.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type(lattice_site(1, 0, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_dot_tag(lattice_site(3, 1, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
+    lyt.assign_dot_tag(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
 
-    assert lyt.num_cells() == 3
+    assert lyt.num_dots() == 3
     assert lyt.sidbs() == [lattice_site(0, 0, 0), lattice_site(1, 0, 0), lattice_site(3, 1, 0)]
     assert lyt.index_of(lattice_site(1, 0, 0)) == 1
     assert lyt.index_of(lattice_site(9, 9, 0)) is None
@@ -42,13 +42,13 @@ def test_cells() -> None:
     assert lyt.is_po(lattice_site(3, 1, 0))
     assert lyt.bounding_box() == (lattice_site(0, 0, 0), lattice_site(3, 1, 0))
 
-    lyt.assign_cell_type(lattice_site(1, 0, 0), sidb_technology.cell_type.EMPTY)
-    assert lyt.num_cells() == 2
-    assert lyt.is_empty_cell(lattice_site(1, 0, 0))
+    lyt.assign_dot_tag(lattice_site(1, 0, 0), sidb_dot_tag.EMPTY)
+    assert lyt.num_dots() == 2
+    assert lyt.is_empty_site(lattice_site(1, 0, 0))
 
     copy = sidb_layout(lyt.get_lattice())
     for site in lyt.sidbs():
-        copy.assign_cell_type(site, lyt.get_cell_type(site))
+        copy.assign_dot_tag(site, lyt.get_dot_tag(site))
     assert copy == lyt
     assert hash(copy) == hash(lyt)
     assert "◯" in repr(lyt)
