@@ -2072,7 +2072,8 @@ TEST_CASE("Operational domain rejects QuickSim with charged defects", "[operatio
     operational_domain_params params{};
     params.operational_params.sim_engine = engine::QUICKSIM;
     params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1}};
-    CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params), std::invalid_argument);
+    CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params),
+                    std::invalid_argument);
 }
 
 TEST_CASE("Operational-domain sweeps reject non-finite and oversized ranges", "[operational-domain]")
