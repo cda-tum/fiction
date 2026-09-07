@@ -1,6 +1,6 @@
 # SiDB I/O
 
-## Cell-level Layouts
+## Dot Layouts
 
 ::::{tab-set}
 :sync-group: language
@@ -10,22 +10,8 @@
 
 **Header:** `fiction/technology/sidb/io/read_sqd_layout.hpp`
 
-```{doxygenfunction} fiction::sidb::io::read_sqd_layout(std::istream& is, const std::string_view& name = "")
-```
-
-```{doxygenfunction} fiction::sidb::io::read_sqd_layout(Lyt& lyt, std::istream& is)
-```
-
-```{doxygenfunction} fiction::sidb::io::read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
-```
-
-```{doxygenfunction} fiction::sidb::io::read_sqd_layout(Lyt& lyt, const std::string_view& filename)
-```
-
-```{doxygenfunction} fiction::sidb::io::read_sqd_layout(std::istream& is, const std::string_view& name)
-```
-
-```{doxygenfunction} fiction::sidb::io::read_sqd_layout(const std::string_view& filename, const std::string_view& name)
+```{doxygenfile} fiction/technology/sidb/io/read_sqd_layout.hpp
+:sections: func
 ```
 
 ```{doxygenclass} fiction::sidb::io::sqd_parsing_error
@@ -63,10 +49,8 @@
 
 **Header:** `fiction/technology/sidb/io/read_surface_defects.hpp`
 
-```{doxygenfunction} fiction::sidb::io::read_surface_defects(std::istream& is, const std::string_view& name = "")
-```
-
-```{doxygenfunction} fiction::sidb::io::read_surface_defects(const std::string_view& filename, const std::string_view& name = "")
+```{doxygenfile} fiction/technology/sidb/io/read_surface_defects.hpp
+:sections: func
 ```
 
 ```{doxygenclass} fiction::sidb::io::unsupported_defect_index_exception

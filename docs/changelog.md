@@ -218,21 +218,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Lattice-site arithmetic now rejects coordinate overflow; dot insertion preserves the layout on
     allocation failure, and moving a defect from an empty site leaves the target unchanged
   - Moving a defect now preserves its target when the site arguments refer to stored defects.
+  - Corrected the SiDB pointer aliases in `types.hpp` and checked their target types.
 
 - Documentation:
 
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
   - Restored Python API entries and method signatures, and formatted generated docstrings.
+  - SiDB reader documentation now lists every overload without ambiguous signatures.
 
 - I/O:
 
   - QCA SVG output now uses valid text colors in simple tile mode.
-
-- `types.hpp`: `sidb_111_cell_clk_lyt_siqad_ptr`, `cds_sidb_cell_clk_lyt_cube`,
-  `cds_sidb_111_cell_clk_lyt_siqad_ptr`, and `cds_sidb_111_cell_clk_lyt_cube_ptr` pointed at
-  the wrong type; a `static_assert` per `*_ptr` alias pins each to the type its name says
-
-- I/O:
   - SQD readers now reject fractional coordinates and trailing text in numeric attributes.
   - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites
   - SQD cell-level output now propagates exceptions from cell and defect formatting
@@ -244,6 +240,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Python bindings:
 
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
+  - Exposed the defect-matrix reader exceptions at the package root.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector
   - `write_sqd_sim_result` accepts the `sidb_simulation_result_100` and `_111` results
