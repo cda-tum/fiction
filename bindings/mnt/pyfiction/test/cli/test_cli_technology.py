@@ -53,6 +53,12 @@ def test_area(mux21_shell: Shell, commands: str, expected: float | None) -> None
         return
     mux21_shell.ok("area")
     result = mux21_shell.session.log[-1]["result"]
+    if isinstance(mux21_shell.session.cell_layouts.current().layout, sidb_layout):
+        assert isinstance(result, dict)
+        assert set(result) == {"area_nm2"}
+        assert result["area_nm2"] > 0
+        assert "layout lattice" in mux21_shell.fails("area -x 20")
+        return
     assert result["cell_width_nm"] == expected  # type: ignore[index]
     assert result["area_nm2"] > 0  # type: ignore[index]
     mux21_shell.ok("area -x 20 -y 20 --hspace 1 --vspace 1")

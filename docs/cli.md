@@ -249,13 +249,14 @@ Cell-level layouts are much larger than gate-level ones, so `show -c` is the bet
 
 `area [-x WIDTH] [-y HEIGHT] [--hspace H] [--vspace V]` computes the physical area of the active cell-level layout
 in nm². Unset dimensions default to the technology's values from [QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/),
-[NMLSim](https://dl.acm.org/doi/10.1145/3338852.3339856), and [SiQAD](https://github.com/siqad/siqad):
+and [NMLSim](https://dl.acm.org/doi/10.1145/3338852.3339856):
 
 | Technology | Width | Height | Horizontal spacing | Vertical spacing |
 | ---------- | ----- | ------ | ------------------ | ---------------- |
 | QCA        | 18 nm | 18 nm  | 2 nm               | 2 nm             |
 | iNML       | 50 nm | 100 nm | 10 nm              | 25 nm            |
-| SiDB       | 0 nm  | 0 nm   | 0.384 nm           | 0.384 nm         |
+
+SiDB area uses the layout's lattice geometry. Cell-dimension overrides do not apply to SiDB layouts.
 
 ## Physical simulation of SiDBs
 

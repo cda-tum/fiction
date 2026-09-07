@@ -90,9 +90,16 @@ def _area_arguments(parser: Parser) -> None:
 def area_command(session: Session, args: argparse.Namespace) -> Result:
     """Compute the physical area of the active cell-level layout in nm².
 
-    Unset dimensions default to QCADesigner's (QCA), NMLSim's (iNML), or SiQAD's (SiDB) values.
+    SiDB area uses the layout lattice. Unset cell dimensions use QCADesigner's (QCA) or NMLSim's (iNML) values.
     """
     layout = session.cell_layouts.current().layout
+    if isinstance(layout, sidb_layout):
+        if any(value is not None for value in (args.width, args.height, args.hspace, args.vspace)):
+            msg = "SiDB area uses the layout lattice; cell dimension overrides do not apply"
+            raise CommandError(msg)
+        result = area(layout)
+        session.info(f"area: {result:.2f} nm²")
+        return {"area_nm2": result}
     defaults = CELL_DIMENSIONS_NM.get(type(layout))
     if defaults is None:
         msg = f"no area model for {TECHNOLOGIES[type(layout)]} layouts"

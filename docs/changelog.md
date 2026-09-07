@@ -361,6 +361,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
 
 - CLI:
+  - The Python shell computes SiDB area from the layout lattice and rejects cell-dimension overrides.
   - SiDB store descriptions and statistics handle the full column range without integer overflow
 
 - Continuous integration:
