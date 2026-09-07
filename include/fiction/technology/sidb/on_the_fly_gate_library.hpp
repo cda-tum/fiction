@@ -574,7 +574,7 @@ class on_the_fly_gate_library
      * Reads the dot tags of a designed gate back into a cell list: the tile's sites in raster order become
      * `'x'` (normal), `'i'` (input), `'o'` (output), `'l'` (logic), or `' '` (empty).
      *
-     * @param lyt The designed gate; its cells lie within the tile.
+     * @param lyt The designed gate; its dots lie within the tile.
      * @return The cell list.
      */
     [[nodiscard]] static std::array<std::array<char, gate_x_size()>, gate_y_size()>

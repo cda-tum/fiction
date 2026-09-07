@@ -428,7 +428,7 @@ class displacement_robustness_domain_impl
                                                   std::min(params.percentage_of_analyzed_displaced_layouts, 1.0)));
         }
 
-        for (const auto& cell_displacements : combinations)
+        for (const auto& dot_displacements : combinations)
         {
             if (num_generated >= max_generated)
             {
@@ -441,9 +441,9 @@ class displacement_robustness_domain_impl
                 displaced.assign_defect(site, d);
             }
 
-            for (std::size_t i = 0; i < cell_displacements.size(); ++i)
+            for (std::size_t i = 0; i < dot_displacements.size(); ++i)
             {
-                displaced.assign_dot_tag(cell_displacements[i],
+                displaced.assign_dot_tag(dot_displacements[i],
                                          layout_to_analyze.get_dot_tag(sidbs_of_the_original_layout[i]));
             }
 
