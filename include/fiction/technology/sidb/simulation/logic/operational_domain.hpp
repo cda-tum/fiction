@@ -2081,9 +2081,9 @@ class operational_domain_impl
  * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
  * @param lyt Layout to compute the operational domain for.
- * @param tt Expected Boolean function of the lyt given as a multi-output truth table.
- * @param ps Parameters for the operational domain computation.
- * @param st Statistics of the process.
+ * @param spec Expected Boolean functions, one dynamic truth table per output.
+ * @param params Parameters for the operational domain computation.
+ * @param stats Statistics of the process.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
  * is requested without rejecting kinks or on a layout without `LOGIC` dots. Any number of sweep
