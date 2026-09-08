@@ -143,7 +143,7 @@ struct exact_physical_design_params
      */
     bool desynchronize = false;
     /**
-     * Flag to indicate that the number of used crossing tiles should be minimized.
+     * @brief Minimize the number of wire tiles.
      */
     bool minimize_wires = false;
     /**
@@ -151,7 +151,7 @@ struct exact_physical_design_params
      */
     bool minimize_crossings = false;
     /**
-     * Sets a timeout in ms for the solving process. Standard is 4294967 seconds as defined by Z3.
+     * @brief Timeout budget for the solving process, in milliseconds.
      */
     unsigned timeout = 4294967u;
     /**

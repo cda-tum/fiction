@@ -27,25 +27,35 @@
 #include <vector>
 
 /**
- * A single report received by a `progress_recorder`.
+ * @brief A single report received by a `progress_recorder`.
  */
 struct progress_record
 {
+    /**
+     * @brief Task reported by the algorithm.
+     */
     std::string task;
+    /**
+     * @brief Number of completed work items.
+     */
     std::size_t done;
+    /**
+     * @brief Total work items, or zero when unknown.
+     */
     std::size_t total;
 };
 
 /**
- * Records every report an algorithm forwards to its `on_progress` callback.
+ * @brief Records every report an algorithm forwards to its `on_progress` callback.
  *
  * The recorder must outlive the algorithm call it observes. Its callback may be invoked from any thread.
+ * Read reports after the algorithm call returns.
  */
 class progress_recorder
 {
   public:
     /**
-     * Creates a callback that appends each report to this recorder.
+     * @brief Creates a callback that appends each report to this recorder.
      *
      * @return A callback to assign to an algorithm's `on_progress` parameter.
      */
@@ -58,7 +68,7 @@ class progress_recorder
         };
     }
     /**
-     * Returns the reports of a single task in the order they were received.
+     * @brief Returns the reports of a single task in the order they were received.
      *
      * @param task The task name to filter by.
      * @return All reports of `task`.
@@ -70,7 +80,7 @@ class progress_recorder
         return filtered;
     }
     /**
-     * Checks that a task was reported consistently: it starts at `0`, never counts backwards except when it is
+     * @brief Checks that a task was reported consistently: it starts at `0`, never counts backwards except when it is
      * restarted at `0`, and it ends at its total if that was known.
      *
      * @param task The task name to check.
@@ -98,7 +108,7 @@ class progress_recorder
         return last.total == 0 || last.done == last.total;
     }
     /**
-     * Returns the final count reported for a task.
+     * @brief Returns the final count reported for a task.
      *
      * @param task The task name to look up.
      * @return The `done` value of the last report of `task`, or `0` if it was never reported.
@@ -111,6 +121,12 @@ class progress_recorder
     }
 
   private:
+    /**
+     * @brief Reports in callback order.
+     */
     std::vector<progress_record> reports{};
-    std::mutex                   mutex{};
+    /**
+     * @brief Serializes callback writes to the report sequence.
+     */
+    std::mutex mutex{};
 };
