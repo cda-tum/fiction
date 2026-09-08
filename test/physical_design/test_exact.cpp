@@ -16,6 +16,7 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #if (FICTION_Z3_SOLVER)
