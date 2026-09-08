@@ -13936,13 +13936,15 @@ static const char *mkd_doc_fiction_sidb_bestagon_library_determine_port_routing 
 R"doc(Determines the port directions of a given tile.
 
 Args:
-    lyt: Given tile `t` for which the port directions are determined.
+    lyt: Layout that contains the tile.
+    t: Tile whose incoming and outgoing port directions are
+       determined.
 
 Template Args:
     GateLyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
-    port directions of the given tile are returned as `port_list`.
+    Incoming and outgoing port directions of the tile.
 
 )doc";
 
@@ -16760,13 +16762,15 @@ static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_determine_port_r
 R"doc(Determines the port directions of a given tile.
 
 Args:
-    lyt: Given tile `t` for which the port directions are determined.
+    lyt: Layout that contains the tile.
+    t: Tile whose incoming and outgoing port directions are
+       determined.
 
 Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
+    Lyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
-    port directions of the given tile are returned as `port_list`.
+    Incoming and outgoing port directions of the tile.
 
 )doc";
 
@@ -16824,7 +16828,7 @@ updated and an error fcn gate is returned.
 Args:
     lyt: Layout that hosts tile `t`.
     t: Tile to be realized as a Bestagon gate.
-    parameters: Parameter to design SiDB gates.
+    params: Parameters for SiDB gate design.
     defect_surface: Optional atomic defect surface in case atomic
                     defects are present.
 
@@ -17313,7 +17317,9 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_stats_time_total = R"doc(The total runtime of the critical temperature computation.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl =
+R"doc(Computes the temperature limit for SiDB ground-state occupation or
+gate operation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_bii = R"doc(Iterator that iterates over all possible input states.)doc";
 
@@ -26245,13 +26251,15 @@ static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library_determine_port
 R"doc(Determines the port directions of a given tile.
 
 Args:
-    lyt: Given tile `t` for which the port directions are determined.
+    lyt: Layout that contains the tile.
+    t: Tile whose incoming and outgoing port directions are
+       determined.
 
 Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
+    Lyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
-    port directions of the given tile are returned as `port_list`.
+    Incoming and outgoing port directions of the tile.
 
 )doc";
 

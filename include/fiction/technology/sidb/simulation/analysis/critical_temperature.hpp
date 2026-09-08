@@ -137,6 +137,9 @@ struct critical_temperature_stats
 namespace detail
 {
 
+/**
+ * @brief Computes the temperature limit for SiDB ground-state occupation or gate operation.
+ */
 class critical_temperature_impl
 {
   public:

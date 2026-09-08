@@ -177,7 +177,7 @@ class on_the_fly_gate_library
      * @tparam Params Type of the parameter used for the gate library.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
-     * @param parameters Parameter to design SiDB gates.
+     * @param params Parameters for SiDB gate design.
      * @param defect_surface Optional atomic defect surface in case atomic defects are present.
      * @return Bestagon gate representation of `t` including mirroring.
      */
@@ -729,11 +729,12 @@ class on_the_fly_gate_library
         return skeleton_with_defect;
     }
     /**
-     * Determines the port directions of a given tile.
+     * @brief Determines the port directions of a given tile.
      *
-     * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
-     * @param lyt Given tile `t` for which the port directions are determined.
-     * @return port directions of the given tile are returned as `port_list`.
+     * @tparam Lyt Pointy-top hexagonal gate-level layout type.
+     * @param lyt Layout that contains the tile.
+     * @param t Tile whose incoming and outgoing port directions are determined.
+     * @return Incoming and outgoing port directions of the tile.
      */
     template <typename Lyt>
     [[nodiscard]] static fcn::port_list<fcn::port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)

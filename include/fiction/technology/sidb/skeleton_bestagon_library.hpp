@@ -117,11 +117,12 @@ class skeleton_bestagon_library
 
   private:
     /**
-     * Determines the port directions of a given tile.
+     * @brief Determines the port directions of a given tile.
      *
-     * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
-     * @param lyt Given tile `t` for which the port directions are determined.
-     * @return port directions of the given tile are returned as `port_list`.
+     * @tparam Lyt Pointy-top hexagonal gate-level layout type.
+     * @param lyt Layout that contains the tile.
+     * @param t Tile whose incoming and outgoing port directions are determined.
+     * @return Incoming and outgoing port directions of the tile.
      */
     template <typename Lyt>
     [[nodiscard]] static fcn::port_list<fcn::port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
