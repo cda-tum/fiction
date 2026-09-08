@@ -55,6 +55,6 @@ on_the_fly_circuit_design
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::generators::is_gate_design_impossible(const layout& skeleton_with_defects, const std::vector<TT>& spec, const is_gate_design_impossible_params& params = {})
+```{doxygenfunction} fiction::sidb::generators::is_gate_design_impossible(const layout& skeleton_with_defects, const std::vector<kitty::dynamic_truth_table>& spec, const is_gate_design_impossible_params& params = {})
 
 ```

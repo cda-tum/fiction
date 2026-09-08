@@ -81,7 +81,7 @@
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec, const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_grid_search(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
 
 ```
 
@@ -89,7 +89,7 @@
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_random_sampling(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec, std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
 
 ```
 
@@ -97,7 +97,7 @@
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_quicktrace(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
 
 ```
 
