@@ -1529,8 +1529,10 @@ class operational_domain_impl
 
             return operational(ct);
         }
-
-        return operational();
+        else
+        {
+            return operational();
+        }
     }
     /**
      * This function checks if the given charge distribution surface (CDS) is physically valid for the parameter point
