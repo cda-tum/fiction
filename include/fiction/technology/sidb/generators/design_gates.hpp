@@ -687,11 +687,20 @@ class design_gates_impl
 }  // namespace detail
 
 /**
- * Designs SiDB gates on a skeleton: canvas SiDBs are placed in the canvas area so that the skeleton's input and
+ * @brief Designs SiDB gates on a skeleton: canvas SiDBs are placed in the canvas area so that the skeleton's input and
  * output wires implement the given Boolean function(s). The design mode chooses between simulating every
  * combination of canvas SiDBs, *QuickCell*'s pruning followed by simulation, random placement, and pruning only.
  * Worker exceptions propagate to the caller after all started workers finish.
  * Random placement samples at most `maximal_random_design_attempts` candidates without enumerating canvas layouts.
+ *
+ * *QuickCell* is described in "Towards Fast Automatic Design of Silicon Dangling Bond Logic" by J. Drewniok,
+ * M. Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
+ * (https://ieeexplore.ieee.org/abstract/document/10992885) and "QuickCell: Fast Automatic Design of Standard Cells
+ * for Silicon Dangling Bond Logic" by the same authors in TCAD 2025
+ * (https://ieeexplore.ieee.org/document/11146893).
+ * The exhaustive designer is described in "Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on
+ * Silicon Dangling Bonds" by J. Drewniok, M. Walter, and R. Wille in NANOARCH 2023
+ * (https://dl.acm.org/doi/10.1145/3611315.3633241).
  *
  * @param skeleton The skeleton with its input and output wires.
  * @param spec The Boolean function(s) to implement; must not be empty.

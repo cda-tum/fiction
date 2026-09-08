@@ -77,7 +77,7 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
 [[nodiscard]] inline energy_and_state_type calculate_energy_and_state_type_with_kinks_accepted(
     const energy_distribution& energy_dist, const std::vector<charge_distribution>& valid_charge_distributions,
     const std::vector<logic::bdl_pair<lattice_site>>& output_bdl_pairs,
-    const std::vector<kitty::dynamic_truth_table>& spec, const uint64_t input_index) noexcept
+    const std::vector<kitty::dynamic_truth_table>& spec, const uint64_t input_index)
 {
     assert(!output_bdl_pairs.empty() && "No output dot provided.");
     assert((spec.size() == output_bdl_pairs.size()) && "Number of truth tables and output BDL pairs does not match");
@@ -98,8 +98,8 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
 
                 for (std::size_t i = 0; i < output_bdl_pairs.size(); ++i)
                 {
-                    if (static_cast<bool>(-model::charge_state_to_sign(
-                            cd.get_charge_state(output_bdl_pairs[i].lower))) != kitty::get_bit(spec[i], input_index))
+                    if (static_cast<bool>(-model::charge_state_to_sign(cd.get_charge_state(
+                            output_bdl_pairs[i].lower))) != static_cast<bool>(kitty::get_bit(spec[i], input_index)))
                     {
                         type_of_considered_state = state_type::REJECTED;
                         break;

@@ -49,7 +49,7 @@ namespace fiction::sidb
 {
 
 /**
- * This exception is thrown when an error occurs during the design of an SiDB gate.
+ * @brief Reports an unsuccessful SiDB gate design.
  * It provides information about the tile, truth table, and port list associated with the error.
  *
  * @tparam GateLyt The type representing the gate-level layout.
@@ -59,37 +59,43 @@ class gate_design_exception : public std::exception
 {
   public:
     /**
-     * Constructor for the gate_design_exception class.
+     * @brief Stores the tile, truth table, and ports of an unsuccessful gate design.
      *
      * @param ti The tile associated with the error.
      * @param spec The truth table associated with the error.
      * @param portlist The port list associated with the error.
      */
     explicit gate_design_exception(const tile<GateLyt>& ti, const kitty::dynamic_truth_table& spec,
-                                   const fcn::port_list<fcn::port_direction>& portlist) noexcept :
+                                   const fcn::port_list<fcn::port_direction>& portlist) :
             std::exception(),
             error_tile{ti},
             truth_table{spec},
             p{portlist}
     {}
     /**
-     * Get the tile associated with the exception.
+     * @brief Returns the tile associated with the exception.
+     *
+     * @return The gate-level tile.
      */
     [[nodiscard]] tile<GateLyt> which_tile() const noexcept
     {
         return error_tile;
     }
     /**
-     * Get the truth table associated with the exception.
+     * @brief Returns the truth table associated with the exception.
+     *
+     * @return A copy of the Boolean specification.
      */
-    [[nodiscard]] kitty::dynamic_truth_table which_truth_table() const noexcept
+    [[nodiscard]] kitty::dynamic_truth_table which_truth_table() const
     {
         return truth_table;
     }
     /**
-     * Get the port list associated with the exception.
+     * @brief Returns the port list associated with the exception.
+     *
+     * @return A copy of the gate ports.
      */
-    [[nodiscard]] fcn::port_list<fcn::port_direction> which_port_list() const noexcept
+    [[nodiscard]] fcn::port_list<fcn::port_direction> which_port_list() const
     {
         return p;
     }
