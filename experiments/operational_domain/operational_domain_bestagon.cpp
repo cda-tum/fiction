@@ -81,7 +81,8 @@ int main()  // NOLINT
 
     op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
 
-    op_domain_params.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions         = {{.dimension = sweep_parameter::EPSILON_R},
+                                                 {.dimension = sweep_parameter::LAMBDA_TF}};
     op_domain_params.sweep_dimensions[0].min  = 1.0;
     op_domain_params.sweep_dimensions[0].max  = 10.0;
     op_domain_params.sweep_dimensions[0].step = 0.05;

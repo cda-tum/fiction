@@ -31,7 +31,6 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
-#include <cstdlib>
 #include <exception>
 #include <optional>
 #include <stdexcept>
@@ -44,11 +43,11 @@ namespace alice
 {
 
 opdom_command::opdom_command(const environment::ptr& e) :
-        command(e,
-                "Computes the operational domain for the current SiDB cell-level layout in store. An operational "
-                "domain is a set of simulation parameter values for which a given SiDB layout is logically operational."
-                "This means that a layout is deemed operational if the layout's ground state corresponds with a given "
-                "Boolean function at the layout's outputs for all possible input combinations.")
+        command(
+            e, "Computes the operational domain for the current SiDB layout in store. An operational "
+               "domain is a set of simulation parameter values for which a given SiDB layout is logically operational. "
+               "This means that a layout is deemed operational if the layout's ground state corresponds with a given "
+               "Boolean function at the layout's outputs for all possible input combinations.")
 {
     add_option("--random_sampling,-r", num_random_samples,
                "Use random sampling instead of grid search with this many random samples");
@@ -65,7 +64,7 @@ opdom_command::opdom_command(const environment::ptr& e) :
     add_flag("--sketch,-s", sketch,
              "Compute the operational domain sketch: determine the operational status by filtering alone instead of by "
              "physical simulation. Much faster, but reports some non-operational points as operational. Implies kink "
-             "rejection and requires a layout with 'LOGIC' cells");
+             "rejection and requires a layout with 'LOGIC' dots");
 
     add_option("--epsilon_r,-e", params.operational_params.sim_params.epsilon_r,
                "Electric permittivity of the substrate (unit-less)", true);
@@ -280,7 +279,7 @@ void opdom_command::execute()
 
             if (lyt.num_pis() == 0 || lyt.num_pos() == 0)
             {
-                env->out() << fmt::format("[e] '{}' requires primary input and output cells to simulate its "
+                env->out() << fmt::format("[e] '{}' requires primary input and output dots to simulate its "
                                           "Boolean function\n",
                                           fiction::cli::name_of(*lyt_ptr));
                 reset_params();
@@ -406,9 +405,18 @@ void opdom_command::reset_params()
 {
     sim_params       = fiction::sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
     sweep_dimensions = std::vector<fiction::sidb::simulation::logic::operational_domain_value_range>{
-        {fiction::sidb::simulation::logic::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
-        {fiction::sidb::simulation::logic::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
-        {fiction::sidb::simulation::logic::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025}};
+        {.dimension = fiction::sidb::simulation::logic::sweep_parameter::EPSILON_R,
+         .min       = 1.0,
+         .max       = 10.0,
+         .step      = 0.1},
+        {.dimension = fiction::sidb::simulation::logic::sweep_parameter::LAMBDA_TF,
+         .min       = 1.0,
+         .max       = 10.0,
+         .step      = 0.1},
+        {.dimension = fiction::sidb::simulation::logic::sweep_parameter::MU_MINUS,
+         .min       = -0.50,
+         .max       = -0.10,
+         .step      = 0.025}};
     params = {};
 
     x_sweep  = "epsilon_r";

@@ -345,6 +345,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
   - SiDB circuit experiments now reject missing placement and equivalence results before reporting.
+  - SiDB sweep initializers now name their fields, and pruning helpers propagate allocation failures.
+    Experiment parameters, output columns, and calculations remain unchanged.
   - The Bestagon experiment converts placed SiDB cells to `sidb::layout` before SQD export and reports input parsing
     or equivalence-checking failures.
   - The Bestagon critical-temperature domain experiment removes a redundant calculation while preserving its

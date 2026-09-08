@@ -74,9 +74,9 @@ int main()  // NOLINT
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
     op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
-    op_domain_params.sweep_dimensions              = {{sweep_parameter::EPSILON_R},
-                                                      {sweep_parameter::LAMBDA_TF},
-                                                      {sweep_parameter::MU_MINUS}};
+    op_domain_params.sweep_dimensions              = {{.dimension = sweep_parameter::EPSILON_R},
+                                                      {.dimension = sweep_parameter::LAMBDA_TF},
+                                                      {.dimension = sweep_parameter::MU_MINUS}};
     op_domain_params.sweep_dimensions[0].min       = 1.0;
     op_domain_params.sweep_dimensions[0].max       = 10.0;
     op_domain_params.sweep_dimensions[0].step      = 0.05;

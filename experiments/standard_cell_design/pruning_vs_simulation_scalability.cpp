@@ -19,6 +19,7 @@
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
@@ -63,7 +64,7 @@ namespace
  *
  * @return Vector of truth tables, each representing an output of the 3-input, 2-output function.
  */
-[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i2o() noexcept
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i2o()
 {
     static constexpr const char* truth_table_string1 = "11100100";
     static constexpr const char* truth_table_string2 = "11100100";
@@ -88,7 +89,7 @@ namespace
  *
  * @return Vector of truth tables, each representing an output of the 3-input, 3-output function.
  */
-[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i3o() noexcept
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i3o()
 {
     static constexpr const char* truth_table_string1 = "11100100";
     static constexpr const char* truth_table_string2 = "11100100";
