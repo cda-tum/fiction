@@ -402,8 +402,10 @@ struct operational_domain_params
      */
     is_operational_params operational_params{};
     /**
-     * The dimensions to sweep over together with their value ranges, ordered by priority. The first dimension is the x
-     * dimension, the second dimension is the y dimension, etc. The default sweeps relative permittivity and screening
+     * @brief Dimensions to sweep over together with their value ranges, ordered by priority.
+     *
+     * The first dimension is the x dimension, the second dimension is the y dimension, etc.
+     * The default sweeps relative permittivity and screening
      * distance from 1.0 to 10.0 in steps of 0.1.
      */
     std::vector<operational_domain_value_range> sweep_dimensions{
