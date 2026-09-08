@@ -3390,7 +3390,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long =
+static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long_long =
 R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
 integer into four parts (from MSB to LSB):
  - 1 bit for the dead indicator - 1 bit for the z position - 31 bit
@@ -18957,6 +18957,11 @@ static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_gray_
 R"doc(Flips the one SiDB in which two Gray codes differ and records it for
 the incremental potential update.
 
+Args:
+    new_gray_code: New Gray code; differs from the old code in at most
+                   one bit.
+    old_gray_code: Gray code of the current charge distribution.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_increase_charge_index_by_one =
@@ -19002,6 +19007,10 @@ the flipped SiDBs, as QuickExact needs.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_index_to_charge_distribution =
 R"doc(Decodes the charge index into charge states, skipping the dependent
 SiDB.
+
+Args:
+    mode: Whether leading zero digits are decoded or retain their
+          charge states.
 
 )doc";
 
@@ -19099,7 +19108,17 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_max_index = R"doc(The largest index of `digits` digits in `base`.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_max_index =
+R"doc(The largest index of `digits` digits in `base`.
+
+Args:
+    base: Charge-index base, either 2 or 3.
+    digits: Number of charge-index digits.
+
+Returns:
+    The largest representable index, saturated at `uint64_t` maximum.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_maximum_charge_index = R"doc(Maximum charge index.)doc";
 
@@ -19337,7 +19356,7 @@ static const char *mkd_doc_fiction_sidb_simulation_engine_name =
 R"doc(Returns the name of the given simulation engine.
 
 Args:
-    engine: An SiDB simulation engine.
+    eng: An SiDB simulation engine.
 
 Template Args:
     EngineType: The type of the SiDB simulation engine
@@ -19471,9 +19490,17 @@ static const char *mkd_doc_fiction_sidb_simulation_engines_detail_binary_cluster
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_binary_cluster_hierarchy_node_2 = R"doc(Forward-declaration of binary_cluster_hierarchy_node.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_binary_cluster_hierarchy_node_binary_cluster_hierarchy_node = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_binary_cluster_hierarchy_node_binary_cluster_hierarchy_node =
+R"doc(Binary cluster hierarchy node constructor.
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_binary_cluster_hierarchy_node_c = R"doc()doc";
+Args:
+    sidbs: The set of SiDBs to contain in this node.
+    children: The pair of binary cluster hierarchy node pointers that
+              become the children of this node.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_binary_cluster_hierarchy_node_c = R"doc(The set of SiDB indices contained in the node)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_binary_cluster_hierarchy_node_sub = R"doc(The two children of the node.)doc";
 
@@ -19522,15 +19549,17 @@ the composition.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster =
 R"doc(Forward declaration of the SiDB cluster hierarchy required for the
-mutual recursive structure in this file. Here we define a pointer to a
-SiDB cluster to be a shared pointer, which enables us to also have
-pointers to parents.)doc";
+mutual recursive structure in this file.
+
+Here we define a pointer to a SiDB cluster to be a shared pointer,
+which enables us to also have pointers to parents.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_2 =
 R"doc(Forward declaration of the SiDB cluster hierarchy required for the
-mutual recursive structure in this file. Here we define a pointer to a
-SiDB cluster to be a shared pointer, which enables us to also have
-pointers to parents.)doc";
+mutual recursive structure in this file.
+
+Here we define a pointer to a SiDB cluster to be a shared pointer,
+which enables us to also have pointers to parents.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_space = R"doc(The charge state space of the cluster.)doc";
 
@@ -19659,7 +19688,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
 state to an 64-bit unsigned integer.
 
@@ -19710,6 +19739,10 @@ Args:
     lyt: The layout to create a cluster hierarchy of.
     linkage_method: The agglomerative clustering linking heuristic
                     that is used by ALGLIB.
+
+Returns:
+    A binary hierarchy of dot indices; an empty node for an empty
+    layout.
 
 )doc";
 
@@ -19784,9 +19817,14 @@ static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_parent
 R"doc(Every cluster carries a pointer to its parent. For the top cluster,
 this is `nullptr`.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_pot_projs = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_pot_projs =
+R"doc(The bounds on the electrostatic potential that is projected from this
+cluster for the different multiset charge configurations in the charge
+space.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_pot_projs_complete_store = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_pot_projs_complete_store =
+R"doc(Potential bounds indexed by multiset charge configuration, retained
+when child clusters are merged.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_projector_state =
 R"doc(A projector state pairs the potential projecting cluster with the
@@ -19845,7 +19883,9 @@ static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_sidbs 
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_uid = R"doc(Unique identifier. Equal to the SiDB index for singleton clusters.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl =
+R"doc(Unfolds the pruned cluster hierarchy into physically valid charge
+distributions.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_add_composition =
 R"doc(A composition is added to the given clustering state, i.e., the
@@ -19900,10 +19940,12 @@ cluster to each possible specialization of it, which then enters the
 recursive call with the clustering state modified to have a set of
 sibling children replacing their direct parent. For each
 specialization, appropriate updates are made to the potential bounds
-store that is part of the clustering state. After a specialization has
-been handled completely, i.e., when the recursive call for this
-specialization returns, the specialization to the potential bounds
-store is undone so that a new specialization may be applied.
+store that is part of the clustering state.
+
+After a specialization has been handled completely, i.e., when the
+recursive call for this specialization returns, the specialization to
+the potential bounds store is undone so that a new specialization may
+be applied.
 
 The two base cases to the recursion are as follows: (1) the charge
 distributions implied by the given clustering state do not meet the
@@ -20010,6 +20052,10 @@ SiDB-.
 Args:
     pot_bound: Potential lower bound.
 
+Returns:
+    Whether the potential lower bound excludes the negative charge
+    state.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_fail_onto_positive_charge =
@@ -20067,9 +20113,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_landscape =
-R"doc(The base layout that is used to create charge distribution surface
-copies.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_landscape = R"doc(Read-only electrostatics shared by the simulation workers.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_lb_fail_onto_neutral_charge =
 R"doc(Performs V > e - mu+.
@@ -20083,19 +20127,13 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_meets_population_stability_criterion =
-R"doc(Function to initialize the charge layout.
-
-
-
-This function performs an analysis that is crucial to the
+R"doc(This function performs an analysis that is crucial to the
 *ClusterComplete*'s efficiency: as the *Ground State Space* construct
 is broken down, combinations of multiset charge configurations are
 tried together in more detail than in the construction preceding this
 second phase of the simulation.
 
 Args:
-    lyt: Layout to simulate.
-    params: Parameters for ClusterComplete.
     cl_state: The clustering state that bundles a slice (i.e., a
               clustering) in the cluster hierarchy along with
               respective projection states (i.e., multiset charge
@@ -20105,9 +20143,8 @@ Args:
               projection states in the clustering state.
 
 Returns:
-    The charge layout initializes with defects specified in the given
-    parameters. `false` if and only if a physically valid charge
-    distribution cannot be extracted from the clustering state.
+    `false` if and only if a physically valid charge distribution
+    cannot be extracted from the clustering state.
 
 )doc";
 
@@ -20293,6 +20330,9 @@ static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplet
 R"doc(Initializes this queue with stolen work. The work itself is kept on
 the stack.
 
+Args:
+    cl_state: Clustering state associated with the stolen work.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_worker_queue_mole =
@@ -20432,6 +20472,9 @@ R"doc(Move assignment operator.
 Args:
     other: Other clustering state to move.
 
+Returns:
+    This clustering state.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustering_state_pot_bounds =
@@ -20494,7 +20537,7 @@ recursive structure in this file.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_ground_state_space_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_ground_state_space_impl = R"doc(Constructs and prunes a hierarchy of multiset charge configurations.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_ground_state_space_impl_add_pot_projection =
 R"doc(Helper function for adding the given potential projection to the store
@@ -20607,6 +20650,10 @@ SiDB-.
 Args:
     pot_bound: Potential lower bound.
 
+Returns:
+    Whether the potential lower bound excludes the negative charge
+    state.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_ground_state_space_impl_fail_onto_positive_charge =
@@ -20694,6 +20741,10 @@ is called on a cluster without children. The aforementioned
 electrostatic potential information with respect to this singleton
 cluster is then computed, and it is added to the clst that eventually
 contains all singleton clusters, which is then returned.
+
+The initial potential bounds consider all other SiDBs negative for one
+bound and positive (base 3) or neutral (base 2) for the other.
+External and defect potentials contribute to both bounds.
 
 Args:
     c: Cluster to add to the clst if it is a singleton, otherwise this
@@ -21093,16 +21144,21 @@ static const char *mkd_doc_fiction_sidb_simulation_engines_detail_ground_state_s
 R"doc(Constructor. Converts the multiset charge configuration into
 requirements for each charge state.
 
+Args:
+    pst: Projector state whose multiset determines the required charge
+         counts.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_ground_state_space_impl_write_children_pot_bounds_to_complete_store =
 R"doc(To facilitate efficient unfolding for the second stage of the
 simulation by *ClusterComplete*, potential bound data that is stored
 in the hierarchy which will not be subject to change anymore is
-converted to a handy format: a complete potential bounds store. It
-holds potential bounds for all SiDBs in the considered layout and thus
-addition and subtraction of other complete potential bound stores are
-easy to perform.
+converted to a handy
+format: a complete potential bounds store. It holds potential bounds
+        for all SiDBs in the considered layout and
+thus addition and subtraction of other complete potential bound stores
+are easy to perform.
 
 Args:
     parent: The newly-forming parent cluster whose children's charge
@@ -21287,13 +21343,15 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_order =
 R"doc(This struct defines the type of potential projection order, along with
-getter and setter operations. Essentially, a potential projection
-order is an ordered collection of potential projections, which allow
-rapid access and modifications of the potential projection bounds by
-relying on the ordering defined on potential projections, and
-canonical operations on ordered set containers. In the decorated
-cluster hierarchy, each cluster has a potential projection order onto
-each SiDB in the layout from which the hierarchy was created.)doc";
+getter and setter operations.
+
+Essentially, a potential projection order is an ordered collection of
+potential projections, which allow rapid access and modifications of
+the potential projection bounds by relying on the ordering defined on
+potential projections, and canonical operations on ordered set
+containers. In the decorated cluster hierarchy, each cluster has a
+potential projection order onto each SiDB in the layout from which the
+hierarchy was created.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_order_add =
 R"doc(Adds a potential projection to the ordering, automatically placing it
@@ -21568,6 +21626,8 @@ Args:
        returned by parsing ALGLIB's result.
     uid: Variable reference which is updated in each execution to
          ensure uniqueness.
+    total_sidbs: Number of SiDBs in the complete layout, including
+                 those outside this subtree.
 
 Returns:
     A uniquely identified node in a decorated cluster hierarchy that
@@ -21615,21 +21675,42 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_ground_state_space =
-R"doc(The *Ground State Space* algorithm constructs a cluster hierarchy over
-the SiDBs of a potential landscape and prunes every cluster charge
-state that cannot be part of a physically valid charge distribution.
-*ClusterComplete* unfolds the surviving states into the valid
-distributions.
+R"doc(Constructs the pruned cluster hierarchy used by *ClusterComplete*.
+
+*Ground State Space* extends the physically informed pruning of
+*QuickExact* from individual SiDBs to multiset charge configurations
+throughout a cluster hierarchy. Clustering groups SiDBs by position
+and lets pruning analyze charge-state-dependent interactions within
+those groups before merging larger groups.
+
+Construction starts with singleton clusters whose charge spaces
+contain negative, neutral, and, for base 3, positive charge states.
+Potential-bound analysis repeatedly removes configurations that cannot
+satisfy population stability until a fixed point is reached. Merging
+children into their parent then exposes interactions between larger
+groups of SiDBs. Repeating pruning and merging folds the charge spaces
+into the top cluster, which retains the configurations and
+compositions of the complete hierarchy. *ClusterComplete* unfolds this
+hierarchy to enumerate physically valid charge distributions.
+
+Validity witness partitioning can strengthen the pruning of large
+layouts. Its subproblems can grow factorially, so the pruning
+parameters limit their size and overlap. Raising those limits trades
+construction time for a smaller search space during *ClusterComplete*
+simulation.
 
 Args:
-    land: Potential landscape of the layout to simulate; its
-          parameters set the physical model, and its external
-          potentials and defects enter the bounds.
-    params: Parameters of the pruning.
+    land: Potential landscape; its physical parameters, external
+          potentials, and defects determine the bounds.
+    params: Pruning limits. The landscape supplies the physical model;
+            `params.sim_params` is ignored.
 
 Returns:
-    The pruned cluster hierarchy with statistics, or an empty result
-    for an empty layout.
+    The pruned hierarchy and construction statistics, or an empty
+    result for an empty layout.
+
+See also:
+    clustercomplete
 
 )doc";
 
@@ -21715,19 +21796,17 @@ below it.
 Args:
     os: The output stream to write to (default: standard output).
 
-Returns:
-    Prints the runtime and the number of pruned top level multisets
-    versus the total amount possible.
-
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_ground_state_space_results_runtime = R"doc(The runtime of the construction is stored.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_ground_state_space_results_top_cluster =
 R"doc(The root of the cluster hierarchy the construction built, with the
-charge space of every cluster below it. The hierarchy is the engines'
-working state: `detail::cluster` and what it points to are
-implementation, not API, and may change without notice.)doc";
+charge space of every cluster below it.
+
+The hierarchy is the engines' working state: `detail::cluster` and
+what it points to are implementation, not API, and may change without
+notice.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact =
 R"doc(*QuickExact* is a quick and exact physical simulation algorithm
@@ -21916,16 +21995,27 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer =
-R"doc(Writes the SiDB positions of a `result` and the charge states of every
-ground state as CSV.)doc";
+R"doc(Writes the SiDB positions and charge states of every ground state as
+CSV.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_location_and_ground_state_writer = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_location_and_ground_state_writer =
+R"doc(Selects the simulation result and output stream.
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_os = R"doc()doc";
+Args:
+    src: Simulation result whose ground states are written.
+    s: Output stream.
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_run = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_sim_result = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_os = R"doc(Destination of the CSV output.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_run =
+R"doc(Writes positions in nanometers and one column per ground state; writes
+nothing for an empty result.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_sim_result = R"doc(Simulation result to serialize.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer =
 R"doc(Writes a `result` as a SiQAD simulation result file: engine info,
@@ -21974,15 +22064,30 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl =
+R"doc(Writes Cartesian SiDB positions and ground-state charges as CSV.
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_os = R"doc(Output stream used for writing the simulation sim_result.)doc";
+Template Args:
+    Lyt: Cartesian SiDB layout type.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_os = R"doc(Destination of the CSV output.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_run =
+R"doc(Writes positions in nanometers and one column per ground state; writes
+nothing for an empty result.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_sim_result = R"doc(Simulation results.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_write_location_and_ground_state_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_write_location_and_ground_state_impl =
+R"doc(Selects the simulation result and output stream.
+
+Args:
+    src: Simulation result whose ground states are written.
+    s: Output stream.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl = R"doc()doc";
 
@@ -22097,11 +22202,11 @@ charge distribution of the ground state(s) to a file.
 This overload uses a file name to create and write into.
 
 Args:
+    sim_result: The simulation result to write.
     filename: The file name to create and write into.
 
 Template Args:
     Lyt: SiDB cell-level SiDB layout type.
-    sim_result: The simulation sim_result to write.
 
 )doc";
 
