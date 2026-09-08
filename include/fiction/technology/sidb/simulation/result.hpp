@@ -46,8 +46,8 @@ namespace fiction::sidb::simulation
 {
 
 /**
- * The unified return type of every SiDB simulation algorithm: the name of the algorithm, its runtime, the layout it
- * simulated, the physically valid charge distributions it found over that layout, the physical parameters, and
+ * @brief The unified return type of every SiDB simulation algorithm: the name of the algorithm, its runtime, the layout
+ * it simulated, the physically valid charge distributions it found over that layout, the physical parameters, and
  * optional algorithm-specific named parameters.
  *
  * The layout is stored once; each charge distribution holds one charge state per SiDB in the layout's raster order
@@ -56,34 +56,34 @@ namespace fiction::sidb::simulation
 struct result
 {
     /**
-     * Name of the algorithm used to determine the charge distributions.
+     * @brief Name of the algorithm used to determine the charge distributions.
      */
     std::string algorithm_name{};
     /**
-     * Total simulation runtime in seconds.
+     * @brief Total simulation runtime in seconds.
      */
     std::chrono::duration<double> simulation_runtime{};
     /**
-     * The simulated layout.
+     * @brief The simulated layout.
      */
     layout lyt{};
     /**
-     * Charge distributions determined by the algorithm.
+     * @brief Charge distributions determined by the algorithm.
      */
     std::vector<charge_distribution> charge_distributions{};
     /**
-     * Physical parameters used in the simulation.
+     * @brief Physical parameters used in the simulation.
      */
     model::simulation_parameters sim_params{};
     /**
-     * Additional named simulation parameters. This is used to store algorithm-dependent parameters that are not part of
-     * the `sidb::model::simulation_parameters` struct.
+     * @brief Additional named simulation parameters. This is used to store algorithm-dependent parameters that are not
+     * part of the `sidb::model::simulation_parameters` struct.
      *
      * The key of the map is the name of the parameter, the element is the value of the parameter.
      */
     std::unordered_map<std::string, std::any> additional_simulation_parameters{};
     /**
-     * The charge state of an SiDB in one of the charge distributions.
+     * @brief The charge state of an SiDB in one of the charge distributions.
      *
      * @param distribution Index into `charge_distributions`.
      * @param s Site of the SiDB.
@@ -95,7 +95,7 @@ struct result
         return charge_distributions.at(distribution).get_charge_state(s);
     }
     /**
-     * The charge distributions of minimal energy. Distributions with identical charge states count once.
+     * @brief The charge distributions of minimal energy. Distributions with identical charge states count once.
      *
      * @note If degenerate states exist in the simulation result, this function returns multiple ground states that all
      * possess the same energy.
@@ -127,8 +127,8 @@ struct result
 };
 
 /**
- * The former result type over `charge_distribution_surface` copies, kept for the algorithms that still consume it.
- * New code uses `result`; `to_legacy_result` converts between the two.
+ * @brief The former result type over `charge_distribution_surface` copies, kept for the algorithms that still consume
+ * it. New code uses `result`; `to_legacy_result` converts between the two.
  *
  * @tparam Lyt SiDB cell-level layout type.
  */
@@ -136,8 +136,8 @@ template <typename Lyt>
 struct legacy_result
 {
     /**
-     * Default constructor. It only exists to allow for the use of `static_assert` statements that restrict the type of
-     * `Lyt`.
+     * @brief Default constructor. It only exists to allow for the use of `static_assert` statements that restrict the
+     * type of `Lyt`.
      */
     legacy_result() noexcept
     {
@@ -145,30 +145,30 @@ struct legacy_result
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     }
     /**
-     * Name of the algorithm used to determine the charge distributions.
+     * @brief Name of the algorithm used to determine the charge distributions.
      */
     std::string algorithm_name{};
     /**
-     * Total simulation runtime in seconds.
+     * @brief Total simulation runtime in seconds.
      */
     std::chrono::duration<double> simulation_runtime{};
     /**
-     * Charge distributions determined by the algorithm.
+     * @brief Charge distributions determined by the algorithm.
      */
     std::vector<sidb::surfaces::charge_distribution_surface<Lyt>> charge_distributions{};
     /**
-     * Physical parameters used in the simulation.
+     * @brief Physical parameters used in the simulation.
      */
     sidb::model::simulation_parameters sim_params{};
     /**
-     * Additional named simulation parameters. This is used to store algorithm-dependent parameters that are not part of
-     * the `sidb::model::simulation_parameters` struct.
+     * @brief Additional named simulation parameters. This is used to store algorithm-dependent parameters that are not
+     * part of the `sidb::model::simulation_parameters` struct.
      *
      * The key of the map is the name of the parameter, the element is the value of the parameter.
      */
     std::unordered_map<std::string, std::any> additional_simulation_parameters{};
     /**
-     * This function computes the ground state of the charge distributions.
+     * @brief This function computes the ground state of the charge distributions.
      *
      * @note If degenerate states exist in the simulation result, this function will return multiple ground states that
      * all possess the same system energy.
@@ -217,9 +217,9 @@ struct legacy_result
 };
 
 /**
- * Converts a result into the former representation over `charge_distribution_surface` copies of a cell-level layout,
- * for the algorithms that still consume it. Each distribution's charge states are assigned to the surface and its
- * potentials and energy recomputed.
+ * @brief Converts a result into the former representation over `charge_distribution_surface` copies of a cell-level
+ * layout, for the algorithms that still consume it. Each distribution's charge states are assigned to the surface and
+ * its potentials and energy recomputed.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param res Result to convert.

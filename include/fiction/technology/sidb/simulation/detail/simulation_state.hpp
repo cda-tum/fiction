@@ -10,8 +10,7 @@
 
 /**
  * @file
- * @brief The mutable working set of the SiDB simulators: charge states, local potentials, energy, and charge-index
- * enumeration over one potential landscape.
+ * @brief Mutable charge states, potentials, energy, and charge-index enumeration for SiDB simulation.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */
@@ -39,93 +38,93 @@ namespace fiction::sidb::simulation::detail
 {
 
 /**
- * Whether the dependent SiDB adapts its charge state to the other SiDBs after a change.
+ * @brief Whether the dependent SiDB adapts its charge state to the other SiDBs after a change.
  */
 enum class dependent_dot_mode : uint8_t
 {
     /**
-     * The dependent SiDB keeps its charge state.
+     * @brief The dependent SiDB keeps its charge state.
      */
     FIXED = 0,
     /**
-     * The dependent SiDB takes the charge state its local potential dictates.
+     * @brief The dependent SiDB takes the charge state its local potential dictates.
      */
     VARIABLE = 1
 };
 /**
- * Whether the energy is recomputed after a change.
+ * @brief Whether the energy is recomputed after a change.
  */
 enum class energy_calculation : uint8_t
 {
     /**
-     * Keep the stored energy.
+     * @brief Keep the stored energy.
      */
     KEEP_OLD_ENERGY_VALUE = 0,
     /**
-     * Recompute the energy.
+     * @brief Recompute the energy.
      */
     UPDATE_ENERGY = 1
 };
 /**
- * Whether the local potentials are updated from the record of changed SiDBs or recomputed from scratch.
+ * @brief Whether the local potentials are updated from the record of changed SiDBs or recomputed from scratch.
  */
 enum class charge_distribution_history : uint8_t
 {
     /**
-     * Update only the contributions of the SiDBs the last index change flipped.
+     * @brief Update only the contributions of the SiDBs the last index change flipped.
      */
     CONSIDER = 0,
     /**
-     * Recompute every local potential.
+     * @brief Recompute every local potential.
      */
     NEGLECT = 1
 };
 /**
- * Whether the charge index follows a charge-state assignment.
+ * @brief Whether the charge index follows a charge-state assignment.
  */
 enum class charge_index_mode : uint8_t
 {
     /**
-     * Recompute the charge index.
+     * @brief Recompute the charge index.
      */
     UPDATE_CHARGE_INDEX = 0,
     /**
-     * Keep the charge index.
+     * @brief Keep the charge index.
      */
     KEEP_CHARGE_INDEX = 1
 };
 /**
- * Whether the charge states follow a charge-index assignment.
+ * @brief Whether the charge states follow a charge-index assignment.
  */
 enum class charge_distribution_mode : uint8_t
 {
     /**
-     * Decode the index into charge states.
+     * @brief Decode the index into charge states.
      */
     UPDATE_CHARGE_DISTRIBUTION = 0,
     /**
-     * Keep the charge states.
+     * @brief Keep the charge states.
      */
     KEEP_CHARGE_DISTRIBUTION = 1
 };
 /**
- * How a charge index is decoded into charge states.
+ * @brief How a charge index is decoded into charge states.
  */
 enum class charge_index_recomputation : uint8_t
 {
     /**
-     * Decode every digit; leading zero digits become negative charge states.
+     * @brief Decode every digit; leading zero digits become negative charge states.
      */
     FROM_SCRATCH = 0,
     /**
-     * Decode only the non-zero digits.
+     * @brief Decode only the non-zero digits.
      */
     IGNORE_LEADING_ZEROES = 1
 };
 
 /**
- * The mutable working set of the SiDB simulators over one `potential_landscape`: the charge state of every SiDB, the
- * local internal potentials, the energy, the validity flag, and the charge-index machinery the exhaustive engines
+ * @brief The mutable working set of the SiDB simulators over one `potential_landscape`: the charge state of every SiDB,
+ * the local internal potentials, the energy, the validity flag, and the charge-index machinery the exhaustive engines
  * enumerate with (Gray codes, a dependent SiDB whose charge follows the others, and a sublayout of SiDBs that can be
  * positively charged). The landscape stays read-only, so worker threads share one landscape and own one state each.
  *
@@ -135,37 +134,37 @@ class simulation_state
 {
   public:
     /**
-     * How the energy is computed.
+     * @brief How the energy is computed.
      */
     enum class energy_model : uint8_t
     {
         /**
-         * The full energy: SiDB and defect charges in the internal and external potentials.
+         * @brief The full energy: SiDB and defect charges in the internal and external potentials.
          */
         FULL,
         /**
-         * The SiDB charges in the internal potential only, which is what QuickSim compares.
+         * @brief The SiDB charges in the internal potential only, which is what QuickSim compares.
          */
         INTERNAL_ONLY
     };
     /**
-     * How a charge index is decoded.
+     * @brief How a charge index is decoded.
      */
     enum class index_decoding : uint8_t
     {
         /**
-         * Decode the whole index.
+         * @brief Decode the whole index.
          */
         PLAIN,
         /**
-         * Decode the layout index and the sublayout index separately and record the flipped SiDBs, as QuickExact
+         * @brief Decode the layout index and the sublayout index separately and record the flipped SiDBs, as QuickExact
          * needs.
          */
         TRACKED
     };
     /**
-     * Creates a state over a landscape with every SiDB in one charge state and the potentials, energy, and validity
-     * computed for it.
+     * @brief Creates a state over a landscape with every SiDB in one charge state and the potentials, energy, and
+     * validity computed for it.
      *
      * @param land Landscape; must outlive the state.
      * @param cs Initial charge state of every SiDB.
@@ -190,7 +189,7 @@ class simulation_state
         update_after_charge_change();
     }
     /**
-     * The landscape.
+     * @brief The landscape.
      *
      * @return The landscape.
      */
@@ -199,7 +198,7 @@ class simulation_state
         return *landscape_ptr;
     }
     /**
-     * Number of SiDBs.
+     * @brief Number of SiDBs.
      *
      * @return Number of SiDBs.
      */
@@ -208,7 +207,7 @@ class simulation_state
         return num_sites;
     }
     /**
-     * The base of the physical model, 2 or 3: whether positive charge states take part at all.
+     * @brief The base of the physical model, 2 or 3: whether positive charge states take part at all.
      *
      * @return The base.
      */
@@ -217,8 +216,8 @@ class simulation_state
         return simulation_base;
     }
     /**
-     * The base the charge index is decoded in. It equals `base()` until a three-state sublayout is split off, from
-     * then on the remaining SiDBs are decoded in base 2.
+     * @brief The base the charge index is decoded in. It equals `base()` until a three-state sublayout is split off,
+     * from then on the remaining SiDBs are decoded in base 2.
      *
      * @return The index base.
      */
@@ -230,7 +229,7 @@ class simulation_state
     // ----------------------------------------------------------------------------------------------- charge states
 
     /**
-     * The charge state of an SiDB.
+     * @brief The charge state of an SiDB.
      *
      * @param i Index of the SiDB.
      * @return Charge state.
@@ -240,7 +239,7 @@ class simulation_state
         return charge_distribution_state.charge_states()[i];
     }
     /**
-     * Assigns the charge state of an SiDB.
+     * @brief Assigns the charge state of an SiDB.
      *
      * @param i Index of the SiDB.
      * @param cs Charge state.
@@ -257,7 +256,7 @@ class simulation_state
         }
     }
     /**
-     * Assigns one charge state to every SiDB.
+     * @brief Assigns one charge state to every SiDB.
      *
      * @param cs Charge state.
      * @param index_mode Whether to recompute the charge index.
@@ -273,7 +272,7 @@ class simulation_state
         }
     }
     /**
-     * Number of negatively charged SiDBs.
+     * @brief Number of negatively charged SiDBs.
      *
      * @return Number of negatively charged SiDBs.
      */
@@ -282,7 +281,7 @@ class simulation_state
         return charge_distribution_state.num_negative_sidbs();
     }
     /**
-     * The current charge distribution with its energy.
+     * @brief The current charge distribution with its energy.
      *
      * @return A copy of the charge states and the energy.
      */
@@ -291,7 +290,7 @@ class simulation_state
         return charge_distribution_state;
     }
     /**
-     * The current charge distribution with its energy.
+     * @brief The current charge distribution with its energy.
      *
      * @return A constant reference to the stored charge distribution.
      */
@@ -303,7 +302,7 @@ class simulation_state
     // -------------------------------------------------------------------------------------------------- potentials
 
     /**
-     * Updates the local internal potentials after charge states changed.
+     * @brief Updates the local internal potentials after charge states changed.
      *
      * @param history_mode Whether to apply only the recorded flips or to recompute from scratch.
      */
@@ -357,7 +356,7 @@ class simulation_state
         }
     }
     /**
-     * The local internal potential at an SiDB: charged SiDBs plus charged defects.
+     * @brief The local internal potential at an SiDB: charged SiDBs plus charged defects.
      *
      * @param i Index of the SiDB.
      * @return Local internal potential (unit: V).
@@ -367,7 +366,7 @@ class simulation_state
         return internal_potential_values[i];
     }
     /**
-     * The local potential at an SiDB: internal plus external.
+     * @brief The local potential at an SiDB: internal plus external.
      *
      * @param i Index of the SiDB.
      * @return Local potential (unit: V).
@@ -377,7 +376,7 @@ class simulation_state
         return internal_potential_values[i] + landscape_ptr->local_external_potential(i);
     }
     /**
-     * All local internal potentials.
+     * @brief All local internal potentials.
      *
      * @return Local internal potential per SiDB (unit: V).
      */
@@ -386,7 +385,7 @@ class simulation_state
         return internal_potential_values;
     }
     /**
-     * Overwrites the local internal potential at an SiDB.
+     * @brief Overwrites the local internal potential at an SiDB.
      *
      * @param i Index of the SiDB.
      * @param pot Local internal potential (unit: V).
@@ -399,7 +398,7 @@ class simulation_state
     // ---------------------------------------------------------------------------------------- energy and validity
 
     /**
-     * Recomputes the energy from the current charge states and local internal potentials.
+     * @brief Recomputes the energy from the current charge states and local internal potentials.
      */
     void recompute_energy()
     {
@@ -423,7 +422,7 @@ class simulation_state
             landscape_ptr->energy(charge_distribution_state, internal_potential_values));
     }
     /**
-     * The energy of the current charge states.
+     * @brief The energy of the current charge states.
      *
      * @return Energy (unit: eV).
      */
@@ -432,7 +431,7 @@ class simulation_state
         return charge_distribution_state.energy();
     }
     /**
-     * Updates potentials, the dependent SiDB, the energy, and the validity after charge states changed.
+     * @brief Updates potentials, the dependent SiDB, the energy, and the validity after charge states changed.
      *
      * @param dep_dot Whether the dependent SiDB adapts its charge state.
      * @param energy_mode Whether to recompute the energy.
@@ -457,7 +456,7 @@ class simulation_state
         validity_check();
     }
     /**
-     * Recomputes the validity flag: population stability of every SiDB, then configuration stability.
+     * @brief Recomputes the validity flag: population stability of every SiDB, then configuration stability.
      */
     void validity_check()
     {
@@ -465,7 +464,7 @@ class simulation_state
                            landscape_ptr->is_configuration_stable(charge_distribution_state, internal_potential_values);
     }
     /**
-     * Whether the current charge states are physically valid, as of the last `validity_check`.
+     * @brief Whether the current charge states are physically valid, as of the last `validity_check`.
      *
      * @return `true` iff physically valid.
      */
@@ -474,7 +473,7 @@ class simulation_state
         return physically_valid;
     }
     /**
-     * Whether no charge hop lowers the energy of the current charge states.
+     * @brief Whether no charge hop lowers the energy of the current charge states.
      *
      * @return `true` iff configuration stable.
      */
@@ -483,7 +482,7 @@ class simulation_state
         return landscape_ptr->is_configuration_stable(charge_distribution_state, internal_potential_values);
     }
     /**
-     * Marks the current charge states physically valid without checking.
+     * @brief Marks the current charge states physically valid without checking.
      */
     void declare_physically_valid() noexcept
     {
@@ -493,15 +492,16 @@ class simulation_state
     // ------------------------------------------------------------------------------------------------ charge index
 
     /**
-     * Recomputes the charge index over every SiDB in the plain base, ignoring the dependent SiDB and the sublayout.
+     * @brief Recomputes the charge index over every SiDB in the plain base, ignoring the dependent SiDB and the
+     * sublayout.
      */
     void charge_distribution_to_index_general() noexcept
     {
         charge_index_value = charge_distribution_state.charge_index(simulation_base);
     }
     /**
-     * Recomputes the charge index (and the sublayout index) from the charge states, skipping the dependent SiDB and
-     * splitting the SiDBs that can be positively charged into their own base-3 index.
+     * @brief Recomputes the charge index (and the sublayout index) from the charge states, skipping the dependent SiDB
+     * and splitting the SiDBs that can be positively charged into their own base-3 index.
      */
     void charge_distribution_to_index() noexcept
     {
@@ -543,7 +543,7 @@ class simulation_state
         sublayout_charge_index = sub_index;
     }
     /**
-     * The charge index.
+     * @brief The charge index.
      *
      * @return The charge index.
      */
@@ -552,7 +552,7 @@ class simulation_state
         return charge_index_value;
     }
     /**
-     * The largest charge index over the SiDBs the index enumerates.
+     * @brief The largest charge index over the SiDBs the index enumerates.
      *
      * @return The maximum charge index.
      */
@@ -561,7 +561,7 @@ class simulation_state
         return maximum_charge_index;
     }
     /**
-     * The charge index of the sublayout of SiDBs that can be positively charged.
+     * @brief The charge index of the sublayout of SiDBs that can be positively charged.
      *
      * @return The sublayout charge index.
      */
@@ -570,7 +570,7 @@ class simulation_state
         return sublayout_charge_index;
     }
     /**
-     * The largest sublayout charge index.
+     * @brief The largest sublayout charge index.
      *
      * @return The maximum sublayout charge index.
      */
@@ -579,7 +579,7 @@ class simulation_state
         return maximum_sublayout_charge_index;
     }
     /**
-     * Assigns a charge index.
+     * @brief Assigns a charge index.
      *
      * @param index Charge index, at most `max_charge_index()`.
      * @param mode Whether to decode the index into charge states.
@@ -597,7 +597,7 @@ class simulation_state
         }
     }
     /**
-     * Steps the charge index up by one and decodes it.
+     * @brief Steps the charge index up by one and decodes it.
      *
      * @param dep_dot Whether the dependent SiDB adapts its charge state.
      * @param energy_mode Whether to recompute the energy.
@@ -627,7 +627,7 @@ class simulation_state
         update_after_charge_change(dep_dot, energy_mode, history_mode);
     }
     /**
-     * Steps the sublayout charge index up by one and decodes it.
+     * @brief Steps the sublayout charge index up by one and decodes it.
      *
      * @param dep_dot Whether the dependent SiDB adapts its charge state.
      * @param energy_mode Whether to recompute the energy.
@@ -657,7 +657,7 @@ class simulation_state
         update_after_charge_change(dep_dot, energy_mode, history_mode);
     }
     /**
-     * Resets the sublayout charge index to zero and decodes it with the flips recorded.
+     * @brief Resets the sublayout charge index to zero and decodes it with the flips recorded.
      */
     void reset_charge_index_sub_layout()
     {
@@ -676,7 +676,8 @@ class simulation_state
                                    charge_distribution_history::CONSIDER);
     }
     /**
-     * Assigns a charge index given as a Gray code and flips the one SiDB that differs from the previous Gray code.
+     * @brief Assigns a charge index given as a Gray code and flips the one SiDB that differs from the previous Gray
+     * code.
      *
      * @param current_gray_code New charge index.
      * @param previous_gray_code Previous charge index.
@@ -701,7 +702,7 @@ class simulation_state
     // ---------------------------------------------------------------------------------- dependent SiDB, sublayout
 
     /**
-     * Declares the SiDB whose charge state follows the other SiDBs; the charge index then enumerates the others.
+     * @brief Declares the SiDB whose charge state follows the other SiDBs; the charge index then enumerates the others.
      *
      * @param i Index of the dependent SiDB.
      */
@@ -713,7 +714,7 @@ class simulation_state
         maximum_charge_index = max_index(simulation_base, num_sites - 1);
     }
     /**
-     * The dependent SiDB, if any.
+     * @brief The dependent SiDB, if any.
      *
      * @return Index of the dependent SiDB.
      */
@@ -722,7 +723,7 @@ class simulation_state
         return dependent_sidb;
     }
     /**
-     * Sets the base of the charge index and the maximum index accordingly.
+     * @brief Sets the base of the charge index and the maximum index accordingly.
      *
      * @param base 2 or 3.
      */
@@ -733,8 +734,8 @@ class simulation_state
         maximum_charge_index = max_index(base, dependent_sidb.has_value() ? num_sites - 1 : num_sites);
     }
     /**
-     * Determines from the all-negative charge distribution which SiDBs can become positively charged and, if any can,
-     * switches to a base-3 sublayout index over them and a base-2 index over the rest.
+     * @brief Determines from the all-negative charge distribution which SiDBs can become positively charged and, if any
+     * can, switches to a base-3 sublayout index over them and a base-2 index over the rest.
      *
      * @return `true` iff some SiDB other than the dependent one can be positively charged.
      */
@@ -787,7 +788,7 @@ class simulation_state
         return required;
     }
     /**
-     * The SiDBs that can be positively charged, ascending.
+     * @brief The SiDBs that can be positively charged, ascending.
      *
      * @return Indices of the sublayout SiDBs.
      */
@@ -796,7 +797,7 @@ class simulation_state
         return three_state_sidb_indices;
     }
     /**
-     * The SiDBs that can only be negatively or neutrally charged, ascending, without the dependent SiDB.
+     * @brief The SiDBs that can only be negatively or neutrally charged, ascending, without the dependent SiDB.
      *
      * @return Indices of the two-state SiDBs.
      */
@@ -808,7 +809,7 @@ class simulation_state
     // ---------------------------------------------------------------------------------------------- QuickSim helpers
 
     /**
-     * Reseeds the random generator of `adjacent_search` from `std::random_device`. A state copied into a worker
+     * @brief Reseeds the random generator of `adjacent_search` from `std::random_device`. A state copied into a worker
      * thread calls this so the threads do not replay one random sequence.
      */
     void reseed() noexcept
@@ -817,7 +818,7 @@ class simulation_state
     }
 
     /**
-     * The SiDBs whose local potential forces them negative regardless of the other charges, i.e., whose (0/-)
+     * @brief The SiDBs whose local potential forces them negative regardless of the other charges, i.e., whose (0/-)
      * transition lies above the Fermi level even at the current potentials.
      *
      * @return Indices of the SiDBs that have to be negatively charged.
@@ -838,9 +839,9 @@ class simulation_state
         return negative;
     }
     /**
-     * QuickSim's max-min diversity step: among the neutral SiDBs, picks one at random that is at least `alpha` times
-     * the maximal distance away from every negative SiDB, charges it negatively, and updates the potentials and the
-     * energy incrementally.
+     * @brief QuickSim's max-min diversity step: among the neutral SiDBs, picks one at random that is at least `alpha`
+     * times the maximal distance away from every negative SiDB, charges it negatively, and updates the potentials and
+     * the energy incrementally.
      *
      * @param alpha Fraction of the maximal distance a candidate has to keep from the negative SiDBs.
      * @param negative_indices Indices of the negative SiDBs; the chosen SiDB is appended.
@@ -906,87 +907,91 @@ class simulation_state
 
   private:
     /**
-     * The landscape.
+     * @brief The landscape.
      */
     const potential_landscape* landscape_ptr;
     /**
-     * Number of SiDBs.
+     * @brief Number of SiDBs.
      */
     std::size_t num_sites;
     /**
-     * Energy model.
+     * @brief Energy model.
      */
     energy_model selected_energy_model;
     /**
-     * Index decoding.
+     * @brief Index decoding.
      */
     index_decoding selected_index_decoding;
     /**
-     * Base of the physical model.
+     * @brief Base of the physical model.
      */
     uint8_t simulation_base;
     /**
-     * Base the charge index is decoded in.
+     * @brief Base the charge index is decoded in.
      */
     uint8_t charge_index_base;
     /**
-     * Charge states and energy.
+     * @brief Charge states and energy.
      */
     charge_distribution charge_distribution_state;
     /**
-     * Local internal potential per SiDB (unit: V).
+     * @brief Local internal potential per SiDB (unit: V).
      */
     std::vector<double> internal_potential_values;
     /**
-     * Validity flag.
+     * @brief Validity flag.
      */
     bool physically_valid{false};
     /**
-     * Charge index over the SiDBs that are not in the sublayout and not the dependent SiDB.
+     * @brief Charge index over the SiDBs that are not in the sublayout and not the dependent SiDB.
      */
     uint64_t charge_index_value{0};
     /**
-     * Charge index over the sublayout.
+     * @brief Charge index over the sublayout.
      */
     uint64_t sublayout_charge_index{0};
     /**
-     * Maximum charge index.
+     * @brief Maximum charge index.
      */
     uint64_t maximum_charge_index{0};
     /**
-     * Maximum sublayout charge index.
+     * @brief Maximum sublayout charge index.
      */
     uint64_t maximum_sublayout_charge_index{0};
     /**
-     * The dependent SiDB.
+     * @brief The dependent SiDB.
      */
     std::optional<std::size_t> dependent_sidb{};
     /**
-     * Whether the dependent SiDB can be positively charged.
+     * @brief Whether the dependent SiDB can be positively charged.
      */
     bool dependent_in_sublayout{false};
     /**
-     * SiDBs that can be positively charged, ascending.
+     * @brief SiDBs that can be positively charged, ascending.
      */
     std::vector<std::size_t> three_state_sidb_indices{};
     /**
-     * SiDBs that cannot be positively charged, ascending, without the dependent SiDB.
+     * @brief SiDBs that cannot be positively charged, ascending, without the dependent SiDB.
      */
     std::vector<std::size_t> two_state_sidb_indices{};
     /**
-     * The SiDB the last Gray-code step flipped and its previous sign; -1 if none.
+     * @brief The SiDB the last Gray-code step flipped and its previous sign; -1 if none.
      */
     std::pair<int64_t, int8_t> gray_code_history{-1, int8_t{0}};
     /**
-     * The SiDBs the last tracked decoding flipped with their previous signs.
+     * @brief The SiDBs the last tracked decoding flipped with their previous signs.
      */
     std::vector<std::pair<std::size_t, int8_t>> changed_sidb_history{};
     /**
-     * Random generator of `adjacent_search`; one per state, so worker threads never share it.
+     * @brief Random generator of `adjacent_search`; one per state, so worker threads never share it.
      */
     std::mt19937_64 random_generator{std::random_device{}()};
     /**
-     * The largest index of `digits` digits in `base`.
+     * @brief The largest index of `digits` digits in `base`.
+     *
+     * @param base Charge-index base, either 2 or 3.
+     * @param digits Number of charge-index digits.
+     * @return The largest representable index, saturated at `uint64_t` maximum.
      */
     [[nodiscard]] static uint64_t max_index(const uint8_t base, const std::size_t digits) noexcept
     {
@@ -1005,7 +1010,7 @@ class simulation_state
         return result - 1;
     }
     /**
-     * Switches to a base-3 sublayout index over the SiDBs that can be positively charged.
+     * @brief Switches to a base-3 sublayout index over the SiDBs that can be positively charged.
      */
     void assign_base_number_to_three()
     {
@@ -1032,7 +1037,7 @@ class simulation_state
         }
     }
     /**
-     * Sets the dependent SiDB to the charge state its local potential dictates and updates the potentials of the
+     * @brief Sets the dependent SiDB to the charge state its local potential dictates and updates the potentials of the
      * others incrementally.
      */
     void update_charge_state_of_dependent_dot()
@@ -1085,7 +1090,10 @@ class simulation_state
         }
     }
     /**
-     * Flips the one SiDB in which two Gray codes differ and records it for the incremental potential update.
+     * @brief Flips the one SiDB in which two Gray codes differ and records it for the incremental potential update.
+     *
+     * @param new_gray_code New Gray code; differs from the old code in at most one bit.
+     * @param old_gray_code Gray code of the current charge distribution.
      */
     void gray_code_to_charge_distribution(const uint64_t new_gray_code, const uint64_t old_gray_code)
     {
@@ -1118,7 +1126,9 @@ class simulation_state
         charge_distribution_state.assign_charge_state_by_index(sidb, model::sign_to_charge_state(sign_new));
     }
     /**
-     * Decodes the charge index into charge states, skipping the dependent SiDB.
+     * @brief Decodes the charge index into charge states, skipping the dependent SiDB.
+     *
+     * @param mode Whether leading zero digits are decoded or retain their charge states.
      */
     void index_to_charge_distribution(const charge_index_recomputation mode = charge_index_recomputation::FROM_SCRATCH)
     {
@@ -1162,8 +1172,8 @@ class simulation_state
         }
     }
     /**
-     * Decodes the sublayout index (base 3) and the layout index (base 2) into charge states and records every SiDB
-     * that flipped, as QuickExact's incremental potential update needs.
+     * @brief Decodes the sublayout index (base 3) and the layout index (base 2) into charge states and records every
+     * SiDB that flipped, as QuickExact's incremental potential update needs.
      */
     void index_to_charge_distribution_tracked()
     {

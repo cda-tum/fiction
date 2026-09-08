@@ -41,33 +41,33 @@ namespace fiction::sidb::simulation
 {
 
 /**
- * The bounds a local potential is tested against to decide whether a charge state is population stable.
+ * @brief The bounds a local potential is tested against to decide whether a charge state is population stable.
  */
 enum class charge_transition_threshold_bounds : uint8_t
 {
     /**
-     * The upper bound check against `mu_minus` to validate DB-.
+     * @brief The upper bound check against `mu_minus` to validate DB-.
      */
     NEGATIVE_UPPER_BOUND = 0,
     /**
-     * The lower bound check against `mu_plus` to validate DB+.
+     * @brief The lower bound check against `mu_plus` to validate DB+.
      */
     POSITIVE_LOWER_BOUND = 1,
     /**
-     * The lower bound check against `mu_minus` to validate DB0.
+     * @brief The lower bound check against `mu_minus` to validate DB0.
      */
     NEUTRAL_LOWER_BOUND = 2,
     /**
-     * The upper bound check against `mu_plus` to validate DB0.
+     * @brief The upper bound check against `mu_plus` to validate DB0.
      */
     NEUTRAL_UPPER_BOUND = 3
 };
 
 /**
- * The static electrostatics of an SiDB layout under one set of physical parameters: the screened Coulomb potential
- * every SiDB exerts on every other, the potential the charged surface defects and the external sources exert on every
- * SiDB, and the resulting charge transition thresholds. Nothing in it depends on the charge states, so one landscape
- * serves every charge distribution of the layout and can be shared read-only by worker threads.
+ * @brief The static electrostatics of an SiDB layout under one set of physical parameters: the screened Coulomb
+ * potential every SiDB exerts on every other, the potential the charged surface defects and the external sources exert
+ * on every SiDB, and the resulting charge transition thresholds. Nothing in it depends on the charge states, so one
+ * landscape serves every charge distribution of the layout and can be shared read-only by worker threads.
  *
  * Distances are stored in nm, potentials in V, energies in eV.
  */
@@ -75,7 +75,7 @@ class potential_landscape
 {
   public:
     /**
-     * Builds the landscape of a layout.
+     * @brief Builds the landscape of a layout.
      *
      * @param lyt Layout; its charged surface defects enter the landscape.
      * @param params Physical parameters.
@@ -190,7 +190,7 @@ class potential_landscape
         }
     }
     /**
-     * The layout the landscape describes.
+     * @brief The layout the landscape describes.
      *
      * @return The layout.
      */
@@ -199,7 +199,7 @@ class potential_landscape
         return layout_data;
     }
     /**
-     * The physical parameters.
+     * @brief The physical parameters.
      *
      * @return The parameters.
      */
@@ -208,7 +208,7 @@ class potential_landscape
         return simulation_parameters_data;
     }
     /**
-     * Number of SiDBs.
+     * @brief Number of SiDBs.
      *
      * @return Number of SiDBs.
      */
@@ -217,7 +217,7 @@ class potential_landscape
         return num_sites;
     }
     /**
-     * The SiDB sites in raster order, shared with the charge distributions built over this landscape.
+     * @brief The SiDB sites in raster order, shared with the charge distributions built over this landscape.
      *
      * @return The shared site list.
      */
@@ -226,7 +226,7 @@ class potential_landscape
         return site_storage;
     }
     /**
-     * The charged surface defects that enter the landscape.
+     * @brief The charged surface defects that enter the landscape.
      *
      * @return Site-defect pairs.
      */
@@ -235,7 +235,7 @@ class potential_landscape
         return charged_defects;
     }
     /**
-     * Distance between two SiDBs.
+     * @brief Distance between two SiDBs.
      *
      * @param i Index of the first SiDB.
      * @param j Index of the second SiDB.
@@ -249,8 +249,8 @@ class potential_landscape
         return distances[(i * num_sites) + j];
     }
     /**
-     * The chargeless potential one SiDB exerts on another, i.e., the potential of a unit charge at the distance of
-     * the two.
+     * @brief The chargeless potential one SiDB exerts on another, i.e., the potential of a unit charge at the distance
+     * of the two.
      *
      * @param i Index of the SiDB the potential acts on.
      * @param j Index of the SiDB that exerts it.
@@ -264,7 +264,7 @@ class potential_landscape
         return potentials[(i * num_sites) + j];
     }
     /**
-     * The external potential at an SiDB: its local external potential plus the global one.
+     * @brief The external potential at an SiDB: its local external potential plus the global one.
      *
      * @param i Index of the SiDB.
      * @return External potential (unit: V).
@@ -275,7 +275,7 @@ class potential_landscape
         return local_external_potentials.at(i);
     }
     /**
-     * The potential the charged surface defects exert on an SiDB.
+     * @brief The potential the charged surface defects exert on an SiDB.
      *
      * @param i Index of the SiDB.
      * @return Defect potential (unit: V).
@@ -286,7 +286,7 @@ class potential_landscape
         return defect_induced_potentials.at(i);
     }
     /**
-     * The charge transition thresholds of an SiDB, indexed by `charge_transition_threshold_bounds`.
+     * @brief The charge transition thresholds of an SiDB, indexed by `charge_transition_threshold_bounds`.
      *
      * @param i Index of the SiDB.
      * @return The four thresholds (unit: V).
@@ -297,7 +297,7 @@ class potential_landscape
         return charge_transition_thresholds.at(i);
     }
     /**
-     * The chargeless potential of a unit charge at a distance under the landscape's parameters.
+     * @brief The chargeless potential of a unit charge at a distance under the landscape's parameters.
      *
      * @param distance Distance (unit: nm).
      * @return Chargeless potential (unit: V); 0 at distance 0.
@@ -313,8 +313,8 @@ class potential_landscape
                 std::exp(-distance / simulation_parameters_data.lambda_tf) * model::ELEMENTARY_CHARGE);
     }
     /**
-     * The chargeless potential a defect exerts at a distance, screened by the defect's own permittivity and screening
-     * length.
+     * @brief The chargeless potential a defect exerts at a distance, screened by the defect's own permittivity and
+     * screening length.
      *
      * @param distance Distance (unit: nm).
      * @param defect Defect.
@@ -332,8 +332,8 @@ class potential_landscape
                (distance * 1e-9) * std::exp(-distance / defect.lambda_tf) * model::ELEMENTARY_CHARGE;
     }
     /**
-     * The local internal potentials of a charge distribution: at every SiDB, the potential of the charged SiDBs plus
-     * the potential of the charged defects. O(N²).
+     * @brief The local internal potentials of a charge distribution: at every SiDB, the potential of the charged SiDBs
+     * plus the potential of the charged defects. O(N²).
      *
      * @param cd Charge distribution over this landscape's SiDBs.
      * @throws std::invalid_argument if the distribution sites differ from the landscape.
@@ -360,7 +360,7 @@ class potential_landscape
         return pot;
     }
     /**
-     * The local potentials of a charge distribution: internal plus external potential per SiDB. O(N²).
+     * @brief The local potentials of a charge distribution: internal plus external potential per SiDB. O(N²).
      *
      * @param cd Charge distribution over this landscape's SiDBs.
      * @throws std::invalid_argument if the distribution sites differ from the landscape.
@@ -378,7 +378,7 @@ class potential_landscape
         return pot;
     }
     /**
-     * The electrostatic potential energy of a charge distribution given its local internal potentials, i.e., the
+     * @brief The electrostatic potential energy of a charge distribution given its local internal potentials, i.e., the
      * energy of the SiDB charges in the potential of the other SiDBs, the defects, and the external sources, plus the
      * energy of the defect charges. O(N + D·N) for D charged defects.
      *
@@ -428,7 +428,7 @@ class potential_landscape
         return collect_ext + (0.5 * collect);
     }
     /**
-     * The electrostatic potential energy of a charge distribution. O(N²).
+     * @brief The electrostatic potential energy of a charge distribution. O(N²).
      *
      * @param cd Charge distribution over this landscape's SiDBs.
      * @throws std::invalid_argument if the distribution sites differ from the landscape.
@@ -439,8 +439,8 @@ class potential_landscape
         return energy(cd, local_internal_potentials(cd));
     }
     /**
-     * Whether every SiDB's charge state is population stable under its local potential: a negative SiDB below the
-     * (0/-) transition, a positive one above the (+/0) transition, a neutral one in between.
+     * @brief Whether every SiDB's charge state is population stable under its local potential: a negative SiDB below
+     * the (0/-) transition, a positive one above the (+/0) transition, a neutral one in between.
      *
      * @param cd Charge distribution over this landscape's SiDBs.
      * @throws std::invalid_argument if the distribution sites differ from the landscape.
@@ -476,7 +476,7 @@ class potential_landscape
         return true;
     }
     /**
-     * Whether no charge hop between two SiDBs lowers the energy, i.e., the distribution is configuration stable.
+     * @brief Whether no charge hop between two SiDBs lowers the energy, i.e., the distribution is configuration stable.
      *
      * @param cd Charge distribution over this landscape's SiDBs.
      * @throws std::invalid_argument if the distribution sites differ from the landscape.
@@ -519,7 +519,7 @@ class potential_landscape
         return true;
     }
     /**
-     * Whether a charge distribution is physically valid: population stable and configuration stable.
+     * @brief Whether a charge distribution is physically valid: population stable and configuration stable.
      *
      * @param cd Charge distribution over this landscape's SiDBs.
      * @throws std::invalid_argument if the distribution sites differ from the landscape.
@@ -534,7 +534,7 @@ class potential_landscape
                is_configuration_stable(cd, local_internal_potential);
     }
     /**
-     * Whether a charge distribution is physically valid. O(N²).
+     * @brief Whether a charge distribution is physically valid. O(N²).
      *
      * @param cd Charge distribution over this landscape's SiDBs.
      * @throws std::invalid_argument if the distribution sites differ from the landscape.
@@ -545,7 +545,7 @@ class potential_landscape
         return is_physically_valid(cd, local_internal_potentials(cd));
     }
     /**
-     * Evaluates a charge distribution: returns a copy with its energy set. O(N²).
+     * @brief Evaluates a charge distribution: returns a copy with its energy set. O(N²).
      *
      * @param cd Charge distribution over this landscape's SiDBs.
      * @throws std::invalid_argument if the distribution sites differ from the landscape.
@@ -560,7 +560,7 @@ class potential_landscape
 
   private:
     /**
-     * Validates an SiDB index before matrix indexing.
+     * @brief Validates an SiDB index before matrix indexing.
      *
      * @param index SiDB index.
      * @throws std::out_of_range if the index is out of range.
@@ -573,7 +573,7 @@ class potential_landscape
         }
     }
     /**
-     * Checks that a distribution covers the landscape's sites.
+     * @brief Checks that a distribution covers the landscape's sites.
      *
      * @param cd Charge distribution.
      * @throws std::invalid_argument if the site lists or cardinalities differ.
@@ -586,7 +586,7 @@ class potential_landscape
         }
     }
     /**
-     * Checks a distribution and its cached local internal potentials.
+     * @brief Checks a distribution and its cached local internal potentials.
      *
      * @param cd Charge distribution.
      * @param internal_potentials Local internal potential per SiDB.
@@ -601,55 +601,55 @@ class potential_landscape
         }
     }
     /**
-     * The layout.
+     * @brief The layout.
      */
     layout layout_data;
     /**
-     * Physical parameters.
+     * @brief Physical parameters.
      */
     model::simulation_parameters simulation_parameters_data;
     /**
-     * SiDB sites in raster order.
+     * @brief SiDB sites in raster order.
      */
     charge_distribution::site_list site_storage;
     /**
-     * Number of SiDBs.
+     * @brief Number of SiDBs.
      */
     std::size_t num_sites;
     /**
-     * Distances between SiDBs, row-major N×N (unit: nm).
+     * @brief Distances between SiDBs, row-major N×N (unit: nm).
      */
     std::vector<double> distances;
     /**
-     * Chargeless potentials between SiDBs, row-major N×N (unit: V).
+     * @brief Chargeless potentials between SiDBs, row-major N×N (unit: V).
      */
     std::vector<double> potentials;
     /**
-     * External potential per SiDB (unit: V).
+     * @brief External potential per SiDB (unit: V).
      */
     std::vector<double> local_external_potentials;
     /**
-     * Potential of the charged defects per SiDB (unit: V).
+     * @brief Potential of the charged defects per SiDB (unit: V).
      */
     std::vector<double> defect_induced_potentials;
     /**
-     * Charge transition thresholds per SiDB (unit: V).
+     * @brief Charge transition thresholds per SiDB (unit: V).
      */
     std::vector<std::array<double, 4>> charge_transition_thresholds;
     /**
-     * The charged defects with their sites.
+     * @brief The charged defects with their sites.
      */
     std::vector<std::pair<lattice_site, model::defect>> charged_defects{};
     /**
-     * Chargeless potential every SiDB exerts on every defect, row-major D×N (unit: V).
+     * @brief Chargeless potential every SiDB exerts on every defect, row-major D×N (unit: V).
      */
     std::vector<double> defect_sidb_potentials{};
     /**
-     * Chargeless potential every defect exerts on every defect, row-major D×D (unit: V).
+     * @brief Chargeless potential every defect exerts on every defect, row-major D×D (unit: V).
      */
     std::vector<double> defect_defect_potentials{};
     /**
-     * External potential per defect (unit: V).
+     * @brief External potential per defect (unit: V).
      */
     std::vector<double> local_external_potentials_at_defects{};
 };

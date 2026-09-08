@@ -94,10 +94,10 @@ enum class heuristic_engine : uint8_t
     QUICKSIM
 };
 /**
- * Returns the name of the given simulation engine.
+ * @brief Returns the name of the given simulation engine.
  *
  * @tparam EngineType The type of the SiDB simulation engine (exhaustive/heuristic/generic).
- * @param engine An SiDB simulation engine.
+ * @param eng An SiDB simulation engine.
  * @return The name of the simulation engine.
  */
 template <typename EngineType>

@@ -41,15 +41,29 @@ namespace fiction::sidb::simulation::io
 namespace detail
 {
 
+/**
+ * @brief Writes Cartesian SiDB positions and ground-state charges as CSV.
+ *
+ * @tparam Lyt Cartesian SiDB layout type.
+ */
 template <typename Lyt>
 class write_location_and_ground_state_impl
 {
   public:
+    /**
+     * @brief Selects the simulation result and output stream.
+     *
+     * @param src Simulation result whose ground states are written.
+     * @param s Output stream.
+     */
     write_location_and_ground_state_impl(const sidb::simulation::legacy_result<Lyt>& src, std::ostream& s) :
             sim_result{src},
             os{s}
     {}
 
+    /**
+     * @brief Writes positions in nanometers and one column per ground state; writes nothing for an empty result.
+     */
     void run()
     {
         // this part searches for the ground state(s) among all physically valid charge distributions
@@ -100,23 +114,32 @@ class write_location_and_ground_state_impl
 
   private:
     /**
-     * Simulation results.
+     * @brief Simulation results.
      */
     const sidb::simulation::legacy_result<Lyt>& sim_result;
     /**
-     * Output stream used for writing the simulation sim_result.
+     * @brief Destination of the CSV output.
      */
     std::ostream& os;
 };
 
 /**
- * Writes the SiDB positions of a `result` and the charge states of every ground state as CSV.
+ * @brief Writes the SiDB positions and charge states of every ground state as CSV.
  */
 class location_and_ground_state_writer
 {
   public:
+    /**
+     * @brief Selects the simulation result and output stream.
+     *
+     * @param src Simulation result whose ground states are written.
+     * @param s Output stream.
+     */
     location_and_ground_state_writer(const sidb::simulation::result& src, std::ostream& s) : sim_result{src}, os{s} {}
 
+    /**
+     * @brief Writes positions in nanometers and one column per ground state; writes nothing for an empty result.
+     */
     void run()
     {
         const auto min_energy = fiction::utils::math::round_to_n_decimal_places(
@@ -162,15 +185,21 @@ class location_and_ground_state_writer
     }
 
   private:
+    /**
+     * @brief Simulation result to serialize.
+     */
     const sidb::simulation::result& sim_result;
-    std::ostream&                   os;
+    /**
+     * @brief Destination of the CSV output.
+     */
+    std::ostream& os;
 };
 
 }  // namespace detail
 
 /**
- * Writes the coordinates of all SiDBs of a layout together with the charge distribution of the ground state(s) to a
- * file.
+ * @brief Writes the coordinates of all SiDBs of a layout together with the charge distribution of the ground state(s)
+ * to a file.
  *
  * This overload uses an output stream to write into.
  *
@@ -190,13 +219,13 @@ void write_location_and_ground_state(const sidb::simulation::legacy_result<Lyt>&
 }
 
 /**
- * Writes the coordinates of all SiDBs of a layout together with the charge distribution of the ground state(s) to a
- * file.
+ * @brief Writes the coordinates of all SiDBs of a layout together with the charge distribution of the ground state(s)
+ * to a file.
  *
  * This overload uses a file name to create and write into.
  *
  * @tparam Lyt SiDB cell-level SiDB layout type.
- * @tparam sim_result The simulation sim_result to write.
+ * @param sim_result The simulation result to write.
  * @param filename The file name to create and write into.
  */
 template <typename Lyt>
