@@ -8207,8 +8207,8 @@ Template Args:
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ari = R"doc(Iterator for the factorization of possible aspect ratios.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ari_mutex =
-R"doc(Restricts access to the aspect_ratio_iterator and the
-result_aspect_ratio.)doc";
+R"doc(Restricts access to the aspect-ratio iterator, result, and worker
+context records.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_black_list =
 R"doc(Maps tiles to blacklisted gate types via their truth tables and port
@@ -8241,9 +8241,10 @@ Args:
     t_num: Thread's identifier.
     ti_list: Pointer to a list of shared thread info that the threads
              use for communication.
+    started: Start of the shared timeout budget.
 
 Returns:
-    A found layout or nullptr if being interrupted.
+    A found layout or `std::nullopt` when interrupted or timed out.
 
 )doc";
 
@@ -8394,6 +8395,15 @@ gates.
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_check_point = R"doc(Current solver checkpoint extracted from the solver tree.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_ctx = R"doc(The context used for all solvers.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_current_solver =
+R"doc(Returns the solver for interruption without cancelling model
+evaluation.
+
+Returns:
+    The solver for the current aspect ratio.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_define_gate_fanin_tiles =
 R"doc(Adds constraints to the solver to enforce that a tile which was
@@ -9021,13 +9031,14 @@ free. Symmetry breaking constraints.
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info =
-R"doc(Contains a context pointer and a currently worked on aspect ratio and
-can be shared between multiple worker threads so that they can notify
-each other via context interrupts based on their individual results,
-i.e., a thread that found a result at aspect ratio x * y can interrupt
-all other threads that are working on larger layout sizes.)doc";
+R"doc(Shares worker solvers and aspect ratios under `rar_mutex`.
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_ctx = R"doc(Pointer to a context.)doc";
+A worker with a result interrupts solvers exploring layouts of equal
+or greater area.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_ctx = R"doc(Context that owns the worker solver.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_solver = R"doc(Current solver, kept alive while other workers may interrupt it.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_worker_aspect_ratio = R"doc(Currently examined layout aspect ratio.)doc";
 

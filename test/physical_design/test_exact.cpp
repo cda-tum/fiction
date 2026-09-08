@@ -809,7 +809,16 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");
 
-    const auto layout = exact<cart_gate_clk_lyt>(maj, res(configuration()));
+    auto params = res(configuration());
+    SECTION("single-threaded")
+    {
+        params.num_threads = 1;
+    }
+    SECTION("multi-threaded")
+    {
+        params.num_threads = 2;
+    }
+    const auto layout = exact<cart_gate_clk_lyt>(maj, params);
 
     REQUIRE(layout.has_value());
 
@@ -832,10 +841,7 @@ TEST_CASE("Exact physical design reports progress", "[exact]")
 {
     const auto ntk = blueprints::and_or_network<technology_network>();
 
-    progress_recorder rec{};
-
-    auto params        = twoddwave(configuration());
-    params.on_progress = rec.callback();
+    auto params = twoddwave(configuration());
 
     SECTION("single-threaded")
     {
@@ -846,17 +852,25 @@ TEST_CASE("Exact physical design reports progress", "[exact]")
         params.num_threads = 2;
     }
 
-    exact_physical_design_stats stats{};
+    // Repeated starts cover workers finding a layout while another worker initializes its context.
+    for (unsigned trial = 0; trial < (params.num_threads > 1 ? 8u : 1u); ++trial)
+    {
+        CAPTURE(trial);
+        progress_recorder rec{};
+        params.on_progress = rec.callback();
 
-    const auto layout = exact<cart_gate_clk_lyt>(ntk, params, &stats);
+        exact_physical_design_stats stats{};
 
-    REQUIRE(layout.has_value());
-    // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the access
-    check_eq(ntk, *layout);
+        const auto layout = exact<cart_gate_clk_lyt>(ntk, params, &stats);
 
-    // the number of aspect ratios is unknown in advance
-    CHECK(rec.is_consistent("aspect ratios"));
-    CHECK(rec.final_count("aspect ratios") == stats.num_aspect_ratios);
+        REQUIRE(layout.has_value());
+        // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the access
+        check_eq(ntk, *layout);
+
+        // the number of aspect ratios is unknown in advance
+        CHECK(rec.is_consistent("aspect ratios"));
+        CHECK(rec.final_count("aspect ratios") == stats.num_aspect_ratios);
+    }
 }
 
 #else  // FICTION_Z3_SOLVER
