@@ -18,11 +18,14 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <limits>
+#include <numeric>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
@@ -72,9 +75,9 @@ template <std::integral T>
  *
  * @param n The total number of items.
  * @param k The number of items to choose from n.
- * @return The binomial coefficient \f$\binom{n}{k}\f$.
+ * @return The binomial coefficient \f$\binom{n}{k}\f$, saturated at `uint64_t`'s maximum.
  */
-[[nodiscard]] inline uint64_t binomial_coefficient(uint64_t n, uint64_t k) noexcept
+[[nodiscard]] inline uint64_t binomial_coefficient(const uint64_t n, uint64_t k) noexcept
 {
     if (k > n)
     {
@@ -83,14 +86,20 @@ template <std::integral T>
 
     uint64_t result = 1;
 
-    if (2 * k > n)
-    {
-        k = n - k;
-    }
+    k = std::min(k, n - k);
 
     for (uint64_t i = 1; i <= k; i++)
     {
-        result = result * (n + 1 - i) / i;
+        const auto numerator = n - i + 1;
+        const auto divisor   = std::gcd(numerator, i);
+        // The remaining denominator divides the preceding coefficient exactly.
+        result /= i / divisor;
+        const auto factor = numerator / divisor;
+        if (result > std::numeric_limits<uint64_t>::max() / factor)
+        {
+            return std::numeric_limits<uint64_t>::max();
+        }
+        result *= factor;
     }
 
     return result;

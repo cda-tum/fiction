@@ -24,6 +24,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -281,6 +283,12 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
     }
 }
 
+TEST_CASE("Combination enumeration rejects counts beyond vector capacity",
+          "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
+{
+    CHECK_THROWS_AS(determine_all_combinations_of_distributing_k_entities_on_n_positions(34, 68), std::length_error);
+}
+
 TEST_CASE("Zero entities", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
 {
     const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(0, 5);
@@ -307,4 +315,13 @@ TEST_CASE("Less entities than positions", "[determine-all-combinations-of-distri
     REQUIRE(result[0] == std::vector<std::size_t>{0, 1});
     REQUIRE(result[1] == std::vector<std::size_t>{0, 2});
     REQUIRE(result[2] == std::vector<std::size_t>{1, 2});
+}
+
+TEST_CASE("Binomial coefficients avoid intermediate overflow and saturate", "[binomial-coefficient]")
+{
+    constexpr auto max_count = std::numeric_limits<uint64_t>::max();
+    CHECK(binomial_coefficient(67, 33) == 14'226'520'737'620'288'370ULL);
+    CHECK(binomial_coefficient(68, 34) == max_count);
+    CHECK(binomial_coefficient(max_count, 1) == max_count);
+    CHECK(binomial_coefficient(max_count, max_count) == 1);
 }
