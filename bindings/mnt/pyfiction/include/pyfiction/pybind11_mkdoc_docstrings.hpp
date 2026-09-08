@@ -3407,7 +3407,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long =
+static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long_long =
 R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
 integer into four parts (from MSB to LSB):
  - 1 bit for the dead indicator - 1 bit for the z position - 31 bit
@@ -14682,7 +14682,8 @@ static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible_par
 static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible_params_sim_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design =
-R"doc(This function implements an on-the-fly SiDB circuit design algorithm.
+R"doc(Designs a lattice-based SiDB circuit for a placed and routed gate-
+level layout.
 
 The process begins with an already placed and routed gate-level
 layout. For each gate, the corresponding SiDB implementation is
@@ -14690,19 +14691,20 @@ designed by using an SiDB gate design algorithm.
 
 Args:
     gate_lyt: Gate-level layout.
-    lattice_tiling: The lattice tiling used for the circuit design.
     params: The parameters used for designing the circuit,
             encapsulated in an `on_the_fly_circuit_design_params`
             object.
-    stats: Pointer to a structure for collecting statistics. If
-           `nullptr`, statistics are discarded.
 
 Template Args:
-    CellLyt: SiDB cell-level layout type.
+    CellLyt: Cartesian SiDB layout type used by the gate-library
+             bridge.
     GateLyt: Gate-level layout type.
 
 Returns:
     Layout representing the designed SiDB circuit.
+
+Raises:
+    unsuccessful_gate_design_error: if a gate cannot be designed.
 
 )doc";
 
@@ -19476,7 +19478,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
 state to an 64-bit unsigned integer.
 
@@ -21915,34 +21917,16 @@ R"doc(Writes both the `simulation_parameters` as well as the
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_write_sqd_sim_result_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_defect_influence_domain =
-R"doc(Writes a CSV representation of an defect influence domain to the
-specified output stream. The data are written as rows, each
-corresponding to one set of simulation parameters and their
-corresponding influence status.
+R"doc(Writes the defect influence at each evaluated lattice position as CSV.
 
-The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
-Influence STATUS ... subsequent rows for each set of simulation
-parameters.
-
-
-
-Writes a defect influence domain as CSV: one line per evaluated defect
-position with its column, its row (`2y + z` of the lattice site), and
-the influence tag.
+Each data row contains the column, the SiQAD row (`2y + z`), and the
+influence tag. The header is `x,y,operational status`.
 
 Args:
-    defect_infdom: The defect influence domain to be written. It
-                   contains a mapping from defect positions to their
-                   influence status.
-    os: The output stream where the CSV representation of the defect
-        influence domain is written to.
-    params: The parameters used for writing, including the influential
-            and non-influential tags. Defaults to an empty
-            `write_defect_influence_domain_params` object, which
-            provides standard tags.
     defect_infdom: The domain to write.
     os: The output stream.
-    params: Parameters.
+    params: Tags used for influential and non-influential defect
+            positions.
 
 )doc";
 
@@ -21953,7 +21937,8 @@ overload.
 Args:
     defect_infdom: The domain to write.
     filename: The file to write to.
-    params: Parameters.
+    params: Tags used for influential and non-influential defect
+            positions.
 
 Raises:
     std::ofstream::failure: if the file cannot be opened.

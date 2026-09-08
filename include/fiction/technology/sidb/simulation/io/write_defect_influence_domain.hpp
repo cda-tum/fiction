@@ -45,26 +45,14 @@ struct write_defect_influence_domain_params
 };
 
 /**
- * Writes a CSV representation of an defect influence domain to the specified output stream. The data are written
- * as rows, each corresponding to one set of simulation parameters and their corresponding influence status.
+ * @brief Writes the defect influence at each evaluated lattice position as CSV.
  *
- * The output CSV format is as follows:
- * X_DIMENSION, Y_DIMENSION, Influence STATUS
- * ... subsequent rows for each set of simulation parameters.
- *
- * @param defect_infdom The defect influence domain to be written. It contains a mapping from defect positions to their
- * influence status.
- * @param os The output stream where the CSV representation of the defect influence domain is written to.
- * @param params The parameters used for writing, including the influential and non-influential tags. Defaults to an
- * empty `write_defect_influence_domain_params` object, which provides standard tags.
- */
-/**
- * Writes a defect influence domain as CSV: one line per evaluated defect position with its column, its row
- * (`2y + z` of the lattice site), and the influence tag.
+ * Each data row contains the column, the SiQAD row (`2y + z`), and the influence tag.
+ * The header is `x,y,operational status`.
  *
  * @param defect_infdom The domain to write.
  * @param os The output stream.
- * @param params Parameters.
+ * @param params Tags used for influential and non-influential defect positions.
  */
 inline void write_defect_influence_domain(const defects::defect_influence_domain& defect_infdom, std::ostream& os,
                                           const write_defect_influence_domain_params& params = {})
@@ -83,11 +71,11 @@ inline void write_defect_influence_domain(const defects::defect_influence_domain
         });
 }
 /**
- * Writes a defect influence domain as CSV to a file; see the stream overload.
+ * @brief Writes a defect influence domain as CSV to a file; see the stream overload.
  *
  * @param defect_infdom The domain to write.
  * @param filename The file to write to.
- * @param params Parameters.
+ * @param params Tags used for influential and non-influential defect positions.
  * @throws std::ofstream::failure if the file cannot be opened.
  */
 inline void write_defect_influence_domain(const defects::defect_influence_domain&     defect_infdom,

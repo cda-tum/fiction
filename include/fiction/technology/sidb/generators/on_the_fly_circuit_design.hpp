@@ -233,19 +233,18 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
 }
 
 /**
- * This function implements an on-the-fly SiDB circuit design algorithm.
+ * @brief Designs a lattice-based SiDB circuit for a placed and routed gate-level layout.
  *
  * The process begins with an already placed and routed gate-level layout. For each gate, the corresponding SiDB
  * implementation is designed by using an SiDB gate design algorithm.
  *
- * @tparam CellLyt SiDB cell-level layout type.
+ * @tparam CellLyt Cartesian SiDB layout type used by the gate-library bridge.
  * @tparam GateLyt Gate-level layout type.
  * @param gate_lyt Gate-level layout.
- * @param lattice_tiling The lattice tiling used for the circuit design.
  * @param params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_circuit_design_params` object.
- * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
  * @return Layout representing the designed SiDB circuit.
+ * @throws unsuccessful_gate_design_error if a gate cannot be designed.
  */
 template <typename CellLyt, typename GateLyt>
 [[nodiscard]] layout on_the_fly_circuit_design(const GateLyt&                          gate_lyt,
