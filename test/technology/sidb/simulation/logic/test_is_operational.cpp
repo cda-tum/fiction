@@ -149,7 +149,7 @@ TEST_CASE("Incomplete BDL wire set is non-operational", "[is-operational]")
 
 TEST_CASE("Canvas filtering rejects SiDBs outside the simulation state", "[is-operational]")
 {
-    const auto                  lyt = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
+    const auto                  lyt = blueprints::siqad_or_gate();
     const is_operational_params params{};
     layout                      canvas{};
     canvas.assign_sidb({1000, 0, 0}, dot_tag::LOGIC);
