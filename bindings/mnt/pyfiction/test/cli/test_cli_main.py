@@ -14,10 +14,18 @@ import json
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- the console script is exercised as a process on purpose
 import sys
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
+from prompt_toolkit import PromptSession
+from prompt_toolkit.application import create_app_session
+from prompt_toolkit.completion import CompleteEvent
+from prompt_toolkit.document import Document
+from prompt_toolkit.input import DummyInput
+from prompt_toolkit.output import DummyOutput
 
 from mnt.pyfiction import __version__
+from mnt.pyfiction.cli import app as cli_app
 from mnt.pyfiction.cli import main
 
 
@@ -69,3 +77,28 @@ def test_console_script_is_installed() -> None:
     result = subprocess.run([str(script), "-c", "version"], check=False, capture_output=True, text=True)  # ruff: ignore[subprocess-without-shell-equals-true]
     assert result.returncode == 0, result.stderr
     assert __version__ in result.stdout
+
+
+def test_interactive_interrupt_continues_and_eof_closes_log(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
+    monkeypatch.setattr(PromptSession, "prompt", Mock(side_effect=[KeyboardInterrupt, "version", EOFError]))
+    log = tmp_path / "interactive.json"
+    with create_app_session(input=DummyInput(), output=DummyOutput()):
+        assert main(["--log", str(log)]) == 0
+    entries = json.loads(log.read_text(encoding="utf-8"))
+    assert len(entries) == 1
+    assert entries[0]["status"] == "ok"
+    assert entries[0]["result"]["version"] == __version__
+
+
+@pytest.mark.parametrize(("text", "expected"), [("", "read"), ("version; rea", "read"), ("read --ty", "--type")])
+def test_command_and_option_completion(text: str, expected: str) -> None:
+    completions = cli_app.CommandCompleter().get_completions(Document(text), CompleteEvent(completion_requested=True))
+    assert expected in {completion.text for completion in completions}
+
+
+def test_file_completion(tmp_path: Path) -> None:
+    (tmp_path / "circuit.v").write_text("", encoding="utf-8")
+    text = f"read {tmp_path.as_posix()}/circ"
+    completions = cli_app.CommandCompleter().get_completions(Document(text), CompleteEvent(completion_requested=True))
+    assert "uit.v" in {completion.text for completion in completions}

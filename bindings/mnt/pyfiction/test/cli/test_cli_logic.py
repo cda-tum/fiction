@@ -42,10 +42,25 @@ def test_map_needs_gates(mux21_shell: Shell) -> None:
     assert "at least one gate type" in mux21_shell.fails("map")
 
 
+@pytest.mark.parametrize("gates", ["--all", "--all3"])
+def test_map_complete_gate_sets_preserves_outputs(mux21_shell: Shell, gates: str) -> None:
+    mux21_shell.ok("simulate -n --store")
+    expected = mux21_shell.session.truth_tables.current().to_binary()
+    mux21_shell.ok(f"map {gates}; simulate -n --store")
+    assert mux21_shell.session.truth_tables.current().to_binary() == expected
+
+
 def test_fanouts_and_balance(mux21_shell: Shell) -> None:
     mux21_shell.ok("fanouts -d 3 -s depth; balance -u")
     assert len(mux21_shell.session.networks) == 3
     assert "usage" in mux21_shell.fails("fanouts -d 4")
+
+
+def test_seeded_fanout_substitution_preserves_outputs(mux21_shell: Shell) -> None:
+    mux21_shell.ok("simulate -n --store")
+    expected = mux21_shell.session.truth_tables.current().to_binary()
+    mux21_shell.ok("fanouts -s random --seed 7; simulate -n --store")
+    assert mux21_shell.session.truth_tables.current().to_binary() == expected
 
 
 def test_gates(mux21_shell: Shell) -> None:

@@ -14,6 +14,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from mnt.pyfiction import inml_layout, mol_qca_layout, mol_qca_technology
+from mnt.pyfiction.cli.stores import CellEntry
+
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
@@ -99,6 +102,41 @@ def test_show_uses_a_temporary_file(mux21_shell: Shell) -> None:
     output = mux21_shell.ok("show -n --silent")
     assert "wrote " in output
     mux21_shell.session.close()
+
+
+@pytest.mark.parametrize("simulate", [False, True])
+def test_show_sidb_svg(shell: Shell, resource: Callable[[str], str], tmp_path: Path, *, simulate: bool) -> None:
+    shell.ok(f"read {resource('siqad_or_gate.sqd')}")
+    if simulate:
+        shell.ok("quickexact")
+    path = tmp_path / "sidb.svg"
+    shell.ok(f"show -c --silent -o {path}")
+    assert "<svg" in path.read_text(encoding="utf-8")
+
+
+def test_show_molecular_qca_svg(shell: Shell, tmp_path: Path) -> None:
+    layout = mol_qca_layout((2, 0), "OPEN", "wire")
+    layout.assign_cell_type((0, 0), mol_qca_technology.cell_type.INPUT)
+    layout.assign_cell_type((1, 0), mol_qca_technology.cell_type.NORMAL1)
+    layout.assign_cell_type((2, 0), mol_qca_technology.cell_type.OUTPUT)
+    shell.session.cell_layouts.add(CellEntry(layout))
+    path = tmp_path / "molecular.svg"
+    shell.ok(f"show -c --silent -o {path}")
+    assert "<svg" in path.read_text(encoding="utf-8")
+
+
+def test_show_rejects_inml_svg(shell: Shell, tmp_path: Path) -> None:
+    shell.session.cell_layouts.add(CellEntry(inml_layout()))
+    assert "no SVG drawer" in shell.fails(f"show -c --silent -o {tmp_path / 'inml.svg'}")
+
+
+def test_show_opens_the_written_file(mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    opened: list[str] = []
+    monkeypatch.setattr("mnt.pyfiction.cli.commands.general.webbrowser.open", opened.append)
+    path = tmp_path / "network.dot"
+    mux21_shell.ok(f"show -n -o {path}")
+    assert opened == [path.resolve().as_uri()]
+    assert "digraph" in path.read_text(encoding="utf-8")
 
 
 def test_clear(mux21_shell: Shell) -> None:

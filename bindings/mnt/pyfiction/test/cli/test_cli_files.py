@@ -40,6 +40,22 @@ def test_read_defaults_to_a_technology_network(mux21_shell: Shell) -> None:
     assert isinstance(mux21_shell.session.networks.current(), technology_network)
 
 
+@pytest.mark.parametrize("network_type", ["aig", "tec"])
+@pytest.mark.parametrize(
+    ("suffix", "text"),
+    [
+        (".aag", "aag 3 2 0 1 1\n2\n4\n6\n6 2 4\ni0 a\ni1 b\no0 f\nc\nAND\n"),
+        (".pla", ".i 2\n.o 1\n11 1\n.e\n"),
+    ],
+)
+def test_read_aiger_and_pla(shell: Shell, tmp_path: Path, network_type: str, suffix: str, text: str) -> None:
+    path = tmp_path / f"and{suffix}"
+    path.write_text(text, encoding="utf-8")
+    shell.ok(f"read {path} --type {network_type}; simulate -n --store")
+    assert shell.session.truth_tables.current().to_binary() == "1000"
+    assert "use --type aig or --type tec" in shell.fails(f"read {path} --type xag")
+
+
 def test_read_blif_rejects_other_types(shell: Shell, tmp_path: Path, mux21_shell: Shell) -> None:
     blif = tmp_path / "mux21.blif"
     mux21_shell.ok(f"write {blif}")
@@ -70,11 +86,22 @@ def test_read_unparsable_file_reports_the_parser(shell: Shell, tmp_path: Path) -
     assert "could not parse" in shell.fails(f"read {bad}")
 
 
-def test_read_sqd_and_fqca(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:
+def test_read_sqd(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f"read {resource('siqad_or_gate.sqd')}")
     entry = shell.session.cell_layouts.current()
     assert entry.layout.num_dots() > 0
     assert shell.session.log[-1]["result"]["cell_layout"]["technology"] == "SiDB"  # type: ignore[index]
+
+
+def test_sqd_shell_round_trip(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:
+    shell.ok(f"read {resource('siqad_or_gate.sqd')}")
+    before = shell.session.cell_layouts.current().layout
+    path = tmp_path / "gate.sqd"
+    shell.ok(f"write {path}; clear -c; read {path}")
+    after = shell.session.cell_layouts.current().layout
+    assert after.num_dots() == before.num_dots()
+    assert after.num_pis() == before.num_pis()
+    assert after.num_pos() == before.num_pos()
     fqca = tmp_path / "gate.fqca"
     shell.ok(f"read {resource('mux21.v')}; ortho; cell; write {fqca}; clear -c; read {fqca}")
     assert shell.session.cell_layouts.current().layout.num_cells() > 0

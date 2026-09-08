@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt import pyfiction
+from mnt.pyfiction.cli.stores import CellEntry
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -69,6 +70,28 @@ def test_physical_parameter_validation(or_gate: Shell) -> None:
     assert "must be positive" in or_gate.fails("quickexact -e 0")
     assert "at least 1" in or_gate.fails("quicksim -i 0")
     assert "usage" in or_gate.fails("quickexact --base 4")
+
+
+@pytest.mark.parametrize("command", ["quickexact -l 0", "quicksim -a 0", "quicksim -a 2"])
+def test_simulation_rejects_invalid_physical_parameters(or_gate: Shell, command: str) -> None:
+    count = len(or_gate.session.cell_layouts)
+    or_gate.fails(command)
+    assert len(or_gate.session.cell_layouts) == count
+    assert or_gate.session.cell_layouts.current().result is None
+
+
+def test_simulation_reports_an_empty_result(shell: Shell) -> None:
+    shell.session.cell_layouts.add(CellEntry(pyfiction.sidb_layout()))
+    assert "no physically valid charge distribution" in shell.ok("quickexact")
+    simulation = shell.session.log[-1]["result"]["cell_layout"]["simulation"]  # type: ignore[index]
+    assert simulation["stable_states"] == 0
+    assert simulation["ground_state_energy_ev"] is None
+
+
+def test_temp_rejects_missing_gate_ports_and_invalid_temperature(shell: Shell) -> None:
+    shell.session.cell_layouts.add(CellEntry(pyfiction.sidb_layout()))
+    assert "must be positive" in shell.fails("temp -t 0")
+    assert "input and output dots" in shell.fails("temp -g")
 
 
 def test_temp(shell: Shell, resource: Callable[[str], str]) -> None:
