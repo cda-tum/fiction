@@ -16,7 +16,6 @@
  */
 
 #include "fiction/synthesis/truth_tables.hpp"
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/generators/design_gates.hpp"
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
 #include "fiction/technology/sidb/lattice.hpp"

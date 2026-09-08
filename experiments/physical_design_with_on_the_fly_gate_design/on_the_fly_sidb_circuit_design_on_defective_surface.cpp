@@ -45,7 +45,6 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
-#include <optional>
 #include <string>
 
 using namespace fiction;
@@ -178,17 +177,24 @@ int main()  // NOLINT
             // check equivalence
             if (!st.gate_layout.has_value())
             {
-                throw std::bad_optional_access{};
+                fmt::print("[e] Circuit design produced no gate-level layout\n");
+                continue;
             }
-            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, st.gate_layout.value());
+
+            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, *st.gate_layout);
+
             if (!miter.has_value())
             {
-                throw std::bad_optional_access{};
+                fmt::print("[e] Miter construction failed\n");
+                continue;
             }
+
             const auto eq = mockturtle::equivalence_checking(*miter);
+
             if (!eq.has_value())
             {
-                throw std::bad_optional_access{};
+                fmt::print("[e] Equivalence checking failed\n");
+                continue;
             }
 
             sidb_circuits_with_defects(benchmark, mockturtle::to_seconds(st.time_total),
