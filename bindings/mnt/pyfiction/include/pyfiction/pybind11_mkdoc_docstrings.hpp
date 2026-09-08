@@ -14751,10 +14751,7 @@ given gate design parameters and the defect density, the gate design
 may fail.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_unsuccessful_gate_design_error_unsuccessful_gate_design_error =
-R"doc(This explicit constructor initializes the base `std::runtime_error`
-class with the provided error message, ensuring that the exception
-contains detailed information about the reason for the gate design
-failure.
+R"doc(Copy the message for an unsuccessful gate design attempt.
 
 Args:
     msg: A descriptive message explaining why the gate design failed.
@@ -14766,8 +14763,7 @@ R"doc(If the blacklist is overly restrictive, finding a valid placement and
 routing becomes impossible, resulting in this exception being thrown.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_unsuccessful_pr_error_unsuccessful_pr_error =
-R"doc(This class inherits from `std::runtime_error` and is used to signal
-errors related to unsuccessful placement and routing.
+R"doc(Copy the message for an unsuccessful placement and routing attempt.
 
 Args:
     msg: The error message describing the unsuccessful placement and
@@ -23628,6 +23624,10 @@ Returns:
     The minimum energy, or `std::nullopt` if no configuration is
     physically valid.
 
+Raises:
+    std::invalid_argument: if a canvas SiDB is absent from the state's
+                           layout.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_layout_with_input_pattern =
@@ -24010,6 +24010,8 @@ Returns:
 Raises:
     std::invalid_argument: if fewer than two dimensions are swept or
                            the seed is outside the sweep grid.
+    std::bad_alloc: if sampling or a flood-fill worker cannot allocate
+                    storage.
 
 )doc";
 
