@@ -280,9 +280,9 @@ TEST_CASE("Time-to-solution averages successful and failed runtimes", "[time-to-
 TEST_CASE("Time-to-solution reports progress", "[time-to-solution]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
 
     progress_recorder rec{};
 

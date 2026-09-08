@@ -544,8 +544,8 @@ TEST_CASE("Defect influence propagates worker exceptions", "[defect-influence]")
 TEST_CASE("Defect influence reports progress", "[defect-influence]")
 {
     auto lyt = layout{};
-    lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0}, dot_tag::NORMAL);
 
     progress_recorder rec{};
 
