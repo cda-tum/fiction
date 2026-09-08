@@ -64,6 +64,13 @@ int main()  // NOLINT
                        "#Lp3",                     // uint64_t
                        "#Lp3/N [%]"};              // double
 
+    /**
+     * @brief Published "le" and "ge" input words, including their unused high bits.
+     */
+    std::array<tt, 2> published_comparisons{tt{2}, tt{2}};
+    *published_comparisons[0].begin() = 0x11;
+    *published_comparisons[1].begin() = 0x13;
+
     const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 22>{
         {{std::vector<tt>{create_not_tt()}, "inv_1i_top_1o_right"},
          {std::vector<tt>{create_id_tt()}, "wire_1i_top_1o_right"},
@@ -81,8 +88,8 @@ int main()  // NOLINT
          {std::vector<tt>{create_xnor_tt()}, "xnor_2i_top_left_1o_right"},
          {std::vector<tt>{create_lt_tt()}, "lt_2i_top_left_1o_right"},
          {std::vector<tt>{create_gt_tt()}, "gt_2i_top_left_1o_right"},
-         {std::vector<tt>{create_le_tt()}, "le_2i_top_left_1o_right"},
-         {std::vector<tt>{create_ge_tt()}, "ge_2i_top_left_1o_right"},
+         {std::vector<tt>{published_comparisons[0]}, "le_2i_top_left_1o_right"},
+         {std::vector<tt>{published_comparisons[1]}, "ge_2i_top_left_1o_right"},
          {std::vector<tt>{create_crossing_wire_tt()}, "cx_2i_top_left_2o_down_right"},
          {std::vector<tt>{create_half_adder_tt()}, "ha_2i_top_left_2o_down_right"},
          {std::vector<tt>{create_double_wire_tt()}, "hourglass_2i_top_left_2o_down_right"}}};
