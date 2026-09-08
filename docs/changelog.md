@@ -266,6 +266,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
   - Canvas filtering now rejects SiDBs missing from the simulation state's layout.
   - Ground State Space reports multiset limits using the potential landscape's charge base.
+  - Corrected the less-than-or-equal and greater-than-or-equal truth tables.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
   - Operational checks and gate pruning now reject mismatched input counts; band-bending resilience rejects unusable inputs.
   - Gate design now propagates worker exceptions to the caller and sets simulation parameters before launching workers.
