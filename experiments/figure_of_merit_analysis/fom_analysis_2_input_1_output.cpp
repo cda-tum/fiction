@@ -20,7 +20,6 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -161,11 +160,7 @@ int main()  // NOLINT
             std::vector<layout> all_gates{};
             design_gates_stats  efficient_stats{};
 
-            for (const auto& gate :
-                 design_gates(to_sidb_layout(skeleton), truth_table, design_params, &efficient_stats))
-            {
-                all_gates.push_back(to_cell_level_layout<Lyt>(gate));
-            }
+            all_gates = design_gates(skeleton, truth_table, design_params, &efficient_stats);
 
             if (all_gates.empty())
             {

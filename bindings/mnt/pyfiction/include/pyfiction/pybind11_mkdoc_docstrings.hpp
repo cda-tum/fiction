@@ -14371,28 +14371,6 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_2 =
-R"doc(Transitional overload for SiDB cell-level layouts: the skeleton is
-converted with `to_sidb_layout` and the gates with
-`to_cell_level_layout`.
-
-Args:
-    skeleton: The skeleton.
-    spec: The Boolean function(s) to implement; must not be empty.
-    params: Parameters.
-    stats: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    The designed gates.
-
-Raises:
-    std::invalid_argument: if `spec` is empty.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params = R"doc(Parameters of the gate designers.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_canvas =
@@ -14606,22 +14584,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_multiple_random_layouts_2 =
-R"doc(Transitional overload for SiDB cell-level layouts; see
-`generate_random_layout`.
-
-Args:
-    params: Parameters.
-    skeleton: The skeleton to place SiDBs on, if any.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    The layouts, or `std::nullopt`.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout =
 R"doc(Generates a random SiDB layout by placing SiDBs at random sites of an
 area, optionally on top of a skeleton. The skeleton's lattice, dots,
@@ -14637,23 +14599,6 @@ Args:
 Returns:
     The generated layout, or `std::nullopt` if not all SiDBs could be
     placed within the attempt limit.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_2 =
-R"doc(Transitional overload for SiDB cell-level layouts: the skeleton is
-converted with `to_sidb_layout` and the result with
-`to_cell_level_layout`.
-
-Args:
-    params: Parameters.
-    skeleton: The skeleton to place SiDBs on, if any.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    The generated layout, or `std::nullopt`.
 
 )doc";
 
@@ -25428,10 +25373,10 @@ feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
-    tt: Expected Boolean function of the lyt given as a multi-output
-        truth table.
-    ps: Parameters for the operational domain computation.
-    st: Statistics of the process.
+    spec: Expected Boolean function of the lyt given as a multi-output
+          truth table.
+    params: Parameters for the operational domain computation.
+    stats: Statistics of the process.
 
 Returns:
     The operational domain of the layout.
@@ -29457,7 +29402,7 @@ static const char *mkd_doc_std_hash_8 = R"doc(Hash for SiDB layouts, over the Si
 
 static const char *mkd_doc_std_hash_9 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
 
-static const char *mkd_doc_std_hash_10 = R"doc()doc";
+static const char *mkd_doc_std_hash_10 = R"doc(Hashes parameter points on the equality comparison grid.)doc";
 
 static const char *mkd_doc_std_hash_operator_call = R"doc()doc";
 
@@ -29512,7 +29457,16 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_10 = R"doc()doc";
+static const char *mkd_doc_std_hash_operator_call_10 =
+R"doc(Computes the hash of a parameter point.
+
+Args:
+    pp: Parameter point to hash.
+
+Returns:
+    Hash of the quantized parameter values.
+
+)doc";
 
 static const char *mkd_doc_std_iterator_traits = R"doc(Iterator traits for enumerating SiDB input patterns.)doc";
 
