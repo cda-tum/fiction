@@ -22,9 +22,6 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/traits.hpp>
-#include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -45,8 +42,6 @@ using namespace fiction::sidb::simulation::engines;
 
 int main()  // NOLINT
 {
-    using Lyt = sidb_100_cell_clk_lyt;
-
     experiments::experiment<std::size_t, std::size_t, double, double, double> simulation_exp{
         "Benchmark",
         "Number SiDBs",
@@ -72,7 +67,7 @@ int main()  // NOLINT
     {
         random_layouts_params.number_of_sidbs = num_sidbs;
 
-        const auto random_layouts = generate_multiple_random_layouts<Lyt>(random_layouts_params);
+        const auto random_layouts = generate_multiple_random_layouts(random_layouts_params);
 
         double runtime_exhaustive = 0;
         double runtime_quickexact = 0;

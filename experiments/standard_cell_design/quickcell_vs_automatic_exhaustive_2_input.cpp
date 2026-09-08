@@ -20,10 +20,10 @@
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -41,6 +41,7 @@
 // algorithm. The final column displays the runtime reduction factor achieved by *QuickCell*.
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
@@ -87,37 +88,37 @@ int main()  // NOLINT
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags", EXPERIMENTS_PATH);
 
-    const auto skeleton_one_input_one_output_straight = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_1i1o_straight.sqd"));
+    const auto skeleton_one_input_one_output_straight =
+        read_sqd_layout(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_1i1o_straight.sqd"));
 
     const auto skeleton_one_input_two_output =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_2i1o.sqd"));
+        read_sqd_layout(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_2i1o.sqd"));
 
     const auto skeleton_two_input_two_output =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_2i2o.sqd"));
+        read_sqd_layout(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_2i2o.sqd"));
+
+    const is_operational_params operational_params{.sim_params                = simulation_parameters{2, -0.32},
+                                                   .sim_engine                = engine::QUICKEXACT,
+                                                   .input_bdl_iterator_params = bdl_input_iterator_params{},
+                                                   .op_condition =
+                                                       is_operational_params::operational_condition::REJECT_KINKS};
 
     design_gates_params params_1_in_1_out_straight{
-        .operational_params =
-            is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT, bdl_input_iterator_params{},
-                                  is_operational_params::operational_condition::REJECT_KINKS},
+        .operational_params     = operational_params,
         .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
         .canvas                 = {{9, 6, 0}, {21, 14, 0}},
         .number_of_canvas_sidbs = 3,
         .termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
     design_gates_params params_2_in_1_out{
-        .operational_params =
-            is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT, bdl_input_iterator_params{},
-                                  is_operational_params::operational_condition::REJECT_KINKS},
+        .operational_params     = operational_params,
         .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
         .canvas                 = {{14, 6, 0}, {24, 10, 0}},
         .number_of_canvas_sidbs = 3,
         .termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
     design_gates_params params_2_in_2_out{
-        .operational_params =
-            is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT, bdl_input_iterator_params{},
-                                  is_operational_params::operational_condition::REJECT_KINKS},
+        .operational_params     = operational_params,
         .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
         .canvas                 = {{14, 6, 0}, {24, 14, 0}},
         .number_of_canvas_sidbs = 3,
@@ -130,7 +131,7 @@ int main()  // NOLINT
     {
         design_gates_stats stats_automatic_exhaustive_design{};
 
-        std::vector<sidb_100_cell_clk_lyt_siqad> automatic_exhaustive_design{};
+        std::vector<layout> automatic_exhaustive_design{};
 
         params_2_in_1_out.design_mode = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
         params_2_in_1_out.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
@@ -158,8 +159,8 @@ int main()  // NOLINT
                                                        &stats_automatic_exhaustive_design);
         }
 
-        std::vector<sidb_100_cell_clk_lyt_siqad> quickcell_design{};
-        design_gates_stats                       stats_quickcell{};
+        std::vector<layout> quickcell_design{};
+        design_gates_stats  stats_quickcell{};
 
         params_2_in_1_out.design_mode = design_gates_params::design_gates_mode::QUICKCELL;
 

@@ -14337,28 +14337,6 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_2 =
-R"doc(Transitional overload for SiDB cell-level layouts: the skeleton is
-converted with `to_sidb_layout` and the gates with
-`to_cell_level_layout`.
-
-Args:
-    skeleton: The skeleton.
-    spec: The Boolean function(s) to implement; must not be empty.
-    params: Parameters.
-    stats: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    The designed gates.
-
-Raises:
-    std::invalid_argument: if `spec` is empty.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params = R"doc(Parameters of the gate designers.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_canvas =
@@ -14572,22 +14550,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_multiple_random_layouts_2 =
-R"doc(Transitional overload for SiDB cell-level layouts; see
-`generate_random_layout`.
-
-Args:
-    params: Parameters.
-    skeleton: The skeleton to place SiDBs on, if any.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    The layouts, or `std::nullopt`.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout =
 R"doc(Generates a random SiDB layout by placing SiDBs at random sites of an
 area, optionally on top of a skeleton. The skeleton's lattice, dots,
@@ -14603,23 +14565,6 @@ Args:
 Returns:
     The generated layout, or `std::nullopt` if not all SiDBs could be
     placed within the attempt limit.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_2 =
-R"doc(Transitional overload for SiDB cell-level layouts: the skeleton is
-converted with `to_sidb_layout` and the result with
-`to_cell_level_layout`.
-
-Args:
-    params: Parameters.
-    skeleton: The skeleton to place SiDBs on, if any.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    The generated layout, or `std::nullopt`.
 
 )doc";
 

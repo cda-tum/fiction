@@ -85,7 +85,7 @@ int main()  // NOLINT
 
     for (const auto& [gate, truth_table] : gates)
     {
-        const auto exhaustive_design = design_gates(lyt, truth_table, params_2_in_1_out);
+        const auto exhaustive_design = design_gates(to_sidb_layout(lyt), truth_table, params_2_in_1_out);
 
         // Create gate directory for plots
         const std::string gate_folder = fmt::format("{}{}/", output_folder, gate);
@@ -93,8 +93,9 @@ int main()  // NOLINT
 
         std::size_t counter_for_wrong_output_of_quicktrace = 0;
 
-        for (const auto& gate_lyt : exhaustive_design)
+        for (const auto& sidb_gate : exhaustive_design)
         {
+            const auto gate_lyt = to_cell_level_layout<sidb_100_cell_clk_lyt_cube>(sidb_gate);
             // using grid search to find the minimum defect clearance
             const auto op_defect_grid = defect_influence_grid_search(gate_lyt, truth_table, params, 1);
             const auto avoidance_grid = calculate_defect_clearance(gate_lyt, op_defect_grid);

@@ -23,6 +23,7 @@
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/generators/design_gates.hpp"
 #include "fiction/technology/sidb/generators/is_gate_design_impossible.hpp"
 #include "fiction/technology/sidb/model/nm_distance.hpp"
@@ -737,14 +738,15 @@ class on_the_fly_gate_library
             }
 
             const auto found_gate_layouts =
-                sidb::generators::design_gates(skeleton, spec, parameters.design_gate_params);
+                sidb::generators::design_gates(to_sidb_layout(skeleton), spec, parameters.design_gate_params);
 
             if (found_gate_layouts.empty())
             {
                 throw gate_design_exception<GateLyt>(tile, synthesis::create_id_tt(), p);
             }
 
-            return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
+            return cell_list_to_gate<char>(
+                cell_level_layout_to_list(to_cell_level_layout<CellLyt>(found_gate_layouts.front())));
         }
 
         if constexpr (is_sidb_defect_surface_v<LytSkeleton>)
@@ -755,14 +757,16 @@ class on_the_fly_gate_library
             }
         }
 
-        const auto found_gate_layouts = sidb::generators::design_gates(skeleton, spec, parameters.design_gate_params);
+        const auto found_gate_layouts =
+            sidb::generators::design_gates(to_sidb_layout(skeleton), spec, parameters.design_gate_params);
 
         if (found_gate_layouts.empty())
         {
             throw gate_design_exception<GateLyt>(tile, spec.front(), p);
         }
 
-        return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
+        return cell_list_to_gate<char>(
+            cell_level_layout_to_list(to_cell_level_layout<CellLyt>(found_gate_layouts.front())));
     }
     /**
      * The function generates a layout where each cell is assigned a specific

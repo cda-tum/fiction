@@ -21,8 +21,6 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/layout_utils.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
@@ -129,33 +127,29 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
 
 TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[design-sidb-gates]")
 {
-    using offset_layout = sidb_100_cell_clk_lyt;
-    using siqad_layout  = sidb_100_cell_clk_lyt_siqad;
-    using cube_layout   = sidb_100_cell_clk_lyt_cube;
+    layout lyt{};
 
-    siqad_layout lyt{};
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({18, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({18, 1, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_sidb({6, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({6, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_sidb({4, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 2, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_sidb({10, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 7, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 7, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_sidb({10, 9, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 10, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_cell_type({10, 9, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 10, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_sidb({10, 12, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, 12, 1}, sidb_technology::cell_type::NORMAL);
-
-    CHECK(lyt.num_cells() == 13);
+    CHECK(lyt.num_dots() == 13);
 
     SECTION("One cell in canvas")
     {
@@ -170,40 +164,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         const auto found_gate_layouts = design_gates(lyt, std::vector<tt>{create_xnor_tt()}, params);
 
         REQUIRE(found_gate_layouts.size() == 1);
-        CHECK(found_gate_layouts[0].num_cells() == 14);
-        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::cell_type::LOGIC);
-
-        // using cube coordinates
-        const auto                lyt_in_cube_coord = convert_layout_to_fiction_coordinates<cube_layout>(lyt);
-        const design_gates_params params_cube{
-            .operational_params =
-                is_operational_params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT},
-            .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-            .canvas                 = {{10, 4, 0}, {10, 4, 0}},
-            .number_of_canvas_sidbs = 1};
-
-        const auto found_gate_layouts_cube =
-            design_gates(lyt_in_cube_coord, std::vector<tt>{create_xnor_tt()}, params_cube);
-
-        REQUIRE(found_gate_layouts_cube.size() == 1);
-        CHECK(found_gate_layouts_cube[0].num_cells() == 14);
-        CHECK(found_gate_layouts_cube[0].get_cell_type({10, 8}) == siqad_layout::technology::cell_type::LOGIC);
-
-        // using offset coordinates
-        const auto                lyt_in_offset_coord = convert_layout_to_fiction_coordinates<offset_layout>(lyt);
-        const design_gates_params params_offset{
-            .operational_params =
-                is_operational_params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT},
-            .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-            .canvas                 = {{10, 4, 0}, {10, 4, 0}},
-            .number_of_canvas_sidbs = 1};
-
-        const auto found_gate_layouts_offset =
-            design_gates(lyt_in_offset_coord, std::vector<tt>{create_xnor_tt()}, params_offset);
-
-        REQUIRE(found_gate_layouts_offset.size() == 1);
-        CHECK(found_gate_layouts_offset[0].num_cells() == 14);
-        CHECK(found_gate_layouts_offset[0].get_cell_type({10, 8}) == offset_layout::technology::cell_type::LOGIC);
+        CHECK(found_gate_layouts[0].num_dots() == 14);
+        CHECK(found_gate_layouts[0].get_dot_tag({10, 4, 0}) == dot_tag::LOGIC);
     }
     SECTION("Four cells in canvas, design all gates with one SiDB in the canvas")
     {
@@ -222,7 +184,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     SECTION("Occupied canvas sites are excluded from exhaustive combinations")
     {
         auto occupied_lyt = lyt;
-        occupied_lyt.assign_cell_type({10, 4, 0}, sidb_technology::cell_type::LOGIC);
+        occupied_lyt.assign_sidb({10, 4, 0}, dot_tag::LOGIC);
 
         const auto params = design_gates_params{
             .operational_params =
@@ -240,20 +202,20 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         for (const auto& gate : found_gate_layouts)
         {
-            CHECK(gate.num_cells() == occupied_lyt.num_cells() + 1);
+            CHECK(gate.num_dots() == occupied_lyt.num_dots() + 1);
         }
         // This canvas yields at most three candidates; use digest buckets if the case grows.
         for (std::size_t i = 0; i < found_gate_layouts.size(); ++i)
         {
             for (std::size_t j = i + 1; j < found_gate_layouts.size(); ++j)
             {
-                CHECK(!are_cell_layouts_identical(found_gate_layouts[i], found_gate_layouts[j]));
+                CHECK(found_gate_layouts[i] != found_gate_layouts[j]);
             }
         }
     }
     SECTION("Random design samples only available canvas sites")
     {
-        auto sparse_lyt = to_sidb_layout(lyt);
+        auto sparse_lyt = lyt;
         sparse_lyt.assign_defect({11, 4, 0}, defect{defect_type::DB, 0});
         sparse_lyt.assign_defect({12, 4, 0}, defect{defect_type::DB, 0});
         sparse_lyt.assign_defect({13, 4, 0}, defect{defect_type::DB, 0});
@@ -271,7 +233,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         CHECK(stats.number_of_layouts == 1);
         REQUIRE(found_gate_layouts.size() == 1);
-        CHECK(found_gate_layouts.front().get_dot_tag({10, 4, 0}) == sidb_technology::cell_type::LOGIC);
+        CHECK(found_gate_layouts.front().get_dot_tag({10, 4, 0}) == dot_tag::LOGIC);
         CHECK(found_gate_layouts.front().defects() == sparse_lyt.defects());
     }
     SECTION("one SiDB in the canvas, terminate after first solution is found, QuickExact")
@@ -289,8 +251,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         const auto found_gate_layouts = design_gates(lyt, std::vector<tt>{create_xnor_tt()}, params, &stats);
 
         REQUIRE(found_gate_layouts.size() == 1);
-        CHECK(found_gate_layouts[0].num_cells() == 14);
-        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::cell_type::LOGIC);
+        CHECK(found_gate_layouts[0].num_dots() == 14);
+        CHECK(found_gate_layouts[0].get_dot_tag({10, 4, 0}) == dot_tag::LOGIC);
         CHECK(mockturtle::to_seconds(stats.time_total) > 0.0);
         CHECK(stats.sim_engine == engine::QUICKEXACT);
     }
@@ -309,8 +271,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         const auto found_gate_layouts = design_gates(lyt, std::vector<tt>{create_xnor_tt()}, params, &stats);
 
         REQUIRE(found_gate_layouts.size() == 1);
-        CHECK(found_gate_layouts[0].num_cells() == 14);
-        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::cell_type::LOGIC);
+        CHECK(found_gate_layouts[0].num_dots() == 14);
+        CHECK(found_gate_layouts[0].get_dot_tag({10, 4, 0}) == dot_tag::LOGIC);
         CHECK(mockturtle::to_seconds(stats.time_total) > 0.0);
         CHECK(stats.sim_engine == engine::QUICKSIM);
     }
