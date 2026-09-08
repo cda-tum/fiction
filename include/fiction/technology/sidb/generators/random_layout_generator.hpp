@@ -23,7 +23,6 @@
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp"
 #include "fiction/technology/sidb/technology.hpp"
-#include "fiction/traits.hpp"
 
 #include <cstdint>
 #include <optional>

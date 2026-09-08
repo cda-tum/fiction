@@ -24,7 +24,6 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/technology.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
@@ -741,7 +740,7 @@ class design_gates_impl
         result = p.run_quickcell();
     }
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }

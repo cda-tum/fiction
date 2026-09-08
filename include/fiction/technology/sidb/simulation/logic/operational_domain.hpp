@@ -409,8 +409,8 @@ struct operational_domain_params
      * distance from 1.0 to 10.0 in steps of 0.1.
      */
     std::vector<operational_domain_value_range> sweep_dimensions{
-        operational_domain_value_range{sweep_parameter::EPSILON_R},
-        operational_domain_value_range{sweep_parameter::LAMBDA_TF}};
+        operational_domain_value_range{.dimension = sweep_parameter::EPSILON_R},
+        operational_domain_value_range{.dimension = sweep_parameter::LAMBDA_TF}};
     /**
      * @brief Number of worker threads to distribute the parameter points over.
      *
@@ -2079,7 +2079,7 @@ operational_domain_grid_search(const layout& lyt, const std::vector<kitty::dynam
 
     const auto result = p.grid_search();
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -2121,7 +2121,7 @@ operational_domain_random_sampling(const layout& lyt, const std::vector<kitty::d
 
     const auto result = p.random_sampling(samples);
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -2174,7 +2174,7 @@ operational_domain_flood_fill(const layout& lyt, const std::vector<kitty::dynami
 
     const auto result = p.flood_fill(samples);
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -2225,7 +2225,7 @@ operational_domain_contour_tracing(const layout& lyt, const std::vector<kitty::d
     fiction::sidb::simulation::logic::detail::operational_domain_impl<operational_domain> p{lyt, spec, params, st};
     const auto result = p.contour_tracing(samples);
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -2269,7 +2269,7 @@ critical_temperature_domain_grid_search(const layout& lyt, const std::vector<kit
 
     const auto result = p.grid_search();
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -2311,7 +2311,7 @@ critical_temperature_domain_random_sampling(const layout& lyt, const std::vector
 
     const auto result = p.random_sampling(samples);
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -2360,7 +2360,7 @@ critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<kitt
 
     const auto result = p.flood_fill(samples);
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -2411,7 +2411,7 @@ critical_temperature_domain_contour_tracing(const layout& lyt, const std::vector
                                                                                                      st};
     const auto result = p.contour_tracing(samples);
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -2615,3 +2615,9 @@ struct tuple_element<I, fiction::sidb::simulation::logic::parameter_point>
 };
 
 }  // namespace std
+
+// Sphinx cannot parse designated initializers. Keep this directive outside the binding docstring.
+/**
+ * @var fiction::sidb::simulation::logic::operational_domain_params::sweep_dimensions
+ * @hideinitializer
+ */

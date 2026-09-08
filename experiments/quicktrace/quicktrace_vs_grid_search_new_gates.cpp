@@ -16,6 +16,7 @@
  */
 
 #include "fiction/synthesis/truth_tables.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/generators/design_gates.hpp"
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
@@ -66,13 +67,13 @@ int main()  // NOLINT
         fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", folder));
 
     const design_gates_params params_2_in_1_out{
-        .operational_params     = is_operational_params{simulation_parameters{2, -0.32}},
+        .operational_params     = is_operational_params{.sim_params = simulation_parameters{2, -0.32}},
         .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
         .canvas                 = {{14, 12, 0}, {24, 23, 0}},
         .number_of_canvas_sidbs = 3};
 
     const auto                  sidb_sim = simulation_parameters{2, -0.32, 5.6, 5.0};
-    const is_operational_params is_op_params{sidb_sim};
+    const is_operational_params is_op_params{.sim_params = sidb_sim};
 
     // for this experiment, we use a stray SiDB defect
     const auto stray_db = defect{defect_type::DB, -1, 4.1, 1.8};

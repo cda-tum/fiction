@@ -480,7 +480,7 @@ class is_operational_impl
                 return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
             }
 
-            if (kitty::get_bit(truth_table[output], input_pattern))
+            if (kitty::get_bit(truth_table[output], input_pattern) != 0u)
             {
                 if (!encodes_bit_one(cd, output_bdl_pairs[output], output_bdl_wires[output].port))
                 {
@@ -917,12 +917,12 @@ class is_operational_impl
                                                                const uint64_t current_input_index) const noexcept
     {
         return std::ranges::any_of(input_bdl_wires | std::views::reverse,
-                                   [this, &cd, &current_input_index, i = 0u](const auto& wire) mutable
+                                   [&cd, &current_input_index, i = 0u](const auto& wire) mutable
                                    {
                                        const auto current_bit_set = (current_input_index & (uint64_t{1} << i++)) != 0;
 
                                        return std::ranges::any_of(wire.pairs,
-                                                                  [this, &cd, current_bit_set, &wire](const auto& bdl)
+                                                                  [&cd, current_bit_set, &wire](const auto& bdl)
                                                                   {
                                                                       if (bdl.type == dot_tag::INPUT)
                                                                       {
@@ -950,7 +950,7 @@ class is_operational_impl
         {
             for (const auto& bdl : output_bdl_wires[i].pairs)
             {
-                if (kitty::get_bit(truth_table[i], current_input_index))
+                if (kitty::get_bit(truth_table[i], current_input_index) != 0u)
                 {
                     if (!encodes_bit_one(cd, bdl, output_bdl_wires[i].port))
                     {

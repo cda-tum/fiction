@@ -21,7 +21,6 @@
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/domain.hpp"
 #include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
-#include "fiction/types.hpp"
 
 #include <cstdint>
 

@@ -66,11 +66,11 @@ class gate_design_exception : public std::exception
      * @param spec The truth table associated with the error.
      * @param portlist The port list associated with the error.
      */
-    explicit gate_design_exception(const tile<GateLyt>& ti, const kitty::dynamic_truth_table& spec,
+    explicit gate_design_exception(const tile<GateLyt>& ti, kitty::dynamic_truth_table spec,
                                    const fcn::port_list<fcn::port_direction>& portlist) :
             std::exception(),
             error_tile{ti},
-            truth_table{spec},
+            truth_table{std::move(spec)},
             p{portlist}
     {}
     /**

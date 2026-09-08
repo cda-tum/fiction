@@ -33,7 +33,7 @@
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
-#include <lorina/lorina.hpp>
+#include <lorina/verilog.hpp>
 #include <mockturtle/algorithms/cut_rewriting.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
