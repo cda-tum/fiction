@@ -34,7 +34,7 @@ enum class charge_state : int8_t
     NEGATIVE = -1,
     NEUTRAL  = 0,
     POSITIVE = 1,
-    NONE     = 127  // assigned when layout cell is empty
+    NONE     = 127  // assigned when a lattice site is empty
 };
 /**
  * Charge states of SiDBs for the context of base 2 simulation.

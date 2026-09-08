@@ -16,6 +16,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Added Python source coverage, including package-root modules, and separate C++ checks.
 
+- Data structures:
+
+  - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
+    `sidb::layout` stores tagged dots and defects without templates. `to_sidb_layout` converts
+    Cartesian cell-level layouts
+
 - Documentation:
 
   - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
@@ -23,10 +29,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added synchronized C++/Python tabs and code copy buttons.
   - Added `llms.txt`, `llms-full.txt`, and Markdown exports of documentation pages.
 
+- I/O:
+  - `read_sqd_layout`, `write_sqd_layout`, `write_sidb_layout_svg`, `read_surface_defects`, and
+    `print_sidb_layout` accept and produce `sidb::layout`; the SQD reader takes the lattice from the file
+    instead of a template parameter
+
 - Python bindings:
 
   - Added directory-based test markers, including `pytest -m simulation`.
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
+  - `lattice`, `lattice_site`, `sidb_layout` (the lattice-based layout), `read_sqd_layout`,
+    `read_surface_defects`, and the `sidb_layout` overloads of `write_sqd_layout` and
+    `write_sidb_layout_svg`
 
 - Tooling:
 
@@ -39,6 +53,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Clang-Tidy skips Python-only changes in the bindings tree.
   - PyPI releases now use trusted publishing instead of an API token.
   - Renovate now waits three days for dated dependency releases before updating.
+
+- Data structures:
+
+  - SiDB layouts use dot operations and `dot_tag` for dot roles. `assign_sidb` defaults to the
+    `NORMAL` tag. Lattice-site constructors
+    take `int32_t` coordinates and an `int8_t` basis index.
 
 - Documentation:
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
@@ -175,6 +195,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** The Python class `sidb_layout` now names the lattice-based `sidb::layout`. The Cartesian
+    SiDB cell-level layout is `sidb_cell_level_layout`
+
   - **Breaking:** `critical_temperature_stats.is_ground_state_transparent` is renamed
     `energy_between_ground_state_and_first_erroneous`, the member it always exposed
 
@@ -185,25 +208,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
 
 - Continuous integration:
-
   - Canceled CI runs now stop optional summary jobs.
+  - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
+  - Change detection now allows five minutes for runner setup and file comparisons.
+
+- Data structures:
+  - Lattice sites now reject invalid basis indices in construction, geometry queries, and cube conversion.
+  - SiDB row conversion and area iteration now handle coordinate limits without signed overflow;
+    defect influence clips to representable sites, and cube conversion rejects rows outside its range
+  - Lattice-site arithmetic now rejects coordinate overflow; dot insertion preserves the layout on
+    allocation failure, and moving a defect from an empty site leaves the target unchanged
+  - Moving a defect now preserves its target when the site arguments refer to stored defects.
+  - Corrected the SiDB pointer aliases in `types.hpp` and checked their target types.
 
 - Documentation:
 
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
   - Restored Python API entries and method signatures, and formatted generated docstrings.
+  - SiDB reader documentation now lists every overload without ambiguous signatures.
 
 - I/O:
 
   - QCA SVG output now uses valid text colors in simple tile mode.
-
-- `types.hpp`: `sidb_111_cell_clk_lyt_siqad_ptr`, `cds_sidb_cell_clk_lyt_cube`,
-  `cds_sidb_111_cell_clk_lyt_siqad_ptr`, and `cds_sidb_111_cell_clk_lyt_cube_ptr` pointed at
-  the wrong type; a `static_assert` per `*_ptr` alias pins each to the type its name says
+  - SQD readers now reject fractional coordinates and trailing text in numeric attributes.
+  - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites
+  - SQD cell-level output now propagates exceptions from cell and defect formatting
+  - `write_sidb_layout_svg` now propagates allocation errors when setting colors and formatting lattice points
+  - SVG and text output now reject padding outside the lattice-site coordinate range
+  - SQD readers now reject empty defect labels, invalid numeric values, and invalid Coulomb parameters.
+    SQD output escapes lattice names, and defect-matrix readers report oversized indices with the documented exception
 
 - Python bindings:
 
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
+  - Exposed the defect-matrix reader exceptions at the package root.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector
   - `write_sqd_sim_result` accepts the `sidb_simulation_result_100` and `_111` results

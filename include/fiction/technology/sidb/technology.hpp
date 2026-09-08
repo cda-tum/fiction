@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Silicon Dangling Bond technology tag and its cell types.
+ * @brief SiDB dot tags and the Cartesian cell-level technology interface.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -22,36 +22,41 @@ namespace fiction::sidb
 {
 
 /**
+ * Tags describing the role of a silicon dangling bond. EMPTY denotes an unoccupied site.
+ */
+enum class dot_tag : uint8_t
+{
+    /**
+     * Unoccupied lattice site.
+     */
+    EMPTY = ' ',
+    /**
+     * Untagged dot.
+     */
+    NORMAL = 'x',
+    /**
+     * Primary input dot.
+     */
+    INPUT = 'i',
+    /**
+     * Primary output dot.
+     */
+    OUTPUT = 'o',
+    /**
+     * Logic dot (e.g., a canvas SiDB).
+     */
+    LOGIC = 'l'
+};
+
+/**
  * Silicon Dangling Bond (SiDB) technology implementation of the FCN concept.
  */
 struct sidb_technology
 {
     /**
-     * Possible types of SiDB cells.
+     * Dot tags used by the Cartesian cell-level layout interface.
      */
-    enum class cell_type : uint8_t
-    {
-        /**
-         * Symbol used for empty SiDB cells.
-         */
-        EMPTY = ' ',
-        /**
-         * Symbol used for normal SiDB cells.
-         */
-        NORMAL = 'x',
-        /**
-         * Symbol used for input SiDB cells.
-         */
-        INPUT = 'i',
-        /**
-         * Symbol used for output SiDB cells.
-         */
-        OUTPUT = 'o',
-        /**
-         * Symbol used for logic SiDB cells (e.g. canvas SiDBs).
-         */
-        LOGIC = 'l'
-    };
+    using cell_type = dot_tag;
 
     /**
      * SiDB cells do not have modes.

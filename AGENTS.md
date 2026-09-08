@@ -362,8 +362,10 @@ imitate.
   - `@author` is `Full Name (handle)`, oldest contributor first, with the file's creator
     at the top. Write the handle without an `@`; Doxygen reports any `@word` it does not
     know as an unknown command. Someone with no GitHub account gets a name-only line.
-  - **Editing a file means adding yourself to its `@author` list**, at the end. Bots and
-    automated formatting runs do not count. `git log --follow -- <file>` gives the
+  - **Human contributors editing a file add themselves to its `@author` list**, at the end.
+    Never add AI tools or models as file authors. Record AI assistance in commit trailers
+    and public disclosures instead. Bots and automated formatting runs do not count.
+    `git log --follow -- <file>` gives the
     existing authors -- never with `--reverse`, which cuts the walk short at the first
     rename and drops everyone from before it.
   - The five people in the C++ history and their handles: Marcel Walter (`marcelwa`), Jan

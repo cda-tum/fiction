@@ -54,7 +54,7 @@ jobs:
   change-detection:
     name: 🕵️ Check
     runs-on: ubuntu-slim
-    timeout-minutes: 1
+    timeout-minutes: 5
     permissions:
       contents: read # required to check out the repository
     outputs:
