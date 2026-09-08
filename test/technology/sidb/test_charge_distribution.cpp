@@ -35,9 +35,9 @@ using namespace fiction::sidb::model;
 TEST_CASE("Charge distribution over a layout", "[charge-distribution]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({3, 1, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 1}, dot_tag::NORMAL);
 
     SECTION("default state")
     {

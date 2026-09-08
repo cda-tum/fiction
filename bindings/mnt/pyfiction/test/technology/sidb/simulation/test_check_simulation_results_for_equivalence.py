@@ -40,8 +40,8 @@ def test_two_sidbs(lat: lattice) -> None:
     """
 
     layout = sidb_layout(lat)
-    layout.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(0, 1, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 1, 1), sidb_dot_tag.NORMAL)
 
     first_result = sidb_simulation_result()
     second_result = sidb_simulation_result()

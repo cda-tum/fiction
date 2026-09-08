@@ -78,7 +78,7 @@ TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]")
 TEST_CASE("ClusterComplete simulation of a single SiDB", "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
     clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32}};
 
@@ -122,10 +122,10 @@ static bool verify_clustercomplete_result_by_charge_indices(const charge_distrib
 TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({2, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({4, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 1, 1}, dot_tag::NORMAL);
 
     SECTION("Base 2")
     {
@@ -223,16 +223,16 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 un
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 6, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 8, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
     clustercomplete_params params{.sim_params = simulation_parameters{2, -0.28}};
 
@@ -258,8 +258,8 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 un
     SECTION("Add SiDBs which are positively charged in the ground state, layout does not fulfill the logic anymore.")
     {
         params.sim_params.base = 3;
-        lyt.assign_dot_tag({15, 2, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({15, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({15, 2, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({15, 2, 0}, dot_tag::NORMAL);
 
         const auto simulation_results = clustercomplete(lyt, params);
         // find the ground state, which is the charge distribution with the lowest energy
@@ -400,7 +400,7 @@ TEST_CASE(
     "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
     const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.25}};
     lyt.assign_defect({1, 2, 0},
                       defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
@@ -415,7 +415,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with one negatively charge def
           "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.25}};
 
@@ -430,7 +430,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with one negatively charge def
           "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
@@ -447,10 +447,10 @@ TEST_CASE("four SiDBs ClusterComplete simulation with one negatively charge defe
           "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({-2, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({0, 1, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.15}};
 
@@ -471,7 +471,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with one highly negatively cha
           "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.1}};
 
@@ -489,7 +489,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with one highly negatively cha
           "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.1}};
 
@@ -507,7 +507,7 @@ TEST_CASE(
     "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.1}};
 
@@ -526,7 +526,7 @@ TEST_CASE(
 TEST_CASE("Single SiDB ClusterComplete simulation with local external potential", "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
     clustercomplete_params params{.sim_params = simulation_parameters{2, -0.25}};
 
@@ -541,7 +541,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with local external potential"
 TEST_CASE("Single SiDB ClusterComplete simulation with local external potential (high)", "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
     clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
@@ -555,7 +555,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with local external potential 
 TEST_CASE("Single SiDB ClusterComplete simulation with global external potential", "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
     clustercomplete_params params{.sim_params = simulation_parameters{2, -0.25}};
     params.global_potential = -0.26;
@@ -570,7 +570,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with global external potential
 TEST_CASE("Single SiDB ClusterComplete simulation with global external potential (high)", "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
     clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
     params.global_potential = -1;
@@ -583,7 +583,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with global external potential
 TEST_CASE("Single SiDB ClusterComplete simulation with global external potential (high, positive)", "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
     clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
     params.global_potential = 1;
@@ -596,8 +596,8 @@ TEST_CASE("Single SiDB ClusterComplete simulation with global external potential
 TEST_CASE("ClusterComplete simulation of a BDL pair", "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 3, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
@@ -628,15 +628,15 @@ TEST_CASE("ClusterComplete simulation of a two-pair BDL wire with one perturber"
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({11, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({13, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({11, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({13, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({17, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({19, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({17, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({19, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
@@ -668,10 +668,10 @@ TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two perturbers
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({15, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({15, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params sim_params{.sim_params = simulation_parameters{3, -0.32}};
 
@@ -693,15 +693,15 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB arrangement", "[clusterc
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({-11, -2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({-10, -1, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({-4, -1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-11, -2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-10, -1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-4, -1, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({-3, -2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({-7, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({-3, -2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-7, 0, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({-7, 1, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({-7, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-7, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({-7, 3, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params sim_params{.sim_params = simulation_parameters{3, -0.32}};
 
@@ -728,17 +728,17 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, c
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({16, 1, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
 
     const clustercomplete_params sim_params{.sim_params = simulation_parameters{2, -0.28}};
 
@@ -766,16 +766,16 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 an
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 6, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 8, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
     clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
     params.local_external_potential.insert({{{6, 2, 0}, -0.5}});
@@ -800,16 +800,16 @@ TEST_CASE("ClusterComplete simulation  of a Y-shape SiDB OR gate with input 01 a
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 6, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 8, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
     clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
     params.global_potential = -0.5;
@@ -834,16 +834,16 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 an
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 6, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 8, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
     clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
     params.global_potential = -2;
@@ -867,10 +867,10 @@ TEST_CASE("ClusterComplete simulation of four SiDBs (far away)", "[clustercomple
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
 
@@ -889,7 +889,7 @@ TEST_CASE("ClusterComplete with one SiDB and one negatively charged defect in pr
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
     lyt.assign_defect({-1, -1, 1},
@@ -907,10 +907,10 @@ TEST_CASE("ClusterComplete simulation  of four SiDBs (far away) with one negativ
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
     lyt.assign_defect({1, 0, 0},
@@ -931,10 +931,10 @@ TEST_CASE("ClusterComplete simulation of four SiDBs (far away) with two negative
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
 
@@ -961,10 +961,10 @@ TEST_CASE("ClusterComplete simulation of four SiDBs (far away) with one negative
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
 
@@ -988,10 +988,10 @@ TEST_CASE("three DBs next to each other", "[clustercomplete]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({-1, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 3, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
@@ -1013,10 +1013,10 @@ TEST_CASE("three DBs next to each other, small mu-", "[clustercomplete]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({-1, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 3, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.8}};
 
@@ -1034,10 +1034,10 @@ TEST_CASE("four DBs next to each other, small mu-", "[clustercomplete]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 3, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
@@ -1055,13 +1055,13 @@ TEST_CASE("seven DBs next to each other, small mu-", "[clustercomplete]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({4, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 3, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
@@ -1077,15 +1077,15 @@ TEST_CASE("7 DBs next to each other (positively charged DBs occur)", "[clusterco
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
@@ -1099,15 +1099,15 @@ TEST_CASE("7 DBs next to each other | only one physically valid charge distribut
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({-6, 1, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 4, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({-6, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 4, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({4, 6, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({-8, -3, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({-1, -1, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({0, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-8, -3, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({-1, -1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 2, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
@@ -1120,10 +1120,10 @@ TEST_CASE("4 DBs next to each other (positively charged DBs occur)", "[clusterco
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.1}};
 
@@ -1136,12 +1136,12 @@ TEST_CASE("6 DBs next to each other (positively charged DBs occur)", "[clusterco
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({-1, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
@@ -1156,10 +1156,10 @@ TEST_CASE("4 DBs close to each other", "[clustercomplete]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 1}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
@@ -1173,9 +1173,9 @@ TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[clusterco
 
     layout lyt{};
 
-    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
@@ -1191,25 +1191,25 @@ TEST_CASE("13 DBs which are all negatively charged", "[clustercomplete]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({26, 10, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({23, 19, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({26, 10, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({23, 19, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({0, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({38, 10, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({38, 10, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({11, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({13, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({11, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({13, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({40, 19, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 9, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({40, 19, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 9, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({19, 16, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 8, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({19, 16, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 8, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 15, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({39, 9, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 15, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({39, 9, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({30, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 15, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
@@ -1230,19 +1230,19 @@ TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]")
     layout lyt{};
 
     // three BDL pairs with one perturber
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({15, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({15, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({19, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({22, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({19, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({22, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({26, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({29, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({26, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({29, 0, 0}, dot_tag::NORMAL);
 
     // clustercomplete parameters are initialized
     clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
@@ -1452,8 +1452,8 @@ TEST_CASE("ClusterComplete simulation of two SiDBs placed directly next to each 
           "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({1, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 3, 0}, dot_tag::NORMAL);
 
     SECTION("Base 2")
     {
@@ -1477,17 +1477,17 @@ TEST_CASE("ClusterComplete simulation of two SiDBs placed directly next to each 
 TEST_CASE("ClusterComplete simulation of positively charged SiDBs", "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({11, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({11, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({11, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({11, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
@@ -1502,9 +1502,9 @@ TEST_CASE("Special test cases", "[clustercomplete]")
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({2, 1, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({1, 1, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({1, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({1, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({1, 2, 0}, dot_tag::NORMAL);
 
         const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
@@ -1515,26 +1515,26 @@ TEST_CASE("Special test cases", "[clustercomplete]")
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({22, 1, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({24, 2, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({23, 3, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({13, 4, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({10, 4, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({1, 5, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({0, 6, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({1, 6, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({24, 6, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({4, 6, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({3, 7, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({0, 8, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({1, 8, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({9, 9, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({24, 9, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({22, 9, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({13, 10, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 10, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({1, 11, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({17, 11, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({22, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 2, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({23, 3, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({13, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({10, 4, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({1, 5, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({1, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({4, 6, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({3, 7, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 8, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({1, 8, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({9, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({22, 9, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({13, 10, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 10, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({1, 11, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({17, 11, 1}, dot_tag::NORMAL);
 
         const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
@@ -1546,10 +1546,10 @@ TEST_CASE("Special test cases", "[clustercomplete]")
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({3, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({0, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 1, 0}, dot_tag::NORMAL);
 
         const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
@@ -1561,10 +1561,10 @@ TEST_CASE("Special test cases", "[clustercomplete]")
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({0, 1, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({9, 3, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({2, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({9, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 4, 0}, dot_tag::NORMAL);
 
         const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
@@ -1577,11 +1577,11 @@ TEST_CASE("Special test cases", "[clustercomplete]")
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({2, 2, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({2, 3, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({7, 3, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({7, 4, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 4, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 2, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({7, 3, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({7, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 4, 1}, dot_tag::NORMAL);
 
         const result& cc_res = clustercomplete(lyt);
 
@@ -1592,26 +1592,26 @@ TEST_CASE("Special test cases", "[clustercomplete]")
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({3, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({13, 0, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({5, 1, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({22, 3, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({11, 5, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({2, 6, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({4, 6, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({23, 7, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({16, 8, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 8, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({15, 9, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({1, 10, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({12, 10, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 10, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({9, 11, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({24, 11, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({10, 11, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({13, 12, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({24, 12, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({13, 0, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({5, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({22, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({11, 5, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 6, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({4, 6, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({23, 7, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({16, 8, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 8, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({15, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({1, 10, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 10, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 10, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({9, 11, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 11, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({10, 11, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({13, 12, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 12, 0}, dot_tag::NORMAL);
 
         const simulation_parameters params{3, -0.32, 5.6, 5.0};
 
@@ -1672,26 +1672,26 @@ TEST_CASE("Special test cases", "[clustercomplete]")
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({11, 1, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({15, 1, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({5, 2, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({17, 2, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({20, 3, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({13, 3, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({9, 4, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({2, 5, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({17, 5, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({2, 6, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({9, 6, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({10, 7, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 7, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({17, 9, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({11, 9, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({12, 9, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({5, 10, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({5, 10, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({7, 11, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({13, 11, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({11, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({15, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({5, 2, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({17, 2, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({20, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({13, 3, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({9, 4, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 5, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({17, 5, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 6, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({9, 6, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({10, 7, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 7, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({17, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({11, 9, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 9, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({5, 10, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({5, 10, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({7, 11, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({13, 11, 1}, dot_tag::NORMAL);
 
         const simulation_parameters params{2, -0.32};
 
@@ -1707,18 +1707,18 @@ TEST_CASE("Special test cases", "[clustercomplete]")
 TEST_CASE("ClusterComplete gate simulation of Si-111 surface", "[clustercomplete]")
 {
     layout lyt{lattice::si_111_1x1()};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 1, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 1, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({4, 8, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({4, 10, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 8, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 10, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({4, 14, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 14, 0}, dot_tag::NORMAL);
 
     const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
 
@@ -1780,8 +1780,8 @@ TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[clustercomp
     SECTION("10 input applied")
     {
         auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::EMPTY);
-        lyt.assign_dot_tag({23, 1, 1}, dot_tag::EMPTY);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::EMPTY);
+        lyt.assign_sidb({23, 1, 1}, dot_tag::EMPTY);
 
         const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
 

@@ -33,8 +33,8 @@ def test_write_location_and_ground_state(tmp_path: Path) -> None:
     """
 
     layout = sidb_layout()
-    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
 
     result = quickexact(layout, quickexact_params())
     assert result.charge_distributions

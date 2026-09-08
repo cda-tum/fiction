@@ -23,9 +23,9 @@ def three_sidbs() -> sidb_layout:
     """
 
     layout = sidb_layout()
-    layout.assign_dot_tag(lattice_site(3, 1, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(3, 1, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
     return layout
 
 

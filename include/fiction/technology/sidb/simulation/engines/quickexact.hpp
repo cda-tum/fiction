@@ -232,7 +232,7 @@ class quickexact_impl
 
         for (const auto i : preassigned_negative_sidbs)
         {
-            reduced.assign_dot_tag(sites[i], dot_tag::EMPTY);
+            reduced.assign_sidb(sites[i], dot_tag::EMPTY);
             // IMPORTANT: The pre-assigned negatively charged SiDBs (they have to be negatively charged to
             // fulfill the population stability) are considered as negatively charged defects in the layout.
             reduced.assign_defect(sites[i], model::defect{model::defect_type::UNKNOWN, -1, params.sim_params.epsilon_r,

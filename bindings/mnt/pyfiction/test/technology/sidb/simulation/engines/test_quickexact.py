@@ -33,9 +33,9 @@ def test_three_sidbs() -> None:
     """QuickExact simulates a three-SiDB layout."""
 
     layout = sidb_layout()
-    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
 
     params = quickexact_params()
     params.simulation_parameters.base = 2
@@ -66,10 +66,10 @@ def test_perturber_and_sidb_pair_111() -> None:
     """QuickExact finds the H-Si(111)-1x1 ground state."""
 
     layout = sidb_layout(lattice.si_111_1x1())
-    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
 
     params = quickexact_params()
     params.simulation_parameters.base = 2
@@ -116,11 +116,11 @@ def test_simulate_all_inputs_of_and_gate(resources_dir: Path) -> None:
 
     for left, right in [(left_b, right_a), (left_b, right_b), (left_a, right_a), (left_a, right_b)]:
         # delete one SiDB of each input BDL pair to set the input pattern
-        and_gate.assign_dot_tag(left, sidb_dot_tag.EMPTY)
-        and_gate.assign_dot_tag(right, sidb_dot_tag.EMPTY)
+        and_gate.assign_sidb(left, sidb_dot_tag.EMPTY)
+        and_gate.assign_sidb(right, sidb_dot_tag.EMPTY)
 
         assert len(quickexact(and_gate, quickexact_parameter).charge_distributions) > 0
 
         # restore the original layout
-        and_gate.assign_dot_tag(left, sidb_dot_tag.INPUT)
-        and_gate.assign_dot_tag(right, sidb_dot_tag.INPUT)
+        and_gate.assign_sidb(left, sidb_dot_tag.INPUT)
+        and_gate.assign_sidb(right, sidb_dot_tag.INPUT)

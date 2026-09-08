@@ -44,9 +44,9 @@ namespace
 layout three_sidbs()
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
     return lyt;
 }
 
@@ -190,9 +190,9 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
     SECTION("three-state detection")
     {
         layout close{};
-        close.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-        close.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
-        close.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
+        close.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+        close.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
+        close.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
 
         const potential_landscape dense{close, simulation_parameters{2, -0.32}};
         detail::simulation_state  state{dense, charge_state::NEGATIVE};
@@ -209,7 +209,7 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
         layout large{};
         for (int32_t x = 0; x < 64; ++x)
         {
-            large.assign_dot_tag({x, 0, 0}, dot_tag::NORMAL);
+            large.assign_sidb({x, 0, 0}, dot_tag::NORMAL);
         }
 
         const potential_landscape      large_landscape{large, simulation_parameters{2, -0.32}};

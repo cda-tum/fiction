@@ -144,9 +144,9 @@ TEST_CASE("Print SiDBs with a charge distribution", "[print-sidb-layout]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({4, 0, 1}, dot_tag::OUTPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 1}, dot_tag::OUTPUT);
     lyt.assign_defect({6, 0, 1}, defect{defect_type::UNKNOWN, -1});
 
     charge_distribution cd{lyt, charge_state::NEGATIVE};
@@ -166,9 +166,9 @@ TEST_CASE("Print SiDBs with a charge distribution", "[print-sidb-layout]")
 TEST_CASE("test_print_sidb_layout rejects mismatched distribution sites", "[sidb-distribution-sites]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
     layout shifted{};
-    shifted.assign_dot_tag({1, 0}, dot_tag::NORMAL);
+    shifted.assign_sidb({1, 0}, dot_tag::NORMAL);
     const charge_distribution cd{shifted};
     std::stringstream         os{};
     CHECK_THROWS_AS(print_sidb_layout(os, lyt, cd), std::invalid_argument);

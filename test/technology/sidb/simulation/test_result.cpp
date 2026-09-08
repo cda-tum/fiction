@@ -43,9 +43,9 @@ TEST_CASE("Determine the groundstate from simulation results", "[sidb-simulation
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({5, 2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({5, 2, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({5, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({5, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({5, 2, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({5, 3, 0}, dot_tag::NORMAL);
 
         const potential_landscape land{lyt};
 
@@ -73,8 +73,8 @@ TEST_CASE("Determine the groundstate from simulation results", "[sidb-simulation
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({5, 2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({5, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
 
         const potential_landscape land{lyt};
 
@@ -116,12 +116,12 @@ TEST_CASE("Determine the groundstate from simulation results for Si-111 lattice 
     {
         layout lyt{lattice::si_111_1x1()};
 
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({0, 1, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({2, 1, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({4, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({4, 1, 1}, dot_tag::NORMAL);
 
         const simulation_parameters params{2, -0.30};
         const auto                  results = exhaustive_ground_state_simulation(lyt, params);
@@ -138,13 +138,13 @@ TEST_CASE("Determine the groundstate of a two BDL pair wire with input 1 applied
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 

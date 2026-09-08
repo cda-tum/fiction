@@ -750,10 +750,10 @@ TEST_CASE("Generate SVG for an sidb::layout with a charge distribution", "[write
 {
     sidb::layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 1, 1}, dot_tag::NORMAL);
 
     sidb::charge_distribution cd{lyt};
     cd.assign_charge_state({0, 0, 0}, charge_state::POSITIVE);
@@ -782,9 +782,9 @@ TEST_CASE("Generate SVG for an sidb::layout with a charge distribution", "[write
 TEST_CASE("test_write_sidb_layout_svg rejects mismatched distribution sites", "[sidb-distribution-sites]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
     layout shifted{};
-    shifted.assign_dot_tag({1, 0}, dot_tag::NORMAL);
+    shifted.assign_sidb({1, 0}, dot_tag::NORMAL);
     const charge_distribution cd{shifted};
     std::stringstream         os{};
     CHECK_THROWS_AS(write_sidb_layout_svg(lyt, cd, os), std::invalid_argument);

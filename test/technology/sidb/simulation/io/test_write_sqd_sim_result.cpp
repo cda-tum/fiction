@@ -297,15 +297,15 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
 
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({11, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({13, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({11, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({13, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({17, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({19, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({17, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({19, 0, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 
@@ -361,9 +361,9 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 
     layout lyt{};
 
-    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{3, -0.32};
 
@@ -411,9 +411,9 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 TEST_CASE("test_write_sqd_sim_result rejects mismatched distribution sites", "[sidb-distribution-sites]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
     layout shifted{};
-    shifted.assign_dot_tag({1, 0}, dot_tag::NORMAL);
+    shifted.assign_sidb({1, 0}, dot_tag::NORMAL);
     const charge_distribution cd{shifted};
     result                    res{};
     res.lyt                  = lyt;

@@ -28,9 +28,9 @@ from mnt.pyfiction import (
 
 def three_sidbs() -> sidb_layout:
     layout = sidb_layout()
-    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(5, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(7, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(5, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(7, 0, 0), sidb_dot_tag.NORMAL)
     return layout
 
 
@@ -102,8 +102,8 @@ def test_external_potentials():
 
 def test_charged_defect():
     layout = sidb_layout()
-    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_defect(lattice_site(1, 1, 0), sidb_defect(sidb_defect_type.SI_VACANCY, -1, 5.6, 5.0))
     layout.assign_defect(lattice_site(6, 1, 0), sidb_defect(sidb_defect_type.SILOXANE, 0))  # neutral, does not enter
 
@@ -140,8 +140,8 @@ def test_input_boundaries() -> None:
             landscape.effective_charge_transition_thresholds(index)
     landscape = potential_landscape(three_sidbs())
     other = three_sidbs()
-    other.assign_dot_tag(lattice_site(7, 0, 0), sidb_dot_tag.EMPTY)
-    other.assign_dot_tag(lattice_site(8, 0, 0), sidb_dot_tag.NORMAL)
+    other.assign_sidb(lattice_site(7, 0, 0), sidb_dot_tag.EMPTY)
+    other.assign_sidb(lattice_site(8, 0, 0), sidb_dot_tag.NORMAL)
     for cd in (charge_distribution(), charge_distribution(other)):
         with pytest.raises(ValueError, match="SiDB sites"):
             landscape.local_internal_potentials(cd)

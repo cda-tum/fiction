@@ -42,9 +42,9 @@ using namespace Catch::Matchers;
 TEST_CASE("Potential landscape of a three-SiDB layout", "[potential-landscape]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
 
     const simulation_parameters params{2, -0.32};
     const potential_landscape   land{lyt, params};
@@ -113,8 +113,8 @@ TEST_CASE("Potential landscape of a three-SiDB layout", "[potential-landscape]")
 TEST_CASE("Potential landscape with a charged defect", "[potential-landscape]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
     lyt.assign_defect({1, 1, 0}, defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});
     lyt.assign_defect({6, 1, 0}, defect{defect_type::SILOXANE, 0});  // neutral type, does not enter
 
@@ -135,12 +135,12 @@ TEST_CASE("Potential landscape with a charged defect", "[potential-landscape]")
 TEST_CASE("Potential-landscape input boundaries", "[potential-landscape]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0}, dot_tag::NORMAL);
     const potential_landscape land{lyt};
     layout                    other{};
-    other.assign_dot_tag({0, 0}, dot_tag::NORMAL);
-    other.assign_dot_tag({6, 0}, dot_tag::NORMAL);
+    other.assign_sidb({0, 0}, dot_tag::NORMAL);
+    other.assign_sidb({6, 0}, dot_tag::NORMAL);
     const std::vector<double> potentials(2, 0.0);
     for (const auto& invalid : {charge_distribution{}, charge_distribution{other}})
     {
@@ -185,7 +185,7 @@ TEST_CASE("Potential landscapes reject invalid basis indices without pair intera
     invalid.z = 2;
     SECTION("one SiDB")
     {
-        lyt.assign_dot_tag(invalid, dot_tag::NORMAL);
+        lyt.assign_sidb(invalid, dot_tag::NORMAL);
     }
     SECTION("one charged defect")
     {

@@ -45,16 +45,16 @@ TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 01", "[si
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 6, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 8, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
     // check for spooky non-determinism in alglib
     for (int8_t i = 0; i < 100; ++i)
@@ -88,17 +88,17 @@ TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated groups of SiD
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({50, -11, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({54, -9, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({50, -11, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({54, -9, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, -5, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, -3, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, -5, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, -3, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({-2, -2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, -2, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({-2, -2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, -2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({53, 10, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({48, 13, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({53, 10, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({48, 13, 1}, dot_tag::NORMAL);
 
     const sidb::simulation::engines::detail::binary_cluster_hierarchy_node& h =
         sidb::simulation::engines::detail::cluster_hierarchy(lyt);
