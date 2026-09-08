@@ -24,12 +24,15 @@
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/detail/simulation_state.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+#include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 
@@ -143,6 +146,20 @@ TEST_CASE("Incomplete BDL wire set is non-operational", "[is-operational]")
 
     CHECK(status == operational_status::NON_OPERATIONAL);
     CHECK(simulator_invocations == 0u);
+}
+
+TEST_CASE("Canvas filtering rejects SiDBs outside the simulation state", "[is-operational]")
+{
+    const auto                  lyt = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
+    const is_operational_params params{};
+    layout                      canvas{};
+    canvas.assign_sidb({1000, 0, 0}, dot_tag::LOGIC);
+
+    const potential_landscape                            landscape{lyt, params.sim_params};
+    sidb::simulation::detail::simulation_state           state{landscape, charge_state::NEGATIVE};
+    sidb::simulation::logic::detail::is_operational_impl implementation{lyt, {create_or_tt()}, params, canvas};
+
+    CHECK_THROWS_AS(implementation.is_physical_validity_feasible(state), std::invalid_argument);
 }
 
 TEST_CASE("SiQAD NAND gate", "[is-operational]")

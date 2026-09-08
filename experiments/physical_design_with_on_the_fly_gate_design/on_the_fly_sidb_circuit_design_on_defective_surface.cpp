@@ -47,6 +47,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <optional>
 #include <string>
 
 using namespace fiction;
@@ -182,9 +183,20 @@ int main()  // NOLINT
             write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // check equivalence
+            if (!st.gate_layout.has_value())
+            {
+                throw std::bad_optional_access{};
+            }
             const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, st.gate_layout.value());
-            const auto eq    = mockturtle::equivalence_checking(*miter);
-            assert(eq.has_value());
+            if (!miter.has_value())
+            {
+                throw std::bad_optional_access{};
+            }
+            const auto eq = mockturtle::equivalence_checking(*miter);
+            if (!eq.has_value())
+            {
+                throw std::bad_optional_access{};
+            }
 
             sidb_circuits_with_defects(benchmark, mockturtle::to_seconds(st.time_total),
                                        st.exact_stats.num_aspect_ratios, *eq, result.num_cells());

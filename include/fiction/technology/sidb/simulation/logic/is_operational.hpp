@@ -577,6 +577,7 @@ class is_operational_impl
      *
      * @param state Simulation state over the layout with the current input pattern; the canvas charges are varied.
      * @return The minimum energy, or `std::nullopt` if no configuration is physically valid.
+     * @throws std::invalid_argument if a canvas SiDB is absent from the state's layout.
      */
     [[nodiscard]] std::optional<double> is_physical_validity_feasible(simulation::detail::simulation_state& state)
     {
@@ -591,7 +592,10 @@ class is_operational_impl
         for (const auto& site : canvas_lyt.sidbs())
         {
             const auto index = lyt.index_of(site);
-            assert(index.has_value() && "canvas SiDB is not part of the layout");
+            if (!index.has_value())
+            {
+                throw std::invalid_argument("canvas SiDB is not part of the layout");
+            }
             canvas.push_back(*index);
         }
 

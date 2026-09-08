@@ -239,6 +239,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - SiDB circuit-design exceptions now copy bounded message views without reading past them.
+  - Canvas filtering now rejects SiDBs missing from the simulation state's layout.
   - Ground State Space reports multiset limits using the potential landscape's charge base.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
   - Operational checks and gate pruning now reject mismatched input counts; band-bending resilience rejects unusable inputs.
@@ -279,6 +281,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
   - Restored Python API entries and method signatures, and formatted generated docstrings.
   - SiDB reader documentation now lists every overload without ambiguous signatures.
+
+- Experiments:
+  - SiDB circuit experiments now reject missing placement and equivalence results before reporting.
 
 - I/O:
 
