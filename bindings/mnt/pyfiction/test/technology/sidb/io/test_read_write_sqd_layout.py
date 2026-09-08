@@ -37,7 +37,7 @@ def test_read_write_sidb_layout(resources_dir: Path, tmp_path: Path) -> None:
     assert lyt.get_lattice() == lattice.si_111_1x1()
     assert lyt.num_dots() > 0
 
-    lyt.assign_dot_tag(lattice_site(-3, 2, 1), sidb_dot_tag.LOGIC)
+    lyt.assign_sidb(lattice_site(-3, 2, 1), sidb_dot_tag.LOGIC)
 
     path = tmp_path / "and.sqd"
     write_sqd_layout(lyt, str(path))

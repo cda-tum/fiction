@@ -3390,7 +3390,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long =
+static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long_long =
 R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
 integer into four parts (from MSB to LSB):
  - 1 bit for the dead indicator - 1 bit for the z position - 31 bit
@@ -15659,13 +15659,15 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_layout_assign_dot_tag =
-R"doc(Assigns a dot tag to a site. Assigning `dot_tag::EMPTY` removes the
-SiDB from the site. Allocation failure leaves the dots unchanged.
+static const char *mkd_doc_fiction_sidb_layout_assign_sidb =
+R"doc(Assigns an SiDB to a lattice site with the given tag, or
+`dot_tag::NORMAL` by default. Reassigning an occupied site updates its
+tag. Assigning `dot_tag::EMPTY` removes the SiDB. Allocation failure
+leaves the dots unchanged.
 
 Args:
     s: Site.
-    tag: Dot tag to assign.
+    tag: Dot tag to assign; defaults to `dot_tag::NORMAL`.
 
 )doc";
 
@@ -18686,7 +18688,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
 state to an 64-bit unsigned integer.
 

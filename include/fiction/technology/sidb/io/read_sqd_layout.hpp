@@ -751,7 +751,7 @@ class sqd_reader
             throw sqd_parsing_error("Error parsing SQD file: no element 'latcoord' in element 'dbdot'");
         }
 
-        lyt.assign_dot_tag(parse_latcoord(latcoord), parse_dot_type(db_dot->FirstChildElement("type")));
+        lyt.assign_sidb(parse_latcoord(latcoord), parse_dot_type(db_dot->FirstChildElement("type")));
     }
     /**
      * Reads a defect with finite, non-negative Coulomb material parameters.

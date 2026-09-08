@@ -127,10 +127,9 @@ layout check_allocation_failures(const layout& original, const std::function<voi
 
 TEST_CASE("Layout updates preserve data when allocation fails", "[layout]")
 {
-    SECTION("cell insertion")
+    SECTION("SiDB insertion")
     {
-        const auto result =
-            check_allocation_failures(layout{}, [](layout& lyt) { lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL); });
+        const auto result = check_allocation_failures(layout{}, [](layout& lyt) { lyt.assign_sidb({0, 0, 0}); });
         CHECK(result.num_dots() == 1);
         CHECK(result.get_dot_tag({0, 0, 0}) == dot_tag::NORMAL);
     }
@@ -169,14 +168,14 @@ TEST_CASE("Empty layout", "[layout]")
     CHECK(named.get_layout_name() == "named");
 }
 
-TEST_CASE("Cells", "[layout]")
+TEST_CASE("Dots", "[layout]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({3, 1, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 1, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 0});
 
     SECTION("lookup")
     {
@@ -239,31 +238,38 @@ TEST_CASE("Cells", "[layout]")
         lyt.foreach_po([&pos](const auto& s) { pos.push_back(s); });
         CHECK(pos == std::vector<lattice_site>{{3, 1, 0}});
     }
+    SECTION("default tag replaces an existing tag")
+    {
+        lyt.assign_sidb({0, 0, 0});
+        CHECK(lyt.num_dots() == 4);
+        CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::NORMAL);
+        CHECK(lyt.num_pis() == 0);
+    }
     SECTION("overwrite and erase")
     {
-        lyt.assign_dot_tag({1, 0, 0}, dot_tag::LOGIC);
+        lyt.assign_sidb({1, 0, 0}, dot_tag::LOGIC);
         CHECK(lyt.num_dots() == 4);
         CHECK(lyt.get_dot_tag({1, 0, 0}) == dot_tag::LOGIC);
 
-        lyt.assign_dot_tag({1, 0, 0}, dot_tag::EMPTY);
+        lyt.assign_sidb({1, 0, 0}, dot_tag::EMPTY);
         CHECK(lyt.num_dots() == 3);
         CHECK(lyt.is_empty_site({1, 0, 0}));
         CHECK(lyt.sidbs() == std::vector<lattice_site>{{0, 0, 0}, {2, 0, 1}, {3, 1, 0}});
         CHECK(lyt.index_of({2, 0, 1}) == 1);
 
-        lyt.assign_dot_tag({7, 7, 1}, dot_tag::EMPTY);
+        lyt.assign_sidb({7, 7, 1}, dot_tag::EMPTY);
         CHECK(lyt.num_dots() == 3);
     }
     SECTION("value semantics")
     {
         auto copy = lyt;
-        copy.assign_dot_tag({0, 0, 0}, dot_tag::EMPTY);
+        copy.assign_sidb({0, 0, 0}, dot_tag::EMPTY);
 
         CHECK(lyt.num_dots() == 4);
         CHECK(copy.num_dots() == 3);
         CHECK(lyt != copy);
 
-        copy.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+        copy.assign_sidb({0, 0, 0}, dot_tag::INPUT);
         CHECK(lyt == copy);
         CHECK(std::hash<layout>{}(lyt) == std::hash<layout>{}(copy));
 
@@ -274,7 +280,7 @@ TEST_CASE("Cells", "[layout]")
     {
         CHECK(lyt.bounding_box() == std::pair{lattice_site{0, 0, 0}, lattice_site{3, 1, 0}});
 
-        lyt.assign_dot_tag({-2, -1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({-2, -1, 1}, dot_tag::NORMAL);
         CHECK(lyt.bounding_box() == std::pair{lattice_site{-2, -1, 1}, lattice_site{3, 1, 0}});
     }
 }
@@ -361,7 +367,7 @@ TEST_CASE("Defects", "[layout]")
     {
         CHECK(lyt.bounding_box() == std::pair{lattice_site{0, 0, 0}, lattice_site{5, 2, 0}});
 
-        lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
         CHECK(lyt.bounding_box() == std::pair{lattice_site{0, 0, 0}, lattice_site{7, 2, 0}});
     }
     SECTION("coordinate limits")

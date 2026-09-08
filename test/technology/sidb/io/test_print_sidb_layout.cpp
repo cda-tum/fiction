@@ -45,9 +45,9 @@ TEST_CASE("Print SiDBs and defects on the H-Si(100)-2x1 surface", "[print-sidb-l
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({4, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 1}, dot_tag::NORMAL);
 
     lyt.assign_defect({0, 0, 0}, defect{defect_type::UNKNOWN, 1});
     lyt.assign_defect({1, 0, 1}, defect{defect_type::UNKNOWN, 0});
@@ -82,9 +82,9 @@ TEST_CASE("Print SiDBs and defects on the H-Si(100)-2x1 surface", "[print-sidb-l
     SECTION("inputs, outputs, and hidden lattice")
     {
         layout gate{};
-        gate.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-        gate.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
-        gate.assign_dot_tag({4, 0, 0}, dot_tag::OUTPUT);
+        gate.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+        gate.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+        gate.assign_sidb({4, 0, 0}, dot_tag::OUTPUT);
 
         print_sidb_layout(print_stream, gate, false, false, false);
 
@@ -96,13 +96,13 @@ TEST_CASE("Print six SiDBs on the H-Si(111)-1x1 surface", "[print-sidb-layout]")
 {
     layout lyt{lattice::si_111_1x1()};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 1, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 1, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 2, 1}, dot_tag::NORMAL);
 
     constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
                                          "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -129,7 +129,7 @@ TEST_CASE("Text padding rejects unrepresentable lattice sites", "[print-sidb-lay
     for (const auto coordinate : {std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()})
     {
         layout lyt{};
-        lyt.assign_dot_tag({coordinate, coordinate, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({coordinate, coordinate, 0}, dot_tag::NORMAL);
         std::stringstream os{};
         CHECK_NOTHROW(print_sidb_layout(os, lyt, false, false));
         os.str("");

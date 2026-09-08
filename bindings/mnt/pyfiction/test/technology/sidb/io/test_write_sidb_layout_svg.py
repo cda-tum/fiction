@@ -267,10 +267,10 @@ def test_write_sidb_charge_distribution_to_svg(sidb_cell_level_layout: sidb_100_
 def test_sidb_layout_svg() -> None:
     """Lattice layouts render occupied sites and their surrounding lattice."""
     lyt = sidb_layout()
-    lyt.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(3, 1, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(3, 1, 1), sidb_dot_tag.NORMAL)
 
     params = write_sidb_layout_svg_params()
     params.color_background = color_mode.LIGHT

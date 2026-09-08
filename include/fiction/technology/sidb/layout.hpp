@@ -102,13 +102,14 @@ class layout
     // ------------------------------------------------------------------------------------------------------- dots
 
     /**
-     * Assigns a dot tag to a site. Assigning `dot_tag::EMPTY` removes the SiDB from the site.
+     * Assigns an SiDB to a lattice site with the given tag, or `dot_tag::NORMAL` by default.
+     * Reassigning an occupied site updates its tag. Assigning `dot_tag::EMPTY` removes the SiDB.
      * Allocation failure leaves the dots unchanged.
      *
      * @param s Site.
-     * @param tag Dot tag to assign.
+     * @param tag Dot tag to assign; defaults to `dot_tag::NORMAL`.
      */
-    void assign_dot_tag(const lattice_site& s, const dot_tag tag)
+    void assign_sidb(const lattice_site& s, const dot_tag tag = dot_tag::NORMAL)
     {
         const auto it = std::ranges::lower_bound(dot_sites, s);
         const auto i  = static_cast<std::size_t>(std::distance(dot_sites.begin(), it));

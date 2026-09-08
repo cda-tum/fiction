@@ -106,7 +106,7 @@ template <typename CellLyt>
 
     layout result{lat, lyt.get_layout_name()};
 
-    lyt.foreach_cell([&](const auto& c) { result.assign_dot_tag(to_lattice_site(c), lyt.get_cell_type(c)); });
+    lyt.foreach_cell([&](const auto& c) { result.assign_sidb(to_lattice_site(c), lyt.get_cell_type(c)); });
 
     if constexpr (is_sidb_defect_surface_v<CellLyt>)
     {

@@ -57,8 +57,8 @@ void layout(nanobind::module_& m)
         .def("get_layout_name", &layout::get_layout_name, DOC(fiction_sidb_layout_get_layout_name))
         .def("set_layout_name", &layout::set_layout_name, py::arg("name"), DOC(fiction_sidb_layout_set_layout_name))
 
-        .def("assign_dot_tag", &layout::assign_dot_tag, py::arg("site"), py::arg("dot_tag"),
-             DOC(fiction_sidb_layout_assign_dot_tag))
+        .def("assign_sidb", &layout::assign_sidb, py::arg("site"), py::arg("dot_tag") = fiction::sidb::dot_tag::NORMAL,
+             DOC(fiction_sidb_layout_assign_sidb))
         .def("get_dot_tag", &layout::get_dot_tag, py::arg("site"), DOC(fiction_sidb_layout_get_dot_tag))
         .def("is_empty_site", &layout::is_empty_site, py::arg("site"), DOC(fiction_sidb_layout_is_empty_site))
         .def("is_empty", &layout::is_empty, DOC(fiction_sidb_layout_is_empty))
