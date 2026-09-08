@@ -976,7 +976,7 @@ class simulation_state
     /**
      * The SiDB the last Gray-code step flipped and its previous sign; -1 if none.
      */
-    std::pair<int64_t, int8_t> gray_code_history{-1, 0};
+    std::pair<int64_t, int8_t> gray_code_history{-1, int8_t{0}};
     /**
      * The SiDBs the last tracked decoding flipped with their previous signs.
      */
@@ -1089,7 +1089,7 @@ class simulation_state
      */
     void gray_code_to_charge_distribution(const uint64_t new_gray_code, const uint64_t old_gray_code)
     {
-        gray_code_history = {-1, 0};
+        gray_code_history = {-1, int8_t{0}};
 
         const std::bitset<64> r_new(new_gray_code);
         const std::bitset<64> r_old(old_gray_code);

@@ -1159,7 +1159,6 @@ class ground_state_space_impl
      */
     [[nodiscard]] constexpr uint64_t maximum_top_level_multisets(const uint64_t number_of_sidbs) const noexcept
     {
-        //
         return params.sim_params.base == 3 ? ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2 : number_of_sidbs + 1;
     }
     /**
