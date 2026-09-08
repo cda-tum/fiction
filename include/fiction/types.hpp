@@ -86,7 +86,6 @@ inline constexpr auto tec_name = "TEC";
 
 using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, tec_ptr>;
 
-// NOLINTBEGIN(readability-avoid-nested-conditional-operator)
 template <class Ntk>
 constexpr const char* get_ntk_type_name()
 {
