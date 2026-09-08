@@ -406,6 +406,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Defect-influence analysis now propagates worker exceptions to the caller.
   - Canvas filtering now rejects SiDBs missing from the simulation state's layout.
   - Ground State Space reports multiset limits using the potential landscape's charge base.
+  - Multi-threaded `exact` synchronizes worker contexts and measures one shared timeout budget.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
   - GOLD now applies each invocation's seed and PI-spacing limit independently
   - Operational checks and gate pruning now reject mismatched input counts; band-bending resilience rejects unusable inputs.
