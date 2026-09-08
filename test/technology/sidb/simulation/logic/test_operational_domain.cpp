@@ -2100,7 +2100,7 @@ TEST_CASE("Operational-domain sweeps reject non-finite and oversized ranges", "[
 TEST_CASE("Operational-domain flood fill requires two dimensions", "[operational-domain]")
 {
     operational_domain_params params{};
-    params.sweep_dimensions = {{sweep_parameter::EPSILON_R, 5.0, 5.1, 0.1}};
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.0, .max = 5.1, .step = 0.1}};
     CHECK_THROWS_AS(operational_domain_flood_fill(layout{}, std::vector<tt>{create_id_tt()}, 0, params),
                     std::invalid_argument);
 }
