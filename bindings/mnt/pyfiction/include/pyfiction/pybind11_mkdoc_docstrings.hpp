@@ -23912,7 +23912,13 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl =
+R"doc(Evaluates SiDB operation or critical temperature across a parameter
+domain.
+
+Template Args:
+    OpDomain: Domain that stores operational statuses or critical
+              temperatures.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_canvas_lyt = R"doc(This layout consists of the canvas dots of the layout.)doc";
 
@@ -25595,9 +25601,9 @@ used across the different operational domain computation algorithms.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_number_of_threads =
 R"doc(Number of worker threads to distribute the parameter points over.
-Defaults to the number of hardware threads, which is the behavior this
-setting replaces, and to `1` where that count is not detectable.
-Values below `1` are treated as `1`.
+
+Defaults to the number of hardware threads, or `1` when that count is
+unavailable. Values below `1` are treated as `1`.
 
 Pinning it makes wall-clock comparisons reproducible across runs and
 machines, and allows an operational domain computation to leave cores
@@ -29676,11 +29682,11 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_iterator_traits = R"doc()doc";
+static const char *mkd_doc_std_iterator_traits = R"doc(Iterator traits for enumerating SiDB input patterns.)doc";
 
 static const char *mkd_doc_std_iterator_traits_2 = R"doc()doc";
 
-static const char *mkd_doc_std_tuple_size = R"doc()doc";
+static const char *mkd_doc_std_tuple_size = R"doc(Number of coordinates exposed by a parameter point's tuple interface.)doc";
 
 #if defined(__GNUG__)
 #pragma GCC diagnostic pop

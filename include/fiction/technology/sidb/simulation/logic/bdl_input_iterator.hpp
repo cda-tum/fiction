@@ -1055,18 +1055,44 @@ template <typename Lyt>
 // make the input iterators compatible with STL iterator categories
 namespace std
 {
+/**
+ * @brief Iterator traits for enumerating SiDB input patterns.
+ */
 template <>
 struct iterator_traits<fiction::sidb::simulation::logic::bdl_input_iterator>
 {
+    /**
+     * @brief Input patterns support random access.
+     */
     using iterator_category = std::random_access_iterator_tag;
-    using difference_type   = int64_t;
-    using value_type        = fiction::sidb::layout;
+    /**
+     * @brief Signed distance between input patterns.
+     */
+    using difference_type = int64_t;
+    /**
+     * @brief SiDB layout carrying one input pattern.
+     */
+    using value_type = fiction::sidb::layout;
 };
+/**
+ * @brief Iterator traits for Cartesian SiDB input patterns.
+ *
+ * @tparam Lyt Cartesian SiDB cell-level layout type.
+ */
 template <typename Lyt>
 struct iterator_traits<fiction::sidb::simulation::logic::legacy_bdl_input_iterator<Lyt>>
 {
+    /**
+     * @brief Input patterns support random access.
+     */
     using iterator_category = std::random_access_iterator_tag;
-    using difference_type   = int64_t;
-    using value_type        = Lyt;
+    /**
+     * @brief Signed distance between input patterns.
+     */
+    using difference_type = int64_t;
+    /**
+     * @brief Cartesian SiDB layout carrying one input pattern.
+     */
+    using value_type = Lyt;
 };
 }  // namespace std

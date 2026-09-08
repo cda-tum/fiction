@@ -410,9 +410,10 @@ struct operational_domain_params
         operational_domain_value_range{.dimension = sweep_parameter::EPSILON_R, .min = 1.0, .max = 10.0, .step = 0.1},
         operational_domain_value_range{.dimension = sweep_parameter::LAMBDA_TF, .min = 1.0, .max = 10.0, .step = 0.1}};
     /**
-     * Number of worker threads to distribute the parameter points over. Defaults to the number of hardware threads,
-     * which is the behavior this setting replaces, and to `1` where that count is not detectable. Values below `1`
-     * are treated as `1`.
+     * @brief Number of worker threads to distribute the parameter points over.
+     *
+     * Defaults to the number of hardware threads, or `1` when that count is unavailable. Values below `1` are treated
+     * as `1`.
      *
      * Pinning it makes wall-clock comparisons reproducible across runs and machines, and allows an operational domain
      * computation to leave cores free for other work.
@@ -530,6 +531,11 @@ inline void validate_operational_domain_params(const layout& lyt, const operatio
     }
 }
 
+/**
+ * @brief Evaluates SiDB operation or critical temperature across a parameter domain.
+ *
+ * @tparam OpDomain Domain that stores operational statuses or critical temperatures.
+ */
 template <typename OpDomain = operational_domain>
 class operational_domain_impl
 {
@@ -2583,15 +2589,24 @@ critical_temperature_domain_contour_tracing(const Lyt& lyt, const std::vector<ki
 namespace std
 {
 
-// make `operational_domain::parameter_point` compatible with `std::integral_constant`
+/**
+ * @brief Number of coordinates exposed by a parameter point's tuple interface.
+ */
 template <>
 struct tuple_size<fiction::sidb::simulation::logic::parameter_point> : std::integral_constant<size_t, 2>
 {};
 
-// make `operational_domain::parameter_point` compatible with `std::tuple_element`
+/**
+ * @brief Coordinate type exposed by a parameter point's tuple interface.
+ *
+ * @tparam I Coordinate index.
+ */
 template <size_t I>
 struct tuple_element<I, fiction::sidb::simulation::logic::parameter_point>
 {
+    /**
+     * @brief Each coordinate is a floating-point parameter value.
+     */
     using type = double;
 };
 
