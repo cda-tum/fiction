@@ -8198,7 +8198,11 @@ Returns:
 
 static const char *mkd_doc_fiction_physical_design_detail_east_south_edge_coloring = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl =
+R"doc(Places and routes a network with SMT constraints.
+
+Template Args:
+    Lyt: Target gate-level layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ari = R"doc(Iterator for the factorization of possible aspect ratios.)doc";
 
@@ -8210,7 +8214,19 @@ static const char *mkd_doc_fiction_physical_design_detail_exact_impl_black_list 
 R"doc(Maps tiles to blacklisted gate types via their truth tables and port
 information.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_exact_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_exact_impl =
+R"doc(Initializes exact placement and routing with a validated clocking
+scheme.
+
+Args:
+    src: Network to place and route; output signals are replaced by
+         output nodes.
+    p: Placement and routing parameters.
+    st: Statistics to update.
+    clocking_scheme: Validated clocking scheme for the target layout.
+    sbl: Gate orientations forbidden at each tile.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_explore_asynchronously =
 R"doc(Thread function for the asynchronous solving strategy. It registers

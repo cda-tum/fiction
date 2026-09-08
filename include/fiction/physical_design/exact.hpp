@@ -188,16 +188,31 @@ struct exact_physical_design_stats
 namespace detail
 {
 
+/**
+ * @brief Places and routes a network with SMT constraints.
+ *
+ * @tparam Lyt Target gate-level layout type.
+ */
 template <typename Lyt>
 class exact_impl
 {
   public:
+    /**
+     * @brief Initializes exact placement and routing with a validated clocking scheme.
+     *
+     * @param src Network to place and route; output signals are replaced by output nodes.
+     * @param p Placement and routing parameters.
+     * @param st Statistics to update.
+     * @param clocking_scheme Validated clocking scheme for the target layout.
+     * @param sbl Gate orientations forbidden at each tile.
+     */
     exact_impl(mockturtle::names_view<networks::technology_network>& src, exact_physical_design_params p,
-               exact_physical_design_stats& st, const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
+               exact_physical_design_stats& st, layouts::clocking::scheme<tile<Lyt>> clocking_scheme,
+               const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
             progress{ps.on_progress, "aspect ratios"},
-            scheme{*layouts::clocking::get_scheme<Lyt>(ps.scheme)},
+            scheme{std::move(clocking_scheme)},
             black_list{sbl}
     {
         // create PO nodes in the network
@@ -662,6 +677,8 @@ class exact_impl
             solver_state new_state{std::make_shared<z3::solver>(*ctx), {get_lit_e(), get_lit_s()}};
 
             return {std::make_shared<solver_state>(new_state), added_tiles, {}, create_assumptions(new_state)};
+            // MSVC shared_ptr ownership transfers to the returned checkpoint.
+            // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
         }
         /**
          * Checks whether a given tile belongs to the added tiles of the current solver check point.
@@ -3241,7 +3258,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st};
+    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, *clocking_scheme};
 
     auto result = p.run();
 
@@ -3313,7 +3330,7 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, black_list};
+    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, *clocking_scheme, black_list};
 
     auto result = p.run();
 
