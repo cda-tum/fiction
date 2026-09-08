@@ -342,185 +342,64 @@ class on_the_fly_gate_library
                     return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
+            /**
+             * @brief Whether the node implements a supported binary gate.
+             */
+            bool is_supported_binary_gate{};
             if constexpr (mockturtle::has_is_and_v<GateLyt>)
             {
-                if (lyt.is_and(n))
-                {
-                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
-
-                    if (defect_surface.has_value())
-                    {
-                        const auto skeleton_with_defects =
-                            add_defect_to_skeleton(defect_surface.value(), skeleton,
-                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
-
-                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                    }
-
-                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
-                }
+                is_supported_binary_gate = is_supported_binary_gate || lyt.is_and(n);
             }
             if constexpr (mockturtle::has_is_or_v<GateLyt>)
             {
-                if (lyt.is_or(n))
-                {
-                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
-
-                    if (defect_surface.has_value())
-                    {
-                        const auto skeleton_with_defects =
-                            add_defect_to_skeleton(defect_surface.value(), skeleton,
-                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
-
-                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                    }
-
-                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
-                }
+                is_supported_binary_gate = is_supported_binary_gate || lyt.is_or(n);
             }
             if constexpr (fiction::has_is_nand_v<GateLyt>)
             {
-                if (lyt.is_nand(n))
-                {
-                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
-
-                    if (defect_surface.has_value())
-                    {
-                        const auto skeleton_with_defects =
-                            add_defect_to_skeleton(defect_surface.value(), skeleton,
-                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
-
-                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                    }
-
-                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
-                }
+                is_supported_binary_gate = is_supported_binary_gate || lyt.is_nand(n);
             }
             if constexpr (fiction::has_is_nor_v<GateLyt>)
             {
-                if (lyt.is_nor(n))
-                {
-                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
-
-                    if (defect_surface.has_value())
-                    {
-                        const auto skeleton_with_defects =
-                            add_defect_to_skeleton(defect_surface.value(), skeleton,
-                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
-
-                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                    }
-
-                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
-                }
+                is_supported_binary_gate = is_supported_binary_gate || lyt.is_nor(n);
             }
             if constexpr (mockturtle::has_is_xor_v<GateLyt>)
             {
-                if (lyt.is_xor(n))
-                {
-                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
-
-                    if (defect_surface.has_value())
-                    {
-                        const auto skeleton_with_defects =
-                            add_defect_to_skeleton(defect_surface.value(), skeleton,
-                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
-
-                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                    }
-
-                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
-                }
+                is_supported_binary_gate = is_supported_binary_gate || lyt.is_xor(n);
             }
             if constexpr (fiction::has_is_xnor_v<GateLyt>)
             {
-                if (lyt.is_xnor(n))
-                {
-                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
-
-                    if (defect_surface.has_value())
-                    {
-                        const auto skeleton_with_defects =
-                            add_defect_to_skeleton(defect_surface.value(), skeleton,
-                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
-
-                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                    }
-
-                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
-                }
+                is_supported_binary_gate = is_supported_binary_gate || lyt.is_xnor(n);
             }
             if constexpr (fiction::has_is_ge_v<GateLyt>)
             {
-                if (lyt.is_ge(n))
-                {
-                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
-
-                    if (defect_surface.has_value())
-                    {
-                        const auto skeleton_with_defects =
-                            add_defect_to_skeleton(defect_surface.value(), skeleton,
-                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
-
-                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                    }
-
-                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
-                }
+                is_supported_binary_gate = is_supported_binary_gate || lyt.is_ge(n);
             }
             if constexpr (fiction::has_is_le_v<GateLyt>)
             {
-                if (lyt.is_le(n))
-                {
-                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
-
-                    if (defect_surface.has_value())
-                    {
-                        const auto skeleton_with_defects =
-                            add_defect_to_skeleton(defect_surface.value(), skeleton,
-                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
-
-                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                    }
-
-                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
-                }
+                is_supported_binary_gate = is_supported_binary_gate || lyt.is_le(n);
             }
             if constexpr (fiction::has_is_gt_v<GateLyt>)
             {
-                if (lyt.is_gt(n))
-                {
-                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
-
-                    if (defect_surface.has_value())
-                    {
-                        const auto skeleton_with_defects =
-                            add_defect_to_skeleton(defect_surface.value(), skeleton,
-                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
-
-                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                    }
-
-                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
-                }
+                is_supported_binary_gate = is_supported_binary_gate || lyt.is_gt(n);
             }
             if constexpr (fiction::has_is_lt_v<GateLyt>)
             {
-                if (lyt.is_lt(n))
+                is_supported_binary_gate = is_supported_binary_gate || lyt.is_lt(n);
+            }
+            if (is_supported_binary_gate)
+            {
+                const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
+
+                if (defect_surface.has_value())
                 {
-                    const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
+                    const auto skeleton_with_defects =
+                        add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                               params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                    if (defect_surface.has_value())
-                    {
-                        const auto skeleton_with_defects =
-                            add_defect_to_skeleton(defect_surface.value(), skeleton,
-                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
-
-                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                    }
-
-                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                 }
+
+                return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
             }
         }
 
@@ -549,7 +428,7 @@ class on_the_fly_gate_library
                                            const on_the_fly_gate_library_params&          parameters)
     {
         const auto sidbs_affected_by_defects =
-            skeleton_with_defects.all_affected_sidbs(std::pair<uint16_t, uint16_t>{0, 0});
+            skeleton_with_defects.all_affected_sidbs(std::pair<uint16_t, uint16_t>{});
 
         auto skeleton_with_defects_copy = skeleton_with_defects;
 
