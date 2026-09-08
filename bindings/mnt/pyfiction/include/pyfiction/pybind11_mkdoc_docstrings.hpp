@@ -10596,9 +10596,7 @@ static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_
 R"doc(Flag to indicate that the number of used crossing tiles should be
 minimized.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_minimize_wires =
-R"doc(Flag to indicate that the number of used crossing tiles should be
-minimized.)doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_minimize_wires = R"doc(Minimize the number of wire tiles.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_num_threads =
 R"doc(Number of threads to use for exploring the possible aspect ratios.
@@ -10622,9 +10620,7 @@ static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_
 R"doc(Technology-specific constraints that are only to be added for a
 certain target technology.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_timeout =
-R"doc(Sets a timeout in ms for the solving process. Standard is 4294967
-seconds as defined by Z3.)doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_timeout = R"doc(Timeout budget for the solving process, in milliseconds.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_upper_bound_area =
 R"doc(Number of total tiles to use as an upper bound.
@@ -26378,9 +26374,9 @@ static const char *mkd_doc_fiction_utils_progress_reporter_next_report = R"doc(T
 
 static const char *mkd_doc_fiction_utils_progress_reporter_on_progress = R"doc(The callback to forward reports to.)doc";
 
-static const char *mkd_doc_fiction_utils_progress_reporter_operator_assign = R"doc()doc";
+static const char *mkd_doc_fiction_utils_progress_reporter_operator_assign = R"doc(Reporters do not support copy assignment.)doc";
 
-static const char *mkd_doc_fiction_utils_progress_reporter_operator_assign_2 = R"doc()doc";
+static const char *mkd_doc_fiction_utils_progress_reporter_operator_assign_2 = R"doc(Reporters do not support move assignment.)doc";
 
 static const char *mkd_doc_fiction_utils_progress_reporter_progress_reporter =
 R"doc(Starts a task and reports `done == 0` to the callback.
@@ -26393,9 +26389,13 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_utils_progress_reporter_progress_reporter_2 = R"doc()doc";
+static const char *mkd_doc_fiction_utils_progress_reporter_progress_reporter_2 =
+R"doc(Reporters cannot be copied because each reporter owns its
+synchronization state.
 
-static const char *mkd_doc_fiction_utils_progress_reporter_progress_reporter_3 = R"doc()doc";
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_progress_reporter_3 = R"doc(Reporters cannot be moved while worker threads may access them.)doc";
 
 static const char *mkd_doc_fiction_utils_progress_reporter_report_locked =
 R"doc(Forwards a report for `done` completed items unless the same report

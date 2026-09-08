@@ -795,12 +795,12 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
 TEST_CASE("Exact physical design timeout", "[exact]")
 {
     auto timeout_config    = use(crossings(configuration()));
-    timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
+    timeout_config.timeout = 1u;  // allow one millisecond to find a solution
 
     const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
     const auto layout     = exact<cart_gate_clk_lyt>(half_adder, timeout_config);
 
-    // since a half adder cannot be synthesized in just one second, layout should not have a value
+    // The one-millisecond budget is insufficient for placing and routing the half adder.
     CHECK(!layout.has_value());
 }
 
