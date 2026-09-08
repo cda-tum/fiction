@@ -75,7 +75,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     56-SiDB NAND: 19.7 → 3.3 s). _QuickSim_ improves by one third, _ExGS_ by one quarter with
     10,000× less heap traffic, and _QuickExact_ holds speed with 28× less heap traffic
   - Potential landscape construction computes each symmetric SiDB interaction once
-  - **Breaking:** SiDB logic and analysis algorithms use `sidb::layout` and non-template simulation types
+  - **Breaking:** SiDB generators, logic, and analysis algorithms use `sidb::layout`,
+    `kitty::dynamic_truth_table`, and non-template simulation types
   - **Breaking:** SiDB defect analyses, generators, and gate libraries use `sidb::layout`
   - Their parameters use `lattice_site` for canvases, scan areas, and fixed SiDBs
   - Defect-influence and displacement-robustness domains are non-template types
@@ -98,7 +99,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - Population-stability results expose the critical dot as `critical_dot` in C++ and Python.
-  - SiDB layouts use dot operations and `dot_tag` for dot roles. Lattice-site constructors
+  - SiDB layouts use dot operations and `dot_tag` for dot roles. `assign_sidb` defaults to the
+    `NORMAL` tag. Lattice-site constructors
     take `int32_t` coordinates and an `int8_t` basis index.
   - Simulation results store charge states and energy beside one shared layout and potential
     landscape instead of copying a `charge_distribution_surface` for every configuration
@@ -107,6 +109,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
+
+- Experiments:
+  - SiDB generator experiments use concrete parameter types with unchanged numerical values.
 
 - Gate libraries:
   - `apply_gate_library_to_defective_surface` and `apply_parameterized_gate_library_to_defective_surface`

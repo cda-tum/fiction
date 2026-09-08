@@ -102,8 +102,8 @@ TEST_CASE("Area computation for different technologies", "[area]")
         CHECK_THAT(area(lyt), Catch::Matchers::WithinAbs(0.0, 0.000001));
 
         // four columns and four single-SiDB rows span the same box as the 5 x 5 cell-level layout above
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({4, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({4, 2, 0}, dot_tag::NORMAL);
 
         area_stats stats{};
         CHECK_THAT(area(lyt, area_params<sidb_technology>{}, &stats), Catch::Matchers::WithinAbs(2.359296, 0.000001));
@@ -122,8 +122,8 @@ TEST_CASE("Area computation for different technologies", "[area]")
     SECTION("SiDB layout spanning the full column range")
     {
         layout lyt{};
-        lyt.assign_dot_tag({std::numeric_limits<int32_t>::min(), 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({std::numeric_limits<int32_t>::max(), 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({std::numeric_limits<int32_t>::min(), 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({std::numeric_limits<int32_t>::max(), 0}, dot_tag::NORMAL);
 
         area_stats stats{};
         CHECK_THAT(area(lyt, area_params<sidb_technology>{}, &stats), Catch::Matchers::WithinAbs(0.0, 0.000001));

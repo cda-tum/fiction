@@ -23,7 +23,7 @@
 #include "fiction/utils/math/combination_utils.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
-#include <kitty/traits.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -144,9 +144,7 @@ namespace detail
  * Implementation of the displacement robustness analysis. Displacements are measured in columns and rows
  * (`2y + z`), so a displacement of one row moves an SiDB to the other site of its dimer.
  *
- * @tparam TT Truth table type.
  */
-template <typename TT>
 class displacement_robustness_domain_impl
 {
   public:
@@ -159,7 +157,7 @@ class displacement_robustness_domain_impl
      * @param st Statistics.
      */
     // NOLINTBEGIN(modernize-pass-by-value): Passing the large stored snapshot by value adds a copy.
-    displacement_robustness_domain_impl(const layout& lyt, const std::vector<TT>& spec,
+    displacement_robustness_domain_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                         const displacement_robustness_domain_params& ps,
                                         displacement_robustness_domain_stats&        st) :
             layout_to_analyze{lyt},
@@ -342,7 +340,7 @@ class displacement_robustness_domain_impl
     /**
      * The Boolean function(s).
      */
-    const std::vector<TT> truth_table;
+    const std::vector<kitty::dynamic_truth_table> truth_table;
     /**
      * Seed source.
      */
@@ -443,8 +441,8 @@ class displacement_robustness_domain_impl
 
             for (std::size_t i = 0; i < dot_displacements.size(); ++i)
             {
-                displaced.assign_dot_tag(dot_displacements[i],
-                                         layout_to_analyze.get_dot_tag(sidbs_of_the_original_layout[i]));
+                displaced.assign_sidb(dot_displacements[i],
+                                      layout_to_analyze.get_dot_tag(sidbs_of_the_original_layout[i]));
             }
 
             if (displaced.num_dots() == layout_to_analyze.num_dots())
@@ -487,7 +485,6 @@ class displacement_robustness_domain_impl
  * the configured number of columns and rows, and every resulting layout is checked for operability.
  * Displaced layouts retain the layout name and the defects at their original positions.
  *
- * @tparam TT Truth table type.
  * @param lyt The operational gate layout.
  * @param spec The Boolean function(s) it implements.
  * @param params Parameters.
@@ -495,16 +492,13 @@ class displacement_robustness_domain_impl
  * @return The displacement robustness domain.
  * @throws std::out_of_range if a displacement exceeds the lattice-site range.
  */
-template <typename TT>
-[[nodiscard]] displacement_robustness_domain
-determine_displacement_robustness_domain(const layout& lyt, const std::vector<TT>& spec,
+[[nodiscard]] inline displacement_robustness_domain
+determine_displacement_robustness_domain(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                          const displacement_robustness_domain_params& params = {},
                                          displacement_robustness_domain_stats*        stats  = nullptr)
 {
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
-    displacement_robustness_domain_stats            st{};
-    detail::displacement_robustness_domain_impl<TT> p{lyt, spec, params, st};
+    displacement_robustness_domain_stats        st{};
+    detail::displacement_robustness_domain_impl p{lyt, spec, params, st};
 
     const auto result = p.determine_robustness_domain();
 
@@ -520,7 +514,6 @@ determine_displacement_robustness_domain(const layout& lyt, const std::vector<TT
  * for every combination of displaced SiDBs, the displaced layouts are checked for operability, and the share of
  * operational ones is the probability.
  *
- * @tparam TT Truth table type.
  * @param lyt The operational gate layout.
  * @param spec The Boolean function(s) it implements.
  * @param params Parameters.
@@ -528,16 +521,12 @@ determine_displacement_robustness_domain(const layout& lyt, const std::vector<TT
  * @return The probability.
  * @throws std::out_of_range if a displacement exceeds the lattice-site range.
  */
-template <typename TT>
-[[nodiscard]] double
-determine_probability_of_fabricating_operational_gate(const layout& lyt, const std::vector<TT>& spec,
-                                                      const displacement_robustness_domain_params& params = {},
-                                                      const double fabrication_error_rate                 = 1.0)
+[[nodiscard]] inline double determine_probability_of_fabricating_operational_gate(
+    const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+    const displacement_robustness_domain_params& params = {}, const double fabrication_error_rate = 1.0)
 {
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
-    displacement_robustness_domain_stats            st{};
-    detail::displacement_robustness_domain_impl<TT> p{lyt, spec, params, st};
+    displacement_robustness_domain_stats        st{};
+    detail::displacement_robustness_domain_impl p{lyt, spec, params, st};
 
     return p.determine_probability_of_fabricating_operational_gate(fabrication_error_rate);
 }

@@ -27,7 +27,7 @@
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 
-#include <kitty/traits.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -170,14 +170,13 @@ class defect_influence_impl
     /**
      * Evaluates every position of the scanning area whose column and row are multiples of the step size.
      *
-     * @tparam TT Truth table type.
      * @param step_size Step size.
      * @param spec The specification, if the influence definition needs one.
      * @return The defect influence domain.
      */
-    template <typename TT = tt>
-    [[nodiscard]] defect_influence_domain grid_search(const std::size_t                     step_size,
-                                                      const std::optional<std::vector<TT>>& spec = std::nullopt)
+    [[nodiscard]] defect_influence_domain
+    grid_search(const std::size_t                                             step_size,
+                const std::optional<std::vector<kitty::dynamic_truth_table>>& spec = std::nullopt)
     {
         if (step_size == 0)
         {
@@ -207,14 +206,13 @@ class defect_influence_impl
     /**
      * Evaluates randomly chosen positions of the scanning area.
      *
-     * @tparam TT Truth table type.
      * @param samples Number of positions to evaluate.
      * @param spec The specification, if the influence definition needs one.
      * @return The defect influence domain.
      */
-    template <typename TT = tt>
-    [[nodiscard]] defect_influence_domain random_sampling(const std::size_t                     samples,
-                                                          const std::optional<std::vector<TT>>& spec = std::nullopt)
+    [[nodiscard]] defect_influence_domain
+    random_sampling(const std::size_t                                             samples,
+                    const std::optional<std::vector<kitty::dynamic_truth_table>>& spec = std::nullopt)
     {
         const mockturtle::stopwatch stop{stats.time_total};
 
@@ -235,14 +233,13 @@ class defect_influence_impl
      * at the left edge of the scanning area, the trace moves right until it hits the first influential position and
      * follows the boundary of the influential region clockwise from there.
      *
-     * @tparam TT Truth table type.
      * @param samples Number of starting rows to try.
      * @param spec The specification, if the influence definition needs one.
      * @return The defect influence domain.
      */
-    template <typename TT = tt>
-    [[nodiscard]] defect_influence_domain quicktrace(const std::size_t                     samples,
-                                                     const std::optional<std::vector<TT>>& spec = std::nullopt)
+    [[nodiscard]] defect_influence_domain
+    quicktrace(const std::size_t                                             samples,
+               const std::optional<std::vector<kitty::dynamic_truth_table>>& spec = std::nullopt)
     {
         const mockturtle::stopwatch stop{stats.time_total};
 
@@ -441,13 +438,11 @@ class defect_influence_impl
     /**
      * Picks a random row at the left edge of the scanning area and returns it if a defect there is not influential.
      *
-     * @tparam TT Truth table type.
      * @param spec The specification.
      * @return The position, or `std::nullopt` if the defect is influential there.
      */
-    template <typename TT>
-    [[nodiscard]] std::optional<lattice_site>
-    find_non_influential_defect_position_at_left_side(const std::optional<std::vector<TT>>& spec)
+    [[nodiscard]] std::optional<lattice_site> find_non_influential_defect_position_at_left_side(
+        const std::optional<std::vector<kitty::dynamic_truth_table>>& spec)
     {
         std::uniform_int_distribution<int64_t> dist{nw_row, se_row};
 
@@ -463,14 +458,12 @@ class defect_influence_impl
     /**
      * Determines whether a defect at `defect_cell` influences the layout and records the verdict.
      *
-     * @tparam TT Truth table type.
      * @param spec The specification.
      * @param defect_cell The defect position.
      * @return The verdict.
      */
-    template <typename TT>
-    defect_influence_status is_defect_influential(const std::optional<std::vector<TT>>& spec,
-                                                  const lattice_site&                   defect_cell)
+    defect_influence_status is_defect_influential(const std::optional<std::vector<kitty::dynamic_truth_table>>& spec,
+                                                  const lattice_site& defect_cell)
     {
         ++num_evaluated_defect_positions;
 
@@ -594,15 +587,13 @@ class defect_influence_impl
     /**
      * Moves right from a non-influential position until the defect becomes influential.
      *
-     * @tparam TT Truth table type.
      * @param spec The specification.
      * @param starting_defect_position The non-influential starting position.
      * @return The last non-influential position before the influential region, or `std::nullopt` if none is hit.
      */
-    template <typename TT>
-    [[nodiscard]] std::optional<lattice_site>
-    find_last_non_influential_defect_position_moving_right(const std::optional<std::vector<TT>>& spec,
-                                                           const lattice_site& starting_defect_position)
+    [[nodiscard]] std::optional<lattice_site> find_last_non_influential_defect_position_moving_right(
+        const std::optional<std::vector<kitty::dynamic_truth_table>>& spec,
+        const lattice_site&                                           starting_defect_position)
     {
         const auto row = row_of(starting_defect_position);
 
@@ -730,7 +721,6 @@ class defect_influence_impl
  * position of a grid over the scanning area and checking whether the gate still implements its Boolean function
  * (or, with `GROUND_STATE_CHANGE`, whether the ground state of any input pattern changes).
  *
- * @tparam TT Truth table type.
  * @param lyt The gate layout.
  * @param spec The Boolean function(s) it implements.
  * @param params Parameters.
@@ -741,13 +731,11 @@ class defect_influence_impl
  * @throws std::invalid_argument if `spec` is empty.
  * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
-template <typename TT>
-[[nodiscard]] defect_influence_domain
-defect_influence_grid_search(const layout& lyt, const std::vector<TT>& spec, const defect_influence_params& params = {},
-                             const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
+[[nodiscard]] inline defect_influence_domain
+defect_influence_grid_search(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                             const defect_influence_params& params = {}, const std::size_t step_size = 1,
+                             defect_influence_stats* stats = nullptr)
 {
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     if (spec.empty())
     {
         throw std::invalid_argument{"spec must not be empty"};
@@ -797,7 +785,6 @@ defect_influence_grid_search(const layout& lyt, const std::vector<TT>& spec, con
 /**
  * Like `defect_influence_grid_search`, but evaluates randomly chosen positions of the scanning area.
  *
- * @tparam TT Truth table type.
  * @param lyt The gate layout.
  * @param spec The Boolean function(s) it implements.
  * @param samples Number of positions to evaluate.
@@ -807,13 +794,11 @@ defect_influence_grid_search(const layout& lyt, const std::vector<TT>& spec, con
  * @throws std::invalid_argument if `spec` is empty.
  * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
-template <typename TT>
-[[nodiscard]] defect_influence_domain
-defect_influence_random_sampling(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                                 const defect_influence_params& params = {}, defect_influence_stats* stats = nullptr)
+[[nodiscard]] inline defect_influence_domain
+defect_influence_random_sampling(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                                 const std::size_t samples, const defect_influence_params& params = {},
+                                 defect_influence_stats* stats = nullptr)
 {
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     if (spec.empty())
     {
         throw std::invalid_argument{"spec must not be empty"};
@@ -861,7 +846,6 @@ defect_influence_random_sampling(const layout& lyt, const std::size_t samples,
  * *QuickTrace*: traces the contour of the region in which a defect influences an SiDB gate, which needs far fewer
  * evaluations than a grid search.
  *
- * @tparam TT Truth table type.
  * @param lyt The gate layout.
  * @param spec The Boolean function(s) it implements.
  * @param samples Number of starting rows to try.
@@ -871,13 +855,11 @@ defect_influence_random_sampling(const layout& lyt, const std::size_t samples,
  * @throws std::invalid_argument if `spec` is empty.
  * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
-template <typename TT>
-[[nodiscard]] defect_influence_domain
-defect_influence_quicktrace(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                            const defect_influence_params& params = {}, defect_influence_stats* stats = nullptr)
+[[nodiscard]] inline defect_influence_domain
+defect_influence_quicktrace(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                            const std::size_t samples, const defect_influence_params& params = {},
+                            defect_influence_stats* stats = nullptr)
 {
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     if (spec.empty())
     {
         throw std::invalid_argument{"spec must not be empty"};

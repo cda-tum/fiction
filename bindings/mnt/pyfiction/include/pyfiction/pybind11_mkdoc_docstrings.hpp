@@ -14282,18 +14282,19 @@ static const char *mkd_doc_fiction_sidb_dot_tag_NORMAL = R"doc(Untagged dot.)doc
 static const char *mkd_doc_fiction_sidb_dot_tag_OUTPUT = R"doc(Primary output dot.)doc";
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception =
-R"doc(This exception is thrown when an error occurs during the design of an
-SiDB gate. It provides information about the tile, truth table, and
-port list associated with the error.
+R"doc(Reports an unsuccessful SiDB gate design.
+
+It provides information about the tile, truth table, and port list
+associated with the error.
 
 Template Args:
-    TT: The type representing the truth table.
     GateLyt: The type representing the gate-level layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception_error_tile = R"doc(The tile associated with the error.)doc";
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception_gate_design_exception =
-R"doc(Constructor for the gate_design_exception class.
+R"doc(Stores the tile, truth table, and ports of an unsuccessful gate
+design.
 
 Args:
     ti: The tile associated with the error.
@@ -14306,30 +14307,60 @@ static const char *mkd_doc_fiction_sidb_gate_design_exception_p = R"doc(The port
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception_truth_table = R"doc(The truth table associated with the error.)doc";
 
-static const char *mkd_doc_fiction_sidb_gate_design_exception_which_port_list = R"doc(Get the port list associated with the exception.)doc";
+static const char *mkd_doc_fiction_sidb_gate_design_exception_which_port_list =
+R"doc(Returns the port list associated with the exception.
 
-static const char *mkd_doc_fiction_sidb_gate_design_exception_which_tile = R"doc(Get the tile associated with the exception.)doc";
+Returns:
+    A copy of the gate ports.
 
-static const char *mkd_doc_fiction_sidb_gate_design_exception_which_truth_table = R"doc(Get the truth table associated with the exception.)doc";
+)doc";
+
+static const char *mkd_doc_fiction_sidb_gate_design_exception_which_tile =
+R"doc(Returns the tile associated with the exception.
+
+Returns:
+    The gate-level tile.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_gate_design_exception_which_truth_table =
+R"doc(Returns the truth table associated with the exception.
+
+Returns:
+    A copy of the Boolean specification.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates =
 R"doc(Designs SiDB gates on a skeleton: canvas SiDBs are placed in the
 canvas area so that the skeleton's input and output wires implement
 the given Boolean function(s). The design mode chooses between
 simulating every combination of canvas SiDBs, *QuickCell*'s pruning
-followed by simulation, random placement, and pruning only. Worker
-exceptions propagate to the caller after all started workers finish.
+followed by simulation, random placement, and pruning only.
+
+Worker exceptions propagate to the caller after all started workers
+finish.
+
 Random placement samples at most `maximal_random_design_attempts`
 candidates without enumerating canvas layouts.
+
+*QuickCell* is described in "Towards Fast Automatic Design of Silicon
+Dangling Bond Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus,
+and R. Wille in DATE 2025
+(https://ieeexplore.ieee.org/abstract/document/10992885) and
+"QuickCell: Fast Automatic Design of Standard Cells for Silicon
+Dangling Bond Logic" by the same authors in TCAD 2025
+(https://ieeexplore.ieee.org/document/11146893). The exhaustive
+designer is described in "Minimal Design of SiDB Gates: An Optimal
+Basis for Circuits Based on Silicon Dangling Bonds" by J. Drewniok, M.
+Walter, and R. Wille in NANOARCH 2023
+(https://dl.acm.org/doi/10.1145/3611315.3633241).
 
 Args:
     skeleton: The skeleton with its input and output wires.
     spec: The Boolean function(s) to implement; must not be empty.
     params: Parameters.
     stats: Statistics.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The designed gates.
@@ -14353,7 +14384,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The designed gates.
@@ -14427,11 +14457,7 @@ static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_sim_engine
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_time_total = R"doc(Total runtime.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl =
-R"doc(Implementation of the gate designers.
-
-Template Args:
-    TT: Truth table type.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl = R"doc(Implementation of the gate designers.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_canvas_layouts = R"doc(All canvas layouts: one per combination of canvas SiDBs.)doc";
 
@@ -14674,9 +14700,6 @@ Args:
     spec: The Boolean function(s) to implement; must not be empty.
     params: Parameters.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     `true` if no gate can be designed on the skeleton.
 
@@ -14696,7 +14719,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     `true` if no gate can be designed on the skeleton.
@@ -16049,13 +16071,15 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_layout_assign_dot_tag =
-R"doc(Assigns a dot tag to a site. Assigning `dot_tag::EMPTY` removes the
-SiDB from the site. Allocation failure leaves the dots unchanged.
+static const char *mkd_doc_fiction_sidb_layout_assign_sidb =
+R"doc(Assigns an SiDB to a lattice site with the given tag, or
+`dot_tag::NORMAL` by default. Reassigning an occupied site updates its
+tag. Assigning `dot_tag::EMPTY` removes the SiDB. Allocation failure
+leaves the dots unchanged.
 
 Args:
     s: Site.
-    tag: Dot tag to assign.
+    tag: Dot tag to assign; defaults to `dot_tag::NORMAL`.
 
 )doc";
 
@@ -16775,7 +16799,6 @@ Args:
     tile: The tile.
 
 Template Args:
-    TT: Truth table type.
     GateLyt: Gate-level layout type.
 
 Returns:
@@ -16811,9 +16834,6 @@ Args:
                            nearby.
     truth_table: The Boolean function(s) of the gate.
     parameters: Parameters.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     `true` if the predefined gate can be used.
@@ -16998,9 +17018,6 @@ Args:
     transition_type: The transition to consider; all transitions if
                      omitted.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The minimum potential difference over all input patterns, or
     infinity if the input wires cannot represent the specification or
@@ -17021,7 +17038,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The minimum potential difference over all input patterns.
@@ -17066,9 +17082,6 @@ Args:
     input_index: The input pattern the charge distributions were
                  simulated for.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The energies with their state types, ascending by energy.
 
@@ -17090,9 +17103,6 @@ Args:
                  simulated for.
     input_bdl_wires: The input BDL wires of `lyt`.
     output_bdl_wires: The output BDL wires of `lyt`.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The energies with their state types.
@@ -17208,9 +17218,6 @@ Args:
     params: Simulation and physical parameters.
     pst: Statistics.
 
-Template Args:
-    TT: Type of the truth table.
-
 Returns:
     The critical temperature (unit: K).
 
@@ -17244,9 +17251,6 @@ Args:
     output_bdl_wires: BDL output wires of the layout.
     pst: Statistics.
 
-Template Args:
-    TT: Type of the truth table.
-
 Returns:
     The critical temperature (unit: K).
 
@@ -17271,7 +17275,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The critical temperature (unit: K).
@@ -17419,9 +17422,6 @@ given Boolean function.
 Args:
     spec: Expected Boolean function of the layout given as a multi-
           output truth table.
-
-Template Args:
-    TT: Type of the truth table.
 
 )doc";
 
@@ -18049,9 +18049,6 @@ Args:
                this are evaluated.
     stats: Statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The defect influence domain.
 
@@ -18124,9 +18121,6 @@ Args:
     params: Parameters.
     stats: Statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The defect influence domain.
 
@@ -18167,9 +18161,6 @@ Args:
     samples: Number of positions to evaluate.
     params: Parameters.
     stats: Statistics.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The defect influence domain.
@@ -18267,9 +18258,6 @@ Args:
     spec: The specification.
     starting_defect_position: The non-influential starting position.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The last non-influential position before the influential region,
     or `std::nullopt` if none is hit.
@@ -18282,9 +18270,6 @@ it if a defect there is not influential.
 
 Args:
     spec: The specification.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The position, or `std::nullopt` if the defect is influential
@@ -18302,9 +18287,6 @@ Args:
     step_size: Step size.
     spec: The specification, if the influence definition needs one.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The defect influence domain.
 
@@ -18319,9 +18301,6 @@ records the verdict.
 Args:
     spec: The specification.
     defect_cell: The defect position.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The verdict.
@@ -18365,9 +18344,6 @@ Args:
     samples: Number of starting rows to try.
     spec: The specification, if the influence definition needs one.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The defect influence domain.
 
@@ -18379,9 +18355,6 @@ R"doc(Evaluates randomly chosen positions of the scanning area.
 Args:
     samples: Number of positions to evaluate.
     spec: The specification, if the influence definition needs one.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The defect influence domain.
@@ -18409,10 +18382,7 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influen
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl =
 R"doc(Implementation of the displacement robustness analysis. Displacements
 are measured in columns and rows (`2y + z`), so a displacement of one
-row moves an SiDB to the other site of its dimer.
-
-Template Args:
-    TT: Truth table type.)doc";
+row moves an SiDB to the other site of its dimer.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_all_possible_sidb_displacements = R"doc(The possible positions of every SiDB.)doc";
 
@@ -18503,9 +18473,6 @@ Args:
     params: Parameters.
     stats: Statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The displacement robustness domain.
 
@@ -18526,9 +18493,6 @@ Args:
     spec: The Boolean function(s) it implements.
     params: Parameters.
     fabrication_error_rate: Share of the SiDBs that are displaced.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The probability.
@@ -22938,9 +22902,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The critical temperature domain of the layout.
 
@@ -22968,7 +22929,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -23022,9 +22982,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The critical temperature domain of the layout.
 
@@ -23052,7 +23009,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -23106,9 +23062,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The critical temperature domain of the layout.
 
@@ -23133,7 +23086,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -23180,9 +23132,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The critical temperature domain of the layout.
 
@@ -23208,7 +23157,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -23233,9 +23181,6 @@ R"doc(Sanity checks shared by every entry point.
 Args:
     lyt: The layout.
     spec: The specification.
-
-Template Args:
-    TT: Truth table type.
 
 )doc";
 
@@ -23340,10 +23285,7 @@ pattern to the input BDL pairs of the layout, simulates the ground
 states, and compares the charge states of the output BDL pairs with
 the expected truth-table entries. With a canvas, the three pruning
 filters (positive charges, physical infeasibility, I/O instability)
-run before any simulation on the layout's potential landscape.
-
-Template Args:
-    TT: Truth table type.)doc";
+run before any simulation on the layout's potential landscape.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_assign =
 R"doc(Assigns a charge state to the SiDB at `site` without touching the
@@ -23649,9 +23591,6 @@ R"doc(The input patterns that kinks render non-operational.
 Args:
     p: The implementation object, configured to reject kinks.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The kink-induced non-operational patterns.
 
@@ -23817,9 +23756,6 @@ Args:
     input_wires: The input wires, or `std::nullopt` to detect them.
     output_wires: The output wires, or `std::nullopt` to detect them.
     canvas_lyt: The canvas, or `std::nullopt` to use the logic dots.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The implementation object.
@@ -24374,9 +24310,6 @@ Args:
     p: The implementation object.
     num_patterns: The number of input patterns.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     All patterns that are operational.
 
@@ -24599,9 +24532,6 @@ Args:
     params: Parameters; kinks are rejected regardless of
             `params.op_condition`.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     `true` if the layout is non-operational because of kinks.
 
@@ -24620,9 +24550,6 @@ Args:
     output_bdl_wire: The output BDL wires of `lyt`.
     canvas_lyt: The canvas; defaults to none.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     `true` if the layout is non-operational because of kinks.
 
@@ -24639,7 +24566,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     `true` if the layout is non-operational because of kinks.
@@ -24660,9 +24586,6 @@ Args:
     spec: The Boolean function(s) it has to implement.
     params: Parameters.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational status and the number of simulator invocations.
 
@@ -24679,9 +24602,6 @@ Args:
     input_bdl_wire: The input BDL wires of `lyt`.
     output_bdl_wire: The output BDL wires of `lyt`.
     canvas_lyt: The canvas; defaults to the logic dots of `lyt`.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The operational status and the number of simulator invocations.
@@ -24701,9 +24621,6 @@ Args:
     output_bdl_wire: The output BDL wires.
     canvas_lyt: The canvas; defaults to the logic dots of the first
                 layout.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The operational status and the number of simulator invocations.
@@ -24725,7 +24642,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The operational status and the number of simulator invocations.
@@ -24819,9 +24735,6 @@ Args:
     params: Parameters; kinks are rejected regardless of
             `params.op_condition`.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The kink-induced non-operational input patterns.
 
@@ -24840,9 +24753,6 @@ Args:
     output_bdl_wire: The output BDL wires of `lyt`.
     canvas_lyt: The canvas; defaults to none.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The kink-induced non-operational input patterns.
 
@@ -24859,7 +24769,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The kink-induced non-operational input patterns.
@@ -25365,9 +25274,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational domain of the layout.
 
@@ -25395,7 +25301,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -25446,9 +25351,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational domain of the layout.
 
@@ -25476,7 +25378,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -25532,9 +25433,6 @@ Args:
     ps: Parameters for the operational domain computation.
     st: Statistics of the process.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational domain of the layout.
 
@@ -25559,7 +25457,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -25628,9 +25525,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational domain of the layout.
 
@@ -25656,7 +25550,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -25684,9 +25577,6 @@ Args:
     pp: The specific parameter point around which the operational
         ratio is computed.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The ratio of operational parameter points to the total number of
     parameter points in the parameter space.
@@ -25711,7 +25601,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The ratio of operational parameter points.
@@ -25763,9 +25652,6 @@ Args:
     spec: The Boolean function(s) it has to implement.
     params: Parameters.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational input patterns.
 
@@ -25783,9 +25669,6 @@ Args:
     output_bdl_wire: The output BDL wires of `lyt`.
     canvas_lyt: The canvas; defaults to none.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational input patterns.
 
@@ -25802,7 +25685,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The operational input patterns.
@@ -25909,9 +25791,6 @@ Args:
     input_pattern: The input pattern `cd` was simulated for.
     input_wires: The input BDL wires of `lyt`.
     output_wires: The output BDL wires of `lyt`.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The operational status.

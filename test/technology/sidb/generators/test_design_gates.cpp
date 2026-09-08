@@ -485,19 +485,6 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         CHECK(design_gates(lyt, std::vector<tt>{create_and_tt()}, params).empty());
     }
 
-    SECTION("Random generation attempt limit")
-    {
-        const design_gates_params params{
-            .operational_params =
-                is_operational_params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT},
-            .design_mode                    = design_gates_params::design_gates_mode::RANDOM,
-            .canvas                         = {{14, 6, 0}, {24, 12, 0}},
-            .number_of_canvas_sidbs         = 3,
-            .maximal_random_design_attempts = 0};
-
-        CHECK(design_gates(lyt, std::vector<tt>{create_and_tt()}, params).empty());
-    }
-
     SECTION("Random and QuickCell with defects")
     {
         layout defect_layout{lyt};

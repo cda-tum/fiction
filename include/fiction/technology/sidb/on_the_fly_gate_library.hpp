@@ -32,6 +32,7 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
+#include <kitty/dynamic_truth_table.hpp>
 #include <phmap.h>
 
 #include <algorithm>
@@ -49,18 +50,17 @@ namespace fiction::sidb
 {
 
 /**
- * This exception is thrown when an error occurs during the design of an SiDB gate.
+ * @brief Reports an unsuccessful SiDB gate design.
  * It provides information about the tile, truth table, and port list associated with the error.
  *
- * @tparam TT The type representing the truth table.
  * @tparam GateLyt The type representing the gate-level layout.
  */
-template <typename TT, typename GateLyt>
+template <typename GateLyt>
 class gate_design_exception : public std::exception
 {
   public:
     /**
-     * Constructor for the gate_design_exception class.
+     * @brief Stores the tile, truth table, and ports of an unsuccessful gate design.
      *
      * @param ti The tile associated with the error.
      * @param spec The truth table associated with the error.
@@ -74,23 +74,29 @@ class gate_design_exception : public std::exception
             p{portlist}
     {}
     /**
-     * Get the tile associated with the exception.
+     * @brief Returns the tile associated with the exception.
+     *
+     * @return The gate-level tile.
      */
     [[nodiscard]] tile<GateLyt> which_tile() const noexcept
     {
         return error_tile;
     }
     /**
-     * Get the truth table associated with the exception.
+     * @brief Returns the truth table associated with the exception.
+     *
+     * @return A copy of the Boolean specification.
      */
-    [[nodiscard]] TT which_truth_table() const noexcept
+    [[nodiscard]] kitty::dynamic_truth_table which_truth_table() const
     {
         return truth_table;
     }
     /**
-     * Get the port list associated with the exception.
+     * @brief Returns the port list associated with the exception.
+     *
+     * @return A copy of the gate ports.
      */
-    [[nodiscard]] fcn::port_list<fcn::port_direction> which_port_list() const noexcept
+    [[nodiscard]] fcn::port_list<fcn::port_direction> which_port_list() const
     {
         return p;
     }
@@ -103,7 +109,7 @@ class gate_design_exception : public std::exception
     /**
      * The truth table associated with the error.
      */
-    const TT truth_table{};
+    const kitty::dynamic_truth_table truth_table{};
     /**
      * The port list associated with the error.
      */
@@ -218,11 +224,11 @@ class on_the_fly_gate_library
                                 defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
                                 absolute_cell);
 
-                            return design_gate<tt, GateLyt>(skeleton_with_defects, synthesis::create_fan_out_tt(),
-                                                            params, p, t);
+                            return design_gate<GateLyt>(skeleton_with_defects, synthesis::create_fan_out_tt(), params,
+                                                        p, t);
                         }
 
-                        return design_gate<tt, GateLyt>(skeleton, synthesis::create_fan_out_tt(), params, p, t);
+                        return design_gate<GateLyt>(skeleton, synthesis::create_fan_out_tt(), params, p, t);
                     }
                 }
             }
@@ -255,9 +261,9 @@ class on_the_fly_gate_library
                                         return DOUBLE_WIRE;
                                     }
 
-                                    return design_gate<tt, GateLyt>(skeleton_with_defects,
-                                                                    synthesis::create_double_wire_tt(),
-                                                                    complex_gate_param, p, t);
+                                    return design_gate<GateLyt>(skeleton_with_defects,
+                                                                synthesis::create_double_wire_tt(), complex_gate_param,
+                                                                p, t);
                                 }
 
                                 if (params.using_predefined_crossing_and_double_wire_if_possible ==
@@ -266,8 +272,8 @@ class on_the_fly_gate_library
                                     return DOUBLE_WIRE;
                                 }
 
-                                return design_gate<tt, GateLyt>(skeleton, synthesis::create_double_wire_tt(),
-                                                                complex_gate_param, p, t);
+                                return design_gate<GateLyt>(skeleton, synthesis::create_double_wire_tt(),
+                                                            complex_gate_param, p, t);
                             }
 
                             if (defect_surface.has_value())
@@ -283,9 +289,8 @@ class on_the_fly_gate_library
                                     return CROSSING;
                                 }
 
-                                return design_gate<tt, GateLyt>(skeleton_with_defects,
-                                                                synthesis::create_crossing_wire_tt(),
-                                                                complex_gate_param, p, t);
+                                return design_gate<GateLyt>(skeleton_with_defects, synthesis::create_crossing_wire_tt(),
+                                                            complex_gate_param, p, t);
                             }
 
                             if (params.using_predefined_crossing_and_double_wire_if_possible ==
@@ -294,8 +299,8 @@ class on_the_fly_gate_library
                                 return CROSSING;
                             }
 
-                            return design_gate<tt, GateLyt>(skeleton, synthesis::create_crossing_wire_tt(),
-                                                            complex_gate_param, p, t);
+                            return design_gate<GateLyt>(skeleton, synthesis::create_crossing_wire_tt(),
+                                                        complex_gate_param, p, t);
                         }
 
                         const auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
@@ -311,10 +316,10 @@ class on_the_fly_gate_library
                             const auto skeleton_with_defects = add_defect_to_skeleton(
                                 defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
                                 absolute_cell);
-                            return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                            return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                         }
 
-                        return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                     }
                     return EMPTY_GATE;
                 }
@@ -331,10 +336,10 @@ class on_the_fly_gate_library
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_and_v<GateLyt>)
@@ -349,10 +354,10 @@ class on_the_fly_gate_library
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_or_v<GateLyt>)
@@ -367,10 +372,10 @@ class on_the_fly_gate_library
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_nand_v<GateLyt>)
@@ -385,10 +390,10 @@ class on_the_fly_gate_library
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_nor_v<GateLyt>)
@@ -403,10 +408,10 @@ class on_the_fly_gate_library
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_xor_v<GateLyt>)
@@ -421,10 +426,10 @@ class on_the_fly_gate_library
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_xnor_v<GateLyt>)
@@ -439,10 +444,10 @@ class on_the_fly_gate_library
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_ge_v<GateLyt>)
@@ -457,10 +462,10 @@ class on_the_fly_gate_library
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_le_v<GateLyt>)
@@ -475,10 +480,10 @@ class on_the_fly_gate_library
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_gt_v<GateLyt>)
@@ -493,10 +498,10 @@ class on_the_fly_gate_library
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_lt_v<GateLyt>)
@@ -511,10 +516,10 @@ class on_the_fly_gate_library
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                        return design_gate<tt, GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<tt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
         }
@@ -532,18 +537,16 @@ class on_the_fly_gate_library
      * Checks whether a predefined Bestagon gate can be used on a skeleton with defects: none of its logic dots may be
      * affected by a defect, and the gate has to be operational with the defects in place.
      *
-     * @tparam TT Truth table type.
      * @param bestagon_lyt The predefined gate.
      * @param skeleton_with_defects The skeleton with the surface defects nearby.
      * @param truth_table The Boolean function(s) of the gate.
      * @param parameters Parameters.
      * @return `true` if the predefined gate can be used.
      */
-    template <typename TT>
-    [[nodiscard]] static bool is_predefined_bestagon_gate_applicable(const layout&          bestagon_lyt,
-                                                                     const layout&          skeleton_with_defects,
-                                                                     const std::vector<TT>& truth_table,
-                                                                     const on_the_fly_gate_library_params& parameters)
+    [[nodiscard]] static bool
+    is_predefined_bestagon_gate_applicable(const layout& bestagon_lyt, const layout& skeleton_with_defects,
+                                           const std::vector<kitty::dynamic_truth_table>& truth_table,
+                                           const on_the_fly_gate_library_params&          parameters)
     {
         const auto sidbs_affected_by_defects =
             skeleton_with_defects.all_affected_sidbs(std::pair<uint16_t, uint16_t>{0, 0});
@@ -561,7 +564,7 @@ class on_the_fly_gate_library
 
         for (const auto& dot : logic_dots)
         {
-            skeleton_with_defects_copy.assign_dot_tag(dot, sidb::dot_tag::LOGIC);
+            skeleton_with_defects_copy.assign_sidb(dot, sidb::dot_tag::LOGIC);
         }
 
         const auto status = sidb::simulation::logic::is_operational(skeleton_with_defects_copy, truth_table,
@@ -630,7 +633,6 @@ class on_the_fly_gate_library
      * impossible, or if the designer finds no gate, a `gate_design_exception` names the tile, the function, and the
      * ports so that placement can blacklist them.
      *
-     * @tparam TT Truth table type.
      * @tparam GateLyt Gate-level layout type.
      * @param skeleton The skeleton, possibly with defects.
      * @param spec The Boolean function(s) to implement.
@@ -640,8 +642,8 @@ class on_the_fly_gate_library
      * @return The designed gate.
      * @throws gate_design_exception if no gate can be designed.
      */
-    template <typename TT, typename GateLyt>
-    [[nodiscard]] static gate design_gate(const layout& skeleton, const std::vector<TT>& spec,
+    template <typename GateLyt>
+    [[nodiscard]] static gate design_gate(const layout& skeleton, const std::vector<kitty::dynamic_truth_table>& spec,
                                           const on_the_fly_gate_library_params&      parameters,
                                           const fcn::port_list<fcn::port_direction>& p, const tile<GateLyt>& tile)
     {
@@ -654,14 +656,14 @@ class on_the_fly_gate_library
 
         if (skeleton.num_defects() > 0 && sidb::generators::is_gate_design_impossible(skeleton, spec, params))
         {
-            throw gate_design_exception<tt, GateLyt>(tile, function_to_report, p);
+            throw gate_design_exception<GateLyt>(tile, function_to_report, p);
         }
 
         const auto found_gate_layouts = sidb::generators::design_gates(skeleton, spec, parameters.design_gate_params);
 
         if (found_gate_layouts.empty())
         {
-            throw gate_design_exception<tt, GateLyt>(tile, function_to_report, p);
+            throw gate_design_exception<GateLyt>(tile, function_to_report, p);
         }
 
         return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
@@ -686,7 +688,7 @@ class on_the_fly_gate_library
             {
                 if (const auto cell = cell_list.at(i).at(j); cell != sidb::dot_tag::EMPTY)
                 {
-                    lyt.assign_dot_tag(sites[counter], cell);
+                    lyt.assign_sidb(sites[counter], cell);
                 }
 
                 ++counter;

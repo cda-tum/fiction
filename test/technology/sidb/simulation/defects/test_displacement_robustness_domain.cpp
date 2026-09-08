@@ -130,8 +130,7 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
         lyt.foreach_dot(
             [&lyt, &boundary_lyt, x_offset](const auto& c)
             {
-                boundary_lyt.assign_dot_tag({static_cast<int32_t>(int64_t{c.x} + x_offset), c.y, c.z},
-                                            lyt.get_dot_tag(c));
+                boundary_lyt.assign_sidb({static_cast<int32_t>(int64_t{c.x} + x_offset), c.y, c.z}, lyt.get_dot_tag(c));
             });
 
         params.displacement_variations = {1, 0};
