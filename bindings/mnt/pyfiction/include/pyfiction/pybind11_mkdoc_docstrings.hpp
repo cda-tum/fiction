@@ -25614,10 +25614,12 @@ R"doc(The parameters used to determine if a layout is operational or non-
 operational.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_sweep_dimensions =
-R"doc(The dimensions to sweep over together with their value ranges, ordered
-by priority. The first dimension is the x dimension, the second
-dimension is the y dimension, etc. The default sweeps relative
-permittivity and screening distance from 1.0 to 10.0 in steps of 0.1.)doc";
+R"doc(Dimensions to sweep over together with their value ranges, ordered by
+priority.
+
+The first dimension is the x dimension, the second dimension is the y
+dimension, etc. The default sweeps relative permittivity and screening
+distance from 1.0 to 10.0 in steps of 0.1.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_random_sampling =
 R"doc(Computes the operational domain of the given SiDB layout. The
