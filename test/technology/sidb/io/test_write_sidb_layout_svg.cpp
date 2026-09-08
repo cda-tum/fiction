@@ -444,10 +444,10 @@ TEST_CASE("Generate SVG for an sidb::layout on the H-Si(111)-1x1 surface", "[wri
 {
     sidb::layout lyt{sidb::lattice::si_111_1x1()};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 1, 1}, dot_tag::NORMAL);
 
     SECTION("light mode")
     {

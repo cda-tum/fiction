@@ -32,10 +32,10 @@ def four_sidb_layout() -> sidb_layout:
         The layout on the H-Si(100) 2x1 lattice.
     """
     lyt = sidb_layout()
-    lyt.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(3, 1, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(3, 1, 1), sidb_dot_tag.NORMAL)
     return lyt
 
 

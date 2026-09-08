@@ -67,7 +67,7 @@ TEST_CASE("Write empty SQD layout", "[sqd]")
 TEST_CASE("Write single-dot SQD layout", "[sqd]")
 {
     sidb::layout lyt{};
-    lyt.assign_dot_tag(site_at_row(1, 2), dot_tag::NORMAL);
+    lyt.assign_sidb(site_at_row(1, 2), dot_tag::NORMAL);
 
     std::stringstream layout_stream{};
 
@@ -83,11 +83,11 @@ TEST_CASE("Write single-dot SQD layout", "[sqd]")
 TEST_CASE("Write multi-dot SQD layout", "[sqd]")
 {
     sidb::layout lyt{};
-    lyt.assign_dot_tag(site_at_row(0, 0), dot_tag::NORMAL);
-    lyt.assign_dot_tag(site_at_row(1, 1), dot_tag::NORMAL);
-    lyt.assign_dot_tag(site_at_row(0, 2), dot_tag::NORMAL);
-    lyt.assign_dot_tag(site_at_row(0, 3), dot_tag::NORMAL);
-    lyt.assign_dot_tag(site_at_row(4, 4), dot_tag::NORMAL);
+    lyt.assign_sidb(site_at_row(0, 0), dot_tag::NORMAL);
+    lyt.assign_sidb(site_at_row(1, 1), dot_tag::NORMAL);
+    lyt.assign_sidb(site_at_row(0, 2), dot_tag::NORMAL);
+    lyt.assign_sidb(site_at_row(0, 3), dot_tag::NORMAL);
+    lyt.assign_sidb(site_at_row(4, 4), dot_tag::NORMAL);
 
     std::stringstream layout_stream{};
 
@@ -103,12 +103,12 @@ TEST_CASE("Write multi-dot SQD layout", "[sqd]")
 TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
 {
     sidb::layout lyt{};
-    lyt.assign_dot_tag(site_at_row(0, 0), dot_tag::INPUT);
-    lyt.assign_dot_tag(site_at_row(1, 1), dot_tag::OUTPUT);
-    lyt.assign_dot_tag(site_at_row(0, 2), dot_tag::NORMAL);
-    lyt.assign_dot_tag(site_at_row(0, 3), dot_tag::OUTPUT);
-    lyt.assign_dot_tag(site_at_row(4, 4), dot_tag::INPUT);
-    lyt.assign_dot_tag(site_at_row(4, 6), dot_tag::LOGIC);
+    lyt.assign_sidb(site_at_row(0, 0), dot_tag::INPUT);
+    lyt.assign_sidb(site_at_row(1, 1), dot_tag::OUTPUT);
+    lyt.assign_sidb(site_at_row(0, 2), dot_tag::NORMAL);
+    lyt.assign_sidb(site_at_row(0, 3), dot_tag::OUTPUT);
+    lyt.assign_sidb(site_at_row(4, 4), dot_tag::INPUT);
+    lyt.assign_sidb(site_at_row(4, 6), dot_tag::LOGIC);
 
     std::stringstream layout_stream{};
 

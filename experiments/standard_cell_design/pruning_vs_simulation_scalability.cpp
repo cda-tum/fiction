@@ -133,32 +133,32 @@ int main()  // NOLINT
     const auto skeleton_3i3o = read_sqd_layout(fmt::format("{}/{}", folder_3i, "3_in_3_out_skeleton.sqd"));
 
     auto two_one = skeleton_2i1o;
-    two_one.assign_dot_tag({22, 10}, dot_tag::LOGIC);
-    two_one.assign_dot_tag({17, 7}, dot_tag::LOGIC);
+    two_one.assign_sidb({22, 10}, dot_tag::LOGIC);
+    two_one.assign_sidb({17, 7}, dot_tag::LOGIC);
 
     auto two_two = skeleton_2i2o;
-    two_two.assign_dot_tag({15, 7}, dot_tag::LOGIC);
-    two_two.assign_dot_tag({22, 8}, dot_tag::LOGIC);
-    two_two.assign_dot_tag({22, 10}, dot_tag::LOGIC);
-    two_two.assign_dot_tag({17, 7}, dot_tag::LOGIC);
+    two_two.assign_sidb({15, 7}, dot_tag::LOGIC);
+    two_two.assign_sidb({22, 8}, dot_tag::LOGIC);
+    two_two.assign_sidb({22, 10}, dot_tag::LOGIC);
+    two_two.assign_sidb({17, 7}, dot_tag::LOGIC);
 
     auto three_one = skeleton_3i1o;
-    three_one.assign_dot_tag({25, 7}, dot_tag::LOGIC);
-    three_one.assign_dot_tag({32, 8}, dot_tag::LOGIC);
-    three_one.assign_dot_tag({36, 11}, dot_tag::LOGIC);
-    three_one.assign_dot_tag({40, 7}, dot_tag::LOGIC);
+    three_one.assign_sidb({25, 7}, dot_tag::LOGIC);
+    three_one.assign_sidb({32, 8}, dot_tag::LOGIC);
+    three_one.assign_sidb({36, 11}, dot_tag::LOGIC);
+    three_one.assign_sidb({40, 7}, dot_tag::LOGIC);
 
     auto three_two = skeleton_3i2o;
-    three_two.assign_dot_tag({25, 7}, dot_tag::LOGIC);
-    three_two.assign_dot_tag({32, 8}, dot_tag::LOGIC);
-    three_two.assign_dot_tag({36, 11}, dot_tag::LOGIC);
-    three_two.assign_dot_tag({40, 7}, dot_tag::LOGIC);
+    three_two.assign_sidb({25, 7}, dot_tag::LOGIC);
+    three_two.assign_sidb({32, 8}, dot_tag::LOGIC);
+    three_two.assign_sidb({36, 11}, dot_tag::LOGIC);
+    three_two.assign_sidb({40, 7}, dot_tag::LOGIC);
 
     auto three_three = skeleton_3i3o;
-    three_three.assign_dot_tag({25, 7}, dot_tag::LOGIC);
-    three_three.assign_dot_tag({32, 8}, dot_tag::LOGIC);
-    three_three.assign_dot_tag({36, 11}, dot_tag::LOGIC);
-    three_three.assign_dot_tag({40, 7}, dot_tag::LOGIC);
+    three_three.assign_sidb({25, 7}, dot_tag::LOGIC);
+    three_three.assign_sidb({32, 8}, dot_tag::LOGIC);
+    three_three.assign_sidb({36, 11}, dot_tag::LOGIC);
+    three_three.assign_sidb({40, 7}, dot_tag::LOGIC);
 
     const std::vector<std::pair<layout, std::vector<kitty::dynamic_truth_table>>> layout_truth_table{
         {two_one, {create_or_tt()}},

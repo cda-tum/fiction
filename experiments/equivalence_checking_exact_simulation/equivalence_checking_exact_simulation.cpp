@@ -96,7 +96,7 @@ int main()  // NOLINT
 
                     for (const auto idx : *std::next(all_distributions.cbegin(), static_cast<int64_t>(ix)))
                     {
-                        lyt.assign_dot_tag(all_sites_in_region[idx], dot_tag::NORMAL);
+                        lyt.assign_sidb(all_sites_in_region[idx], dot_tag::NORMAL);
                     }
 
                     auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);

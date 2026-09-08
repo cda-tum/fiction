@@ -945,20 +945,20 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
     lyt.set_layout_name("BDL wire");
 
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({3, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({3, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 0, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 0, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({20, 0, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({18, 0, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, fiction::sidb::dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_dot_tag({24, 0, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 0, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -972,22 +972,22 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 1}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({20, 0, 1}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({18, 1, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({20, 0, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({18, 1, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({4, 2, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 3, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({4, 2, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 3, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 3, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 2, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 3, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({16, 2, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 6, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({10, 7, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 6, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 7, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({10, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({10, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1001,22 +1001,22 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({16, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({14, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({16, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({14, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({4, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({4, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 2, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({6, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({10, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 5, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({8, 6, 1}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 5, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 6, 1}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({8, 8, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 8, 1}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1030,25 +1030,25 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 1}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({20, 0, 1}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({18, 1, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({20, 0, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({18, 1, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({4, 2, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 3, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({4, 2, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 3, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({16, 2, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 3, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({16, 2, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 3, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 4, 1}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({10, 5, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({10, 4, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({10, 5, 1}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_dot_tag({10, 8, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({10, 9, 1}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 8, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 9, 1}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({10, 12, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({10, 12, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1063,34 +1063,34 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({23, 9, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({18, 11, 1}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({18, 9, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({19, 8, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({23, 9, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({18, 11, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({18, 9, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({19, 8, 0}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_dot_tag({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1107,36 +1107,36 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{fiction::sidb::lattice::si_111_1x1()};
 
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({1, 1, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({1, 1, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({25, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({23, 1, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({25, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({23, 1, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({4, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({21, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({4, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({21, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({5, 5, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({19, 5, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({5, 5, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({19, 5, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({17, 8, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 8, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({17, 8, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 8, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({9, 9, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({15, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({9, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({15, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_dot_tag({13, 17, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({16, 18, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({10, 18, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({13, 17, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({16, 18, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({10, 18, 0}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_dot_tag({15, 21, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({17, 23, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({15, 21, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({17, 23, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({19, 25, 1}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({21, 27, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({19, 25, 1}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({21, 27, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({23, 29, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({23, 29, 1}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1145,36 +1145,36 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{fiction::sidb::lattice::si_111_1x1()};
 
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({1, -2, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({1, -2, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({25, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({23, -2, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({25, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({23, -2, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({4, -4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({21, -4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({4, -4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({21, -4, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({5, -6, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({19, -6, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({5, -6, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({19, -6, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({17, -8, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, -8, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({17, -8, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, -8, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({9, -10, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({15, -10, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({9, -10, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({15, -10, 1}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_dot_tag({13, -17, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({16, -18, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({10, -18, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({13, -17, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({16, -18, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({10, -18, 0}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_dot_tag({15, -22, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({17, -23, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({15, -22, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({17, -23, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({19, -26, 1}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({21, -27, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({19, -26, 1}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({21, -27, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({23, -30, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({23, -30, 1}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1189,47 +1189,47 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_dot_tag({20, 8, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({14, 9, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({18, 9, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({14, 11, 1}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({20, 12, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({24, 13, 1}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({16, 13, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({20, 8, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({14, 9, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({18, 9, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({14, 11, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({20, 12, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({24, 13, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({16, 13, 1}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1239,44 +1239,44 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 1, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_dot_tag({19, 7, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({16, 10, 1}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({17, 12, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({19, 7, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({16, 10, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({17, 12, 0}, fiction::sidb::dot_tag::LOGIC);
 
     // output wires
-    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 17, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 18, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 19, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({0, 20, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({38, 20, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 20, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({38, 20, 0}, fiction::sidb::dot_tag::INPUT);
 
     return lyt;
 }
@@ -1292,37 +1292,37 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_dot_tag({19, 8, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({23, 9, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({18, 9, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({18, 11, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({19, 8, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({23, 9, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({18, 9, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({18, 11, 1}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_dot_tag({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1338,34 +1338,34 @@ CellLyt single_layer_inml_crosswire() noexcept
 {
     fiction::sidb::layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({19, 7, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({18, 6, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({19, 7, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({18, 6, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_dot_tag({21, 11, 1}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({17, 11, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({18, 13, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({21, 11, 1}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({17, 11, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({18, 13, 0}, fiction::sidb::dot_tag::LOGIC);
 
-    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1382,39 +1382,39 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // output wires
-    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1429,39 +1429,39 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 1, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // output wires
-    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 17, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 18, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 19, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({0, 20, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({38, 20, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 20, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({38, 20, 0}, fiction::sidb::dot_tag::INPUT);
 
     return lyt;
 }
@@ -1478,32 +1478,32 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // output wire
-    lyt.assign_dot_tag({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1513,38 +1513,38 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas
-    lyt.assign_dot_tag({15, 7, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({19, 8, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({17, 9, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 11, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({15, 7, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({19, 8, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({17, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({20, 11, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // output wire
-    lyt.assign_dot_tag({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1558,37 +1558,37 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_dot_tag({19, 7, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({17, 11, 0}, fiction::sidb::dot_tag::LOGIC);
-    lyt.assign_dot_tag({21, 10, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({19, 7, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({17, 11, 0}, fiction::sidb::dot_tag::LOGIC);
+    lyt.assign_sidb({21, 10, 0}, fiction::sidb::dot_tag::LOGIC);
 
     // output wire
-    lyt.assign_dot_tag({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1602,28 +1602,28 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // first input wire
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // second input wire
-    lyt.assign_dot_tag({0, 15, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 14, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({6, 13, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 12, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 11, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 10, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({0, 15, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 14, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({6, 13, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 12, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 11, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 10, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // output wire
-    lyt.assign_dot_tag({26, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({28, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({32, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({34, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({26, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({28, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({32, 3, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({34, 2, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({38, 1, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({38, 1, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1640,52 +1640,52 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
     // left SiDBs
-    lyt.assign_dot_tag({14, 7, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 9, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({11, 11, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 12, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 7, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({10, 9, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({11, 11, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 12, 1}, fiction::sidb::dot_tag::NORMAL);
 
     // right SiDBs
-    lyt.assign_dot_tag({24, 7, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({28, 9, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({27, 11, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 12, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 7, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({28, 9, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({27, 11, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 12, 1}, fiction::sidb::dot_tag::NORMAL);
 
     // output wires
-    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1702,45 +1702,45 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_dot_tag({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_dot_tag({17, 8, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 9, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({17, 12, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 13, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({17, 8, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({16, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({17, 12, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({20, 13, 1}, fiction::sidb::dot_tag::NORMAL);
 
     // output wires
-    lyt.assign_dot_tag({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({14, 15, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({12, 16, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({6, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({2, 19, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
@@ -1754,34 +1754,34 @@ CellLyt single_layer_inml_crosswire() noexcept
     fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_dot_tag({4, 9, 1}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({1, 9, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({4, 9, 1}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({1, 9, 1}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({14, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_dot_tag({16, 1, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({14, 0, 0}, fiction::sidb::dot_tag::INPUT);
+    lyt.assign_sidb({16, 1, 0}, fiction::sidb::dot_tag::INPUT);
 
-    lyt.assign_dot_tag({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({28, 5, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({28, 5, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({19, 9, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({19, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({16, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({11, 9, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({11, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({8, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({36, 9, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({39, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({36, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({39, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({44, 9, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({47, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({44, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({47, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({22, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 2, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({22, 3, 0}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({20, 2, 0}, fiction::sidb::dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({52, 9, 1}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_dot_tag({55, 9, 1}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({52, 9, 1}, fiction::sidb::dot_tag::OUTPUT);
+    lyt.assign_sidb({55, 9, 1}, fiction::sidb::dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({60, 9, 1}, fiction::sidb::dot_tag::NORMAL);
+    lyt.assign_sidb({60, 9, 1}, fiction::sidb::dot_tag::NORMAL);
 
     return lyt;
 }
