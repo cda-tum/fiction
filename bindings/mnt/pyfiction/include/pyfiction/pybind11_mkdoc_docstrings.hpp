@@ -19144,9 +19144,7 @@ pruning.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_mutex_to_protect_the_simulation_results = R"doc(Mutex to protect the simulation results.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_progress =
-R"doc(Reports the unfolded compositions. Their number is not known in
-advance, so the total stays unknown.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_progress = R"doc(Reports unfolded compositions; the total is unknown.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_remove_composition =
 R"doc(A composition is removed from the given clustering state, i.e., the
