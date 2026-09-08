@@ -1894,10 +1894,10 @@ TEST_CASE("QuickExact propagates invalid lattice-basis errors", "[quickexact]")
 TEST_CASE("QuickExact reports progress", "[quickexact]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({-2, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({0, 1, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
 
     progress_recorder rec{};
 

@@ -1823,10 +1823,10 @@ TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[clustercomp
 TEST_CASE("ClusterComplete reports progress", "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({2, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({4, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 1, 1}, dot_tag::NORMAL);
 
     progress_recorder rec{};
 
