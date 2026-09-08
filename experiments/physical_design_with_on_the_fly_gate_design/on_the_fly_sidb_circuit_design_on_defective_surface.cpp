@@ -25,6 +25,7 @@
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/surfaces/defect_surface.hpp>
@@ -49,6 +50,7 @@
 #include <string>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::layouts;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::io;
@@ -72,7 +74,7 @@ int main()  // NOLINT
     design_gates_params design_gate_params{};
     design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
     // needs to be changed if a different skeleton is used.
-    design_gate_params.canvas = {{24, 17}, {34, 28}};
+    design_gate_params.canvas = {site_at_row(24, 17), site_at_row(34, 28)};
 
     design_gate_params.number_of_canvas_sidbs        = 3;
     design_gate_params.operational_params.sim_engine = engine::QUICKEXACT;

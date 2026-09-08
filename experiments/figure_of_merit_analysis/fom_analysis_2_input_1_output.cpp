@@ -22,6 +22,7 @@
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp>
@@ -49,6 +50,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
@@ -84,7 +86,7 @@ int main()  // NOLINT
 
     design_params.operational_params     = op_params;
     design_params.design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-    design_params.canvas                 = {{17, 14, 0}, {21, 22, 0}};
+    design_params.canvas                 = {site_at_row(17, 14), site_at_row(21, 22)};
     design_params.number_of_canvas_sidbs = 2;
     design_params.termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED;
     // QuickExact was used for the paper. However, ClusterComplete is more efficient and faster but does not influence

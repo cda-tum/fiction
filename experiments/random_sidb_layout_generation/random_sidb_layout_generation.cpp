@@ -17,6 +17,7 @@
 
 #include <fiction/technology/sidb/generators/random_layout_generator.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -30,6 +31,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::layouts;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::io;
@@ -194,9 +196,12 @@ int main(int argc, const char* argv[])  // NOLINT
                     std::cout << "Folder already exists.\n";
                 }
 
-                const generate_random_layout_params params{
-                    {{nw_x, nw_y}, {se_x, se_y}},    number_of_placed_sidbs,      charges,
-                    simulation_parameters{3, -0.32}, static_cast<uint64_t>(10E6), number_of_layouts};
+                const generate_random_layout_params params{{site_at_row(nw_x, nw_y), site_at_row(se_x, se_y)},
+                                                           number_of_placed_sidbs,
+                                                           charges,
+                                                           simulation_parameters{3, -0.32},
+                                                           static_cast<uint64_t>(10E6),
+                                                           number_of_layouts};
                 const auto unique_lyts = generate_multiple_random_layouts<sidb_100_cell_clk_lyt>(params);
 
                 if (unique_lyts.has_value())

@@ -18,6 +18,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/technology/sidb/generators/random_layout_generator.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
@@ -33,6 +34,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::engines;
@@ -59,7 +61,7 @@ int main()  // NOLINT
                                       .base_number_detection = quickexact_params::automatic_base_number_detection::OFF};
 
     auto random_layouts_params =
-        generate_random_layout_params{.coordinate_pair  = {{0, 0}, {10, 10}},
+        generate_random_layout_params{.coordinate_pair  = {site_at_row(0, 0), site_at_row(10, 10)},
                                       .number_of_sidbs  = 0,
                                       .positive_sidbs   = generate_random_layout_params::positive_charges::MAY_OCCUR,
                                       .sim_params       = sim_params,
