@@ -26725,8 +26725,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_create_ge_tt =
-R"doc(Creates and returns a truth table that implements the greater-than-or-
-equal function in two variables.
+R"doc(Creates a truth table that implements the greater-than-or-equal
+function in two variables.
 
 Returns:
     Greater-than-or-equal function in two variables.
@@ -26775,8 +26775,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_create_le_tt =
-R"doc(Creates and returns a truth table that implements the less-than-or-
-equal function in two variables.
+R"doc(Creates a truth table that implements the less-than-or-equal function
+in two variables.
 
 Returns:
     Less-than-or-equal function in two variables.
