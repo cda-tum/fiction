@@ -44,8 +44,10 @@
 #include <functional>
 #include <future>
 #include <limits>
+#include <new>
 #include <optional>
 #include <stdexcept>
+#include <tuple>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -2103,6 +2105,43 @@ TEST_CASE("Operational-domain flood fill requires two dimensions", "[operational
     params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.0, .max = 5.1, .step = 0.1}};
     CHECK_THROWS_AS(operational_domain_flood_fill(layout{}, std::vector<tt>{create_id_tt()}, 0, params),
                     std::invalid_argument);
+}
+
+TEST_CASE("Flood fill propagates a worker's storage failure", "[operational-domain]")
+{
+    /**
+     * @brief Stores the seed point and rejects subsequent results to exercise worker failure.
+     */
+    class failing_domain : public operational_domain
+    {
+      public:
+        /**
+         * @brief Stores the seed result.
+         * @param point Parameter point to store.
+         * @param value Operational status of the point.
+         * @throws std::bad_alloc for any point other than the seed.
+         */
+        void add_value(const parameter_point& point, const std::tuple<operational_status>& value)
+        {
+            if (point != parameter_point{{5.6, 5.0}})
+            {
+                throw std::bad_alloc{};
+            }
+            operational_domain::add_value(point, value);
+        }
+    };
+
+    const layout              lat{to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>())};
+    operational_domain_params params{};
+    params.number_of_threads             = 2;
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.7, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.1, .step = 0.1}};
+    operational_domain_stats                                                 stats{};
+    sidb::simulation::logic::detail::operational_domain_impl<failing_domain> impl{lat, std::vector{create_and_tt()},
+                                                                                  params, stats};
+
+    CHECK_THROWS_AS(impl.flood_fill(0, parameter_point{{5.6, 5.0}}), std::bad_alloc);
 }
 
 TEST_CASE("Concurrent operational-domain sampling matches grid results", "[operational-domain]")

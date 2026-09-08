@@ -325,7 +325,7 @@ class critical_temperature_domain : public sidb::simulation::domain<parameter_po
      *
      * @return The minimum critical temperature.
      */
-    [[nodiscard]] double minimum_ct() const noexcept
+    [[nodiscard]] double minimum_ct() const
     {
         double min_ct = std::numeric_limits<double>::infinity();
 
@@ -345,7 +345,7 @@ class critical_temperature_domain : public sidb::simulation::domain<parameter_po
      *
      * @return The maximum critical temperature.
      */
-    [[nodiscard]] double maximum_ct() const noexcept
+    [[nodiscard]] double maximum_ct() const
     {
         double max_ct = 0.0;
 
@@ -629,7 +629,7 @@ class operational_domain_impl
         all_step_points.reserve(all_index_combinations.size());
 
         std::ranges::transform(all_index_combinations, std::back_inserter(all_step_points),
-                               [](const auto& comb) noexcept { return step_point{comb}; });
+                               [](const auto& comb) { return step_point{comb}; });
 
         // shuffle the step points to simulate in random order. This helps with load-balancing since
         // operational/non-operational points are usually clustered. However, non-operational points can be simulated
@@ -680,6 +680,7 @@ class operational_domain_impl
      * operational region, it is used as a starting point for flood fill.
      * @return The (partial) operational domain of the layout.
      * @throws std::invalid_argument if fewer than two dimensions are swept or the seed is outside the sweep grid.
+     * @throws std::bad_alloc if sampling or a flood-fill worker cannot allocate storage.
      */
     [[nodiscard]] OpDomain flood_fill(const std::size_t                     samples,
                                       const std::optional<parameter_point>& given_parameter_point = std::nullopt)
@@ -728,21 +729,21 @@ class operational_domain_impl
 
         // a utility function that gathers the neighbors of `sp` that are not already known. This is the expensive part
         // of the discovery, so it is deliberately called without holding `queue_mutex`
-        const auto unknown_neighborhood = [this](const step_point& sp) noexcept
+        const auto unknown_neighborhood = [this](const step_point& sp)
         {
             std::vector<step_point> unknown{};
 
             const auto neighborhood = moore_neighborhood(sp);
 
             std::ranges::copy_if(neighborhood, std::back_inserter(unknown),
-                                 [this](const auto& m) noexcept { return !op_domain.contains(to_parameter_point(m)); });
+                                 [this](const auto& m) { return !op_domain.contains(to_parameter_point(m)); });
 
             return unknown;
         };
 
         // a utility function that adds the given step points to the queue for further evaluation. Each step point is
         // scheduled at most once, which ensures that no parameter point is simulated twice. Must be called under lock
-        const auto schedule_points = [&queue, &scheduled](const std::vector<step_point>& step_points) noexcept
+        const auto schedule_points = [&queue, &scheduled](const std::vector<step_point>& step_points)
         {
             for (const auto& sp : step_points)
             {
@@ -766,64 +767,91 @@ class operational_domain_impl
         // if random sampling did not find a single operational point, there is nothing to flood fill
         if (!queue.empty())
         {
+            const auto stop_workers = [&]()
+            {
+                const std::scoped_lock lock{queue_mutex};
+                finished = true;
+                queue_cv.notify_all();
+            };
+
             const auto worker = [&]()
             {
-                while (true)
+                try
                 {
-                    std::unique_lock lock{queue_mutex};
-
-                    queue_cv.wait(lock, [&queue, &finished]() noexcept { return !queue.empty() || finished; });
-
-                    // the queue can only be empty here once the flood fill is complete
-                    if (queue.empty())
+                    while (true)
                     {
-                        return;
+                        std::unique_lock lock{queue_mutex};
+
+                        queue_cv.wait(lock, [&queue, &finished]() noexcept { return !queue.empty() || finished; });
+
+                        // Stop every worker after completion or another worker fails.
+                        if (finished)
+                        {
+                            return;
+                        }
+
+                        // fetch the step point and remove it from the queue
+                        const auto sp = queue.front();
+                        queue.pop_front();
+
+                        ++active_workers;
+
+                        lock.unlock();
+
+                        // determine the operational status and, if the point is operational, its yet unknown neighbors.
+                        // No lock is held here, which is what enables the parallelism in the first place
+                        const auto discovered = is_step_point_operational(sp) == operational_status::OPERATIONAL ?
+                                                    unknown_neighborhood(sp) :
+                                                    std::vector<step_point>{};
+
+                        lock.lock();
+
+                        if (finished)
+                        {
+                            return;
+                        }
+
+                        schedule_points(discovered);
+
+                        --active_workers;
+
+                        // the flood fill is complete only once the queue has run dry and no worker is left that could
+                        // still discover new points
+                        finished = queue.empty() && active_workers == 0;
+
+                        if (finished || !queue.empty())
+                        {
+                            queue_cv.notify_all();
+                        }
                     }
-
-                    // fetch the step point and remove it from the queue
-                    const auto sp = queue.front();
-                    queue.pop_front();
-
-                    ++active_workers;
-
-                    lock.unlock();
-
-                    // determine the operational status and, if the point is operational, its yet unknown neighbors.
-                    // No lock is held here, which is what enables the parallelism in the first place
-                    const auto discovered = is_step_point_operational(sp) == operational_status::OPERATIONAL ?
-                                                unknown_neighborhood(sp) :
-                                                std::vector<step_point>{};
-
-                    lock.lock();
-
-                    schedule_points(discovered);
-
-                    --active_workers;
-
-                    // the flood fill is complete only once the queue has run dry and no worker is left that could
-                    // still discover new points
-                    finished = queue.empty() && active_workers == 0;
-
-                    if (finished || !queue.empty())
-                    {
-                        queue_cv.notify_all();
-                    }
+                }
+                catch (...)
+                {
+                    stop_workers();
+                    throw;
                 }
             };
 
-            const auto num_workers = number_of_threads;
+            std::vector<std::future<void>> workers{};
+            workers.reserve(number_of_threads);
 
-            std::vector<std::thread> workers{};
-            workers.reserve(num_workers);
-
-            for (std::size_t i = 0; i < num_workers; ++i)
+            try
             {
-                workers.emplace_back(worker);
+                for (std::size_t i = 0; i < number_of_threads; ++i)
+                {
+                    workers.emplace_back(std::async(std::launch::async, worker));
+                }
+
+                for (auto& worker_result : workers)
+                {
+                    worker_result.get();
+                }
             }
-
-            for (auto& w : workers)
+            catch (...)
             {
-                w.join();
+                // Wake blocked workers before the futures wait for their completion.
+                stop_workers();
+                throw;
             }
         }
 
@@ -868,7 +896,7 @@ class operational_domain_impl
         simulate_operational_status_in_parallel(step_point_samples);
 
         const auto next_clockwise_point = [](std::vector<step_point>& neighborhood,
-                                             const step_point&        backtrack) noexcept -> step_point
+                                             const step_point&        backtrack) -> step_point
         {
             assert(std::ranges::find(neighborhood, backtrack) != neighborhood.cend() &&
                    "The backtrack point must be part of the neighborhood");
@@ -1202,7 +1230,7 @@ class operational_domain_impl
      *
      * @return The parameter points that have been inferred to be operational.
      */
-    [[nodiscard]] std::vector<parameter_point> inferred_operational_parameter_points() const noexcept
+    [[nodiscard]] std::vector<parameter_point> inferred_operational_parameter_points() const
     {
         std::vector<parameter_point> parameter_points{};
         parameter_points.reserve(inferred_op_domain.size());
@@ -1363,7 +1391,7 @@ class operational_domain_impl
      * @param sp Step point to convert.
      * @return The parameter point corresponding to the step point `sp`.
      */
-    [[nodiscard]] parameter_point to_parameter_point(const step_point& sp) const noexcept
+    [[nodiscard]] parameter_point to_parameter_point(const step_point& sp) const
     {
         std::vector<double> parameter_values{};
         parameter_values.reserve(num_dimensions);
@@ -1416,7 +1444,7 @@ class operational_domain_impl
      * @param dim Sweep dimension to set the value `val` to.
      */
     void set_dimension_value(sidb::model::simulation_parameters& sim_parameters, const double val,
-                             const std::size_t dim) const noexcept
+                             const std::size_t dim) const
     {
         switch (params.sweep_dimensions.at(dim).dimension)
         {
@@ -1462,8 +1490,7 @@ class operational_domain_impl
 
         const auto param_point = to_parameter_point(sp);
 
-        // NOLINTNEXTLINE(bugprone-exception-escape): only allocation can throw, as in the enclosing algorithms
-        const auto operational = [this, &param_point](const std::optional<double>& ct_value = std::nullopt) noexcept
+        const auto operational = [this, &param_point](const std::optional<double>& ct_value = std::nullopt)
         {
             if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
             {
@@ -1480,7 +1507,7 @@ class operational_domain_impl
             return operational_status::OPERATIONAL;
         };
 
-        const auto non_operational = [this, &param_point]() noexcept
+        const auto non_operational = [this, &param_point]()
         {
             if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
             {
@@ -1607,7 +1634,7 @@ class operational_domain_impl
      * @param samples Maximum number of random `step_point`s to generate.
      * @return A vector of unique random `step_point`s in the stored parameter range of size at most equal to `samples`.
      */
-    [[nodiscard]] std::vector<step_point> generate_random_step_points(const std::size_t samples) const noexcept
+    [[nodiscard]] std::vector<step_point> generate_random_step_points(const std::size_t samples) const
     {
         std::mt19937_64 generator{std::random_device{}()};
 
@@ -1770,7 +1797,7 @@ class operational_domain_impl
      * @param sp Step point to get the 2D Moore neighborhood of.
      * @return The 2D Moore neighborhood of the step point at `sp = (x, y)`.
      */
-    [[nodiscard]] std::vector<step_point> moore_neighborhood_2d(const step_point& sp) const noexcept
+    [[nodiscard]] std::vector<step_point> moore_neighborhood_2d(const step_point& sp) const
     {
         assert(num_dimensions == 2 && "2D Moore neighborhood is only supported for 2 dimensions");
         assert(sp.step_values.size() == 2 && "Given step point must have 2 dimensions");
@@ -1778,7 +1805,7 @@ class operational_domain_impl
         std::vector<step_point> neighbors{};
         neighbors.reserve(8);
 
-        const auto emplace = [&neighbors](const auto x, const auto y) noexcept
+        const auto emplace = [&neighbors](const auto x, const auto y)
         { neighbors.emplace_back(std::vector<std::size_t>{x, y}); };
 
         const auto x = sp.step_values.at(0);
@@ -1846,7 +1873,7 @@ class operational_domain_impl
      * @param sp Step point to get the von Neumann neighborhood of.
      * @return The von Neumann neighborhood of `sp`.
      */
-    [[nodiscard]] std::vector<step_point> von_neumann_neighborhood(const step_point& sp) const noexcept
+    [[nodiscard]] std::vector<step_point> von_neumann_neighborhood(const step_point& sp) const
     {
         assert(sp.step_values.size() == num_dimensions && "Given step point must match the number of dimensions");
 
@@ -1886,7 +1913,7 @@ class operational_domain_impl
      * @param sp Step point to get the Moore neighborhood of.
      * @return The Moore neighborhood of `sp`.
      */
-    [[nodiscard]] std::vector<step_point> moore_neighborhood(const step_point& sp) const noexcept
+    [[nodiscard]] std::vector<step_point> moore_neighborhood(const step_point& sp) const
     {
         assert(sp.step_values.size() == num_dimensions && "Given step point must match the number of dimensions");
 
@@ -1955,9 +1982,8 @@ class operational_domain_impl
      * function might invoke undefined behavior.
      * @param contour The step points visited by the contour trace that encloses `starting_point`.
      */
-    // NOLINTNEXTLINE(bugprone-exception-escape): only allocation can throw, as in the calling `contour_tracing`
     void infer_operational_status_in_enclosing_contour(const step_point&                   starting_point,
-                                                       const phmap::btree_set<step_point>& contour) noexcept
+                                                       const phmap::btree_set<step_point>& contour)
     {
         assert(is_step_point_operational(starting_point) == operational_status::OPERATIONAL &&
                "starting_point must be within the operational domain");
@@ -2018,7 +2044,7 @@ class operational_domain_impl
      * Due to data races that can occur during the computation, each value is temporarily held in an atomic variable and
      * written to the statistics object only after the computation has finished.
      */
-    void log_stats() const noexcept
+    void log_stats() const
     {
         stats.num_simulator_invocations            = num_simulator_invocations.load();
         stats.num_evaluated_parameter_combinations = num_evaluated_parameter_combinations.load();
