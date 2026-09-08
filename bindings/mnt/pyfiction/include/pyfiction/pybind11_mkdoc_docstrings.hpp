@@ -25599,10 +25599,10 @@ feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
-    tt: Expected Boolean function of the lyt given as a multi-output
-        truth table.
-    ps: Parameters for the operational domain computation.
-    st: Statistics of the process.
+    spec: Expected Boolean function of the lyt given as a multi-output
+          truth table.
+    params: Parameters for the operational domain computation.
+    stats: Statistics of the process.
 
 Returns:
     The operational domain of the layout.
@@ -29665,7 +29665,7 @@ static const char *mkd_doc_std_hash_8 = R"doc(Hash for SiDB layouts, over the Si
 
 static const char *mkd_doc_std_hash_9 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
 
-static const char *mkd_doc_std_hash_10 = R"doc()doc";
+static const char *mkd_doc_std_hash_10 = R"doc(Hashes parameter points on the equality comparison grid.)doc";
 
 static const char *mkd_doc_std_hash_operator_call = R"doc()doc";
 
@@ -29720,7 +29720,16 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_10 = R"doc()doc";
+static const char *mkd_doc_std_hash_operator_call_10 =
+R"doc(Computes the hash of a parameter point.
+
+Args:
+    pp: Parameter point to hash.
+
+Returns:
+    Hash of the quantized parameter values.
+
+)doc";
 
 static const char *mkd_doc_std_iterator_traits = R"doc()doc";
 

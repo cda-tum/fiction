@@ -146,6 +146,44 @@ struct parameter_point
      */
     std::vector<double> parameters;
 };
+
+}  // namespace fiction::sidb::simulation::logic
+
+namespace std
+{
+
+/**
+ * @brief Hashes parameter points on the equality comparison grid.
+ */
+template <>
+struct hash<fiction::sidb::simulation::logic::parameter_point>
+{
+    /**
+     * @brief Computes the hash of a parameter point.
+     *
+     * @param pp Parameter point to hash.
+     * @return Hash of the quantized parameter values.
+     */
+    [[nodiscard]] size_t operator()(const fiction::sidb::simulation::logic::parameter_point& pp) const noexcept
+    {
+        size_t hash_value = 0;
+        for (const auto& parameter : pp.get_parameters())
+        {
+            // hash the cell the parameter value falls into, which is what `parameter_point::operator==` compares.
+            // Casting the quotient straight to `size_t` would be undefined for the negative values that a `MU_MINUS`
+            // sweep produces
+            fiction::utils::stl::hash_combine(hash_value,
+                                              fiction::sidb::simulation::logic::parameter_point::quantize(parameter));
+        }
+
+        return hash_value;
+    }
+};
+
+}  // namespace std
+
+namespace fiction::sidb::simulation::logic
+{
 /**
  * Possible sweep parameters for the operational domain computation.
  */
@@ -2011,9 +2049,9 @@ class operational_domain_impl
  * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
  * @param lyt Layout to compute the operational domain for.
- * @param tt Expected Boolean function of the lyt given as a multi-output truth table.
- * @param ps Parameters for the operational domain computation.
- * @param st Statistics of the process.
+ * @param spec Expected Boolean function of the lyt given as a multi-output truth table.
+ * @param params Parameters for the operational domain computation.
+ * @param stats Statistics of the process.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
  * is requested without rejecting kinks or on a layout without `LOGIC` dots. Any number of sweep
@@ -2555,26 +2593,6 @@ template <size_t I>
 struct tuple_element<I, fiction::sidb::simulation::logic::parameter_point>
 {
     using type = double;
-};
-
-// make `operational_domain::parameter_point` compatible with `std::hash`
-template <>
-struct hash<fiction::sidb::simulation::logic::parameter_point>
-{
-    size_t operator()(const fiction::sidb::simulation::logic::parameter_point& pp) const noexcept
-    {
-        size_t hash_value = 0;
-        for (const auto& parameter : pp.get_parameters())
-        {
-            // hash the cell the parameter value falls into, which is what `parameter_point::operator==` compares.
-            // Casting the quotient straight to `size_t` would be undefined for the negative values that a `MU_MINUS`
-            // sweep produces
-            fiction::utils::stl::hash_combine(hash_value,
-                                              fiction::sidb::simulation::logic::parameter_point::quantize(parameter));
-        }
-
-        return hash_value;
-    }
 };
 
 }  // namespace std
