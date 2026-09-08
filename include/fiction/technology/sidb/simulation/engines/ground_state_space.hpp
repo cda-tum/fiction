@@ -140,7 +140,9 @@ class ground_state_space_impl
      * @param parameters The parameters that *Ground State Space* will use throughout the construction.
      */
     ground_state_space_impl(const potential_landscape& land, const ground_state_space_params parameters) :
-            params{parameters},
+            params{.sim_params = land.params(),
+                   .witness_partitioning_cluster_size_limit = parameters.witness_partitioning_cluster_size_limit,
+                   .num_overlapping_witnesses_limit_gss = parameters.num_overlapping_witnesses_limit_gss},
             top_cluster{to_cluster(cluster_hierarchy(land.get_layout()))},
             clst{get_initial_clustering(top_cluster, land)},
             mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - land.params().mu_minus,

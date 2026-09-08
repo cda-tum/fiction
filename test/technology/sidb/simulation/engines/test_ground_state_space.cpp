@@ -26,6 +26,7 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/ground_state_space.hpp>
@@ -67,6 +68,18 @@ TEST_CASE("Empty layout Ground State Space construction", "[ground-state-space]"
     CHECK(!res.top_cluster);
     CHECK(mockturtle::to_seconds(res.runtime) == 0.0);
     CHECK(res.maximum_top_level_multisets == 0);
+}
+
+TEST_CASE("Ground State Space statistics use the landscape charge base", "[ground-state-space]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0, 0});
+
+    const potential_landscape land{lyt, simulation_parameters{2}};
+
+    const auto res = ground_state_space(land);
+
+    CHECK(res.maximum_top_level_multisets == 2);
 }
 
 TEST_CASE("Ground State Space construction of a single SiDB", "[ground-state-space]")
