@@ -69,15 +69,14 @@ int main()  // NOLINT
     using gate_lyt = hex_even_row_gate_clk_lyt;
     using cell_lyt = sidb_cell_clk_lyt_cube;
 
-    design_gates_params<cell<cell_lyt>> design_gate_params{};
+    design_gates_params design_gate_params{};
     design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
     // needs to be changed if a different skeleton is used.
     design_gate_params.canvas = {{24, 17}, {34, 28}};
 
     design_gate_params.number_of_canvas_sidbs        = 3;
     design_gate_params.operational_params.sim_engine = engine::QUICKEXACT;
-    design_gate_params.termination_cond =
-        design_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+    design_gate_params.termination_cond              = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
 
     // save atomic defects which their respective physical parameters as experimentally determined by T. R. Huff, T.
     // Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A. Wolkow, "Electrostatic landscape of a

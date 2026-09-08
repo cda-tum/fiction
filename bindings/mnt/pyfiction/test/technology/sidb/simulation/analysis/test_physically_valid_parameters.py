@@ -24,7 +24,7 @@ from mnt.pyfiction import (
 def test_one_sidb_100_lattice() -> None:
     """Check physical parameter validity on the Si(100) lattice."""
     layout = sidb_layout()
-    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
 
     valid_parameters = physically_valid_parameters(layout, charge_distribution(layout))
 
@@ -40,7 +40,7 @@ def test_one_sidb_100_lattice() -> None:
 def test_one_sidb_111_lattice() -> None:
     """Check physical parameter validity on the Si(111) lattice."""
     layout = sidb_layout(lattice.si_111_1x1())
-    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
 
     valid_parameters = physically_valid_parameters(layout, charge_distribution(layout))
 

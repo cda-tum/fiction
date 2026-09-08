@@ -58,13 +58,13 @@ int main()  // NOLINT
     const quickexact_params qe_params{.sim_params            = sim_params,
                                       .base_number_detection = quickexact_params::automatic_base_number_detection::OFF};
 
-    auto random_layouts_params = generate_random_layout_params<cell<Lyt>>{
-        .coordinate_pair                    = {{0, 0}, {10, 10}},
-        .number_of_sidbs                    = 0,
-        .positive_sidbs                     = generate_random_layout_params<cell<Lyt>>::positive_charges::MAY_OCCUR,
-        .sim_params                         = sim_params,
-        .maximal_attempts                   = static_cast<uint64_t>(10E6),
-        .number_of_unique_generated_layouts = 10};
+    auto random_layouts_params =
+        generate_random_layout_params{.coordinate_pair  = {{0, 0}, {10, 10}},
+                                      .number_of_sidbs  = 0,
+                                      .positive_sidbs   = generate_random_layout_params::positive_charges::MAY_OCCUR,
+                                      .sim_params       = sim_params,
+                                      .maximal_attempts = static_cast<uint64_t>(10E6),
+                                      .number_of_unique_generated_layouts = 10};
 
     for (auto num_sidbs = 5u; num_sidbs < 20; num_sidbs++)
     {

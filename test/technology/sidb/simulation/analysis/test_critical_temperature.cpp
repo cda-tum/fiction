@@ -59,10 +59,10 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("No physically valid charge distribution could be found")
     {
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({6, 1, 0}, dot_tag::OUTPUT);
-        lyt.assign_dot_tag({8, 1, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({6, 1, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({8, 1, 0}, dot_tag::OUTPUT);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKSIM;
@@ -105,26 +105,26 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Not working diagonal wire where positively charged SiDBs can occur")
     {
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
 
         // canvas SiDB
-        lyt.assign_dot_tag({14, 6, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 6, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({15, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 6, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({15, 6, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
-        lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({30, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKEXACT;
@@ -150,11 +150,11 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("four SiDBs with two valid charge distributions, QuickExact")
     {
-        lyt.assign_dot_tag({0, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({2, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({4, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({2, 2}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({4, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 2}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKEXACT;
@@ -184,22 +184,22 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Y-shaped SiQAD AND gate")
     {
-        lyt.assign_dot_tag({0, 0, 1}, dot_tag::INPUT);
-        lyt.assign_dot_tag({2, 1, 1}, dot_tag::INPUT);
+        lyt.assign_sidb({0, 0, 1}, dot_tag::INPUT);
+        lyt.assign_sidb({2, 1, 1}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({20, 0, 1}, dot_tag::INPUT);
-        lyt.assign_dot_tag({18, 1, 1}, dot_tag::INPUT);
+        lyt.assign_sidb({20, 0, 1}, dot_tag::INPUT);
+        lyt.assign_sidb({18, 1, 1}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({4, 2, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({6, 3, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({4, 2, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 3, 1}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({14, 3, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({16, 2, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 3, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({16, 2, 1}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({10, 6, 0}, dot_tag::OUTPUT);
-        lyt.assign_dot_tag({10, 7, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({10, 6, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({10, 7, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_dot_tag({10, 9, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({10, 9, 1}, dot_tag::NORMAL);
 
         sim_params.mu_minus = -0.28;
 
@@ -260,34 +260,34 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Bestagon AND gate, QuickExact")
     {
-        lyt.assign_dot_tag({36, 1, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({36, 1, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({38, 0, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({38, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({23, 9, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({18, 11, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({18, 9, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({19, 8, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({23, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({18, 11, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({18, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({19, 8, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({20, 14, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({19, 13, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({20, 14, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({19, 13, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({32, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({30, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({26, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
-        lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({30, 17, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKEXACT;
@@ -346,34 +346,34 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Bestagon AND gate, QuickSim")
     {
-        lyt.assign_dot_tag({36, 1, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({36, 1, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({38, 0, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({38, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({23, 9, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({18, 11, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({18, 9, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({19, 8, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({23, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({18, 11, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({18, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({19, 8, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({20, 14, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({19, 13, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({20, 14, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({19, 13, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({32, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({30, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({26, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
-        lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({30, 17, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKSIM;
@@ -399,33 +399,33 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Bestagon FO2 gate")
     {
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({21, 11, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({17, 11, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({18, 13, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({19, 7, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({21, 11, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({17, 11, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({18, 13, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({19, 7, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({18, 6, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({18, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({12, 16, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 16, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 15, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({8, 17, 0}, dot_tag::OUTPUT);
-        lyt.assign_dot_tag({6, 18, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({8, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({6, 18, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
-        lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({30, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({2, 19, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 19, 0}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKEXACT;
@@ -514,27 +514,27 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("SiQAD OR gate")
     {
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({26, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({26, 0, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({24, 1, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({24, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({20, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({20, 2, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({18, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({18, 3, 0}, dot_tag::NORMAL);
 
         // three canvas SiDBs
-        lyt.assign_dot_tag({12, 6, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({12, 7, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({15, 11, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 7, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({15, 11, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({18, 13, 0}, dot_tag::OUTPUT);
-        lyt.assign_dot_tag({20, 14, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({18, 13, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({20, 14, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
 
         sim_params.mu_minus = -0.25;
 
@@ -586,24 +586,24 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Not working diagonal Wire")
     {
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
 
         // canvas SiDB
-        lyt.assign_dot_tag({14, 6, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 6, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
-        lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({30, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKEXACT;
@@ -637,16 +637,16 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("nine SiDBs, QuickSim, non-gate-based")
     {
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({3, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({9, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({9, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({3, 1, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({6, 1, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({9, 1, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({12, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({3, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({9, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 1, 1}, dot_tag::NORMAL);
 
         params.operational_params.sim_params = sim_params;
         params.operational_params.sim_engine = engine::QUICKSIM;
@@ -768,45 +768,45 @@ TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical-temperat
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({36, 1, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({36, 1, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({38, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 12, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 11, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 12, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 11, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 15, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 9, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 9, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 16, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 9, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 13, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({18, 9, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 13, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 13, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 13, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 8, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 8, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({6, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({6, 18, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({8, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 17, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({2, 19, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 19, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
     critical_temperature_params params{};
     const simulation_parameters sim_params{2, -0.32, 5.6, 5.0};

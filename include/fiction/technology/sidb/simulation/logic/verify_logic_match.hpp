@@ -23,7 +23,7 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 
-#include <kitty/traits.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <cassert>
 #include <cstdint>
@@ -38,7 +38,6 @@ namespace fiction::sidb::simulation::logic
  * free of kinks. If positively charged SiDBs can occur in the layout under the given parameters (base 2 only), the
  * layout is non-operational.
  *
- * @tparam TT Truth table type.
  * @param lyt The layout the charge distribution belongs to.
  * @param cd The charge distribution to check.
  * @param params Parameters.
@@ -49,14 +48,11 @@ namespace fiction::sidb::simulation::logic
  * @return The operational status.
  * @throws std::out_of_range if validation encounters an invalid lattice basis index.
  */
-template <typename TT>
-[[nodiscard]] operational_status
+[[nodiscard]] inline operational_status
 verify_logic_match(const layout& lyt, const charge_distribution& cd, const is_operational_params& params,
-                   const std::vector<TT>& spec, const uint64_t input_pattern, const std::vector<bdl_wire>& input_wires,
-                   const std::vector<bdl_wire>& output_wires)
+                   const std::vector<kitty::dynamic_truth_table>& spec, const uint64_t input_pattern,
+                   const std::vector<bdl_wire>& input_wires, const std::vector<bdl_wire>& output_wires)
 {
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
     assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
@@ -67,7 +63,7 @@ verify_logic_match(const layout& lyt, const charge_distribution& cd, const is_op
         return operational_status::NON_OPERATIONAL;
     }
 
-    const detail::is_operational_impl<TT> p{lyt, spec, params, input_wires, output_wires, false};
+    const detail::is_operational_impl p{lyt, spec, params, input_wires, output_wires, false};
 
     const auto [op_status, _] = p.verify_logic_match_of_cd(cd, input_pattern);
 

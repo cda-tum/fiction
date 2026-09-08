@@ -45,7 +45,7 @@
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
-#include <kitty/traits.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -210,9 +210,7 @@ enum class layout_invalidity_reason : uint8_t
  * entries. With a canvas, the three pruning filters (positive charges, physical infeasibility, I/O instability) run
  * before any simulation on the layout's potential landscape.
  *
- * @tparam TT Truth table type.
  */
-template <typename TT>
 class is_operational_impl
 {
   public:
@@ -223,7 +221,8 @@ class is_operational_impl
      * @param spec The Boolean function(s) to implement.
      * @param params Parameters.
      */
-    is_operational_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params) :
+    is_operational_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                        const is_operational_params& params) :
             sidb_layout{lyt},
             truth_table{spec},
             parameters{params},
@@ -246,9 +245,9 @@ class is_operational_impl
      * @param initialize_bii Whether to set up the input iterator. `verify_logic_match` passes `false` since it
      * checks a given charge distribution.
      */
-    is_operational_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-                        const std::vector<bdl_wire>& input_wires, const std::vector<bdl_wire>& output_wires,
-                        const bool initialize_bii = true) :
+    is_operational_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                        const is_operational_params& params, const std::vector<bdl_wire>& input_wires,
+                        const std::vector<bdl_wire>& output_wires, const bool initialize_bii = true) :
             sidb_layout{lyt},
             truth_table{spec},
             parameters{params},
@@ -269,9 +268,9 @@ class is_operational_impl
      * @param output_wires The output BDL wires of `lyt`.
      * @param c_lyt The canvas: the SiDBs of `lyt` whose charge states the pruning filters enumerate.
      */
-    is_operational_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-                        const std::vector<bdl_wire>& input_wires, const std::vector<bdl_wire>& output_wires,
-                        layout c_lyt) :
+    is_operational_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                        const is_operational_params& params, const std::vector<bdl_wire>& input_wires,
+                        const std::vector<bdl_wire>& output_wires, layout c_lyt) :
             sidb_layout{lyt},
             truth_table{spec},
             parameters{params},
@@ -290,8 +289,8 @@ class is_operational_impl
      * @param params Parameters.
      * @param c_lyt The canvas.
      */
-    is_operational_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-                        layout c_lyt) :
+    is_operational_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                        const is_operational_params& params, layout c_lyt) :
             sidb_layout{lyt},
             truth_table{spec},
             parameters{params},
@@ -314,9 +313,10 @@ class is_operational_impl
      * @param output_wires The output BDL wires.
      * @param c_lyt The canvas.
      */
-    is_operational_impl(const std::vector<layout>& input_pattern_lyts, const std::vector<TT>& spec,
-                        const is_operational_params& params, const std::vector<bdl_wire>& input_wires,
-                        const std::vector<bdl_wire>& output_wires, layout c_lyt) :
+    is_operational_impl(const std::vector<layout>&                     input_pattern_lyts,
+                        const std::vector<kitty::dynamic_truth_table>& spec, const is_operational_params& params,
+                        const std::vector<bdl_wire>& input_wires, const std::vector<bdl_wire>& output_wires,
+                        layout c_lyt) :
             truth_table{spec},
             parameters{params},
             output_bdl_pairs{detect_bdl_pairs(input_pattern_lyts.front(), dot_tag::OUTPUT,
@@ -767,7 +767,7 @@ class is_operational_impl
     /**
      * The Boolean function(s) to implement.
      */
-    const std::vector<TT>& truth_table;
+    const std::vector<kitty::dynamic_truth_table>& truth_table;
     /**
      * Parameters.
      */
@@ -1018,7 +1018,7 @@ class is_operational_impl
 
     for (const auto& c : lyt.dots_with_tag(dot_tag::LOGIC))
     {
-        canvas.assign_dot_tag(c, dot_tag::LOGIC);
+        canvas.assign_sidb(c, dot_tag::LOGIC);
     }
 
     return canvas;
@@ -1026,15 +1026,12 @@ class is_operational_impl
 /**
  * Sanity checks shared by every entry point.
  *
- * @tparam TT Truth table type.
  * @param lyt The layout.
  * @param spec The specification.
  */
-template <typename TT>
-void check_arguments([[maybe_unused]] const layout& lyt, [[maybe_unused]] const std::vector<TT>& spec) noexcept
+inline void check_arguments([[maybe_unused]] const layout&                                  lyt,
+                            [[maybe_unused]] const std::vector<kitty::dynamic_truth_table>& spec) noexcept
 {
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     assert(lyt.num_pis() > 0 && "lyt needs input dots");
     assert(lyt.num_pos() > 0 && "lyt needs output dots");
     assert(!spec.empty());
@@ -1046,7 +1043,6 @@ void check_arguments([[maybe_unused]] const layout& lyt, [[maybe_unused]] const 
  * Builds the implementation for a layout with optional wires and canvas: the canvas defaults to the layout's logic
  * dots.
  *
- * @tparam TT Truth table type.
  * @param lyt The layout.
  * @param spec The specification.
  * @param params Parameters.
@@ -1055,9 +1051,8 @@ void check_arguments([[maybe_unused]] const layout& lyt, [[maybe_unused]] const 
  * @param canvas_lyt The canvas, or `std::nullopt` to use the logic dots.
  * @return The implementation object.
  */
-template <typename TT>
-[[nodiscard]] is_operational_impl<TT>
-make_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+[[nodiscard]] inline is_operational_impl
+make_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const is_operational_params& params,
           const std::optional<std::vector<bdl_wire>>& input_wires,
           const std::optional<std::vector<bdl_wire>>& output_wires, const std::optional<layout>& canvas_lyt)
 {
@@ -1067,29 +1062,27 @@ make_impl(const layout& lyt, const std::vector<TT>& spec, const is_operational_p
     {
         if (!canvas.is_empty())
         {
-            return is_operational_impl<TT>{lyt, spec, params, *input_wires, *output_wires, canvas};
+            return is_operational_impl{lyt, spec, params, *input_wires, *output_wires, canvas};
         }
 
-        return is_operational_impl<TT>{lyt, spec, params, *input_wires, *output_wires};
+        return is_operational_impl{lyt, spec, params, *input_wires, *output_wires};
     }
 
     if (!canvas.is_empty())
     {
-        return is_operational_impl<TT>{lyt, spec, params, canvas};
+        return is_operational_impl{lyt, spec, params, canvas};
     }
 
-    return is_operational_impl<TT>{lyt, spec, params};
+    return is_operational_impl{lyt, spec, params};
 }
 /**
  * The input patterns that are not operational for the given reasons.
  *
- * @tparam TT Truth table type.
  * @param p The implementation object.
  * @param num_patterns The number of input patterns.
  * @return All patterns that are operational.
  */
-template <typename TT>
-[[nodiscard]] std::set<uint64_t> operational_patterns_of(is_operational_impl<TT>& p, const uint64_t num_patterns)
+[[nodiscard]] inline std::set<uint64_t> operational_patterns_of(is_operational_impl& p, const uint64_t num_patterns)
 {
     std::set<uint64_t> input_patterns{};
 
@@ -1108,12 +1101,10 @@ template <typename TT>
 /**
  * The input patterns that kinks render non-operational.
  *
- * @tparam TT Truth table type.
  * @param p The implementation object, configured to reject kinks.
  * @return The kink-induced non-operational patterns.
  */
-template <typename TT>
-[[nodiscard]] std::set<uint64_t> kink_patterns_of(is_operational_impl<TT>& p)
+[[nodiscard]] inline std::set<uint64_t> kink_patterns_of(is_operational_impl& p)
 {
     std::set<uint64_t> patterns{};
 
@@ -1138,15 +1129,14 @@ template <typename TT>
  * canvas of the pruning filters that run before any simulation whenever the parameters ask for filtering and reject
  * kinks.
  *
- * @tparam TT Truth table type.
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters.
  * @return The operational status and the number of simulator invocations.
  */
-template <typename TT>
-[[nodiscard]] std::pair<operational_status, std::size_t> is_operational(const layout& lyt, const std::vector<TT>& spec,
-                                                                        const is_operational_params& params = {})
+[[nodiscard]] inline std::pair<operational_status, std::size_t>
+is_operational(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+               const is_operational_params& params = {})
 {
     detail::check_arguments(lyt, spec);
 
@@ -1159,7 +1149,6 @@ template <typename TT>
 /**
  * Like the overload above, with the BDL wires and, optionally, the canvas given by the caller.
  *
- * @tparam TT Truth table type.
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters.
@@ -1168,11 +1157,10 @@ template <typename TT>
  * @param canvas_lyt The canvas; defaults to the logic dots of `lyt`.
  * @return The operational status and the number of simulator invocations.
  */
-template <typename TT>
-[[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-               const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire,
-               const std::optional<layout>& canvas_lyt = std::nullopt)
+[[nodiscard]] inline std::pair<operational_status, std::size_t>
+is_operational(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+               const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire,
+               const std::vector<bdl_wire>& output_bdl_wire, const std::optional<layout>& canvas_lyt = std::nullopt)
 {
     detail::check_arguments(lyt, spec);
 
@@ -1186,7 +1174,6 @@ is_operational(const layout& lyt, const std::vector<TT>& spec, const is_operatio
  * Like the overloads above, but with one layout per input pattern given by the caller instead of applying the
  * patterns to the input BDL pairs.
  *
- * @tparam TT Truth table type.
  * @param input_pattern_layouts One layout per input pattern, pattern `0` first.
  * @param spec The Boolean function(s) to implement.
  * @param params Parameters.
@@ -1196,14 +1183,11 @@ is_operational(const layout& lyt, const std::vector<TT>& spec, const is_operatio
  * @return The operational status and the number of simulator invocations.
  * @throws std::invalid_argument if `spec` is empty or the number of layouts does not match the number of patterns.
  */
-template <typename TT>
-[[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const std::vector<layout>& input_pattern_layouts, const std::vector<TT>& spec,
+[[nodiscard]] inline std::pair<operational_status, std::size_t>
+is_operational(const std::vector<layout>& input_pattern_layouts, const std::vector<kitty::dynamic_truth_table>& spec,
                const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire,
                const std::vector<bdl_wire>& output_bdl_wire, const std::optional<layout>& canvas_lyt = std::nullopt)
 {
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     // this overload indexes a caller-supplied container, so a wrong size is an out-of-bounds read rather than a
     // wrong answer. It is also reachable from `pyfiction` with an arbitrary list, so the checks survive `NDEBUG`
     if (spec.empty())
@@ -1222,7 +1206,7 @@ is_operational(const std::vector<layout>& input_pattern_layouts, const std::vect
 
     const auto canvas = canvas_lyt.has_value() ? *canvas_lyt : detail::canvas_of(input_pattern_layouts.front());
 
-    detail::is_operational_impl<TT> p{input_pattern_layouts, spec, params, input_bdl_wire, output_bdl_wire, canvas};
+    detail::is_operational_impl p{input_pattern_layouts, spec, params, input_bdl_wire, output_bdl_wire, canvas};
 
     const auto [status, _] = p.run();
 
@@ -1231,26 +1215,24 @@ is_operational(const std::vector<layout>& input_pattern_layouts, const std::vect
 /**
  * Determines the input patterns for which the layout is operational.
  *
- * @tparam TT Truth table type.
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters.
  * @return The operational input patterns.
  */
-template <typename TT>
-[[nodiscard]] std::set<uint64_t> operational_input_patterns(const layout& lyt, const std::vector<TT>& spec,
-                                                            const is_operational_params& params = {})
+[[nodiscard]] inline std::set<uint64_t> operational_input_patterns(const layout&                                  lyt,
+                                                                   const std::vector<kitty::dynamic_truth_table>& spec,
+                                                                   const is_operational_params& params = {})
 {
     detail::check_arguments(lyt, spec);
 
-    detail::is_operational_impl<TT> p{lyt, spec, params};
+    detail::is_operational_impl p{lyt, spec, params};
 
     return detail::operational_patterns_of(p, spec.front().num_bits());
 }
 /**
  * Like the overload above, with the BDL wires and, optionally, the canvas given by the caller.
  *
- * @tparam TT Truth table type.
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters.
@@ -1259,52 +1241,49 @@ template <typename TT>
  * @param canvas_lyt The canvas; defaults to none.
  * @return The operational input patterns.
  */
-template <typename TT>
-[[nodiscard]] std::set<uint64_t>
-operational_input_patterns(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-                           const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire,
+[[nodiscard]] inline std::set<uint64_t>
+operational_input_patterns(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                           const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire,
+                           const std::vector<bdl_wire>& output_bdl_wire,
                            const std::optional<layout>& canvas_lyt = std::nullopt)
 {
     detail::check_arguments(lyt, spec);
 
     if (canvas_lyt.has_value())
     {
-        detail::is_operational_impl<TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire, *canvas_lyt};
+        detail::is_operational_impl p{lyt, spec, params, input_bdl_wire, output_bdl_wire, *canvas_lyt};
 
         return detail::operational_patterns_of(p, spec.front().num_bits());
     }
 
-    detail::is_operational_impl<TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire};
+    detail::is_operational_impl p{lyt, spec, params, input_bdl_wire, output_bdl_wire};
 
     return detail::operational_patterns_of(p, spec.front().num_bits());
 }
 /**
  * Determines the input patterns for which kinks render the layout non-operational.
  *
- * @tparam TT Truth table type.
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters; kinks are rejected regardless of `params.op_condition`.
  * @return The kink-induced non-operational input patterns.
  */
-template <typename TT>
-[[nodiscard]] std::set<uint64_t> kink_induced_non_operational_input_patterns(const layout&                lyt,
-                                                                             const std::vector<TT>&       spec,
-                                                                             const is_operational_params& params = {})
+[[nodiscard]] inline std::set<uint64_t>
+kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                                            const is_operational_params& params = {})
 {
     detail::check_arguments(lyt, spec);
 
     is_operational_params params_with_rejecting_kinks = params;
     params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
 
-    detail::is_operational_impl<TT> p{lyt, spec, params_with_rejecting_kinks};
+    detail::is_operational_impl p{lyt, spec, params_with_rejecting_kinks};
 
     return detail::kink_patterns_of(p);
 }
 /**
  * Like the overload above, with the BDL wires and, optionally, the canvas given by the caller.
  *
- * @tparam TT Truth table type.
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters; kinks are rejected regardless of `params.op_condition`.
@@ -1313,9 +1292,8 @@ template <typename TT>
  * @param canvas_lyt The canvas; defaults to none.
  * @return The kink-induced non-operational input patterns.
  */
-template <typename TT>
-[[nodiscard]] std::set<uint64_t> kink_induced_non_operational_input_patterns(
-    const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+[[nodiscard]] inline std::set<uint64_t> kink_induced_non_operational_input_patterns(
+    const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const is_operational_params& params,
     const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire,
     const std::optional<layout>& canvas_lyt = std::nullopt)
 {
@@ -1326,35 +1304,34 @@ template <typename TT>
 
     if (canvas_lyt.has_value())
     {
-        detail::is_operational_impl<TT> p{
-            lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire, *canvas_lyt};
+        detail::is_operational_impl p{lyt,        spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire,
+                                      *canvas_lyt};
 
         return detail::kink_patterns_of(p);
     }
 
-    detail::is_operational_impl<TT> p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire};
+    detail::is_operational_impl p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire};
 
     return detail::kink_patterns_of(p);
 }
 /**
  * Determines whether kinks are the reason the layout is non-operational.
  *
- * @tparam TT Truth table type.
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters; kinks are rejected regardless of `params.op_condition`.
  * @return `true` if the layout is non-operational because of kinks.
  */
-template <typename TT>
-[[nodiscard]] bool is_kink_induced_non_operational(const layout& lyt, const std::vector<TT>& spec,
-                                                   const is_operational_params& params = {})
+[[nodiscard]] inline bool is_kink_induced_non_operational(const layout&                                  lyt,
+                                                          const std::vector<kitty::dynamic_truth_table>& spec,
+                                                          const is_operational_params&                   params = {})
 {
     detail::check_arguments(lyt, spec);
 
     is_operational_params params_with_rejecting_kinks = params;
     params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
 
-    detail::is_operational_impl<TT> p{lyt, spec, params_with_rejecting_kinks};
+    detail::is_operational_impl p{lyt, spec, params_with_rejecting_kinks};
 
     const auto [op_status, non_op_reason] = p.run();
 
@@ -1364,7 +1341,6 @@ template <typename TT>
 /**
  * Like the overload above, with the BDL wires and, optionally, the canvas given by the caller.
  *
- * @tparam TT Truth table type.
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters; kinks are rejected regardless of `params.op_condition`.
@@ -1373,12 +1349,12 @@ template <typename TT>
  * @param canvas_lyt The canvas; defaults to none.
  * @return `true` if the layout is non-operational because of kinks.
  */
-template <typename TT>
-[[nodiscard]] bool is_kink_induced_non_operational(const layout& lyt, const std::vector<TT>& spec,
-                                                   const is_operational_params& params,
-                                                   const std::vector<bdl_wire>& input_bdl_wire,
-                                                   const std::vector<bdl_wire>& output_bdl_wire,
-                                                   const std::optional<layout>& canvas_lyt = std::nullopt)
+[[nodiscard]] inline bool is_kink_induced_non_operational(const layout&                                  lyt,
+                                                          const std::vector<kitty::dynamic_truth_table>& spec,
+                                                          const is_operational_params&                   params,
+                                                          const std::vector<bdl_wire>&                   input_bdl_wire,
+                                                          const std::vector<bdl_wire>& output_bdl_wire,
+                                                          const std::optional<layout>& canvas_lyt = std::nullopt)
 {
     detail::check_arguments(lyt, spec);
 
@@ -1395,13 +1371,13 @@ template <typename TT>
 
     if (canvas_lyt.has_value())
     {
-        detail::is_operational_impl<TT> p{
-            lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire, *canvas_lyt};
+        detail::is_operational_impl p{lyt,        spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire,
+                                      *canvas_lyt};
 
         return run(p);
     }
 
-    detail::is_operational_impl<TT> p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire};
+    detail::is_operational_impl p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire};
 
     return run(p);
 }
@@ -1415,16 +1391,16 @@ template <typename TT>
  * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters.
  * @return The operational status and the number of simulator invocations.
  */
-template <typename Lyt, typename TT>
+template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::pair<operational_status, std::size_t> is_operational(const Lyt& lyt, const std::vector<TT>& spec,
-                                                                        const is_operational_params& params = {})
+[[nodiscard]] std::pair<operational_status, std::size_t>
+is_operational(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+               const is_operational_params& params = {})
 {
     return is_operational(to_sidb_layout(lyt), spec, params);
 }
@@ -1432,16 +1408,16 @@ template <typename Lyt, typename TT>
  * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters.
  * @return The operational input patterns.
  */
-template <typename Lyt, typename TT>
+template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
-                                                            const is_operational_params& params = {})
+[[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt&                                     lyt,
+                                                            const std::vector<kitty::dynamic_truth_table>& spec,
+                                                            const is_operational_params&                   params = {})
 {
     return operational_input_patterns(to_sidb_layout(lyt), spec, params);
 }
@@ -1449,17 +1425,16 @@ template <typename Lyt, typename TT>
  * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters.
  * @return The kink-induced non-operational input patterns.
  */
-template <typename Lyt, typename TT>
+template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::set<uint64_t> kink_induced_non_operational_input_patterns(const Lyt&                   lyt,
-                                                                             const std::vector<TT>&       spec,
-                                                                             const is_operational_params& params = {})
+[[nodiscard]] std::set<uint64_t>
+kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                                            const is_operational_params& params = {})
 {
     return kink_induced_non_operational_input_patterns(to_sidb_layout(lyt), spec, params);
 }
@@ -1467,15 +1442,14 @@ template <typename Lyt, typename TT>
  * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters.
  * @return `true` if the layout is non-operational because of kinks.
  */
-template <typename Lyt, typename TT>
+template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
+[[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                                    const is_operational_params& params = {})
 {
     return is_kink_induced_non_operational(to_sidb_layout(lyt), spec, params);

@@ -21,6 +21,7 @@
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/traits.hpp"
 
+#include <algorithm>
 #include <cstdint>
 #include <stdexcept>
 #include <type_traits>
@@ -161,6 +162,57 @@ template <typename CellLyt>
 [[nodiscard]] layout to_sidb_layout(const CellLyt& lyt)
 {
     return to_sidb_layout(lyt, lattice_of<CellLyt>());
+}
+
+/**
+ * Converts a `sidb::layout` back into a Cartesian SiDB cell-level layout: cell types, inputs, outputs, the layout
+ * name, and, for defect surfaces, the surface defects carry over. The layout's lattice is not represented in the
+ * cell-level type and is dropped. This is the inverse of `to_sidb_layout` for the algorithms that still hand out
+ * cell-level layouts.
+ *
+ * @tparam CellLyt SiDB cell-level layout type to create.
+ * @param lyt The layout to convert.
+ * @return The cell-level layout.
+ * @throws std::out_of_range if a cell or a retained defect cannot be represented by the target coordinate type.
+ */
+template <typename CellLyt>
+[[nodiscard]] CellLyt to_cell_level_layout(const layout& lyt)
+{
+    static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
+
+    typename CellLyt::aspect_ratio bounds{0, 0, 0};
+    const auto                     extend_bounds = [&bounds](const auto& cell)
+    {
+        bounds = typename CellLyt::aspect_ratio{
+            std::max<int64_t>(static_cast<int64_t>(bounds.x), static_cast<int64_t>(cell.x)),
+            std::max<int64_t>(static_cast<int64_t>(bounds.y), static_cast<int64_t>(cell.y)),
+            std::max<int64_t>(static_cast<int64_t>(bounds.z), static_cast<int64_t>(cell.z))};
+    };
+
+    lyt.foreach_dot([&extend_bounds](const auto& s) { extend_bounds(to_cell<CellLyt>(s)); });
+
+    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+    {
+        lyt.foreach_defect([&extend_bounds](const auto& sd) { extend_bounds(to_cell<CellLyt>(sd.first)); });
+    }
+
+    CellLyt result{bounds};
+
+    if constexpr (has_set_layout_name_v<CellLyt>)
+    {
+        result.set_layout_name(lyt.get_layout_name());
+    }
+
+    lyt.foreach_dot([&result, &lyt](const auto& s)
+                    { result.assign_cell_type(to_cell<CellLyt>(s), lyt.get_dot_tag(s)); });
+
+    if constexpr (is_sidb_defect_surface_v<CellLyt>)
+    {
+        lyt.foreach_defect([&result](const auto& sd) { result.assign_defect(to_cell<CellLyt>(sd.first), sd.second); });
+    }
+
+    return result;
 }
 
 }  // namespace fiction::sidb

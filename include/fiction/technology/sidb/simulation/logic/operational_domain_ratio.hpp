@@ -22,7 +22,7 @@
 #include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
 #include "fiction/traits.hpp"
 
-#include <kitty/traits.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <vector>
 
@@ -49,7 +49,6 @@ struct operational_domain_ratio_params
  * parameter values. A ratio close to 0 indicates that the gate is highly sensitive to parameter variations and may fail
  * to operate correctly.
  *
- * @tparam TT Truth table type.
  * @param lyt The SiDB layout for which to compute the ratio of operational parameter points surrounding a specified
  * parameter point to the total number of parameter points.
  * @param spec The expected Boolean function of the layout, provided as a multi-output truth table.
@@ -59,15 +58,14 @@ struct operational_domain_ratio_params
  * @throws std::invalid_argument if the sweep has fewer than two dimensions, a range is invalid, or the seed is
  * non-finite, outside the grid, or has the wrong dimension count.
  */
-template <typename TT>
-[[nodiscard]] double operational_domain_ratio(const layout& lyt, const std::vector<TT>& spec, const parameter_point& pp,
-                                              const operational_domain_ratio_params& params = {})
+[[nodiscard]] inline double operational_domain_ratio(const layout&                                  lyt,
+                                                     const std::vector<kitty::dynamic_truth_table>& spec,
+                                                     const parameter_point&                         pp,
+                                                     const operational_domain_ratio_params&         params = {})
 {
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     operational_domain_stats stats{};
 
-    fiction::sidb::simulation::logic::detail::operational_domain_impl<TT, operational_domain> p{
+    fiction::sidb::simulation::logic::detail::operational_domain_impl<operational_domain> p{
         lyt, spec, params.op_domain_params, stats};
 
     const auto op_domain = p.flood_fill(0, pp);
@@ -81,16 +79,16 @@ template <typename TT>
  * Transitional overload for SiDB cell-level layouts, converted with `to_sidb_layout`; see the `layout` overload.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
  * @param lyt The layout to investigate.
  * @param spec The Boolean function(s) the layout implements.
  * @param pp The parameter point to start the flood fill from.
  * @param params Parameters.
  * @return The ratio of operational parameter points.
  */
-template <typename Lyt, typename TT>
+template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt>)
-[[nodiscard]] double operational_domain_ratio(const Lyt& lyt, const std::vector<TT>& spec, const parameter_point& pp,
+[[nodiscard]] double operational_domain_ratio(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                                              const parameter_point&                 pp,
                                               const operational_domain_ratio_params& params = {})
 {
     return operational_domain_ratio(to_sidb_layout(lyt), spec, pp, params);

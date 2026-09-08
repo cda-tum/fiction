@@ -145,13 +145,12 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
     }
 }
 
-TEST_CASE("Logic matching propagates invalid lattice basis errors",
-          "[does-charge-distribution-match-logic-for-given-input-pattern]")
+TEST_CASE("Logic matching propagates invalid lattice basis errors", "[verify-logic-match]")
 {
     layout       lyt{};
     lattice_site invalid{};
     invalid.z = 2;
-    lyt.assign_dot_tag(invalid, dot_tag::NORMAL);
+    lyt.assign_sidb(invalid, dot_tag::NORMAL);
     is_operational_params params{};
     params.sim_params.base = 2;
 

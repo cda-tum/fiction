@@ -24,6 +24,7 @@
 #include "fiction/utils/math/combination_utils.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -161,7 +162,7 @@ struct displacement_robustness_domain_stats
 namespace detail
 {
 
-template <typename Lyt, typename TT>
+template <typename Lyt>
 class displacement_robustness_domain_impl
 {
   public:
@@ -173,7 +174,7 @@ class displacement_robustness_domain_impl
      * @param ps Parameters for the displacement robustness computation.
      * @param st Statistics related to the displacement robustness computation.
      */
-    displacement_robustness_domain_impl(const Lyt& lyt, const std::vector<TT>& spec,
+    displacement_robustness_domain_impl(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                         const displacement_robustness_domain_params<cell<Lyt>>& ps,
                                         displacement_robustness_domain_stats&                   st) :
             layout{lyt},
@@ -371,7 +372,7 @@ class displacement_robustness_domain_impl
     /**
      * The logical specification of the layout.
      */
-    const std::vector<TT> truth_table;
+    const std::vector<kitty::dynamic_truth_table> truth_table;
     /**
      * Random device for obtaining seed for the random number generator.
      * Provides a source of quasi-non-deterministic pseudo-random numbers.
@@ -611,23 +612,22 @@ class displacement_robustness_domain_impl
  * `percentage_of_analyzed_displaced_layouts` in `params`.
  *
  * @tparam Lyt The SiDB cell-level layout type.
- * @tparam TT Truth table type.
  * @param spec Vector of truth table specifications.
  * @param params Parameters for the displacement robustness computation.
  * @param stats Statistics related to the displacement robustness computation.
  * @return The displacement robustness domain of the SiDB layout.
  */
-template <typename Lyt, typename TT>
+template <typename Lyt>
 [[nodiscard]] displacement_robustness_domain<Lyt>
-determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT>& spec,
+determine_displacement_robustness_domain(const Lyt& layout, const std::vector<kitty::dynamic_truth_table>& spec,
                                          const displacement_robustness_domain_params<cell<Lyt>>& params = {},
                                          displacement_robustness_domain_stats*                   stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    displacement_robustness_domain_stats                 st{};
-    detail::displacement_robustness_domain_impl<Lyt, TT> p{layout, spec, params, st};
+    displacement_robustness_domain_stats             st{};
+    detail::displacement_robustness_domain_impl<Lyt> p{layout, spec, params, st};
 
     const auto result = p.determine_robustness_domain();
 
@@ -649,7 +649,6 @@ determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT
  * fabrication error rate of 0.0 or negative indicates that the SiDB layout is designed without displacement.
  *
  * @tparam Lyt The SiDB cell-level layout type.
- * @tparam TT The type of the truth table.
  * @param layout The SiDB cell-level layout which is analyzed.
  * @param spec Vector of truth table specifications.
  * @param params Parameters for the displacement robustness computation.
@@ -657,16 +656,16 @@ determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT
  *        SiDBs have a slight displacement.
  * @return The probability of fabricating an operational SiDB layout.
  */
-template <typename Lyt, typename TT>
+template <typename Lyt>
 [[nodiscard]] double determine_probability_of_fabricating_operational_gate(
-    const Lyt& layout, const std::vector<TT>& spec, const displacement_robustness_domain_params<cell<Lyt>>& params = {},
-    const double fabrication_error_rate = 1.0)
+    const Lyt& layout, const std::vector<kitty::dynamic_truth_table>& spec,
+    const displacement_robustness_domain_params<cell<Lyt>>& params = {}, const double fabrication_error_rate = 1.0)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    displacement_robustness_domain_stats                 st{};
-    detail::displacement_robustness_domain_impl<Lyt, TT> p{layout, spec, params, st};
+    displacement_robustness_domain_stats             st{};
+    detail::displacement_robustness_domain_impl<Lyt> p{layout, spec, params, st};
 
     return p.determine_probability_of_fabricating_operational_gate(fabrication_error_rate);
 }

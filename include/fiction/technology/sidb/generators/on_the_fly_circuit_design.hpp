@@ -201,7 +201,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
 
                 // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
                 // blacklist and the process is rerun.
-                catch (const sidb::gate_design_exception<tt, GateLyt>& e)
+                catch (const sidb::gate_design_exception<GateLyt>& e)
                 {
                     gate_level_layout = std::nullopt;
                     black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
@@ -274,7 +274,7 @@ template <typename CellLyt, typename GateLyt>
 
     // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
     // blacklist and the process is rerun.
-    catch (const sidb::gate_design_exception<tt, GateLyt>& e)
+    catch (const sidb::gate_design_exception<GateLyt>& e)
     {
         throw unsuccessful_gate_design_error("Gate design was unsuccessful");
     }

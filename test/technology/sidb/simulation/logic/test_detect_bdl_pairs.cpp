@@ -41,20 +41,20 @@ TEST_CASE("BDL wire", "[detect-bdl-pairs]")
 {
     layout lyt{lattice::si_100_2x1(), "Atomic wire"};
 
-    lyt.assign_dot_tag({-1, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({3, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({-1, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_dot_tag({24, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
 
     detect_bdl_pairs_params params{};
 
@@ -79,16 +79,16 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
 {
     layout lyt{lattice::si_100_2x1(), "Atomic wire"};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({1, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({1, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({3, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({7, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::OUTPUT);
 
     detect_bdl_pairs_params params{};
 
@@ -178,17 +178,17 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
 {
     layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
 
     detect_bdl_pairs_params params{};
     // set default minimum distance to 0 for testing
@@ -253,22 +253,22 @@ TEST_CASE("SiQAD's AND gate BDL detection", "[detect-bdl-pairs]")
 {
     layout lyt{lattice::si_100_2x1(), "AND gate"};
 
-    lyt.assign_dot_tag({0, 0, 1}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 1}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 1}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 1}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({20, 0, 1}, dot_tag::INPUT);
-    lyt.assign_dot_tag({18, 1, 1}, dot_tag::INPUT);
+    lyt.assign_sidb({20, 0, 1}, dot_tag::INPUT);
+    lyt.assign_sidb({18, 1, 1}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({4, 2, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 3, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 3, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 3, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 3, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 6, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({10, 7, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 6, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 7, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({10, 9, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 9, 1}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -299,36 +299,36 @@ TEST_CASE("Bestagon fan-out BDL detection", "[detect-bdl-pairs]")
 {
     layout lyt{lattice::si_100_2x1(), "Fan-out"};
 
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({4, 2, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({4, 2, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 4, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 6, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({20, 7, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({21, 8, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 7, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({21, 8, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({19, 12, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({23, 12, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({20, 14, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({19, 12, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({23, 12, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 14, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({16, 16, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 17, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 17, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({28, 17, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({28, 17, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 18, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({8, 19, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 19, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({34, 19, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({34, 19, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({4, 20, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({38, 20, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 20, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({38, 20, 0}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 

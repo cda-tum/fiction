@@ -65,11 +65,11 @@ int main()  // NOLINT
     auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_cube>(
         fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", folder));
 
-    const design_gates_params<cell<sidb_100_cell_clk_lyt_cube>> params_2_in_1_out{
-        is_operational_params{simulation_parameters{2, -0.32}},
-        design_gates_params<cell<sidb_100_cell_clk_lyt_cube>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-        {{14, 12, 0}, {24, 23, 0}},
-        3};
+    const design_gates_params params_2_in_1_out{
+        .operational_params     = is_operational_params{simulation_parameters{2, -0.32}},
+        .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        .canvas                 = {{14, 12, 0}, {24, 23, 0}},
+        .number_of_canvas_sidbs = 3};
 
     const auto                  sidb_sim = simulation_parameters{2, -0.32, 5.6, 5.0};
     const is_operational_params is_op_params{sidb_sim};

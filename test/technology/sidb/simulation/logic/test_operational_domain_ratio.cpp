@@ -48,20 +48,20 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
 
     layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({3, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_dot_tag({24, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 

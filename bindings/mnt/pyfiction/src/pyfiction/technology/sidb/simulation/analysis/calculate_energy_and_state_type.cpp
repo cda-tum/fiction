@@ -16,7 +16,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp>
 
@@ -47,13 +46,13 @@ void calculate_energy_and_state_type(nanobind::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     m.def("calculate_energy_and_state_type_with_kinks_accepted",
-          &fiction::sidb::simulation::analysis::calculate_energy_and_state_type_with_kinks_accepted<py_tt>,
+          &fiction::sidb::simulation::analysis::calculate_energy_and_state_type_with_kinks_accepted,
           py::arg("energy_distribution"), py::arg("valid_charge_distributions"), py::arg("output_bdl_pairs"),
           py::arg("spec"), py::arg("input_index"),
           DOC(fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_accepted));
     m.def("calculate_energy_and_state_type_with_kinks_rejected",
-          &fiction::sidb::simulation::analysis::calculate_energy_and_state_type_with_kinks_rejected<py_tt>,
-          py::arg("lyt"), py::arg("energy_distribution"), py::arg("valid_charge_distributions"), py::arg("spec"),
+          &fiction::sidb::simulation::analysis::calculate_energy_and_state_type_with_kinks_rejected, py::arg("lyt"),
+          py::arg("energy_distribution"), py::arg("valid_charge_distributions"), py::arg("spec"),
           py::arg("input_index"), py::arg("input_bdl_wires"), py::arg("output_bdl_wires"),
           DOC(fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_rejected));
 }

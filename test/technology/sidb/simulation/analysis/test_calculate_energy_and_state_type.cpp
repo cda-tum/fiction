@@ -111,8 +111,8 @@ TEST_CASE("Energy labeling propagates invalid lattice basis errors", "[calculate
     layout       lyt{};
     lattice_site invalid{};
     invalid.z = 2;
-    lyt.assign_dot_tag(invalid, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb(invalid, dot_tag::OUTPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::OUTPUT);
     const std::vector distributions{charge_distribution{lyt}};
     const auto        energies = calculate_energy_distribution(distributions);
 

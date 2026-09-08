@@ -50,6 +50,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Exposed lattice-based BDL types, wire detection, and input-pattern generation
   - Exposed lattice-based logic checks, parameter domains, critical-temperature analysis,
     time-to-solution estimates, and population-stability analysis
+  - SiDB gate and random-layout generators accept and return `sidb_layout`
 
 - Tooling:
 
@@ -66,7 +67,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     56-SiDB NAND: 19.7 → 3.3 s). _QuickSim_ improves by one third, _ExGS_ by one quarter with
     10,000× less heap traffic, and _QuickExact_ holds speed with 28× less heap traffic
   - Potential landscape construction computes each symmetric SiDB interaction once
-  - **Breaking:** SiDB logic and analysis algorithms use `sidb::layout` and non-template simulation types
+  - **Breaking:** SiDB generators, logic, and analysis algorithms use `sidb::layout`,
+    `kitty::dynamic_truth_table`, and non-template simulation types
+  - Random gate design samples at most `maximal_random_design_attempts` candidates without enumerating
+    canvas layouts; candidate counts saturate at the largest representable value
 
 - Continuous integration:
   - Reusable workflows now use GitHub's self-repository reference syntax.
@@ -87,6 +91,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
+
+- Experiments:
+  - SiDB generator experiments use concrete parameter types with unchanged numerical values.
 
 - I/O:
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
@@ -242,6 +249,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Simulation comparison and output now validate distribution sites. Ground State Space uses the landscape's physical parameters.
   - Parallel SiDB consumers now propagate worker errors and reject QuickSim with charged defects.
   - Concurrent operational-domain searches now use independent random number generators.
+  - Binomial coefficients avoid intermediate overflow and saturate at the `uint64_t` limit.
+  - Combination enumeration rejects results that cannot fit in a vector.
+  - Gate design enumerates, counts, and randomly samples only empty, defect-free canvas sites.
   - SiDB parameter sweeps now reject non-finite ranges, invalid steps, and unrepresentable point counts.
     Operational-domain ratios also reject malformed seeds and fewer than two sweep dimensions.
   - Population-stability analysis now distinguishes complete charge distributions beyond the charge-index range.

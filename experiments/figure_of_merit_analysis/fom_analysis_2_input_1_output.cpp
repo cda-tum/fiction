@@ -80,13 +80,13 @@ int main()  // NOLINT
         "Minimal Cost", "gate", "#canvas SiDBs", "CT", "OPD", "MDC_arsenic", "MDC_vacancy", "BBR", "X_custom,min"};
 
     const auto op_params     = is_operational_params{simulation_parameters{2, -0.32}};
-    auto       design_params = design_gates_params<cell<Lyt>>{};
+    auto       design_params = design_gates_params{};
 
-    design_params.operational_params = op_params;
-    design_params.design_mode = design_gates_params<cell<Lyt>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-    design_params.canvas      = {{17, 14, 0}, {21, 22, 0}};
+    design_params.operational_params     = op_params;
+    design_params.design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+    design_params.canvas                 = {{17, 14, 0}, {21, 22, 0}};
     design_params.number_of_canvas_sidbs = 2;
-    design_params.termination_cond = design_gates_params<cell<Lyt>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
+    design_params.termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED;
     // QuickExact was used for the paper. However, ClusterComplete is more efficient and faster but does not influence
     // the results.
     design_params.operational_params.sim_engine = engine::CLUSTERCOMPLETE;

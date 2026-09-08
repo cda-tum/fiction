@@ -49,11 +49,11 @@ TEST_CASE("Band bending resilience rejects unusable input wires", "[band-bending
     layout lyt{};
     for (const auto x : {0, 2, 6, 8})
     {
-        lyt.assign_dot_tag({x, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({x, 0, 0}, dot_tag::INPUT);
     }
     for (const auto x : {20, 22})
     {
-        lyt.assign_dot_tag({x, 0, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({x, 0, 0}, dot_tag::OUTPUT);
     }
 
     const simulation::logic::bdl_input_iterator bii{lyt};

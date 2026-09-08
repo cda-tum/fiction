@@ -63,7 +63,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
 
     SECTION("determine if layout is operational, tolerate kinks")
     {
-        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params).first == operational_status::OPERATIONAL);
+        CHECK(is_operational(lat, {create_or_tt()}, op_params).first == operational_status::OPERATIONAL);
     }
 
     // from now on, we will reject kinks
@@ -181,8 +181,8 @@ TEST_CASE("SiQAD NAND gate", "[is-operational]")
         detect_bdl_wires(lat, detect_bdl_wires_params{.threshold_bdl_interdistance = 2.0}, bdl_wire_selection::OUTPUT);
 
     layout canvas_lyt{};
-    canvas_lyt.assign_dot_tag({10, 4, 1}, dot_tag::NORMAL);
-    canvas_lyt.assign_dot_tag({10, 5, 1}, dot_tag::NORMAL);
+    canvas_lyt.assign_sidb({10, 4, 1}, dot_tag::NORMAL);
+    canvas_lyt.assign_sidb({10, 5, 1}, dot_tag::NORMAL);
 
     SECTION("use pre-determined I/O pins")
     {
@@ -197,22 +197,22 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operat
 
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 1}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 1}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 1}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 1}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({20, 0, 1}, dot_tag::INPUT);
-    lyt.assign_dot_tag({19, 1, 1}, dot_tag::INPUT);
+    lyt.assign_sidb({20, 0, 1}, dot_tag::INPUT);
+    lyt.assign_sidb({19, 1, 1}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({4, 2, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 3, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 3, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 3, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 3, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 6, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({10, 7, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 6, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 7, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({10, 9, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 9, 1}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -379,24 +379,24 @@ TEST_CASE("Not working diagonal Wire", "[is-operational]")
 
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
 
     // canvas SiDB
-    lyt.assign_dot_tag({14, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 6, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -483,20 +483,20 @@ TEST_CASE("BDL wire", "[is-operational]")
 
     layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({3, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_dot_tag({24, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
 
     simulation_parameters sim_params{};
 
@@ -512,27 +512,27 @@ TEST_CASE("Special wire that cannot be pruned, but is non-operational when kinks
     layout lyt{};
 
     // input wires
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_dot_tag({11, 7, 0}, dot_tag::LOGIC);
-    lyt.assign_dot_tag({13, 13, 0}, dot_tag::LOGIC);
+    lyt.assign_sidb({11, 7, 0}, dot_tag::LOGIC);
+    lyt.assign_sidb({13, 13, 0}, dot_tag::LOGIC);
 
     // output wires
-    lyt.assign_dot_tag({14, 15, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 16, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 17, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({6, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({6, 18, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({2, 19, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 19, 0}, dot_tag::NORMAL);
 
     simulation_parameters sim_params{};
 
@@ -785,27 +785,27 @@ TEST_CASE("Both is_operational entry points apply the same canvas rule", "[is-op
     layout lyt{};
 
     // input wires
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_dot_tag({11, 7, 0}, dot_tag::LOGIC);
-    lyt.assign_dot_tag({13, 13, 0}, dot_tag::LOGIC);
+    lyt.assign_sidb({11, 7, 0}, dot_tag::LOGIC);
+    lyt.assign_sidb({13, 13, 0}, dot_tag::LOGIC);
 
     // output wires
-    lyt.assign_dot_tag({14, 15, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 16, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 17, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({6, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({8, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({6, 18, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({2, 19, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 19, 0}, dot_tag::NORMAL);
 
     const auto spec = std::vector<tt>{create_id_tt()};
 

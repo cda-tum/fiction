@@ -416,13 +416,13 @@ class bdl_input_iterator
             {
                 if (upper_input_closer_to_wire_end[i])
                 {
-                    sidb_layout.assign_dot_tag(input_i.lower, dot_tag::EMPTY);
-                    sidb_layout.assign_dot_tag(input_i.upper, dot_tag::INPUT);
+                    sidb_layout.assign_sidb(input_i.lower, dot_tag::EMPTY);
+                    sidb_layout.assign_sidb(input_i.upper, dot_tag::INPUT);
                 }
                 else
                 {
-                    sidb_layout.assign_dot_tag(input_i.lower, dot_tag::INPUT);
-                    sidb_layout.assign_dot_tag(input_i.upper, dot_tag::EMPTY);
+                    sidb_layout.assign_sidb(input_i.lower, dot_tag::INPUT);
+                    sidb_layout.assign_sidb(input_i.upper, dot_tag::EMPTY);
                 }
             }
             else if (params.input_bdl_config ==
@@ -430,19 +430,19 @@ class bdl_input_iterator
             {
                 if (upper_input_closer_to_wire_end[i])
                 {
-                    sidb_layout.assign_dot_tag(input_i.lower, dot_tag::INPUT);
-                    sidb_layout.assign_dot_tag(input_i.upper, dot_tag::EMPTY);
+                    sidb_layout.assign_sidb(input_i.lower, dot_tag::INPUT);
+                    sidb_layout.assign_sidb(input_i.upper, dot_tag::EMPTY);
                 }
                 else
                 {
-                    sidb_layout.assign_dot_tag(input_i.lower, dot_tag::EMPTY);
-                    sidb_layout.assign_dot_tag(input_i.upper, dot_tag::INPUT);
+                    sidb_layout.assign_sidb(input_i.lower, dot_tag::EMPTY);
+                    sidb_layout.assign_sidb(input_i.upper, dot_tag::INPUT);
                 }
             }
             else
             {
-                sidb_layout.assign_dot_tag(input_i.upper, dot_tag::EMPTY);
-                sidb_layout.assign_dot_tag(input_i.lower, dot_tag::EMPTY);
+                sidb_layout.assign_sidb(input_i.upper, dot_tag::EMPTY);
+                sidb_layout.assign_sidb(input_i.lower, dot_tag::EMPTY);
             }
         }
     }

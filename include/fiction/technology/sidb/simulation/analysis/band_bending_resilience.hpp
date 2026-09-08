@@ -23,7 +23,7 @@
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/traits.hpp"
 
-#include <kitty/traits.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -53,7 +53,6 @@ struct band_bending_resilience_params
  * transition requires in the ground state of any input pattern. A larger value means the gate tolerates more band
  * bending before its ground state changes.
  *
- * @tparam TT Truth table type.
  * @param lyt The gate layout.
  * @param spec The Boolean function(s) the gate implements; determines the number of input patterns.
  * @param params Parameters.
@@ -61,13 +60,11 @@ struct band_bending_resilience_params
  * @return The minimum potential difference over all input patterns, or infinity if the input wires cannot represent
  * the specification or no charge transition exists.
  */
-template <typename TT>
-[[nodiscard]] double band_bending_resilience(const layout& lyt, const std::vector<TT>& spec,
-                                             const band_bending_resilience_params& params          = {},
-                                             const std::optional<transition_type>  transition_type = std::nullopt)
+[[nodiscard]] inline double band_bending_resilience(const layout&                                  lyt,
+                                                    const std::vector<kitty::dynamic_truth_table>& spec,
+                                                    const band_bending_resilience_params&          params = {},
+                                                    const std::optional<transition_type> transition_type = std::nullopt)
 {
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     assert(lyt.num_pis() > 0 && "skeleton needs input dots");
     assert(lyt.num_pos() > 0 && "skeleton needs output dots");
     assert(!spec.empty());
@@ -118,16 +115,15 @@ template <typename TT>
  * Transitional overload for SiDB cell-level layouts, converted with `to_sidb_layout`; see the `layout` overload.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
  * @param lyt The gate layout.
  * @param spec The Boolean function(s) the gate implements.
  * @param params Parameters.
  * @param transition_type The transition to consider; all transitions if omitted.
  * @return The minimum potential difference over all input patterns.
  */
-template <typename Lyt, typename TT>
+template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt>)
-[[nodiscard]] double band_bending_resilience(const Lyt& lyt, const std::vector<TT>& spec,
+[[nodiscard]] double band_bending_resilience(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                              const band_bending_resilience_params& params          = {},
                                              const std::optional<transition_type>  transition_type = std::nullopt)
 {

@@ -111,12 +111,13 @@ int main()  // NOLINT
     constexpr auto num_canvas_sidbs                  = 3u;
     constexpr auto num_canvas_sidbs_2_input_2_output = 4u;
 
-    design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
-        is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT, bdl_input_iterator_params{{3}},
-                              is_operational_params::operational_condition::REJECT_KINKS},
-        design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
-        {{18, 9, 0}, {26, 13, 0}},
-        num_canvas_sidbs};
+    design_gates_params params{.operational_params =
+                                   is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT,
+                                                         bdl_input_iterator_params{{3}},
+                                                         is_operational_params::operational_condition::REJECT_KINKS},
+                               .design_mode            = design_gates_params::design_gates_mode::QUICKCELL,
+                               .canvas                 = {{18, 9, 0}, {26, 13, 0}},
+                               .number_of_canvas_sidbs = num_canvas_sidbs};
 
     for (const auto& [truth_table, gate_name] : truth_tables_and_names)
     {

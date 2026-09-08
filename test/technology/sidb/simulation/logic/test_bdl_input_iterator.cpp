@@ -177,17 +177,17 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
 
     layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
 
     const auto& lat = lyt;
 
@@ -255,17 +255,17 @@ TEST_CASE("Mirrored BDL wire iteration", "[bdl-input-iterator]")
 
     layout lyt{lattice::si_100_2x1(), "mirrored BDL wire"};
 
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::OUTPUT);
 
     const auto& lat = lyt;
 
@@ -485,7 +485,7 @@ TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
 
         REQUIRE(layouts[0].get_dot_tag(probe) == dot_tag::EMPTY);
 
-        layouts[0].assign_dot_tag(probe, dot_tag::NORMAL);
+        layouts[0].assign_sidb(probe, dot_tag::NORMAL);
 
         CHECK(layouts[0].get_dot_tag(probe) == dot_tag::NORMAL);
 

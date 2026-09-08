@@ -35,7 +35,7 @@ using namespace fiction::sidb::simulation::analysis;
 TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 {
     layout lyt{};
-    lyt.assign_dot_tag({1, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 1, 0}, dot_tag::NORMAL);
 
     SECTION("Precision of distance_corresponding_to_potential is two")
     {
@@ -84,9 +84,9 @@ TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-populatio
     layout lyt{};
 
     constexpr auto params = physical_population_stability_params{};
-    lyt.assign_dot_tag({1, 1, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({1, 1, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
 
     const auto result = physical_population_stability(lyt, params);
     REQUIRE(result.size() == 3);
@@ -139,34 +139,34 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     constexpr auto params = physical_population_stability_params{};
 
-    lyt.assign_dot_tag({36, 1, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({36, 1, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({38, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({23, 9, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({18, 11, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({18, 9, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({19, 8, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({23, 9, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({18, 11, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({18, 9, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({19, 8, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({20, 14, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({19, 13, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 14, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({19, 13, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
     const layout lat{lyt};
 
@@ -183,8 +183,8 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     SECTION("input 00")
     {
-        lyt.assign_dot_tag({36, 1, 0}, dot_tag::EMPTY);
-        lyt.assign_dot_tag({2, 1, 0}, dot_tag::EMPTY);
+        lyt.assign_sidb({36, 1, 0}, dot_tag::EMPTY);
+        lyt.assign_sidb({2, 1, 0}, dot_tag::EMPTY);
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 2);
         const auto& population_stability_detail = result[0];
@@ -198,8 +198,8 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     SECTION("input 01")
     {
-        lyt.assign_dot_tag({36, 1, 0}, dot_tag::EMPTY);
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::EMPTY);
+        lyt.assign_sidb({36, 1, 0}, dot_tag::EMPTY);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::EMPTY);
 
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 4);
@@ -214,8 +214,8 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     SECTION("input 10")
     {
-        lyt.assign_dot_tag({38, 0, 0}, dot_tag::EMPTY);
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::EMPTY);
+        lyt.assign_sidb({38, 0, 0}, dot_tag::EMPTY);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::EMPTY);
 
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 8);
@@ -229,8 +229,8 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     SECTION("input 11")
     {
-        lyt.assign_dot_tag({36, 1, 0}, dot_tag::EMPTY);
-        lyt.assign_dot_tag({2, 1, 0}, dot_tag::EMPTY);
+        lyt.assign_sidb({36, 1, 0}, dot_tag::EMPTY);
+        lyt.assign_sidb({2, 1, 0}, dot_tag::EMPTY);
 
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 2);
@@ -251,42 +251,42 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
         layout lyt{};
 
         constexpr auto params = physical_population_stability_params{};
-        lyt.assign_dot_tag({36, 1, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({36, 1, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({20, 12, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 11, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({20, 12, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 11, 1}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 15, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({26, 4, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({14, 9, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({12, 16, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 16, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({18, 9, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({24, 13, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({18, 9, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 13, 1}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({16, 13, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({24, 5, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({30, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({16, 13, 1}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({20, 8, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({32, 2, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({20, 8, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
-        lyt.assign_dot_tag({6, 18, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({30, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({6, 18, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
-        lyt.assign_dot_tag({8, 17, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
+        lyt.assign_sidb({8, 17, 0}, dot_tag::OUTPUT);
 
-        lyt.assign_dot_tag({2, 19, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 19, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
         CHECK(lyt.num_dots() == 27);
 

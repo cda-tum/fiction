@@ -21,9 +21,9 @@ from mnt.pyfiction import (
 def test_three_sidbs_100_lattice() -> None:
     """Check population stability on the Si(100) lattice."""
     layout = sidb_layout()
-    layout.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(0, 1, 1), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 1, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
     params = physical_population_stability_params()
     params.simulation_parameters.mu_minus = -0.25
     result = physical_population_stability(layout, params)
@@ -40,9 +40,9 @@ def test_three_sidbs_100_lattice() -> None:
 def test_three_sidbs_111_lattice() -> None:
     """Check population stability on the Si(111) lattice."""
     layout = sidb_layout(lattice.si_111_1x1())
-    layout.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(0, 1, 1), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(0, 1, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
     params = physical_population_stability_params()
     params.simulation_parameters.mu_minus = -0.25
     result = physical_population_stability(layout, params)

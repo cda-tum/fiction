@@ -662,20 +662,20 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({3, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_dot_tag({24, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -1415,20 +1415,20 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
 
     layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({3, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_dot_tag({24, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -1450,7 +1450,7 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
     {
         operational_domain_stats op_domain_stats{};
 
-        sidb::simulation::logic::detail::operational_domain_impl<tt, operational_domain> impl{
+        sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
             lat, std::vector{create_id_tt()}, op_domain_params, op_domain_stats};
 
         const auto op_domain = impl.contour_tracing(50);
@@ -1497,20 +1497,20 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
 
     layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({3, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
 
     // output perturber
-    lyt.assign_dot_tag({24, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -1553,7 +1553,7 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
     {
         operational_domain_stats op_domain_stats{};
 
-        sidb::simulation::logic::detail::operational_domain_impl<tt, operational_domain> impl{
+        sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
             lat, std::vector{create_id_tt()}, op_domain_params, op_domain_stats};
 
         const auto op_domain = impl.flood_fill(0, seed_point);
@@ -1603,22 +1603,22 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     layout lyt{lattice::si_100_2x1(), "AND gate"};
 
-    lyt.assign_dot_tag({0, 0, 1}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 1}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 1}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 1}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({20, 0, 1}, dot_tag::INPUT);
-    lyt.assign_dot_tag({18, 1, 1}, dot_tag::INPUT);
+    lyt.assign_sidb({20, 0, 1}, dot_tag::INPUT);
+    lyt.assign_sidb({18, 1, 1}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({4, 2, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 3, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 3, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 3, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 2, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 3, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 6, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({10, 7, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 6, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 7, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({10, 9, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 9, 1}, dot_tag::NORMAL);
 
     const auto& lat = lyt;
 
@@ -2008,14 +2008,14 @@ TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::NORMAL);
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;

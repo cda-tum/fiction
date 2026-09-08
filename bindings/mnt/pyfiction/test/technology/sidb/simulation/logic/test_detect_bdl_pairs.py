@@ -27,16 +27,16 @@ from mnt.pyfiction import (
 def test_detect_bdl_pairs(lat):
     lyt = sidb_layout(lat)
 
-    lyt.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
-    lyt.assign_dot_tag(lattice_site(1, 0, 0), sidb_dot_tag.INPUT)
+    lyt.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
+    lyt.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.INPUT)
 
-    lyt.assign_dot_tag(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(4, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(5, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(4, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(5, 0, 0), sidb_dot_tag.NORMAL)
 
-    lyt.assign_dot_tag(lattice_site(6, 0, 0), sidb_dot_tag.OUTPUT)
-    lyt.assign_dot_tag(lattice_site(7, 0, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_sidb(lattice_site(6, 0, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_sidb(lattice_site(7, 0, 0), sidb_dot_tag.OUTPUT)
 
     params = detect_bdl_pairs_params()
 

@@ -14253,7 +14253,6 @@ SiDB gate. It provides information about the tile, truth table, and
 port list associated with the error.
 
 Template Args:
-    TT: The type representing the truth table.
     GateLyt: The type representing the gate-level layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception_error_tile = R"doc(The tile associated with the error.)doc";
@@ -14279,200 +14278,143 @@ static const char *mkd_doc_fiction_sidb_gate_design_exception_which_tile = R"doc
 static const char *mkd_doc_fiction_sidb_gate_design_exception_which_truth_table = R"doc(Get the truth table associated with the exception.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates =
-R"doc(The *SiDB Gate Designer* designs SiDB gate implementations based on a
-specified Boolean function, a skeleton layout (can hold defects),
-canvas size, and a predetermined number of canvas SiDBs. Three
-different design modes are implemented: `quickcell`, `exhaustive` and
-`random design`.
-
-A first version of `QuickCell` was proposed in \"Towards Fast
-Automatic Design of Silicon Dangling Bond Logic\" by J. Drewniok, M.
-Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
-(https://ieeexplore.ieee.org/abstract/document/10992885).
-
-An extended version of `QuickCell` was proposed in \"QuickCell: Fast
-Automatic Design of Standard Cells for Silicon Dangling Bond Logic\"
-by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in TCAD
-2025 (https://ieeexplore.ieee.org/document/11146893).
-
-The `Automatic Exhaustive Gate Designer` was proposed in \"Minimal
-Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon
-Dangling Bonds\" by J. Drewniok, M. Walter, and R. Wille in NANOARCH
-2023 (https://dl.acm.org/doi/10.1145/3611315.3633241).
-
-The `quickcell` design mode consists of two key steps:
-1. **Initial Pruning:** Efficient filtering techniques are applied to
-   discard layouts that cannot correctly
-implement the specified logic.
-2. **Physical Simulation:** The remaining candidate layouts undergo
-   physical simulation to verify their
-operationality.
-
-The `exhaustive design` is composed of three steps:
-1. In the initial step, all possible distributions of
-   `number_of_canvas_sidbs` SiDBs within a given canvas are
-exhaustively determined. This ensures exhaustive coverage of every
-potential arrangement of `number_of_canvas_sidbs` SiDBs across the
-canvas.
-2. The calculated SiDB distributions are then incorporated into the
-   skeleton, resulting in the generation of distinct
-SiDB layouts.
-3. The generated SiDB layouts then undergo an extensive simulation
-   process. All input combinations possible for the
-given Boolean function are used to verify if the logic is fulfilled.
-
-The `random design` is composed of four steps:
-1. A specified number of canvas SiDBs (`number_of_canvas_sidbs`) are
-   randomly added to the skeleton layout.
-2. The operation status of the layout is simulated based on a given
-   Boolean function.
-3. If the layout is `operational`, it is returned as the result, and
-   the process terminates successfully.
-4. If the layout is `non-operational`, the process is repeated from
-   the first step until an operational layout is
-found.
-
-Exceptions escaping worker operations propagate to the caller after
-all started workers finish.
+R"doc(Designs SiDB gates on a skeleton: canvas SiDBs are placed in the
+canvas area so that the skeleton's input and output wires implement
+the given Boolean function(s). The design mode chooses between
+simulating every combination of canvas SiDBs, *QuickCell*'s pruning
+followed by simulation, random placement, and pruning only. Worker
+exceptions propagate to the caller after all started workers finish.
+Random placement samples at most `maximal_random_design_attempts`
+candidates without enumerating canvas layouts.
 
 Args:
-    skeleton: The skeleton layout used for gate design.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    params: Parameters for the *SiDB Gate Designer*.
+    skeleton: The skeleton with its input and output wires.
+    spec: The Boolean function(s) to implement; must not be empty.
+    params: Parameters.
+    stats: Statistics.
+
+Returns:
+    The designed gates.
+
+Raises:
+    std::invalid_argument: if `spec` is empty or the input wire count
+                           differs from the specification.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_design_gates_2 =
+R"doc(Transitional overload for SiDB cell-level layouts: the skeleton is
+converted with `to_sidb_layout` and the gates with
+`to_cell_level_layout`.
+
+Args:
+    skeleton: The skeleton.
+    spec: The Boolean function(s) to implement; must not be empty.
+    params: Parameters.
     stats: Statistics.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: The type of the truth table specifying the gate behavior.
 
 Returns:
-    A vector of designed SiDB gate layouts.
+    The designed gates.
 
 Raises:
-    std::invalid_argument: if the input wire count differs from the
-                           specification.
+    std::invalid_argument: if `spec` is empty.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params =
-R"doc(This struct contains parameters and settings to design SiDB gates.
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params = R"doc(Parameters of the gate designers.)doc";
 
-Template Args:
-    CellType: Cell type.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_canvas =
+R"doc(The canvas: the area canvas SiDBs are placed in, as two opposite
+corners.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_canvas = R"doc(Canvas spanned by the northwest and southeast cell.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode = R"doc(The design mode.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode = R"doc(Selector for the available design approaches.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Simulate every canvas layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_PRUNING_ONLY =
-R"doc(This design approach adopts the three pruning techniques used by
-*QuickCell* to efficiently filter out non-operational layouts. Unlike
-*QuickCell*, the subsequent physical simulation step is skipped to
-enhance efficiency. As a result, the operational validity of the final
-layouts cannot be guaranteed, although a substantial portion of them
-are usually operational.)doc";
+R"doc(Only run the pruning filters of *QuickCell* and return the surviving
+candidates.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_QUICKCELL = R"doc(Gates are designed by using *QuickCell*.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_QUICKCELL =
+R"doc(*QuickCell*: prune the canvas layouts with the filters of the
+operational check, then simulate the rest.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_RANDOM = R"doc(Gate layouts are designed randomly.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_RANDOM =
+R"doc(Place canvas SiDBs at random until an operational gate is found or the
+attempt limit is reached.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_mode = R"doc(Gate design mode.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_mode = R"doc(The design mode.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs = R"doc(Number of SiDBs placed in the canvas to create a working gate.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_maximal_random_design_attempts =
+R"doc(Maximum number of layouts evaluated by random gate design across all
+threads.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_operational_params = R"doc(Parameters for the `is_operational` function.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs = R"doc(Number of canvas SiDBs.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_cond =
-R"doc(The design process is terminated after a valid SiDB gate design is
-found.
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_operational_params = R"doc(Parameters of the operational check.)doc";
 
-Note:
-    This parameter has no effect unless the gate design is exhaustive.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_cond = R"doc(When to stop.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition =
-R"doc(Selector for the different termination conditions for the SiDB gate
-design process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition = R"doc(When to stop.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_AFTER_FIRST_SOLUTION =
-R"doc(The design process is terminated as soon as the first valid SiDB gate
-design is found.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_AFTER_FIRST_SOLUTION = R"doc(Stop after the first operational gate.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED =
-R"doc(The design process ends after all possible combinations of SiDBs
-within the canvas are enumerated.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED = R"doc(Enumerate every combination of canvas SiDBs.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats = R"doc(Statistics for the design of SiDB gates.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats = R"doc(Statistics of the gate designers.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts = R"doc(The number of all possible layouts.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts = R"doc(Number of canvas layouts, saturated at `std::size_t`'s maximum.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_first_pruning =
-R"doc(The number of layouts that remain after first pruning (discarding
-layouts with potential positive SiDBs).)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_first_pruning = R"doc(Number of canvas layouts that survived the first pruning filter.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_second_pruning =
-R"doc(The number of layouts that remain after second pruning (discarding
-layouts that fail to satisfy the physical model).)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_second_pruning = R"doc(Number of canvas layouts that survived the second pruning filter.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_third_pruning =
-R"doc(The number of layouts that remain after third pruning (discarding
-layouts with unstable I/O signals).)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_third_pruning = R"doc(Number of canvas layouts that survived the third pruning filter.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_pruning_total = R"doc(The runtime of the pruning process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_pruning_total = R"doc(Runtime of the pruning.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_report =
-R"doc(This function outputs the total time taken for the SiDB gate design
-process to the provided output stream. If no output stream is
-provided, it defaults to standard output (`std::cout`).
+R"doc(Prints the statistics.
 
 Args:
-    out: The output stream to which the report will be written.
+    out: The stream to print to.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_sim_engine =
-R"doc(The simulation engine to be used for the operational domain
-computation.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_sim_engine = R"doc(The simulation engine used.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_time_total = R"doc(The total runtime of SiDB gate design process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_time_total = R"doc(Total runtime.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl =
-R"doc(Implementation of SiDB gate design with parallel pruning and
-simulation.
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl = R"doc(Implementation of the gate designers.)doc";
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_canvas_layouts = R"doc(All canvas layouts: one per combination of canvas SiDBs.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_canvas_layouts = R"doc(All Canvas SiDB layout (without I/O pins).)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_available_sidbs_in_canvas = R"doc(Empty, defect-free sites of the canvas.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_design_canvas_layout =
-R"doc(This function designs canvas SiDB layouts based on given indices.
+R"doc(Builds the canvas layout of a combination: its canvas SiDBs plus the
+skeleton's own logic dots.
 
 Args:
-    cell_indices: A vector of indices of cells to be added to the
-                  skeleton layout.
+    site_indices: Indices into the canvas sites.
 
 Returns:
-    An SiDB cell-level layout consisting of canvas SidBs.
+    The canvas layout.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_design_gates_impl =
-R"doc(This constructor initializes an instance of the *SiDB Gate Designer*
-implementation with the provided skeleton layout and configuration
-parameters.
+R"doc(Constructor.
 
 Args:
-    skeleton: The skeleton layout used as a basis for gate design.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    ps: Parameters and settings for the gate designer.
-    st: Statistics for the gate design process.
+    skeleton: The skeleton: the input and output wires the gate has to
+              connect.
+    spec: The Boolean function(s) to implement.
+    ps: Parameters.
+    st: Statistics.
 
 Raises:
     std::invalid_argument: if the input wire count differs from the
@@ -14481,216 +14423,239 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_determine_all_possible_canvas_layouts =
-R"doc(This function calculates all combinations of distributing a given
-number of SiDBs across a specified number of positions in the canvas.
-Each combination is then used to create a gate layout candidate.
+R"doc(Builds one canvas layout per combination of canvas SiDBs.
 
 Returns:
-    A vector containing all possible gate layouts generated from the
-    combinations.
+    The canvas layouts.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_for_each_in_parallel =
+R"doc(Runs `fn` on every item on the configured number of threads; stops
+early once `done` is set and the termination condition asks for the
+first solution only. Worker exceptions propagate after all started
+workers finish.
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_first_pruning = R"doc(Number of discarded layouts at first pruning.)doc";
+Args:
+    items: The items.
+    fn: The function.
+    done: The stop flag.
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_second_pruning = R"doc(Number of discarded layouts at second pruning.)doc";
+Template Args:
+    Items: Container type.
+    Fn: Callable type.
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_third_pruning = R"doc(Number of discarded layouts at third pruning.)doc";
+)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_input_bdl_wires = R"doc(The input wires of the skeleton.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_first_pruning = R"doc(Number of canvas layouts the first pruning filter discarded.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_threads = R"doc(Number of threads to be used for the design process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_second_pruning = R"doc(Number of canvas layouts the second pruning filter discarded.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_third_pruning = R"doc(Number of canvas layouts the third pruning filter discarded.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_threads = R"doc(Number of threads to use.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_output_bdl_wires = R"doc(The output wires of the skeleton.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_params = R"doc(Parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_automatic_exhaustive_gate_designer =
-R"doc(Design gates by using the *Automatic Exhaustive Gate Designer*. This
-algorithm was proposed in \"Minimal Design of SiDB Gates: An Optimal
-Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok,
-M. Walter, and R. Wille in NANOARCH 2023
-(https://dl.acm.org/doi/10.1145/3611315.3633241).
-
-This function adds each cell combination to the given skeleton, and
-determines whether the layout is operational based on the specified
-parameters. The design process is parallelized to improve performance.
+R"doc(Simulates every combination of canvas SiDBs.
 
 Returns:
-    A vector of designed SiDB gate layouts.
+    The operational gates.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_pruning =
-R"doc(This function processes each layout to determine if it represents a
-valid gate implementation or if it can be pruned by using three
-distinct physically-informed pruning steps. It leverages multi-
-threading to accelerate the evaluation and ensures thread-safe access
-to shared resources.
+R"doc(Runs the pruning filters of the operational check on every canvas
+layout.
 
 Returns:
-    A vector containing the valid gate candidates that were not
-    pruned.
+    The surviving candidates.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_quickcell =
-R"doc(Design Standard Cells/gates by using the *QuickCell* algorithm.
+R"doc(*QuickCell*: prunes the canvas layouts with the filters of the
+operational check and simulates the survivors.
 
 Returns:
-    A vector of designed SiDB gate layouts.
+    The operational gates, or the pruned candidates in `PRUNING_ONLY`
+    mode.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_random_design =
-R"doc(Design gates randomly and in parallel.
-
-This function adds cells randomly to the given skeleton, and
-determines whether the layout is operational based on the specified
-parameters. The design process is parallelized to improve performance.
+R"doc(Places canvas SiDBs at random until an operational gate is found.
 
 Returns:
-    A vector of designed SiDB gate layouts.
+    The operational gate, or an empty vector if none was found.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_skeleton_layout =
-R"doc(The skeleton layout serves as a starting layout to which SiDBs are
-added to create unique SiDB layouts and, if possible, working gates.
-It defines input and output wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_skeleton_layout = R"doc(The skeleton.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_skeleton_layout_with_canvas_sidbs =
-R"doc(This function adds SiDBs (given by indices) to the skeleton layout
-that is returned afterwards.
+R"doc(Adds the canvas SiDBs of a combination to the skeleton as logic dots;
+sites that hold a defect stay empty.
 
 Args:
-    cell_indices: A vector of indices of cells to be added to the
-                  skeleton layout.
+    site_indices: Indices into the canvas sites.
 
 Returns:
-    A copy of the original layout (`skeleton_layout`) with SiDB cells
-    added at specified indices.
+    The skeleton with the canvas SiDBs.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_stats = R"doc(The statistics of the gate design.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_stats = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_truth_table = R"doc(Truth table of the given gate.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_truth_table = R"doc(The Boolean function(s).)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_multiple_random_layouts =
-R"doc(Generates multiple random layouts featuring a random arrangement of
-SiDBs. These randomly placed dots can be incorporated into an existing
-layout skeleton that may be optionally provided.
-
-Exceptions from cloning the supplied skeleton propagate to the caller.
-
-Args:
-    params: The parameters for generating the random SiDB layouts.
-    skeleton: Optional layout to which random dots are added.
-
-Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
+static const char *mkd_doc_fiction_sidb_generators_detail_random_generator =
+R"doc(The generator's random source, one per thread.
 
 Returns:
-    A vector containing the unique randomly generated SiDB layouts. If
-    the design is impossible, `std::nullopt`
+    The generator.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_multiple_random_layouts =
+R"doc(Generates several unique random SiDB layouts with
+`generate_random_layout`.
+
+Args:
+    params: Parameters; `number_of_unique_generated_layouts` layouts
+            are requested.
+    skeleton: The skeleton to place SiDBs on, if any.
+
+Returns:
+    The layouts, or `std::nullopt` if none could be generated within
+    the attempt limit.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_multiple_random_layouts_2 =
+R"doc(Transitional overload for SiDB cell-level layouts; see
+`generate_random_layout`.
+
+Args:
+    params: Parameters.
+    skeleton: The skeleton to place SiDBs on, if any.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    The layouts, or `std::nullopt`.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout =
-R"doc(Generates a layout featuring a random arrangement of SiDBs. These
-randomly placed dots can be incorporated into an existing layout
-skeleton that may be optionally provided.
-
-Exceptions from cloning the supplied skeleton propagate to the caller.
+R"doc(Generates a random SiDB layout by placing SiDBs at random sites of an
+area, optionally on top of a skeleton. The skeleton's lattice, dots,
+and defects carry over; sites that hold a defect or that a neutral
+defect affects are left empty. Depending on the positive charge
+policy, SiDBs that would allow positive charges are removed again, or
+the generation is repeated until positive charges are possible.
 
 Args:
-    params: The parameters for generating the random layout.
-    skeleton: Optional layout to which random dots are added.
-
-Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
+    params: Parameters.
+    skeleton: The skeleton to place SiDBs on, if any.
 
 Returns:
-    A randomly generated SiDB layout, or `std::nullopt` if the process
-    failed due to conflicting parameters.
+    The generated layout, or `std::nullopt` if not all SiDBs could be
+    placed within the attempt limit.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params =
-R"doc(This struct stores the parameters for the `generate_random_layout`
-algorithm.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_coordinate_pair =
-R"doc(Two coordinates that span the region where SiDBs may be placed (order
-is not important). The first coordinate is the upper left corner and
-the second coordinate is the lower right corner of the area.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_maximal_attempts =
-R"doc(Maximum number of steps to place the specified number of SiDBs.
-Example: If the area, where SiDBs can be placed, is small and many
-SiDBs are to be placed, several tries are required to generate a
-layout with no positively charged SiDBs.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_maximal_attempts_for_multiple_layouts =
-R"doc(The maximum number of attempts allowed to generate the given number of
-unique layouts (default: :math:`10^{6}`).
-Example: If the area, where SiDBs can be placed, is small and many
-         SiDBs are to be placed, it may be difficult or
-even impossible to find several unique (given by
-number_of_unique_generated_layouts) layouts. Therefore, this parameter
-sets a limit for the maximum number of tries.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_sidbs = R"doc(Number of SiDBs that are placed on the layout.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_unique_generated_layouts = R"doc(The desired number of unique layouts to be generated.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges =
-R"doc(An enumeration of modes to use for the generation of random SiDB
-layouts to control control the appearance of positive charges.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_ALLOWED =
-R"doc(Positive charges can occur (i.e. SiDBs can be placed right next to
-each other).)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_FORBIDDEN =
-R"doc(Positive charges are not allowed to occur (i.e. SiDBs need to be
-separated by a few lattice points).)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_MAY_OCCUR =
-R"doc(Positive charges can occur, which means that the
-`can_positive_charges_occur` function returns `true`.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_sidbs =
-R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed
-closer than the minimal_spacing.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_sim_params = R"doc(Simulation parameters.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible =
-R"doc(This function evaluates whether it is impossible to design an SiDB
-gate for a given truth table and a given skeleton with atomic defects.
-It determines the possible charge states at the output BDL pairs.
-Atomic defects can cause a BDL pair to be neutrally charged only.
-Thus, the BDL pair would not work as intended.
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_2 =
+R"doc(Transitional overload for SiDB cell-level layouts: the skeleton is
+converted with `to_sidb_layout` and the result with
+`to_cell_level_layout`.
 
 Args:
-    skeleton_with_defects: An SiDB skeleton layout with atomic
-                           defects.
-    spec: A vector of truth tables (each truth table is representing
-          one output) representing the gate's intended functionality.
-    params: Parameters to determine if the gate design is impossible.
+    params: Parameters.
+    skeleton: The skeleton to place SiDBs on, if any.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: The truth table type.
 
 Returns:
-    `true` if gate design is impossible, `false` otherwise.
+    The generated layout, or `std::nullopt`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params = R"doc(Parameters of the random layout generator.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_coordinate_pair = R"doc(The area to place SiDBs in, as two opposite corners.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_maximal_attempts = R"doc(Maximum number of placement attempts.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_maximal_attempts_for_multiple_layouts = R"doc(Maximum number of generation attempts for multiple layouts.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_sidbs = R"doc(Number of SiDBs to place.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_unique_generated_layouts =
+R"doc(Number of unique layouts to generate with
+`generate_multiple_random_layouts`.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges = R"doc(Whether positively charged SiDBs may occur in the generated layout.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_ALLOWED = R"doc(Positive charges are allowed.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_FORBIDDEN =
+R"doc(Positive charges are forbidden: SiDBs that would enable them are
+removed again.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_MAY_OCCUR =
+R"doc(Positive charges have to be possible: generation is repeated until
+they are.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_sidbs = R"doc(Positive charge policy.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_sim_params = R"doc(Physical parameters for the positive charge check.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible =
+R"doc(Checks whether a gate can be designed on a skeleton with defects at
+all: if the charged defects push one SiDB of an output BDL pair past
+its neutral transition threshold for any input pattern, that SiDB can
+never be negatively charged, the pair loses its BDL property, and no
+canvas can fix that.
+
+Args:
+    skeleton_with_defects: The skeleton, including the defects of the
+                           surface it sits on.
+    spec: The Boolean function(s) to implement; must not be empty.
+    params: Parameters.
+
+Returns:
+    `true` if no gate can be designed on the skeleton.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible_2 =
+R"doc(Transitional overload for SiDB cell-level layouts, converted with
+`to_sidb_layout`; see the `layout` overload.
+
+Args:
+    skeleton_with_defects: The skeleton with defects.
+    spec: The Boolean function(s) to implement; must not be empty.
+    params: Parameters.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    `true` if no gate can be designed on the skeleton.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
 
 )doc";
 
@@ -16786,7 +16751,6 @@ Args:
 
 Template Args:
     LytSkeleton: The cell-level layout of the skeleton.
-    TT: Truth table type.
     CellLyt: The cell-level layout.
     GateLyt: The gate-level layout.
 
@@ -16823,7 +16787,6 @@ Args:
 
 Template Args:
     CellLyt: SiDB defect surface type.
-    TT: Truth table type.
     Params: Type of the parameters used for the parametrized gate
             library.
 
@@ -17014,9 +16977,6 @@ Args:
     transition_type: The transition to consider; all transitions if
                      omitted.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The minimum potential difference over all input patterns, or
     infinity if the input wires cannot represent the specification or
@@ -17037,7 +16997,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The minimum potential difference over all input patterns.
@@ -17082,9 +17041,6 @@ Args:
     input_index: The input pattern the charge distributions were
                  simulated for.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The energies with their state types, ascending by energy.
 
@@ -17106,9 +17062,6 @@ Args:
                  simulated for.
     input_bdl_wires: The input BDL wires of `lyt`.
     output_bdl_wires: The output BDL wires of `lyt`.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The energies with their state types.
@@ -17224,9 +17177,6 @@ Args:
     params: Simulation and physical parameters.
     pst: Statistics.
 
-Template Args:
-    TT: Type of the truth table.
-
 Returns:
     The critical temperature (unit: K).
 
@@ -17260,9 +17210,6 @@ Args:
     output_bdl_wires: BDL output wires of the layout.
     pst: Statistics.
 
-Template Args:
-    TT: Type of the truth table.
-
 Returns:
     The critical temperature (unit: K).
 
@@ -17287,7 +17234,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The critical temperature (unit: K).
@@ -17435,9 +17381,6 @@ given Boolean function.
 Args:
     spec: Expected Boolean function of the layout given as a multi-
           output truth table.
-
-Template Args:
-    TT: Type of the truth table.
 
 )doc";
 
@@ -18077,7 +18020,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The defect influence domain of the layout.
@@ -18190,7 +18132,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The (partial) defect influence domain of the layout.
@@ -18256,7 +18197,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The (partial) defect influence domain of the layout.
@@ -18632,7 +18572,6 @@ Args:
 
 Template Args:
     Lyt: The SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The displacement robustness domain of the SiDB layout.
@@ -18662,7 +18601,6 @@ Args:
 
 Template Args:
     Lyt: The SiDB cell-level layout type.
-    TT: The type of the truth table.
 
 Returns:
     The probability of fabricating an operational SiDB layout.
@@ -23112,9 +23050,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The critical temperature domain of the layout.
 
@@ -23142,7 +23077,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -23196,9 +23130,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The critical temperature domain of the layout.
 
@@ -23226,7 +23157,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -23280,9 +23210,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The critical temperature domain of the layout.
 
@@ -23307,7 +23234,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -23354,9 +23280,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The critical temperature domain of the layout.
 
@@ -23382,7 +23305,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -23407,9 +23329,6 @@ R"doc(Sanity checks shared by every entry point.
 Args:
     lyt: The layout.
     spec: The specification.
-
-Template Args:
-    TT: Truth table type.
 
 )doc";
 
@@ -23514,10 +23433,7 @@ pattern to the input BDL pairs of the layout, simulates the ground
 states, and compares the charge states of the output BDL pairs with
 the expected truth-table entries. With a canvas, the three pruning
 filters (positive charges, physical infeasibility, I/O instability)
-run before any simulation on the layout's potential landscape.
-
-Template Args:
-    TT: Truth table type.)doc";
+run before any simulation on the layout's potential landscape.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_assign =
 R"doc(Assigns a charge state to the SiDB at `site` without touching the
@@ -23819,9 +23735,6 @@ R"doc(The input patterns that kinks render non-operational.
 Args:
     p: The implementation object, configured to reject kinks.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The kink-induced non-operational patterns.
 
@@ -23987,9 +23900,6 @@ Args:
     input_wires: The input wires, or `std::nullopt` to detect them.
     output_wires: The output wires, or `std::nullopt` to detect them.
     canvas_lyt: The canvas, or `std::nullopt` to use the logic dots.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The implementation object.
@@ -24536,9 +24446,6 @@ Args:
     p: The implementation object.
     num_patterns: The number of input patterns.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     All patterns that are operational.
 
@@ -24761,9 +24668,6 @@ Args:
     params: Parameters; kinks are rejected regardless of
             `params.op_condition`.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     `true` if the layout is non-operational because of kinks.
 
@@ -24782,9 +24686,6 @@ Args:
     output_bdl_wire: The output BDL wires of `lyt`.
     canvas_lyt: The canvas; defaults to none.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     `true` if the layout is non-operational because of kinks.
 
@@ -24801,7 +24702,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     `true` if the layout is non-operational because of kinks.
@@ -24822,9 +24722,6 @@ Args:
     spec: The Boolean function(s) it has to implement.
     params: Parameters.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational status and the number of simulator invocations.
 
@@ -24841,9 +24738,6 @@ Args:
     input_bdl_wire: The input BDL wires of `lyt`.
     output_bdl_wire: The output BDL wires of `lyt`.
     canvas_lyt: The canvas; defaults to the logic dots of `lyt`.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The operational status and the number of simulator invocations.
@@ -24863,9 +24757,6 @@ Args:
     output_bdl_wire: The output BDL wires.
     canvas_lyt: The canvas; defaults to the logic dots of the first
                 layout.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The operational status and the number of simulator invocations.
@@ -24887,7 +24778,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The operational status and the number of simulator invocations.
@@ -24981,9 +24871,6 @@ Args:
     params: Parameters; kinks are rejected regardless of
             `params.op_condition`.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The kink-induced non-operational input patterns.
 
@@ -25002,9 +24889,6 @@ Args:
     output_bdl_wire: The output BDL wires of `lyt`.
     canvas_lyt: The canvas; defaults to none.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The kink-induced non-operational input patterns.
 
@@ -25021,7 +24905,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The kink-induced non-operational input patterns.
@@ -25527,9 +25410,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational domain of the layout.
 
@@ -25557,7 +25437,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -25608,9 +25487,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational domain of the layout.
 
@@ -25638,7 +25514,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -25694,9 +25569,6 @@ Args:
     ps: Parameters for the operational domain computation.
     st: Statistics of the process.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational domain of the layout.
 
@@ -25721,7 +25593,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -25788,9 +25659,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational domain of the layout.
 
@@ -25816,7 +25684,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The domain.
@@ -25844,9 +25711,6 @@ Args:
     pp: The specific parameter point around which the operational
         ratio is computed.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The ratio of operational parameter points to the total number of
     parameter points in the parameter space.
@@ -25871,7 +25735,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The ratio of operational parameter points.
@@ -25923,9 +25786,6 @@ Args:
     spec: The Boolean function(s) it has to implement.
     params: Parameters.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational input patterns.
 
@@ -25943,9 +25803,6 @@ Args:
     output_bdl_wire: The output BDL wires of `lyt`.
     canvas_lyt: The canvas; defaults to none.
 
-Template Args:
-    TT: Truth table type.
-
 Returns:
     The operational input patterns.
 
@@ -25962,7 +25819,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The operational input patterns.
@@ -26069,9 +25925,6 @@ Args:
     input_pattern: The input pattern `cd` was simulated for.
     input_wires: The input BDL wires of `lyt`.
     output_wires: The output BDL wires of `lyt`.
-
-Template Args:
-    TT: Truth table type.
 
 Returns:
     The operational status.
@@ -26842,6 +26695,29 @@ Returns:
 Raises:
     std::out_of_range: if the site cannot be represented by the target
                        coordinate type.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_to_cell_level_layout =
+R"doc(Converts a `sidb::layout` back into a Cartesian SiDB cell-level
+layout: cell types, inputs, outputs, the layout name, and, for defect
+surfaces, the surface defects carry over. The layout's lattice is not
+represented in the cell-level type and is dropped. This is the inverse
+of `to_sidb_layout` for the algorithms that still hand out cell-level
+layouts.
+
+Args:
+    lyt: The layout to convert.
+
+Template Args:
+    CellLyt: SiDB cell-level layout type to create.
+
+Returns:
+    The cell-level layout.
+
+Raises:
+    std::out_of_range: if a cell or a retained defect cannot be
+                       represented by the target coordinate type.
 
 )doc";
 
@@ -28388,7 +28264,8 @@ Args:
     k: The number of items to choose from n.
 
 Returns:
-    The binomial coefficient :math:`\binom{n}{k}`.
+    The binomial coefficient :math:`\binom{n}{k}`, saturated at
+    `uint64_t`'s maximum.
 
 )doc";
 
@@ -28445,6 +28322,10 @@ Args:
 Returns:
     A vector of vectors representing all possible combinations of
     distributing k entities on n positions.
+
+Raises:
+    std::length_error: if the number of combinations exceeds the
+                       vector's capacity.
 
 )doc";
 

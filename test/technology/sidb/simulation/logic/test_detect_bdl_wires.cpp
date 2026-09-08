@@ -38,14 +38,14 @@ TEST_CASE("Three separate BDL pairs on the same y-coord (three wires)", "[detect
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({38, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({36, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({36, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({9, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({9, 0, 0}, dot_tag::OUTPUT);
 
     SECTION("Determine all wires")
     {
@@ -70,14 +70,14 @@ TEST_CASE("Three separate BDL pairs on the same x-coord (three wires)", "[detect
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 36, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({0, 37, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 36, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 37, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({0, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 1, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({0, 8, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({0, 9, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({0, 8, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({0, 9, 0}, dot_tag::OUTPUT);
 
     SECTION("Determine all wires")
     {
@@ -104,14 +104,14 @@ TEST_CASE("BDL wire without I/O BDL pairs", "[detect-bdl-wires]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({7, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({9, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({9, 0, 0}, dot_tag::NORMAL);
 
     const auto all_bdl_wires = detect_bdl_wires(lyt);
     REQUIRE(all_bdl_wires.size() == 1);
@@ -124,17 +124,17 @@ TEST_CASE("Output BDL wire from west to east", "[detect-bdl-wires]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
 
     const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::ALL);
     REQUIRE(all_bdl_wires.size() == 1);
@@ -153,17 +153,17 @@ TEST_CASE("BDL wire from west to east", "[detect-bdl-wires]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
 
     const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::ALL);
     REQUIRE(all_bdl_wires.size() == 1);
@@ -191,17 +191,17 @@ TEST_CASE("BDL wire bottom to up", "[detect-bdl-wires]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({0, 1, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({0, 1, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({0, 6, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({0, 7, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 7, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({0, 12, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({0, 13, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 12, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 13, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({0, 18, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({0, 19, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 18, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 19, 0}, dot_tag::INPUT);
 
     const detect_bdl_wires_params params{.threshold_bdl_interdistance = 5.0};
 
@@ -221,17 +221,17 @@ TEST_CASE("BDL wire from east to west", "[detect-bdl-wires]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({2, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({18, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({20, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::INPUT);
 
     SECTION("Determine wire")
     {
@@ -245,14 +245,14 @@ TEST_CASE("Three separate BDL pairs (three wires)", "[detect-bdl-wires]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({38, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({36, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({36, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({30, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({32, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({32, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({30, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
 
     SECTION("Determine all wires")
     {
@@ -277,30 +277,30 @@ TEST_CASE("Detect BDL wires", "[detect-bdl-wires]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({38, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({38, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({36, 1, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({36, 1, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
 
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({30, 17, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({32, 18, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 17, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
     SECTION("Determine all wires")
     {
@@ -337,30 +337,30 @@ TEST_CASE("Output cells at the top and input at the bottom", "[detect-bdl-wires]
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({38, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({38, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({36, 1, 0}, dot_tag::OUTPUT);
-    lyt.assign_dot_tag({2, 1, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({36, 1, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::OUTPUT);
 
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({32, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({32, 2, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({30, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({26, 4, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({26, 4, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({24, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({14, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({24, 15, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({26, 16, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({30, 17, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({32, 18, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag({36, 19, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 17, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({32, 18, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
     SECTION("Determine all wires")
     {
@@ -495,17 +495,17 @@ TEST_CASE("special cases", "[detect-bdl-wires]")
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({2, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({2, 0, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({6, 1, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 1, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({12, 0, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 0, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 0, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 0, 1}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({18, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({20, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({18, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
 
         const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.5,
                                              .bdl_pairs_params = detect_bdl_pairs_params{.minimum_distance = 0.5}};
@@ -526,17 +526,17 @@ TEST_CASE("special cases", "[detect-bdl-wires]")
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({2, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({6, 1, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 1, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({12, 0, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 0, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 0, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 0, 1}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({18, 0, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({20, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({18, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({20, 0, 0}, dot_tag::INPUT);
 
         const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.5,
                                              .bdl_pairs_params = detect_bdl_pairs_params{.minimum_distance = 0.5}};
@@ -557,17 +557,17 @@ TEST_CASE("special cases", "[detect-bdl-wires]")
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({2, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({2, 0, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({6, 1, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 1, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({12, 0, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 0, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 0, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 0, 1}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({18, 1, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({20, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({18, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({20, 1, 0}, dot_tag::NORMAL);
 
         const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.5,
                                              .bdl_pairs_params = detect_bdl_pairs_params{.minimum_distance = 0.5}};
@@ -588,17 +588,17 @@ TEST_CASE("special cases", "[detect-bdl-wires]")
     {
         layout lyt{};
 
-        lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-        lyt.assign_dot_tag({2, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+        lyt.assign_sidb({2, 0, 0}, dot_tag::INPUT);
 
-        lyt.assign_dot_tag({6, 1, 0}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({8, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({6, 1, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({8, 1, 0}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({12, 0, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({14, 0, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({12, 0, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({14, 0, 1}, dot_tag::NORMAL);
 
-        lyt.assign_dot_tag({18, -1, 1}, dot_tag::NORMAL);
-        lyt.assign_dot_tag({20, -1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({18, -1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({20, -1, 1}, dot_tag::NORMAL);
 
         const detect_bdl_wires_params params{.threshold_bdl_interdistance = 3.0,
                                              .bdl_pairs_params = detect_bdl_pairs_params{.minimum_distance = 0.5}};
@@ -627,7 +627,7 @@ TEST_CASE("BDL wire detection propagates invalid lattice-basis errors", "[detect
     layout       lyt{};
     lattice_site invalid{1, 0, 0};
     invalid.z = 2;
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_dot_tag(invalid, dot_tag::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb(invalid, dot_tag::INPUT);
     CHECK_THROWS_AS(detect_bdl_wires(lyt), std::out_of_range);
 }

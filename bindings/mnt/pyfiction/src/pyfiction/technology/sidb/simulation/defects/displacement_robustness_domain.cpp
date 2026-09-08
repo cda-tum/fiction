@@ -49,7 +49,7 @@ void determine_displacement_robustness_domain_impl(nanobind::module_& m, const s
                 &fiction::sidb::simulation::defects::displacement_robustness_domain<Lyt>::operational_values);
 
     m.def(fmt::format("determine_displacement_robustness_domain_{}", lattice).c_str(),
-          &fiction::sidb::simulation::defects::determine_displacement_robustness_domain<Lyt, py_tt>, py::arg("layout"),
+          &fiction::sidb::simulation::defects::determine_displacement_robustness_domain<Lyt>, py::arg("layout"),
           py::arg("spec"), py::arg("params"), py::arg("stats") = nullptr);
 }
 

@@ -28,17 +28,17 @@ def bdl_wire() -> sidb_layout:
     """
     layout = sidb_layout()
 
-    layout.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
-    layout.assign_dot_tag(lattice_site(2, 0, 0), sidb_dot_tag.INPUT)
+    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
+    layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.INPUT)
 
-    layout.assign_dot_tag(lattice_site(6, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(8, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(6, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(8, 0, 0), sidb_dot_tag.NORMAL)
 
-    layout.assign_dot_tag(lattice_site(12, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(14, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(12, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(14, 0, 0), sidb_dot_tag.NORMAL)
 
-    layout.assign_dot_tag(lattice_site(18, 0, 0), sidb_dot_tag.OUTPUT)
-    layout.assign_dot_tag(lattice_site(20, 0, 0), sidb_dot_tag.OUTPUT)
+    layout.assign_sidb(lattice_site(18, 0, 0), sidb_dot_tag.OUTPUT)
+    layout.assign_sidb(lattice_site(20, 0, 0), sidb_dot_tag.OUTPUT)
     return layout
 
 
@@ -153,22 +153,22 @@ def test_automatic_siqad_and_gate_iteration() -> None:
     """Check automatic iteration over all SiQAD AND-gate input patterns."""
     layout = sidb_layout(lattice.si_100_2x1(), "AND gate")
 
-    layout.assign_dot_tag(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
-    layout.assign_dot_tag(lattice_site(2, 1, 1), sidb_dot_tag.INPUT)
+    layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
+    layout.assign_sidb(lattice_site(2, 1, 1), sidb_dot_tag.INPUT)
 
-    layout.assign_dot_tag(lattice_site(20, 0, 1), sidb_dot_tag.INPUT)
-    layout.assign_dot_tag(lattice_site(18, 1, 1), sidb_dot_tag.INPUT)
+    layout.assign_sidb(lattice_site(20, 0, 1), sidb_dot_tag.INPUT)
+    layout.assign_sidb(lattice_site(18, 1, 1), sidb_dot_tag.INPUT)
 
-    layout.assign_dot_tag(lattice_site(4, 2, 1), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(6, 3, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(4, 2, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(6, 3, 1), sidb_dot_tag.NORMAL)
 
-    layout.assign_dot_tag(lattice_site(14, 3, 1), sidb_dot_tag.NORMAL)
-    layout.assign_dot_tag(lattice_site(16, 2, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(14, 3, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(16, 2, 1), sidb_dot_tag.NORMAL)
 
-    layout.assign_dot_tag(lattice_site(10, 3, 0), sidb_dot_tag.OUTPUT)
-    layout.assign_dot_tag(lattice_site(10, 3, 1), sidb_dot_tag.OUTPUT)
+    layout.assign_sidb(lattice_site(10, 3, 0), sidb_dot_tag.OUTPUT)
+    layout.assign_sidb(lattice_site(10, 3, 1), sidb_dot_tag.OUTPUT)
 
-    layout.assign_dot_tag(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
 
     bii = bdl_input_iterator(layout)
 

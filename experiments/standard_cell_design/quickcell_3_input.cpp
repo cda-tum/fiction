@@ -90,7 +90,7 @@ int main()  // NOLINT
     const auto skeleton_two =
         read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "3_in_1_out_skeleton_two.sqd"));
 
-    const design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+    const design_gates_params params{
         .operational_params =
             is_operational_params{
                 .sim_params = simulation_parameters{2, -0.31},
@@ -99,7 +99,7 @@ int main()  // NOLINT
                     bdl_input_iterator_params{.bdl_wire_params =
                                                   detect_bdl_wires_params{.threshold_bdl_interdistance = 3.0}},
                 .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
-        .design_mode            = design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
+        .design_mode            = design_gates_params::design_gates_mode::QUICKCELL,
         .canvas                 = {{22, 6, 0}, {32, 12, 0}},
         .number_of_canvas_sidbs = 4};
 

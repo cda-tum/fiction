@@ -34,9 +34,9 @@ TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occur]")
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({4, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
 
     SECTION("Default values")
     {
@@ -61,16 +61,16 @@ TEST_CASE("Y-shaped SiDB OR gate with input 01, using siqad coordinates", "[can-
 {
     layout lyt{};
 
-    lyt.assign_dot_tag({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({12, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({14, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_dot_tag({10, 6, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({10, 8, 1}, dot_tag::NORMAL);
-    lyt.assign_dot_tag({16, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
     SECTION("Default values")
     {
@@ -96,6 +96,6 @@ TEST_CASE("Positive-charge analysis propagates invalid lattice-basis errors", "[
     layout       lyt{};
     lattice_site invalid{};
     invalid.z = 2;
-    lyt.assign_dot_tag(invalid, dot_tag::NORMAL);
+    lyt.assign_sidb(invalid, dot_tag::NORMAL);
     CHECK_THROWS_AS(can_positive_charges_occur(lyt, simulation_parameters{}), std::out_of_range);
 }

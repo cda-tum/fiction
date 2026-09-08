@@ -21,11 +21,11 @@ on_the_fly_circuit_design
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::generators::generate_random_layout
+```{doxygenfunction} fiction::sidb::generators::generate_random_layout(const generate_random_layout_params& params, const std::optional<layout>& skeleton = std::nullopt)
 
 ```
 
-```{doxygenfunction} fiction::sidb::generators::generate_multiple_random_layouts
+```{doxygenfunction} fiction::sidb::generators::generate_multiple_random_layouts(const generate_random_layout_params& params, const std::optional<layout>& skeleton = std::nullopt)
 
 ```
 
@@ -55,6 +55,6 @@ on_the_fly_circuit_design
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::generators::is_gate_design_impossible
+```{doxygenfunction} fiction::sidb::generators::is_gate_design_impossible(const layout& skeleton_with_defects, const std::vector<TT>& spec, const is_gate_design_impossible_params& params = {})
 
 ```

@@ -53,7 +53,7 @@ physically_valid_parameters(const layout& lyt, const charge_distribution& cd,
 
     logic::operational_domain_stats st{};
 
-    logic::detail::operational_domain_impl<tt, logic::operational_domain> p{lyt, params, st};
+    logic::detail::operational_domain_impl<logic::operational_domain> p{lyt, params, st};
 
     return p.grid_search_for_physically_valid_parameters(cd);
 }

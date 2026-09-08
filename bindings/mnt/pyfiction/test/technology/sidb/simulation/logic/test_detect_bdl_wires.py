@@ -21,29 +21,29 @@ from mnt.pyfiction import (
 def test_detect_bdl_wires_100_lattice():
     lyt = sidb_layout()
 
-    lyt.assign_dot_tag(lattice_site(38, 0, 0), sidb_dot_tag.OUTPUT)
-    lyt.assign_dot_tag(lattice_site(0, 0, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_sidb(lattice_site(38, 0, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.OUTPUT)
 
-    lyt.assign_dot_tag(lattice_site(36, 1, 0), sidb_dot_tag.OUTPUT)
-    lyt.assign_dot_tag(lattice_site(2, 1, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_sidb(lattice_site(36, 1, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_sidb(lattice_site(2, 1, 0), sidb_dot_tag.OUTPUT)
 
-    lyt.assign_dot_tag(lattice_site(6, 2, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(32, 2, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(6, 2, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(32, 2, 0), sidb_dot_tag.NORMAL)
 
-    lyt.assign_dot_tag(lattice_site(30, 3, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(8, 3, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(30, 3, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(8, 3, 0), sidb_dot_tag.NORMAL)
 
-    lyt.assign_dot_tag(lattice_site(26, 4, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(12, 4, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(26, 4, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(12, 4, 0), sidb_dot_tag.NORMAL)
 
-    lyt.assign_dot_tag(lattice_site(24, 5, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(14, 5, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(24, 5, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(14, 5, 0), sidb_dot_tag.NORMAL)
 
-    lyt.assign_dot_tag(lattice_site(24, 15, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_dot_tag(lattice_site(26, 16, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(24, 15, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(lattice_site(26, 16, 0), sidb_dot_tag.NORMAL)
 
-    lyt.assign_dot_tag(lattice_site(30, 17, 0), sidb_dot_tag.INPUT)
-    lyt.assign_dot_tag(lattice_site(32, 18, 0), sidb_dot_tag.INPUT)
+    lyt.assign_sidb(lattice_site(30, 17, 0), sidb_dot_tag.INPUT)
+    lyt.assign_sidb(lattice_site(32, 18, 0), sidb_dot_tag.INPUT)
 
     params = detect_bdl_wires_params()
 
