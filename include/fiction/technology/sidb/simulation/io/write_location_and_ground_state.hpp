@@ -247,7 +247,8 @@ void write_location_and_ground_state(const sidb::simulation::legacy_result<Lyt>&
 }
 
 /**
- * Writes the SiDB positions of a simulation result and the charge states of its ground states as CSV to a stream.
+ * @brief Writes the SiDB positions of a simulation result and the charge states of its ground states as CSV to a
+ * stream.
  *
  * @param sim_result Result to write.
  * @param os Output stream to write into.
@@ -259,7 +260,7 @@ inline void write_location_and_ground_state(const sidb::simulation::result& sim_
     p.run();
 }
 /**
- * Writes the SiDB positions of a simulation result and the charge states of its ground states as CSV.
+ * @brief Writes the SiDB positions of a simulation result and the charge states of its ground states as CSV.
  *
  * @param sim_result Result to write.
  * @param filename File to write into.

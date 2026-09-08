@@ -1032,9 +1032,10 @@ using clustering = std::set<cluster_ptr>;
 using clustering = phmap::flat_hash_set<cluster_ptr, cluster_ptr_hash>;
 #endif
 /**
- * @brief This struct defined the fully decorated cluster hierarchy type which follows the structure of a "general
- * tree". It contains multiple stores:
- * - a set of indices that correspond to the SiDBs as stored in a `charge_distribution_surface` object,
+ * @brief Decorated cluster hierarchy containing charge spaces and potential bounds.
+ *
+ * The hierarchy contains multiple stores:
+ * - a set of indices that correspond to the SiDBs as stored in a `potential_landscape` object,
  * - a store of potential bounds for each SiDB in the cluster that give the fraction of the local electrostatic
  * potential that is received from outside the cluster, and
  * - a store containing the potential projection orders onto each SiDB, inside and outside the cluster.
