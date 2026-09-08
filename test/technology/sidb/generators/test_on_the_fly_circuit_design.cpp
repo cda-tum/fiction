@@ -13,8 +13,11 @@
  * @brief Tests for bounded SiDB circuit-design exception messages.
  */
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+
+#if (FICTION_Z3_SOLVER)
+
+#include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 
@@ -34,3 +37,12 @@ TEMPLATE_TEST_CASE("Circuit-design exceptions copy the supplied message view", "
     const TestType empty{std::string_view{}};
     CHECK(std::string_view{empty.what()}.empty());
 }
+
+#else  // FICTION_Z3_SOLVER
+
+TEST_CASE("Circuit-design exception messages require the Z3-dependent header", "[on-the-fly-circuit-design]")
+{
+    SKIP("Z3 support is disabled");
+}
+
+#endif  // FICTION_Z3_SOLVER

@@ -26,6 +26,7 @@
 #include "fiction/technology/sidb/surface_analysis.hpp"
 #include "fiction/traits.hpp"
 
+#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdio>
