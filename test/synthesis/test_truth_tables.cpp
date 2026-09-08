@@ -31,8 +31,8 @@ TEST_CASE("Comparison truth tables include equality", "[truth-tables]")
 
     for (uint64_t input = 0; input < 4; ++input)
     {
-        const auto lhs = input >> 1;
-        const auto rhs = input & 1;
+        const auto lhs = input >> 1u;
+        const auto rhs = input & 1u;
 
         CHECK(static_cast<bool>(kitty::get_bit(less_equal, input)) == (lhs <= rhs));
         CHECK(static_cast<bool>(kitty::get_bit(greater_equal, input)) == (lhs >= rhs));
