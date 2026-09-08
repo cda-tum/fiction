@@ -409,8 +409,8 @@ struct operational_domain_params
      * distance from 1.0 to 10.0 in steps of 0.1.
      */
     std::vector<operational_domain_value_range> sweep_dimensions{
-        operational_domain_value_range{.dimension = sweep_parameter::EPSILON_R, .min = 1.0, .max = 10.0, .step = 0.1},
-        operational_domain_value_range{.dimension = sweep_parameter::LAMBDA_TF, .min = 1.0, .max = 10.0, .step = 0.1}};
+        operational_domain_value_range{sweep_parameter::EPSILON_R},
+        operational_domain_value_range{sweep_parameter::LAMBDA_TF}};
     /**
      * @brief Number of worker threads to distribute the parameter points over.
      *
