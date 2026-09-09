@@ -25,7 +25,7 @@ network specifications under constraints. This approach finds exact results but 
 
 ```
 
-```{doxygenfunction} fiction::physical_design::exact_with_blacklist(const Ntk& ntk, const sidb::surface_black_list<Lyt, fcn::port_direction>& black_list, exact_physical_design_params ps  = {}, exact_physical_design_stats* pst = nullptr)
+```{doxygenfunction} fiction::physical_design::exact_with_blacklist(const Ntk& ntk, const surface_black_list<Lyt, fcn::port_direction>& black_list, exact_physical_design_params ps  = {}, exact_physical_design_stats* pst = nullptr)
 
 ```
 
