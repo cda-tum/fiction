@@ -60,13 +60,6 @@ int main()  // NOLINT
         "d = 3"   // uint64_t
     };
 
-    /**
-     * @brief Published "le" and "ge" input words, including their unused high bits.
-     */
-    std::array<tt, 2> published_comparisons{tt{2}, tt{2}};
-    *published_comparisons[0].begin() = 0x11;
-    *published_comparisons[1].begin() = 0x13;
-
     const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 18>{
         {{std::vector<tt>{create_not_tt()}, "inv"},
          {std::vector<tt>{create_id_tt()}, "wire"},
@@ -81,8 +74,8 @@ int main()  // NOLINT
          {std::vector<tt>{create_xnor_tt()}, "xnor"},
          {std::vector<tt>{create_lt_tt()}, "lt"},
          {std::vector<tt>{create_gt_tt()}, "gt"},
-         {std::vector<tt>{published_comparisons[0]}, "le"},
-         {std::vector<tt>{published_comparisons[1]}, "ge"},
+         {std::vector<tt>{create_le_tt()}, "le"},
+         {std::vector<tt>{create_ge_tt()}, "ge"},
          {std::vector<tt>{create_crossing_wire_tt()}, "cx"},
          {std::vector<tt>{create_half_adder_tt()}, "ha"},
          {std::vector<tt>{create_double_wire_tt()}, "hourglass"}}};
