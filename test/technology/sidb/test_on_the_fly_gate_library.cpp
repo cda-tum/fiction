@@ -26,6 +26,9 @@
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
+
 #include <array>
 #include <optional>
 
@@ -45,8 +48,13 @@ TEST_CASE("Parameterized gate library traits", "[parameterized-gate-library]")
 
 TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports", "[parameterized-gate-library]")
 {
-    const std::array functions{create_and_tt(),  create_or_tt(), create_nand_tt(), create_nor_tt(), create_xor_tt(),
-                               create_xnor_tt(), create_ge_tt(), create_le_tt(),   create_gt_tt(),  create_lt_tt()};
+    kitty::dynamic_truth_table ge{2};
+    kitty::dynamic_truth_table le{2};
+    kitty::create_from_binary_string(ge, "1101");
+    kitty::create_from_binary_string(le, "1011");
+    const std::array functions{
+        create_and_tt(), create_or_tt(), create_nand_tt(), create_nor_tt(), create_xor_tt(), create_xnor_tt(), ge, le,
+        create_gt_tt(),  create_lt_tt()};
 
     for (const auto& function : functions)
     {
@@ -71,9 +79,7 @@ TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports
 
             try
             {
-                static_cast<void>(
-                    on_the_fly_gate_library::set_up_gate<hex_even_row_gate_clk_lyt, sidb_100_cell_clk_lyt_cube>(
-                        gate_layout, {1, 1}, params, surface));
+                static_cast<void>(on_the_fly_gate_library::set_up_gate(gate_layout, {1, 1}, params, surface));
                 FAIL("Two canvas SiDBs cannot fit on one available site");
             }
             catch (const gate_design_exception<hex_even_row_gate_clk_lyt>& error)

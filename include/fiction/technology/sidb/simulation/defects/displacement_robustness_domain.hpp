@@ -481,15 +481,23 @@ class displacement_robustness_domain_impl
 }  // namespace detail
 
 /**
- * Determines the displacement robustness domain of an SiDB gate: every SiDB that is not fixed is displaced by up to
- * the configured number of columns and rows, and every resulting layout is checked for operability.
+ * @brief During fabrication, SiDBs may not align precisely with their intended atomic positions, resulting in
+ * displacement. This means that an SiDB is fabricated close to the desired one, typically one or a few H-Si positions
+ * away. Consequently, depending on the fabrication speed, a certain number of SiDBs may experience displacement.
+ *
+ * This function determines the operational status of all possible displacements of the SiDBs of the given SiDB layout,
+ * based on the provided truth table specification and displacement robustness computation parameters.
+ * The number of displacements grows exponentially with the number of SiDBs. For small layouts, all displacements
+ * can be analyzed. For larger layouts, random sampling can be applied, controllable by the `analysis_mode` and
+ * `percentage_of_analyzed_displaced_layouts` in `params`.
+ *
  * Displaced layouts retain the layout name and the defects at their original positions.
  *
- * @param lyt The operational gate layout.
- * @param spec The Boolean function(s) it implements.
- * @param params Parameters.
- * @param stats Statistics.
- * @return The displacement robustness domain.
+ * @param lyt The SiDB layout which is analyzed.
+ * @param spec Vector of truth table specifications.
+ * @param params Parameters for the displacement robustness computation.
+ * @param stats Statistics related to the displacement robustness computation.
+ * @return The displacement robustness domain of the SiDB layout.
  * @throws std::out_of_range if a displacement exceeds the lattice-site range.
  */
 [[nodiscard]] inline displacement_robustness_domain
@@ -510,15 +518,21 @@ determine_displacement_robustness_domain(const layout& lyt, const std::vector<ki
     return result;
 }
 /**
- * Estimates the probability that a fabricated SiDB gate is operational when a share of its SiDBs is displaced:
- * for every combination of displaced SiDBs, the displaced layouts are checked for operability, and the share of
- * operational ones is the probability.
+ * @brief During fabrication, SiDBs may not align precisely with their intended atomic positions, resulting in
+ * displacement. This means that an SiDB is fabricated close to the desired one, typically one or a few H-Si positions
+ * away. The percentage of displaced SiDBs depends on the fabrication speed. Therefore, SiDB layouts with high
+ * displacement tolerance are preferred to speed up the fabrication process.
  *
- * @param lyt The operational gate layout.
- * @param spec The Boolean function(s) it implements.
- * @param params Parameters.
- * @param fabrication_error_rate Share of the SiDBs that are displaced.
- * @return The probability.
+ * This function calculates the probability of
+ * fabricating an operational SiDB layout for an originally given SiDB layout and a given fabrication error rate. A
+ * fabrication error rate of 0.0 or negative indicates that the SiDB layout is designed without displacement.
+ *
+ * @param lyt The SiDB layout which is analyzed.
+ * @param spec Vector of truth table specifications.
+ * @param params Parameters for the displacement robustness computation.
+ * @param fabrication_error_rate The fabrication error rate. For example, 0.1 describes that 10% of all manufactured
+ *        SiDBs have a slight displacement.
+ * @return The probability of fabricating an operational SiDB layout.
  * @throws std::out_of_range if a displacement exceeds the lattice-site range.
  */
 [[nodiscard]] inline double determine_probability_of_fabricating_operational_gate(

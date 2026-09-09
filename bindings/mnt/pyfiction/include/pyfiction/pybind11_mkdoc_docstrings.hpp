@@ -3407,7 +3407,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long =
+static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long_long =
 R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
 integer into four parts (from MSB to LSB):
  - 1 bit for the dead indicator - 1 bit for the z position - 31 bit
@@ -7827,7 +7827,6 @@ Args:
     defect_surface: The surface with the defects.
 
 Template Args:
-    CellLyt: SiDB cell-level layout type the gates are placed on.
     GateLibrary: Gate library type.
     GateLyt: Gate-level layout type.
 
@@ -7875,8 +7874,6 @@ Args:
     defect_surface: The surface with the defects.
 
 Template Args:
-    CellLyt: SiDB cell-level layout type the gates are placed on; it
-             has to use cube coordinates.
     GateLibrary: Gate library type.
     GateLyt: Gate-level layout type.
     Params: Parameter type of the gate library.
@@ -8272,9 +8269,6 @@ gate-level layout and maps gates to cell implementations based on
 their corresponding positions and types. Optionally, it performs post-
 layout optimization and sets the layout name if certain conditions are
 met.
-
-Args:
-    defect_lyt: Optional defect surface.
 
 Returns:
     A `CellLyt` object representing the generated cell layout.
@@ -12843,8 +12837,6 @@ Args:
 Template Args:
     GateLibrary: SiDB gate library type.
     GateLyt: Gate-level layout type.
-    CellLyt: SiDB cell-level layout type that positions the gates; it
-             has to use cube coordinates.
 
 Returns:
     The black list.
@@ -14698,8 +14690,6 @@ Args:
             object.
 
 Template Args:
-    CellLyt: Cartesian SiDB layout type used by the gate-library
-             bridge.
     GateLyt: Gate-level layout type.
 
 Returns:
@@ -14711,8 +14701,8 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface =
-R"doc(This function implements an on-the-fly circuit design algorithm for a
-defective SiDB surface.
+R"doc(Implements an on-the-fly circuit design algorithm for a defective SiDB
+surface.
 
 The process begins with placement and routing using a blacklist and
 the `exact` method. The blacklist includes skeleton-tile pairs that
@@ -14744,7 +14734,6 @@ Args:
 
 Template Args:
     Ntk: The type of the input network.
-    CellLyt: SiDB defect surface type.
     GateLyt: Gate-level layout type.
 
 Returns:
@@ -16822,8 +16811,8 @@ static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_set_up_gate =
 R"doc(Overrides the corresponding function in gate_library. Given a tile
 `t`, this function takes all necessary information from the stored
 grid into account to design the correct gate representation for that
-tile. In case there is no possible SiDB design, the blacklist is
-updated and an error fcn gate is returned.
+tile. In case there is no possible SiDB design, the function throws
+`gate_design_exception`.
 
 Args:
     lyt: Layout that hosts tile `t`.
@@ -16834,11 +16823,18 @@ Args:
 
 Template Args:
     GateLyt: Pointy-top hexagonal gate-level layout type.
-    CellLyt: SiDB cell-level layout type.
     Params: Type of the parameter used for the gate library.
 
 Returns:
     Bestagon gate representation of `t` including mirroring.
+
+Raises:
+    gate_design_exception: if no gate can be designed.
+    fcn::unsupported_gate_orientation_exception: if the gate
+                                                 orientation is
+                                                 unsupported.
+    fcn::unsupported_gate_type_exception: if the gate type is
+                                          unsupported.
 
 )doc";
 
@@ -17988,22 +17984,21 @@ R"doc(The influence of a defect on a layout for every evaluated defect
 position.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_grid_search =
-R"doc(Determines the influence of a defect on the operational status of an
-SiDB gate by placing the defect at every position of a grid over the
-scanning area and checking whether the gate still implements its
-Boolean function (or, with `GROUND_STATE_CHANGE`, whether the ground
-state of any input pattern changes).
+R"doc(This algorithm uses a grid search to determine the defect influence
+domain. The grid search is performed by exhaustively sweeping all
+possible atomic defect positions in x and y dimensions.
 
 Args:
-    lyt: The gate layout.
-    spec: The Boolean function(s) it implements.
-    params: Parameters.
-    step_size: Only positions whose column and row are multiples of
-               this are evaluated.
+    lyt: Layout to compute the defect influence domain for.
+    spec: Expected Boolean function of the layout given as a multi-
+          output truth table.
+    step_size: The parameter specifying the interval between
+               consecutive defect positions to be evaluated.
+    params: Defect influence domain computation parameters.
     stats: Statistics.
 
 Returns:
-    The defect influence domain.
+    The defect influence domain of the layout.
 
 Raises:
     std::invalid_argument: if `step_size` is zero.
@@ -18015,20 +18010,23 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_grid_search_2 =
-R"doc(Determines the influence of a defect on the ground state of an SiDB
-layout by placing the defect at every position of a grid over the
-scanning area.
+R"doc(This algorithm uses a grid search to determine the defect influence
+domain. The grid search is performed by exhaustively sweeping all
+possible atomic defect positions in x and y dimensions.
+
+Set `params.influence_def` to `GROUND_STATE_CHANGE` to compare ground
+states without a truth table. With `OPERATIONALITY_CHANGE`, this
+overload classifies sampled defect positions as non-influential.
 
 Args:
-    lyt: The layout.
-    params: Parameters; the influence definition has to be
-            `GROUND_STATE_CHANGE`.
-    step_size: Only positions whose column and row are multiples of
-               this are evaluated.
+    lyt: Layout to compute the defect influence domain for.
+    step_size: The parameter specifying the interval between
+               consecutive defect positions to be evaluated.
+    params: Defect influence domain computation parameters.
     stats: Statistics.
 
 Returns:
-    The defect influence domain.
+    The defect influence domain of the layout.
 
 Raises:
     std::invalid_argument: if `step_size` is zero.
@@ -18063,19 +18061,55 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_para
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_operational_params = R"doc(Parameters of the operational check and the simulation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_quicktrace =
-R"doc(*QuickTrace*: traces the contour of the region in which a defect
-influences an SiDB gate, which needs far fewer evaluations than a grid
-search.
+R"doc(The *QuickTrace* algorithm which was proposed in \"QuickTrace: An
+Efficient Contour Tracing Algorithm for Defect Robustness Simulation
+of Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, and R.
+Wille in ISCAS 2025 (https://ieeexplore.ieee.org/document/11044082)
+applies contour tracing to identify the boundary (contour) between
+influencing and non-influencing defect positions for a given SiDB
+layout.
+
+The algorithm uses a screened Coulomb potential, where the
+electrostatic interaction weakens as distance increases. If a defect
+at position `p` causes the SiDB layout to be non-influential, then
+defects further away from the layout are also likely to have no
+influence on the layout's functionality or performance. Conversely,
+defects closer to the layout may cause it to fail. This behavior
+allows for efficient contour tracing of the transition between
+influential and non-influential states.
+
+The process is as follows:
+1. **Initialization**: Randomly select `samples` initial defect
+   positions several nanometers away from the layout where they are
+   unlikely to influence the layout.
+2. **Contour Tracing**: For each position, perform a defect-aware
+   physical simulation to identify adjacent positions along the x-axis
+   that influence the layout.
+3. **Contour Following**: Trace the contour of non-influential
+   positions until the starting point is reached
+again, thereby closing the contour.
+4. **Repetition**: Repeat steps 1-3 for multiple initial heights to
+   identify additional contours, since multiple
+influential-to-non-influential contours may exist. This process helps
+to detect all relevant transitions in the layout. This algorithm uses
+contour tracing to identify the transition between influencing and
+non-influencing defect positions of the SiDB layout. It starts by
+searching for defect locations on the left side (bounding_box +
+additional scanning area). The y-coordinate for these positions is
+chosen randomly. The number of samples is determined by the `samples`
+parameter. Then, the algorithm moves each defect position to the
+right, searching for the last non-influencing defect position.
 
 Args:
-    lyt: The gate layout.
-    spec: The Boolean function(s) it implements.
-    samples: Number of starting rows to try.
-    params: Parameters.
-    stats: Statistics.
+    lyt: Layout to compute the defect influence domain for.
+    spec: Expected Boolean function of the layout given as a multi-
+          output truth table.
+    samples: Number of samples to perform.
+    params: Defect influence domain computation parameters.
+    stats: Defect influence computation statistics.
 
 Returns:
-    The defect influence domain.
+    The (partial) defect influence domain of the layout.
 
 Raises:
     std::invalid_argument: if `spec` is empty. std::invalid_argument:
@@ -18085,18 +18119,46 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_quicktrace_2 =
-R"doc(*QuickTrace* without a specification: traces the contour of the region
-in which a defect changes the ground state of an SiDB layout.
+R"doc(Applies contour tracing to identify the boundary (contour) between
+influencing and non-influencing defect positions for a given SiDB
+layout.
+
+The algorithm uses a screened Coulomb potential, where the
+electrostatic interaction weakens as distance increases. If a defect
+at position `p` causes the SiDB layout to be non-influential, then
+defects further away from the layout are also likely to have no
+influence on the layout's functionality or performance. Conversely,
+defects closer to the layout may cause it to fail. This behavior
+allows for efficient contour tracing of the transition between
+influential and non-influential states.
+
+The process is as follows:
+1. **Initialization**: Randomly select `samples` initial defect
+   positions several nanometers away from the layout where they are
+   unlikely to influence the layout.
+2. **Contour Tracing**: For each position, perform a defect-aware
+   physical simulation to identify adjacent positions along the x-axis
+   that influence the layout.
+3. **Contour Following**: Trace the contour of non-influential
+   positions until the starting point is reached
+again, thereby closing the contour.
+4. **Repetition**: Repeat steps 1-3 for multiple initial heights to
+   identify additional contours, since multiple
+influential-to-non-influential contours may exist. This process helps
+to detect all relevant transitions in the layout.
+
+Set `params.influence_def` to `GROUND_STATE_CHANGE` to compare ground
+states without a truth table. With `OPERATIONALITY_CHANGE`, this
+overload classifies sampled defect positions as non-influential.
 
 Args:
-    lyt: The layout.
-    samples: Number of starting rows to try.
-    params: Parameters; the influence definition has to be
-            `GROUND_STATE_CHANGE`.
-    stats: Statistics.
+    lyt: Layout to compute the defect influence domain for.
+    samples: Number of samples to perform.
+    params: Defect influence domain computation parameters.
+    stats: Defect influence computation statistics.
 
 Returns:
-    The defect influence domain.
+    The (partial) defect influence domain of the layout.
 
 Raises:
     std::invalid_argument: if `params.additional_scanning_area`
@@ -18105,18 +18167,21 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_random_sampling =
-R"doc(Like `defect_influence_grid_search`, but evaluates randomly chosen
-positions of the scanning area.
+R"doc(This algorithm uses random sampling to find a part of the defect
+influence domain that might not be complete. It performs a total of
+`samples` uniformly-distributed random samples within the specified
+area.
 
 Args:
-    lyt: The gate layout.
-    spec: The Boolean function(s) it implements.
-    samples: Number of positions to evaluate.
-    params: Parameters.
+    lyt: Layout to compute the defect influence domain for.
+    spec: Expected Boolean function of the layout given as a multi-
+          output truth table.
+    samples: Number of random samples to perform.
+    params: Defect influence domain computation parameters.
     stats: Statistics.
 
 Returns:
-    The defect influence domain.
+    The (partial) defect influence domain of the layout.
 
 Raises:
     std::invalid_argument: if `spec` is empty. std::invalid_argument:
@@ -18126,18 +18191,23 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_random_sampling_2 =
-R"doc(Like `defect_influence_grid_search` without a specification, but
-evaluates randomly chosen positions.
+R"doc(This algorithm uses random sampling to find a part of the defect
+influence domain that might not be complete. It performs a total of
+`samples` uniformly-distributed random samples within the specified
+area.
+
+Set `params.influence_def` to `GROUND_STATE_CHANGE` to compare ground
+states without a truth table. With `OPERATIONALITY_CHANGE`, this
+overload classifies sampled defect positions as non-influential.
 
 Args:
-    lyt: The layout.
-    samples: Number of positions to evaluate.
-    params: Parameters; the influence definition has to be
-            `GROUND_STATE_CHANGE`.
+    lyt: Layout to compute the defect influence domain for.
+    samples: Number of random samples to perform.
+    params: Defect influence domain computation parameters.
     stats: Statistics.
 
 Returns:
-    The defect influence domain.
+    The (partial) defect influence domain of the layout.
 
 Raises:
     std::invalid_argument: if `params.additional_scanning_area`
@@ -18414,20 +18484,33 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_determine_displacement_robustness_domain =
-R"doc(Determines the displacement robustness domain of an SiDB gate: every
-SiDB that is not fixed is displaced by up to the configured number of
-columns and rows, and every resulting layout is checked for
-operability. Displaced layouts retain the layout name and the defects
-at their original positions.
+R"doc(During fabrication, SiDBs may not align precisely with their intended
+atomic positions, resulting in displacement. This means that an SiDB
+is fabricated close to the desired one, typically one or a few H-Si
+positions away. Consequently, depending on the fabrication speed, a
+certain number of SiDBs may experience displacement.
+
+This function determines the operational status of all possible
+displacements of the SiDBs of the given SiDB layout, based on the
+provided truth table specification and displacement robustness
+computation parameters. The number of displacements grows
+exponentially with the number of SiDBs. For small layouts, all
+displacements can be analyzed. For larger layouts, random sampling can
+be applied, controllable by the `analysis_mode` and
+`percentage_of_analyzed_displaced_layouts` in `params`.
+
+Displaced layouts retain the layout name and the defects at their
+original positions.
 
 Args:
-    lyt: The operational gate layout.
-    spec: The Boolean function(s) it implements.
-    params: Parameters.
-    stats: Statistics.
+    lyt: The SiDB layout which is analyzed.
+    spec: Vector of truth table specifications.
+    params: Parameters for the displacement robustness computation.
+    stats: Statistics related to the displacement robustness
+           computation.
 
 Returns:
-    The displacement robustness domain.
+    The displacement robustness domain of the SiDB layout.
 
 Raises:
     std::out_of_range: if a displacement exceeds the lattice-site
@@ -18436,19 +18519,28 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_determine_probability_of_fabricating_operational_gate =
-R"doc(Estimates the probability that a fabricated SiDB gate is operational
-when a share of its SiDBs is displaced: for every combination of
-displaced SiDBs, the displaced layouts are checked for operability,
-and the share of operational ones is the probability.
+R"doc(During fabrication, SiDBs may not align precisely with their intended
+atomic positions, resulting in displacement. This means that an SiDB
+is fabricated close to the desired one, typically one or a few H-Si
+positions away. The percentage of displaced SiDBs depends on the
+fabrication speed. Therefore, SiDB layouts with high displacement
+tolerance are preferred to speed up the fabrication process.
+
+This function calculates the probability of fabricating an operational
+SiDB layout for an originally given SiDB layout and a given
+fabrication error rate. A fabrication error rate of 0.0 or negative
+indicates that the SiDB layout is designed without displacement.
 
 Args:
-    lyt: The operational gate layout.
-    spec: The Boolean function(s) it implements.
-    params: Parameters.
-    fabrication_error_rate: Share of the SiDBs that are displaced.
+    lyt: The SiDB layout which is analyzed.
+    spec: Vector of truth table specifications.
+    params: Parameters for the displacement robustness computation.
+    fabrication_error_rate: The fabrication error rate. For example,
+                            0.1 describes that 10% of all manufactured
+                            SiDBs have a slight displacement.
 
 Returns:
-    The probability.
+    The probability of fabricating an operational SiDB layout.
 
 Raises:
     std::out_of_range: if a displacement exceeds the lattice-site
@@ -19484,7 +19576,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
 state to an 64-bit unsigned integer.
 
@@ -26725,8 +26817,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_create_ge_tt =
-R"doc(Creates a truth table that implements the greater-than-or-equal
-function in two variables.
+R"doc(Creates and returns a truth table that implements the greater-than-or-
+equal function in two variables.
 
 Returns:
     Greater-than-or-equal function in two variables.
@@ -26775,8 +26867,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_create_le_tt =
-R"doc(Creates a truth table that implements the less-than-or-equal function
-in two variables.
+R"doc(Creates and returns a truth table that implements the less-than-or-
+equal function in two variables.
 
 Returns:
     Less-than-or-equal function in two variables.

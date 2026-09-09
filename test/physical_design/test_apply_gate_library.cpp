@@ -116,6 +116,14 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
             apply_gate_library<sidb_100_cell_clk_lyt, bestagon_library, hex_even_row_gate_clk_lyt>(layout);
 
         CHECK(bestagon_and.num_cells() == 18);
+
+        sidb::layout surface{sidb::lattice::si_111_1x1()};
+        surface.assign_defect(site_at_row(-2, -3), defect{defect_type::DB, -1, 4.1, 1.8});
+        const auto placed = apply_gate_library_to_defective_surface<bestagon_library>(layout, surface);
+
+        CHECK(placed.num_dots() == 18);
+        CHECK(placed.get_lattice() == surface.get_lattice());
+        CHECK(placed.get_defect(site_at_row(-2, -3)).type == defect_type::DB);
     }
     SECTION("Design SiDB circuit on-the-fly")
     {
@@ -157,9 +165,8 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                 surface.assign_defect(site_at_row(45, 55), defect{defect_type::DB, -1, 4.1, 1.8});
 
                 const auto bestagon_and_with_defects =
-                    apply_parameterized_gate_library_to_defective_surface<cell_lyt, on_the_fly_gate_library,
-                                                                          hex_even_row_gate_clk_lyt>(layout, params,
-                                                                                                     surface);
+                    apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
+                                                                                                   surface);
 
                 CHECK(bestagon_and_with_defects.num_defects() == 2);
                 CHECK(bestagon_and_with_defects.get_defect(site_at_row(30, 20)).type == defect_type::DB);
@@ -255,9 +262,8 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
                 surface.assign_defect(site_at_row(45, 55), defect{defect_type::DB, -1, 4.1, 1.8});
 
                 const auto bestagon_double_wire_with_defects =
-                    apply_parameterized_gate_library_to_defective_surface<cell_lyt, on_the_fly_gate_library,
-                                                                          hex_even_row_gate_clk_lyt>(layout, params,
-                                                                                                     surface);
+                    apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
+                                                                                                   surface);
 
                 CHECK(bestagon_double_wire_with_defects.num_defects() == 2);
                 CHECK(bestagon_double_wire_with_defects.get_defect(site_at_row(30, 20)).type == defect_type::DB);
@@ -286,8 +292,7 @@ TEST_CASE("On-the-fly SiDB fanout gate", "[apply-gate-library]")
     params.design_gate_params.design_mode                   = design_gates_params::design_gates_mode::QUICKCELL;
     params.design_gate_params.number_of_canvas_sidbs        = 3;
 
-    const auto fanout_gate =
-        on_the_fly_gate_library::set_up_gate<hex_even_row_gate_clk_lyt, cell_lyt>(layout, {1, 1}, params);
+    const auto fanout_gate = on_the_fly_gate_library::set_up_gate(layout, {1, 1}, params);
 
     CHECK(std::ranges::any_of(fanout_gate,
                               [](const auto& row)
@@ -299,8 +304,7 @@ TEST_CASE("On-the-fly SiDB fanout gate", "[apply-gate-library]")
     sidb::layout surface{};
     surface.assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
 
-    const auto fanout_gate_with_defect =
-        on_the_fly_gate_library::set_up_gate<hex_even_row_gate_clk_lyt, cell_lyt>(layout, {1, 1}, params, surface);
+    const auto fanout_gate_with_defect = on_the_fly_gate_library::set_up_gate(layout, {1, 1}, params, surface);
 
     CHECK(std::ranges::any_of(fanout_gate_with_defect,
                               [](const auto& row)
@@ -327,8 +331,7 @@ TEST_CASE("On-the-fly SiDB crossing gate", "[apply-gate-library]")
     params.using_predefined_crossing_and_double_wire_if_possible =
         on_the_fly_gate_library_params::complex_gate_design_policy::USING_PREDEFINED;
 
-    const auto crossing_gate =
-        on_the_fly_gate_library::set_up_gate<hex_even_row_gate_clk_lyt, cell_lyt>(layout, {1, 1, 0}, params);
+    const auto crossing_gate = on_the_fly_gate_library::set_up_gate(layout, {1, 1, 0}, params);
 
     CHECK(std::ranges::any_of(crossing_gate,
                               [](const auto& row)
@@ -340,8 +343,7 @@ TEST_CASE("On-the-fly SiDB crossing gate", "[apply-gate-library]")
     sidb::layout surface{};
     surface.assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
 
-    CHECK(on_the_fly_gate_library::set_up_gate<hex_even_row_gate_clk_lyt, cell_lyt>(layout, {1, 1, 0}, params,
-                                                                                    surface) == crossing_gate);
+    CHECK(on_the_fly_gate_library::set_up_gate(layout, {1, 1, 0}, params, surface) == crossing_gate);
 }
 
 TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
@@ -390,9 +392,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                                                    design_gate_params.operational_params.sim_params.lambda_tf});
 
                 const auto inverter_with_defects =
-                    apply_parameterized_gate_library_to_defective_surface<cell_lyt, on_the_fly_gate_library,
-                                                                          hex_even_row_gate_clk_lyt>(layout, params,
-                                                                                                     defect_layout);
+                    apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
+                                                                                                   defect_layout);
 
                 CHECK(inverter_with_defects.num_defects() == 1);
 
@@ -449,9 +450,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                                                    design_gate_params.operational_params.sim_params.lambda_tf});
 
                 const auto or_layout_with_defects =
-                    apply_parameterized_gate_library_to_defective_surface<cell_lyt, on_the_fly_gate_library,
-                                                                          hex_even_row_gate_clk_lyt>(layout, params,
-                                                                                                     defect_layout);
+                    apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
+                                                                                                   defect_layout);
 
                 CHECK(or_layout_with_defects.num_defects() == 1);
 
@@ -513,9 +513,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                                                    design_gate_params.operational_params.sim_params.lambda_tf});
 
                 const auto nand_layout_with_defects =
-                    apply_parameterized_gate_library_to_defective_surface<cell_lyt, on_the_fly_gate_library,
-                                                                          hex_even_row_gate_clk_lyt>(layout, params,
-                                                                                                     defect_layout);
+                    apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
+                                                                                                   defect_layout);
 
                 CHECK(nand_layout_with_defects.num_defects() == 2);
 

@@ -23,6 +23,7 @@
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/hash.hpp>
@@ -51,30 +52,26 @@ using surface_black_list =
                                                      kitty::hash<kitty::dynamic_truth_table>>>;
 
 /**
- * Analyzes a defective SiDB surface for a gate-level layout: for every tile and every gate implementation of the
+ * @brief Analyzes a defective SiDB surface for a gate-level layout: for every tile and every gate implementation of the
  * library, the gate's SiDBs are placed at the tile's position, and if any of them is affected by a defect of the
  * surface, the gate's ports are blacklisted for that tile and function. Placement can then avoid those gates.
  *
  * @tparam GateLibrary SiDB gate library type.
  * @tparam GateLyt Gate-level layout type.
- * @tparam CellLyt SiDB cell-level layout type that positions the gates; it has to use cube coordinates.
  * @param gate_lyt The gate-level layout.
  * @param surface The defective surface.
  * @param charged_defect_spacing_overwrite Overrides the spacing charged defects keep SiDBs at.
  * @param neutral_defect_spacing_overwrite Overrides the spacing neutral defects keep SiDBs at.
  * @return The black list.
  */
-template <typename GateLibrary, typename GateLyt, typename CellLyt>
-    requires std::same_as<fiction::technology<CellLyt>, sidb::sidb_technology> &&
-             std::same_as<fiction::technology<CellLyt>, fiction::technology<GateLibrary>>
-[[nodiscard]] auto surface_analysis(
-    const GateLyt& gate_lyt, const sidb::layout& surface,
-    const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,
-    const std::optional<std::pair<uint16_t, uint16_t>>& neutral_defect_spacing_overwrite = std::nullopt) noexcept
+template <typename GateLibrary, typename GateLyt>
+    requires std::same_as<fiction::technology<GateLibrary>, sidb::sidb_technology>
+[[nodiscard]] auto
+surface_analysis(const GateLyt& gate_lyt, const sidb::layout& surface,
+                 const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,
+                 const std::optional<std::pair<uint16_t, uint16_t>>& neutral_defect_spacing_overwrite = std::nullopt)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
-    static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
     static_assert(has_get_functional_implementations_v<GateLibrary>,
                   "GateLibrary does not implement the get_functional_implementations function");
     static_assert(has_get_gate_ports_v<GateLibrary>, "GateLibrary does not implement the get_gate_ports function");
@@ -101,14 +98,15 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
             {
                 for (uint16_t x = 0u; x < GateLibrary::gate_x_size(); ++x)
                 {
-                    if (const auto cell_type = gate[y][x]; cell_type != fiction::technology<CellLyt>::cell_type::EMPTY)
+                    if (const auto cell_type = gate[y][x]; cell_type != sidb::dot_tag::EMPTY)
                     {
-                        const cell<CellLyt> relative_cell_pos{x, y, t.z};
+                        const cell<sidb_cell_clk_lyt_cube> relative_cell_pos{x, y, t.z};
 
                         const auto sidb_pos = sidb::to_lattice_site(
                             layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
-                                                                        GateLibrary::gate_y_size(), GateLyt, CellLyt>(
-                                gate_lyt, t, relative_cell_pos));
+                                                                        GateLibrary::gate_y_size(), GateLyt,
+                                                                        sidb_cell_clk_lyt_cube>(gate_lyt, t,
+                                                                                                relative_cell_pos));
 
                         if (sidbs_affected_by_defects.contains(sidb_pos))
                         {

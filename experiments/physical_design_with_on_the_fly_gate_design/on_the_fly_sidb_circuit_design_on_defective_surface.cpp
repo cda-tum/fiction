@@ -168,9 +168,8 @@ int main()  // NOLINT
 
         try
         {
-            const auto result =
-                on_the_fly_circuit_design_on_defective_surface<decltype(mapped_network), cell_lyt, gate_lyt>(
-                    mapped_network, lattice_tiling, surface_lattice, params, &st);
+            const auto result = on_the_fly_circuit_design_on_defective_surface(mapped_network, lattice_tiling,
+                                                                               surface_lattice, params, &st);
 
             write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 

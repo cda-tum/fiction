@@ -717,16 +717,15 @@ class defect_influence_impl
 }  // namespace detail
 
 /**
- * Determines the influence of a defect on the operational status of an SiDB gate by placing the defect at every
- * position of a grid over the scanning area and checking whether the gate still implements its Boolean function
- * (or, with `GROUND_STATE_CHANGE`, whether the ground state of any input pattern changes).
+ * @brief This algorithm uses a grid search to determine the defect influence domain. The grid search is performed
+ * by exhaustively sweeping all possible atomic defect positions in x and y dimensions.
  *
- * @param lyt The gate layout.
- * @param spec The Boolean function(s) it implements.
- * @param params Parameters.
- * @param step_size Only positions whose column and row are multiples of this are evaluated.
+ * @param lyt Layout to compute the defect influence domain for.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param step_size The parameter specifying the interval between consecutive defect positions to be evaluated.
+ * @param params Defect influence domain computation parameters.
  * @param stats Statistics.
- * @return The defect influence domain.
+ * @return The defect influence domain of the layout.
  * @throws std::invalid_argument if `step_size` is zero.
  * @throws std::invalid_argument if `spec` is empty.
  * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
@@ -754,14 +753,17 @@ defect_influence_grid_search(const layout& lyt, const std::vector<kitty::dynamic
     return result;
 }
 /**
- * Determines the influence of a defect on the ground state of an SiDB layout by placing the defect at every position
- * of a grid over the scanning area.
+ * @brief This algorithm uses a grid search to determine the defect influence domain. The grid search is performed
+ * by exhaustively sweeping all possible atomic defect positions in x and y dimensions.
  *
- * @param lyt The layout.
- * @param params Parameters; the influence definition has to be `GROUND_STATE_CHANGE`.
- * @param step_size Only positions whose column and row are multiples of this are evaluated.
+ * Set `params.influence_def` to `GROUND_STATE_CHANGE` to compare ground states without a truth table.
+ * With `OPERATIONALITY_CHANGE`, this overload classifies sampled defect positions as non-influential.
+ *
+ * @param lyt Layout to compute the defect influence domain for.
+ * @param step_size The parameter specifying the interval between consecutive defect positions to be evaluated.
+ * @param params Defect influence domain computation parameters.
  * @param stats Statistics.
- * @return The defect influence domain.
+ * @return The defect influence domain of the layout.
  * @throws std::invalid_argument if `step_size` is zero.
  * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
@@ -783,14 +785,15 @@ defect_influence_grid_search(const layout& lyt, const std::vector<kitty::dynamic
     return result;
 }
 /**
- * Like `defect_influence_grid_search`, but evaluates randomly chosen positions of the scanning area.
+ * @brief This algorithm uses random sampling to find a part of the defect influence domain that might not be
+ * complete. It performs a total of `samples` uniformly-distributed random samples within the specified area.
  *
- * @param lyt The gate layout.
- * @param spec The Boolean function(s) it implements.
- * @param samples Number of positions to evaluate.
- * @param params Parameters.
+ * @param lyt Layout to compute the defect influence domain for.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param samples Number of random samples to perform.
+ * @param params Defect influence domain computation parameters.
  * @param stats Statistics.
- * @return The defect influence domain.
+ * @return The (partial) defect influence domain of the layout.
  * @throws std::invalid_argument if `spec` is empty.
  * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
@@ -817,13 +820,17 @@ defect_influence_random_sampling(const layout& lyt, const std::vector<kitty::dyn
     return result;
 }
 /**
- * Like `defect_influence_grid_search` without a specification, but evaluates randomly chosen positions.
+ * @brief This algorithm uses random sampling to find a part of the defect influence domain that might not be
+ * complete. It performs a total of `samples` uniformly-distributed random samples within the specified area.
  *
- * @param lyt The layout.
- * @param samples Number of positions to evaluate.
- * @param params Parameters; the influence definition has to be `GROUND_STATE_CHANGE`.
+ * Set `params.influence_def` to `GROUND_STATE_CHANGE` to compare ground states without a truth table.
+ * With `OPERATIONALITY_CHANGE`, this overload classifies sampled defect positions as non-influential.
+ *
+ * @param lyt Layout to compute the defect influence domain for.
+ * @param samples Number of random samples to perform.
+ * @param params Defect influence domain computation parameters.
  * @param stats Statistics.
- * @return The defect influence domain.
+ * @return The (partial) defect influence domain of the layout.
  * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
 [[nodiscard]] inline defect_influence_domain
@@ -843,15 +850,39 @@ defect_influence_random_sampling(const layout& lyt, const std::size_t samples,
     return result;
 }
 /**
- * *QuickTrace*: traces the contour of the region in which a defect influences an SiDB gate, which needs far fewer
- * evaluations than a grid search.
+ * @brief The *QuickTrace* algorithm which was proposed in \"QuickTrace: An Efficient Contour Tracing Algorithm for
+ * Defect Robustness Simulation of Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, and R. Wille in ISCAS 2025
+ * (https://ieeexplore.ieee.org/document/11044082) applies contour tracing to identify the boundary (contour) between
+ * influencing and non-influencing defect positions for a given SiDB layout.
  *
- * @param lyt The gate layout.
- * @param spec The Boolean function(s) it implements.
- * @param samples Number of starting rows to try.
- * @param params Parameters.
- * @param stats Statistics.
- * @return The defect influence domain.
+ * The algorithm uses a screened Coulomb potential, where the electrostatic interaction weakens
+ * as distance increases. If a defect at position `p` causes the SiDB layout to be non-influential, then defects
+ * further away from the layout are also likely to have no influence on the layout's functionality or performance.
+ * Conversely, defects closer to the layout may cause it to fail. This behavior allows for efficient contour tracing
+ * of the transition between influential and non-influential states.
+ *
+ * The process is as follows:
+ * 1. **Initialization**: Randomly select `samples` initial defect positions several nanometers away
+ *    from the layout where they are unlikely to influence the layout.
+ * 2. **Contour Tracing**: For each position, perform a defect-aware physical simulation to identify adjacent
+ *    positions along the x-axis that influence the layout.
+ * 3. **Contour Following**: Trace the contour of non-influential positions until the starting point is reached
+ * again, thereby closing the contour.
+ * 4. **Repetition**: Repeat steps 1-3 for multiple initial heights to identify additional contours, since multiple
+ * influential-to-non-influential contours may exist. This process helps to detect all relevant transitions in the
+ * layout.
+ * This algorithm uses contour tracing to identify the transition between influencing and non-influencing defect
+ * positions of the SiDB layout. It starts by searching for defect locations on the left side (bounding_box + additional
+ * scanning area). The y-coordinate for these positions is chosen randomly. The number of samples is determined by the
+ * `samples` parameter. Then, the algorithm moves each defect position to the right, searching for the last
+ * non-influencing defect position.
+ *
+ * @param lyt Layout to compute the defect influence domain for.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param samples Number of samples to perform.
+ * @param params Defect influence domain computation parameters.
+ * @param stats Defect influence computation statistics.
+ * @return The (partial) defect influence domain of the layout.
  * @throws std::invalid_argument if `spec` is empty.
  * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
@@ -878,14 +909,34 @@ defect_influence_quicktrace(const layout& lyt, const std::vector<kitty::dynamic_
     return result;
 }
 /**
- * *QuickTrace* without a specification: traces the contour of the region in which a defect changes the ground state
- * of an SiDB layout.
+ * @brief Applies contour tracing to identify the boundary (contour) between influencing and
+ * non-influencing defect positions for a given SiDB layout.
  *
- * @param lyt The layout.
- * @param samples Number of starting rows to try.
- * @param params Parameters; the influence definition has to be `GROUND_STATE_CHANGE`.
- * @param stats Statistics.
- * @return The defect influence domain.
+ * The algorithm uses a screened Coulomb potential, where the electrostatic interaction weakens
+ * as distance increases. If a defect at position `p` causes the SiDB layout to be non-influential, then defects
+ * further away from the layout are also likely to have no influence on the layout's functionality or performance.
+ * Conversely, defects closer to the layout may cause it to fail. This behavior allows for efficient contour tracing
+ * of the transition between influential and non-influential states.
+ *
+ * The process is as follows:
+ * 1. **Initialization**: Randomly select `samples` initial defect positions several nanometers away
+ *    from the layout where they are unlikely to influence the layout.
+ * 2. **Contour Tracing**: For each position, perform a defect-aware physical simulation to identify adjacent
+ *    positions along the x-axis that influence the layout.
+ * 3. **Contour Following**: Trace the contour of non-influential positions until the starting point is reached
+ * again, thereby closing the contour.
+ * 4. **Repetition**: Repeat steps 1-3 for multiple initial heights to identify additional contours, since multiple
+ * influential-to-non-influential contours may exist. This process helps to detect all relevant transitions in the
+ * layout.
+ *
+ * Set `params.influence_def` to `GROUND_STATE_CHANGE` to compare ground states without a truth table.
+ * With `OPERATIONALITY_CHANGE`, this overload classifies sampled defect positions as non-influential.
+ *
+ * @param lyt Layout to compute the defect influence domain for.
+ * @param samples Number of samples to perform.
+ * @param params Defect influence domain computation parameters.
+ * @param stats Defect influence computation statistics.
+ * @return The (partial) defect influence domain of the layout.
  * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
 [[nodiscard]] inline defect_influence_domain defect_influence_quicktrace(const layout& lyt, const std::size_t samples,

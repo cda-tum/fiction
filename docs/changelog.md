@@ -112,12 +112,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
   - SiDB generator experiments use concrete parameter types with unchanged numerical values.
-  - Preserved the published gate-design experiments' comparison inputs as explicit truth-table words.
 
 - Gate libraries:
   - `apply_gate_library_to_defective_surface` and `apply_parameterized_gate_library_to_defective_surface`
-    take the defective surface as a `sidb::layout` and return one that carries its defects. The cell-level
-    layout to place gates on is their first template argument
+    take the defective surface as a `sidb::layout` and return one that carries its defects.
+    SiDB gate placement, surface analysis, and circuit design no longer take a cell-layout template argument.
 
 - I/O:
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
@@ -267,7 +266,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
   - Canvas filtering now rejects SiDBs missing from the simulation state's layout.
   - Ground State Space reports multiset limits using the potential landscape's charge base.
-  - Corrected the less-than-or-equal and greater-than-or-equal truth tables.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
   - Operational checks and gate pruning now reject mismatched input counts; band-bending resilience rejects unusable inputs.
   - Gate design now propagates worker exceptions to the caller and sets simulation parameters before launching workers.

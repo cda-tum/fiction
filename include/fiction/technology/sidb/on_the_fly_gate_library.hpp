@@ -168,27 +168,26 @@ class on_the_fly_gate_library
   public:
     explicit on_the_fly_gate_library() = delete;
     /**
-     * Overrides the corresponding function in gate_library. Given a tile `t`, this function takes all necessary
+     * @brief Overrides the corresponding function in gate_library. Given a tile `t`, this function takes all necessary
      * information from the stored grid into account to design the correct gate representation for that tile. In
-     * case there is no possible SiDB design, the blacklist is updated and an error fcn gate is returned.
+     * case there is no possible SiDB design, the function throws `gate_design_exception`.
      *
      * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
-     * @tparam CellLyt SiDB cell-level layout type.
      * @tparam Params Type of the parameter used for the gate library.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
      * @param params Parameters for SiDB gate design.
      * @param defect_surface Optional atomic defect surface in case atomic defects are present.
      * @return Bestagon gate representation of `t` including mirroring.
+     * @throws gate_design_exception if no gate can be designed.
+     * @throws fcn::unsupported_gate_orientation_exception if the gate orientation is unsupported.
+     * @throws fcn::unsupported_gate_type_exception if the gate type is unsupported.
      */
-    template <typename GateLyt, typename CellLyt, typename Params>
+    template <typename GateLyt, typename Params>
     static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const Params& params,
                             const std::optional<layout>& defect_surface = std::nullopt)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
-        static_assert(has_cube_coord_v<CellLyt>, "CellLyt must be based on cube coordinates");
-        static_assert(is_cell_level_layout_v<CellLyt>, "Lyt is not a cell-level layout");
-        static_assert(has_sidb_technology_v<CellLyt>, "Lyt is not an SiDB layout");
 
         const auto n = lyt.get_node(t);
         const auto f = lyt.node_function(n);
@@ -197,13 +196,13 @@ class on_the_fly_gate_library
         // center cell of the Bestagon tile. IMPORTANT: There is no center for the specified Bestagon library. The
         // middle is at 22.66666 (34*2/3). However, this is not an integer and does not specify a cell. Cell close to it
         // is chosen.
-        const auto center_cell =
-            to_lattice_site(layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
-                lyt, t, cell<CellLyt>{gate_x_size() / 2, gate_y_size() / 2}));
+        const auto center_cell = to_lattice_site(
+            layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, sidb_cell_clk_lyt_cube>(
+                lyt, t, cell<sidb_cell_clk_lyt_cube>{gate_x_size() / 2, gate_y_size() / 2}));
         // center cell of the current tile
-        const auto absolute_cell =
-            to_lattice_site(layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
-                lyt, t, cell<CellLyt>{0, 0}));
+        const auto absolute_cell = to_lattice_site(
+            layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, sidb_cell_clk_lyt_cube>(
+                lyt, t, cell<sidb_cell_clk_lyt_cube>{0, 0}));
 
         auto complex_gate_param                                      = params;
         complex_gate_param.design_gate_params.number_of_canvas_sidbs = params.canvas_sidb_complex_gates;

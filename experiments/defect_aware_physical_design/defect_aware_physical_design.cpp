@@ -139,7 +139,7 @@ int main()  // NOLINT
 
     const auto lattice_tiling = gate_lyt{{11, 30}};  // our surface data is 12 x 31 Bestagon tiles
     //    const auto lattice_tiling = gate_lyt{{12, 17}};  // our surface data is 13 x 18 Bestagon tiles
-    const auto black_list = surface_analysis<bestagon_library, gate_lyt, cell_lyt>(lattice_tiling, surface_lattice);
+    const auto black_list = surface_analysis<bestagon_library>(lattice_tiling, surface_lattice);
 
     // parameters for SMT-based physical design
     exact_physical_design_params exact_params{};
@@ -204,8 +204,8 @@ int main()  // NOLINT
             const auto cp_tp = critical_path_length_and_throughput(*gate_level_layout);
 
             // apply gate library
-            const auto dot_accurate_layout = apply_gate_library_to_defective_surface<cell_lyt, bestagon_library>(
-                *gate_level_layout, surface_lattice);
+            const auto dot_accurate_layout =
+                apply_gate_library_to_defective_surface<bestagon_library>(*gate_level_layout, surface_lattice);
 
             // compute area (the bounding box covers SiDBs and defects)
             const auto layout_area = area(dot_accurate_layout);
