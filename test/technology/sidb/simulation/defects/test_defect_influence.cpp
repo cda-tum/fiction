@@ -528,7 +528,10 @@ TEST_CASE("Concurrent defect-influence sampling matches grid results", "[defect-
 TEST_CASE("Defect influence propagates worker exceptions", "[defect-influence]")
 {
     layout lyt{};
-    lyt.assign_sidb({0, 0});
+    lyt.assign_sidb({0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({8, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({10, 0}, dot_tag::OUTPUT);
     defect_influence_params params{};
     params.defect                        = defect{defect_type::DB, -1, 5.6, 5.0};
     params.additional_scanning_area      = {1, 0};
