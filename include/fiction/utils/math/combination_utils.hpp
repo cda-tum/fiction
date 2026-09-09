@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <numeric>
+#include <stdexcept>
 #include <vector>
 
 #include <combinations.h>
@@ -37,9 +38,10 @@ namespace fiction::utils::math
  * @param n The number of positions available for distribution.
  * @return A vector of vectors representing all possible combinations of
  *         distributing k entities on n positions.
+ * @throws std::length_error if the number of combinations exceeds the vector's capacity.
  */
 [[nodiscard]] inline std::vector<std::vector<std::size_t>>
-determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::size_t k, const std::size_t n) noexcept
+determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::size_t k, const std::size_t n)
 {
     // Handle a special case
     if (k > n)
@@ -54,7 +56,12 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::
         return all_combinations;
     }
 
-    all_combinations.reserve(binomial_coefficient(n, k));
+    const auto number_of_combinations = binomial_coefficient(n, k);
+    if (number_of_combinations > all_combinations.max_size())
+    {
+        throw std::length_error{"number of combinations exceeds vector capacity"};
+    }
+    all_combinations.reserve(static_cast<std::size_t>(number_of_combinations));
 
     std::vector<std::size_t> numbers(n);
     std::iota(numbers.begin(), numbers.end(), 0);

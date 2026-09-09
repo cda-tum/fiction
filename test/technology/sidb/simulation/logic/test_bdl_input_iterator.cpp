@@ -19,42 +19,39 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/layouts/layout_utils.hpp>
+#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
-#include <fiction/technology/sidb/surfaces/lattice.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <cstdint>
 #include <iterator>
 #include <type_traits>
+#include <vector>
 
 using namespace fiction;
-using namespace fiction::layouts;
 using namespace fiction::sidb;
 using namespace fiction::sidb::simulation::logic;
 
 TEST_CASE("BDL Input Iterator Traits", "[bdl-input-iterator]")
 {
-    using layout = sidb_100_cell_clk_lyt_siqad;
 
-    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::iterator_category,
-                         std::random_access_iterator_tag>);
+    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator>::iterator_category, std::random_access_iterator_tag>);
 
-    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::value_type, layout>);
+    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator>::value_type, layout>);
 
-    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::difference_type, int64_t>);
+    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator>::difference_type, int64_t>);
 }
 
 TEST_CASE("Operators", "[bdl-input-iterators]")
 {
-    using layout = sidb_100_cell_clk_lyt_siqad;
 
     const layout lyt{};
 
-    bdl_input_iterator<layout> bii{lyt};
+    bdl_input_iterator bii{lyt};
 
     CHECK(bii == 0ull);
     CHECK(bii != 1ull);
@@ -125,68 +122,78 @@ TEST_CASE("Operators", "[bdl-input-iterators]")
 
 TEST_CASE("Empty layout iteration", "[bdl-input-iterator]")
 {
-    using layout = sidb_100_cell_clk_lyt_siqad;
 
     const layout lyt{};
 
-    bdl_input_iterator<layout> bii{lyt};
+    bdl_input_iterator bii{lyt};
 
     CHECK(bii.num_input_pairs() == 0);
-    CHECK((*bii).num_cells() == 0);
+    CHECK((*bii).num_dots() == 0);
 
     // increment
 
     ++bii;
 
     CHECK(bii.num_input_pairs() == 0);
-    CHECK((*bii).num_cells() == 0);
+    CHECK((*bii).num_dots() == 0);
 
     auto bii_cp = bii++;
 
     CHECK(bii.num_input_pairs() == 0);
     CHECK(bii_cp.num_input_pairs() == 0);
-    CHECK((*bii).num_cells() == 0);
-    CHECK((*bii_cp).num_cells() == 0);
+    CHECK((*bii).num_dots() == 0);
+    CHECK((*bii_cp).num_dots() == 0);
 
     // decrement
 
     --bii;
 
     CHECK(bii.num_input_pairs() == 0);
-    CHECK((*bii).num_cells() == 0);
+    CHECK((*bii).num_dots() == 0);
 
     auto bii_cm = bii--;
 
     CHECK(bii.num_input_pairs() == 0);
-    CHECK((*bii).num_cells() == 0);
+    CHECK((*bii).num_dots() == 0);
 
     CHECK(bii_cm.num_input_pairs() == 0);
-    CHECK((*bii_cm).num_cells() == 0);
+    CHECK((*bii_cm).num_dots() == 0);
+}
+
+TEST_CASE("Incomplete BDL wire set", "[bdl-input-iterator]")
+{
+    const auto lyt = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
+
+    bdl_input_iterator bii{lyt, bdl_input_iterator_params{}, std::vector<bdl_wire>{}};
+
+    CHECK_FALSE(bii.is_valid());
+    bii = 0;
+    ++bii;
+    CHECK(generate_bdl_input_pattern_layouts(lyt, bdl_input_iterator_params{}, {}).empty());
 }
 
 TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
 
-    layout lyt{{20, 0}, "BDL wire"};
+    layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const auto& lat = lyt;
 
-    bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat};
+    bdl_input_iterator bii{lat};
 
-    CHECK((*bii).num_cells() == 7);  // 2 inputs (1 already deleted for input pattern 0), 4 normal, 2 outputs
+    CHECK((*bii).num_dots() == 7);  // 2 inputs (1 already deleted for input pattern 0), 4 normal, 2 outputs
 
     CHECK(bii.num_input_pairs() == 1);
 
@@ -198,8 +205,8 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
     const auto& lyt_0 = *bii;
 
     // the iterator should have toggled the second input cell
-    CHECK(lyt_0.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::INPUT);
-    CHECK(lyt_0.get_cell_type({2, 0, 0}) == sidb_technology::cell_type::EMPTY);
+    CHECK(lyt_0.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
+    CHECK(lyt_0.get_dot_tag({2, 0, 0}) == dot_tag::EMPTY);
 
     ++bii;
     CHECK(bii == 1ull);
@@ -208,8 +215,8 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
     const auto& lyt_1 = *bii;
 
     // the iterator should have toggled the first input cell
-    CHECK(lyt_1.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::EMPTY);
-    CHECK(lyt_1.get_cell_type({2, 0, 0}) == sidb_technology::cell_type::INPUT);
+    CHECK(lyt_1.get_dot_tag({0, 0, 0}) == dot_tag::EMPTY);
+    CHECK(lyt_1.get_dot_tag({2, 0, 0}) == dot_tag::INPUT);
 
     // doing another iteration should overflow and set it back to 0
     ++bii;
@@ -217,8 +224,8 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
 
     const auto& lyt_2 = *bii;
 
-    CHECK(lyt_2.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::INPUT);
-    CHECK(lyt_2.get_cell_type({2, 0, 0}) == sidb_technology::cell_type::EMPTY);
+    CHECK(lyt_2.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
+    CHECK(lyt_2.get_dot_tag({2, 0, 0}) == dot_tag::EMPTY);
 
     // finally, decrement back to the initial state, doing another wrap-around
 
@@ -227,16 +234,16 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
 
     const auto& lyt_1_1 = *bii;
 
-    CHECK(lyt_1_1.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::EMPTY);
-    CHECK(lyt_1_1.get_cell_type({2, 0, 0}) == sidb_technology::cell_type::INPUT);
+    CHECK(lyt_1_1.get_dot_tag({0, 0, 0}) == dot_tag::EMPTY);
+    CHECK(lyt_1_1.get_dot_tag({2, 0, 0}) == dot_tag::INPUT);
 
     --bii;
     CHECK(bii == 0ull);
 
     const auto& lyt_0_1 = *bii;
 
-    CHECK(lyt_0_1.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::INPUT);
-    CHECK(lyt_0_1.get_cell_type({2, 0, 0}) == sidb_technology::cell_type::EMPTY);
+    CHECK(lyt_0_1.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
+    CHECK(lyt_0_1.get_dot_tag({2, 0, 0}) == dot_tag::EMPTY);
 }
 
 TEST_CASE("Mirrored BDL wire iteration", "[bdl-input-iterator]")
@@ -245,54 +252,53 @@ TEST_CASE("Mirrored BDL wire iteration", "[bdl-input-iterator]")
     // left, so that the dot closer to the end of the wire is the opposite one of the two. Under
     // `PERTURBER_DISTANCE_ENCODED`, an input of `1` places the perturber closer to the wire, so both orientations
     // together cover both outcomes of the distance comparison
-    using layout = sidb_cell_clk_lyt_siqad;
 
-    layout lyt{{20, 0}, "mirrored BDL wire"};
+    layout lyt{lattice::si_100_2x1(), "mirrored BDL wire"};
 
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::INPUT);
 
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::OUTPUT);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const auto& lat = lyt;
 
-    bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat};
+    bdl_input_iterator bii{lat};
 
     REQUIRE(bii.num_input_pairs() == 1);
 
     // input state 0 keeps the perturber that is farther away from the wire, which is the right-hand dot here
     const auto& lyt_0 = *bii;
 
-    CHECK(lyt_0.get_cell_type({20, 0, 0}) == sidb_technology::cell_type::INPUT);
-    CHECK(lyt_0.get_cell_type({18, 0, 0}) == sidb_technology::cell_type::EMPTY);
+    CHECK(lyt_0.get_dot_tag({20, 0, 0}) == dot_tag::INPUT);
+    CHECK(lyt_0.get_dot_tag({18, 0, 0}) == dot_tag::EMPTY);
 
     ++bii;
 
     // input state 1 keeps the perturber that is closer to the wire, which is the left-hand dot here
     const auto& lyt_1 = *bii;
 
-    CHECK(lyt_1.get_cell_type({20, 0, 0}) == sidb_technology::cell_type::EMPTY);
-    CHECK(lyt_1.get_cell_type({18, 0, 0}) == sidb_technology::cell_type::INPUT);
+    CHECK(lyt_1.get_dot_tag({20, 0, 0}) == dot_tag::EMPTY);
+    CHECK(lyt_1.get_dot_tag({18, 0, 0}) == dot_tag::INPUT);
 }
 
 TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 {
-    const auto lyt = blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>());
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const auto& lat = lyt;
 
     const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.0};
 
     SECTION("SiQAD coordinates, encode input 0 with the absence of perturbers")
     {
-        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{
+        bdl_input_iterator bii{
             lat,
             bdl_input_iterator_params{
                 .bdl_wire_params  = params,
@@ -306,11 +312,11 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
                 {
                     const auto& lyt_0 = *bii;
 
-                    CHECK(lyt_0.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_0.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_0.get_dot_tag({0, 0, 1}) == dot_tag::EMPTY);
+                    CHECK(lyt_0.get_dot_tag({2, 1, 1}) == dot_tag::EMPTY);
 
-                    CHECK(lyt_0.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_0.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_0.get_dot_tag({20, 0, 1}) == dot_tag::EMPTY);
+                    CHECK(lyt_0.get_dot_tag({18, 1, 1}) == dot_tag::EMPTY);
 
                     break;
                 }
@@ -318,11 +324,11 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
                 {
                     const auto& lyt_1 = *bii;
 
-                    CHECK(lyt_1.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_1.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_1.get_dot_tag({0, 0, 1}) == dot_tag::EMPTY);
+                    CHECK(lyt_1.get_dot_tag({2, 1, 1}) == dot_tag::EMPTY);
 
-                    CHECK(lyt_1.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_1.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_1.get_dot_tag({20, 0, 1}) == dot_tag::EMPTY);
+                    CHECK(lyt_1.get_dot_tag({18, 1, 1}) == dot_tag::INPUT);
 
                     break;
                 }
@@ -330,11 +336,11 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
                 {
                     const auto& lyt_2 = *bii;
 
-                    CHECK(lyt_2.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_2.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_2.get_dot_tag({0, 0, 1}) == dot_tag::EMPTY);
+                    CHECK(lyt_2.get_dot_tag({2, 1, 1}) == dot_tag::INPUT);
 
-                    CHECK(lyt_2.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_2.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_2.get_dot_tag({20, 0, 1}) == dot_tag::EMPTY);
+                    CHECK(lyt_2.get_dot_tag({18, 1, 1}) == dot_tag::EMPTY);
 
                     break;
                 }
@@ -342,11 +348,11 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
                 {
                     const auto& lyt_3 = *bii;
 
-                    CHECK(lyt_3.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_3.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_3.get_dot_tag({0, 0, 1}) == dot_tag::EMPTY);
+                    CHECK(lyt_3.get_dot_tag({2, 1, 1}) == dot_tag::INPUT);
 
-                    CHECK(lyt_3.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_3.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_3.get_dot_tag({20, 0, 1}) == dot_tag::EMPTY);
+                    CHECK(lyt_3.get_dot_tag({18, 1, 1}) == dot_tag::INPUT);
 
                     break;
                 }
@@ -360,7 +366,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     SECTION("SiQAD coordinates")
     {
-        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, bdl_input_iterator_params{.bdl_wire_params = params}};
+        bdl_input_iterator bii{lat, bdl_input_iterator_params{.bdl_wire_params = params}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -370,76 +376,11 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
                 {
                     const auto& lyt_0 = *bii;
 
-                    CHECK(lyt_0.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::INPUT);
-                    CHECK(lyt_0.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_0.get_dot_tag({0, 0, 1}) == dot_tag::INPUT);
+                    CHECK(lyt_0.get_dot_tag({2, 1, 1}) == dot_tag::EMPTY);
 
-                    CHECK(lyt_0.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::INPUT);
-                    CHECK(lyt_0.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::EMPTY);
-
-                    break;
-                }
-                case 1:
-                {
-                    const auto& lyt_1 = *bii;
-
-                    CHECK(lyt_1.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::INPUT);
-                    CHECK(lyt_1.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::EMPTY);
-
-                    CHECK(lyt_1.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_1.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::INPUT);
-
-                    break;
-                }
-                case 2:
-                {
-                    const auto& lyt_2 = *bii;
-
-                    CHECK(lyt_2.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_2.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::INPUT);
-
-                    CHECK(lyt_2.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::INPUT);
-                    CHECK(lyt_2.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::EMPTY);
-
-                    break;
-                }
-                case 3:
-                {
-                    const auto& lyt_3 = *bii;
-
-                    CHECK(lyt_3.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_3.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::INPUT);
-
-                    CHECK(lyt_3.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_3.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::INPUT);
-
-                    break;
-                }
-                default:
-                {
-                    CHECK(false);
-                }
-            }
-        }
-    }
-
-    SECTION("cube coordinates")
-    {
-        const auto         layout_cube = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
-        bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_cube}};
-
-        for (auto i = 0; bii < 4; ++bii, ++i)
-        {
-            switch (i)
-            {
-                case 0:
-                {
-                    const auto& lyt_0 = *bii;
-
-                    CHECK(lyt_0.get_cell_type({0, 1}) == sidb_technology::cell_type::INPUT);
-                    CHECK(lyt_0.get_cell_type({2, 3}) == sidb_technology::cell_type::EMPTY);
-
-                    CHECK(lyt_0.get_cell_type({20, 1}) == sidb_technology::cell_type::INPUT);
-                    CHECK(lyt_0.get_cell_type({18, 3}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_0.get_dot_tag({20, 0, 1}) == dot_tag::INPUT);
+                    CHECK(lyt_0.get_dot_tag({18, 1, 1}) == dot_tag::EMPTY);
 
                     break;
                 }
@@ -447,76 +388,11 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
                 {
                     const auto& lyt_1 = *bii;
 
-                    CHECK(lyt_1.get_cell_type({0, 1}) == sidb_technology::cell_type::INPUT);
-                    CHECK(lyt_1.get_cell_type({2, 3}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_1.get_dot_tag({0, 0, 1}) == dot_tag::INPUT);
+                    CHECK(lyt_1.get_dot_tag({2, 1, 1}) == dot_tag::EMPTY);
 
-                    CHECK(lyt_1.get_cell_type({20, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_1.get_cell_type({18, 3}) == sidb_technology::cell_type::INPUT);
-
-                    break;
-                }
-                case 2:
-                {
-                    const auto& lyt_2 = *bii;
-
-                    CHECK(lyt_2.get_cell_type({0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_2.get_cell_type({2, 3}) == sidb_technology::cell_type::INPUT);
-
-                    CHECK(lyt_2.get_cell_type({20, 1}) == sidb_technology::cell_type::INPUT);
-                    CHECK(lyt_2.get_cell_type({18, 3}) == sidb_technology::cell_type::EMPTY);
-
-                    break;
-                }
-                case 3:
-                {
-                    const auto& lyt_3 = *bii;
-
-                    CHECK(lyt_3.get_cell_type({0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_3.get_cell_type({2, 3}) == sidb_technology::cell_type::INPUT);
-
-                    CHECK(lyt_3.get_cell_type({20, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_3.get_cell_type({18, 3}) == sidb_technology::cell_type::INPUT);
-
-                    break;
-                }
-                default:
-                {
-                    CHECK(false);
-                }
-            }
-        }
-    }
-
-    SECTION("offset coordinates")
-    {
-        const auto         layout_offset = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
-        bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_offset}};
-
-        for (auto i = 0; bii < 4; ++bii, ++i)
-        {
-            switch (i)
-            {
-                case 0:
-                {
-                    const auto& lyt_0 = *bii;
-
-                    CHECK(lyt_0.get_cell_type({0, 1}) == sidb_technology::cell_type::INPUT);
-                    CHECK(lyt_0.get_cell_type({2, 3}) == sidb_technology::cell_type::EMPTY);
-
-                    CHECK(lyt_0.get_cell_type({20, 1}) == sidb_technology::cell_type::INPUT);
-                    CHECK(lyt_0.get_cell_type({18, 3}) == sidb_technology::cell_type::EMPTY);
-
-                    break;
-                }
-                case 1:
-                {
-                    const auto& lyt_1 = *bii;
-
-                    CHECK(lyt_1.get_cell_type({0, 1}) == sidb_technology::cell_type::INPUT);
-                    CHECK(lyt_1.get_cell_type({2, 3}) == sidb_technology::cell_type::EMPTY);
-
-                    CHECK(lyt_1.get_cell_type({20, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_1.get_cell_type({18, 3}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_1.get_dot_tag({20, 0, 1}) == dot_tag::EMPTY);
+                    CHECK(lyt_1.get_dot_tag({18, 1, 1}) == dot_tag::INPUT);
 
                     break;
                 }
@@ -524,11 +400,11 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
                 {
                     const auto& lyt_2 = *bii;
 
-                    CHECK(lyt_2.get_cell_type({0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_2.get_cell_type({2, 3}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_2.get_dot_tag({0, 0, 1}) == dot_tag::EMPTY);
+                    CHECK(lyt_2.get_dot_tag({2, 1, 1}) == dot_tag::INPUT);
 
-                    CHECK(lyt_2.get_cell_type({20, 1}) == sidb_technology::cell_type::INPUT);
-                    CHECK(lyt_2.get_cell_type({18, 3}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_2.get_dot_tag({20, 0, 1}) == dot_tag::INPUT);
+                    CHECK(lyt_2.get_dot_tag({18, 1, 1}) == dot_tag::EMPTY);
 
                     break;
                 }
@@ -536,11 +412,11 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
                 {
                     const auto& lyt_3 = *bii;
 
-                    CHECK(lyt_3.get_cell_type({0, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_3.get_cell_type({2, 3}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_3.get_dot_tag({0, 0, 1}) == dot_tag::EMPTY);
+                    CHECK(lyt_3.get_dot_tag({2, 1, 1}) == dot_tag::INPUT);
 
-                    CHECK(lyt_3.get_cell_type({20, 1}) == sidb_technology::cell_type::EMPTY);
-                    CHECK(lyt_3.get_cell_type({18, 3}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_3.get_dot_tag({20, 0, 1}) == dot_tag::EMPTY);
+                    CHECK(lyt_3.get_dot_tag({18, 1, 1}) == dot_tag::INPUT);
 
                     break;
                 }
@@ -555,9 +431,9 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
 TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
 {
-    const auto lyt = blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>());
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const auto& lat = lyt;
 
     const bdl_input_iterator_params params{.bdl_wire_params =
                                                detect_bdl_wires_params{.threshold_bdl_interdistance = 2.0}};
@@ -568,16 +444,16 @@ TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
 
         REQUIRE(layouts.size() == 4);
 
-        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, params};
+        bdl_input_iterator bii{lat, params};
 
         for (uint64_t i = 0; i < layouts.size(); ++i, ++bii)
         {
             const auto& expected = *bii;
 
-            CHECK(layouts[i].num_cells() == expected.num_cells());
+            CHECK(layouts[i].num_dots() == expected.num_dots());
 
-            expected.foreach_cell([&layouts, &expected, i](const auto& c)
-                                  { CHECK(layouts[i].get_cell_type(c) == expected.get_cell_type(c)); });
+            expected.foreach_dot([&layouts, &expected, i](const auto& c)
+                                 { CHECK(layouts[i].get_dot_tag(c) == expected.get_dot_tag(c)); });
         }
     }
 
@@ -592,8 +468,8 @@ TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
 
         for (uint64_t i = 0; i < layouts.size(); ++i)
         {
-            layouts[i].foreach_cell([&layouts, &layouts_with_wires, i](const auto& c)
-                                    { CHECK(layouts_with_wires[i].get_cell_type(c) == layouts[i].get_cell_type(c)); });
+            layouts[i].foreach_dot([&layouts, &layouts_with_wires, i](const auto& c)
+                                   { CHECK(layouts_with_wires[i].get_dot_tag(c) == layouts[i].get_dot_tag(c)); });
         }
     }
 
@@ -605,17 +481,17 @@ TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
 
         REQUIRE(layouts.size() == 4);
 
-        const cell<sidb_100_cell_clk_lyt_siqad> probe{100, 100, 0};
+        const lattice_site probe{100, 100, 0};
 
-        REQUIRE(layouts[0].get_cell_type(probe) == sidb_technology::cell_type::EMPTY);
+        REQUIRE(layouts[0].get_dot_tag(probe) == dot_tag::EMPTY);
 
-        layouts[0].assign_cell_type(probe, sidb_technology::cell_type::NORMAL);
+        layouts[0].assign_sidb(probe, dot_tag::NORMAL);
 
-        CHECK(layouts[0].get_cell_type(probe) == sidb_technology::cell_type::NORMAL);
+        CHECK(layouts[0].get_dot_tag(probe) == dot_tag::NORMAL);
 
         for (uint64_t i = 1; i < layouts.size(); ++i)
         {
-            CHECK(layouts[i].get_cell_type(probe) == sidb_technology::cell_type::EMPTY);
+            CHECK(layouts[i].get_dot_tag(probe) == dot_tag::EMPTY);
         }
     }
 }

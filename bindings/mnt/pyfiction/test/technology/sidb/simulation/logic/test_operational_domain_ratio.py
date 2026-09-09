@@ -17,14 +17,14 @@ from mnt.pyfiction import (
     operational_domain_ratio_params,
     operational_domain_value_range,
     parameter_point,
-    read_sqd_layout_100,
+    read_sqd_layout,
     sidb_simulation_engine,
     sweep_parameter,
 )
 
 
 def test_and_gate_100_lattice(resources_dir):
-    lyt = read_sqd_layout_100(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
+    lyt = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT

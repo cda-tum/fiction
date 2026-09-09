@@ -20,11 +20,11 @@
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -38,6 +38,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
@@ -83,14 +84,12 @@ int main()  // NOLINT
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_3_input/", EXPERIMENTS_PATH);
 
     // this skeleton is used for the design of AND3 and Gamble
-    const auto skeleton_one =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "3_in_1_out_skeleton_one.sqd"));
+    const auto skeleton_one = read_sqd_layout(fmt::format("{}/{}", folder, "3_in_1_out_skeleton_one.sqd"));
 
     // this skeleton is used for the design of all Boolean functions, except for AND3 and Gamble.
-    const auto skeleton_two =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "3_in_1_out_skeleton_two.sqd"));
+    const auto skeleton_two = read_sqd_layout(fmt::format("{}/{}", folder, "3_in_1_out_skeleton_two.sqd"));
 
-    const design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+    const design_gates_params params{
         .operational_params =
             is_operational_params{
                 .sim_params = simulation_parameters{2, -0.31},
@@ -99,14 +98,14 @@ int main()  // NOLINT
                     bdl_input_iterator_params{.bdl_wire_params =
                                                   detect_bdl_wires_params{.threshold_bdl_interdistance = 3.0}},
                 .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
-        .design_mode            = design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
+        .design_mode            = design_gates_params::design_gates_mode::QUICKCELL,
         .canvas                 = {{22, 6, 0}, {32, 12, 0}},
         .number_of_canvas_sidbs = 4};
 
     for (const auto& [truth_tables, gate_names] : truth_tables_and_names)
     {
-        std::vector<sidb_100_cell_clk_lyt_siqad> quickcell_design{};
-        design_gates_stats                       stats_quickcell{};
+        std::vector<layout> quickcell_design{};
+        design_gates_stats  stats_quickcell{};
 
         if (gate_names == "and3" || gate_names == "gamble")
         {

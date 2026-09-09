@@ -19,6 +19,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
@@ -48,61 +49,90 @@ namespace pyfiction
 namespace detail
 {
 
-template <typename Lyt>
-void operational_domain_impl(nanobind::module_& m)
+/**
+ * Registers the operational domain and critical temperature domain algorithms on `sidb_layout`.
+ *
+ * @param m The module.
+ */
+inline void operational_domain_functions(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
-    m.def("operational_domain_grid_search",
-          &fiction::sidb::simulation::logic::operational_domain_grid_search<Lyt, py_tt>, py::arg("lyt"),
-          py::arg("spec"), py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_sidb_simulation_logic_operational_domain_grid_search));
+    using fiction::sidb::layout;
+    using fiction::sidb::simulation::logic::operational_domain_params;
+    using fiction::sidb::simulation::logic::operational_domain_stats;
 
-    m.def("operational_domain_random_sampling",
-          &fiction::sidb::simulation::logic::operational_domain_random_sampling<Lyt, py_tt>, py::arg("lyt"),
-          py::arg("spec"), py::arg("samples"),
-          py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_sidb_simulation_logic_operational_domain_random_sampling));
-
-    m.def("operational_domain_flood_fill", &fiction::sidb::simulation::logic::operational_domain_flood_fill<Lyt, py_tt>,
-          py::arg("lyt"), py::arg("spec"), py::arg("samples"),
-          py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_sidb_simulation_logic_operational_domain_flood_fill));
-
-    m.def("operational_domain_contour_tracing",
-          &fiction::sidb::simulation::logic::operational_domain_contour_tracing<Lyt, py_tt>, py::arg("lyt"),
-          py::arg("spec"), py::arg("samples"),
-          py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_sidb_simulation_logic_operational_domain_contour_tracing));
-}
-
-template <typename Lyt>
-void critical_temperature_domain_impl(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("critical_temperature_domain_grid_search",
-          &fiction::sidb::simulation::logic::critical_temperature_domain_grid_search<Lyt, py_tt>, py::arg("lyt"),
-          py::arg("spec"), py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_sidb_simulation_logic_critical_temperature_domain_grid_search));
-
-    m.def("critical_temperature_domain_random_sampling",
-          &fiction::sidb::simulation::logic::critical_temperature_domain_random_sampling<Lyt, py_tt>, py::arg("lyt"),
-          py::arg("spec"), py::arg("samples"),
-          py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_sidb_simulation_logic_critical_temperature_domain_random_sampling));
-
-    m.def("critical_temperature_domain_flood_fill",
-          &fiction::sidb::simulation::logic::critical_temperature_domain_flood_fill<Lyt, py_tt>, py::arg("lyt"),
-          py::arg("spec"), py::arg("samples"),
-          py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_sidb_simulation_logic_critical_temperature_domain_flood_fill));
-
-    m.def("critical_temperature_domain_contour_tracing",
-          &fiction::sidb::simulation::logic::critical_temperature_domain_contour_tracing<Lyt, py_tt>, py::arg("lyt"),
-          py::arg("spec"), py::arg("samples"),
-          py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_sidb_simulation_logic_critical_temperature_domain_contour_tracing));
+    m.def(
+        "operational_domain_grid_search",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const operational_domain_params& params,
+           operational_domain_stats* stats)
+        { return fiction::sidb::simulation::logic::operational_domain_grid_search(lyt, spec, params, stats); },
+        py::arg("lyt"), py::arg("spec"), py::arg("params") = operational_domain_params{}, py::arg("stats") = nullptr,
+        DOC(fiction_sidb_simulation_logic_operational_domain_grid_search));
+    m.def(
+        "operational_domain_random_sampling",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+           const operational_domain_params& params, operational_domain_stats* stats)
+        {
+            return fiction::sidb::simulation::logic::operational_domain_random_sampling(lyt, spec, samples, params,
+                                                                                        stats);
+        },
+        py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = operational_domain_params{},
+        py::arg("stats") = nullptr, DOC(fiction_sidb_simulation_logic_operational_domain_random_sampling));
+    m.def(
+        "operational_domain_flood_fill",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+           const operational_domain_params& params, operational_domain_stats* stats)
+        { return fiction::sidb::simulation::logic::operational_domain_flood_fill(lyt, spec, samples, params, stats); },
+        py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = operational_domain_params{},
+        py::arg("stats") = nullptr, DOC(fiction_sidb_simulation_logic_operational_domain_flood_fill));
+    m.def(
+        "operational_domain_contour_tracing",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+           const operational_domain_params& params, operational_domain_stats* stats)
+        {
+            return fiction::sidb::simulation::logic::operational_domain_contour_tracing(lyt, spec, samples, params,
+                                                                                        stats);
+        },
+        py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = operational_domain_params{},
+        py::arg("stats") = nullptr, DOC(fiction_sidb_simulation_logic_operational_domain_contour_tracing));
+    m.def(
+        "critical_temperature_domain_grid_search",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const operational_domain_params& params,
+           operational_domain_stats* stats)
+        { return fiction::sidb::simulation::logic::critical_temperature_domain_grid_search(lyt, spec, params, stats); },
+        py::arg("lyt"), py::arg("spec"), py::arg("params") = operational_domain_params{}, py::arg("stats") = nullptr,
+        DOC(fiction_sidb_simulation_logic_critical_temperature_domain_grid_search));
+    m.def(
+        "critical_temperature_domain_random_sampling",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+           const operational_domain_params& params, operational_domain_stats* stats)
+        {
+            return fiction::sidb::simulation::logic::critical_temperature_domain_random_sampling(lyt, spec, samples,
+                                                                                                 params, stats);
+        },
+        py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = operational_domain_params{},
+        py::arg("stats") = nullptr, DOC(fiction_sidb_simulation_logic_critical_temperature_domain_random_sampling));
+    m.def(
+        "critical_temperature_domain_flood_fill",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+           const operational_domain_params& params, operational_domain_stats* stats)
+        {
+            return fiction::sidb::simulation::logic::critical_temperature_domain_flood_fill(lyt, spec, samples, params,
+                                                                                            stats);
+        },
+        py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = operational_domain_params{},
+        py::arg("stats") = nullptr, DOC(fiction_sidb_simulation_logic_critical_temperature_domain_flood_fill));
+    m.def(
+        "critical_temperature_domain_contour_tracing",
+        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+           const operational_domain_params& params, operational_domain_stats* stats)
+        {
+            return fiction::sidb::simulation::logic::critical_temperature_domain_contour_tracing(lyt, spec, samples,
+                                                                                                 params, stats);
+        },
+        py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = operational_domain_params{},
+        py::arg("stats") = nullptr, DOC(fiction_sidb_simulation_logic_critical_temperature_domain_contour_tracing));
 }
 
 }  // namespace detail
@@ -385,11 +415,7 @@ void operational_domain(nanobind::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::operational_domain_impl<py_sidb_100_lattice>(m);
-    detail::operational_domain_impl<py_sidb_111_lattice>(m);
-
-    detail::critical_temperature_domain_impl<py_sidb_100_lattice>(m);
-    detail::critical_temperature_domain_impl<py_sidb_111_lattice>(m);
+    detail::operational_domain_functions(m);
 }
 
 }  // namespace pyfiction

@@ -26,9 +26,8 @@
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/surfaces/defect_surface.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
-#include <kitty/traits.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -172,9 +171,9 @@ class defect_influence_impl
      * coordinates divisible by `step_size` will be checked.
      * @return The defect influence domain.
      */
-    template <typename TT = tt>
-    [[nodiscard]] defect_influence_domain<Lyt> grid_search(const std::size_t                     step_size,
-                                                           const std::optional<std::vector<TT>>& spec = std::nullopt)
+    [[nodiscard]] defect_influence_domain<Lyt>
+    grid_search(const std::size_t                                             step_size,
+                const std::optional<std::vector<kitty::dynamic_truth_table>>& spec = std::nullopt)
     {
         mockturtle::stopwatch stop{stats.time_total};
         const auto        all_possible_defect_positions = layouts::all_coordinates_in_spanned_area(nw_cell, se_cell);
@@ -238,9 +237,9 @@ class defect_influence_impl
      * @param spec The optional truth table to be used for the simulation.
      * @return The defect influence domain.
      */
-    template <typename TT = tt>
     [[nodiscard]] defect_influence_domain<Lyt>
-    random_sampling(const std::size_t samples, const std::optional<std::vector<TT>>& spec = std::nullopt)
+    random_sampling(const std::size_t                                             samples,
+                    const std::optional<std::vector<kitty::dynamic_truth_table>>& spec = std::nullopt)
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -324,9 +323,9 @@ class defect_influence_impl
      * @param spec The optional truth table to be used for the simulation.
      * @return The defect influence domain.
      */
-    template <typename TT = tt>
-    [[nodiscard]] defect_influence_domain<Lyt> quicktrace(const std::size_t                     samples,
-                                                          const std::optional<std::vector<TT>>& spec = std::nullopt)
+    [[nodiscard]] defect_influence_domain<Lyt>
+    quicktrace(const std::size_t                                             samples,
+               const std::optional<std::vector<kitty::dynamic_truth_table>>& spec = std::nullopt)
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -526,9 +525,8 @@ class defect_influence_impl
      * @return Defect position which does not influence the SiDB layout. If no non-influential defect position is found,
      * `std::nullopt` is returned.
      */
-    template <typename TT>
-    [[nodiscard]] std::optional<typename Lyt::cell>
-    find_non_influential_defect_position_at_left_side(const std::optional<std::vector<TT>>& spec)
+    [[nodiscard]] std::optional<typename Lyt::cell> find_non_influential_defect_position_at_left_side(
+        const std::optional<std::vector<kitty::dynamic_truth_table>>& spec)
     {
         auto starting_point = nw_cell;
 
@@ -552,9 +550,8 @@ class defect_influence_impl
      * @param spec The optional truth table to be used for the simulation.
      * @param defect_cell Defect position to be investigated.
      */
-    template <typename TT>
-    defect_influence_status is_defect_influential(const std::optional<std::vector<TT>>& spec,
-                                                  const typename Lyt::cell&             defect_cell)
+    defect_influence_status is_defect_influential(const std::optional<std::vector<kitty::dynamic_truth_table>>& spec,
+                                                  const typename Lyt::cell& defect_cell)
     {
         // increment the number of evaluated parameter combinations
         ++num_evaluated_defect_positions;
@@ -606,7 +603,7 @@ class defect_influence_impl
 
             if (params.influence_def == defect_influence_params<cell<Lyt>>::influence_definition::GROUND_STATE_CHANGE)
             {
-                auto bii = sidb::simulation::logic::bdl_input_iterator<Lyt>{
+                auto bii = sidb::simulation::logic::legacy_bdl_input_iterator<Lyt>{
                     lyt_copy, params.operational_params.input_bdl_iterator_params};
 
                 // number of different input combinations
@@ -716,10 +713,9 @@ class defect_influence_impl
      * @return The last non-influential defect position. If no non-influential defect position is found, `std::nullopt`
      * is returned.
      */
-    template <typename TT>
-    [[nodiscard]] std::optional<typename Lyt::cell>
-    find_last_non_influential_defect_position_moving_right(const std::optional<std::vector<TT>>& spec,
-                                                           const typename Lyt::cell& starting_defect_position)
+    [[nodiscard]] std::optional<typename Lyt::cell> find_last_non_influential_defect_position_moving_right(
+        const std::optional<std::vector<kitty::dynamic_truth_table>>& spec,
+        const typename Lyt::cell&                                     starting_defect_position)
     {
         auto latest_non_influential_defect_position = starting_defect_position;
 
@@ -876,7 +872,6 @@ class defect_influence_impl
  * by exhaustively sweeping all possible atomic defect positions in x and y dimensions.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
  * @param lyt Layout to compute the defect influence domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param step_size The parameter specifying the interval between consecutive defect positions to be evaluated.
@@ -884,15 +879,14 @@ class defect_influence_impl
  * @param stats Statistics.
  * @return The defect influence domain of the layout.
  */
-template <typename Lyt, typename TT>
+template <typename Lyt>
 [[nodiscard]] defect_influence_domain<Lyt>
-defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
+defect_influence_grid_search(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                              const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1,
                              defect_influence_stats* stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
     static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
 
     defect_influence_stats             st{};
@@ -945,7 +939,6 @@ defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<
  * complete. It performs a total of `samples` uniformly-distributed random samples within the specified area.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
  * @param lyt Layout to compute the defect influence domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param samples Number of random samples to perform.
@@ -953,15 +946,14 @@ defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<
  * @param stats Statistics.
  * @return The (partial) defect influence domain of the layout.
  */
-template <typename Lyt, typename TT>
+template <typename Lyt>
 [[nodiscard]] defect_influence_domain<Lyt>
-defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
-                                 const defect_influence_params<cell<Lyt>>& params = {},
-                                 defect_influence_stats*                   stats  = nullptr)
+defect_influence_random_sampling(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                                 std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {},
+                                 defect_influence_stats* stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
     static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
 
     defect_influence_stats             st{};
@@ -1040,7 +1032,6 @@ defect_influence_random_sampling(const Lyt& lyt, std::size_t samples,
  * non-influencing defect position.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
  * @param lyt Layout to compute the defect influence domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param samples Number of samples to perform.
@@ -1048,11 +1039,11 @@ defect_influence_random_sampling(const Lyt& lyt, std::size_t samples,
  * @param stats Defect influence computation statistics.
  * @return The (partial) defect influence domain of the layout.
  */
-template <typename Lyt, typename TT>
+template <typename Lyt>
 [[nodiscard]] defect_influence_domain<Lyt>
-defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                            const defect_influence_params<cell<Lyt>>& params = {},
-                            defect_influence_stats*                   stats  = nullptr)
+defect_influence_quicktrace(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                            const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {},
+                            defect_influence_stats* stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

@@ -59,6 +59,11 @@ TEST_CASE("Coordinate to site", "[cell-level-layout-conversion]")
     CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt>(invalid), std::out_of_range);
     CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt_cube>(invalid), std::out_of_range);
     CHECK_THROWS_AS(to_cell<sidb_100_cell_clk_lyt_siqad>(invalid), std::out_of_range);
+    invalid.z = -1;
+    CHECK_THROWS_AS(to_cube(invalid), std::out_of_range);
+    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt>(invalid), std::out_of_range);
+    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt_cube>(invalid), std::out_of_range);
+    CHECK_THROWS_AS(to_cell<sidb_100_cell_clk_lyt_siqad>(invalid), std::out_of_range);
 }
 
 TEST_CASE("Lattice of a layout type", "[cell-level-layout-conversion]")
@@ -134,4 +139,35 @@ TEST_CASE("Cell conversion rejects unrepresentable coordinates", "[cell-level-la
     CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt>({0, -1, 0}), std::out_of_range);
     CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt>({0, max_coordinate, 1}), std::out_of_range);
     CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt_cube>({0, max_coordinate, 1}), std::out_of_range);
+}
+
+TEST_CASE("Layout conversion rejects unrepresentable cells and defects", "[cell-level-layout-conversion]")
+{
+    layout lyt{};
+    lyt.assign_sidb({-1, -1, 0}, sidb_technology::cell_type::NORMAL);
+    CHECK_THROWS_AS(to_cell_level_layout<sidb_cell_clk_lyt>(lyt), std::out_of_range);
+    CHECK(to_cell_level_layout<sidb_cell_clk_lyt_cube>(lyt).get_cell_type({-1, -2}) ==
+          sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_sidb({0, std::numeric_limits<int32_t>::max(), 1}, sidb_technology::cell_type::NORMAL);
+    CHECK_THROWS_AS(to_cell_level_layout<sidb_cell_clk_lyt_cube>(lyt), std::out_of_range);
+
+    layout defective{};
+    defective.assign_defect({-1, 0, 0}, defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});
+    CHECK_THROWS_AS(to_cell_level_layout<surfaces::defect_surface<sidb_cell_clk_lyt>>(defective), std::out_of_range);
+}
+
+TEST_CASE("SiDB layout conversion preserves represented bounds", "[cell-level-layout-conversion]")
+{
+    layout lyt{};
+    lyt.assign_sidb({2, 1, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_defect({4, 2, 0}, defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});
+
+    const auto cells = to_cell_level_layout<sidb_cell_clk_lyt>(lyt);
+    CHECK(cells.x() == 2);
+    CHECK(cells.y() == 3);
+
+    const auto surface = to_cell_level_layout<surfaces::defect_surface<sidb_cell_clk_lyt>>(lyt);
+    CHECK(surface.x() == 4);
+    CHECK(surface.y() == 4);
 }

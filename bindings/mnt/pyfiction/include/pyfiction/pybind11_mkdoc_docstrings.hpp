@@ -14248,18 +14248,19 @@ static const char *mkd_doc_fiction_sidb_dot_tag_NORMAL = R"doc(Untagged dot.)doc
 static const char *mkd_doc_fiction_sidb_dot_tag_OUTPUT = R"doc(Primary output dot.)doc";
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception =
-R"doc(This exception is thrown when an error occurs during the design of an
-SiDB gate. It provides information about the tile, truth table, and
-port list associated with the error.
+R"doc(Reports an unsuccessful SiDB gate design.
+
+It provides information about the tile, truth table, and port list
+associated with the error.
 
 Template Args:
-    TT: The type representing the truth table.
     GateLyt: The type representing the gate-level layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception_error_tile = R"doc(The tile associated with the error.)doc";
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception_gate_design_exception =
-R"doc(Constructor for the gate_design_exception class.
+R"doc(Stores the tile, truth table, and ports of an unsuccessful gate
+design.
 
 Args:
     ti: The tile associated with the error.
@@ -14272,404 +14273,369 @@ static const char *mkd_doc_fiction_sidb_gate_design_exception_p = R"doc(The port
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception_truth_table = R"doc(The truth table associated with the error.)doc";
 
-static const char *mkd_doc_fiction_sidb_gate_design_exception_which_port_list = R"doc(Get the port list associated with the exception.)doc";
+static const char *mkd_doc_fiction_sidb_gate_design_exception_which_port_list =
+R"doc(Returns the port list associated with the exception.
 
-static const char *mkd_doc_fiction_sidb_gate_design_exception_which_tile = R"doc(Get the tile associated with the exception.)doc";
+Returns:
+    A copy of the gate ports.
 
-static const char *mkd_doc_fiction_sidb_gate_design_exception_which_truth_table = R"doc(Get the truth table associated with the exception.)doc";
+)doc";
+
+static const char *mkd_doc_fiction_sidb_gate_design_exception_which_tile =
+R"doc(Returns the tile associated with the exception.
+
+Returns:
+    The gate-level tile.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_gate_design_exception_which_truth_table =
+R"doc(Returns the truth table associated with the exception.
+
+Returns:
+    A copy of the Boolean specification.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates =
-R"doc(The *SiDB Gate Designer* designs SiDB gate implementations based on a
-specified Boolean function, a skeleton layout (can hold defects),
-canvas size, and a predetermined number of canvas SiDBs. Three
-different design modes are implemented: `quickcell`, `exhaustive` and
-`random design`.
+R"doc(Designs SiDB gates on a skeleton: canvas SiDBs are placed in the
+canvas area so that the skeleton's input and output wires implement
+the given Boolean function(s). The design mode chooses between
+simulating every combination of canvas SiDBs, *QuickCell*'s pruning
+followed by simulation, random placement, and pruning only.
 
-A first version of `QuickCell` was proposed in \"Towards Fast
-Automatic Design of Silicon Dangling Bond Logic\" by J. Drewniok, M.
-Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
-(https://ieeexplore.ieee.org/abstract/document/10992885).
+Worker exceptions propagate to the caller after all started workers
+finish.
 
-An extended version of `QuickCell` was proposed in \"QuickCell: Fast
-Automatic Design of Standard Cells for Silicon Dangling Bond Logic\"
-by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in TCAD
-2025 (https://ieeexplore.ieee.org/document/11146893).
+Random placement samples at most `maximal_random_design_attempts`
+candidates without enumerating canvas layouts.
 
-The `Automatic Exhaustive Gate Designer` was proposed in \"Minimal
-Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon
-Dangling Bonds\" by J. Drewniok, M. Walter, and R. Wille in NANOARCH
-2023 (https://dl.acm.org/doi/10.1145/3611315.3633241).
-
-The `quickcell` design mode consists of two key steps:
-1. **Initial Pruning:** Efficient filtering techniques are applied to
-   discard layouts that cannot correctly
-implement the specified logic.
-2. **Physical Simulation:** The remaining candidate layouts undergo
-   physical simulation to verify their
-operationality.
-
-The `exhaustive design` is composed of three steps:
-1. In the initial step, all possible distributions of
-   `number_of_canvas_sidbs` SiDBs within a given canvas are
-exhaustively determined. This ensures exhaustive coverage of every
-potential arrangement of `number_of_canvas_sidbs` SiDBs across the
-canvas.
-2. The calculated SiDB distributions are then incorporated into the
-   skeleton, resulting in the generation of distinct
-SiDB layouts.
-3. The generated SiDB layouts then undergo an extensive simulation
-   process. All input combinations possible for the
-given Boolean function are used to verify if the logic is fulfilled.
-
-The `random design` is composed of four steps:
-1. A specified number of canvas SiDBs (`number_of_canvas_sidbs`) are
-   randomly added to the skeleton layout.
-2. The operation status of the layout is simulated based on a given
-   Boolean function.
-3. If the layout is `operational`, it is returned as the result, and
-   the process terminates successfully.
-4. If the layout is `non-operational`, the process is repeated from
-   the first step until an operational layout is
-found.
+*QuickCell* is described in "Towards Fast Automatic Design of Silicon
+Dangling Bond Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus,
+and R. Wille in DATE 2025
+(https://ieeexplore.ieee.org/abstract/document/10992885) and
+"QuickCell: Fast Automatic Design of Standard Cells for Silicon
+Dangling Bond Logic" by the same authors in TCAD 2025
+(https://ieeexplore.ieee.org/document/11146893). The exhaustive
+designer is described in "Minimal Design of SiDB Gates: An Optimal
+Basis for Circuits Based on Silicon Dangling Bonds" by J. Drewniok, M.
+Walter, and R. Wille in NANOARCH 2023
+(https://dl.acm.org/doi/10.1145/3611315.3633241).
 
 Args:
-    skeleton: The skeleton layout used for gate design.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    params: Parameters for the *SiDB Gate Designer*.
+    skeleton: The skeleton with its input and output wires.
+    spec: The Boolean function(s) to implement; must not be empty.
+    params: Parameters.
     stats: Statistics.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: The type of the truth table specifying the gate behavior.
-
 Returns:
-    A vector of designed SiDB gate layouts.
+    The designed gates.
+
+Raises:
+    std::invalid_argument: if `spec` is empty or the input wire count
+                           differs from the specification.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params =
-R"doc(This struct contains parameters and settings to design SiDB gates.
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params = R"doc(Parameters of the gate designers.)doc";
 
-Template Args:
-    CellType: Cell type.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_canvas =
+R"doc(The canvas: the area canvas SiDBs are placed in, as two opposite
+corners.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_canvas = R"doc(Canvas spanned by the northwest and southeast cell.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode = R"doc(The design mode.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode = R"doc(Selector for the available design approaches.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Simulate every canvas layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_PRUNING_ONLY =
-R"doc(This design approach adopts the three pruning techniques used by
-*QuickCell* to efficiently filter out non-operational layouts. Unlike
-*QuickCell*, the subsequent physical simulation step is skipped to
-enhance efficiency. As a result, the operational validity of the final
-layouts cannot be guaranteed, although a substantial portion of them
-are usually operational.)doc";
+R"doc(Only run the pruning filters of *QuickCell* and return the surviving
+candidates.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_QUICKCELL = R"doc(Gates are designed by using *QuickCell*.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_QUICKCELL =
+R"doc(*QuickCell*: prune the canvas layouts with the filters of the
+operational check, then simulate the rest.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_RANDOM = R"doc(Gate layouts are designed randomly.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_RANDOM =
+R"doc(Place canvas SiDBs at random until an operational gate is found or the
+attempt limit is reached.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_mode = R"doc(Gate design mode.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_mode = R"doc(The design mode.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs = R"doc(Number of SiDBs placed in the canvas to create a working gate.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_maximal_random_design_attempts =
+R"doc(Maximum number of layouts evaluated by random gate design across all
+threads.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_operational_params = R"doc(Parameters for the `is_operational` function.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs = R"doc(Number of canvas SiDBs.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_cond =
-R"doc(The design process is terminated after a valid SiDB gate design is
-found.
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_operational_params = R"doc(Parameters of the operational check.)doc";
 
-Note:
-    This parameter has no effect unless the gate design is exhaustive.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_cond = R"doc(When to stop.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition =
-R"doc(Selector for the different termination conditions for the SiDB gate
-design process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition = R"doc(When to stop.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_AFTER_FIRST_SOLUTION =
-R"doc(The design process is terminated as soon as the first valid SiDB gate
-design is found.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_AFTER_FIRST_SOLUTION = R"doc(Stop after the first operational gate.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED =
-R"doc(The design process ends after all possible combinations of SiDBs
-within the canvas are enumerated.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED = R"doc(Enumerate every combination of canvas SiDBs.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats = R"doc(Statistics for the design of SiDB gates.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats = R"doc(Statistics of the gate designers.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts = R"doc(The number of all possible layouts.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts = R"doc(Number of canvas layouts, saturated at `std::size_t`'s maximum.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_first_pruning =
-R"doc(The number of layouts that remain after first pruning (discarding
-layouts with potential positive SiDBs).)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_first_pruning = R"doc(Number of canvas layouts that survived the first pruning filter.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_second_pruning =
-R"doc(The number of layouts that remain after second pruning (discarding
-layouts that fail to satisfy the physical model).)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_second_pruning = R"doc(Number of canvas layouts that survived the second pruning filter.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_third_pruning =
-R"doc(The number of layouts that remain after third pruning (discarding
-layouts with unstable I/O signals).)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_third_pruning = R"doc(Number of canvas layouts that survived the third pruning filter.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_pruning_total = R"doc(The runtime of the pruning process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_pruning_total = R"doc(Runtime of the pruning.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_report =
-R"doc(This function outputs the total time taken for the SiDB gate design
-process to the provided output stream. If no output stream is
-provided, it defaults to standard output (`std::cout`).
+R"doc(Prints the statistics.
 
 Args:
-    out: The output stream to which the report will be written.
+    out: The stream to print to.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_sim_engine =
-R"doc(The simulation engine to be used for the operational domain
-computation.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_sim_engine = R"doc(The simulation engine used.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_time_total = R"doc(The total runtime of SiDB gate design process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_time_total = R"doc(Total runtime.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl = R"doc(Implementation of the gate designers.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_canvas_layouts = R"doc(All Canvas SiDB layout (without I/O pins).)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_canvas_layouts = R"doc(All canvas layouts: one per combination of canvas SiDBs.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_available_sidbs_in_canvas = R"doc(Empty, defect-free sites of the canvas.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_design_canvas_layout =
-R"doc(This function designs canvas SiDB layouts based on given indices.
+R"doc(Builds the canvas layout of a combination: its canvas SiDBs plus the
+skeleton's own logic dots.
 
 Args:
-    cell_indices: A vector of indices of cells to be added to the
-                  skeleton layout.
+    site_indices: Indices into the canvas sites.
 
 Returns:
-    An SiDB cell-level layout consisting of canvas SidBs.
+    The canvas layout.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_design_gates_impl =
-R"doc(This constructor initializes an instance of the *SiDB Gate Designer*
-implementation with the provided skeleton layout and configuration
-parameters.
+R"doc(Constructor.
 
 Args:
-    skeleton: The skeleton layout used as a basis for gate design.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    ps: Parameters and settings for the gate designer.
-    st: Statistics for the gate design process.
+    skeleton: The skeleton: the input and output wires the gate has to
+              connect.
+    spec: The Boolean function(s) to implement.
+    ps: Parameters.
+    st: Statistics.
+
+Raises:
+    std::invalid_argument: if the input wire count differs from the
+                           specification.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_determine_all_possible_canvas_layouts =
-R"doc(This function calculates all combinations of distributing a given
-number of SiDBs across a specified number of positions in the canvas.
-Each combination is then used to create a gate layout candidate.
+R"doc(Builds one canvas layout per combination of canvas SiDBs.
 
 Returns:
-    A vector containing all possible gate layouts generated from the
-    combinations.
+    The canvas layouts.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_for_each_in_parallel =
+R"doc(Runs `fn` on every item on the configured number of threads; stops
+early once `done` is set and the termination condition asks for the
+first solution only. Worker exceptions propagate after all started
+workers finish.
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_first_pruning = R"doc(Number of discarded layouts at first pruning.)doc";
+Args:
+    items: The items.
+    fn: The function.
+    done: The stop flag.
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_second_pruning = R"doc(Number of discarded layouts at second pruning.)doc";
+Template Args:
+    Items: Container type.
+    Fn: Callable type.
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_third_pruning = R"doc(Number of discarded layouts at third pruning.)doc";
+)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_input_bdl_wires = R"doc(The input wires of the skeleton.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_first_pruning = R"doc(Number of canvas layouts the first pruning filter discarded.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_threads = R"doc(Number of threads to be used for the design process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_second_pruning = R"doc(Number of canvas layouts the second pruning filter discarded.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_third_pruning = R"doc(Number of canvas layouts the third pruning filter discarded.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_threads = R"doc(Number of threads to use.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_output_bdl_wires = R"doc(The output wires of the skeleton.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_params = R"doc(Parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_automatic_exhaustive_gate_designer =
-R"doc(Design gates by using the *Automatic Exhaustive Gate Designer*. This
-algorithm was proposed in \"Minimal Design of SiDB Gates: An Optimal
-Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok,
-M. Walter, and R. Wille in NANOARCH 2023
-(https://dl.acm.org/doi/10.1145/3611315.3633241).
-
-This function adds each cell combination to the given skeleton, and
-determines whether the layout is operational based on the specified
-parameters. The design process is parallelized to improve performance.
+R"doc(Simulates every combination of canvas SiDBs.
 
 Returns:
-    A vector of designed SiDB gate layouts.
+    The operational gates.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_pruning =
-R"doc(This function processes each layout to determine if it represents a
-valid gate implementation or if it can be pruned by using three
-distinct physically-informed pruning steps. It leverages multi-
-threading to accelerate the evaluation and ensures thread-safe access
-to shared resources.
+R"doc(Runs the pruning filters of the operational check on every canvas
+layout.
 
 Returns:
-    A vector containing the valid gate candidates that were not
-    pruned.
+    The surviving candidates.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_quickcell =
-R"doc(Design Standard Cells/gates by using the *QuickCell* algorithm.
+R"doc(*QuickCell*: prunes the canvas layouts with the filters of the
+operational check and simulates the survivors.
 
 Returns:
-    A vector of designed SiDB gate layouts.
+    The operational gates, or the pruned candidates in `PRUNING_ONLY`
+    mode.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_random_design =
-R"doc(Design gates randomly and in parallel.
-
-This function adds cells randomly to the given skeleton, and
-determines whether the layout is operational based on the specified
-parameters. The design process is parallelized to improve performance.
+R"doc(Places canvas SiDBs at random until an operational gate is found.
 
 Returns:
-    A vector of designed SiDB gate layouts.
+    The operational gate, or an empty vector if none was found.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_skeleton_layout =
-R"doc(The skeleton layout serves as a starting layout to which SiDBs are
-added to create unique SiDB layouts and, if possible, working gates.
-It defines input and output wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_skeleton_layout = R"doc(The skeleton.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_skeleton_layout_with_canvas_sidbs =
-R"doc(This function adds SiDBs (given by indices) to the skeleton layout
-that is returned afterwards.
+R"doc(Adds the canvas SiDBs of a combination to the skeleton as logic dots;
+sites that hold a defect stay empty.
 
 Args:
-    cell_indices: A vector of indices of cells to be added to the
-                  skeleton layout.
+    site_indices: Indices into the canvas sites.
 
 Returns:
-    A copy of the original layout (`skeleton_layout`) with SiDB cells
-    added at specified indices.
+    The skeleton with the canvas SiDBs.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_stats = R"doc(The statistics of the gate design.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_stats = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_truth_table = R"doc(Truth table of the given gate.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_truth_table = R"doc(The Boolean function(s).)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_multiple_random_layouts =
-R"doc(Generates multiple random layouts featuring a random arrangement of
-SiDBs. These randomly placed dots can be incorporated into an existing
-layout skeleton that may be optionally provided.
-
-Args:
-    params: The parameters for generating the random SiDB layouts.
-    skeleton: Optional layout to which random dots are added.
-
-Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
+static const char *mkd_doc_fiction_sidb_generators_detail_random_generator =
+R"doc(The generator's random source, one per thread.
 
 Returns:
-    A vector containing the unique randomly generated SiDB layouts. If
-    the design is impossible, `std::nullopt`
+    The generator.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_multiple_random_layouts =
+R"doc(Generates several unique random SiDB layouts with
+`generate_random_layout`.
+
+Args:
+    params: Parameters; `number_of_unique_generated_layouts` layouts
+            are requested.
+    skeleton: The skeleton to place SiDBs on, if any.
+
+Returns:
+    The layouts, or `std::nullopt` if none could be generated within
+    the attempt limit.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout =
-R"doc(Generates a layout featuring a random arrangement of SiDBs. These
-randomly placed dots can be incorporated into an existing layout
-skeleton that may be optionally provided.
+R"doc(Generates a random SiDB layout by placing SiDBs at random sites of an
+area, optionally on top of a skeleton. The skeleton's lattice, dots,
+and defects carry over; sites that hold a defect or that a neutral
+defect affects are left empty. Depending on the positive charge
+policy, SiDBs that would allow positive charges are removed again, or
+the generation is repeated until positive charges are possible.
 
 Args:
-    params: The parameters for generating the random layout.
-    skeleton: Optional layout to which random dots are added.
-
-Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
+    params: Parameters.
+    skeleton: The skeleton to place SiDBs on, if any.
 
 Returns:
-    A randomly generated SiDB layout, or `std::nullopt` if the process
-    failed due to conflicting parameters.
+    The generated layout, or `std::nullopt` if not all SiDBs could be
+    placed within the attempt limit.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params =
-R"doc(This struct stores the parameters for the `generate_random_layout`
-algorithm.)doc";
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params = R"doc(Parameters of the random layout generator.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_coordinate_pair =
-R"doc(Two coordinates that span the region where SiDBs may be placed (order
-is not important). The first coordinate is the upper left corner and
-the second coordinate is the lower right corner of the area.)doc";
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_coordinate_pair = R"doc(The area to place SiDBs in, as two opposite corners.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_maximal_attempts =
-R"doc(Maximum number of steps to place the specified number of SiDBs.
-Example: If the area, where SiDBs can be placed, is small and many
-SiDBs are to be placed, several tries are required to generate a
-layout with no positively charged SiDBs.)doc";
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_maximal_attempts = R"doc(Maximum number of placement attempts.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_maximal_attempts_for_multiple_layouts =
-R"doc(The maximum number of attempts allowed to generate the given number of
-unique layouts (default: :math:`10^{6}`).
-Example: If the area, where SiDBs can be placed, is small and many
-         SiDBs are to be placed, it may be difficult or
-even impossible to find several unique (given by
-number_of_unique_generated_layouts) layouts. Therefore, this parameter
-sets a limit for the maximum number of tries.)doc";
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_maximal_attempts_for_multiple_layouts = R"doc(Maximum number of generation attempts for multiple layouts.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_sidbs = R"doc(Number of SiDBs that are placed on the layout.)doc";
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_sidbs = R"doc(Number of SiDBs to place.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_unique_generated_layouts = R"doc(The desired number of unique layouts to be generated.)doc";
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_unique_generated_layouts =
+R"doc(Number of unique layouts to generate with
+`generate_multiple_random_layouts`.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges =
-R"doc(An enumeration of modes to use for the generation of random SiDB
-layouts to control control the appearance of positive charges.)doc";
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges = R"doc(Whether positively charged SiDBs may occur in the generated layout.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_ALLOWED =
-R"doc(Positive charges can occur (i.e. SiDBs can be placed right next to
-each other).)doc";
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_ALLOWED = R"doc(Positive charges are allowed.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_FORBIDDEN =
-R"doc(Positive charges are not allowed to occur (i.e. SiDBs need to be
-separated by a few lattice points).)doc";
+R"doc(Positive charges are forbidden: SiDBs that would enable them are
+removed again.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges_MAY_OCCUR =
-R"doc(Positive charges can occur, which means that the
-`can_positive_charges_occur` function returns `true`.)doc";
+R"doc(Positive charges have to be possible: generation is repeated until
+they are.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_sidbs =
-R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed
-closer than the minimal_spacing.)doc";
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_sidbs = R"doc(Positive charge policy.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_sim_params = R"doc(Simulation parameters.)doc";
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_sim_params = R"doc(Physical parameters for the positive charge check.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible =
-R"doc(This function evaluates whether it is impossible to design an SiDB
-gate for a given truth table and a given skeleton with atomic defects.
-It determines the possible charge states at the output BDL pairs.
-Atomic defects can cause a BDL pair to be neutrally charged only.
-Thus, the BDL pair would not work as intended.
+R"doc(Checks whether a gate can be designed on a skeleton with defects at
+all: if the charged defects push one SiDB of an output BDL pair past
+its neutral transition threshold for any input pattern, that SiDB can
+never be negatively charged, the pair loses its BDL property, and no
+canvas can fix that.
 
 Args:
-    skeleton_with_defects: An SiDB skeleton layout with atomic
-                           defects.
-    spec: A vector of truth tables (each truth table is representing
-          one output) representing the gate's intended functionality.
-    params: Parameters to determine if the gate design is impossible.
+    skeleton_with_defects: The skeleton, including the defects of the
+                           surface it sits on.
+    spec: The Boolean function(s) to implement; must not be empty.
+    params: Parameters.
+
+Returns:
+    `true` if no gate can be designed on the skeleton.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible_2 =
+R"doc(Transitional overload for SiDB cell-level layouts, converted with
+`to_sidb_layout`; see the `layout` overload.
+
+Args:
+    skeleton_with_defects: The skeleton with defects.
+    spec: The Boolean function(s) to implement; must not be empty.
+    params: Parameters.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: The truth table type.
 
 Returns:
-    `true` if gate design is impossible, `false` otherwise.
+    `true` if no gate can be designed on the skeleton.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
 
 )doc";
 
@@ -14785,10 +14751,7 @@ given gate design parameters and the defect density, the gate design
 may fail.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_unsuccessful_gate_design_error_unsuccessful_gate_design_error =
-R"doc(This explicit constructor initializes the base `std::runtime_error`
-class with the provided error message, ensuring that the exception
-contains detailed information about the reason for the gate design
-failure.
+R"doc(Copy the message for an unsuccessful gate design attempt.
 
 Args:
     msg: A descriptive message explaining why the gate design failed.
@@ -14800,8 +14763,7 @@ R"doc(If the blacklist is overly restrictive, finding a valid placement and
 routing becomes impossible, resulting in this exception being thrown.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_unsuccessful_pr_error_unsuccessful_pr_error =
-R"doc(This class inherits from `std::runtime_error` and is used to signal
-errors related to unsuccessful placement and routing.
+R"doc(Copy the message for an unsuccessful placement and routing attempt.
 
 Args:
     msg: The error message describing the unsuccessful placement and
@@ -16765,7 +16727,6 @@ Args:
 
 Template Args:
     LytSkeleton: The cell-level layout of the skeleton.
-    TT: Truth table type.
     CellLyt: The cell-level layout.
     GateLyt: The gate-level layout.
 
@@ -16802,7 +16763,6 @@ Args:
 
 Template Args:
     CellLyt: SiDB defect surface type.
-    TT: Truth table type.
     Params: Type of the parameters used for the parametrized gate
             library.
 
@@ -16980,31 +16940,42 @@ Returns:
 static const char *mkd_doc_fiction_sidb_sidb_technology_sidb_technology = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilience =
-R"doc(Calculates the band bending resilience. This is the minimum
-electrostatic potential required to induce a charge change in an SiDB
-layout among all possible input combinations which was proposed in
-\"Unifying Figures of Merit: A Versatile Cost Function for Silicon
-Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K.
-Walus, and R. Wille in IEEE NANO 2024
-(https://ieeexplore.ieee.org/abstract/document/10628671).
+R"doc(Calculates the band bending resilience of an SiDB gate: the minimum
+potential change (unit: V) that any charge transition requires in the
+ground state of any input pattern. A larger value means the gate
+tolerates more band bending before its ground state changes.
 
 Args:
-    lyt: Layout for which the band bending resilience is calculated.
-    spec: Expected Boolean function of the layout, provided as a
-          multi-output truth table.
-    params: Parameters for assessing physical population stability.
-    transition_type: The optional type of charge transition to
-                     consider. This can be used if one is only
-                     interested in a specific type of charge
-                     transition.
+    lyt: The gate layout.
+    spec: The Boolean function(s) the gate implements; determines the
+          number of input patterns.
+    params: Parameters.
+    transition_type: The transition to consider; all transitions if
+                     omitted.
+
+Returns:
+    The minimum potential difference over all input patterns, or
+    infinity if the input wires cannot represent the specification or
+    no charge transition exists.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilience_2 =
+R"doc(Transitional overload for SiDB cell-level layouts, converted with
+`to_sidb_layout`; see the `layout` overload.
+
+Args:
+    lyt: The gate layout.
+    spec: The Boolean function(s) the gate implements.
+    params: Parameters.
+    transition_type: The transition to consider; all transitions if
+                     omitted.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
-    The minimum potential (in V) required for charge change across all
-    input combinations.
+    The minimum potential difference over all input patterns.
 
 )doc";
 
@@ -17031,51 +17002,49 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_accepted =
-R"doc(This function takes in an SiDB energy distribution. For each charge
-distribution, the state type is determined (i.e. erroneous,
-transparent) while kinks are accepted, meaning a state with kinks is
-considered transparent.
+R"doc(Labels every energy level of an energy distribution by whether the
+physically valid charge distributions at that level encode the
+expected output for the given input pattern (`ACCEPTED`) or not
+(`REJECTED`). Kinks in the wires are tolerated: only the output BDL
+pairs are inspected.
 
 Args:
-    energy_dist: Energy distribution.
-    valid_charge_distributions: Physically valid charge distributions.
-    output_bdl_pairs: Output BDL pairs.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    input_index: The index of the current input configuration.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: The type of the truth table specifying the gate behavior.
+    energy_dist: The energy distribution of the charge distributions.
+    valid_charge_distributions: The physically valid charge
+                                distributions.
+    output_bdl_pairs: The output BDL pairs of the layout.
+    spec: The Boolean function(s) to implement.
+    input_index: The input pattern the charge distributions were
+                 simulated for.
 
 Returns:
-    Electrostatic potential energy of all charge distributions with
-    state type.
+    The energies with their state types, ascending by energy.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_rejected =
-R"doc(This function takes in an SiDB energy distribution. For each charge
-distribution, the state type is determined (i.e. erroneous,
-transparent) while kinks are rejected, meaning a state with kinks is
-considered erroneous.
+R"doc(Like `calculate_energy_and_state_type_with_kinks_accepted`, but a
+charge distribution with kinks in its wires is `REJECTED` as well:
+every energy level is `ACCEPTED`, and additionally `REJECTED` if any
+of its charge distributions fails the logic match with kinks rejected.
 
 Args:
-    energy_dist: Energy distribution.
-    valid_charge_distributions: Physically valid charge distributions.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    input_index: The index of the current input configuration.
-    input_bdl_wires: Input BDL wires.
-    output_bdl_wires: Output BDL wires.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: The type of the truth table specifying the gate behavior.
+    lyt: The layout the charge distributions belong to.
+    energy_dist: The energy distribution of the charge distributions.
+    valid_charge_distributions: The physically valid charge
+                                distributions.
+    spec: The Boolean function(s) to implement.
+    input_index: The input pattern the charge distributions were
+                 simulated for.
+    input_bdl_wires: The input BDL wires of `lyt`.
+    output_bdl_wires: The output BDL wires of `lyt`.
 
 Returns:
-    Electrostatic potential energy of all charge distributions with
-    state type.
+    The energies with their state types.
+
+Raises:
+    std::out_of_range: if logic validation encounters an invalid
+                       lattice basis index.
 
 )doc";
 
@@ -17113,16 +17082,55 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_can_positive_charges_occur =
-R"doc(This algorithm determines if positively charged SiDBs can occur in a
-given SiDB cell-level layout due to strong electrostatic interaction.
+R"doc(Checks whether positively charged SiDBs can occur in a layout under
+the given physical parameters, i.e., whether the band bending of the
+fully negatively charged layout, which maximizes every local
+potential, pushes any SiDB past its positive transition threshold. If
+it does not in this extreme case, it does not for any other charge
+distribution either.
 
 Args:
-    lyt: The layout to be analyzed.
-    sim_params: Physical parameters used to determine whether
-                positively charged SiDBs can occur.
+    land: The potential landscape of the layout under the parameters
+          to check.
+
+Returns:
+    `true` if at least one SiDB can be positively charged, `false`
+    otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_can_positive_charges_occur_2 =
+R"doc(Checks whether positively charged SiDBs can occur in a layout under
+the given physical parameters. See the `potential_landscape` overload.
+
+Args:
+    lyt: The layout to check.
+    sim_params: The physical parameters.
+
+Returns:
+    `true` if at least one SiDB can be positively charged, `false`
+    otherwise.
+
+Raises:
+    std::out_of_range: if a SiDB or defect site has an invalid lattice
+                       basis index.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_can_positive_charges_occur_3 =
+R"doc(Transitional overload for SiDB cell-level layouts, which are converted
+with `to_sidb_layout` first.
+
+Args:
+    lyt: The layout to check.
+    sim_params: The physical parameters.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
+
+Returns:
+    `true` if at least one SiDB can be positively charged, `false`
+    otherwise.
 
 )doc";
 
@@ -17144,10 +17152,6 @@ Args:
           output truth table.
     params: Simulation and physical parameters.
     pst: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Type of the truth table.
 
 Returns:
     The critical temperature (unit: K).
@@ -17182,10 +17186,6 @@ Args:
     output_bdl_wires: BDL output wires of the layout.
     pst: Statistics.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Type of the truth table.
-
 Returns:
     The critical temperature (unit: K).
 
@@ -17195,6 +17195,24 @@ Raises:
                            of input combinations of `spec`, or if the
                            number of output BDL pairs does not match
                            the number of truth tables.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_gate_based_3 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to simulate.
+    spec: The Boolean function(s) the layout implements.
+    params: Parameters.
+    pst: Statistics.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    The critical temperature (unit: K).
 
 )doc";
 
@@ -17210,11 +17228,25 @@ Args:
     params: Simulation and physical parameters.
     pst: Statistics.
 
+Returns:
+    The critical temperature (unit: K)
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_non_gate_based_2 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to simulate.
+    params: Parameters.
+    pst: Statistics.
+
 Template Args:
     Lyt: SiDB cell-level layout type.
 
 Returns:
-    The critical temperature (unit: K)
+    The critical temperature (unit: K).
 
 )doc";
 
@@ -17275,7 +17307,15 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temp
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_critical_temperature = R"doc(Critical temperature [K].)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_critical_temperature_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_critical_temperature_impl =
+R"doc(Initializes the algorithm for a layout.
+
+Args:
+    source_layout: The layout to simulate.
+    ps: Parameters for the critical temperature algorithm.
+    st: Statistics of the process.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_critical_temperature_impl_2 =
 R"doc(Constructor to initialize the algorithm with a pre-generated input
@@ -17318,9 +17358,6 @@ Args:
     spec: Expected Boolean function of the layout given as a multi-
           output truth table.
 
-Template Args:
-    TT: Type of the truth table.
-
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_get_critical_temperature =
@@ -17353,8 +17390,6 @@ Returns:
     returned.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_layout_with_input_pattern =
 R"doc(Returns the layout with the given input pattern applied.
@@ -17405,6 +17440,8 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temp
 R"doc(Pre-detected output BDL wires, or `nullptr` if they are to be detected
 here. Not owned by this object.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_sidb_layout = R"doc(SiDB layout.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_stats = R"doc(Statistics.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_energy_of =
@@ -17422,127 +17459,63 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl =
-R"doc(This class implements the simulation of the population stability for a
-given SiDB layout. It determines the minimum electrostatic potential
-required for charge state transitions within the layout and identifies
-the corresponding critical SiDB along with the type of charge state
-transition.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_collect_energy_and_charge_index =
-R"doc(Collects the system energy with the corresponding charge index
-information of all physically valid charge distributions of a given
-SiDB layout.
-
-Args:
-    sim_results: The simulation results, including all physically
-                 valid charge distributions.
-
-Returns:
-    A vector of energy_and_charge_index pairs, where each pair
-    consists of a double value representing the system energy and a
-    uint64_t representing the unique charge index. The vector is
-    sorted in ascending order of the energy values.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_energy_and_charge_index =
-R"doc(This struct represents the electrostatic energy and charge index of a
-charge distribution.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_energy_and_charge_index_charge_index = R"doc(Charge index of the charge distribution.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_energy_and_charge_index_energy = R"doc(Electrostatic energy of the charge distribution (unit: eV).)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl = R"doc(Implementation of the population stability analysis.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_handle_negative_charges =
-R"doc(This function checks if the absolute difference between the given
-local potential and µ- is smaller than the current minimum potential
-difference to transition for a negatively charged SiDB. If `true`, it
-updates the population stability information with the new minimum
-difference and critical cell.
+R"doc(Records the negative-to-neutral transition of a negatively charged
+SiDB if it is the closest so far.
 
 Args:
-    local_potential: The local potential associated with the cell.
-    c: The cell for which the charge state is being considered (SiDB
-       is negatively charged).
-    pop_stability_information: The current population stability
-                               information.
-
-Returns:
-    An updated population stability information with potential
-    transition details.
+    local_potential: Local potential at the SiDB.
+    c: The SiDB.
+    info: The information to update.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_handle_neutral_charges =
-R"doc(This function checks if the absolute difference between the given
-local potential and µ- or µ+ is smaller than the current minimum
-potential difference. If `true`, it updates the population stability
-information with the new minimum difference and critical cell.
+R"doc(Records the neutral-to-negative and neutral-to-positive transitions of
+a neutral SiDB if they are the closest so far.
 
 Args:
-    local_potential: The local potential associated with the cell.
-    c: The cell for which the charge state is being considered (SiDB
-       is neutrally charged).
-    pop_stability_information: The current population stability
-                               information.
-
-Returns:
-    An updated population stability information with potential
-    transition details.
+    local_potential: Local potential at the SiDB.
+    c: The SiDB.
+    info: The information to update.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_handle_positive_charges =
-R"doc(This function checks if the absolute difference between the given
-local potential and µ+ is smaller than the current minimum potential
-difference. If `true`, it updates the population stability information
-with the new minimum difference and critical cell.
+R"doc(Records the positive-to-neutral transition of a positively charged
+SiDB if it is the closest so far.
 
 Args:
-    local_potential: The local potential associated with the cell.
-    c: The cell for which the charge state is being considered (SiDB
-       is positively charged).
-    pop_stability_information: The current population stability
-                               information.
-
-Returns:
-    An updated population stability information with potential
-    transition details.
+    local_potential: Local potential at the SiDB.
+    c: The SiDB.
+    info: The information to update.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_layout = R"doc(Layout to analyze.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_params = R"doc(Parameters required to simulate the population stability.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_params = R"doc(Parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_physical_population_stability_impl =
-R"doc(Constructor for physical_population_stability_impl.
+R"doc(Constructor.
 
 Args:
-    lyt: SiDB layout.
-    parameters: The simulation parameters used.
+    lyt: The layout to analyze.
+    parameters: Parameters.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_run =
-R"doc(Runs a population stability simulation for a given SiDB layout using
-the provided simulation parameters. This function determines the
-minimum electrostatic potential required for charge state transitions
-within the layout and identifies the corresponding critical SiDB along
-with the type of charge state transition.
+R"doc(Simulates the layout with *QuickExact* and analyzes every physically
+valid charge distribution, ordered by energy.
 
 Returns:
-    A vector of population stability information structures, where
-    each element represents a charge distribution in ascending energy
-    order. Each structure contains details about the critical SiDB,
-    the type of charge state transition, and the minimum electrostatic
-    potential required for the charge transition.
+    The population stability information, one entry per distinct
+    charge distribution.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_sidb_layout = R"doc(The layout to analyze.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_energy_distribution =
 R"doc(This class is used to store the energy distribution of an SiDB layout.
@@ -17724,93 +17697,78 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability =
-R"doc(This function simulates the population stability of each physically
-valid charge distributions of a given SiDB layout. It determines the
-minimum absolute electrostatic potential required to induce a charge
-distribution transition. The function also identifies the SiDB for
-which this is the case (critical SiDB) and the corresponding charge
-state transition (i.e., the change from one charge state to another).
+R"doc(Assesses the population stability of an SiDB layout: for every
+physically valid charge distribution (found with *QuickExact*), it
+determines the SiDB closest to each charge transition and the
+potential change required for it, in ascending order of the
+distributions' energies. The distance an SiDB would have to be placed
+at to cause that potential change is reported as well.
 
 Args:
-    lyt: The layout for which the population stability is simulated.
-    params: Parameters used to simulate the population stability.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
+    lyt: The layout to analyze.
+    params: Parameters.
 
 Returns:
-    A vector of population stability information for all physically
-    valid charge distributions of the given SiDB layout.
+    The population stability information, one entry per distinct
+    charge distribution.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params =
-R"doc(This struct stores the parameters required to simulate the population
-stability.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params = R"doc(Parameters of the population stability analysis.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_precision_for_distance_corresponding_to_potential =
-R"doc(The precision level for the conversion from the minimum potential
-difference to the corresponding distance.)doc";
+R"doc(Number of decimal places of the distance corresponding to a potential
+difference.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_sim_params = R"doc(Parameters for the electrostatic potential.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_sim_params = R"doc(Physical parameters of the simulation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physically_valid_parameters =
-R"doc(This function computes the physical parameters necessary for ensuring
-the physical validity of a given charge distribution and determines
-the corresponding excited state number. The ground state is denoted by
-zero, with each subsequent excited state incrementally numbered.
-
-This function is designed to derive the physical parameters from
-charge distribution measurements of SiDB layouts, often acquired
-through Atomic Force Microscopy (AFM). Given a specific charge
-distribution, the function typically yields several physically valid
-parameters.
-
-As more SiDB layouts with corresponding charge distributions are
-recorded, the number of physically valid parameters for all layouts
-decreases. Consequently, this enables a more precise determination of
-the physical parameters present on the surface.
+R"doc(Determines the physical parameters under which a given charge
+distribution of a layout is physically valid: every parameter point of
+the sweep dimensions in `params` is checked, and for each one where
+the charge distribution is valid, its excited-state number (the number
+of valid configurations with lower energy under those parameters) is
+recorded.
 
 Args:
-    cds: The charge distribution surface for which physical parameters
-         are to be determined.
-    params: Operational domain parameters.
-
-Template Args:
-    Lyt: The charge distribution surface type.
+    lyt: The layout.
+    cd: The charge distribution whose validity is checked.
+    params: Parameters; the sweep dimensions and the engine that
+            determines the excited-state number.
 
 Returns:
-    Physically valid parameters with the corresponding excited state
-    number of the given charge distribution surface for each parameter
-    point.
+    The parameter points where `cd` is physically valid, each with its
+    excited-state number; empty if `cd` does not cover the layout's
+    SiDBs in raster order.
+
+Raises:
+    std::invalid_argument: if a sweep range has non-finite or reversed
+                           bounds, a non-positive or non-finite step,
+                           or more points than the storage range
+                           permits.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information =
-R"doc(This struct encapsulates information related to the population
-stability of a charge distribution. It includes details about the SiDB
-closest to a charge transition (critical cell), the specific charge
-state transition, the electrostatic potential difference required for
-the transition, the corresponding distance, and the total
-electrostatic energy of the given charge distribution.
+R"doc(Population stability of one physically valid charge distribution: for
+every transition type, the SiDB that is closest to that transition and
+the potential change it would take, plus the distance an SiDB would
+have to be placed at to induce that potential change.)doc";
 
-Template Args:
-    Lyt: SiDB cell-level layout type.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_critical_cell = R"doc(SiDB cell which is closest to a charge transition.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_critical_dot =
+R"doc(SiDB with the minimum potential difference to any charge transition
+threshold.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_distance_corresponding_to_potential =
-R"doc(This map collects for all charge transition types, the electrostatic
-potential difference which is required to conduct a charge change as a
-distance in nanometer. This is possible since the electrostatic
-potential is connected to the distance.)doc";
+R"doc(For each transition type, the distance (unit: nm) an additional SiDB
+would have to be placed at to induce the required potential
+difference.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_system_energy = R"doc(Total electrostatic energy (unit: eV) of given charge distribution.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_system_energy = R"doc(Electrostatic potential energy of the charge distribution (unit: eV).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_transition_potentials =
-R"doc(This map collects all charge transition types, the corresponding
-critical cells and the required electrostatic potential (unit: V)
-required to conduct the transition.)doc";
+R"doc(For each transition type, the SiDB closest to it and the required
+potential difference (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_state_type = R"doc(Label to categorize ground and excited states of an SiDB layout.)doc";
 
@@ -17819,22 +17777,36 @@ R"doc(A state is accepted if the charge distribution encodes the desired
 logic.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_state_type_REJECTED =
-R"doc(A state is rejected if the charge distributiion does not encode the
+R"doc(A state is rejected if the charge distribution does not encode the
 desired logic. Moreover, if kinks are rejected, a charge distribution
 that encodes the logic, but does show kinks, is rejected.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution =
-R"doc(Determines the time-to-solution (TTS) and accuracy of *QuickSim*.
-Every attempt contributes to the accuracy and mean runtime. Failed
-attempts use elapsed wall time; successful attempts retain the engine
-runtime.
+R"doc(Computes the time-to-solution (TTS) of *QuickSim* for a layout: the
+layout is simulated once with the exact engine of the parameters and
+`tts_params.repetitions` times with *QuickSim*, and the runs are
+combined with `time_to_solution_for_given_simulation_results`.
+
+Failed attempts contribute elapsed wall time; successful attempts
+retain the engine runtime.
 
 Args:
-    lyt: Layout that is used for the simulation.
-    qs_params: Parameters required for the *QuickSim* algorithm.
-    tts_params: Parameters used for the time-to-solution calculation.
-    ps: Pointer to a struct where the results (time_to_solution, acc,
-        single runtime) are stored.
+    lyt: The layout to simulate.
+    qs_params: *QuickSim* parameters.
+    tts_params: TTS parameters.
+    ps: Statistics.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_2 =
+R"doc(Transitional overload for SiDB cell-level layouts, converted with
+`to_sidb_layout`; see the `layout` overload.
+
+Args:
+    lyt: The layout to simulate.
+    qs_params: *QuickSim* parameters.
+    tts_params: TTS parameters.
+    ps: Statistics.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
@@ -17842,31 +17814,19 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_for_given_simulation_results =
-R"doc(This function calculates the Time-to-Solution (TTS) by analyzing the
-simulation results of a heuristic algorithm in comparison to those of
-an exact algorithm. It provides further statistical metrics, including
-the accuracy of the heuristic algorithm, and individual runtimes. An
-empty sample yields zero accuracy, zero mean heuristic runtime, and
-infinite time-to-solution.
+R"doc(Computes the time-to-solution (TTS) of *QuickSim* from an exact result
+and a series of heuristic results: the accuracy is the share of
+heuristic runs that found the ground state, and TTS is the mean
+heuristic runtime scaled to reach the given confidence level, `t ·
+log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy, zero
+mean heuristic runtime, and infinite time-to-solution.
 
 Args:
-    results_exact: Simulation results of the exact algorithm.
-    results_heuristic: Simulation of the heuristic for which the TTS
-                       is determined.
-    confidence_level: Confidence level for the TTS computation. The
-                      confidence level represents the probability that
-                      the confidence interval calculated from the
-                      simulation contains the true value. For example,
-                      a 95 % (0.95) confidence level means that if the
-                      simulation were repeated many times,
-                      approximately 95 out of 100 of the calculated
-                      confidence intervals would contain the true
-                      value.
-    ps: Pointer to a struct where the statistics of this function call
-        (time_to_solution, acc, single runtime) are to be stored.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
+    results_exact: The result of an exact engine, which provides the
+                   ground state.
+    results_heuristic: The results of the heuristic runs.
+    confidence_level: Confidence level for the TTS computation.
+    ps: Statistics.
 
 )doc";
 
@@ -18036,7 +17996,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The defect influence domain of the layout.
@@ -18149,7 +18108,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The (partial) defect influence domain of the layout.
@@ -18215,7 +18173,6 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The (partial) defect influence domain of the layout.
@@ -18591,7 +18548,6 @@ Args:
 
 Template Args:
     Lyt: The SiDB cell-level layout type.
-    TT: Truth table type.
 
 Returns:
     The displacement robustness domain of the SiDB layout.
@@ -18621,7 +18577,6 @@ Args:
 
 Template Args:
     Lyt: The SiDB cell-level layout type.
-    TT: The type of the truth table.
 
 Returns:
     The probability of fabricating an operational SiDB layout.
@@ -22509,142 +22464,122 @@ static const char *mkd_doc_fiction_sidb_simulation_legacy_result_sim_params = R"
 static const char *mkd_doc_fiction_sidb_simulation_legacy_result_simulation_runtime = R"doc(Total simulation runtime in seconds.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator =
-R"doc(Iterator that iterates over all possible input states of a BDL layout.
-There are :math:`2^n` possible input states for an :math:`n`-input BDL
-layout, each with a unique input index. The input index is interpreted
-as a binary number, where the :math:`i`-th bit represents the input
-state of the :math:`i`-th input BDL pair. If the bit is `1`, the lower
-BDL dot is set and the upper BDL dot removed. If the bit is `0`, the
-upper BDL dot is removed and the lower BDL dot set. The iterator
-creates and stores a deep-copy of the given layout. The state
-enumeration wraps around, i.e., after the last possible input state,
-the first input state is set again.
-
-The iterator satisfies the requirements of
-`LegacyRandomAccessIterator` and can be used in iterator-based `for`
-loops.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.)doc";
+R"doc(Iterator that assigns the input patterns to the input BDL pairs of an
+SiDB layout. Incrementing the iterator advances the input pattern;
+dereferencing it yields the layout with that pattern applied. Every
+input BDL pair encodes one bit: a `1` keeps the SiDB closer to the
+wire's end, a `0` keeps the other one (perturber-distance encoding) or
+none (perturber-absence encoding). Bit `i` of the pattern belongs to
+the `i`-th input pair in layout order, with the first pair as the most
+significant bit.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_bdl_input_iterator =
-R"doc(Standard constructor. It alters the layout to set the first input
-state, which assigns binary `0` to all input BDL pairs.
+R"doc(Detects the input BDL pairs and wires of `source_layout` and applies
+input pattern `0`.
 
 Args:
-    lyt: The SiDB BDL layout to iterate over.
-    ps: Parameters for the BDL input iterator.
+    source_layout: The layout to iterate over.
+    ps: Parameters for the BDL pair and wire detection and the input
+        encoding.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_bdl_input_iterator_2 =
-R"doc(Constructor with pre-detected input wires and directions. It alters
-the layout to set the first input state, which assigns binary `0` to
-all input BDL pairs.
+R"doc(Like the constructor above but with input wires that are already
+known.
 
 Args:
-    lyt: The SiDB BDL layout to iterate over.
-    ps: Parameters for the BDL input iterator.
-    input_wires: Pre-detected input BDL wires.
+    source_layout: The layout to iterate over.
+    ps: Parameters for the BDL pair detection and the input encoding.
+    source_input_wires: The input wires of `source_layout`.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_current_input_index =
-R"doc(The current input index. There are :math:`2^n` possible input states
-for an :math:`n`-input BDL layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_current_input_index = R"doc(The current input pattern.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_detected_input_wires = R"doc(The input wires.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_determine_last_bdl_for_each_wire =
-R"doc(This function iterates through each wire in `input_bdl_wires`,
-identifies the first BDL pair of type `INPUT`, and then finds the BDL
-pair within the same wire that has the maximum distance from the
-starting pair. The resulting last BDL pairs are stored in
-`last_bdl_for_each_wire`.
+R"doc(Finds, for each input wire, the BDL pair farthest from the wire's
+input pair.
 
-Note:
-    Assumes that `input_bdl_wires` and `last_bdl_for_each_wire` are
-    accessible within the scope.
+Returns:
+    One pair per wire.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_determine_upper_input_closer_to_wire_end =
-R"doc(Determines, for each input BDL pair, whether its upper dot is closer
-to the end of its wire than its lower dot.
-
-`set_all_inputs` needs only this comparison, not the distances
-themselves, and both operands are fixed for this object's lifetime.
-Evaluating it once here keeps the two `sidb::model::nm_distance` calls
-per input pair out of every increment.
+R"doc(Determines for each input pair whether its upper SiDB is closer to the
+end of its wire than its lower one.
 
 Returns:
-    One flag per input BDL pair, indexed like `input_pairs`.
-
-Note:
-    Assumes that `input_pairs` and `last_bdl_for_each_wire` are
-    already initialized.
+    One flag per input pair.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_get_current_input_index =
-R"doc(Returns the current input index.
+R"doc(The current input pattern.
 
 Returns:
-    The current input index.
+    The pattern.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_input_pairs = R"doc(The input BDL pairs in layout order.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_is_valid =
+R"doc(Whether every input BDL pair belongs to a complete detected wire.
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_last_bdl_for_each_wire = R"doc(Last BDL pairs for each BDL wire.)doc";
+Returns:
+    `true` if input patterns can be applied.
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_layout = R"doc(The layout to iterate over.)doc";
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_last_bdl_for_each_wire = R"doc(For each input wire, the BDL pair farthest from its input pair.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_num_input_pairs =
-R"doc(Returns the total number of input BDL pairs of the given SiDB gate
-layout.
+R"doc(Number of input BDL pairs.
 
 Returns:
-    The number of input BDL pairs.
+    The number of input pairs.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_num_inputs = R"doc(The amount of input BDL pairs.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_add =
-R"doc(Addition operator. Computes the input state of the current iterator
-plus the given integer.
+R"doc(Returns an iterator `m` patterns ahead.
 
 Args:
-    m: The amount of input states to skip.
+    m: The number of patterns to advance.
 
 Returns:
-    The input state of the current iterator plus the given integer.
+    The advanced iterator.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_array =
-R"doc(Subscript operator. Computes the input state of the current iterator
-plus the given integer.
+R"doc(Returns an iterator `m` patterns ahead.
 
 Args:
-    m: The amount of input states to skip.
+    m: The number of patterns to advance.
 
 Returns:
-    The input state of the current iterator plus the given integer.
+    The advanced iterator.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_assign =
-R"doc(Assignment operator. Sets the input state to the given integer.
+R"doc(Jumps to input pattern `m`.
 
 Args:
-    m: The input state to set.
+    m: The input pattern.
+
+Returns:
+    Reference to `this`.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_dec =
-R"doc(Prefix decrement operator. Sets the previous input state.
+R"doc(Goes back to the previous input pattern.
 
 Returns:
     Reference to `this`.
@@ -22652,57 +22587,29 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_dec_2 =
-R"doc(Postfix decrement operator. Sets the previous input state.
+R"doc(Goes back to the previous input pattern.
 
 Returns:
-    Copy of `this` before decrementing.
+    Copy of `this` before the decrement.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_eq =
-R"doc(Equality operator. Compares the current input index with the given
-integer.
+R"doc(Whether the current input pattern is `m`.
 
 Args:
-    m: Integer to compare with.
+    m: The pattern to compare with.
 
 Returns:
-    `true` if the current input index is equal to `m`, `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_ge =
-R"doc(Greater-or-equal-than operator. Compares the current input index with
-the given integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current input index is greater than or equal to `m`,
-    `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_gt =
-R"doc(Greater-than operator. Compares the current input index with the given
-integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current input index is greater than `m`, `false`
-    otherwise.
+    `true` if the patterns are equal.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_iadd =
-R"doc(Addition assignment operator. Sets a next input state.
+R"doc(Advances by `m` patterns.
 
 Args:
-    m: The amount of input states to skip.
+    m: The number of patterns to advance.
 
 Returns:
     Reference to `this`.
@@ -22710,7 +22617,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_inc =
-R"doc(Prefix increment operator. Sets the next input state.
+R"doc(Advances to the next input pattern.
 
 Returns:
     Reference to `this`.
@@ -22718,18 +22625,18 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_inc_2 =
-R"doc(Postfix increment operator. Sets the next input state.
+R"doc(Advances to the next input pattern.
 
 Returns:
-    Copy of `this` before incrementing.
+    Copy of `this` before the increment.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_isub =
-R"doc(Subtraction assignment operator. Sets a previous input state.
+R"doc(Goes back by `m` patterns.
 
 Args:
-    m: The amount of input states to skip.
+    m: The number of patterns to go back.
 
 Returns:
     Reference to `this`.
@@ -22737,81 +22644,49 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_le =
-R"doc(Less-or-equal-than operator. Compares the current input index with the
-given integer.
+R"doc(Compares the current input pattern with `m`.
 
 Args:
-    m: Integer to compare with.
+    m: The pattern to compare with.
 
 Returns:
-    `true` if the current input index is less than or equal to `m`,
-    `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_lt =
-R"doc(Less-than operator. Compares the current input index with the given
-integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current input index is less than `m`, `false`
-    otherwise.
+    The three-way comparison result.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_mul =
-R"doc(Dereference operator. Returns a reference to the layout with the
-current input state.
+R"doc(The layout with the current input pattern applied.
 
 Returns:
-    Reference to the current layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_ne =
-R"doc(Inequality operator. Compares the current input index with the given
-integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current input index is not equal to `m`, `false`
-    otherwise.
+    The layout.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_sub =
-R"doc(Subtraction operator. Computes the input state of the current iterator
-minus the given integer.
+R"doc(Returns an iterator `m` patterns behind.
 
 Args:
-    m: The amount of input states to skip.
+    m: The number of patterns to go back.
 
 Returns:
-    The input state of the current iterator minus the given integer.
+    The iterator.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_operator_sub_2 =
-R"doc(Subtraction operator. Computes the difference between the current
-input index and the given iterator ones.
+R"doc(Distance between two iterators in input patterns.
 
 Args:
-    other: Iterator to compute the difference with.
+    other: The other iterator.
 
 Returns:
-    The difference between the current input index and the given
-    iterator ones.
+    `this` pattern minus `other`'s pattern.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_params_2 = R"doc(Parameters for the BDL input iterator.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_params_2 = R"doc(Parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_params_bdl_wire_params = R"doc(Parameters to detect BDL wires.)doc";
 
@@ -22843,30 +22718,20 @@ R"doc(An input of `1` is generated by placing a perturber closer to the BDL
 wire, whereas a `0` is produced by positioning the perturber farther
 away (as described in https://dl.acm.org/doi/10.1145/3489517.3530525).)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_set_all_inputs =
-R"doc(Sets all input cells of the layout according to the current input
-index. The input index is interpreted as a binary number, where the
-:math:`i`-th bit represents the input state of the :math:`i`-th input
-BDL pair. If the bit is `1`, the lower BDL dot is set and the upper
-BDL dot removed. If the bit is `0`, the upper BDL dot is removed and
-the lower BDL dot set.
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_set_all_inputs = R"doc(Applies the current input pattern to the input pairs.)doc";
 
-)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_sidb_layout = R"doc(The layout with the current input pattern applied.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_upper_input_closer_to_wire_end =
-R"doc(For each input BDL pair, whether its upper dot is closer to the end of
-its wire than its lower dot.
-
-This only depends on `input_pairs` and `last_bdl_for_each_wire`, both
-of which are fixed for this object's lifetime, so it is determined
-once here instead of on every increment in `set_all_inputs`.)doc";
+R"doc(For each input pair, whether its upper SiDB is the one closer to the
+wire's end.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_pair =
 R"doc(A Binary-dot Logic (BDL) pair is a pair of SiDBs that are close to
 each other and, thus, most likely share a charge.
 
 Template Args:
-    CellType: Cell type.)doc";
+    CellType: Coordinate type.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_pair_bdl_pair = R"doc(Standard constructor for empty BDL pairs.)doc";
 
@@ -23003,124 +22868,102 @@ R"doc(The upper SiDB of the pair. Upper and lower are defined relative to
 each other via the `operator<` overload.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire =
-R"doc(This struct encapsulates a vector of `bdl_pair` objects, representing
-the pairs of SiDBs in the BDL wire.
+R"doc(A BDL wire is a chain of BDL pairs. Wires with fewer than two pairs or
+only NORMAL pairs have no port; direction updates leave their end
+pairs unchanged. The vector constructor initializes the end pairs from
+the first and last supplied pairs. Adding only NORMAL pairs to a
+default-constructed wire leaves both unset.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.)doc";
+For other wires, input and output pairs form the endpoints where
+present. An input-only wire ends at the farthest pair from its input;
+an output-only wire starts at the farthest pair from its output.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_add_bdl_pair =
-R"doc(Add a BDL pair to the wire.
+R"doc(Adds a BDL pair to the wire, keeps the pairs sorted, and updates the
+direction.
 
 Args:
     pair: The BDL pair to add.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_bdl_wire = R"doc(Default constructor for an empty BDL wire.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_bdl_wire = R"doc(Constructs an empty wire.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_bdl_wire_2 =
-R"doc(Constructor to initialize the BDL wire with a given vector of BDL
-pairs.
-
-Also updates the start and end BDL pairs based on the given vector.
+R"doc(Constructs a wire from BDL pairs and determines its direction.
 
 Args:
-    p: The vector of BDL pairs to initialize the wire with.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_bdl_wire_3 =
-R"doc(Copy constructor.
-
-Creates a new `bdl_wire` object as a copy of another `bdl_wire`
-object.
-
-Args:
-    other: The `bdl_wire` object to copy from.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_bdl_wire_4 =
-R"doc(Move constructor.
-
-Transfers ownership of the BDL pairs, port, and start/end pairs from
-another `bdl_wire` object.
-
-Args:
-    other: The `bdl_wire` object to move from.
+    p: The BDL pairs of the wire.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_erase_bdl_pair =
-R"doc(Erase a specific BDL pair from the wire.
+R"doc(Removes a BDL pair from the wire and updates the direction if it was
+present.
 
 Args:
-    pair: The BDL pair to remove. The pair is compared using the
-          equality operator (operator==).
+    pair: The BDL pair to remove.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_find_bdl_pair_by_type =
-R"doc(Find the first Binary-dot Logic (BDL) pair of a specified type in the
-wire.
+R"doc(Finds the first BDL pair of the given type.
 
 Args:
-    t: Type of BDL pair to search for
-       (`sidb::sidb_technology::cell_type::INPUT`,
-       `sidb::sidb_technology::cell_type::OUTPUT`, etc.).
+    t: The SiDB type to look for.
 
 Returns:
-    Optional containing the first BDL pair with the specified type
-    `t`, or `std::nullopt` if no such BDL pair is found.
+    The first BDL pair of type `t`, or `std::nullopt` if the wire has
+    none.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_first_bdl_pair = R"doc(First BDL pair of the wire.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_index_distance =
+R"doc(Euclidean distance of two sites in units of lattice indices, ignoring
+the sublattice index. This is the measure the direction heuristics
+below rank the pairs of a wire by.
+
+Args:
+    a: First site.
+    b: Second site.
+
+Returns:
+    The distance.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_last_bdl_pair = R"doc(Last BDL pair of the wire.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_operator_assign =
-R"doc(Move assignment operator.
-
-Transfers ownership of the BDL pairs, port, and start/end pairs from
-another `bdl_wire` object.
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_operator_eq =
+R"doc(Equality operator. Also provides `operator!=` via `= default`.
 
 Args:
-    other: The `bdl_wire` object to move from.
+    other: The other wire to compare with.
 
 Returns:
-    A reference to the updated object.
+    `true` if both wires hold the same pairs, port, and end pairs.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_operator_assign_2 =
-R"doc(Copy assignment operator.
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_pairs = R"doc(The BDL pairs of the wire.)doc";
 
-Copies the content of another `bdl_wire` object, including start and
-end pairs.
-
-Args:
-    other: The `bdl_wire` object to copy from.
-
-Returns:
-    A reference to the updated object.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_pairs = R"doc(Vector of BDL pairs representing the wire.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_port = R"doc(Port of the BDL wire.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_port = R"doc(Port direction of the wire.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection = R"doc(An enumeration of the selection of different types of wires.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection_ALL = R"doc(Select all BDL wires.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection_INPUT = R"doc(Select only BDL wires that start with input cells.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection_INPUT = R"doc(Select only BDL wires that start with input dots.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection_OUTPUT = R"doc(Select only BDL wires that end with output cells.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection_OUTPUT = R"doc(Select only BDL wires that end with output dots.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_update_direction = R"doc(Update the port of the wire based on the current BDL pairs.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_update_direction =
+R"doc(Determines the port direction of the wire from the positions of its
+input and output pairs.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain =
 R"doc(The `critical_temperature_domain` class collects the critical
@@ -23147,10 +22990,10 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_contour_tracing =
-R"doc(Computes the critical temperature domain of the given SiDB cell-level
-layout. The critical temperature domain consists of all parameter
-combinations for which the layout is logically operational, along with
-the critical temperature for each specific parameter point.
+R"doc(Computes the critical temperature domain of the given SiDB layout. The
+critical temperature domain consists of all parameter combinations for
+which the layout is logically operational, along with the critical
+temperature for each specific parameter point.
 
 This algorithm first uses random sampling to find a set of operational
 point within the parameter range. From there, it traverses outwards to
@@ -23183,10 +23026,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
 Returns:
     The critical temperature domain of the layout.
 
@@ -23194,10 +23033,29 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Flood fill
-                           and contour tracing additionally require at
+                           layout without `LOGIC` dots. Flood fill and
+                           contour tracing additionally require at
                            least two sweep dimensions; grid search and
                            random sampling accept any number.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_contour_tracing_2 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to investigate.
+    spec: The Boolean function(s) the layout implements.
+    samples: Number of random samples.
+    params: Parameters.
+    stats: Statistics.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    The domain.
 
 )doc";
 
@@ -23216,10 +23074,10 @@ R"doc(The dimensions to sweep over, ordered by priority. The first dimension
 is the x dimension, the second dimension is the y dimension, etc.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_flood_fill =
-R"doc(Computes the critical temperature domain of the given SiDB cell-level
-layout. The critical temperature domain consists of all parameter
-combinations for which the layout is logically operational, along with
-the critical temperature for each specific parameter point.
+R"doc(Computes the critical temperature domain of the given SiDB layout. The
+critical temperature domain consists of all parameter combinations for
+which the layout is logically operational, along with the critical
+temperature for each specific parameter point.
 
 This algorithm first uses random sampling to find several operational
 points within the parameter range. From there, it employs the "flood
@@ -23248,10 +23106,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
 Returns:
     The critical temperature domain of the layout.
 
@@ -23259,10 +23113,29 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Flood fill
-                           and contour tracing additionally require at
+                           layout without `LOGIC` dots. Flood fill and
+                           contour tracing additionally require at
                            least two sweep dimensions; grid search and
                            random sampling accept any number.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_flood_fill_2 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to investigate.
+    spec: The Boolean function(s) the layout implements.
+    samples: Number of random samples.
+    params: Parameters.
+    stats: Statistics.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    The domain.
 
 )doc";
 
@@ -23289,10 +23162,10 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_grid_search =
-R"doc(Computes the critical temperature domain of the given SiDB cell-level
-layout. The critical temperature domain consists of all parameter
-combinations for which the layout is logically operational, along with
-the critical temperature for each specific parameter point.
+R"doc(Computes the critical temperature domain of the given SiDB layout. The
+critical temperature domain consists of all parameter combinations for
+which the layout is logically operational, along with the critical
+temperature for each specific parameter point.
 
 This algorithm uses a grid search to find the operational domain. The
 grid search is performed by exhaustively sweeping all sweep
@@ -23313,10 +23186,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
 Returns:
     The critical temperature domain of the layout.
 
@@ -23324,8 +23193,26 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Any number of
+                           layout without `LOGIC` dots. Any number of
                            sweep dimensions is accepted.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_grid_search_2 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to investigate.
+    spec: The Boolean function(s) the layout implements.
+    params: Parameters.
+    stats: Statistics.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    The domain.
 
 )doc";
 
@@ -23346,10 +23233,10 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_random_sampling =
-R"doc(Computes the critical temperature domain of the given SiDB cell-level
-layout. The critical temperature domain consists of all parameter
-combinations for which the layout is logically operational, along with
-the critical temperature for each specific parameter point.
+R"doc(Computes the critical temperature domain of the given SiDB layout. The
+critical temperature domain consists of all parameter combinations for
+which the layout is logically operational, along with the critical
+temperature for each specific parameter point.
 
 This algorithm uses random sampling to find a part of the operational
 domain that might not be complete. It performs a total of `samples`
@@ -23369,10 +23256,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
 Returns:
     The critical temperature domain of the layout.
 
@@ -23380,8 +23263,48 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Any number of
+                           layout without `LOGIC` dots. Any number of
                            sweep dimensions is accepted.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_random_sampling_2 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to investigate.
+    spec: The Boolean function(s) the layout implements.
+    samples: Number of random samples.
+    params: Parameters.
+    stats: Statistics.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    The domain.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_canvas_of =
+R"doc(Collects the logic dots of a layout into a canvas layout on the same
+lattice.
+
+Args:
+    lyt: The layout.
+
+Returns:
+    A layout holding only the logic dots of `lyt`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_check_arguments =
+R"doc(Sanity checks shared by every entry point.
+
+Args:
+    lyt: The layout.
+    spec: The specification.
 
 )doc";
 
@@ -23402,9 +23325,416 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl = R"doc(Chains the BDL pairs of a layout into wires.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_aggregate_bdl_pairs =
+R"doc(Collects the input, output, and normal BDL pairs of the layout.
+
+Args:
+    lyt: The layout.
+
+Returns:
+    All BDL pairs.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_bdl_wires = R"doc(The detected wires.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_detect_bdl_wires_impl =
+R"doc(Detects the wires of `lyt`.
+
+Args:
+    lyt: The layout.
+    ps: Parameters.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_filter_wires =
+R"doc(Returns the detected wires, optionally restricted to input or output
+wires.
+
+Args:
+    selection: Which wires to return.
+
+Returns:
+    The selected wires.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_filter_wires_by_type =
+R"doc(Returns the wires that contain a pair of the given type. If an input
+wire also holds output pairs, those are removed from the returned
+copy, and vice versa. All returned unmixed wires have to be equally
+long.
+
+Args:
+    type: The SiDB type to filter by.
+
+Returns:
+    The filtered wires.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_find_bdl_neighbor_above =
+R"doc(Finds a neighboring BDL pair above the given one.
+
+Args:
+    given: The given pair.
+    bdl_pairs: The pairs not assigned to a wire yet.
+
+Returns:
+    A neighboring pair above `given`, if any.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_find_bdl_neighbor_below =
+R"doc(Finds a neighboring BDL pair below the given one.
+
+Args:
+    given: The given pair.
+    bdl_pairs: The pairs not assigned to a wire yet.
+
+Returns:
+    A neighboring pair below `given`, if any.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_lat = R"doc(The layout's lattice.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_params = R"doc(Parameters.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl =
+R"doc(Implementation of the operational check. It applies every input
+pattern to the input BDL pairs of the layout, simulates the ground
+states, and compares the charge states of the output BDL pairs with
+the expected truth-table entries. With a canvas, the three pruning
+filters (positive charges, physical infeasibility, I/O instability)
+run before any simulation on the layout's potential landscape.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_assign =
+R"doc(Assigns a charge state to the SiDB at `site` without touching the
+charge index.
+
+Args:
+    state: The state to modify.
+    lyt: The state's layout.
+    site: The site.
+    cs: The charge state.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_bii = R"doc(Iterator over the input patterns.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_canvas_filtering_applicable =
+R"doc(Whether the pruning filters apply: a canvas is given, the strategy
+asks for filtering, and kinks are rejected.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_canvas_lyt = R"doc(The canvas.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_check_existence_of_kinks_in_input_wires =
+R"doc(Whether any pair of an input wire (the input pairs aside) does not
+encode the bit of the input pattern.
+
+Args:
+    cd: The charge distribution.
+    current_input_index: The input pattern.
+
+Returns:
+    `true` if a kink exists.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_check_existence_of_kinks_in_output_wires =
+R"doc(Whether any pair of an output wire does not encode the expected output
+bit.
+
+Args:
+    cd: The charge distribution.
+    current_input_index: The input pattern.
+
+Returns:
+    `true` if a kink exists.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_determine_non_operational_input_patterns_and_non_operationality_reason =
+R"doc(Simulates every input pattern and collects the non-operational ones
+with their reasons.
+
+Returns:
+    The non-operational input patterns and the reason for each.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_encodes_bit_one =
+R"doc(Whether a BDL pair encodes bit `1` given the wire's port direction.
+
+Args:
+    cd: The charge distribution.
+    bdl: The pair.
+    port: The wire's port.
+
+Returns:
+    `true` if the pair encodes `1`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_encodes_bit_zero =
+R"doc(Whether a BDL pair encodes bit `0` given the wire's port direction.
+
+Args:
+    cd: The charge distribution.
+    bdl: The pair.
+    port: The wire's port.
+
+Returns:
+    `true` if the pair encodes `0`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_get_number_of_simulator_invocations =
+R"doc(Number of simulator invocations so far.
+
+Returns:
+    The count.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_has_valid_bdl_configuration =
+R"doc(Whether the input and output BDL topology supports the requested
+Boolean function.
+
+Returns:
+    `true` if every input pattern and output can be evaluated.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_input_bdl_wires = R"doc(The input BDL wires.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_input_pattern_layouts = R"doc(Caller-supplied layouts, one per input pattern, or `nullptr`.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_io_signal_unstable =
+R"doc(Checks whether any wrong I/O assignment has a physically valid
+configuration with lower energy than the expected one.
+
+Args:
+    state: Simulation state over the layout with the current input
+           pattern.
+    max_input_pattern_index: Number of input patterns.
+    input_pattern: The current input pattern.
+    logical_correct_output_pattern: The expected output pattern.
+    minimal_energy_of_physically_valid_layout: The minimum energy of
+                                               the expected I/O
+                                               assignment.
+
+Returns:
+    `true` if a wrong assignment is energetically preferred.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_layout_invalid =
+R"doc(Rejects an invalid I/O topology, then runs the pruning filters for one
+input pattern: positive charges, physical infeasibility of the
+expected I/O charge states, and I/O instability.
+
+Args:
+    input_pattern: The input pattern.
+
+Returns:
+    The reason the layout is invalid, or `std::nullopt` if the filters
+    accept it.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_operational_impl =
+R"doc(Detects the BDL pairs and wires of `lyt` itself.
+
+Args:
+    lyt: The layout to check.
+    spec: The Boolean function(s) to implement.
+    params: Parameters.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_operational_impl_2 =
+R"doc(Takes the wires of `lyt` from the caller.
+
+Args:
+    lyt: The layout to check.
+    spec: The Boolean function(s) to implement.
+    params: Parameters.
+    input_wires: The input BDL wires of `lyt`.
+    output_wires: The output BDL wires of `lyt`.
+    initialize_bii: Whether to set up the input iterator.
+                    `verify_logic_match` passes `false` since it
+                    checks a given charge distribution.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_operational_impl_3 =
+R"doc(Takes the wires and the canvas of `lyt` from the caller.
+
+Args:
+    lyt: The layout to check.
+    spec: The Boolean function(s) to implement.
+    params: Parameters.
+    input_wires: The input BDL wires of `lyt`.
+    output_wires: The output BDL wires of `lyt`.
+    c_lyt: The canvas: the SiDBs of `lyt` whose charge states the
+           pruning filters enumerate.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_operational_impl_4 =
+R"doc(Detects the wires of `lyt` and takes the canvas from the caller.
+
+Args:
+    lyt: The layout to check.
+    spec: The Boolean function(s) to implement.
+    params: Parameters.
+    c_lyt: The canvas.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_operational_impl_5 =
+R"doc(Takes one layout per input pattern instead of applying the patterns
+itself.
+
+Args:
+    input_pattern_lyts: One layout per input pattern, pattern `0`
+                        first.
+    spec: The Boolean function(s) to implement.
+    params: Parameters.
+    input_wires: The input BDL wires.
+    output_wires: The output BDL wires.
+    c_lyt: The canvas.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_physical_validity_feasible =
+R"doc(Enumerates the charge states of the canvas SiDBs, with the remaining
+SiDBs' charges fixed as set in `state`, and returns the lowest energy
+of a physically valid configuration.
+
+Args:
+    state: Simulation state over the layout with the current input
+           pattern; the canvas charges are varied.
+
+Returns:
+    The minimum energy, or `std::nullopt` if no configuration is
+    physically valid.
+
+Raises:
+    std::invalid_argument: if a canvas SiDB is absent from the state's
+                           layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_layout_with_input_pattern =
+R"doc(The layout with an input pattern applied.
+
+Args:
+    input_pattern: The input pattern.
+
+Returns:
+    The layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_output_bdl_pairs = R"doc(The output BDL pairs.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_output_bdl_wires = R"doc(The output BDL wires.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_parameters = R"doc(Parameters.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_physical_simulation_of_layout =
+R"doc(Simulates the layout with the configured engine.
+
+Args:
+    lyt_with_input_pattern: The layout to simulate.
+
+Returns:
+    The simulation result; empty if the engine found no valid
+    configuration.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_run =
+R"doc(Runs the operational check.
+
+Returns:
+    The status and, if non-operational, the reason.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_set_charge_distribution_of_input_pins =
+R"doc(Sets the charge states of the input wires to encode an input pattern
+(the input pairs themselves are set by the layout); every other SiDB
+becomes negative.
+
+Args:
+    state: The state to modify.
+    current_input_index: The input pattern.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_set_charge_distribution_of_output_pins =
+R"doc(Sets the charge states of the output wires to encode an output
+pattern.
+
+Args:
+    state: The state to modify.
+    output_wire_index: The output pattern.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_sidb_layout = R"doc(The layout to check.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_simulator_invocations = R"doc(Number of simulator invocations.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_truth_table = R"doc(The Boolean function(s) to implement.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_verify_logic_match_of_cd =
+R"doc(Checks whether a charge distribution encodes the expected output for
+an input pattern, and, if kinks are rejected, whether the wires are
+free of kinks. The positive-charge check of `run()` is not repeated
+here.
+
+Args:
+    cd: The charge distribution to check.
+    input_pattern: The input pattern it belongs to.
+
+Returns:
+    The status and, if non-operational, the reason.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_kink_patterns_of =
+R"doc(The input patterns that kinks render non-operational.
+
+Args:
+    p: The implementation object, configured to reject kinks.
+
+Returns:
+    The kink-induced non-operational patterns.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason = R"doc(Reasons why a layout is invalid before any simulation ran.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason_IO_INSTABILITY =
+R"doc(The I/O topology is invalid or a wrong I/O assignment is energetically
+preferred.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason_PHYSICAL_INFEASIBILITY =
+R"doc(No physically valid charge distribution exists for the expected input
+and output pins.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive charges may occur.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_aggregate_bdl_pairs =
 R"doc(Aggregates BDL pairs of specified types into a set.
 
 Template Args:
@@ -23415,9 +23745,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_bdl_wires = R"doc(All detected BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_bdl_wires = R"doc(All detected BDL wires.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_detect_bdl_wires =
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_detect_bdl_wires =
 R"doc(This function operates in two main phases:
 
 1. **Aggregation**: It first collects all BDL pairs of the specified
@@ -23436,9 +23766,7 @@ detect the next wire using any remaining BDL pairs.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_detect_bdl_wires_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_filter_wires =
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_filter_wires =
 R"doc(This function filters the wires from the `bdl_wires` collection based
 on the current `selection`. If `selection` is set to
 `bdl_wire_selection::INPUT`, it returns all wires containing an input
@@ -23455,13 +23783,13 @@ Args:
                `bdl_wire_selection` enum.
 
 Returns:
-    A vector of filtered `bdl_wire` objects based on the current
-    selection. If no wires match the selection criteria, an empty
-    vector is returned.
+    A vector of filtered `legacy_bdl_wire` objects based on the
+    current selection. If no wires match the selection criteria, an
+    empty vector is returned.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_filter_wires_by_type =
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_filter_wires_by_type =
 R"doc(This function scans through the `bdl_wires` and selects those
 containing BDL pair cells of the specified type. It also checks that
 all selected wires have the same length and triggers an assertion if
@@ -23471,12 +23799,13 @@ Args:
     type: The type of the BDL pair cells to filter by.
 
 Returns:
-    A vector of `bdl_wire` objects containing cells of the specified
-    type. If no such wires are found, an empty vector is returned.
+    A vector of `legacy_bdl_wire` objects containing cells of the
+    specified type. If no such wires are found, an empty vector is
+    returned.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_find_bdl_neighbor_above =
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_find_bdl_neighbor_above =
 R"doc(This function searches for the first Binary-dot Logic (BDL) pair in a
 given set of BDL pairs that is above a specified BDL pair. The
 function returns the first BDL pair that meets the following criteria:
@@ -23505,7 +23834,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_find_bdl_neighbor_below =
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_find_bdl_neighbor_below =
 R"doc(This function searches for the first Binary-dot Logic (BDL) pair in a
 given set of BDL pairs that is below a specified BDL pair. The
 function returns the first BDL pair that meets the following criteria:
@@ -23534,414 +23863,30 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_layout = R"doc(SiDB cell-level layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_params = R"doc(Parameters for detecting BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_legacy_detect_bdl_wires_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl =
-R"doc(Implementation of the `is_operational` algorithm for a given SiDB
-layout.
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_params = R"doc(Parameters for detecting BDL wires.)doc";
 
-This class provides an implementation of the `is_operational`
-algorithm for a specified SiDB layout and parameters. It checks
-whether the SiDB layout is operational by simulating its behavior for
-different input combinations and comparing the results to expected
-outputs from a truth table.
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_make_impl =
+R"doc(Builds the implementation for a layout with optional wires and canvas:
+the canvas defaults to the layout's logic dots.
 
 Args:
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Type of the truth table.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_bii = R"doc(Iterator that iterates over all possible input states.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_canvas_cds =
-R"doc(The charge distribution surface of the canvas layout, enumerated by
-`is_physical_validity_feasible`. It is built on first use and reused
-afterwards, since the canvas does not change over this object's
-lifetime. Empty until then, so that the strategies that never inspect
-the canvas do not pay for it.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_canvas_charge_distribution =
-R"doc(Returns the charge distribution surface of the canvas layout,
-constructing it on first use.
-
-Constructing it means computing the potential matrix over the canvas
-SiDBs, which `is_physical_validity_feasible` would otherwise repeat on
-each of its calls even though the canvas is fixed. The caller is
-responsible for resetting the charge index; the base number and the
-dependent cell are set here and stay valid.
+    lyt: The layout.
+    spec: The specification.
+    params: Parameters.
+    input_wires: The input wires, or `std::nullopt` to detect them.
+    output_wires: The output wires, or `std::nullopt` to detect them.
+    canvas_lyt: The canvas, or `std::nullopt` to use the logic dots.
 
 Returns:
-    The canvas charge distribution surface.
+    The implementation object.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_canvas_filtering_applicable =
-R"doc(Whether the canvas-based filtering steps can be applied. They need a
-canvas to enumerate, they are skipped by `SIMULATION_ONLY`, and they
-are only defined for `REJECT_KINKS`.
-
-This is the single place the condition is decided. The entry points
-build a canvas whenever the layout has `LOGIC` cells and leave it to
-`run()` to determine whether the filtering applies, so that the same
-layout and the same parameters take the same path regardless of which
-overload the caller reached.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_canvas_lyt = R"doc(Layout consisting of all canvas SiDBs.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_check_existence_of_kinks_in_input_wires =
-R"doc(This function iterates through the input wires and evaluates their
-charge states against the expected states derived from the input
-pattern. A kink is considered to exist if an input wire's charge state
-does not match the expected value (i.e., bit one or bit zero) for the
-given input index.
-
-Args:
-    ground_state: The ground state charge distribution surface.
-    current_input_index: The current input index used to retrieve the
-                         expected output from the truth table.
-
-Returns:
-    `true` if any input wire contains a kink (i.e., an unexpected
-    charge state), `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_check_existence_of_kinks_in_output_wires =
-R"doc(This function iterates through the output wires and evaluates their
-charge states against the expected states derived from the truth
-table. A kink is considered to exist if an output wire's charge state
-does not match the expected value (i.e., bit one or bit zero) for the
-given input index.
-
-Args:
-    ground_state: The ground state charge distribution surface.
-    current_input_index: The current input index used to retrieve the
-                         expected output from the truth table.
-
-Returns:
-    `true` if any output wire contains a kink (i.e., an unexpected
-    charge state), `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_determine_non_operational_input_patterns_and_non_operationality_reason =
-R"doc(Determines the input combinations for which the layout is non-
-operational and the reason why the layout is non-operational.
-
-Returns:
-    Vector of pairs where the first element of the pair is the input
-    pattern (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for
-    which the layout is non-operational. The second entry indicates
-    the reason why the layout is non-operational
-    (`non_operationality_reason`) for the given input pattern.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_encodes_bit_one =
-R"doc(This function returns `true` if `1` is encoded in the charge state of
-the given BDL pair. `false` otherwise.
-
-Args:
-    ground_state: The ground state charge distribution surface.
-    bdl: BDL pair to be evaluated.
-
-Returns:
-    `true` if `1` is encoded, `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_encodes_bit_zero =
-R"doc(This function returns `true` if `0` is encoded in the charge state of
-the given BDL pair. `false` otherwise.
-
-Args:
-    ground_state: The ground state charge distribution surface.
-    bdl: BDL pair to be evaluated.
-
-Returns:
-    `true` if `0` is encoded, `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_get_number_of_simulator_invocations =
-R"doc(Returns the total number of simulator invocations.
-
-Returns:
-    The number of simulator invocations.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_input_pattern_layouts =
-R"doc(Pre-generated layouts, one per input pattern, or `nullptr` if the BDL
-input iterator is used instead. Not owned by this object and only ever
-read.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_io_signal_unstable =
-R"doc(This function iterates through various input patterns and output wire
-indices to determine if any configuration results in a physically
-valid layout with energy below the given energy value, indicating I/O
-signal instability.
-
-Args:
-    cds_layout: The charge distribution surface layout to be modified
-                and checked.
-    max_input_pattern_index: The maximum index for input pattern
-    input_pattern: The specific input pattern for which the stability
-                   check is conducted.
-    logical_correct_output_pattern: The expected correct output
-                                    pattern for the given input.
-    minimal_energy_of_physically_valid_layout: The minimum energy
-                                               threshold below which
-                                               the layout is
-                                               considered unstable.
-
-Returns:
-    `true` if the I/O signal is unstable, `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_layout_invalid =
-R"doc(This function evaluates whether the given layout is invalid, i.e., it
-cannot implement the given Boolean function. This is done in three
-separate filtering steps: (1) discarding SiDB layouts with potentially
-positively charged SiDBs, (2) utilizing an efficient method to
-identify and discard SiDB layouts that do not satisfy physical model
-constraints under the I/O pin conditions required for the desired
-Boolean function, and (3) detecting I/O signal instability.
-
-Args:
-    input_pattern: The current input pattern.
-
-Returns:
-    A `layout_invalidity_reason` object indicating why the layout is
-    non-operational; or `std::nullopt` if it could not certainly be
-    determined to be in fact non-operational.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_operational_impl =
-R"doc(Constructor to initialize the algorithm with a layout and parameters.
-
-Args:
-    lyt: The SiDB cell-level layout to be checked.
-    tt: Expected Boolean function of the layout given as a multi-
-        output truth table.
-    params: Parameters for the `is_operational` algorithm.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_operational_impl_2 =
-R"doc(Constructor to initialize the algorithm with a layout, parameters,
-input and output wires.
-
-Args:
-    lyt: The SiDB cell-level layout to be checked.
-    tt: Expected Boolean function of the layout given as a multi-
-        output truth table.
-    params: Parameters for the `is_operational` algorithm.
-    input_wires: BDL input wires of lyt.
-    output_wires: BDL output wires of lyt.
-    initialize_bii: If `true`, the BDL input iterator is initialized,
-                    `false` otherwise. This parameter is only needed
-                    in special cases (verify_logic_match.hpp).
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_operational_impl_3 =
-R"doc(Constructor to initialize the algorithm with a layout, parameters,
-input and output wires, and a canvas layout.
-
-Args:
-    lyt: The SiDB cell-level layout to be checked.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    params: Parameters for the `is_operational` algorithm.
-    input_wires: BDL input wires of lyt.
-    output_wires: BDL output wires of lyt.
-    c_lyt: Canvas layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_operational_impl_4 =
-R"doc(Constructor to initialize the algorithm with a layout and parameters.
-
-Args:
-    lyt: The SiDB cell-level layout to be checked.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    params: Parameters for the `is_operational` algorithm.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_operational_impl_5 =
-R"doc(Constructor to initialize the algorithm with pre-generated input
-pattern layouts.
-
-The layouts are not copied and must outlive this object. They are only
-read, so the same layouts may be shared by concurrently running
-instances.
-
-Args:
-    input_pattern_lyts: One layout per input pattern, indexed by input
-                        pattern, as generated by
-                        `generate_bdl_input_pattern_layouts`.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    params: Parameters for the `is_operational` algorithm.
-    input_wires: BDL input wires of the layout.
-    output_wires: BDL output wires of the layout.
-    c_lyt: Canvas layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_is_physical_validity_feasible =
-R"doc(This function determines if there is a charge distribution of the
-canvas SiDBs for which the charge distribution of the whole layout is
-physically valid.
-
-Args:
-    cds_layout: The charge distribution surface layout to be
-                evaluated.
-
-Returns:
-    The minimum energy value if a physically valid configuration is
-    found, `std::nullopt` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_layout = R"doc(SiDB cell-level layout.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_layout_with_input_pattern =
-R"doc(Returns the layout with the given input pattern applied.
-
-Reads from the pre-generated input pattern layouts if they were
-supplied, and drives the BDL input iterator to the requested pattern
-otherwise.
-
-Args:
-    input_pattern: The input pattern to apply.
-
-Returns:
-    The layout with `input_pattern` applied.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_output_bdl_pairs = R"doc(Output BDL pairs.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_parameters = R"doc(Parameters for the `is_operational` algorithm.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_physical_simulation_of_layout =
-R"doc(This function conducts physical simulation of the given SiDB layout.
-The simulation results are stored in the `sim_result` variable.
-
-Args:
-    lyt_with_input_pattern: The SiDB layout with a given input
-                            combination applied.
-
-Returns:
-    Simulation results.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_run =
-R"doc(Run the `is_operational` algorithm.
-
-This function executes the operational status checking algorithm for
-the given SiDB layout and parameters provided during initialization.
-
-Returns:
-    Pair with the first element indicating the operational status
-    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the second element
-    indicating the reason if it is non-operational.
-
-Raises:
-    std::invalid_argument: if QuickSim is selected for charged
-                           defects.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_set_charge_distribution_of_input_pins =
-R"doc(This function assigns the charge states of the input pins in the
-layout according to the input index provided. This means that when a
-zero is applied, each BDL pair in the wire is set to zero.
-
-Args:
-    cds: The charge distribution surface layout to be modified.
-    current_input_index: The index representing the current input
-                         pattern.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_set_charge_distribution_of_output_pins =
-R"doc(This function assigns the charge states of the output pins in the
-layout according to the input index provided. This means that when a
-zero is applied, each BDL pair in the wire is set to zero.
-
-Args:
-    cds: The charge distribution surface layout to be modified.
-    output_wire_index: The index representing the current input
-                       pattern of the output wire.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_simulator_invocations = R"doc(Number of simulator invocations.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_truth_table = R"doc(The specification of the layout.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_verify_logic_match_of_cds =
-R"doc(Checks if the given charge distribution correctly encodes the expected
-logic for the given input pattern, based on a provided truth table.
-
-Example:
-In the ground state charge distribution of an AND gate, kinks are
-rejected for the gate to be considered operational. Given an input
-pattern of `01`, this function will:
-- Verify that the left input wire encodes `0`. - Verify that the right
-  input wire encodes `1`. - Verify that the output wire encodes `0`.
-Determines if the given charge distribution fulfills the correct logic
-based on the provided charge index and truth table.
-
-Args:
-    given_cds: The charge distribution surface to be checked for
-               operation.
-    input_pattern: Input pattern represented by the position of
-                   perturbers.
-
-Returns:
-    Pair with the first element indicating the operational status
-    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the second element
-    indicating the reason if it is non-operational.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason =
-R"doc(Reason why the layout is not a valid gate implementation for the given
-Boolean function.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason_IO_INSTABILITY =
-R"doc(I/O signals are unstable, indicating that an information flip results
-in a lower energy state.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason_PHYSICAL_INFEASIBILITY =
-R"doc(The layout is physically infeasible, meaning no charge distribution of
-the canvas SiDBs satisfies the criteria for physical validity.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive SiDBs can potentially occur.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_non_operationality_reason = R"doc(Reason why a layout is non-operational.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_non_operationality_reason = R"doc(Reasons why a layout is not operational.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_non_operationality_reason_KINKS = R"doc(Kinks induced the layout to become non-operational.)doc";
 
@@ -23949,11 +23894,33 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_detail_non_operationali
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_non_operationality_reason_NONE = R"doc(No reason for non-operationality could be determined.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_non_operationality_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive charges may occur but the simulation base is set to `2`.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_non_operationality_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive charges may occur.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_num_sweep_steps =
+R"doc(Validates a sweep range and calculates its rounded number of steps.
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_canvas_lyt = R"doc(This layout consists of the canvas cells of the layout.)doc";
+Args:
+    range: Sweep bounds and step size.
+
+Returns:
+    The number of steps, excluding the initial point.
+
+Raises:
+    std::invalid_argument: if bounds are non-finite or reversed, the
+                           step is not finite and positive, or the
+                           number of points exceeds the storage range.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl =
+R"doc(Evaluates SiDB operation or critical temperature across a parameter
+domain.
+
+Template Args:
+    OpDomain: Domain that stores operational statuses or critical
+              temperatures.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_canvas_lyt = R"doc(This layout consists of the canvas dots of the layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_contour_tracing =
 R"doc(Performs contour tracing to determine the operational domain. The
@@ -24040,11 +24007,18 @@ Args:
 Returns:
     The (partial) operational domain of the layout.
 
+Raises:
+    std::invalid_argument: if fewer than two dimensions are swept or
+                           the seed is outside the sweep grid.
+    std::bad_alloc: if sampling or a flood-fill worker cannot allocate
+                    storage.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_generate_random_step_points =
 R"doc(Generates unique random `step_points` in the stored parameter range.
-The number of generated points is at most equal to `samples`.
+The number of generated points is at most equal to `samples`. Each
+call owns its random number generator.
 
 Args:
     samples: Maximum number of random `step_point`s to generate.
@@ -24073,8 +24047,7 @@ physically valid, it is determined whether the CDS is the ground state
 or the n-th excited state.
 
 Args:
-    lyt: SiDB cell-level layout that is simulated and compared to the
-         given CDS.
+    cd: Charge distribution to evaluate.
 
 Returns:
     All physically valid physical parameters and the excited state
@@ -24134,6 +24107,15 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_initialize_sweep =
+R"doc(Builds the indices and values of each validated sweep dimension.
+
+Raises:
+    std::invalid_argument: if a sweep range is invalid or exceeds the
+                           storage range.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_input_pattern_layouts =
@@ -24189,16 +24171,13 @@ physically valid for the parameter point represented by the step point
 `sp`.
 
 Args:
-    lyt: CDS to check.
+    cd: The charge distribution to check.
     sp: Step point to be investigated.
 
 Returns:
-    The operational status of the layout under the given simulation
-    parameters.
+    Whether `cd` is physically valid under the parameters of `sp`.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_layout = R"doc(The SiDB cell-level layout to investigate.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_log_stats =
 R"doc(Helper function that writes the the statistics of the operational
@@ -24252,15 +24231,6 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_doma
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_steps =
-R"doc(Calculates the number of steps in the given dimension based on the
-provided parameters.
-
-Returns:
-    The number of steps in the given dimension.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_number_of_threads =
 R"doc(Number of worker threads to distribute the parameter points over,
 taken from the parameters and floored at `1`.)doc";
@@ -24268,26 +24238,26 @@ taken from the parameters and floored at `1`.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_op_domain = R"doc(The operational domain of the layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_operational_domain_impl =
-R"doc(Standard constructor. Initializes the lyt, the truth table, the
+R"doc(Standard constructor. Initializes the layout, the truth table, the
 parameters and the statistics. Also detects the output BDL pair, which
-is necessary for the operational domain computation. The lyt must have
-exactly one output BDL pair.
+is necessary for the operational domain computation. The layout must
+have exactly one output BDL pair.
 
 Args:
-    lyt: SiDB cell-level lyt to be evaluated.
-    tt: Expected Boolean function of the lyt given as a multi-output
-        truth table.
+    source_layout: SiDB layout to be evaluated.
+    tt: Expected Boolean function of the layout given as a multi-
+        output truth table.
     ps: Parameters for the operational domain computation.
     st: Statistics of the process.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_operational_domain_impl_2 =
-R"doc(Additional Constructor. Initializes the layout, the parameters and the
-statistics.
+R"doc(Initializes the layout, parameters, and statistics for a physical-
+validity sweep.
 
 Args:
-    lyt: SiDB cell-level layout to be evaluated.
+    source_layout: SiDB layout to be evaluated.
     ps: Parameters for the operational domain computation.
     st: Statistics of the process.
 
@@ -24323,6 +24293,8 @@ Args:
     dim: Sweep dimension to set the value `val` to.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_sidb_layout = R"doc(The SiDB layout to investigate.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_simulate_operational_status_in_parallel =
 R"doc(Simulates the operational status of the given points in parallel. It
@@ -24391,7 +24363,12 @@ Args:
     pp: Parameter point to convert.
 
 Returns:
-    The step point corresponding to the parameter point `pp`.
+    The first grid point at or above each coordinate of `pp`.
+
+Raises:
+    std::invalid_argument: if the dimension count is wrong or a
+                           coordinate is non-finite or outside the
+                           grid.
 
 )doc";
 
@@ -24450,22 +24427,32 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_patterns_of =
+R"doc(The input patterns that are not operational for the given reasons.
+
+Args:
+    p: The implementation object.
+    num_patterns: The number of input patterns.
+
+Returns:
+    All patterns that are operational.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_validate_operational_domain_params =
-R"doc(This function validates the given parameters for the operational
-domain computation. It checks if the minimum value of any sweep
-dimension is larger than the corresponding maximum value, and if the
-step size of any sweep dimension is negative or zero. Additionally, it
-checks the preconditions of the operational domain sketch.
+R"doc(Validates the sweep count, finite ordered bounds, positive finite
+steps, point counts, and the preconditions of the operational domain
+sketch.
 
 The sketch, i.e., `operational_analysis_strategy::FILTER_ONLY`,
 determines the operational status by filtering alone. It has two
 preconditions: the filtering steps are only defined when kinks are
 rejected, and they enumerate the charge configurations of the canvas,
-which the layout's `LOGIC` cells define. If either is unmet, the
-sketch evaluates nothing and silently falls back to a full simulation
-of the entire parameter space. Since that is the exhaustive cost the
-sketch exists to avoid, an unmet precondition is rejected instead of
-being absorbed.
+which the layout's `LOGIC` dots define. If either is unmet, the sketch
+evaluates nothing and silently falls back to a full simulation of the
+entire parameter space. Since that is the exhaustive cost the sketch
+exists to avoid, an unmet precondition is rejected instead of being
+absorbed.
 
 Args:
     lyt: The layout the operational domain is computed for.
@@ -24477,15 +24464,34 @@ Args:
     algorithm_name: The name of the calling algorithm, used to phrase
                     the sweep dimension count error.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
 Raises:
     std::invalid_argument: if the parameters are invalid.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detect_bdl_pairs =
+R"doc(Detects the BDL pairs of an SiDB layout. Dots with the given tag are
+uniquely paired in increasing distance. The closest unpaired dots
+within `[params.minimum_distance, params.maximum_distance]` (defaults
+of 0.75 nm and 1.5 nm) form a pair. The lower bound keeps, e.g., the
+SiDBs of an atomic wire from being paired; the upper bound prevents
+unlikely pairings and bounds the work. Distances follow the layout's
+lattice. The pairs are returned sorted.
+
+Args:
+    lyt: The layout to detect BDL pairs in.
+    type: Optional dot tag to restrict the detection to (`INPUT`,
+          `OUTPUT`, `NORMAL`, ...). If omitted, the BDL pairs of the
+          input, output, and normal SiDBs are detected and returned in
+          that order.
+    params: Parameters for the BDL pair detection.
+
+Returns:
+    The detected BDL pairs.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detect_bdl_pairs_2 =
 R"doc(This algorithm detects BDL pairs in an SiDB layout. It does so by
 first collecting all dots of the given type and then uniquely pairing
 them up based on their distance. Lower and upper distance thresholds
@@ -24525,6 +24531,22 @@ This is useful to prevent, e.g., SiDBs of atomic wires to be
 considered BDL pairs. (unit: nm).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detect_bdl_wires =
+R"doc(Detects the BDL wires of an SiDB layout: the BDL pairs of all types
+are chained into wires along the layout's lattice whenever two pairs
+lie within `params.threshold_bdl_interdistance` of each other.
+
+Args:
+    lyt: The layout.
+    params: Parameters for the BDL pair and wire detection.
+    wire_selection: Which wires to return: all, input, or output
+                    wires.
+
+Returns:
+    The detected wires.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detect_bdl_wires_2 =
 R"doc(This function identifies BDL wires in a given SiDB cell-level layout
 by detecting BDL pairs and linking them based on their spatial
 relationships. The function supports selection of different types of
@@ -24555,10 +24577,39 @@ R"doc(A distance threshold, which is used to determine if two pairs of BDLs
 are part of the same wire. (unit: nm).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_generate_bdl_input_pattern_layouts =
+R"doc(Applies every input pattern to the input BDL pairs of a layout and
+returns the resulting layouts, pattern `0` first, with the input wires
+given by the caller.
+
+Args:
+    lyt: The layout.
+    ps: Parameters for the BDL pair detection and the input encoding.
+    input_wires: The input wires of `lyt`.
+
+Returns:
+    One layout per input pattern.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_generate_bdl_input_pattern_layouts_2 =
+R"doc(Applies every input pattern to the input BDL pairs of a layout and
+returns the resulting layouts, pattern `0` first; the input wires are
+detected first.
+
+Args:
+    lyt: The layout.
+    ps: Parameters for the BDL detection and the input encoding.
+
+Returns:
+    One layout per input pattern.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_generate_bdl_input_pattern_layouts_3 =
 R"doc(Generates the SiDB layout of every input pattern of a BDL layout. For
 an :math:`n`-input BDL layout, this returns :math:`2^n` layouts, where
 the layout at index :math:`i` has the input pattern :math:`i` applied,
-using the same encoding as `bdl_input_iterator`.
+using the same encoding as `legacy_bdl_input_iterator`.
 
 Since the input configuration of a layout does not depend on the
 physical simulation parameters, algorithms that evaluate the same
@@ -24579,7 +24630,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_generate_bdl_input_pattern_layouts_2 =
+static const char *mkd_doc_fiction_sidb_simulation_logic_generate_bdl_input_pattern_layouts_4 =
 R"doc(Generates the SiDB layout of every input pattern of a BDL layout,
 reusing pre-detected input BDL wires.
 
@@ -24597,156 +24648,127 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_kink_induced_non_operational =
-R"doc(This function determines if the layout is only considered non-
-operational because of kinks. This means that the layout would be
-considered as operational, if kinks were accepted.
+R"doc(Determines whether kinks are the reason the layout is non-operational.
 
 Args:
-    lyt: The SiDB cell-level layout to be checked.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    params: Parameters for the `is_operational` algorithm.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Type of the truth table.
+    lyt: The layout to check.
+    spec: The Boolean function(s) it has to implement.
+    params: Parameters; kinks are rejected regardless of
+            `params.op_condition`.
 
 Returns:
-    Bool that indicates whether kinks induce the layout to become non-
-    operational. `true` if the layout is non-operational due to kinks,
-    `false` otherwise.
-
-Note:
-    "Kink induced non-operational" refers to the non-operational
-    status being exclusively caused by kinks with an otherwise correct
-    logic match.
+    `true` if the layout is non-operational because of kinks.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_kink_induced_non_operational_2 =
-R"doc(This function determines if the layout is only considered non-
-operational because of kinks. This means that the layout would be
-considered as operational, if kinks were accepted.
+R"doc(Like the overload above, with the BDL wires and, optionally, the
+canvas given by the caller.
 
 Args:
-    lyt: The SiDB cell-level layout to be checked.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    params: Parameters for the `is_operational` algorithm.
-    input_bdl_wire: Optional BDL input wires of lyt.
-    output_bdl_wire: Optional BDL output wires of lyt.
-    canvas_lyt: Optional canvas layout.
+    lyt: The layout to check.
+    spec: The Boolean function(s) it has to implement.
+    params: Parameters; kinks are rejected regardless of
+            `params.op_condition`.
+    input_bdl_wire: The input BDL wires of `lyt`.
+    output_bdl_wire: The output BDL wires of `lyt`.
+    canvas_lyt: The canvas; defaults to none.
+
+Returns:
+    `true` if the layout is non-operational because of kinks.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_is_kink_induced_non_operational_3 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to check.
+    spec: The Boolean function(s) it has to implement.
+    params: Parameters.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Type of the truth table.
 
 Returns:
-    Bool that indicates whether kinks induce the layout to become non-
-    operational. `true` if the layout is non-operational due to kinks,
-    `false` otherwise.
-
-Note:
-    "Kink induced non-operational" refers to the non-operational
-    status being exclusively caused by kinks with an otherwise correct
-    logic match.
+    `true` if the layout is non-operational because of kinks.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational =
-R"doc(Determine the operational status of an SiDB layout.
-
-This function checks the operational status of a given SiDB layout
-using the `is_operational` algorithm. It determines whether the SiDB
-layout is operational and returns the correct result for all
-:math:`2^n` input combinations.
+R"doc(Determines whether an SiDB layout implements the given Boolean
+function(s). Every input pattern is applied to the input BDL pairs,
+the ground states are simulated with the configured engine, and the
+charge states of the output BDL pairs are compared with the expected
+truth-table entries. If the layout carries logic dots, they form the
+canvas of the pruning filters that run before any simulation whenever
+the parameters ask for filtering and reject kinks.
 
 Args:
-    lyt: The SiDB cell-level layout to be checked.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    params: Parameters for the `is_operational` algorithm.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Type of the truth table.
+    lyt: The layout to check.
+    spec: The Boolean function(s) it has to implement.
+    params: Parameters.
 
 Returns:
-    A pair containing the operational status of the SiDB layout
-    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
-    input combinations tested.
+    The operational status and the number of simulator invocations.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_2 =
-R"doc(Determine the operational status of an SiDB layout.
-
-This function checks the operational status of a given SiDB layout
-using the `is_operational` algorithm. It determines whether the SiDB
-layout is operational and returns the correct result for all
-:math:`2^n` input combinations.
+R"doc(Like the overload above, with the BDL wires and, optionally, the
+canvas given by the caller.
 
 Args:
-    lyt: The SiDB cell-level layout to be checked.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    params: Parameters for the `is_operational` algorithm.
-    input_bdl_wire: Optional BDL input wires of lyt.
-    output_bdl_wire: Optional BDL output wires of lyt.
-    canvas_lyt: Optional canvas layout.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Type of the truth table.
+    lyt: The layout to check.
+    spec: The Boolean function(s) it has to implement.
+    params: Parameters.
+    input_bdl_wire: The input BDL wires of `lyt`.
+    output_bdl_wire: The output BDL wires of `lyt`.
+    canvas_lyt: The canvas; defaults to the logic dots of `lyt`.
 
 Returns:
-    A pair containing the operational status of the SiDB layout
-    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
-    input combinations tested.
+    The operational status and the number of simulator invocations.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_3 =
-R"doc(Determine the operational status of an SiDB layout from its pre-
-generated input pattern layouts.
-
-The layout is operational only if it produces the correct output for
-every input pattern, so this overload takes one layout per input
-pattern and reports the layout operational only if all of them are.
-Since the input configuration does not depend on the simulation
-parameters, a caller that evaluates the same layout under many
-parameter settings can generate the layouts once with
-`generate_bdl_input_pattern_layouts` and pass them to every call,
-instead of re-deriving them each time.
-
-The layouts are only read and may be shared by concurrent calls.
+R"doc(Like the overloads above, but with one layout per input pattern given
+by the caller instead of applying the patterns to the input BDL pairs.
 
 Args:
-    input_pattern_layouts: One layout per input pattern, indexed by
-                           input pattern, as generated by
-                           `generate_bdl_input_pattern_layouts`. All
-                           of them must be operational for the layout
-                           to be operational.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    params: Parameters for the `is_operational` algorithm.
-    input_bdl_wire: BDL input wires of the layout.
-    output_bdl_wire: BDL output wires of the layout.
-    canvas_lyt: Optional canvas layout.
+    input_pattern_layouts: One layout per input pattern, pattern `0`
+                           first.
+    spec: The Boolean function(s) to implement.
+    params: Parameters.
+    input_bdl_wire: The input BDL wires.
+    output_bdl_wire: The output BDL wires.
+    canvas_lyt: The canvas; defaults to the logic dots of the first
+                layout.
+
+Returns:
+    The operational status and the number of simulator invocations.
+
+Raises:
+    std::invalid_argument: if `spec` is empty or the number of layouts
+                           does not match the number of patterns.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_4 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to check.
+    spec: The Boolean function(s) it has to implement.
+    params: Parameters.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Type of the truth table.
 
 Returns:
-    A pair containing the operational status of the SiDB layout
-    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
-    input combinations tested.
-
-Raises:
-    std::invalid_argument: if `spec` is empty, or if the number of
-                           input pattern layouts does not match the
-                           number of input combinations of `spec`.
+    The operational status and the number of simulator invocations.
 
 )doc";
 
@@ -24775,9 +24797,9 @@ possible that the layout is non-operational, but the filtering
 strategies do not detect it. Sweeping a parameter space this way is
 called the operational domain sketch. The filtering steps are only
 defined when kinks are rejected, and they enumerate the charge
-configurations of the canvas that the layout's `LOGIC` cells define,
-so this setting is only effective with `REJECT_KINKS` on a layout that
-has such cells.
+configurations of the canvas that the layout's `LOGIC` dots define, so
+this setting is only effective with `REJECT_KINKS` on a layout that
+has such dots.
 - `FILTER_THEN_SIMULATION`: Before a physical simulation is conducted,
   the algorithm checks if filtering
 strategies have detected whether the layout is non-operational. This
@@ -24792,7 +24814,7 @@ operational domain sketch.
 Note:
     This is an extremely fast approximation that may sometimes lead to
     false positives. It requires `REJECT_KINKS` and a layout with
-    `LOGIC` cells; without either, no filter step runs.)doc";
+    `LOGIC` dots; without either, no filter step runs.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION =
 R"doc(Before a physical simulation is conducted, the algorithm checks if
@@ -24828,57 +24850,487 @@ R"doc(Strategy to determine whether a layout is operational or non-
 operational.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns =
-R"doc(This function determines all input combinations for which kinks induce
-the SiDB layout to become non-operational. This means that the layout
-is operational if kinks would be accepted.
+R"doc(Determines the input patterns for which kinks render the layout non-
+operational.
 
 Args:
-    lyt: The SiDB layout.
-    spec: Vector of truth table specifications.
-    params: Parameters for the `is_operational` algorithm.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Type of the truth table.
+    lyt: The layout to check.
+    spec: The Boolean function(s) it has to implement.
+    params: Parameters; kinks are rejected regardless of
+            `params.op_condition`.
 
 Returns:
-    The input combinations where kinks induce the SiDB layout to
-    become non-operational.
-
-Note:
-    "Kink induced non-operational" refers to the non-operational
-    status being exclusively caused by kinks with an otherwise correct
-    logic match.
+    The kink-induced non-operational input patterns.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns_2 =
-R"doc(This function determines all input combinations for which kinks induce
-the SiDB layout to become non-operational. This means that the layout
-is operational if kinks would be accepted.
+R"doc(Like the overload above, with the BDL wires and, optionally, the
+canvas given by the caller.
 
 Args:
-    lyt: The SiDB layout.
-    spec: Vector of truth table specifications.
-    params: Parameters for the `is_operational` algorithm.
-    input_bdl_wire: Optional BDL input wires of lyt.
-    output_bdl_wire: Optional BDL output wires of lyt.
-    canvas_lyt: Optional canvas layout.
+    lyt: The layout to check.
+    spec: The Boolean function(s) it has to implement.
+    params: Parameters; kinks are rejected regardless of
+            `params.op_condition`.
+    input_bdl_wire: The input BDL wires of `lyt`.
+    output_bdl_wire: The output BDL wires of `lyt`.
+    canvas_lyt: The canvas; defaults to none.
+
+Returns:
+    The kink-induced non-operational input patterns.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns_3 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to check.
+    spec: The Boolean function(s) it has to implement.
+    params: Parameters.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Type of the truth table.
 
 Returns:
-    The input combinations where kinks induce the SiDB layout to
-    become non-operational.
-
-Note:
-    "Kink induced non-operational" refers to the non-operational
-    status being exclusively caused by kinks with an otherwise correct
-    logic match.
+    The kink-induced non-operational input patterns.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator =
+R"doc(Iterator that iterates over all possible input states of a BDL layout.
+There are :math:`2^n` possible input states for an :math:`n`-input BDL
+layout, each with a unique input index. The input index is interpreted
+as a binary number, where the :math:`i`-th bit represents the input
+state of the :math:`i`-th input BDL pair. If the bit is `1`, the lower
+BDL dot is set and the upper BDL dot removed. If the bit is `0`, the
+upper BDL dot is removed and the lower BDL dot set. The iterator
+creates and stores a deep-copy of the given layout. The state
+enumeration wraps around, i.e., after the last possible input state,
+the first input state is set again.
+
+The iterator satisfies the requirements of
+`LegacyRandomAccessIterator` and can be used in iterator-based `for`
+loops.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_current_input_index =
+R"doc(The current input index. There are :math:`2^n` possible input states
+for an :math:`n`-input BDL layout.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_determine_last_bdl_for_each_wire =
+R"doc(This function iterates through each wire in `input_bdl_wires`,
+identifies the first BDL pair of type `INPUT`, and then finds the BDL
+pair within the same wire that has the maximum distance from the
+starting pair. The resulting last BDL pairs are stored in
+`last_bdl_for_each_wire`.
+
+Note:
+    Assumes that `input_bdl_wires` and `last_bdl_for_each_wire` are
+    accessible within the scope.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_determine_upper_input_closer_to_wire_end =
+R"doc(Determines, for each input BDL pair, whether its upper dot is closer
+to the end of its wire than its lower dot.
+
+`set_all_inputs` needs only this comparison, not the distances
+themselves, and both operands are fixed for this object's lifetime.
+Evaluating it once here keeps the two `sidb::model::nm_distance` calls
+per input pair out of every increment.
+
+Returns:
+    One flag per input BDL pair, indexed like `input_pairs`.
+
+Note:
+    Assumes that `input_pairs` and `last_bdl_for_each_wire` are
+    already initialized.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_get_current_input_index =
+R"doc(Returns the current input index.
+
+Returns:
+    The current input index.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_last_bdl_for_each_wire = R"doc(Last BDL pairs for each BDL wire.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_layout = R"doc(The layout to iterate over.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_legacy_bdl_input_iterator =
+R"doc(Standard constructor. It alters the layout to set the first input
+state, which assigns binary `0` to all input BDL pairs.
+
+Args:
+    lyt: The SiDB BDL layout to iterate over.
+    ps: Parameters for the BDL input iterator.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_legacy_bdl_input_iterator_2 =
+R"doc(Constructor with pre-detected input wires and directions. It alters
+the layout to set the first input state, which assigns binary `0` to
+all input BDL pairs.
+
+Args:
+    lyt: The SiDB BDL layout to iterate over.
+    ps: Parameters for the BDL input iterator.
+    input_wires: Pre-detected input BDL wires.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_num_input_pairs =
+R"doc(Returns the total number of input BDL pairs of the given SiDB gate
+layout.
+
+Returns:
+    The number of input BDL pairs.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_num_inputs = R"doc(The amount of input BDL pairs.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_add =
+R"doc(Addition operator. Computes the input state of the current iterator
+plus the given integer.
+
+Args:
+    m: The amount of input states to skip.
+
+Returns:
+    The input state of the current iterator plus the given integer.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_array =
+R"doc(Subscript operator. Computes the input state of the current iterator
+plus the given integer.
+
+Args:
+    m: The amount of input states to skip.
+
+Returns:
+    The input state of the current iterator plus the given integer.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_assign =
+R"doc(Assignment operator. Sets the input state to the given integer.
+
+Args:
+    m: The input state to set.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_dec =
+R"doc(Prefix decrement operator. Sets the previous input state.
+
+Returns:
+    Reference to `this`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_dec_2 =
+R"doc(Postfix decrement operator. Sets the previous input state.
+
+Returns:
+    Copy of `this` before decrementing.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_eq =
+R"doc(Equality operator. Compares the current input index with the given
+integer.
+
+Args:
+    m: Integer to compare with.
+
+Returns:
+    `true` if the current input index is equal to `m`, `false`
+    otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_ge =
+R"doc(Greater-or-equal-than operator. Compares the current input index with
+the given integer.
+
+Args:
+    m: Integer to compare with.
+
+Returns:
+    `true` if the current input index is greater than or equal to `m`,
+    `false` otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_gt =
+R"doc(Greater-than operator. Compares the current input index with the given
+integer.
+
+Args:
+    m: Integer to compare with.
+
+Returns:
+    `true` if the current input index is greater than `m`, `false`
+    otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_iadd =
+R"doc(Addition assignment operator. Sets a next input state.
+
+Args:
+    m: The amount of input states to skip.
+
+Returns:
+    Reference to `this`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_inc =
+R"doc(Prefix increment operator. Sets the next input state.
+
+Returns:
+    Reference to `this`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_inc_2 =
+R"doc(Postfix increment operator. Sets the next input state.
+
+Returns:
+    Copy of `this` before incrementing.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_isub =
+R"doc(Subtraction assignment operator. Sets a previous input state.
+
+Args:
+    m: The amount of input states to skip.
+
+Returns:
+    Reference to `this`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_le =
+R"doc(Less-or-equal-than operator. Compares the current input index with the
+given integer.
+
+Args:
+    m: Integer to compare with.
+
+Returns:
+    `true` if the current input index is less than or equal to `m`,
+    `false` otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_lt =
+R"doc(Less-than operator. Compares the current input index with the given
+integer.
+
+Args:
+    m: Integer to compare with.
+
+Returns:
+    `true` if the current input index is less than `m`, `false`
+    otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_mul =
+R"doc(Dereference operator. Returns a reference to the layout with the
+current input state.
+
+Returns:
+    Reference to the current layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_ne =
+R"doc(Inequality operator. Compares the current input index with the given
+integer.
+
+Args:
+    m: Integer to compare with.
+
+Returns:
+    `true` if the current input index is not equal to `m`, `false`
+    otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_sub =
+R"doc(Subtraction operator. Computes the input state of the current iterator
+minus the given integer.
+
+Args:
+    m: The amount of input states to skip.
+
+Returns:
+    The input state of the current iterator minus the given integer.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_sub_2 =
+R"doc(Subtraction operator. Computes the difference between the current
+input index and the given iterator ones.
+
+Args:
+    other: Iterator to compute the difference with.
+
+Returns:
+    The difference between the current input index and the given
+    iterator ones.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_set_all_inputs =
+R"doc(Sets all input cells of the layout according to the current input
+index. The input index is interpreted as a binary number, where the
+:math:`i`-th bit represents the input state of the :math:`i`-th input
+BDL pair. If the bit is `1`, the lower BDL dot is set and the upper
+BDL dot removed. If the bit is `0`, the upper BDL dot is removed and
+the lower BDL dot set.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_upper_input_closer_to_wire_end =
+R"doc(For each input BDL pair, whether its upper dot is closer to the end of
+its wire than its lower dot.
+
+This only depends on `input_pairs` and `last_bdl_for_each_wire`, both
+of which are fixed for this object's lifetime, so it is determined
+once here instead of on every increment in `set_all_inputs`.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire =
+R"doc(This struct encapsulates a vector of `bdl_pair` objects, representing
+the pairs of SiDBs in the BDL wire.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_add_bdl_pair =
+R"doc(Add a BDL pair to the wire.
+
+Args:
+    pair: The BDL pair to add.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_erase_bdl_pair =
+R"doc(Erase a specific BDL pair from the wire.
+
+Args:
+    pair: The BDL pair to remove. The pair is compared using the
+          equality operator (operator==).
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_find_bdl_pair_by_type =
+R"doc(Find the first Binary-dot Logic (BDL) pair of a specified type in the
+wire.
+
+Args:
+    t: Type of BDL pair to search for
+       (`sidb::sidb_technology::cell_type::INPUT`,
+       `sidb::sidb_technology::cell_type::OUTPUT`, etc.).
+
+Returns:
+    Optional containing the first BDL pair with the specified type
+    `t`, or `std::nullopt` if no such BDL pair is found.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_first_bdl_pair = R"doc(First BDL pair of the wire.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_last_bdl_pair = R"doc(Last BDL pair of the wire.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_legacy_bdl_wire = R"doc(Default constructor for an empty BDL wire.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_legacy_bdl_wire_2 =
+R"doc(Constructor to initialize the BDL wire with a given vector of BDL
+pairs.
+
+Also updates the start and end BDL pairs based on the given vector.
+
+Args:
+    p: The vector of BDL pairs to initialize the wire with.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_legacy_bdl_wire_3 =
+R"doc(Copy constructor.
+
+Creates a new `legacy_bdl_wire` object as a copy of another
+`legacy_bdl_wire` object.
+
+Args:
+    other: The `legacy_bdl_wire` object to copy from.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_legacy_bdl_wire_4 =
+R"doc(Move constructor.
+
+Transfers ownership of the BDL pairs, port, and start/end pairs from
+another `legacy_bdl_wire` object.
+
+Args:
+    other: The `legacy_bdl_wire` object to move from.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_operator_assign =
+R"doc(Move assignment operator.
+
+Transfers ownership of the BDL pairs, port, and start/end pairs from
+another `legacy_bdl_wire` object.
+
+Args:
+    other: The `legacy_bdl_wire` object to move from.
+
+Returns:
+    A reference to the updated object.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_operator_assign_2 =
+R"doc(Copy assignment operator.
+
+Copies the content of another `legacy_bdl_wire` object, including
+start and end pairs.
+
+Args:
+    other: The `legacy_bdl_wire` object to copy from.
+
+Returns:
+    A reference to the updated object.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_pairs = R"doc(Vector of BDL pairs representing the wire.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_port = R"doc(Port of the BDL wire.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_update_direction = R"doc(Update the port of the wire based on the current BDL pairs.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain =
 R"doc(An operational domain is a set of simulation parameter values for
@@ -24909,12 +25361,12 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_contour_tracing =
-R"doc(Computes the operational domain of the given SiDB cell-level layout.
-The operational domain is the set of all parameter combinations for
-which the layout is logically operational. Logical operation is
-defined as the layout implementing the given truth table. The input
-BDL pairs of the layout are assumed to be in the same order as the
-inputs of the truth table.
+R"doc(Computes the operational domain of the given SiDB layout. The
+operational domain is the set of all parameter combinations for which
+the layout is logically operational. Logical operation is defined as
+the layout implementing the given truth table. The input BDL pairs of
+the layout are assumed to be in the same order as the inputs of the
+truth table.
 
 This algorithm first uses random sampling to find a set of operational
 point within the parameter range. From there, it traverses outwards to
@@ -24946,10 +25398,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
 Returns:
     The operational domain of the layout.
 
@@ -24957,10 +25405,29 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Flood fill
-                           and contour tracing additionally require at
+                           layout without `LOGIC` dots. Flood fill and
+                           contour tracing additionally require at
                            least two sweep dimensions; grid search and
                            random sampling accept any number.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_contour_tracing_2 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to investigate.
+    spec: The Boolean function(s) the layout implements.
+    samples: Number of random samples.
+    params: Parameters.
+    stats: Statistics.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    The domain.
 
 )doc";
 
@@ -24969,12 +25436,12 @@ R"doc(The dimensions to sweep over. The first dimension is the x dimension,
 the second dimension is the y dimension, etc.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_flood_fill =
-R"doc(Computes the operational domain of the given SiDB cell-level layout.
-The operational domain is the set of all parameter combinations for
-which the layout is logically operational. Logical operation is
-defined as the layout implementing the given truth table. The input
-BDL pairs of the layout are assumed to be in the same order as the
-inputs of the truth table.
+R"doc(Computes the operational domain of the given SiDB layout. The
+operational domain is the set of all parameter combinations for which
+the layout is logically operational. Logical operation is defined as
+the layout implementing the given truth table. The input BDL pairs of
+the layout are assumed to be in the same order as the inputs of the
+truth table.
 
 This algorithm first uses random sampling to find several operational
 points within the parameter range. From there, it employs the "flood
@@ -25008,10 +25475,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
 Returns:
     The operational domain of the layout.
 
@@ -25019,10 +25482,29 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Flood fill
-                           and contour tracing additionally require at
+                           layout without `LOGIC` dots. Flood fill and
+                           contour tracing additionally require at
                            least two sweep dimensions; grid search and
                            random sampling accept any number.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_flood_fill_2 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to investigate.
+    spec: The Boolean function(s) the layout implements.
+    samples: Number of random samples.
+    params: Parameters.
+    stats: Statistics.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    The domain.
 
 )doc";
 
@@ -25049,12 +25531,12 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_grid_search =
-R"doc(Computes the operational domain of the given SiDB cell-level layout.
-The operational domain is the set of all parameter combinations for
-which the layout is logically operational. Logical operation is
-defined as the layout implementing the given truth table. The input
-BDL pairs of the layout are assumed to be in the same order as the
-inputs of the truth table.
+R"doc(Computes the operational domain of the given SiDB layout. The
+operational domain is the set of all parameter combinations for which
+the layout is logically operational. Logical operation is defined as
+the layout implementing the given truth table. The input BDL pairs of
+the layout are assumed to be in the same order as the inputs of the
+truth table.
 
 This algorithm uses a grid search to find the operational domain. The
 grid search is performed by exhaustively sweeping all sweep
@@ -25070,14 +25552,10 @@ feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
-    tt: Expected Boolean function of the lyt given as a multi-output
-        truth table.
-    ps: Parameters for the operational domain computation.
-    st: Statistics of the process.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
+    spec: Expected Boolean function of the lyt given as a multi-output
+          truth table.
+    params: Parameters for the operational domain computation.
+    stats: Statistics of the process.
 
 Returns:
     The operational domain of the layout.
@@ -25086,8 +25564,26 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Any number of
+                           layout without `LOGIC` dots. Any number of
                            sweep dimensions is accepted.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_grid_search_2 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to investigate.
+    spec: The Boolean function(s) the layout implements.
+    params: Parameters.
+    stats: Statistics.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    The domain.
 
 )doc";
 
@@ -25107,9 +25603,9 @@ used across the different operational domain computation algorithms.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_number_of_threads =
 R"doc(Number of worker threads to distribute the parameter points over.
-Defaults to the number of hardware threads, which is the behavior this
-setting replaces, and to `1` where that count is not detectable.
-Values below `1` are treated as `1`.
+
+Defaults to the number of hardware threads, or `1` when that count is
+unavailable. Values below `1` are treated as `1`.
 
 Pinning it makes wall-clock comparisons reproducible across runs and
 machines, and allows an operational domain computation to leave cores
@@ -25120,17 +25616,20 @@ R"doc(The parameters used to determine if a layout is operational or non-
 operational.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_sweep_dimensions =
-R"doc(The dimensions to sweep over together with their value ranges, ordered
-by priority. The first dimension is the x dimension, the second
-dimension is the y dimension, etc.)doc";
+R"doc(Dimensions to sweep over together with their value ranges, ordered by
+priority.
+
+The first dimension is the x dimension, the second dimension is the y
+dimension, etc. The default sweeps relative permittivity and screening
+distance from 1.0 to 10.0 in steps of 0.1.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_random_sampling =
-R"doc(Computes the operational domain of the given SiDB cell-level layout.
-The operational domain is the set of all parameter combinations for
-which the layout is logically operational. Logical operation is
-defined as the layout implementing the given truth table. The input
-BDL pairs of the layout are assumed to be in the same order as the
-inputs of the truth table.
+R"doc(Computes the operational domain of the given SiDB layout. The
+operational domain is the set of all parameter combinations for which
+the layout is logically operational. Logical operation is defined as
+the layout implementing the given truth table. The input BDL pairs of
+the layout are assumed to be in the same order as the inputs of the
+truth table.
 
 This algorithm uses random sampling to find a part of the operational
 domain that might not be complete. It performs a total of `samples`
@@ -25150,10 +25649,6 @@ Args:
     params: Operational domain computation parameters.
     stats: Operational domain computation statistics.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
 Returns:
     The operational domain of the layout.
 
@@ -25161,8 +25656,27 @@ Raises:
     std::invalid_argument: if the given sweep parameters are invalid,
                            or if the operational domain sketch is
                            requested without rejecting kinks or on a
-                           layout without `LOGIC` cells. Any number of
+                           layout without `LOGIC` dots. Any number of
                            sweep dimensions is accepted.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_random_sampling_2 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to investigate.
+    spec: The Boolean function(s) the layout implements.
+    samples: Number of random samples.
+    params: Parameters.
+    stats: Statistics.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    The domain.
 
 )doc";
 
@@ -25187,13 +25701,33 @@ Args:
     pp: The specific parameter point around which the operational
         ratio is computed.
 
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
 Returns:
     The ratio of operational parameter points to the total number of
     parameter points in the parameter space.
+
+Raises:
+    std::invalid_argument: if the sweep has fewer than two dimensions,
+                           a range is invalid, or the seed is non-
+                           finite, outside the grid, or has the wrong
+                           dimension count.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_ratio_2 =
+R"doc(Transitional overload for SiDB cell-level layouts, converted with
+`to_sidb_layout`; see the `layout` overload.
+
+Args:
+    lyt: The layout to investigate.
+    spec: The Boolean function(s) the layout implements.
+    pp: The parameter point to start the flood fill from.
+    params: Parameters.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    The ratio of operational parameter points.
 
 )doc";
 
@@ -25235,43 +25769,49 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_valu
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range_step = R"doc(The step size of the dimension sweep.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_input_patterns =
-R"doc(This function determines the input combinations for which the layout
-is operational.
+R"doc(Determines the input patterns for which the layout is operational.
 
 Args:
-    lyt: The SiDB layout.
-    spec: Vector of truth table specifications.
-    params: Parameters to simulate if a input combination is
-            operational.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Type of the truth table.
+    lyt: The layout to check.
+    spec: The Boolean function(s) it has to implement.
+    params: Parameters.
 
 Returns:
-    The operational input combinations.
+    The operational input patterns.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_input_patterns_2 =
-R"doc(This function determines the input combinations for which the layout
-is operational.
+R"doc(Like the overload above, with the BDL wires and, optionally, the
+canvas given by the caller.
 
 Args:
-    lyt: The SiDB layout.
-    spec: Vector of truth table specifications.
-    params: Parameters to simulate if a input combination is
-            operational.
-    input_bdl_wire: Optional BDL input wires of lyt.
-    output_bdl_wire: Optional BDL output wires of lyt.
-    canvas_lyt: Optional canvas layout.
+    lyt: The layout to check.
+    spec: The Boolean function(s) it has to implement.
+    params: Parameters.
+    input_bdl_wire: The input BDL wires of `lyt`.
+    output_bdl_wire: The output BDL wires of `lyt`.
+    canvas_lyt: The canvas; defaults to none.
+
+Returns:
+    The operational input patterns.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_input_patterns_3 =
+R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
+overload.
+
+Args:
+    lyt: The layout to check.
+    spec: The Boolean function(s) it has to implement.
+    params: Parameters.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Type of the truth table.
 
 Returns:
-    The count of operational input combinations.
+    The operational input patterns.
 
 )doc";
 
@@ -25360,39 +25900,28 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_sweep_parameter_LAMBDA_
 static const char *mkd_doc_fiction_sidb_simulation_logic_sweep_parameter_MU_MINUS = R"doc(The energy transition level.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_verify_logic_match =
-R"doc(Checks if a given charge distribution correctly encodes the expected
-logic for a specified input pattern, based on a provided truth table.
-
-
-Example:
-In the ground state charge distribution of an AND gate, kinks are
-rejected for the gate to be considered operational. Given an input
-pattern of `01`, this function will:
-- Verify that the left input wire encodes `0`. - Verify that the right
-  input wire encodes `1`. - Verify that the output wire encodes `0`.
+R"doc(Checks whether a given charge distribution of a layout implements the
+expected output for an input pattern: the output BDL pairs have to
+encode the truth-table entries and, if the parameters reject kinks,
+the wires have to be free of kinks. If positively charged SiDBs can
+occur in the layout under the given parameters (base 2 only), the
+layout is non-operational.
 
 Args:
-    cds: Charge distribution surface, containing charge state
-         information for each SiDB.
-    params: The parameters used to determine if a layout is
-            `operational` or `non-operational`.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    input_pattern: The specific input pattern of the given charge
-                   distribution surface.
-    input_wires: Input BDL wires.
-    output_wires: Output BDL wires.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
+    lyt: The layout the charge distribution belongs to.
+    cd: The charge distribution to check.
+    params: Parameters.
+    spec: The Boolean function(s) to implement.
+    input_pattern: The input pattern `cd` was simulated for.
+    input_wires: The input BDL wires of `lyt`.
+    output_wires: The output BDL wires of `lyt`.
 
 Returns:
-    The operational status indicating if the charge distribution
-    matches the logic for the given input pattern.
+    The operational status.
 
-Note:
-    Kinks are rejected.
+Raises:
+    std::out_of_range: if validation encounters an invalid lattice
+                       basis index.
 
 )doc";
 
@@ -26156,6 +26685,29 @@ Returns:
 Raises:
     std::out_of_range: if the site cannot be represented by the target
                        coordinate type.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_to_cell_level_layout =
+R"doc(Converts a `sidb::layout` back into a Cartesian SiDB cell-level
+layout: cell types, inputs, outputs, the layout name, and, for defect
+surfaces, the surface defects carry over. The layout's lattice is not
+represented in the cell-level type and is dropped. This is the inverse
+of `to_sidb_layout` for the algorithms that still hand out cell-level
+layouts.
+
+Args:
+    lyt: The layout to convert.
+
+Template Args:
+    CellLyt: SiDB cell-level layout type to create.
+
+Returns:
+    The cell-level layout.
+
+Raises:
+    std::out_of_range: if a cell or a retained defect cannot be
+                       represented by the target coordinate type.
 
 )doc";
 
@@ -27702,7 +28254,8 @@ Args:
     k: The number of items to choose from n.
 
 Returns:
-    The binomial coefficient :math:`\binom{n}{k}`.
+    The binomial coefficient :math:`\binom{n}{k}`, saturated at
+    `uint64_t`'s maximum.
 
 )doc";
 
@@ -27759,6 +28312,10 @@ Args:
 Returns:
     A vector of vectors representing all possible combinations of
     distributing k entities on n positions.
+
+Raises:
+    std::length_error: if the number of combinations exceeds the
+                       vector's capacity.
 
 )doc";
 
@@ -29063,7 +29620,7 @@ static const char *mkd_doc_std_hash_8 = R"doc(Hash for SiDB layouts, over the Si
 
 static const char *mkd_doc_std_hash_9 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
 
-static const char *mkd_doc_std_hash_10 = R"doc()doc";
+static const char *mkd_doc_std_hash_10 = R"doc(Hashes parameter points on the equality comparison grid.)doc";
 
 static const char *mkd_doc_std_hash_operator_call = R"doc()doc";
 
@@ -29118,11 +29675,22 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_10 = R"doc()doc";
+static const char *mkd_doc_std_hash_operator_call_10 =
+R"doc(Computes the hash of a parameter point.
 
-static const char *mkd_doc_std_iterator_traits = R"doc()doc";
+Args:
+    pp: Parameter point to hash.
 
-static const char *mkd_doc_std_tuple_size = R"doc()doc";
+Returns:
+    Hash of the quantized parameter values.
+
+)doc";
+
+static const char *mkd_doc_std_iterator_traits = R"doc(Iterator traits for enumerating SiDB input patterns.)doc";
+
+static const char *mkd_doc_std_iterator_traits_2 = R"doc()doc";
+
+static const char *mkd_doc_std_tuple_size = R"doc(Number of coordinates exposed by a parameter point's tuple interface.)doc";
 
 #if defined(__GNUG__)
 #pragma GCC diagnostic pop

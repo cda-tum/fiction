@@ -18,7 +18,7 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::generators::design_gates
+```{doxygenfunction} fiction::sidb::generators::design_gates(const layout& skeleton, const std::vector<kitty::dynamic_truth_table>& spec, const design_gates_params& params = {}, design_gates_stats* stats = nullptr)
 
 ```
 

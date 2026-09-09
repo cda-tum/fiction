@@ -25,13 +25,14 @@
 #include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
 #include "fiction/technology/sidb/surface_analysis.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
+#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdio>
 #include <optional>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <utility>
 
@@ -46,12 +47,11 @@ class unsuccessful_pr_error : public std::runtime_error
 {
   public:
     /**
-     * This class inherits from `std::runtime_error` and is used to signal
-     * errors related to unsuccessful placement and routing.
+     * @brief Copy the message for an unsuccessful placement and routing attempt.
      *
      * @param msg The error message describing the unsuccessful placement and routing.
      */
-    explicit unsuccessful_pr_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
+    explicit unsuccessful_pr_error(const std::string_view msg) : std::runtime_error(std::string{msg}) {}
 };
 /**
  * Exception thrown if the gate design was unsuccessful. Depending on the given gate design parameters and the defect
@@ -61,13 +61,11 @@ class unsuccessful_gate_design_error : public std::runtime_error
 {
   public:
     /**
-     * This explicit constructor initializes the base `std::runtime_error` class
-     * with the provided error message, ensuring that the exception contains
-     * detailed information about the reason for the gate design failure.
+     * @brief Copy the message for an unsuccessful gate design attempt.
      *
      * @param msg A descriptive message explaining why the gate design failed.
      */
-    explicit unsuccessful_gate_design_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
+    explicit unsuccessful_gate_design_error(const std::string_view msg) : std::runtime_error(std::string{msg}) {}
 };
 /**
  * This struct stores the parameters to design an SiDB circuit on a defective surface.
@@ -201,7 +199,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
 
                 // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
                 // blacklist and the process is rerun.
-                catch (const sidb::gate_design_exception<tt, GateLyt>& e)
+                catch (const sidb::gate_design_exception<GateLyt>& e)
                 {
                     gate_level_layout = std::nullopt;
                     black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
@@ -274,7 +272,7 @@ template <typename CellLyt, typename GateLyt>
 
     // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
     // blacklist and the process is rerun.
-    catch (const sidb::gate_design_exception<tt, GateLyt>& e)
+    catch (const sidb::gate_design_exception<GateLyt>& e)
     {
         throw unsuccessful_gate_design_error("Gate design was unsuccessful");
     }

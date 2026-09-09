@@ -34,6 +34,7 @@
 #include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/on_the_fly_gate_library.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
@@ -100,11 +101,10 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
     {
         on_the_fly_gate_library_params<cell<cell_lyt>> params{};
 
-        design_gates_params<cell<cell_lyt>> design_gate_params{};
+        design_gates_params design_gate_params{};
         design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-        design_gate_params.termination_cond =
-            design_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
-        design_gate_params.canvas = {{24, 17}, {34, 28}};
+        design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
+        design_gate_params.canvas           = {site_at_row(24, 17), site_at_row(34, 28)};
 
         SECTION("AND gate can be designed successfully")
         {
@@ -187,11 +187,10 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
     {
         on_the_fly_gate_library_params<cell<cell_lyt>> params{};
 
-        design_gates_params<cell<cell_lyt>> design_gate_params{};
+        design_gates_params design_gate_params{};
         design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-        design_gate_params.canvas                        = {{24, 17}, {34, 28}};
-        design_gate_params.termination_cond =
-            design_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+        design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
+        design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
 
         SECTION("use predefined gate implementation for complex gates (double wire and crossing)")
         {
@@ -211,12 +210,11 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
         }
         SECTION("Design all gates of the layout on-the-fly")
         {
-            design_gate_params.canvas                 = {{24, 17}, {29, 28}};
+            design_gate_params.canvas                 = {site_at_row(24, 17), site_at_row(29, 28)};
             design_gate_params.number_of_canvas_sidbs = 3;
-            design_gate_params.design_mode = design_gates_params<cell<cell_lyt>>::design_gates_mode::QUICKCELL;
-            design_gate_params.termination_cond =
-                design_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
-            params.design_gate_params = design_gate_params;
+            design_gate_params.design_mode            = design_gates_params::design_gates_mode::QUICKCELL;
+            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
+            params.design_gate_params           = design_gate_params;
             params.using_predefined_crossing_and_double_wire_if_possible =
                 on_the_fly_gate_library_params<cell<cell_lyt>>::complex_gate_design_policy::DESIGN_ON_THE_FLY;
 
@@ -274,12 +272,11 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             on_the_fly_gate_library_params<cell<cell_lyt>> params{};
 
-            design_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gates_params design_gate_params{};
             design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {{25, 19}, {32, 25}};
+            design_gate_params.canvas                        = {site_at_row(25, 19), site_at_row(32, 25)};
             design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond =
-                design_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
 
             params.design_gate_params = design_gate_params;
 
@@ -332,12 +329,11 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             on_the_fly_gate_library_params<cell<cell_lyt>> params{};
 
-            design_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gates_params design_gate_params{};
             design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {{24, 17}, {34, 28}};
+            design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
             design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond =
-                design_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
 
             params.design_gate_params = design_gate_params;
 
@@ -391,12 +387,11 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             on_the_fly_gate_library_params<cell<cell_lyt>> params{};
 
-            design_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gates_params design_gate_params{};
             design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {{24, 17}, {34, 28}};
+            design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
             design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond =
-                design_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
 
             params.design_gate_params = design_gate_params;
 
@@ -455,12 +450,11 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             on_the_fly_gate_library_params<cell<cell_lyt>> params{};
 
-            design_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gates_params design_gate_params{};
             design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {{24, 17}, {34, 28}};
+            design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
             design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond =
-                design_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
 
             params.design_gate_params = design_gate_params;
 
@@ -494,12 +488,11 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             on_the_fly_gate_library_params<cell<cell_lyt>> params{};
 
-            design_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gates_params design_gate_params{};
             design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {{24, 17}, {34, 28}};
+            design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
             design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond =
-                design_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
 
             params.design_gate_params = design_gate_params;
 
@@ -515,12 +508,11 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             on_the_fly_gate_library_params<cell<cell_lyt>> params{};
 
-            design_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gates_params design_gate_params{};
             design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {{24, 17}, {34, 28}};
+            design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
             design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond =
-                design_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
             design_gate_params.operational_params.op_condition =
                 is_operational_params::operational_condition::REJECT_KINKS;
 
@@ -558,12 +550,11 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             on_the_fly_gate_library_params<cell<cell_lyt>> params{};
 
-            design_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gates_params design_gate_params{};
             design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {{24, 17}, {34, 28}};
+            design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
             design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond =
-                design_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
 
             params.design_gate_params = design_gate_params;
 

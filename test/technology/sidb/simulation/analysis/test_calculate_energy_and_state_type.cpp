@@ -16,41 +16,46 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
+#include <fiction/technology/sidb/charge_distribution.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
-#include <fiction/traits.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 
 #include <limits>
 #include <set>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
 
-using layout = sidb_cell_clk_lyt_siqad;
-
 TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
 {
-    const auto bestagon_and = blueprints::bestagon_and_gate<layout>();
+    const auto bestagon_and = to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>());
 
     auto bii = bdl_input_iterator{bestagon_and};
 
     // set input index 1
     bii = 1;
 
-    const auto output_bdls = detect_bdl_pairs(*bii, technology<layout>::cell_type::OUTPUT);
+    const auto output_bdls = detect_bdl_pairs(*bii, dot_tag::OUTPUT);
 
     const auto simulation_results = quickexact(*bii);
 
@@ -99,4 +104,19 @@ TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
 
     CHECK_THAT(fourth_excited.first, Catch::Matchers::WithinAbs(1.2976, 0.0001));
     CHECK(fourth_excited.second == state_type::REJECTED);
+}
+
+TEST_CASE("Energy labeling propagates invalid lattice basis errors", "[calculate-energy-and-state-type]")
+{
+    layout       lyt{};
+    lattice_site invalid{};
+    invalid.z = 2;
+    lyt.assign_sidb(invalid, dot_tag::OUTPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::OUTPUT);
+    const std::vector distributions{charge_distribution{lyt}};
+    const auto        energies = calculate_energy_distribution(distributions);
+
+    CHECK_THROWS_AS(calculate_energy_and_state_type_with_kinks_rejected(lyt, energies, distributions,
+                                                                        std::vector{create_id_tt()}, 0, {}, {}),
+                    std::out_of_range);
 }

@@ -20,8 +20,10 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp>
@@ -49,6 +51,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
@@ -79,14 +82,14 @@ int main()  // NOLINT
     experiments::experiment<std::string, std::size_t, double, double, double, double, double, double> minimal_cost{
         "Minimal Cost", "gate", "#canvas SiDBs", "CT", "OPD", "MDC_arsenic", "MDC_vacancy", "BBR", "X_custom,min"};
 
-    const auto op_params     = is_operational_params{simulation_parameters{2, -0.32}};
-    auto       design_params = design_gates_params<cell<Lyt>>{};
+    const auto op_params     = is_operational_params{.sim_params = simulation_parameters{2, -0.32}};
+    auto       design_params = design_gates_params{};
 
-    design_params.operational_params = op_params;
-    design_params.design_mode = design_gates_params<cell<Lyt>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-    design_params.canvas      = {{17, 14, 0}, {21, 22, 0}};
+    design_params.operational_params     = op_params;
+    design_params.design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+    design_params.canvas                 = {site_at_row(17, 14), site_at_row(21, 22)};
     design_params.number_of_canvas_sidbs = 2;
-    design_params.termination_cond = design_gates_params<cell<Lyt>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
+    design_params.termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED;
     // QuickExact was used for the paper. However, ClusterComplete is more efficient and faster but does not influence
     // the results.
     design_params.operational_params.sim_engine = engine::CLUSTERCOMPLETE;
@@ -106,12 +109,13 @@ int main()  // NOLINT
         std::make_pair("inv", std::vector<tt>{create_not_tt()}),
         std::make_pair("inv_diag", std::vector<tt>{create_not_tt()})};
 
-    const critical_temperature_params ct_params{op_params};
+    const critical_temperature_params ct_params{.operational_params = op_params};
 
     // defining the operational domain parameters
-    operational_domain_params op_domain_params{op_params};
+    operational_domain_params op_domain_params{.operational_params = op_params};
 
-    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R},
+                                         {.dimension = sweep_parameter::LAMBDA_TF}};
 
     op_domain_params.sweep_dimensions[0].min  = 4.0;
     op_domain_params.sweep_dimensions[0].max  = 6.0;
@@ -120,7 +124,8 @@ int main()  // NOLINT
     op_domain_params.sweep_dimensions[1].max  = 6.0;
     op_domain_params.sweep_dimensions[1].step = 0.2;
 
-    const band_bending_resilience_params bbr_params{physical_population_stability_params{op_params.sim_params}};
+    const band_bending_resilience_params bbr_params{
+        .assess_population_stability_params = physical_population_stability_params{.sim_params = op_params.sim_params}};
 
     // for this experiment, we use two different defects: a vacancy in the Si lattice and an arsenic atom.
     // The physical properties are taken from the paper "Electrostatic landscape of a Hydrogen-terminated Silicon
@@ -158,7 +163,11 @@ int main()  // NOLINT
             std::vector<Lyt>   all_gates{};
             design_gates_stats efficient_stats{};
 
-            all_gates = design_gates(skeleton, truth_table, design_params, &efficient_stats);
+            for (const auto& gate :
+                 design_gates(to_sidb_layout(skeleton), truth_table, design_params, &efficient_stats))
+            {
+                all_gates.push_back(to_cell_level_layout<Lyt>(gate));
+            }
 
             if (all_gates.empty())
             {
