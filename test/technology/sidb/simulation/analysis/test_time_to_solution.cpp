@@ -27,16 +27,18 @@
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/traits.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <limits>
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
@@ -52,9 +54,9 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
     SECTION("layout with no SiDB placed")
     {
         constexpr simulation_parameters   params{2, -0.30};
-        const quicksim_params             qs_params{params};
+        const quicksim_params             qs_params{.sim_params = params};
         time_to_solution_stats            tts_stat_quickexact{};
-        constexpr time_to_solution_params tts_params_quickexact{exact_engine::QUICKEXACT};
+        constexpr time_to_solution_params tts_params_quickexact{.engine = exact_engine::QUICKEXACT};
         time_to_solution<TestType>(lyt, qs_params, tts_params_quickexact, &tts_stat_quickexact);
 
         CHECK(tts_stat_quickexact.algorithm == "QuickExact");
@@ -65,7 +67,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
 #if (FICTION_ALGLIB_ENABLED)
 
         time_to_solution_stats            tts_stat_clustercomplete{};
-        constexpr time_to_solution_params tts_params_clustercomplete{exact_engine::CLUSTERCOMPLETE};
+        constexpr time_to_solution_params tts_params_clustercomplete{.engine = exact_engine::CLUSTERCOMPLETE};
         time_to_solution<TestType>(lyt, qs_params, tts_params_clustercomplete, &tts_stat_clustercomplete);
 
         CHECK(tts_stat_clustercomplete.algorithm == "ClusterComplete");
@@ -76,7 +78,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
 #endif  // FICTION_ALGLIB_ENABLED
 
         time_to_solution_stats        tts_stat_exgs{};
-        const time_to_solution_params tts_params_exgs{exact_engine::EXGS};
+        const time_to_solution_params tts_params_exgs{.engine = exact_engine::EXGS};
         time_to_solution<TestType>(lyt, qs_params, tts_params_exgs, &tts_stat_exgs);
 
         CHECK(tts_stat_exgs.algorithm == "ExGS");
@@ -95,9 +97,9 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         lyt.assign_cell_type({12, 3, 0}, TestType::cell_type::NORMAL);
 
         constexpr simulation_parameters params{2, -0.30};
-        const quicksim_params           qs_params{params};
+        const quicksim_params           qs_params{.sim_params = params};
 
-        constexpr time_to_solution_params tts_params_exgs{exact_engine::EXGS};
+        constexpr time_to_solution_params tts_params_exgs{.engine = exact_engine::EXGS};
         time_to_solution_stats            tts_stat_exgs{};
         time_to_solution<TestType>(lyt, qs_params, tts_params_exgs, &tts_stat_exgs);
 
@@ -106,7 +108,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
         time_to_solution_stats        tts_stat_quickexact{};
-        const time_to_solution_params tts_params{exact_engine::QUICKEXACT};
+        const time_to_solution_params tts_params{.engine = exact_engine::QUICKEXACT};
         time_to_solution<TestType>(lyt, qs_params, tts_params, &tts_stat_quickexact);
 
         REQUIRE(tts_stat_quickexact.acc == 100.0);
@@ -125,7 +127,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
 #if (FICTION_ALGLIB_ENABLED)
 
         time_to_solution_stats            tts_stat_clustercomplete{};
-        constexpr time_to_solution_params tts_params_clustercomplete{exact_engine::CLUSTERCOMPLETE};
+        constexpr time_to_solution_params tts_params_clustercomplete{.engine = exact_engine::CLUSTERCOMPLETE};
         time_to_solution<TestType>(lyt, qs_params, tts_params_clustercomplete, &tts_stat_clustercomplete);
 
         REQUIRE(tts_stat_clustercomplete.acc == 100);
@@ -167,10 +169,10 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
 
         constexpr simulation_parameters params{2, -0.32};
 
-        quicksim_params qs_params{params};
+        quicksim_params qs_params{.sim_params = params};
         qs_params.iteration_steps = 10;
 
-        constexpr time_to_solution_params tts_params_exgs{exact_engine::EXGS};
+        constexpr time_to_solution_params tts_params_exgs{.engine = exact_engine::EXGS};
         time_to_solution_stats            tts_stat_exgs{};
         time_to_solution<TestType>(lyt, qs_params, tts_params_exgs, &tts_stat_exgs);
 
@@ -178,7 +180,7 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
         CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
         time_to_solution_stats            tts_stat_quickexact{};
-        constexpr time_to_solution_params tts_params{exact_engine::QUICKEXACT};
+        constexpr time_to_solution_params tts_params{.engine = exact_engine::QUICKEXACT};
         time_to_solution<TestType>(lyt, qs_params, tts_params, &tts_stat_quickexact);
 
         CHECK(tts_stat_quickexact.time_to_solution > 0.0);
@@ -217,10 +219,10 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
         lyt.assign_cell_type({12, 6, 0}, TestType::cell_type::NORMAL);
 
         constexpr simulation_parameters params{3, -0.32};
-        const quicksim_params           qs_params{params};
+        const quicksim_params           qs_params{.sim_params = params};
 
-        constexpr std::size_t         number_of_repetitions = 100;
-        std::vector<result<TestType>> simulation_results_quicksim{};
+        constexpr std::size_t                number_of_repetitions = 100;
+        std::vector<legacy_result<TestType>> simulation_results_quicksim{};
         simulation_results_quicksim.reserve(number_of_repetitions);
 
         for (auto i = 0u; i < number_of_repetitions; i++)
@@ -232,7 +234,7 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
         }
 
         const auto simulation_results_quickexact =
-            quickexact(lyt, quickexact_params<cell<TestType>>{qs_params.sim_params});
+            quickexact(lyt, quickexact_params{.sim_params = qs_params.sim_params});
 
         time_to_solution_stats st{};
         time_to_solution_for_given_simulation_results(simulation_results_quickexact, simulation_results_quicksim, 0.997,
@@ -265,7 +267,7 @@ TEMPLATE_TEST_CASE("time-to-solution test with fewer negatively charged SiDBs in
         lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
 
         constexpr simulation_parameters params{2, -0.05};
-        const quicksim_params           qs_params{params};
+        const quicksim_params           qs_params{.sim_params = params};
 
         auto tts_stats_quicksim = time_to_solution_stats{};
 
@@ -273,4 +275,46 @@ TEMPLATE_TEST_CASE("time-to-solution test with fewer negatively charged SiDBs in
 
         CHECK(tts_stats_quicksim.time_to_solution < 10.0);
     }
+}
+
+TEST_CASE("Time-to-solution counts failed and absent heuristic attempts", "[time-to-solution]")
+{
+    sidb_100_cell_clk_lyt_siqad lyt{};
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    const quicksim_params qs_params{.sim_params      = simulation_parameters{2, -0.32},
+                                    .iteration_steps = 1,
+                                    .number_threads  = 1,
+                                    .timeout         = 0};
+    REQUIRE_FALSE(quicksim(lyt, qs_params).has_value());
+
+    time_to_solution_stats stats{};
+    time_to_solution(lyt, qs_params, time_to_solution_params{.repetitions = 3}, &stats);
+    CHECK(std::isinf(stats.time_to_solution));
+    CHECK_THAT(stats.acc, Catch::Matchers::WithinAbs(0.0, 1e-12));
+    CHECK(stats.mean_single_runtime > 0.0);
+
+    time_to_solution(lyt, qs_params, time_to_solution_params{.repetitions = 0}, &stats);
+    CHECK(std::isinf(stats.time_to_solution));
+    CHECK_THAT(stats.acc, Catch::Matchers::WithinAbs(0.0, 1e-12));
+    CHECK_THAT(stats.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 1e-12));
+    CHECK(stats.algorithm == "QuickExact");
+}
+
+TEST_CASE("Time-to-solution averages successful and failed runtimes", "[time-to-solution]")
+{
+    sidb_100_cell_clk_lyt_siqad lyt{};
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    const auto exact              = quickexact(lyt);
+    auto       successful         = exact;
+    successful.simulation_runtime = std::chrono::seconds{2};
+    legacy_result<sidb_100_cell_clk_lyt_siqad> failed{};
+    failed.simulation_runtime = std::chrono::seconds{6};
+
+    time_to_solution_stats stats{};
+    time_to_solution_for_given_simulation_results(exact, std::vector{successful, failed}, 0.997, &stats);
+    CHECK_THAT(stats.acc, Catch::Matchers::WithinAbs(50.0, 1e-12));
+    CHECK_THAT(stats.mean_single_runtime, Catch::Matchers::WithinAbs(4.0, 1e-12));
+    CHECK_THAT(stats.time_to_solution, Catch::Matchers::WithinAbs(4.0 * std::log(0.003) / std::log(0.5), 1e-12));
 }

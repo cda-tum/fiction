@@ -21,6 +21,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
     `sidb::layout` stores tagged dots and defects without templates. `to_sidb_layout` converts
     Cartesian cell-level layouts
+  - `sidb::charge_distribution` assigns one charge state per SiDB and carries its energy;
+    `sidb::simulation::result` stores one layout plus its physically valid configurations
+  - `sidb::simulation::potential_landscape` stores static electrostatics for reuse across
+    charge configurations and simulation worker threads
 
 - Documentation:
 
@@ -41,12 +45,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `lattice`, `lattice_site`, `sidb_layout` (the lattice-based layout), `read_sqd_layout`,
     `read_surface_defects`, and the `sidb_layout` overloads of `write_sqd_layout` and
     `write_sidb_layout_svg`
+  - Exposed `charge_distribution`, `potential_landscape`, charge transition thresholds,
+    and `sidb_simulation_result`; simulation engines and consumers accept the new types
 
 - Tooling:
 
   - Added EditorConfig settings that match the repository's formatters.
 
 ### Changed
+
+- Algorithms:
+  - **Breaking:** _QuickExact_, _QuickSim_, _ExGS_, _ClusterComplete_, and _Ground State Space_
+    simulate `sidb::layout` and return the non-template `sidb::simulation::result`. The former
+    result remains available as `legacy_result<Lyt>` while consumers migrate
+  - _QuickSim_ returns `std::nullopt` for layouts with charged surface defects
+  - On the same machine, _ClusterComplete_ runs 2–4× faster (29-SiDB crossing: 11.4 → 5.1 ms;
+    56-SiDB NAND: 19.7 → 3.3 s). _QuickSim_ improves by one third, _ExGS_ by one quarter with
+    10,000× less heap traffic, and _QuickExact_ holds speed with 28× less heap traffic
+  - Potential landscape construction computes each symmetric SiDB interaction once
 
 - Continuous integration:
   - Reusable workflows now use GitHub's self-repository reference syntax.
@@ -59,11 +75,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB layouts use dot operations and `dot_tag` for dot roles. `assign_sidb` defaults to the
     `NORMAL` tag. Lattice-site constructors
     take `int32_t` coordinates and an `int8_t` basis index.
+  - Simulation results store charge states and energy beside one shared layout and potential
+    landscape instead of copying a `charge_distribution_surface` for every configuration
 
 - Documentation:
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
+
+- I/O:
+  - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
+    `charge_distribution`
 
 - **Breaking:** Restructured `include/fiction/` so that the directory a header lives in tells
   you what the header is about, and introduced nested namespaces mirroring that tree
@@ -205,7 +227,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Ground State Space reports multiset limits using the potential landscape's charge base.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
+  - SiDB simulation engines and their consumers now propagate errors from checked charge and potential operations.
+  - Time-to-solution now counts failed QuickSim attempts and their elapsed runtime, and handles empty samples.
+  - ClusterComplete now assigns distinct queue indices to workers without initial work.
+  - Simulation comparison and output now validate distribution sites. Ground State Space uses the landscape's physical parameters.
+  - Parallel SiDB consumers now propagate worker errors and reject QuickSim with charged defects.
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
@@ -213,6 +241,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+  - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.
+  - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
+    Potential landscapes validate basis indices even for isolated SiDBs and defects.
+  - SiDB cell conversion now rejects coordinates outside the target coordinate range.
   - Lattice sites now reject invalid basis indices in construction, geometry queries, and cube conversion.
   - SiDB row conversion and area iteration now handle coordinate limits without signed overflow;
     defect influence clips to representable sites, and cube conversion rejects rows outside its range

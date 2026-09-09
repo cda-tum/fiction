@@ -29,18 +29,24 @@
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace fiction::sidb::simulation::analysis
 {
 
+/**
+ * Parameters for measuring heuristic accuracy and time-to-solution.
+ */
 struct time_to_solution_params
 {
     /**
@@ -77,7 +83,7 @@ struct time_to_solution_stats
      */
     double acc{};
     /**
-     * Average single simulation runtime in seconds.
+     * Average runtime of all heuristic attempts in seconds, including failed attempts.
      */
     double mean_single_runtime{};
     /**
@@ -100,7 +106,8 @@ struct time_to_solution_stats
     }
 };
 /**
- * This function determines the time-to-solution (TTS) and the accuracy (acc) of the *QuickSim* algorithm.
+ * Determines the time-to-solution (TTS) and accuracy of *QuickSim*. Every attempt contributes to the accuracy and
+ * mean runtime. Failed attempts use elapsed wall time; successful attempts retain the engine runtime.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout that is used for the simulation.
@@ -110,7 +117,7 @@ struct time_to_solution_stats
  */
 template <typename Lyt>
 void time_to_solution(const Lyt& lyt, const sidb::simulation::engines::quicksim_params& qs_params,
-                      const time_to_solution_params& tts_params = {}, time_to_solution_stats* ps = nullptr) noexcept
+                      const time_to_solution_params& tts_params = {}, time_to_solution_stats* ps = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -132,19 +139,20 @@ void time_to_solution(const Lyt& lyt, const sidb::simulation::engines::quicksim_
         return;
     }
 
-    sidb::simulation::result<Lyt> simulation_result{};
+    sidb::simulation::legacy_result<Lyt> simulation_result{};
     if (tts_params.engine == exact_engine::QUICKEXACT)
     {
-        const sidb::simulation::engines::quickexact_params<cell<Lyt>> params{
-            qs_params.sim_params,
-            sidb::simulation::engines::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+        const sidb::simulation::engines::quickexact_params params{
+            .sim_params = qs_params.sim_params,
+            .base_number_detection =
+                sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
         st.algorithm      = sidb::simulation::engine_name(exact_engine::QUICKEXACT);
         simulation_result = sidb::simulation::engines::quickexact(lyt, params);
     }
 #if (FICTION_ALGLIB_ENABLED)
     else if (tts_params.engine == exact_engine::CLUSTERCOMPLETE)
     {
-        const sidb::simulation::engines::clustercomplete_params<cell<Lyt>> params{qs_params.sim_params};
+        const sidb::simulation::engines::clustercomplete_params params{.sim_params = qs_params.sim_params};
         st.algorithm      = sidb::simulation::engine_name(exact_engine::CLUSTERCOMPLETE);
         simulation_result = sidb::simulation::engines::clustercomplete(lyt, params);
     }
@@ -155,22 +163,20 @@ void time_to_solution(const Lyt& lyt, const sidb::simulation::engines::quicksim_
         simulation_result = sidb::simulation::engines::exhaustive_ground_state_simulation(lyt, qs_params.sim_params);
     }
 
-    std::vector<sidb::simulation::result<Lyt>> simulation_results_quicksim{};
+    std::vector<sidb::simulation::legacy_result<Lyt>> simulation_results_quicksim{};
     simulation_results_quicksim.reserve(tts_params.repetitions);
 
-    for (auto i = 0u; i < tts_params.repetitions; ++i)
+    for (uint64_t i = 0; i < tts_params.repetitions; ++i)
     {
-        if (const auto result = sidb::simulation::engines::quicksim<Lyt>(lyt, qs_params))
+        mockturtle::stopwatch<>::duration elapsed{};
+        auto                              heuristic = mockturtle::call_with_stopwatch(
+            elapsed, [&] { return sidb::simulation::engines::quicksim(lyt, qs_params); });
+        if (!heuristic)
         {
-            if (!result.has_value())
-            {
-                simulation_results_quicksim.push_back(sidb::simulation::result<Lyt>{});
-            }
-            else
-            {
-                simulation_results_quicksim.push_back(*result);
-            }
+            heuristic.emplace();
+            heuristic->simulation_runtime = elapsed;
         }
+        simulation_results_quicksim.push_back(std::move(*heuristic));
     }
 
     time_to_solution_for_given_simulation_results(simulation_result, simulation_results_quicksim,
@@ -185,9 +191,10 @@ void time_to_solution(const Lyt& lyt, const sidb::simulation::engines::quicksim_
 /**
  * This function calculates the Time-to-Solution (TTS) by analyzing the simulation results of a heuristic algorithm
  * in comparison to those of an exact algorithm. It provides further statistical metrics, including the accuracy of the
- * heuristic algorithm, and individual runtimes.
+ * heuristic algorithm, and individual runtimes. An empty sample yields zero accuracy, zero mean heuristic runtime,
+ * and infinite time-to-solution.
  *
- * @tparam Lyt SiDB ell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  * @param results_exact Simulation results of the exact algorithm.
  * @param results_heuristic Simulation of the heuristic for which the TTS is determined.
  * @param confidence_level Confidence level for the TTS computation. The confidence level represents the probability
@@ -198,15 +205,27 @@ void time_to_solution(const Lyt& lyt, const sidb::simulation::engines::quicksim_
  * to be stored.
  */
 template <typename Lyt>
-void time_to_solution_for_given_simulation_results(const sidb::simulation::result<Lyt>&              results_exact,
-                                                   const std::vector<sidb::simulation::result<Lyt>>& results_heuristic,
-                                                   const double            confidence_level = 0.997,
-                                                   time_to_solution_stats* ps               = nullptr) noexcept
+void time_to_solution_for_given_simulation_results(
+    const sidb::simulation::legacy_result<Lyt>&              results_exact,
+    const std::vector<sidb::simulation::legacy_result<Lyt>>& results_heuristic, const double confidence_level = 0.997,
+    time_to_solution_stats* ps = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     time_to_solution_stats st{};
+
+    if (results_heuristic.empty())
+    {
+        st.single_runtime_exact = mockturtle::to_seconds(results_exact.simulation_runtime);
+        st.time_to_solution     = std::numeric_limits<double>::infinity();
+        if (ps != nullptr)
+        {
+            st.algorithm = ps->algorithm;
+            *ps          = st;
+        }
+        return;
+    }
 
     auto        total_runtime_heuristic = 0.0;
     std::size_t gs_count                = 0;

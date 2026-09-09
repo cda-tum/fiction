@@ -20,14 +20,16 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/charge_distribution.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp"
 #include "fiction/technology/sidb/simulation/engines/ground_state_space.hpp"
+#include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
@@ -53,63 +55,63 @@ namespace fiction::sidb::simulation::engines
 {
 
 /**
- * The struct containing the parameters both passed on to pre-simulator Ground State Space, and used during simulation.
+ * @brief The struct containing the parameters both passed on to pre-simulator Ground State Space, and used during
+ * simulation.
  */
-template <typename CellType = layouts::coords::offset>
 struct clustercomplete_params
 {
     /**
-     * This enum class provides meaningful options for configuring the reporting of the *Ground State Space* statistics.
-     * These statistic may be used especially to configure the validity witness partitioning options for *Ground State
-     * Space*, that may impair runtimes when set too high, but could provide a large benefit to the complexity of the
-     * unfolding process of large simulation problems by performing more involved pruning procedures in the construction
-     * stage.
+     * @brief This enum class provides meaningful options for configuring the reporting of the *Ground State Space*
+     * statistics. These statistic may be used especially to configure the validity witness partitioning options for
+     * *Ground State Space*, that may impair runtimes when set too high, but could provide a large benefit to the
+     * complexity of the unfolding process of large simulation problems by performing more involved pruning procedures
+     * in the construction stage.
      */
     enum class ground_state_space_reporting : uint8_t
     {
         /**
-         * Enabling this option will output *Ground State Space* statistics to the standard output.
+         * @brief Enabling this option will output *Ground State Space* statistics to the standard output.
          */
         ON,
         /**
-         * Disabling this option will suppress the output of *Ground State Space* statistics.
+         * @brief Disabling this option will suppress the output of *Ground State Space* statistics.
          */
         OFF
     };
     /**
-     * Physical simulation parameters.
+     * @brief Physical simulation parameters.
      */
     sidb::model::simulation_parameters sim_params{};
     /**
-     * Local external electrostatic potentials (e.g., locally applied electrodes).
+     * @brief Local external electrostatic potentials (e.g., locally applied electrodes).
      */
-    std::unordered_map<CellType, double> local_external_potential = {};
+    std::unordered_map<lattice_site, double> local_external_potential = {};
     /**
-     * Global external electrostatic potential. Value is applied on each cell in the layout.
+     * @brief Global external electrostatic potential. Value is applied to each dot in the layout.
      */
     double global_potential = 0;
     /**
-     * This specifies the maximum cluster size for which *Ground State Space* will solve an NP-complete sub-problem
-     * exhaustively. The sets of SiDBs that witness local population stability for each respective charge state may be
-     * partitioned into disjoint sets such that the number of required witnesses for each respective charge state is
-     * satisfied. If no such partition exists, the multiset charge configuration associated with the requirements may be
-     * rejected.
+     * @brief This specifies the maximum cluster size for which *Ground State Space* will solve an NP-complete
+     * sub-problem exhaustively. The sets of SiDBs that witness local population stability for each respective charge
+     * state may be partitioned into disjoint sets such that the number of required witnesses for each respective charge
+     * state is satisfied. If no such partition exists, the multiset charge configuration associated with the
+     * requirements may be rejected.
      */
     uint64_t validity_witness_partitioning_max_cluster_size_gss = 6;
     /**
-     * The complexity is of validity witness partitioning bounded by a factorial in the number of overlapping witnesses.
-     * This parameter thus allows the validity witness partitioning procedure to perform the reduction to overlapping
-     * witnesses for larger cluster sizes that could be runtime-impairing, then limiting specifically the length of the
-     * input to the factorial call.
+     * @brief The complexity is of validity witness partitioning bounded by a factorial in the number of overlapping
+     * witnesses. This parameter thus allows the validity witness partitioning procedure to perform the reduction to
+     * overlapping witnesses for larger cluster sizes that could be runtime-impairing, then limiting specifically the
+     * length of the input to the factorial call.
      */
     uint64_t num_overlapping_witnesses_limit_gss = 6;
     /**
-     * Number of threads to make available to *ClusterComplete* for the unfolding stage.
+     * @brief Number of threads to make available to *ClusterComplete* for the unfolding stage.
      */
     uint64_t available_threads = std::thread::hardware_concurrency();
     /**
-     * Option to decide if the *Ground State Space* statistics are reported to the standard output. By default, this
-     * option is disabled.
+     * @brief Option to decide if the *Ground State Space* statistics are reported to the standard output. By default,
+     * this option is disabled.
      */
     ground_state_space_reporting report_gss_stats = ground_state_space_reporting::OFF;
 };
@@ -117,34 +119,38 @@ struct clustercomplete_params
 namespace detail
 {
 
-template <typename Lyt>
+/**
+ * @brief Unfolds the pruned cluster hierarchy into physically valid charge distributions.
+ */
 class clustercomplete_impl
 {
   public:
     /**
-     * Constructor.
+     * @brief Constructor.
      *
      * @param lyt Layout to simulate.
      * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
      */
-    clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
+    clustercomplete_impl(const layout& lyt, const clustercomplete_params& params) :
             available_threads{std::max(uint64_t{1}, params.available_threads)},
-            charge_layout{initialize_charge_layout(lyt, params)},
+            landscape{lyt, params.sim_params, params.local_external_potential, params.global_potential},
             mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
                                  -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
                                  fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_plus(),
                                  -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_plus()}
     {}
     /**
-     * This function performs the *ClusterComplete* simulation; first executing the *Ground State Space* construction,
-     * then destructing the sim_result into the set of all physically valid charge distributions that are returned.
+     * @brief This function performs the *ClusterComplete* simulation; first executing the *Ground State Space*
+     * construction, then destructing the sim_result into the set of all physically valid charge distributions that are
+     * returned.
      *
      * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
      * @return Results of the exact simulation.
      */
-    [[nodiscard]] sidb::simulation::result<Lyt> run(const clustercomplete_params<cell<Lyt>>& params) noexcept
+    [[nodiscard]] result run(const clustercomplete_params& params)
     {
         sim_result.sim_params     = params.sim_params;
+        sim_result.lyt            = landscape.get_layout();
         sim_result.algorithm_name = "ClusterComplete";
         sim_result.additional_simulation_parameters.emplace("global_potential", params.global_potential);
         sim_result.additional_simulation_parameters.emplace("validity_witness_partitioning_limit",
@@ -154,16 +160,20 @@ class clustercomplete_impl
 
         // run Ground State Space to obtain the complete hierarchical charge space
         const ground_state_space_results& gss_stats = ground_state_space(
-            charge_layout,
-            ground_state_space_params{params.sim_params, params.validity_witness_partitioning_max_cluster_size_gss,
-                                      params.num_overlapping_witnesses_limit_gss});
+            landscape,
+            ground_state_space_params{
+                .sim_params                              = params.sim_params,
+                .witness_partitioning_cluster_size_limit = params.validity_witness_partitioning_max_cluster_size_gss,
+                .num_overlapping_witnesses_limit_gss     = params.num_overlapping_witnesses_limit_gss});
 
         if (!gss_stats.top_cluster)
         {
+            sim_result.simulation_runtime += gss_stats.runtime;
+
             return sim_result;
         }
 
-        if (params.report_gss_stats == clustercomplete_params<cell<Lyt>>::ground_state_space_reporting::ON)
+        if (params.report_gss_stats == clustercomplete_params::ground_state_space_reporting::ON)
         {
             gss_stats.report();
         }
@@ -232,31 +242,31 @@ class clustercomplete_impl
 
   private:
     /**
-     * Forward declaration of the worker struct.
+     * @brief Forward declaration of the worker struct.
      */
     struct worker;
     /**
-     * Simulation results.
+     * @brief Simulation results.
      */
-    sidb::simulation::result<Lyt> sim_result{};
+    result sim_result{};
     /**
-     * Number of available threads.
+     * @brief Number of available threads.
      */
     const uint64_t available_threads;
     /**
-     * Vector containing all workers.
+     * @brief Vector containing all workers.
      */
     std::vector<std::unique_ptr<worker>> workers{};
     /**
-     * Mutex to protect the simulation results.
+     * @brief Mutex to protect the simulation results.
      */
     std::mutex mutex_to_protect_the_simulation_results;
     /**
-     * The base layout that is used to create charge distribution surface copies.
+     * @brief Read-only electrostatics shared by the simulation workers.
      */
-    const sidb::surfaces::charge_distribution_surface<Lyt> charge_layout;
+    const potential_landscape landscape;
     /**
-     * Globally available array of bounds that section the band gap, used for pruning.
+     * @brief Globally available array of bounds that section the band gap, used for pruning.
      */
     const std::array<double, 4> mu_bounds_with_error;
 
@@ -265,9 +275,9 @@ class clustercomplete_impl
     ///
 
     /**
-     * Helper function for obtaining the stored lower or upper bound on the electrostatic potential that SiDBs in the
-     * given projector state--i.e., a cluster together with an associated multiset charge configuration--collectively
-     * project onto the given SiDB.
+     * @brief Helper function for obtaining the stored lower or upper bound on the electrostatic potential that SiDBs in
+     * the given projector state--i.e., a cluster together with an associated multiset charge
+     * configuration--collectively project onto the given SiDB.
      *
      * @tparam bound Bound to obtain (lower/upper).
      * @param pst Projector state.
@@ -281,9 +291,11 @@ class clustercomplete_impl
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).pot_val;
     }
     /**
-     * Returns `true` if and only if the given potential bound closes out SiDB-.
+     * @brief Returns `true` if and only if the given potential bound closes out SiDB-.
      *
      * @param pot_bound Potential lower bound.
+     *
+     * @return Whether the potential lower bound excludes the negative charge state.
      */
     [[nodiscard]] constexpr bool fail_onto_negative_charge(const double pot_bound) const noexcept
     {
@@ -291,7 +303,7 @@ class clustercomplete_impl
         return pot_bound > mu_bounds_with_error.at(0);
     }
     /**
-     * Performs V < -e - mu+.
+     * @brief Performs V < -e - mu+.
      *
      * @param pot_bound Potential upper bound.
      * @return `true` if and only if the given potential bound closes out SiDB+.
@@ -301,7 +313,7 @@ class clustercomplete_impl
         return pot_bound < mu_bounds_with_error.at(3);
     }
     /**
-     * Performs V < -e - mu-.
+     * @brief Performs V < -e - mu-.
      *
      * @param pot_bound Potential upper bound.
      * @return `true` if and only if the given potential bound closes out SiDB0.
@@ -311,7 +323,7 @@ class clustercomplete_impl
         return pot_bound < mu_bounds_with_error.at(1);
     }
     /**
-     * Performs V > e - mu+.
+     * @brief Performs V > e - mu+.
      *
      * @param pot_bound Potential lower bound.
      * @return `true` if and only if the given potential bound closes out SiDB0.
@@ -321,40 +333,9 @@ class clustercomplete_impl
         return pot_bound > mu_bounds_with_error.at(2);
     }
     /**
-     * Function to initialize the charge layout.
-     *
-     * @param lyt Layout to simulate.
-     * @param params Parameters for ClusterComplete.
-     * @return The charge layout initializes with defects specified in the given parameters.
-     */
-    [[nodiscard]] static sidb::surfaces::charge_distribution_surface<Lyt>
-    initialize_charge_layout(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept
-    {
-        sidb::surfaces::charge_distribution_surface<Lyt> cds{lyt};
-        cds.assign_physical_parameters(params.sim_params);
-
-        // assign defects if applicable
-        if constexpr (has_foreach_sidb_defect_v<Lyt>)
-        {
-            lyt.foreach_sidb_defect(
-                [&](const auto& cd)
-                {
-                    if (const auto& [cell, defect] = cd; defect.type != sidb::model::defect_type::NONE)
-                    {
-                        cds.add_sidb_defect_to_potential_landscape(cell, lyt.get_defect(cell));
-                    }
-                });
-        }
-
-        cds.assign_local_external_potential(params.local_external_potential);
-        cds.assign_global_external_potential(params.global_potential);
-
-        return cds;
-    }
-    /**
-     * This function performs an analysis that is crucial to the *ClusterComplete*'s efficiency: as the *Ground State
-     * Space* construct is broken down, combinations of multiset charge configurations are tried together in more detail
-     * than in the construction preceding this second phase of the simulation.
+     * @brief This function performs an analysis that is crucial to the *ClusterComplete*'s efficiency: as the *Ground
+     * State Space* construct is broken down, combinations of multiset charge configurations are tried together in more
+     * detail than in the construction preceding this second phase of the simulation.
      *
      * @param cl_state The clustering state that bundles a slice (i.e., a clustering) in the cluster hierarchy
      * along with respective projection states (i.e., multiset charge configurations) together with a store of
@@ -404,59 +385,43 @@ class clustercomplete_impl
         return true;
     }
     /**
-     * This function handles performs the last analysis step before collecting a simulation sim_result. In order to
-     * judge whether a population stable charge distribution is physically valid, the *configuration stability* needs to
-     * be tested. If this criterion passes, the charge distribution is added to the simulation results.
+     * @brief This function handles performs the last analysis step before collecting a simulation sim_result. In order
+     * to judge whether a population stable charge distribution is physically valid, the *configuration stability* needs
+     * to be tested. If this criterion passes, the charge distribution is added to the simulation results.
      *
      * @param cl_state A clustering state consisting of only singleton clusters along with associated charge
      * states that make up a charge distribution that conforms to the *population stability* criterion.
      */
-    void add_if_configuration_stability_is_met(const clustering_state& cl_state) noexcept
+    void add_if_configuration_stability_is_met(const clustering_state& cl_state)
     {
-        sidb::surfaces::charge_distribution_surface charge_layout_copy{charge_layout};
+        charge_distribution cd{landscape.sites(), sidb::model::charge_state::NEGATIVE};
+        std::vector<double> local_internal_potential(landscape.num_sidbs(), 0.0);
 
-        // convert bottom clustering state to charge distribution
         for (const auto& pst : cl_state.proj_states)
         {
             const uint64_t sidb_ix = get_singleton_ix(pst->cluster);
-            charge_layout_copy.assign_charge_state_by_index(sidb_ix,
-                                                            singleton_multiset_conf_to_charge_state(pst->multiset_conf),
-                                                            sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
 
-            assert(charge_layout_copy.get_local_external_potential_by_index(sidb_ix).has_value() &&
-                   "Local external potential at SiDB is undefined");
+            cd.assign_charge_state_by_index(sidb_ix, singleton_multiset_conf_to_charge_state(pst->multiset_conf));
 
-            charge_layout_copy.assign_local_internal_potential_by_index(
-                sidb_ix, -cl_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
-                             *charge_layout_copy.get_local_external_potential_by_index(sidb_ix));
+            local_internal_potential[sidb_ix] =
+                -cl_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) - landscape.local_external_potential(sidb_ix);
         }
 
-        if (!charge_layout_copy.is_configuration_stable())
+        if (!landscape.is_configuration_stable(cd, local_internal_potential))
         {
             return;
         }
 
-        // population stability is a given when this function is called; hence the charge distribution is physically
-        // valid when configuration stability is met
-        charge_layout_copy.declare_physically_valid();
-
-        if constexpr (is_sidb_defect_surface_v<Lyt>)
-        {
-            charge_layout_copy.update_local_defect_potential();
-        }
-
-        charge_layout_copy.recompute_electrostatic_potential_energy();
-
-        charge_layout_copy.charge_distribution_to_index();
+        cd.assign_energy(landscape.energy(cd, local_internal_potential));
 
         {
             const std::scoped_lock lock{mutex_to_protect_the_simulation_results};
 
-            sim_result.charge_distributions.emplace_back(charge_layout_copy);
+            sim_result.charge_distributions.push_back(std::move(cd));
         }
     }
     /**
-     * Finds the cluster of the maximum size in the clustering associated with the input.
+     * @brief Finds the cluster of the maximum size in the clustering associated with the input.
      *
      * @param proj_states A vector of projector states that forms a clustering when only the respectively contained
      * clusters are considered.
@@ -480,7 +445,7 @@ class clustercomplete_impl
         return max_pst_ix;
     }
     /**
-     * Before the parent projector state may be specialized to a specific composition of its children, first the
+     * @brief Before the parent projector state may be specialized to a specific composition of its children, first the
      * projections of the parent must be subtracted. The parent projector state is moved out and returned.
      *
      * @param cl_state The clustering state from which the parent projector state should be taken out.
@@ -506,7 +471,7 @@ class clustercomplete_impl
         return parent_pst;
     }
     /**
-     * After all specializations have been tried, the clustering state needs to un-specialize in order for other
+     * @brief After all specializations have been tried, the clustering state needs to un-specialize in order for other
      * specializations to take place later. This action undoes the action performed by the function above, adding the
      * given parent projector state and putting it back at the given index.
      *
@@ -529,8 +494,8 @@ class clustercomplete_impl
         std::swap(cl_state.proj_states.back(), cl_state.proj_states[parent_pst_ix]);
     }
     /**
-     * A composition is added to the given clustering state, i.e., the projector states in the composition are added to
-     * the clustering state and the potential bounds store is updated accordingly.
+     * @brief A composition is added to the given clustering state, i.e., the projector states in the composition are
+     * added to the clustering state and the potential bounds store is updated accordingly.
      *
      * @param cl_state Clustering state to which the given composition should be added.
      * @param composition The composition that needs to be added to the given clustering state.
@@ -546,8 +511,8 @@ class clustercomplete_impl
         }
     }
     /**
-     * A composition is removed from the given clustering state, i.e., the projector states in the compositions are
-     * removed from the clustering state and the potential bounds store is updated accordingly.
+     * @brief A composition is removed from the given clustering state, i.e., the projector states in the compositions
+     * are removed from the clustering state and the potential bounds store is updated accordingly.
      *
      * @param cl_state Clustering state from which the given composition should be removed.
      * @param composition The composition that needs to be removed from the given clustering state.
@@ -568,7 +533,7 @@ class clustercomplete_impl
     ///
 
     /**
-     * This recursive function is the heart of the *ClusterComplete* destruction. The given clustering state is
+     * @brief This recursive function is the heart of the *ClusterComplete* destruction. The given clustering state is
      * dissected at the largest cluster to each possible specialization of it, which then enters the recursive call with
      * the clustering state modified to have a set of sibling children replacing their direct parent. For each
      * specialization, appropriate updates are made to the potential bounds store that is part of the clustering state.
@@ -584,7 +549,7 @@ class clustercomplete_impl
      * @param cl_state A clustering state that holds a specific combination of multiset charge configurations as
      * projector states of which the respectively associated clusters form a clustering in the cluster hierarchy.
      */
-    void add_physically_valid_charge_configurations(clustering_state& cl_state) noexcept
+    void add_physically_valid_charge_configurations(clustering_state& cl_state)
     {
         // check for pruning
         if (!meets_population_stability_criterion(cl_state))
@@ -593,7 +558,7 @@ class clustercomplete_impl
         }
 
         // check if all clusters are singletons
-        if (cl_state.proj_states.size() == charge_layout.num_cells())
+        if (cl_state.proj_states.size() == landscape.num_sidbs())
         {
             add_if_configuration_stability_is_met(cl_state);
             return;
@@ -622,22 +587,22 @@ class clustercomplete_impl
         add_parent(cl_state, max_pst_ix, std::move(max_pst));
     }
     /**
-     * After the *Ground State Space* construction was completed and the top cluster was returned, this function splits
-     * the charge space of the top cluster into sections for the individual threads to handle. Each are decomposed
-     * recursively to generate physically valid charge distributions that emerge from increasingly specializing multiset
-     * charge configurations.
+     * @brief After the *Ground State Space* construction was completed and the top cluster was returned, this function
+     * splits the charge space of the top cluster into sections for the individual threads to handle. Each are
+     * decomposed recursively to generate physically valid charge distributions that emerge from increasingly
+     * specializing multiset charge configurations.
      *
      * @param top_cluster The top cluster that is returned by the *Ground State Space construction; it contains the
      * entire cluster hierarchy construct.
      */
-    void collect_physically_valid_charge_distributions_single_threaded(const cluster_ptr& top_cluster) noexcept
+    void collect_physically_valid_charge_distributions_single_threaded(const cluster_ptr& top_cluster)
     {
         for (const cluster_charge_state& ccs : top_cluster->charge_space)
         {
             for (const charge_space_composition& composition : ccs.compositions)
             {
                 // convert charge space composition to clustering state
-                clustering_state cl_state{charge_layout.num_cells()};
+                clustering_state cl_state{landscape.num_sidbs()};
                 add_composition(cl_state, composition);
 
                 // unfold
@@ -651,30 +616,30 @@ class clustercomplete_impl
     ///
 
     /**
-     * A work item is a constant reference to SiDB charge space composition.
+     * @brief A work item is a constant reference to SiDB charge space composition.
      */
     using work_t = std::reference_wrapper<const charge_space_composition>;
     /**
-     * A worker queue contains a double-layer queue of work items, a clustering state for thieves that want to steal
-     * from the lowest layer of the queue, along with a queue of moles that tell how to transition this clustering state
-     * for thieves to facilitate stealing from one layer to the next.
+     * @brief A worker queue contains a double-layer queue of work items, a clustering state for thieves that want to
+     * steal from the lowest layer of the queue, along with a queue of moles that tell how to transition this clustering
+     * state for thieves to facilitate stealing from one layer to the next.
      */
     struct worker_queue
     {
         /**
-         * A mole contains information on how to transition from one clustering state to a subsequent one.
+         * @brief A mole contains information on how to transition from one clustering state to a subsequent one.
          */
         struct mole
         {
             /**
-             * The index of the cluster in the clustering state that is the selected parent cluster to unfold next. It
-             * needs to be taken out in a clustering state transition.
+             * @brief The index of the cluster in the clustering state that is the selected parent cluster to unfold
+             * next. It needs to be taken out in a clustering state transition.
              */
             uint64_t parent_to_move_out_ix;
             /**
-             * The composition of the previously selected parent that fills the gap made by previously taking out this
-             * selected parent. In a clustering state transition, first the composition is added (filling the gap made
-             * by the previously selected parent), then the currently selected parent is taken out according to the
+             * @brief The composition of the previously selected parent that fills the gap made by previously taking out
+             * this selected parent. In a clustering state transition, first the composition is added (filling the gap
+             * made by the previously selected parent), then the currently selected parent is taken out according to the
              * `parent_to_move_out_ix` above. This way, a work item may be unfolded as it fills the gap made by taking
              * out the currently selected parent. Thus, this work item becomes the `composition` value of the next mole
              * in line.
@@ -682,32 +647,32 @@ class clustercomplete_impl
             const charge_space_composition& composition;
         };
         /**
-         * The clustering state for thieves, which enables thieves to join in and steal work from the bottom of the
-         * queue, while the owner of this queue will take items from the top of the queue.
+         * @brief The clustering state for thieves, which enables thieves to join in and steal work from the bottom of
+         * the queue, while the owner of this queue will take items from the top of the queue.
          */
         clustering_state clustering_state_for_thieves;
         /**
-         * The queue of moles. For each transition between layers of the double layer work queue below, there is an
-         * associated mole which informs how the transition takes place. This way, the clustering state for thieves can
-         * be dynamically updated through forward-tracking (opposite of backtracking).
+         * @brief The queue of moles. For each transition between layers of the double layer work queue below, there is
+         * an associated mole which informs how the transition takes place. This way, the clustering state for thieves
+         * can be dynamically updated through forward-tracking (opposite of backtracking).
          */
         std::deque<mole> thief_informants{};
         /**
-         * Double layer queue of work items. Each layer corresponds with a clustering state that needs to be used to
-         * unfold the items in that layer. The clustering states of subsequent layers are each one informant application
-         * apart.
+         * @brief Double layer queue of work items. Each layer corresponds with a clustering state that needs to be used
+         * to unfold the items in that layer. The clustering states of subsequent layers are each one informant
+         * application apart.
          */
         std::deque<std::deque<work_t>> queue;
         /**
-         * Counter to keep track of the total amount of work in the double-layer work queue.
+         * @brief Counter to keep track of the total amount of work in the double-layer work queue.
          */
         uint64_t work_in_queue_count{0};
         /**
-         * Mutex used to protect shared resources in this queue.
+         * @brief Mutex used to protect shared resources in this queue.
          */
         std::mutex mutex_to_protect_this_queue;
         /**
-         * Standard constructor.
+         * @brief Standard constructor.
          *
          * @param num_sidbs_in_layout The number of SiDBs in the layout to simulate. Required for initializing
          * clustering states.
@@ -716,7 +681,9 @@ class clustercomplete_impl
                 clustering_state_for_thieves{num_sidbs_in_layout}
         {}
         /**
-         * Initializes this queue with stolen work. The work itself is kept on the stack.
+         * @brief Initializes this queue with stolen work. The work itself is kept on the stack.
+         *
+         * @param cl_state Clustering state associated with the stolen work.
          */
         void initialize_queue_after_stealing(const clustering_state& cl_state) noexcept
         {
@@ -732,12 +699,12 @@ class clustercomplete_impl
             work_in_queue_count = 0;
         }
         /**
-         * A mole is popped from the queue which says which composition to add to the clustering state for thieves, and
-         * which cluster is selected for the subsequent unfolding, which should then be taken out.
+         * @brief A mole is popped from the queue which says which composition to add to the clustering state for
+         * thieves, and which cluster is selected for the subsequent unfolding, which should then be taken out.
          */
         void apply_informant() noexcept
         {
-            mole informant = std::move(thief_informants.front());
+            const mole informant = thief_informants.front();
             thief_informants.pop_front();
 
             add_composition(clustering_state_for_thieves, informant.composition);
@@ -745,8 +712,8 @@ class clustercomplete_impl
             take_parent_out(clustering_state_for_thieves, informant.parent_to_move_out_ix);
         }
         /**
-         * Called during backtracking to descend to the previous layer of the queue, along with popping the unnecessary
-         * mole.
+         * @brief Called during backtracking to descend to the previous layer of the queue, along with popping the
+         * unnecessary mole.
          */
         void pop_last_layer() noexcept
         {
@@ -762,15 +729,15 @@ class clustercomplete_impl
             thief_informants.pop_back();
         }
         /**
-         * Adds a vector of work items to the queue, along with adding an informant that allows for a dynamic update of
-         * the clustering state for thieves to assume one of the work items that are added to the queue.
+         * @brief Adds a vector of work items to the queue, along with adding an informant that allows for a dynamic
+         * update of the clustering state for thieves to assume one of the work items that are added to the queue.
          *
          * @param compositions Vector of work items.
          * @param informant A mole providing the required information to update the clustering state for thieves to
          * enable forward-tracking. The mole says which composition to add to the clustering state, and which cluster is
          * selected for the subsequent unfolding.
          */
-        void add_to_queue(const std::vector<charge_space_composition>& compositions, mole&& informant) noexcept
+        void add_to_queue(const std::vector<charge_space_composition>& compositions, const mole informant) noexcept
         {
             const std::scoped_lock lock{mutex_to_protect_this_queue};
 
@@ -785,13 +752,13 @@ class clustercomplete_impl
             work_in_queue_count += compositions.size() - 1;
 
             // add informant
-            thief_informants.emplace_back(std::move(informant));
+            thief_informants.emplace_back(informant);
 
             assert(queue.empty() || queue.size() == thief_informants.size() + 1);
         }
         /**
-         * Own work is obtained in a blocking fashion. If there is no more work in the queue, `false` is returned to
-         * indicate no backtracking is necessary, since there is no follow-up work item to backtrack towards.
+         * @brief Own work is obtained in a blocking fashion. If there is no more work in the queue, `false` is returned
+         * to indicate no backtracking is necessary, since there is no follow-up work item to backtrack towards.
          *
          * @return Either work if there is work left to do on the current level---i.e., for the current clustering state
          * of the worker that calls this function---or `true` if this not the case and backtracking is required in order
@@ -823,9 +790,9 @@ class clustercomplete_impl
             return work;
         }
         /**
-         * Attempt to steal work from this queue in a non-blocking fashion. When a lock is acquired, forward-tracking is
-         * applied to dynamically update the clustering state for thieves to where it can be copied for a thief that
-         * steals the last work item in this queue.
+         * @brief Attempt to steal work from this queue in a non-blocking fashion. When a lock is acquired,
+         * forward-tracking is applied to dynamically update the clustering state for thieves to where it can be copied
+         * for a thief that steals the last work item in this queue.
          *
          * @return Either `true` when the queue is locked, `false` when there is no work in this queue, or a pair of a
          * copy of the updated (forward-tracked) clustering state for thieves along with the corresponding work item.
@@ -858,7 +825,7 @@ class clustercomplete_impl
             }
 
             // stealing goes from the back
-            work_t work = queue.back().back();
+            const work_t work = queue.back().back();
             queue.back().pop_back();
 
             --work_in_queue_count;
@@ -870,31 +837,32 @@ class clustercomplete_impl
         }
     };
     /**
-     * Each thread has a unique worker object with its own dynamic state and queue of work that it generated. When it
-     * has no work of its own, it will steal work from another worker.
+     * @brief Each thread has a unique worker object with its own dynamic state and queue of work that it generated.
+     * When it has no work of its own, it will steal work from another worker.
      */
     struct worker
     {
         /**
-         * Worker index in the vector of all workers.
+         * @brief Worker index in the vector of all workers.
          */
         const uint64_t index;
         /**
-         * This worker's queue where work can be obtained from either by this worker or by others (work stealing).
+         * @brief This worker's queue where work can be obtained from either by this worker or by others (work
+         * stealing).
          */
         worker_queue work_stealing_queue;
         /**
-         * This worker's current state, consisting of a clustering where each cluster has an assigned multiset charge
-         * configuration, and a store containing lower and upper bounds on the local potential for each SiDB under this
-         * multiset charge configuration assignment.
+         * @brief This worker's current state, consisting of a clustering where each cluster has an assigned multiset
+         * charge configuration, and a store containing lower and upper bounds on the local potential for each SiDB
+         * under this multiset charge configuration assignment.
          */
         clustering_state cl_state;
         /**
-         * The vector of all workers where this worker is at `ix`.
+         * @brief The vector of all workers where this worker is at `ix`.
          */
         const std::vector<std::unique_ptr<worker>>& all_workers;
         /**
-         * Standard constructor.
+         * @brief Standard constructor.
          *
          * @param ix Worker index in the vector of all workers.
          * @param num_sidbs The number of SiDBs in the layout to simulate.
@@ -908,7 +876,7 @@ class clustercomplete_impl
                 all_workers{workers}
         {}
         /**
-         * Obtains work for this worker, either from their own queue, or else from another worker's queue (work
+         * @brief Obtains work for this worker, either from their own queue, or else from another worker's queue (work
          * stealing).
          *
          * @return Either nothing, if no work was found (and this thread can thus terminate), or the work that was
@@ -959,8 +927,8 @@ class clustercomplete_impl
         }
     };
     /**
-     * Work in the form of compositions of charge space elements of the top cluster are extracted into a vector and
-     * shuffled at random before being returned. The shuffling may balance the initial workload division.
+     * @brief Work in the form of compositions of charge space elements of the top cluster are extracted into a vector
+     * and shuffled at random before being returned. The shuffling may balance the initial workload division.
      *
      * @param top_cluster The top cluster that is returned by running the *Ground State Space* construction.
      * @return A vector containing all work contained by the top cluster in random order.
@@ -982,7 +950,8 @@ class clustercomplete_impl
         return work_from_top_cluster;
     }
     /**
-     * Initializes the worker queues with work from the top cluster, dividing it evenly over the available threads.
+     * @brief Initializes the worker queues with work from the top cluster, dividing it evenly over the available
+     * threads.
      *
      * @param work_from_top_cluster A vector containing all compositions of all charge space elements of the top
      * cluster.
@@ -1012,7 +981,7 @@ class clustercomplete_impl
         // for each worker, add work to the queue from the respectively assigned section
         for (uint64_t i = 0; i < num_threads_with_initial_work; ++i)
         {
-            std::unique_ptr<worker> w = std::make_unique<worker>(i, charge_layout.num_cells(), workers);
+            std::unique_ptr<worker> w = std::make_unique<worker>(i, landscape.num_sidbs(), workers);
 
             w->work_stealing_queue.queue.emplace_front();
 
@@ -1030,13 +999,13 @@ class clustercomplete_impl
         }
 
         // initialize each worker that did not get initial work as thieves
-        for (uint64_t thread_ix = 0; thread_ix < available_threads - num_threads_with_initial_work; ++thread_ix)
+        for (uint64_t thread_ix = num_threads_with_initial_work; thread_ix < available_threads; ++thread_ix)
         {
-            workers.emplace_back(std::make_unique<worker>(thread_ix, charge_layout.num_cells(), workers));
+            workers.emplace_back(std::make_unique<worker>(thread_ix, landscape.num_sidbs(), workers));
         }
     }
     /**
-     * This recursive function is the heart of the *ClusterComplete* destruction. The given clustering state is
+     * @brief This recursive function is the heart of the *ClusterComplete* destruction. The given clustering state is
      * dissected at the largest cluster to each possible specialization of it, which then enters the recursive call
      * with the clustering state modified to have a set of sibling children replacing their direct parent. For each
      * specialization, appropriate updates are made to the potential bounds store that is part of the clustering
@@ -1060,7 +1029,7 @@ class clustercomplete_impl
      * not required.
      */
     [[nodiscard]] bool add_physically_valid_charge_configurations(worker&                         w,
-                                                                  const charge_space_composition& composition) noexcept
+                                                                  const charge_space_composition& composition)
     {
         // check for pruning
         if (!meets_population_stability_criterion(w.cl_state))
@@ -1069,7 +1038,7 @@ class clustercomplete_impl
         }
 
         // check if all clusters are singletons
-        if (w.cl_state.proj_states.size() == charge_layout.num_cells())
+        if (w.cl_state.proj_states.size() == landscape.num_sidbs())
         {
             add_if_configuration_stability_is_met(w.cl_state);
             return true;
@@ -1082,8 +1051,9 @@ class clustercomplete_impl
         cluster_projector_state_ptr max_pst = take_parent_out(w.cl_state, max_pst_ix);
 
         // unfold all compositions
-        if (!unfold_all_compositions(w, get_projector_state_compositions(*max_pst),
-                                     typename worker_queue::mole{max_pst_ix, composition}))
+        if (!unfold_all_compositions(
+                w, get_projector_state_compositions(*max_pst),
+                typename worker_queue::mole{.parent_to_move_out_ix = max_pst_ix, .composition = composition}))
         {
             return false;
         }
@@ -1096,10 +1066,11 @@ class clustercomplete_impl
         return true;
     }
     /**
-     * After a cluster in a clustering state was chosen to be unfolded next, the unfolding is performed through ensuring
-     * that all compositions of the multiset associated with the cluster in the clustering state are each unfolded. The
-     * current worker will always unfold the first composition, while putting the other compositions in its queue such
-     * that threads without work may steal those if the current worker is still working on this first composition.
+     * @brief After a cluster in a clustering state was chosen to be unfolded next, the unfolding is performed through
+     * ensuring that all compositions of the multiset associated with the cluster in the clustering state are each
+     * unfolded. The current worker will always unfold the first composition, while putting the other compositions in
+     * its queue such that threads without work may steal those if the current worker is still working on this first
+     * composition.
      *
      * @param w The worker running on the current thread.
      * @param compositions A vector containing all compositions to unfold.
@@ -1109,16 +1080,15 @@ class clustercomplete_impl
      * @return `false` if and only if the queue of this worker is found to be completely empty and thus backtracking is
      * not required.
      */
-    // NOLINTNEXTLINE(bugprone-exception-escape): std::get is safely guarded
     [[nodiscard]] bool unfold_all_compositions(worker& w, const std::vector<charge_space_composition>& compositions,
-                                               typename worker_queue::mole&& informant) noexcept
+                                               const typename worker_queue::mole informant)
     {
         if (compositions.empty())
         {
             return true;
         }
 
-        w.work_stealing_queue.add_to_queue(compositions, std::move(informant));
+        w.work_stealing_queue.add_to_queue(compositions, informant);
 
         // unfold first composition
         unfold_composition(w, compositions.front());
@@ -1140,7 +1110,7 @@ class clustercomplete_impl
         return std::get<bool>(work);
     }
     /**
-     * The clustering state of the current worker is specialized according to the given composition preceding the
+     * @brief The clustering state of the current worker is specialized according to the given composition preceding the
      * recursion. If there is still work left to do by this worker, backtracking is performed, for which also the
      * aforementioned specialization needs to be undone.
      *
@@ -1148,7 +1118,7 @@ class clustercomplete_impl
      * @param composition The composition to unfold.
      * @return `false` if and only if there is no need for backtracking after this return.
      */
-    bool unfold_composition(worker& w, const charge_space_composition& composition) noexcept
+    bool unfold_composition(worker& w, const charge_space_composition& composition)
     {
         // specialize parent to a specific composition of its children
         add_composition(w.cl_state, composition);
@@ -1169,8 +1139,8 @@ class clustercomplete_impl
 }  // namespace detail
 
 /**
- * *ClusterComplete* is an instantiation of a general solution to exhaustive state assignment searching for which all
- * local predicates hold, given respective local evaluations that may be aggregated from individual inter-variable
+ * @brief *ClusterComplete* is an instantiation of a general solution to exhaustive state assignment searching for which
+ * all local predicates hold, given respective local evaluations that may be aggregated from individual inter-variable
  * interactions. Applied to the problem of exact physical simulation of SiDBs, it is able to efficiently consider
  * positive charges that are rare to occur, but drastically blow up exact simulation runtimes when hierarchical pruning
  * methods are not applied. In fact, the exponential growth in problem complexity for added SiDBs is tamed by
@@ -1189,19 +1159,31 @@ class clustercomplete_impl
  * *ClusterComplete* was proposed in \"Mastering the Exponential Complexity of Exact Physical Simulation of Silicon
  * Dangling Bonds\" by W. Lambooy, J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2026.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to simulate.
  * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
  * @return Simulation results.
+ * @throws std::out_of_range if a site has an invalid lattice basis index.
+ */
+[[nodiscard]] inline result clustercomplete(const layout& lyt, const clustercomplete_params& params = {})
+{
+    return detail::clustercomplete_impl{lyt, params}.run(params);
+}
+
+/**
+ * @brief *ClusterComplete* on a Cartesian SiDB cell-level layout: the layout is converted with `to_sidb_layout`,
+ * simulated, and the result converted back with `to_legacy_result`. This overload serves the algorithms that still
+ * consume `legacy_result`.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt Layout to simulate.
+ * @param params Parameter required for the simulation.
+ * @return Simulation result over surfaces of `lyt`.
  */
 template <typename Lyt>
-[[nodiscard]] sidb::simulation::result<Lyt>
-clustercomplete(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params = {}) noexcept
+    requires(is_cell_level_layout_v<Lyt>)
+[[nodiscard]] legacy_result<Lyt> clustercomplete(const Lyt& lyt, const clustercomplete_params& params = {})
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-
-    return detail::clustercomplete_impl<Lyt>{lyt, params}.run(params);
+    return to_legacy_result(clustercomplete(to_sidb_layout(lyt), params), lyt);
 }
 
 }  // namespace fiction::sidb::simulation::engines

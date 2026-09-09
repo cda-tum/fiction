@@ -48,6 +48,7 @@
 #include <cstdlib>
 #include <deque>
 #include <functional>
+#include <future>
 #include <iterator>
 #include <limits>
 #include <mutex>
@@ -108,7 +109,7 @@ struct parameter_point
      */
     [[nodiscard]] static int64_t quantize(const double value) noexcept
     {
-        return static_cast<int64_t>(std::llround(value / fiction::utils::math::ERROR_MARGIN));
+        return std::llround(value / fiction::utils::math::ERROR_MARGIN);
     }
     /**
      * Support for structured bindings.
@@ -431,6 +432,13 @@ void validate_operational_domain_params(const Lyt& lyt, const operational_domain
                                         const std::size_t      min_sweep_dimensions = 1,
                                         const std::string_view algorithm_name       = "The operational domain")
 {
+    if constexpr (is_sidb_defect_surface_v<Lyt>)
+    {
+        if (params.operational_params.sim_engine == engine::QUICKSIM && lyt.num_charged_defects() > 0)
+        {
+            throw std::invalid_argument("QuickSim does not support charged defects");
+        }
+    }
     if (params.sweep_dimensions.size() < min_sweep_dimensions)
     {
         throw std::invalid_argument(
@@ -603,7 +611,7 @@ class operational_domain_impl
      *
      * @return The operational domain of the layout.
      */
-    [[nodiscard]] OpDomain grid_search() noexcept
+    [[nodiscard]] OpDomain grid_search()
     {
         const mockturtle::stopwatch stop{stats.time_total};
 
@@ -635,7 +643,7 @@ class operational_domain_impl
      * @param samples Number of random samples to be taken.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] OpDomain random_sampling(const std::size_t samples) noexcept
+    [[nodiscard]] OpDomain random_sampling(const std::size_t samples)
     {
         const mockturtle::stopwatch stop{stats.time_total};
 
@@ -665,9 +673,8 @@ class operational_domain_impl
      * @return The (partial) operational domain of the layout.
      */
     // NOLINTBEGIN(bugprone-exception-escape): only allocation can throw, which is fatal to the algorithm anyway
-    [[nodiscard]] OpDomain
-    flood_fill(const std::size_t                     samples,
-               const std::optional<parameter_point>& given_parameter_point = std::nullopt) noexcept
+    [[nodiscard]] OpDomain flood_fill(const std::size_t                     samples,
+                                      const std::optional<parameter_point>& given_parameter_point = std::nullopt)
     {
         assert(num_dimensions >= 2 && "Flood fill is only supported for two or more dimensions");
 
@@ -748,7 +755,7 @@ class operational_domain_impl
         // if random sampling did not find a single operational point, there is nothing to flood fill
         if (!queue.empty())
         {
-            const auto worker = [&]() noexcept
+            const auto worker = [&]()
             {
                 while (true)
                 {
@@ -825,8 +832,7 @@ class operational_domain_impl
      * @param samples Maximum number of random samples to be taken before contour tracing.
      * @return The (partial) operational domain of the layout.
      */
-    // NOLINTNEXTLINE(bugprone-exception-escape): only allocation can throw, which is fatal to the algorithm anyway
-    [[nodiscard]] OpDomain contour_tracing(const std::size_t samples) noexcept
+    [[nodiscard]] OpDomain contour_tracing(const std::size_t samples)
     {
         assert(num_dimensions >= 2 && "Contour tracing is only supported for two or more dimensions");
 
@@ -841,8 +847,7 @@ class operational_domain_impl
      * @param samples Maximum number of random samples to be taken before contour tracing.
      * @return The (partial) operational domain of the layout.
      */
-    // NOLINTNEXTLINE(bugprone-exception-escape): only allocation can throw, which is fatal to the algorithm anyway
-    [[nodiscard]] OpDomain trace_contour_curve(const std::size_t samples) noexcept
+    [[nodiscard]] OpDomain trace_contour_curve(const std::size_t samples)
     {
         assert(num_dimensions == 2 && "Moore contour tracing is only supported for two dimensions");
 
@@ -949,8 +954,7 @@ class operational_domain_impl
      * @param samples Maximum number of random samples to be taken before tracing.
      * @return The (partial) operational domain of the layout.
      */
-    // NOLINTNEXTLINE(bugprone-exception-escape): only allocation can throw, which is fatal to the algorithm anyway
-    [[nodiscard]] OpDomain trace_boundary_surface(const std::size_t samples) noexcept
+    [[nodiscard]] OpDomain trace_boundary_surface(const std::size_t samples)
     {
         assert(num_dimensions >= 3 && "Boundary surface tracing is intended for three or more dimensions");
 
@@ -966,7 +970,7 @@ class operational_domain_impl
         //
         // the neighborhood is returned alongside the verdict so that the expansion below does not have to rebuild it.
         // It grows as `3^n - 1`, so recomputing it once per popped point gets expensive in higher dimensions
-        const auto neighborhood_and_boundary_status = [this](const step_point& sp) noexcept
+        const auto neighborhood_and_boundary_status = [this](const step_point& sp)
         {
             auto neighborhood = moore_neighborhood(sp);
 
@@ -976,7 +980,7 @@ class operational_domain_impl
             }
 
             const auto on_boundary =
-                std::ranges::any_of(neighborhood, [this](const auto& m) noexcept
+                std::ranges::any_of(neighborhood, [this](const auto& m)
                                     { return is_step_point_operational(m) == operational_status::NON_OPERATIONAL; });
 
             return std::pair{std::move(neighborhood), on_boundary};
@@ -1056,7 +1060,7 @@ class operational_domain_impl
      * @return All physically valid physical parameters and the excited state number.
      */
     [[nodiscard]] sidb::simulation::domain<parameter_point, uint64_t>
-    grid_search_for_physically_valid_parameters(Lyt& lyt) noexcept
+    grid_search_for_physically_valid_parameters(Lyt& lyt)
     {
         sidb::simulation::domain<parameter_point, uint64_t> suitable_params_domain{};
 
@@ -1072,10 +1076,10 @@ class operational_domain_impl
         // calculate the size of each slice
         const auto slice_size = (all_index_combinations.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::thread> threads{};
+        // launch threads, each with its own slice of random step points
+        std::vector<std::future<void>> threads{};
         threads.reserve(num_threads);
 
-        // launch threads, each with its own slice of random step points
         for (auto i = 0ul; i < num_threads; ++i)
         {
             const auto start = i * slice_size;
@@ -1087,22 +1091,23 @@ class operational_domain_impl
             }
 
             threads.emplace_back(
-                [this, &lyt, start, end, &all_index_combinations]
-                {
-                    for (auto it = all_index_combinations.cbegin() + static_cast<int64_t>(start);
-                         it != all_index_combinations.cbegin() + static_cast<int64_t>(end); ++it)
-                    {
-                        is_step_point_suitable(lyt, step_point{*it});  // construct a step_point
-                    }
-                });
+                std::async(std::launch::async,
+                           [this, &lyt, start, end, &all_index_combinations]
+                           {
+                               for (auto it = all_index_combinations.cbegin() + static_cast<int64_t>(start);
+                                    it != all_index_combinations.cbegin() + static_cast<int64_t>(end); ++it)
+                               {
+                                   is_step_point_suitable(lyt, step_point{*it});  // construct a step_point
+                               }
+                           }));
         }
 
         // wait for all threads to complete
         for (auto& thread : threads)
         {
-            if (thread.joinable())
+            if (thread.valid())
             {
-                thread.join();
+                thread.get();
             }
         }
 
@@ -1123,15 +1128,16 @@ class operational_domain_impl
                         set_dimension_value(sim_params, param_point.get_parameters().at(d), d);
                     }
 
-                    auto sim_results = sidb::simulation::result<Lyt>{};
+                    auto sim_results = sidb::simulation::legacy_result<Lyt>{};
 
                     if (params.operational_params.sim_engine == engine::QUICKEXACT)
                     {
                         // perform an exact ground state simulation
                         sim_results = sidb::simulation::engines::quickexact(
-                            lyt, sidb::simulation::engines::quickexact_params<cell<Lyt>>{
-                                     sim_params, sidb::simulation::engines::quickexact_params<
-                                                     cell<Lyt>>::automatic_base_number_detection::OFF});
+                            lyt, sidb::simulation::engines::quickexact_params{
+                                     .sim_params            = sim_params,
+                                     .base_number_detection = sidb::simulation::engines::quickexact_params::
+                                         automatic_base_number_detection::OFF});
                     }
                     else if (params.operational_params.sim_engine == engine::EXGS)
                     {
@@ -1407,7 +1413,7 @@ class operational_domain_impl
      * @param sp Step point to be investigated.
      * @return The operational status of the layout under the given simulation parameters.
      */
-    operational_status is_step_point_operational(const step_point& sp) noexcept
+    operational_status is_step_point_operational(const step_point& sp)
     {
         if (const auto op_value = op_domain.contains(to_parameter_point(sp)); op_value.has_value())
         {
@@ -1494,7 +1500,7 @@ class operational_domain_impl
      * @param sp Step point to be investigated.
      * @return The operational status of the layout under the given simulation parameters.
      */
-    operational_status is_step_point_suitable(Lyt lyt, const step_point& sp) noexcept
+    operational_status is_step_point_suitable(Lyt lyt, const step_point& sp)
     {
         // if the point has already been sampled, return the stored operational status
         if (const auto op_value = op_domain.contains(to_parameter_point(sp)); op_value.has_value())
@@ -1604,7 +1610,7 @@ class operational_domain_impl
      *
      * @param step_points A vector of step points for which the operational status is to be simulated.
      */
-    void simulate_operational_status_in_parallel(const std::vector<step_point>& step_points) noexcept
+    void simulate_operational_status_in_parallel(const std::vector<step_point>& step_points)
     {
         // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
         // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
@@ -1613,10 +1619,10 @@ class operational_domain_impl
         // calculate the size of each slice
         const auto slice_size = (step_points.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::thread> threads{};
+        // launch threads, each with its own slice of random step points
+        std::vector<std::future<void>> threads{};
         threads.reserve(num_threads);
 
-        // launch threads, each with its own slice of random step points
         for (auto i = 0ul; i < num_threads; ++i)
         {
             const auto start = i * slice_size;
@@ -1627,19 +1633,20 @@ class operational_domain_impl
                 break;  // no more work to distribute
             }
 
-            threads.emplace_back(
+            threads.emplace_back(std::async(
+                std::launch::async,
                 [this, start, end, &step_points]
                 {
                     std::ranges::for_each(std::ranges::subrange{step_points.cbegin() + static_cast<int64_t>(start),
                                                                 step_points.cbegin() + static_cast<int64_t>(end)},
                                           [this](const auto& sp) { is_step_point_operational(sp); });
-                });
+                }));
         }
 
         // wait for all threads to complete
         for (auto& thread : threads)
         {
-            thread.join();
+            thread.get();
         }
     }
     /**
@@ -1654,7 +1661,7 @@ class operational_domain_impl
      * @return The first operational step point, if any could be found, `std::nullopt` otherwise.
      */
     [[maybe_unused]] [[nodiscard]] std::optional<step_point>
-    find_operational_step_point_via_random_sampling(const std::size_t samples) noexcept
+    find_operational_step_point_via_random_sampling(const std::size_t samples)
     {
         for (const auto& sample_step_point : generate_random_step_points(samples))
         {
@@ -1680,7 +1687,7 @@ class operational_domain_impl
      * @param starting_point Starting step point for the boundary search.
      * @return An operational step point at the edge of the operational domain `starting_point` is located in.
      */
-    [[nodiscard]] step_point find_operational_contour_step_point(const step_point& starting_point) noexcept
+    [[nodiscard]] step_point find_operational_contour_step_point(const step_point& starting_point)
     {
         assert(starting_point.step_values.size() == num_dimensions &&
                "Given step point must match the number of dimensions");

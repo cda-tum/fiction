@@ -71,14 +71,25 @@ class unsupported_defect_index_exception : public std::exception
 class missing_position_exception : public std::exception
 {
   public:
+    /**
+     * @brief Record the input line that lacks a SiDB position.
+     * @param n Line number in the input file.
+     */
     explicit missing_position_exception(const uint32_t n) noexcept : line{n} {}
 
+    /**
+     * @brief Return the input line that lacks a SiDB position.
+     * @return Line number in the input file.
+     */
     [[nodiscard]] uint32_t where() const noexcept
     {
         return line;
     }
 
   private:
+    /**
+     * @brief Line number in the input file.
+     */
     const uint32_t line;
 };
 

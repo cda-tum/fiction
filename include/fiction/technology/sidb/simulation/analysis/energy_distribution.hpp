@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
@@ -258,6 +259,52 @@ calculate_energy_distribution(const std::vector<sidb::surfaces::charge_distribut
             }));
 
         distribution.add_energy_state(energy_state(energy, number_of_states_with_given_energy));
+    }
+
+    return distribution;
+}
+
+/**
+ * The energy distribution of a set of charge distributions: every distinct energy with the number of distinct charge
+ * distributions that have it. Distributions with identical charge states count once.
+ *
+ * @param charge_distributions Charge distributions of one layout.
+ * @return The energy distribution.
+ */
+[[nodiscard]] inline energy_distribution
+calculate_energy_distribution(const std::vector<charge_distribution>& charge_distributions)
+{
+    energy_distribution distribution{};
+
+    std::vector<const charge_distribution*> unique{};
+    unique.reserve(charge_distributions.size());
+
+    for (const auto& cd : charge_distributions)
+    {
+        if (std::ranges::none_of(unique, [&cd](const auto* u) { return u->same_charge_states(cd); }))
+        {
+            unique.push_back(&cd);
+        }
+    }
+
+    std::set<double> unique_energies{};
+
+    for (const auto* cd : unique)
+    {
+        if (std::ranges::none_of(unique_energies, [cd](const double e)
+                                 { return std::fabs(cd->energy() - e) < fiction::utils::math::ERROR_MARGIN; }))
+        {
+            unique_energies.insert(cd->energy());
+        }
+    }
+
+    for (const auto energy : unique_energies)
+    {
+        const auto degeneracy = static_cast<uint64_t>(
+            std::ranges::count_if(unique, [energy](const auto* cd)
+                                  { return std::abs(cd->energy() - energy) < fiction::utils::math::ERROR_MARGIN; }));
+
+        distribution.add_energy_state(energy_state{energy, degeneracy});
     }
 
     return distribution;

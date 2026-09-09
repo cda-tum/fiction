@@ -39,6 +39,7 @@
 
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <stdexcept>
 #include <thread>
 #include <vector>
 
@@ -714,3 +715,17 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
 }
 
 #endif
+
+TEST_CASE("Gate design propagates worker simulation errors", "[design-sidb-gates]")
+{
+    using defect_layout_type = surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>;
+    auto lyt                 = blueprints::two_input_one_output_skeleton_west_west<defect_layout_type>();
+    lyt.assign_defect({100, 100}, defect{defect_type::DB, -1});
+    design_gates_params<cell<defect_layout_type>> params{};
+    params.operational_params.sim_engine      = engine::QUICKSIM;
+    params.operational_params.sim_params.base = 2;
+    params.design_mode                        = decltype(params)::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+    params.canvas                             = {{27, 6, 0}, {27, 6, 0}};
+    params.number_of_canvas_sidbs             = 1;
+    CHECK_THROWS_AS(design_gates(lyt, std::vector<tt>{create_and_tt()}, params), std::invalid_argument);
+}

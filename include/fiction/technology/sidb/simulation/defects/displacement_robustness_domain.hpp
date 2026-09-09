@@ -30,6 +30,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <future>
 #include <limits>
 #include <mutex>
 #include <random>
@@ -174,7 +175,7 @@ class displacement_robustness_domain_impl
      */
     displacement_robustness_domain_impl(const Lyt& lyt, const std::vector<TT>& spec,
                                         const displacement_robustness_domain_params<cell<Lyt>>& ps,
-                                        displacement_robustness_domain_stats&                   st) noexcept :
+                                        displacement_robustness_domain_stats&                   st) :
             layout{lyt},
             params{ps},
             stats{st},
@@ -200,7 +201,7 @@ class displacement_robustness_domain_impl
      * This function calculates the robustness domain of the SiDB layout based on the provided truth table specification
      * and displacement robustness computation parameters.
      */
-    displacement_robustness_domain<Lyt> determine_robustness_domain() noexcept
+    displacement_robustness_domain<Lyt> determine_robustness_domain()
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -221,7 +222,7 @@ class displacement_robustness_domain_impl
         std::mutex mutex_to_protect_displacement_robustness_domain{};
 
         const auto check_operational_status =
-            [this, &mutex_to_protect_displacement_robustness_domain, &domain](const Lyt& lyt) noexcept
+            [this, &mutex_to_protect_displacement_robustness_domain, &domain](const Lyt& lyt)
         {
             const auto op_status = sidb::simulation::logic::is_operational(lyt, truth_table, params.operational_params);
             {
@@ -239,10 +240,10 @@ class displacement_robustness_domain_impl
         // calculate the size of each slice
         const auto slice_size = (layouts.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::thread> threads{};
+        // launch threads, each with its own slice of random step points
+        std::vector<std::future<void>> threads{};
         threads.reserve(num_threads);
 
-        // launch threads, each with its own slice of random step points
         for (auto i = 0ul; i < num_threads; ++i)
         {
             const auto start = i * slice_size;
@@ -253,23 +254,23 @@ class displacement_robustness_domain_impl
                 break;  // no more work to distribute
             }
 
-            threads.emplace_back(
-                [start, end, &layouts, &check_operational_status]
-                {
-                    for (auto it = layouts.cbegin() + static_cast<int64_t>(start);
-                         it != layouts.cbegin() + static_cast<int64_t>(end); ++it)
-                    {
-                        check_operational_status(*it);
-                    }
-                });
+            threads.emplace_back(std::async(std::launch::async,
+                                            [start, end, &layouts, &check_operational_status]
+                                            {
+                                                for (auto it = layouts.cbegin() + static_cast<int64_t>(start);
+                                                     it != layouts.cbegin() + static_cast<int64_t>(end); ++it)
+                                                {
+                                                    check_operational_status(*it);
+                                                }
+                                            }));
         }
 
         // wait for all threads to complete
         for (auto& thread : threads)
         {
-            if (thread.joinable())
+            if (thread.valid())
             {
-                thread.join();
+                thread.get();
             }
         }
 

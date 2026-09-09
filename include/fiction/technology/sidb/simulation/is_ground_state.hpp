@@ -20,6 +20,7 @@
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/traits.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <unordered_set>
@@ -38,8 +39,8 @@ namespace fiction::sidb::simulation
  * simulation. `false` otherwise.
  */
 template <typename Lyt>
-[[nodiscard]] bool is_ground_state(const sidb::simulation::result<Lyt>& heuristic_results,
-                                   const sidb::simulation::result<Lyt>& exact_results) noexcept
+[[nodiscard]] bool is_ground_state(const sidb::simulation::legacy_result<Lyt>& heuristic_results,
+                                   const sidb::simulation::legacy_result<Lyt>& exact_results) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -80,6 +81,36 @@ template <typename Lyt>
     }
 
     return true;
+}
+
+/**
+ * Whether a heuristic simulation found every ground state an exact simulation found: the two results have the same
+ * number of ground states and every exact ground state appears among the heuristic ones.
+ *
+ * @param heuristic_results Result of a heuristic simulation.
+ * @param exact_results Result of an exact simulation of the same layout.
+ * @return `true` iff the heuristic result contains every ground state of the exact one.
+ */
+[[nodiscard]] inline bool is_ground_state(const result& heuristic_results, const result& exact_results) noexcept
+{
+    if (exact_results.charge_distributions.empty())
+    {
+        return false;
+    }
+
+    const auto exact     = exact_results.groundstates();
+    const auto heuristic = heuristic_results.groundstates();
+
+    assert(heuristic.size() <= exact.size() && "The heuristic results must be less equal than the exact results.");
+
+    if (exact.size() != heuristic.size())
+    {
+        return false;
+    }
+
+    return std::ranges::all_of(
+        exact, [&heuristic](const auto& e)
+        { return std::ranges::any_of(heuristic, [&e](const auto& h) { return h.same_charge_states(e); }); });
 }
 
 }  // namespace fiction::sidb::simulation

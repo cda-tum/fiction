@@ -173,8 +173,8 @@ class defect_influence_impl
      * @return The defect influence domain.
      */
     template <typename TT = tt>
-    [[nodiscard]] defect_influence_domain<Lyt>
-    grid_search(const std::size_t step_size, const std::optional<std::vector<TT>>& spec = std::nullopt) noexcept
+    [[nodiscard]] defect_influence_domain<Lyt> grid_search(const std::size_t                     step_size,
+                                                           const std::optional<std::vector<TT>>& spec = std::nullopt)
     {
         mockturtle::stopwatch stop{stats.time_total};
         const auto        all_possible_defect_positions = layouts::all_coordinates_in_spanned_area(nw_cell, se_cell);
@@ -240,7 +240,7 @@ class defect_influence_impl
      */
     template <typename TT = tt>
     [[nodiscard]] defect_influence_domain<Lyt>
-    random_sampling(const std::size_t samples, const std::optional<std::vector<TT>>& spec = std::nullopt) noexcept
+    random_sampling(const std::size_t samples, const std::optional<std::vector<TT>>& spec = std::nullopt)
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -325,8 +325,8 @@ class defect_influence_impl
      * @return The defect influence domain.
      */
     template <typename TT = tt>
-    [[nodiscard]] defect_influence_domain<Lyt>
-    quicktrace(const std::size_t samples, const std::optional<std::vector<TT>>& spec = std::nullopt) noexcept
+    [[nodiscard]] defect_influence_domain<Lyt> quicktrace(const std::size_t                     samples,
+                                                          const std::optional<std::vector<TT>>& spec = std::nullopt)
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -528,7 +528,7 @@ class defect_influence_impl
      */
     template <typename TT>
     [[nodiscard]] std::optional<typename Lyt::cell>
-    find_non_influential_defect_position_at_left_side(const std::optional<std::vector<TT>>& spec) noexcept
+    find_non_influential_defect_position_at_left_side(const std::optional<std::vector<TT>>& spec)
     {
         auto starting_point = nw_cell;
 
@@ -554,7 +554,7 @@ class defect_influence_impl
      */
     template <typename TT>
     defect_influence_status is_defect_influential(const std::optional<std::vector<TT>>& spec,
-                                                  const typename Lyt::cell&             defect_cell) noexcept
+                                                  const typename Lyt::cell&             defect_cell)
     {
         // increment the number of evaluated parameter combinations
         ++num_evaluated_defect_positions;
@@ -647,8 +647,8 @@ class defect_influence_impl
      * @param defect_pos Position of the defect.
      * @return The influence status of the defect.
      */
-    [[nodiscard]] defect_influence_status
-    does_defect_influence_groundstate(const Lyt& lyt_without_defect, const typename Lyt::cell& defect_pos) noexcept
+    [[nodiscard]] defect_influence_status does_defect_influence_groundstate(const Lyt& lyt_without_defect,
+                                                                            const typename Lyt::cell& defect_pos)
     {
         static_assert(!is_sidb_defect_surface_v<Lyt>, "Lyt should not be an SiDB defect surface");
 
@@ -657,9 +657,9 @@ class defect_influence_impl
             return defect_influence_status::INFLUENTIAL;
         }
 
-        const sidb::simulation::engines::quickexact_params<cell<Lyt>> qe_params{
+        const sidb::simulation::engines::quickexact_params qe_params{
             params.operational_params.sim_params,
-            sidb::simulation::engines::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+            sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
 
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -719,7 +719,7 @@ class defect_influence_impl
     template <typename TT>
     [[nodiscard]] std::optional<typename Lyt::cell>
     find_last_non_influential_defect_position_moving_right(const std::optional<std::vector<TT>>& spec,
-                                                           const typename Lyt::cell& starting_defect_position) noexcept
+                                                           const typename Lyt::cell& starting_defect_position)
     {
         auto latest_non_influential_defect_position = starting_defect_position;
 

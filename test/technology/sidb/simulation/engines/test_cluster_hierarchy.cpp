@@ -17,12 +17,12 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
-#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp>
-#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 #include <set>
@@ -34,7 +34,6 @@
 
 using namespace fiction;
 using namespace fiction::sidb;
-using namespace fiction::sidb::surfaces;
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 using set_container = std::set<uint64>;
@@ -42,21 +41,20 @@ using set_container = std::set<uint64>;
 using set_container = phmap::flat_hash_set<uint64_t>;
 #endif
 
-TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 01", "[sidb-cluster-hierarchy]",
-                   sidb_cell_clk_lyt_siqad, charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 01", "[sidb-cluster-hierarchy]")
 {
-    TestType lyt{};
+    layout lyt{};
 
-    lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({14, 2, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 5, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
     // check for spooky non-determinism in alglib
     for (int8_t i = 0; i < 100; ++i)
@@ -86,23 +84,21 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 
     }
 }
 
-TEMPLATE_TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated groups of SiDBs",
-                   "[sidb-cluster-hierarchy]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated groups of SiDBs", "[sidb-cluster-hierarchy]")
 {
-    TestType lyt{};
+    layout lyt{};
 
-    lyt.assign_cell_type({50, -11, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({54, -9, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_sidb({50, -11, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({54, -9, 0}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({10, -5, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, -3, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_sidb({10, -5, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, -3, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({-2, -2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, -2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_sidb({-2, -2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, -2, 1}, dot_tag::NORMAL);
 
-    lyt.assign_cell_type({53, 10, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({48, 13, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_sidb({53, 10, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({48, 13, 1}, dot_tag::NORMAL);
 
     const sidb::simulation::engines::detail::binary_cluster_hierarchy_node& h =
         sidb::simulation::engines::detail::cluster_hierarchy(lyt);

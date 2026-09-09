@@ -22,6 +22,7 @@
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -54,16 +55,16 @@ int main()  // NOLINT
 
     const simulation_parameters sim_params{3, -0.32};
 
-    const quickexact_params<cell<Lyt>> qe_params{sim_params,
-                                                 quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+    const quickexact_params qe_params{.sim_params            = sim_params,
+                                      .base_number_detection = quickexact_params::automatic_base_number_detection::OFF};
 
-    auto random_layouts_params =
-        generate_random_layout_params<cell<Lyt>>{{{0, 0}, {10, 10}},
-                                                 0,
-                                                 generate_random_layout_params<cell<Lyt>>::positive_charges::MAY_OCCUR,
-                                                 sim_params,
-                                                 static_cast<uint64_t>(10E6),
-                                                 10};
+    auto random_layouts_params = generate_random_layout_params<cell<Lyt>>{
+        .coordinate_pair                    = {{0, 0}, {10, 10}},
+        .number_of_sidbs                    = 0,
+        .positive_sidbs                     = generate_random_layout_params<cell<Lyt>>::positive_charges::MAY_OCCUR,
+        .sim_params                         = sim_params,
+        .maximal_attempts                   = static_cast<uint64_t>(10E6),
+        .number_of_unique_generated_layouts = 10};
 
     for (auto num_sidbs = 5u; num_sidbs < 20; num_sidbs++)
     {
@@ -99,7 +100,7 @@ int main()  // NOLINT
 
         const auto average_pos_sibs_of_gs =
             static_cast<double>(std::accumulate(number_of_positive_sidbs_of_gs_per_layout.cbegin(),
-                                                number_of_positive_sidbs_of_gs_per_layout.cend(), 0u)) /
+                                                number_of_positive_sidbs_of_gs_per_layout.cend(), std::size_t{0})) /
             static_cast<double>(number_of_positive_sidbs_of_gs_per_layout.size());
 
         simulation_exp(random_layouts_params.number_of_sidbs, random_layouts.value().size(), runtime_exhaustive,
