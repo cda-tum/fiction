@@ -3407,7 +3407,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long_long =
+static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long =
 R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
 integer into four parts (from MSB to LSB):
  - 1 bit for the dead indicator - 1 bit for the z position - 31 bit
@@ -18387,6 +18387,8 @@ Returns:
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_run_in_parallel =
 R"doc(Runs `fn(i)` for `i` in `[0, n)` on the configured number of threads.
 
+Worker exceptions propagate to the caller after the workers finish.
+
 Args:
     n: Number of indices.
     fn: The function to run.
@@ -19576,7 +19578,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long_long =
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
 state to an 64-bit unsigned integer.
 
