@@ -111,7 +111,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Documentation now displays the installed package version.
 
 - Experiments:
-  - SiDB generator experiments use concrete parameter types with unchanged numerical values.
+  - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
 
 - Gate libraries:
   - `apply_gate_library_to_defective_surface` and `apply_parameterized_gate_library_to_defective_surface`

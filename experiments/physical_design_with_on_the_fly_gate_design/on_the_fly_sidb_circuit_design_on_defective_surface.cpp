@@ -66,7 +66,6 @@ using namespace fiction::synthesis;
 int main()  // NOLINT
 {
     using gate_lyt = hex_even_row_gate_clk_lyt;
-    using cell_lyt = sidb_cell_clk_lyt_cube;
 
     design_gates_params design_gate_params{};
     design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};

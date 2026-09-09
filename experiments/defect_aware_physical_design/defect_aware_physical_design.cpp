@@ -71,7 +71,6 @@ using namespace fiction::verification;
 int main()  // NOLINT
 {
     using gate_lyt = hex_even_row_gate_clk_lyt;
-    using cell_lyt = sidb_cell_clk_lyt;
 
     static const std::string layouts_folder = fmt::format("{}/defect_aware_physical_design/layouts", EXPERIMENTS_PATH);
 
