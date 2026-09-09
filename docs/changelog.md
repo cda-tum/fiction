@@ -264,6 +264,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
+  - Defect-influence analysis now propagates worker exceptions to the caller.
   - Canvas filtering now rejects SiDBs missing from the simulation state's layout.
   - Ground State Space reports multiset limits using the potential landscape's charge base.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.

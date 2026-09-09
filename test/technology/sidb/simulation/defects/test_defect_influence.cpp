@@ -30,6 +30,7 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/defects/defect_clearance.hpp>
 #include <fiction/technology/sidb/simulation/defects/defect_influence.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
@@ -50,6 +51,7 @@
 using namespace fiction;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::defects;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
@@ -521,4 +523,17 @@ TEST_CASE("Concurrent defect-influence sampling matches grid results", "[defect-
                 CHECK(*expected == value);
             });
     }
+}
+
+TEST_CASE("Defect influence propagates worker exceptions", "[defect-influence]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0});
+    defect_influence_params params{};
+    params.defect                        = defect{defect_type::DB, -1, 5.6, 5.0};
+    params.additional_scanning_area      = {1, 0};
+    params.operational_params.sim_engine = engine::QUICKSIM;
+    params.number_of_threads             = 2;
+
+    CHECK_THROWS_AS(defect_influence_grid_search(lyt, std::vector{create_id_tt()}, params), std::invalid_argument);
 }

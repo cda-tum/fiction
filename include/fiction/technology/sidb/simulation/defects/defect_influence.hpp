@@ -36,6 +36,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <future>
 #include <limits>
 #include <optional>
 #include <random>
@@ -394,7 +395,8 @@ class defect_influence_impl
         return sites_in_area(site_at_row(nw_x, nw_row), site_at_row(se_x, se_row));
     }
     /**
-     * Runs `fn(i)` for `i` in `[0, n)` on the configured number of threads.
+     * @brief Runs `fn(i)` for `i` in `[0, n)` on the configured number of threads.
+     * Worker exceptions propagate to the caller after the workers finish.
      *
      * @tparam Fn Callable type.
      * @param n Number of indices.
@@ -407,7 +409,7 @@ class defect_influence_impl
             std::max(std::min(std::max(params.number_of_threads, std::size_t{1}), n), std::size_t{1});
         const auto slice_size = (n + number_of_threads - 1) / number_of_threads;
 
-        std::vector<std::thread> threads{};
+        std::vector<std::future<void>> threads{};
         threads.reserve(number_of_threads);
 
         for (std::size_t t = 0; t < number_of_threads; ++t)
@@ -420,19 +422,19 @@ class defect_influence_impl
                 break;
             }
 
-            threads.emplace_back(
-                [start, end, &fn]
-                {
-                    for (auto i = start; i < end; ++i)
-                    {
-                        fn(i);
-                    }
-                });
+            threads.emplace_back(std::async(std::launch::async,
+                                            [start, end, &fn]
+                                            {
+                                                for (auto i = start; i < end; ++i)
+                                                {
+                                                    fn(i);
+                                                }
+                                            }));
         }
 
         for (auto& thread : threads)
         {
-            thread.join();
+            thread.get();
         }
     }
     /**
@@ -629,9 +631,9 @@ class defect_influence_impl
         return latest_non_influential;
     }
     /**
-     * Writes the counters into the statistics.
+     * @brief Writes the counters into the statistics.
      */
-    void log_stats() const noexcept
+    void log_stats() const
     {
         stats.num_simulator_invocations      = num_simulator_invocations.load();
         stats.num_evaluated_defect_positions = num_evaluated_defect_positions.load();
