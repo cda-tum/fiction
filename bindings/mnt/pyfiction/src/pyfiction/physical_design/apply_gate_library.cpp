@@ -23,6 +23,8 @@
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/qca/sim7_mol_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
+#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
@@ -65,7 +67,20 @@ void apply_gate_library(nanobind::module_& m)
     detail::apply_gate_library<fiction::qca::qca_one_library, py_cartesian_gate_layout>(m, "qca_one");
     detail::apply_gate_library<fiction::qca::sim7_mol_library, py_cartesian_gate_layout>(m, "sim7_mol");
     detail::apply_gate_library<fiction::inml::topolinano_library, py_shifted_cartesian_gate_layout>(m, "topolinano");
-    detail::apply_gate_library<fiction::sidb::bestagon_library, py_hexagonal_gate_layout>(m, "bestagon");
+
+    namespace py = nanobind;
+
+    // the SiDB gate library yields an SiDB layout over the H-Si(100) 2x1 lattice
+    m.def(
+        "apply_bestagon_library",
+        [](const py_hexagonal_gate_layout& lyt)
+        {
+            return fiction::sidb::to_sidb_layout(
+                fiction::physical_design::apply_gate_library<py_cartesian_cell_layout<fiction::sidb::sidb_technology>,
+                                                             fiction::sidb::bestagon_library, py_hexagonal_gate_layout>(
+                    lyt));
+        },
+        py::arg("layout"), DOC(fiction_physical_design_apply_gate_library));
 }
 
 }  // namespace pyfiction

@@ -19,16 +19,20 @@
 
 #include "fiction/physical_design/apply_gate_library.hpp"
 #include "fiction/physical_design/exact.hpp"
+#include "fiction/physical_design/surface_analysis.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/on_the_fly_gate_library.hpp"
 #include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
-#include "fiction/technology/sidb/surface_analysis.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <cstdint>
 #include <cstdio>
 #include <optional>
 #include <stdexcept>
@@ -70,15 +74,13 @@ class unsuccessful_gate_design_error : public std::runtime_error
 /**
  * This struct stores the parameters to design an SiDB circuit on a defective surface.
  *
- * @tparam CellLyt SiDB cell-level layout type.
  */
-template <typename CellLyt>
 struct on_the_fly_circuit_design_on_defective_surface_params
 {
     /**
      * Parameters for the SiDB on-the-fly gate library.
      */
-    sidb::on_the_fly_gate_library_params<CellLyt> sidb_on_the_fly_gate_library_parameters = {};
+    sidb::on_the_fly_gate_library_params sidb_on_the_fly_gate_library_parameters = {};
     /**
      * Parameters for the *exact* placement and routing algorithm.
      */
@@ -88,15 +90,13 @@ struct on_the_fly_circuit_design_on_defective_surface_params
 /**
  * This struct stores the parameters to design an SiDB circuit.
  *
- * @tparam CellLyt SiDB cell-level layout type.
  */
-template <typename CellLyt>
 struct on_the_fly_circuit_design_params
 {
     /**
      * Parameters for the SiDB on-the-fly gate library.
      */
-    sidb::on_the_fly_gate_library_params<CellLyt> sidb_on_the_fly_gate_library_parameters = {};
+    sidb::on_the_fly_gate_library_params sidb_on_the_fly_gate_library_parameters = {};
 };
 
 /**
@@ -122,7 +122,7 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
 };
 
 /**
- * This function implements an on-the-fly circuit design algorithm for a defective SiDB surface.
+ * @brief Implements an on-the-fly circuit design algorithm for a defective SiDB surface.
  *
  * The process begins with placement and routing using a blacklist and the `exact` method. The blacklist includes
  * skeleton-tile pairs that are excluded due to collisions between skeleton and neutral defects on specific tiles. After
@@ -137,7 +137,6 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * (https://ieeexplore.ieee.org/abstract/document/10628962).
  *
  * @tparam Ntk The type of the input network.
- * @tparam CellLyt SiDB defect surface type.
  * @tparam GateLyt Gate-level layout type.
  * @param ntk The input network to be mapped onto the defective surface.
  * @param lattice_tiling The lattice tiling used for the circuit design.
@@ -147,36 +146,32 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
  * @return Layout representing the designed circuit on the defective surface.
  */
-template <typename Ntk, typename CellLyt, typename GateLyt>
-[[nodiscard]] CellLyt on_the_fly_circuit_design_on_defective_surface(
-    const Ntk& ntk, const GateLyt& lattice_tiling, const CellLyt& defective_surface,
-    const on_the_fly_circuit_design_on_defective_surface_params<cell<CellLyt>>& params = {},
-    on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>*              stats  = nullptr)
+template <typename Ntk, typename GateLyt>
+[[nodiscard]] layout on_the_fly_circuit_design_on_defective_surface(
+    const Ntk& ntk, const GateLyt& lattice_tiling, const layout& defective_surface,
+    const on_the_fly_circuit_design_on_defective_surface_params&   params = {},
+    on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>* stats  = nullptr)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt is not a hexagonal");
-    static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-    static_assert(is_sidb_defect_surface_v<CellLyt>, "CellLyt is not an SiDB defect surface");
-
     on_the_fly_circuit_design_on_defective_surface_stats<GateLyt> st{};
 
     physical_design::exact_physical_design_stats exact_stats{};
 
-    CellLyt result{};
+    layout result{};
 
     {
         const mockturtle::stopwatch stop{st.time_total};
 
         std::optional<GateLyt> gate_level_layout = std::nullopt;
 
-        CellLyt lyt{};
+        layout lyt{};
 
         // generating the blacklist based on neutral defects. The long-range electrostatic influence of charged defects
         // is not considered as gates are designed on-the-fly.
-        auto black_list = sidb::surface_analysis<sidb::skeleton_bestagon_library, GateLyt, CellLyt>(
-            lattice_tiling, defective_surface, std::make_pair(0, 0));
+        auto black_list = physical_design::surface_analysis<sidb::skeleton_bestagon_library>(
+            lattice_tiling, defective_surface, std::pair<uint16_t, uint16_t>{0, 0});
 
         while (!gate_level_layout.has_value())
         {
@@ -192,8 +187,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
                 try
                 {
                     lyt = physical_design::apply_parameterized_gate_library_to_defective_surface<
-                        CellLyt, sidb::on_the_fly_gate_library, GateLyt,
-                        sidb::on_the_fly_gate_library_params<cell<CellLyt>>>(
+                        sidb::on_the_fly_gate_library>(
                         *gate_level_layout, params.sidb_on_the_fly_gate_library_parameters, defective_surface);
                 }
 
@@ -205,7 +199,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
                     black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
                 }
 
-                catch (const fcn::unsupported_gate_orientation_exception<cell<CellLyt>, fcn::port_direction>& e)
+                catch (const fcn::unsupported_gate_orientation_exception<tile<GateLyt>, fcn::port_direction>& e)
                 {
                     fmt::print(stderr, "[e] Unsupported gate orientation encountered at tile: {} and ports: {}\n",
                                e.where(), e.which_ports());
@@ -228,7 +222,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
         result = lyt;
     }
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -237,42 +231,33 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
 }
 
 /**
- * This function implements an on-the-fly SiDB circuit design algorithm.
+ * @brief Designs a lattice-based SiDB circuit for a placed and routed gate-level layout.
  *
  * The process begins with an already placed and routed gate-level layout. For each gate, the corresponding SiDB
  * implementation is designed by using an SiDB gate design algorithm.
  *
- * @tparam CellLyt SiDB cell-level layout type.
  * @tparam GateLyt Gate-level layout type.
  * @param gate_lyt Gate-level layout.
- * @param lattice_tiling The lattice tiling used for the circuit design.
  * @param params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_circuit_design_params` object.
- * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
  * @return Layout representing the designed SiDB circuit.
+ * @throws unsuccessful_gate_design_error if a gate cannot be designed.
  */
-template <typename CellLyt, typename GateLyt>
-[[nodiscard]] CellLyt on_the_fly_circuit_design(const GateLyt&                                   gate_lyt,
-                                                const on_the_fly_circuit_design_params<CellLyt>& params = {})
+template <typename GateLyt>
+[[nodiscard]] layout on_the_fly_circuit_design(const GateLyt&                          gate_lyt,
+                                               const on_the_fly_circuit_design_params& params = {})
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt is not a hexagonal");
-    static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
-    static_assert(!is_sidb_defect_surface_v<CellLyt>, "CellLyt cannot be an SiDB defect surface");
-
-    CellLyt result{};
-
     try
     {
-        return physical_design::apply_parameterized_gate_library<CellLyt, sidb::on_the_fly_gate_library, GateLyt,
-                                                                 sidb::on_the_fly_gate_library_params<CellLyt>>(
-            *gate_lyt, params.sidb_on_the_fly_gate_library_parameters);
+        return to_sidb_layout(
+            physical_design::apply_parameterized_gate_library<sidb_cell_clk_lyt_cube, sidb::on_the_fly_gate_library>(
+                gate_lyt, params.sidb_on_the_fly_gate_library_parameters));
     }
 
-    // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
-    // blacklist and the process is rerun.
-    catch (const sidb::gate_design_exception<GateLyt>& e)
+    // Report an unsuccessful gate design to the circuit-design caller.
+    catch (const sidb::gate_design_exception<GateLyt>&)
     {
         throw unsuccessful_gate_design_error("Gate design was unsuccessful");
     }

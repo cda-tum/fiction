@@ -20,12 +20,24 @@
 #include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
+#include <fiction/types.hpp>
 
 #include <array>
 #include <string_view>
 
 using namespace fiction;
 using namespace fiction::sidb::generators;
+
+TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-design]")
+{
+    hex_even_row_gate_clk_lyt gate_layout{{2, 2}};
+    gate_layout.create_and(0, 1, {1, 2});
+
+    on_the_fly_circuit_design_params params{};
+    params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs = 0;
+
+    CHECK_THROWS_AS(on_the_fly_circuit_design(gate_layout, params), unsuccessful_gate_design_error);
+}
 
 TEMPLATE_TEST_CASE("Circuit-design exceptions copy the supplied message view", "[on-the-fly-circuit-design]",
                    unsuccessful_pr_error, unsuccessful_gate_design_error)

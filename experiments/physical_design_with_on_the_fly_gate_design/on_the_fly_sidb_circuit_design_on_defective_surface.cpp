@@ -19,17 +19,15 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/layouts/bounding_box.hpp>
 #include <fiction/synthesis/technology_mapping.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
-#include <fiction/technology/sidb/surfaces/defect_surface.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -47,7 +45,6 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
-#include <optional>
 #include <string>
 
 using namespace fiction;
@@ -57,7 +54,6 @@ using namespace fiction::sidb::generators;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
-using namespace fiction::sidb::surfaces;
 using namespace fiction::synthesis;
 
 // This script conducts defect-aware placement and routing with defect-aware on-the-fly SiDB gate design. Thereby, SiDB
@@ -70,7 +66,6 @@ using namespace fiction::synthesis;
 int main()  // NOLINT
 {
     using gate_lyt = hex_even_row_gate_clk_lyt;
-    using cell_lyt = sidb_cell_clk_lyt_cube;
 
     design_gates_params design_gate_params{};
     design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
@@ -91,14 +86,14 @@ int main()  // NOLINT
         fmt::format("{}/physical_design_with_on_the_fly_gate_design/layouts", EXPERIMENTS_PATH);
 
     // read-in the initial defects. Physical parameters of the defects are not stored yet.
-    auto surface_lattice_initial = read_surface_defects<cell_lyt>(
+    auto surface_lattice_initial = read_surface_defects(
         "../../experiments/physical_design_with_on_the_fly_gate_design/0.5_percent_with_charged_surface.txt");
 
     // create an empty surface.
-    defect_surface<cell_lyt> surface_lattice{};
+    layout surface_lattice{};
 
     // add physical parameters of the defects to the surface_lattice.
-    surface_lattice_initial.foreach_sidb_defect(
+    surface_lattice_initial.foreach_defect(
         [&surface_lattice, &stray_db, &si_vacancy](const auto& cd)
         {
             if (cd.second.type == defect_type::DB)
@@ -114,10 +109,6 @@ int main()  // NOLINT
                 surface_lattice.assign_defect(cd.first, cd.second);
             }
         });
-
-    // determine bounding-box of the surface to set the aspect ratio of the surface lattice.
-    const auto bb_defect_surface = bounding_box_2d{surface_lattice};
-    surface_lattice.resize(bb_defect_surface.get_max());
 
     const auto lattice_tiling = gate_lyt{{11, 30}};
 
@@ -160,7 +151,7 @@ int main()  // NOLINT
         // perform technology mapping
         const auto mapped_network = technology_mapping(cut_xag, tech_map_params);
 
-        on_the_fly_circuit_design_on_defective_surface_params<cell<cell_lyt>> params{};
+        on_the_fly_circuit_design_on_defective_surface_params params{};
 
         params.exact_design_parameters.scheme        = "ROW4";
         params.exact_design_parameters.crossings     = true;
@@ -176,30 +167,36 @@ int main()  // NOLINT
 
         try
         {
-            const auto result = on_the_fly_circuit_design_on_defective_surface<decltype(mapped_network),
-                                                                               decltype(surface_lattice), gate_lyt>(
-                mapped_network, lattice_tiling, surface_lattice, params, &st);
+            const auto result = on_the_fly_circuit_design_on_defective_surface(mapped_network, lattice_tiling,
+                                                                               surface_lattice, params, &st);
 
             write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // check equivalence
             if (!st.gate_layout.has_value())
             {
-                throw std::bad_optional_access{};
+                fmt::print("[e] Circuit design produced no gate-level layout\n");
+                continue;
             }
-            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, st.gate_layout.value());
+
+            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, *st.gate_layout);
+
             if (!miter.has_value())
             {
-                throw std::bad_optional_access{};
+                fmt::print("[e] Miter construction failed\n");
+                continue;
             }
+
             const auto eq = mockturtle::equivalence_checking(*miter);
+
             if (!eq.has_value())
             {
-                throw std::bad_optional_access{};
+                fmt::print("[e] Equivalence checking failed\n");
+                continue;
             }
 
             sidb_circuits_with_defects(benchmark, mockturtle::to_seconds(st.time_total),
-                                       st.exact_stats.num_aspect_ratios, *eq, result.num_cells());
+                                       st.exact_stats.num_aspect_ratios, *eq, result.num_dots());
 
             sidb_circuits_with_defects.save();
             sidb_circuits_with_defects.table();

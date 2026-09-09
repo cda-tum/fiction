@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Algorithms:
+
+  - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
+
 - Code quality:
 
   - Added QCA SVG regression tests for colors, detail modes, tile labels, and file output.
@@ -51,6 +55,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Exposed lattice-based logic checks, parameter domains, critical-temperature analysis,
     time-to-solution estimates, and population-stability analysis
   - SiDB gate and random-layout generators accept and return `sidb_layout`
+  - SiDB defect analyses accept `sidb_layout`; the displacement analysis returns
+    `displacement_robustness_domain`, and defect-domain writers return `None`
+  - `displacement_robustness_domain` replaces its `_100` and `_111` variants
+  - `apply_bestagon_library` returns `sidb_layout`
 
 - Tooling:
 
@@ -69,8 +77,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Potential landscape construction computes each symmetric SiDB interaction once
   - **Breaking:** SiDB generators, logic, and analysis algorithms use `sidb::layout`,
     `kitty::dynamic_truth_table`, and non-template simulation types
+  - **Breaking:** SiDB defect analyses, generators, and gate libraries use `sidb::layout`
+  - Their parameters use `lattice_site` for canvases, scan areas, and fixed SiDBs
+  - Defect-influence and displacement-robustness domains are non-template types
+  - Gate designers retain cell-level overloads while the remaining consumers migrate
   - Random gate design samples at most `maximal_random_design_attempts` candidates without enumerating
     canvas layouts; candidate counts saturate at the largest representable value
+  - Gate-design and defect-influence APIs reject empty specifications
+  - `on_the_fly_gate_library` measures the distance between a defect and the gate's SiDBs on the surface's
+    lattice
+  - `surface_analysis` and `surface_black_list` live in `physical_design/surface_analysis.hpp` and namespace
+    `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
+    SiDB header dependency
 
 - Continuous integration:
   - Reusable workflows now use GitHub's self-repository reference syntax.
@@ -93,7 +111,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Documentation now displays the installed package version.
 
 - Experiments:
-  - SiDB generator experiments use concrete parameter types with unchanged numerical values.
+  - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
+
+- Gate libraries:
+  - `apply_gate_library_to_defective_surface` and `apply_parameterized_gate_library_to_defective_surface`
+    take the defective surface as a `sidb::layout` and return one that carries its defects.
+    SiDB gate placement, surface analysis, and circuit design no longer take a cell-layout template argument.
 
 - I/O:
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
@@ -241,6 +264,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
+  - Defect-influence analysis now propagates worker exceptions to the caller.
   - Canvas filtering now rejects SiDBs missing from the simulation state's layout.
   - Ground State Space reports multiset limits using the potential landscape's charge base.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
@@ -251,13 +275,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - ClusterComplete now assigns distinct queue indices to workers without initial work.
   - Simulation comparison and output now validate distribution sites. Ground State Space uses the landscape's physical parameters.
   - Parallel SiDB consumers now propagate worker errors and reject QuickSim with charged defects.
-  - Concurrent operational-domain searches now use independent random number generators.
-  - Binomial coefficients avoid intermediate overflow and saturate at the `uint64_t` limit.
-  - Combination enumeration rejects results that cannot fit in a vector.
-  - Gate design enumerates, counts, and randomly samples only empty, defect-free canvas sites.
+  - Concurrent operational-domain and defect-influence searches now use independent random number generators.
+  - Binomial coefficients avoid intermediate overflow and saturate at the `uint64_t` limit
+  - Displacement analysis retains layout names and stationary defects
+  - Defect influence compares complete ground-state charge vectors
   - SiDB parameter sweeps now reject non-finite ranges, invalid steps, and unrepresentable point counts.
     Operational-domain ratios also reject malformed seeds and fewer than two sweep dimensions.
   - Population-stability analysis now distinguishes complete charge distributions beyond the charge-index range.
+  - Gate design enumerates, counts, and randomly samples only empty, defect-free canvas sites.
+  - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
@@ -276,6 +302,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     allocation failure, and moving a defect from an empty site leaves the target unchanged
   - Moving a defect now preserves its target when the site arguments refer to stored defects.
   - Corrected the SiDB pointer aliases in `types.hpp` and checked their target types.
+  - SiDB-to-cell-level conversion preserves bounds from converted cells and retained defects.
 
 - Documentation:
 

@@ -20,10 +20,10 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp>
@@ -34,7 +34,6 @@
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
@@ -68,10 +67,8 @@ using namespace fiction::utils::math;
 
 int main()  // NOLINT
 {
-    using Lyt = sidb_100_cell_clk_lyt_cube;
-
     // 2-input/1-output gate skeleton for the experiments. It is used to design gates with 2 inputs and 1 output.
-    static const auto skeleton = read_sqd_layout<Lyt>(fmt::format(
+    static const auto skeleton = read_sqd_layout(fmt::format(
         "{}/gate_skeletons/skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", EXPERIMENTS_PATH));
 
     // This table is used to explore the figures of merit for 2-input/1-output SiDB gates.
@@ -135,7 +132,7 @@ int main()  // NOLINT
 
     const std::vector<defect> defects = {si_vacancy, arsenic};
 
-    defect_influence_params<cell<sidb_100_cell_clk_lyt_cube>> params{};
+    defect_influence_params params{};
     params.additional_scanning_area = {20, 20};
     params.operational_params       = op_params;
 
@@ -160,14 +157,10 @@ int main()  // NOLINT
             std::vector<double> defect_influence_vacancy      = {};
             std::vector<double> bbr_all                       = {};
 
-            std::vector<Lyt>   all_gates{};
-            design_gates_stats efficient_stats{};
+            std::vector<layout> all_gates{};
+            design_gates_stats  efficient_stats{};
 
-            for (const auto& gate :
-                 design_gates(to_sidb_layout(skeleton), truth_table, design_params, &efficient_stats))
-            {
-                all_gates.push_back(to_cell_level_layout<Lyt>(gate));
-            }
+            all_gates = design_gates(skeleton, truth_table, design_params, &efficient_stats);
 
             if (all_gates.empty())
             {

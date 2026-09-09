@@ -11,6 +11,7 @@ graph_oriented_layout_design
 hexagonalization
 orthogonal
 post_layout_optimization
+surface_analysis
 wiring_reduction
 path_finding/path_finding
 ```

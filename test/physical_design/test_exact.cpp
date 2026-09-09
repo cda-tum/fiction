@@ -27,12 +27,12 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/exact.hpp>
+#include <fiction/physical_design/surface_analysis.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/technology/sidb/surface_analysis.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
@@ -61,68 +61,107 @@ using namespace fiction::verification;
 namespace
 {
 
-exact_physical_design_params configuration() noexcept
+/**
+ * @return The default exact-layout parameters.
+ */
+exact_physical_design_params configuration()
 {
     return {};
 }
 
-exact_physical_design_params&& open(exact_physical_design_params&& ps) noexcept
+/**
+ * @param ps Parameters to configure with open clocking.
+ * @return The configured parameters.
+ */
+exact_physical_design_params&& open(exact_physical_design_params&& ps)
 {
     ps.scheme = "Open";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& columnar(exact_physical_design_params&& ps) noexcept
+/**
+ * @param ps Parameters to configure with columnar clocking.
+ * @return The configured parameters.
+ */
+exact_physical_design_params&& columnar(exact_physical_design_params&& ps)
 {
     ps.scheme = "Columnar";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& row(exact_physical_design_params&& ps) noexcept
+/**
+ * @param ps Parameters to configure with row clocking.
+ * @return The configured parameters.
+ */
+exact_physical_design_params&& row(exact_physical_design_params&& ps)
 {
     ps.scheme = "Row";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& twoddwave(exact_physical_design_params&& ps) noexcept
+/**
+ * @param ps Parameters to configure with 2DDWave clocking.
+ * @return The configured parameters.
+ */
+exact_physical_design_params&& twoddwave(exact_physical_design_params&& ps)
 {
     ps.scheme = "2DDWave";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& use(exact_physical_design_params&& ps) noexcept
+/**
+ * @param ps Parameters to configure with USE clocking.
+ * @return The configured parameters.
+ */
+exact_physical_design_params&& use(exact_physical_design_params&& ps)
 {
     ps.scheme = "USE";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& res(exact_physical_design_params&& ps) noexcept
+/**
+ * @param ps Parameters to configure with RES clocking.
+ * @return The configured parameters.
+ */
+exact_physical_design_params&& res(exact_physical_design_params&& ps)
 {
     ps.scheme = "RES";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& esr(exact_physical_design_params&& ps) noexcept
+/**
+ * @param ps Parameters to configure with ESR clocking.
+ * @return The configured parameters.
+ */
+exact_physical_design_params&& esr(exact_physical_design_params&& ps)
 {
     ps.scheme = "ESR";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& cfe(exact_physical_design_params&& ps) noexcept
+/**
+ * @param ps Parameters to configure with CFE clocking.
+ * @return The configured parameters.
+ */
+exact_physical_design_params&& cfe(exact_physical_design_params&& ps)
 {
     ps.scheme = "CFE";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& srs(exact_physical_design_params&& ps) noexcept
+/**
+ * @param ps Parameters to configure with SRS clocking.
+ * @return The configured parameters.
+ */
+exact_physical_design_params&& srs(exact_physical_design_params&& ps)
 {
     ps.scheme = "SRS";
 
@@ -171,36 +210,61 @@ exact_physical_design_params&& topolinano(exact_physical_design_params&& ps) noe
     return std::move(ps);
 }
 
+/**
+ * @tparam Lyt Gate-level layout type.
+ * @return An empty surface blacklist.
+ */
 template <typename Lyt>
-surface_black_list<Lyt, port_direction> blacklist() noexcept
+surface_black_list<Lyt, port_direction> blacklist()
 {
     return {};
 }
 
+/**
+ * @tparam Lyt Gate-level layout type.
+ * @param t Tile at which wires are forbidden.
+ * @param ports Forbidden port combinations.
+ * @param sbl Blacklist to extend.
+ * @return The extended blacklist.
+ */
 template <typename Lyt>
 surface_black_list<Lyt, port_direction>&& blacklist_wire(const tile<Lyt>&                              t,
                                                          const std::vector<port_list<port_direction>>& ports,
-                                                         surface_black_list<Lyt, port_direction>&&     sbl) noexcept
+                                                         surface_black_list<Lyt, port_direction>&&     sbl)
 {
     sbl[t].insert({create_id_tt(), ports});
 
     return std::move(sbl);
 }
 
+/**
+ * @tparam Lyt Gate-level layout type.
+ * @param t Tile at which AND gates are forbidden.
+ * @param ports Forbidden port combinations.
+ * @param sbl Blacklist to extend.
+ * @return The extended blacklist.
+ */
 template <typename Lyt>
 surface_black_list<Lyt, port_direction>&& blacklist_and(const tile<Lyt>&                              t,
                                                         const std::vector<port_list<port_direction>>& ports,
-                                                        surface_black_list<Lyt, port_direction>&&     sbl) noexcept
+                                                        surface_black_list<Lyt, port_direction>&&     sbl)
 {
     sbl[t].insert({create_and_tt(), ports});
 
     return std::move(sbl);
 }
 
+/**
+ * @tparam Lyt Gate-level layout type.
+ * @param t Tile at which OR gates are forbidden.
+ * @param ports Forbidden port combinations.
+ * @param sbl Blacklist to extend.
+ * @return The extended blacklist.
+ */
 template <typename Lyt>
 surface_black_list<Lyt, port_direction>&& blacklist_or(const tile<Lyt>&                              t,
                                                        const std::vector<port_list<port_direction>>& ports,
-                                                       surface_black_list<Lyt, port_direction>&&     sbl) noexcept
+                                                       surface_black_list<Lyt, port_direction>&&     sbl)
 {
     sbl[t].insert({create_or_tt(), ports});
 

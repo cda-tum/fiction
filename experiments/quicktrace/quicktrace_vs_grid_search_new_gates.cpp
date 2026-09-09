@@ -16,14 +16,13 @@
  */
 
 #include "fiction/synthesis/truth_tables.hpp"
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/generators/design_gates.hpp"
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_clearance.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction_experiments.hpp"
 
@@ -37,6 +36,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
@@ -63,13 +63,13 @@ int main()  // NOLINT
         std::make_pair("inv", std::vector<tt>{create_not_tt()}),
         std::make_pair("wire", std::vector<tt>{create_id_tt()})};
 
-    auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_cube>(
+    auto lyt = read_sqd_layout(
         fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", folder));
 
     const design_gates_params params_2_in_1_out{
         .operational_params     = is_operational_params{.sim_params = simulation_parameters{2, -0.32}},
         .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-        .canvas                 = {{14, 12, 0}, {24, 23, 0}},
+        .canvas                 = {site_at_row(14, 12), site_at_row(24, 23)},
         .number_of_canvas_sidbs = 3};
 
     const auto                  sidb_sim = simulation_parameters{2, -0.32, 5.6, 5.0};
@@ -79,14 +79,14 @@ int main()  // NOLINT
     const auto stray_db = defect{defect_type::DB, -1, 4.1, 1.8};
     // const auto si_vacancy = sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
-    defect_influence_params<cell<sidb_100_cell_clk_lyt_cube>> params{};
+    defect_influence_params params{};
     params.additional_scanning_area = {100, 1000};
     params.defect                   = stray_db;
     params.operational_params       = is_op_params;
 
     for (const auto& [gate, truth_table] : gates)
     {
-        const auto exhaustive_design = design_gates(to_sidb_layout(lyt), truth_table, params_2_in_1_out);
+        const auto exhaustive_design = design_gates(lyt, truth_table, params_2_in_1_out);
 
         // Create gate directory for plots
         const std::string gate_folder = fmt::format("{}{}/", output_folder, gate);
@@ -94,9 +94,8 @@ int main()  // NOLINT
 
         std::size_t counter_for_wrong_output_of_quicktrace = 0;
 
-        for (const auto& sidb_gate : exhaustive_design)
+        for (const auto& gate_lyt : exhaustive_design)
         {
-            const auto gate_lyt = to_cell_level_layout<sidb_100_cell_clk_lyt_cube>(sidb_gate);
             // using grid search to find the minimum defect clearance
             const auto op_defect_grid = defect_influence_grid_search(gate_lyt, truth_table, params, 1);
             const auto avoidance_grid = calculate_defect_clearance(gate_lyt, op_defect_grid);

@@ -4,7 +4,8 @@
 
 Applies an FCN {ref}`gate library <fcn-gate-libraries>` to a `gate_level_layout` to obtain a `cell_level_layout` implemented
 in the same {ref}`technology <fcn-cell-technologies>` as the provided gate library. Thereby, this function creates cell-accurate
-implementations for each gate present in the passed `gate_level_layout`.
+implementations for each gate present in the passed `gate_level_layout`. The variants that place gates on a defective
+surface take the surface as a `sidb::layout` and return one, carrying the surface's defects.
 
 ::::{tab-set}
 :sync-group: language
@@ -18,7 +19,7 @@ implementations for each gate present in the passed `gate_level_layout`.
 
 ```
 
-```{doxygenfunction} fiction::physical_design::apply_gate_library_to_defective_surface(const GateLyt& lyt, const DefectLyt& defect_surface)
+```{doxygenfunction} fiction::physical_design::apply_gate_library_to_defective_surface(const GateLyt& lyt, const sidb::layout& defect_surface)
 
 ```
 
@@ -26,7 +27,7 @@ implementations for each gate present in the passed `gate_level_layout`.
 
 ```
 
-```{doxygenfunction} fiction::physical_design::apply_parameterized_gate_library_to_defective_surface(const GateLyt& lyt, const Params& params, const DefectLyt& defect_surface)
+```{doxygenfunction} fiction::physical_design::apply_parameterized_gate_library_to_defective_surface(const GateLyt& lyt, const Params& params, const sidb::layout& defect_surface)
 
 ```
 
