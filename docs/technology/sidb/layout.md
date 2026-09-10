@@ -93,6 +93,9 @@ Python exposes the tags as `sidb_dot_tag`.
 
 ```{eval-rst}
 
+.. autoclass:: mnt.pyfiction.sidb_dot_tag
+    :members:
+
 .. autoclass:: mnt.pyfiction.sidb_layout
     :members:
 
