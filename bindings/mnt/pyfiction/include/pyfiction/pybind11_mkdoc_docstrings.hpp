@@ -2873,13 +2873,6 @@ coordinates:
   0) - (0, 0, 1) - (1, 0, 1) - (0, 1, 1) - (1, 1, 1) - (0, 2, 1) - (1,
   2, 1)
 
-For SiQAD coordinates with the same parameters, we have the following
-order of enumeration:
-
-- (0, 0, 0) - (1, 0, 0) - (0, 0, 1) - (1, 0, 1) - (0, 1, 0) - (1, 2,
-  0) - (0, 1, 1) - (1, 1, 1) - (1, 1, 0) - (0, 2, 0) - (0, 2, 1) - (1,
-  2, 1)
-
 iterator is compatible with the STL forward_iterator category. Does
 not iterate over negative coordinates.
 
@@ -5763,7 +5756,7 @@ Args:
     lyt: The layout which is to be normalized.
 
 Template Args:
-    Lyt: SiDB cell-level layout type.
+    Lyt: Cartesian cell-level layout type.
 
 Returns:
     New normalized equivalent layout.
@@ -21364,10 +21357,7 @@ wire's end.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_pair =
 R"doc(A Binary-dot Logic (BDL) pair is a pair of SiDBs that are close to
-each other and, thus, most likely share a charge.
-
-Template Args:
-    CellType: Coordinate type.)doc";
+each other and, thus, most likely share a charge.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_pair_bdl_pair = R"doc(Standard constructor for empty BDL pairs.)doc";
 
