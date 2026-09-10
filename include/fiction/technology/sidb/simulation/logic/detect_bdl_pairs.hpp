@@ -34,10 +34,7 @@ namespace fiction::sidb::simulation::logic
 
 /**
  * A Binary-dot Logic (BDL) pair is a pair of SiDBs that are close to each other and, thus, most likely share a charge.
- *
- * @tparam CellType Coordinate type.
  */
-template <typename CellType>
 struct bdl_pair
 {
     /**
@@ -48,11 +45,11 @@ struct bdl_pair
     /**
      * The upper SiDB of the pair. Upper and lower are defined relative to each other via the `operator<` overload.
      */
-    CellType upper{};
+    lattice_site upper{};
     /**
      * The lower SiDB of the pair. Upper and lower are defined relative to each other via the `operator<` overload.
      */
-    CellType lower{};
+    lattice_site lower{};
     /**
      * Standard constructor for empty BDL pairs.
      */
@@ -64,7 +61,8 @@ struct bdl_pair
      * @param u The upper SiDB of the pair.
      * @param l The lower SiDB of the pair.
      */
-    bdl_pair(const sidb::dot_tag t, const CellType& u, const CellType& l) noexcept : type{t}, upper{u}, lower{l} {}
+    bdl_pair(const sidb::dot_tag t, const lattice_site& u, const lattice_site& l) noexcept : type{t}, upper{u}, lower{l}
+    {}
 
     /**
      * Equality operator. Also provides `operator!=` via `= default`.
@@ -72,14 +70,14 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if this BDL pair is equal to the other, `false` otherwise.
      */
-    [[nodiscard]] constexpr bool operator==(const bdl_pair<CellType>& other) const noexcept = default;
+    [[nodiscard]] constexpr bool operator==(const bdl_pair& other) const noexcept = default;
     /**
      * Less than operator.
      *
      * @param other The other BDL pair to compare with.
      * @return `true` if this BDL pair is less than the other, `false` otherwise.
      */
-    [[nodiscard]] constexpr bool operator<(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool operator<(const bdl_pair& other) const noexcept
     {
         if (upper != other.upper)
         {
@@ -94,7 +92,7 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if this BDL pair is less than or equal to the other, `false` otherwise.
      */
-    [[nodiscard]] constexpr bool operator<=(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool operator<=(const bdl_pair& other) const noexcept
     {
         return (*this < other) || (*this == other);
     }
@@ -104,7 +102,7 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if this BDL pair is greater than the other, `false` otherwise.
      */
-    [[nodiscard]] constexpr bool operator>(const bdl_pair<CellType>& other) const
+    [[nodiscard]] constexpr bool operator>(const bdl_pair& other) const
     {
         return !(*this <= other);
     }
@@ -114,7 +112,7 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if this BDL pair is greater than or equal to the other, otherwise `false`.
      */
-    [[nodiscard]] constexpr bool operator>=(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool operator>=(const bdl_pair& other) const noexcept
     {
         return !(*this < other);
     }
@@ -124,7 +122,7 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if the `upper` and `lower` attributes are equal, otherwise `false`.
      */
-    [[nodiscard]] constexpr bool equal_ignore_type(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool equal_ignore_type(const bdl_pair& other) const noexcept
     {
         return upper == other.upper && lower == other.lower;
     }
@@ -135,7 +133,7 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if the `upper` and `lower` attributes are not equal, otherwise `false`.
      */
-    [[nodiscard]] constexpr bool not_equal_ignore_type(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool not_equal_ignore_type(const bdl_pair& other) const noexcept
     {
         return !equal_ignore_type(other);
     }
@@ -148,7 +146,7 @@ struct bdl_pair
      * @return `true` if both the `upper` and `lower` SiDBs in this pair have the same y-coordinate
      *         as the corresponding SiDBs in the other pair, otherwise `false`.
      */
-    [[nodiscard]] constexpr bool has_same_y_coordinate(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool has_same_y_coordinate(const bdl_pair& other) const noexcept
     {
         return upper.y == other.upper.y && lower.y == other.lower.y;
     }
@@ -161,7 +159,7 @@ struct bdl_pair
      * @return `true` if both the `upper` and `lower` SiDBs in this pair have the same x-coordinate
      *         as the corresponding SiDBs in the other pair, otherwise `false`.
      */
-    [[nodiscard]] constexpr bool has_same_x_coordinate(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool has_same_x_coordinate(const bdl_pair& other) const noexcept
     {
         return upper.x == other.upper.x && lower.x == other.lower.x;
     }
@@ -197,9 +195,9 @@ struct detect_bdl_pairs_params
  * @param params Parameters for the BDL pair detection.
  * @return The detected BDL pairs.
  */
-[[nodiscard]] inline std::vector<bdl_pair<lattice_site>>
-detect_bdl_pairs(const layout& lyt, const std::optional<dot_tag>& type = std::nullopt,
-                 const detect_bdl_pairs_params& params = {})
+[[nodiscard]] inline std::vector<bdl_pair> detect_bdl_pairs(const layout&                  lyt,
+                                                            const std::optional<dot_tag>&  type   = std::nullopt,
+                                                            const detect_bdl_pairs_params& params = {})
 {
     assert(params.minimum_distance <= params.maximum_distance);
 
@@ -210,7 +208,7 @@ detect_bdl_pairs(const layout& lyt, const std::optional<dot_tag>& type = std::nu
         const auto output_bdls = detect_bdl_pairs(lyt, dot_tag::OUTPUT, params);
         const auto normal_bdls = detect_bdl_pairs(lyt, dot_tag::NORMAL, params);
 
-        std::vector<bdl_pair<lattice_site>> all_bdls{};
+        std::vector<bdl_pair> all_bdls{};
         all_bdls.reserve(input_bdls.size() + output_bdls.size() + normal_bdls.size());
 
         std::ranges::copy(input_bdls, std::back_inserter(all_bdls));
@@ -250,7 +248,7 @@ detect_bdl_pairs(const layout& lyt, const std::optional<dot_tag>& type = std::nu
     std::ranges::sort(pairwise_distances,
                       [](const auto& lhs, const auto& rhs) noexcept { return lhs.distance < rhs.distance; });
 
-    std::vector<bdl_pair<lattice_site>> bdl_pairs{};
+    std::vector<bdl_pair> bdl_pairs{};
     bdl_pairs.reserve(dots.size() / 2);
 
     std::unordered_set<lattice_site> paired_dots{};

@@ -83,7 +83,7 @@ struct bdl_wire
     /**
      * The BDL pairs of the wire.
      */
-    std::vector<bdl_pair<lattice_site>> pairs{};
+    std::vector<bdl_pair> pairs{};
     /**
      * Port direction of the wire.
      */
@@ -91,11 +91,11 @@ struct bdl_wire
     /**
      * First BDL pair of the wire.
      */
-    std::optional<bdl_pair<lattice_site>> first_bdl_pair{};
+    std::optional<bdl_pair> first_bdl_pair{};
     /**
      * Last BDL pair of the wire.
      */
-    std::optional<bdl_pair<lattice_site>> last_bdl_pair{};
+    std::optional<bdl_pair> last_bdl_pair{};
     /**
      * Constructs an empty wire.
      */
@@ -105,7 +105,7 @@ struct bdl_wire
      *
      * @param p The BDL pairs of the wire.
      */
-    explicit bdl_wire(std::vector<bdl_pair<lattice_site>> p) noexcept : pairs(std::move(p))
+    explicit bdl_wire(std::vector<bdl_pair> p) noexcept : pairs(std::move(p))
     {
         if (!pairs.empty())
         {
@@ -120,7 +120,7 @@ struct bdl_wire
      *
      * @param pair The BDL pair to add.
      */
-    void add_bdl_pair(const bdl_pair<lattice_site>& pair) noexcept
+    void add_bdl_pair(const bdl_pair& pair) noexcept
     {
         pairs.push_back(pair);
         std::ranges::sort(pairs);
@@ -131,7 +131,7 @@ struct bdl_wire
      *
      * @param pair The BDL pair to remove.
      */
-    void erase_bdl_pair(const bdl_pair<lattice_site>& pair) noexcept
+    void erase_bdl_pair(const bdl_pair& pair) noexcept
     {
         if (std::erase(pairs, pair) > 0)
         {
@@ -144,7 +144,7 @@ struct bdl_wire
      * @param t The SiDB type to look for.
      * @return The first BDL pair of type `t`, or `std::nullopt` if the wire has none.
      */
-    [[nodiscard]] std::optional<bdl_pair<lattice_site>> find_bdl_pair_by_type(const dot_tag t) const noexcept
+    [[nodiscard]] std::optional<bdl_pair> find_bdl_pair_by_type(const dot_tag t) const noexcept
     {
         const auto it = std::ranges::find_if(pairs, [t](const auto& bdl) { return bdl.type == t; });
 
@@ -416,9 +416,8 @@ class detect_bdl_wires_impl
      * @param bdl_pairs The pairs not assigned to a wire yet.
      * @return A neighboring pair above `given`, if any.
      */
-    [[nodiscard]] std::optional<bdl_pair<lattice_site>>
-    find_bdl_neighbor_above(const bdl_pair<lattice_site>&           given,
-                            const std::set<bdl_pair<lattice_site>>& bdl_pairs) const
+    [[nodiscard]] std::optional<bdl_pair> find_bdl_neighbor_above(const bdl_pair&           given,
+                                                                  const std::set<bdl_pair>& bdl_pairs) const
     {
         const auto it = std::ranges::find_if(
             bdl_pairs,
@@ -443,9 +442,8 @@ class detect_bdl_wires_impl
      * @param bdl_pairs The pairs not assigned to a wire yet.
      * @return A neighboring pair below `given`, if any.
      */
-    [[nodiscard]] std::optional<bdl_pair<lattice_site>>
-    find_bdl_neighbor_below(const bdl_pair<lattice_site>&           given,
-                            const std::set<bdl_pair<lattice_site>>& bdl_pairs) const
+    [[nodiscard]] std::optional<bdl_pair> find_bdl_neighbor_below(const bdl_pair&           given,
+                                                                  const std::set<bdl_pair>& bdl_pairs) const
     {
         const auto it = std::ranges::find_if(
             bdl_pairs,
@@ -526,9 +524,9 @@ class detect_bdl_wires_impl
      * @param lyt The layout.
      * @return All BDL pairs.
      */
-    [[nodiscard]] std::set<bdl_pair<lattice_site>> aggregate_bdl_pairs(const layout& lyt) const
+    [[nodiscard]] std::set<bdl_pair> aggregate_bdl_pairs(const layout& lyt) const
     {
-        std::set<bdl_pair<lattice_site>> bdl_pairs{};
+        std::set<bdl_pair> bdl_pairs{};
 
         for (const auto type : {dot_tag::INPUT, dot_tag::OUTPUT, dot_tag::NORMAL})
         {

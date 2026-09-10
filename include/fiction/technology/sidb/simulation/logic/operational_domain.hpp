@@ -1277,7 +1277,7 @@ class operational_domain_impl
     /**
      * The output BDL pairs of the layout.
      */
-    const std::vector<bdl_pair<lattice_site>> output_bdl_pairs;
+    const std::vector<bdl_pair> output_bdl_pairs;
     /**
      * The number of dimensions.
      */

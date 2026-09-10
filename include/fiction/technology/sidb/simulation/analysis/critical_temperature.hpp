@@ -177,10 +177,9 @@ class critical_temperature_impl
      * @param output_wires BDL output wires of the layout.
      */
     critical_temperature_impl(const std::vector<layout>& input_pattern_lyts, const critical_temperature_params& ps,
-                              critical_temperature_stats&                       st,
-                              const std::vector<logic::bdl_pair<lattice_site>>& output_pairs,
-                              const std::vector<logic::bdl_wire>&               input_wires,
-                              const std::vector<logic::bdl_wire>&               output_wires) :
+                              critical_temperature_stats& st, const std::vector<logic::bdl_pair>& output_pairs,
+                              const std::vector<logic::bdl_wire>& input_wires,
+                              const std::vector<logic::bdl_wire>& output_wires) :
             // a shallow copy, so that the `is_empty()`, `num_pos()` and `num_dots()` guards keep working
             sidb_layout{input_pattern_lyts.front()},
             params{ps},
@@ -221,7 +220,7 @@ class critical_temperature_impl
             // otherwise. None of them depend on the simulation parameters
             const auto detected_output_bdl_pairs =
                 pre_detected_output_bdl_pairs != nullptr ?
-                    std::vector<logic::bdl_pair<lattice_site>>{} :
+                    std::vector<logic::bdl_pair>{} :
                     sidb::simulation::logic::detect_bdl_pairs(
                         sidb_layout, sidb::dot_tag::OUTPUT,
                         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
@@ -528,7 +527,7 @@ class critical_temperature_impl
     /**
      * Pre-detected output BDL pairs, or `nullptr` if they are to be detected here. Not owned by this object.
      */
-    const std::vector<logic::bdl_pair<lattice_site>>* pre_detected_output_bdl_pairs{nullptr};
+    const std::vector<logic::bdl_pair>* pre_detected_output_bdl_pairs{nullptr};
     /**
      * Pre-detected input BDL wires, or `nullptr` if they are to be detected here. Not owned by this object.
      */
@@ -679,13 +678,13 @@ inline double critical_temperature_gate_based(const layout& lyt, const std::vect
  * @throws std::invalid_argument if `spec` is empty, if the number of input pattern layouts does not match the number
  * of input combinations of `spec`, or if the number of output BDL pairs does not match the number of truth tables.
  */
-inline double critical_temperature_gate_based(const std::vector<layout>&                        input_pattern_layouts,
-                                              const std::vector<kitty::dynamic_truth_table>&    spec,
-                                              const critical_temperature_params&                params,
-                                              const std::vector<logic::bdl_pair<lattice_site>>& output_bdl_pairs,
-                                              const std::vector<logic::bdl_wire>&               input_bdl_wires,
-                                              const std::vector<logic::bdl_wire>&               output_bdl_wires,
-                                              critical_temperature_stats*                       pst = nullptr)
+inline double critical_temperature_gate_based(const std::vector<layout>&                     input_pattern_layouts,
+                                              const std::vector<kitty::dynamic_truth_table>& spec,
+                                              const critical_temperature_params&             params,
+                                              const std::vector<logic::bdl_pair>&            output_bdl_pairs,
+                                              const std::vector<logic::bdl_wire>&            input_bdl_wires,
+                                              const std::vector<logic::bdl_wire>&            output_bdl_wires,
+                                              critical_temperature_stats*                    pst = nullptr)
 {
 
     // unlike the other overload, this one indexes caller-supplied containers, so a wrong size is an out-of-bounds

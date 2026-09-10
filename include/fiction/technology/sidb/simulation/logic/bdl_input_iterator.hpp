@@ -309,7 +309,7 @@ class bdl_input_iterator
     /**
      * The input BDL pairs in layout order.
      */
-    std::vector<bdl_pair<lattice_site>> input_pairs;
+    std::vector<bdl_pair> input_pairs;
     /**
      * The input wires.
      */
@@ -317,7 +317,7 @@ class bdl_input_iterator
     /**
      * For each input wire, the BDL pair farthest from its input pair.
      */
-    std::vector<bdl_pair<lattice_site>> last_bdl_for_each_wire;
+    std::vector<bdl_pair> last_bdl_for_each_wire;
     /**
      * For each input pair, whether its upper SiDB is the one closer to the wire's end.
      */
@@ -335,11 +335,11 @@ class bdl_input_iterator
      *
      * @return One pair per wire.
      */
-    [[nodiscard]] std::vector<bdl_pair<lattice_site>> determine_last_bdl_for_each_wire() const
+    [[nodiscard]] std::vector<bdl_pair> determine_last_bdl_for_each_wire() const
     {
         const auto& lat = sidb_layout.get_lattice();
 
-        std::vector<bdl_pair<lattice_site>> end_bdls{};
+        std::vector<bdl_pair> end_bdls{};
         end_bdls.reserve(detected_input_wires.size());
 
         for (const auto& wire : detected_input_wires)

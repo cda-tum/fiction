@@ -16502,21 +16502,6 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temp
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_stats = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_energy_of =
-R"doc(The energy of a charge distribution.
-
-Args:
-    cd: The distribution.
-
-Template Args:
-    T: Charge distribution type with `energy()` or
-       `get_electrostatic_potential_energy()`.
-
-Returns:
-    Its electrostatic potential energy (unit: eV).
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl = R"doc(Implementation of the population stability analysis.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_handle_negative_charges =
@@ -24185,25 +24170,6 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library_skeleton_bestagon_library = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_to_cell =
-R"doc(The coordinate of a lattice site in a given Cartesian SiDB cell-level
-layout type: the column and the single-SiDB row.
-
-Args:
-    s: Lattice site.
-
-Template Args:
-    CellLyt: SiDB cell-level layout type.
-
-Returns:
-    The cell of `CellLyt` at `s`.
-
-Raises:
-    std::out_of_range: if the site cannot be represented by the target
-                       coordinate type.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_to_lattice_site =
 R"doc(The lattice site a Cartesian cell-level layout coordinate refers to:
 the coordinate counts single SiDB rows, so row `y` becomes unit cell
@@ -27113,8 +27079,6 @@ Returns:
 static const char *mkd_doc_std_iterator_traits = R"doc(Iterator traits for enumerating SiDB input patterns.)doc";
 
 static const char *mkd_doc_std_iterator_traits_2 = R"doc()doc";
-
-static const char *mkd_doc_std_tuple_size = R"doc(Number of coordinates exposed by a parameter point's tuple interface.)doc";
 
 #if defined(__GNUG__)
 #pragma GCC diagnostic pop

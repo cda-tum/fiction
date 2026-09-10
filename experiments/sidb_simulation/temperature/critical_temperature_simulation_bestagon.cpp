@@ -21,6 +21,7 @@
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
+#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 

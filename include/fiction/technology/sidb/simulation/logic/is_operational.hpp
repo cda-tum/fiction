@@ -777,7 +777,7 @@ class is_operational_impl
     /**
      * The output BDL pairs.
      */
-    std::vector<bdl_pair<lattice_site>> output_bdl_pairs;
+    std::vector<bdl_pair> output_bdl_pairs;
     /**
      * Iterator over the input patterns.
      */
@@ -972,7 +972,7 @@ class is_operational_impl
      * @param port The wire's port.
      * @return `true` if the pair encodes `0`.
      */
-    [[nodiscard]] static bool encodes_bit_zero(const charge_distribution& cd, const bdl_pair<lattice_site>& bdl,
+    [[nodiscard]] static bool encodes_bit_zero(const charge_distribution& cd, const bdl_pair& bdl,
                                                const fcn::port_direction port) noexcept
     {
         if (port.dir == fcn::port_direction::SOUTH || port.dir == fcn::port_direction::EAST ||
@@ -993,7 +993,7 @@ class is_operational_impl
      * @param port The wire's port.
      * @return `true` if the pair encodes `1`.
      */
-    [[nodiscard]] static bool encodes_bit_one(const charge_distribution& cd, const bdl_pair<lattice_site>& bdl,
+    [[nodiscard]] static bool encodes_bit_one(const charge_distribution& cd, const bdl_pair& bdl,
                                               const fcn::port_direction port) noexcept
     {
         if (port.dir == fcn::port_direction::SOUTH || port.dir == fcn::port_direction::EAST ||

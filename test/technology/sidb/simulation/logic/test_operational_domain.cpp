@@ -147,17 +147,17 @@ TEST_CASE("Test parameter point", "[operational-domain]")
     const parameter_point p4({1.0, 2.0, 3.1});
     REQUIRE(p1 != p4);
 
-    // Test structured bindings (get<I>() method)
-    SECTION("Structured bindings - valid index")
+    SECTION("Parameter values - valid index")
     {
-        REQUIRE(p1.get<0>() == 1.0);
-        REQUIRE(p1.get<1>() == 2.0);
-        REQUIRE(p1.get<2>() == 3.0);
+        REQUIRE(p1.get_parameters().size() == 3);
+        REQUIRE(p1.get_parameters()[0] == 1.0);
+        REQUIRE(p1.get_parameters()[1] == 2.0);
+        REQUIRE(p1.get_parameters()[2] == 3.0);
     }
 
-    SECTION("Structured bindings - invalid index")
+    SECTION("Parameter values - invalid index")
     {
-        REQUIRE_THROWS_AS(p1.get<3>(), std::out_of_range);
+        REQUIRE_THROWS_AS(p1.get_parameters().at(3), std::out_of_range);
     }
 
     SECTION("Equal parameter points hash equally")

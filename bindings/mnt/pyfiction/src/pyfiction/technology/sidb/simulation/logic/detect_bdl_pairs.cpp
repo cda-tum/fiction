@@ -44,7 +44,7 @@ void detect_bdl_pairs(nanobind::module_& m)
 
     using fiction::sidb::lattice_site;
     using fiction::sidb::layout;
-    using bdl_pair_t = fiction::sidb::simulation::logic::bdl_pair<lattice_site>;
+    using bdl_pair_t = fiction::sidb::simulation::logic::bdl_pair;
 
     py::class_<bdl_pair_t>(m, "bdl_pair", DOC(fiction_sidb_simulation_logic_bdl_pair))
         .def(py::init<>(), DOC(fiction_sidb_simulation_logic_bdl_pair_bdl_pair))
