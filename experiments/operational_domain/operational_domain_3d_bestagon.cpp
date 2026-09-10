@@ -23,7 +23,6 @@
 #include <fiction/technology/sidb/simulation/engine.hpp>                       // SiDB simulation engines
 #include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>  // writer for operational domains
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
-#include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                    // output formatting
 #include <mockturtle/utils/stopwatch.hpp>  // stopwatch for time measurement

@@ -251,7 +251,7 @@ template <typename Lyt>
  * are normalized, i.e., start at `(0, 0)` and are all positive. To this end, all existing coordinates are shifted by an
  * x and y offset.
  *
- * @tparam Lyt SiDB cell-level layout type.
+ * @tparam Lyt Cartesian cell-level layout type.
  * @param lyt The layout which is to be normalized.
  * @return New normalized equivalent layout.
  */
@@ -324,83 +324,6 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
     std::uniform_int_distribution<> dist_z(coordinate1.z, coordinate2.z);
 
     return {dist_x(generator), dist_y(generator), dist_z(generator)};
-}
-/**
- * This function checks whether the given layouts `first_lyt` and `second_lyt` are identical by comparing the number
- * of cells and the types of cells.
- *
- * @Note The aspect ratios of the cell-level layouts are not compared.
- *
- * @tparam Lyt The layout type. Must be a cell-level layout.
- * @param first_lyt The first layout to compare.
- * @param second_lyt The second layout to compare.
- * @return `true` if the layouts are identical, `false` otherwise.
- */
-template <typename Lyt>
-[[nodiscard]] inline bool are_cell_layouts_identical(const Lyt& first_lyt, const Lyt& second_lyt) noexcept
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-
-    if (first_lyt.num_cells() != second_lyt.num_cells())
-    {
-        return false;
-    }
-
-    bool different_cells = false;
-
-    first_lyt.foreach_cell(
-        [&first_lyt, &second_lyt, &different_cells](const auto& c)
-        {
-            if (first_lyt.get_cell_type(c) != second_lyt.get_cell_type(c))
-            {
-                different_cells = true;
-                return false;  // abort
-            }
-            return true;  // keep looping
-        });
-
-    return !different_cells;
-}
-/**
- * @brief Computes a digest of the given cell-level layout that respects the equality
- * `are_cell_layouts_identical` implements.
- *
- * Identical layouts always share a digest, so layouts with different digests are never identical. That makes the
- * digest a cheap filter in front of `are_cell_layouts_identical`. Different layouts may share a digest, so a
- * digest match still has to be confirmed with `are_cell_layouts_identical`.
- *
- * The digest covers the cells and their types. Following `are_cell_layouts_identical`, it ignores the layout's aspect
- * ratio.
- *
- * @tparam Lyt The layout type. Must be a cell-level layout.
- * @param lyt The layout to digest.
- * @return Hash value that identifies `lyt` up to `are_cell_layouts_identical`.
- */
-template <typename Lyt>
-[[nodiscard]] inline std::size_t cell_layout_digest(const Lyt& lyt) noexcept
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-
-    // cells live in a hash map, so two layouts holding the same elements do not agree on the order in which
-    // foreach_cell visits them. hash_combine_unordered is commutative and therefore
-    // independent of that order. An ordered container is not an option here: the coordinate types order by x, y,
-    // and z while comparing and hashing the dead indicator as well, so a sorted fold would merge a cell with its
-    // dead twin and lose one of the two
-    std::size_t cell_fold{0};
-
-    lyt.foreach_cell(
-        [&lyt, &cell_fold](const auto& c)
-        {
-            std::size_t cell_hash{0};
-            fiction::utils::stl::hash_combine(cell_hash, c, lyt.get_cell_type(c));
-
-            fiction::utils::stl::hash_combine_unordered(cell_fold, cell_hash);
-        });
-
-    std::size_t digest{0};
-    fiction::utils::stl::hash_combine(digest, lyt.num_cells(), cell_fold);
-
-    return digest;
 }
 
 }  // namespace fiction::layouts

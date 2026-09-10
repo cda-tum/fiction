@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Offset, cube, and SiQAD coordinate types and the conversions between them.
+ * @brief Offset and cube coordinate types and the conversions between them.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
@@ -23,7 +23,6 @@
 #include <fmt/format.h>
 
 #include <algorithm>
-#include <cassert>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
@@ -554,37 +553,6 @@ struct cube
 };
 
 /**
- * Provides SiQAD coordinates. SiQAD coordinates are used to describe locations of Silicon Dangling Bonds on the
- * H-Si(100) 2x1 surface were dimer columns and rows are identified by x and y values, respectively, while the z value
- * (0,1) points to the top or bottom Si atom in the dimer. The coordinates are originally used in the SiQAD simulator
- * (https://github.com/siqad).
- */
-
-/**
- * Converts offset coordinates to cube coordinates.
- *
- * @note This function assumes that the input coordinates are within the valid range for cube coordinates. Specifically,
- * the x, y, and z coordinates should be within the range of \f$(0, 0, 0)\f$ to \f$(2^{31} - 1, 2^{31} - 1, 1)\f$. If
- * the input coordinates are outside this range, the behavior of the function is undefined. If the input coordinate is
- * dead, a dead cube coordinate is returned.
- *
- * @param coord Offset coordinate to convert to a cube coordinate.
- * @return Cube coordinate equivalent to `coord`.
- */
-constexpr cube to_cube(const offset& coord) noexcept
-{
-    assert(coord.x <= std::numeric_limits<int32_t>::max() && coord.y <= std::numeric_limits<int32_t>::max() &&
-           coord.z <= std::numeric_limits<int32_t>::max() && "Coordinate is out-of-range and cannot be transformed");
-
-    if (coord.is_dead())
-    {
-        return cube{};
-    }
-
-    return {static_cast<decltype(cube::x)>(coord.x), static_cast<decltype(cube::y)>(coord.y),
-            static_cast<decltype(cube::z)>(coord.z)};
-}
-/**
  * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)\f$.
  *
  * @tparam CoordinateType Coordinate type.
@@ -648,21 +616,6 @@ class coordinate_iterator
      * - (1, 0, 1)
      * - (0, 1, 1)
      * - (1, 1, 1)
-     * - (0, 2, 1)
-     * - (1, 2, 1)
-     *
-     * For SiQAD coordinates with the same parameters, we have the following order of enumeration:
-     *
-     * - (0, 0, 0)
-     * - (1, 0, 0)
-     * - (0, 0, 1)
-     * - (1, 0, 1)
-     * - (0, 1, 0)
-     * - (1, 2, 0)
-     * - (0, 1, 1)
-     * - (1, 1, 1)
-     * - (1, 1, 0)
-     * - (0, 2, 0)
      * - (0, 2, 1)
      * - (1, 2, 1)
      *

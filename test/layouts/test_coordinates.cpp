@@ -105,29 +105,6 @@ TEST_CASE("Unsigned offset coordinates", "[coordinates]")
     CHECK(os.str() == "(3,2,1)");
 }
 
-TEST_CASE("Offset to cube coordinate conversion", "[coordinates]")
-{
-    auto t = coords::offset{};
-    CHECK(t.is_dead());
-    auto fiction_d = coords::to_cube(t);
-    CHECK(fiction_d.is_dead());
-
-    auto t0        = coords::offset{0, 0, 0};
-    auto fiction_0 = coords::to_cube(t0);
-    CHECK(!fiction_0.is_dead());
-
-    auto t1      = coords::offset{1, 3, 1};
-    auto t1_cube = coords::to_cube(t1);
-    CHECK(t1_cube.x == 1);
-    CHECK(t1_cube.y == 3);
-
-    auto t2      = coords::offset{1, 2};
-    auto t2_cube = coords::to_cube(t2);
-    CHECK(t2_cube.x == 1);
-    CHECK(t2_cube.y == 2);
-    CHECK(t2_cube.z == 0);
-}
-
 TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", coords::offset, coords::cube)
 {
     using lyt_t = cartesian_layout<TestType>;

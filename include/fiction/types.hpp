@@ -255,12 +255,10 @@ using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
 using sidb_cell_clk_lyt =
     layouts::cell_level_layout<sidb::sidb_technology,
                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-using sidb_cell_clk_lyt_ptr = std::shared_ptr<sidb_cell_clk_lyt>;
 
 using sidb_cell_clk_lyt_cube =
     layouts::cell_level_layout<sidb::sidb_technology,
                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
-using sidb_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_cell_clk_lyt_cube>;
 /**
  * SiDB layout over a crystal lattice.
  */
@@ -295,8 +293,6 @@ static_assert(std::is_same_v<qca_cell_clk_lyt_ptr::element_type, qca_cell_clk_ly
 static_assert(std::is_same_v<stacked_qca_cell_clk_lyt_ptr::element_type, stacked_qca_cell_clk_lyt>);
 static_assert(std::is_same_v<mol_qca_cell_clk_lyt_ptr::element_type, mol_qca_cell_clk_lyt>);
 static_assert(std::is_same_v<inml_cell_clk_lyt_ptr::element_type, inml_cell_clk_lyt>);
-static_assert(std::is_same_v<sidb_cell_clk_lyt_ptr::element_type, sidb_cell_clk_lyt>);
-static_assert(std::is_same_v<sidb_cell_clk_lyt_cube_ptr::element_type, sidb_cell_clk_lyt_cube>);
 static_assert(std::is_same_v<sidb_layout_ptr::element_type, sidb::layout>);
 static_assert(std::is_same_v<sidb_sim_result_ptr::element_type, sidb::simulation::result>);
 

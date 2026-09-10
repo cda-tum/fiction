@@ -272,12 +272,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `to_sidb_layout`); the traits `is_siqad_coord_v`, `has_siqad_coord_v`, `is_charge_distribution_surface_v`,
   `is_sidb_lattice*_v`, `is_sidb_defect_surface_v`, `has_*_sidb_defect_v`, and `has_*_charge_state_v`;
   `convert_layout_to_siqad_coordinates`, `convert_layout_to_fiction_coordinates`, and
-  `all_coordinates_in_spanned_area` (use `sidb::sites_in_area`); the SiDB branches of `bounding_box_2d`,
-  `print_layout`, `are_cell_layouts_identical`, and `cell_layout_digest`; every `template <typename Lyt>`
-  overload of the SiDB simulation, analysis, generator, and I/O functions together with `legacy_result`,
-  `legacy_bdl_wire`, and `legacy_bdl_input_iterator`
+  `all_coordinates_in_spanned_area` (use `sidb::sites_in_area`); the SiDB branches of `bounding_box_2d` and
+  `print_layout`; every `template <typename Lyt>` overload of the SiDB simulation, analysis, generator, and I/O
+  functions together with `legacy_result`, `legacy_bdl_wire`, and `legacy_bdl_input_iterator`
+- **Breaking:** `layouts::are_cell_layouts_identical`, `layouts::cell_layout_digest`, and
+  `utils::stl::hash_combine_unordered`, which existed only to deduplicate randomly generated SiDB cell-level
+  layouts. `generate_multiple_random_layouts` deduplicates `sidb::layout` values directly
+- **Breaking:** `layouts::coords::to_cube`, the offset-to-cube coordinate conversion, which lost its last caller
+  with the SiQAD coordinate type
+- **Breaking:** `sidb::to_cell_level_layout`, `sidb::to_cell`, and `sidb::to_cube`. Physical design converts in
+  one direction only; use `to_sidb_layout` and `to_lattice_site`
+- **Breaking:** The tuple interface of `sidb::simulation::logic::parameter_point`
+  (`get<I>`, `std::tuple_size`, `std::tuple_element`). It was fixed at two dimensions and would have bound only
+  two of three coordinates in a 3D sweep; use `get_parameters()`
+- The unused pointer aliases `sidb_cell_clk_lyt_ptr` and `sidb_cell_clk_lyt_cube_ptr`
 - **Breaking:** The SQD writer takes an `sidb::layout` and no longer accepts QCA layouts, which it wrote as four
   dangling bonds per cell. The CLI's `sqd` command also takes an `sidb::layout`
+- **Breaking:** In Python, `sidb_technology` and its `cell_type` alias for `sidb_dot_tag`; no Python API takes
+  an SiDB cell type any more. Use `sidb_dot_tag`
 - **Breaking:** In Python, `sidb_cell_level_layout`, `sidb_100_lattice`, `sidb_111_lattice`,
   `charge_distribution_surface` and its `_100`/`_111` twins with the `charge_index_mode`,
   `dependent_cell_mode`, `energy_calculation`, `charge_distribution_history`, and `charge_distribution_mode`

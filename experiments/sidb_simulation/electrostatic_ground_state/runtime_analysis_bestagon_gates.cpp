@@ -25,7 +25,6 @@
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
-#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>

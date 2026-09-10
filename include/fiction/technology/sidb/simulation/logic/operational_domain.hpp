@@ -117,18 +117,6 @@ struct parameter_point
         return std::llround(value / fiction::utils::math::ERROR_MARGIN);
     }
     /**
-     * Support for structured bindings.
-     *
-     * @tparam I Index of the parameter value to be returned.
-     * @return The parameter value at the specified index.
-     * @throws std::out_of_range if the index is out of bounds.
-     */
-    template <std::size_t I>
-    [[nodiscard]] auto get() const
-    {
-        return parameters.at(I);
-    }
-    /**
      * Returns the parameter values for each dimension.
      *
      * @return The parameter values for each dimension.
@@ -569,22 +557,16 @@ class operational_domain_impl
             input_pattern_layouts{generate_bdl_input_pattern_layouts(
                 source_layout, params.operational_params.input_bdl_iterator_params, input_bdl_wires)}
     {
+        // The canvas contains the LOGIC sites that the filter-only operational analysis evaluates. The entry points
+        // in `is_operational` build theirs with the same helper, so the two agree by construction.
+        canvas_lyt = canvas_of(source_layout);
+
         // the public entry points reject a `FILTER_ONLY` request on a layout without `LOGIC` dots, so this may only
         // be empty for the strategies that do not need a canvas
-        const auto logic_dots = source_layout.dots_with_tag(dot_tag::LOGIC);
-
         assert(((params.operational_params.strategy_to_analyze_operational_status !=
                  is_operational_params::operational_analysis_strategy::FILTER_ONLY) ||
-                (logic_dots.size() > 0)) &&
+                !canvas_lyt.is_empty()) &&
                "No logic dots found in the layout");
-
-        // The canvas contains the LOGIC sites that the filter-only operational analysis evaluates.
-        canvas_lyt.set_lattice(source_layout.get_lattice());
-
-        for (const auto& c : logic_dots)
-        {
-            canvas_lyt.assign_sidb(c, dot_tag::LOGIC);
-        }
 
         initialize_sweep();
     }
@@ -2442,31 +2424,6 @@ critical_temperature_domain_contour_tracing(const layout& lyt, const std::vector
 }
 
 }  // namespace fiction::sidb::simulation::logic
-namespace std
-{
-
-/**
- * @brief Number of coordinates exposed by a parameter point's tuple interface.
- */
-template <>
-struct tuple_size<fiction::sidb::simulation::logic::parameter_point> : std::integral_constant<size_t, 2>
-{};
-
-/**
- * @brief Coordinate type exposed by a parameter point's tuple interface.
- *
- * @tparam I Coordinate index.
- */
-template <size_t I>
-struct tuple_element<I, fiction::sidb::simulation::logic::parameter_point>
-{
-    /**
-     * @brief Each coordinate is a floating-point parameter value.
-     */
-    using type = double;
-};
-
-}  // namespace std
 
 // Sphinx cannot parse designated initializers. Keep this directive outside the binding docstring.
 /**

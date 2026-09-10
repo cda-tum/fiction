@@ -1050,26 +1050,6 @@ static const char *mkd_doc_fiction_is_virtual_network_type = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_are_cell_layouts_identical =
-R"doc(This function checks whether the given layouts `first_lyt` and
-`second_lyt` are identical by comparing the number of cells and the
-types of cells.
-
-Args:
-    first_lyt: The first layout to compare.
-    second_lyt: The second layout to compare.
-
-Template Args:
-    Lyt: The layout type. Must be a cell-level layout.
-
-Returns:
-    `true` if the layouts are identical, `false` otherwise.
-
-Note:
-    The aspect ratios of the cell-level layouts are not compared.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_bounding_box_2d =
 R"doc(A 2D bounding box object that computes a minimum-sized box around all
 non-empty coordinates in a given layout. Layouts can be of arbitrary
@@ -1870,31 +1850,6 @@ that still belongs to the layout.
 
 Returns:
     z-dimension.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_layout_digest =
-R"doc(Computes a digest of the given cell-level layout that respects the
-equality `are_cell_layouts_identical` implements.
-
-Identical layouts always share a digest, so layouts with different
-digests are never identical. That makes the digest a cheap filter in
-front of `are_cell_layouts_identical`. Different layouts may share a
-digest, so a digest match still has to be confirmed with
-`are_cell_layouts_identical`.
-
-The digest covers the cells and their types. Following
-`are_cell_layouts_identical`, it ignores the layout's aspect ratio.
-
-Args:
-    lyt: The layout to digest.
-
-Template Args:
-    Lyt: The layout type. Must be a cell-level layout.
-
-Returns:
-    Hash value that identifies `lyt` up to
-    `are_cell_layouts_identical`.
 
 )doc";
 
@@ -3343,25 +3298,6 @@ static const char *mkd_doc_fiction_layouts_coords_offset_y = R"doc(31 bit for th
 static const char *mkd_doc_fiction_layouts_coords_offset_z = R"doc(1 bit for the z coordinate.)doc";
 
 static const char *mkd_doc_fiction_layouts_coords_operator_lshift = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_to_cube =
-R"doc(Converts offset coordinates to cube coordinates.
-
-Args:
-    coord: Offset coordinate to convert to a cube coordinate.
-
-Returns:
-    Cube coordinate equivalent to `coord`.
-
-Note:
-    This function assumes that the input coordinates are within the
-    valid range for cube coordinates. Specifically, the x, y, and z
-    coordinates should be within the range of :math:`(0, 0, 0)` to
-    :math:`(2^{31} - 1, 2^{31} - 1, 1)`. If the input coordinates are
-    outside this range, the behavior of the function is undefined. If
-    the input coordinate is dead, a dead cube coordinate is returned.
-
-)doc";
 
 static const char *mkd_doc_fiction_layouts_coords_volume_of =
 R"doc(Computes the volume of a given coordinate assuming its origin is (0,
@@ -23625,20 +23561,6 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_operational_status_OPER
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_parameter_point = R"doc(The parameter point holds one parameter value per sweep dimension.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_parameter_point_get =
-R"doc(Support for structured bindings.
-
-Template Args:
-    I: Index of the parameter value to be returned.
-
-Returns:
-    The parameter value at the specified index.
-
-Raises:
-    std::out_of_range: if the index is out of bounds.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_parameter_point_get_parameters =
 R"doc(Returns the parameter values for each dimension.
 
@@ -24279,43 +24201,6 @@ Returns:
 Raises:
     std::out_of_range: if the site cannot be represented by the target
                        coordinate type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_to_cell_level_layout =
-R"doc(Converts an `sidb::layout` into a Cartesian SiDB cell-level layout:
-cell types, inputs, outputs, and the layout name carry over. The
-layout's lattice and its defects are not represented in the cell-level
-type and are dropped. This is the inverse of `to_sidb_layout`.
-
-Args:
-    lyt: The layout to convert.
-
-Template Args:
-    CellLyt: SiDB cell-level layout type to create.
-
-Returns:
-    The cell-level layout.
-
-Raises:
-    std::out_of_range: if a cell cannot be represented by the target
-                       coordinate type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_to_cube =
-R"doc(The cube coordinate of a lattice site in a Cartesian SiDB cell-level
-layout, the inverse of `to_lattice_site`.
-
-Args:
-    s: Lattice site.
-
-Returns:
-    Cube coordinate at column `x` and single-SiDB row `2 * y + z`.
-
-Raises:
-    std::out_of_range: if the basis index is invalid or the row
-                       exceeds the cube coordinate range.
 
 )doc";
 
@@ -26468,34 +26353,6 @@ Args:
 Template Args:
     T: Type to hash.
     Rest: Parameter pack.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_hash_combine_unordered =
-R"doc(Combines a hash value into a seed independently of the order in which
-the values arrive.
-
-`hash_combine` is order-dependent by construction, which rules it out
-for folding over a container whose iteration order is not canonical,
-such as a hash map. This function adds instead, which is commutative,
-so the seed depends only on which values were combined and how often,
-not on their order.
-
-The scrambling step is not optional. `std::hash` of the cube and SiQAD
-coordinate types weighs the coordinate components linearly, so a plain
-sum over their hash values makes the cell sets `{(0, 0), (3, 0)}` and
-`{(1, 0), (2, 0)}` collide. The splitmix64 finalizer applied here
-spreads every input bit across the whole word before the sum sees it.
-
-Overrides the passed seed.
-
-Args:
-    seed: Hashing seed. This value is overridden with the combined
-          hash value.
-    v: Value to hash next.
-
-Template Args:
-    T: Type to hash.
 
 )doc";
 

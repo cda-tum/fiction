@@ -10,10 +10,8 @@
 
 /**
  * @file
- * @brief Simplified 2D textual rendering of gate-, cell-, and SiDB-level layouts.
+ * @brief Simplified 2D textual rendering of gate- and cell-level layouts.
  * @author Marcel Walter (marcelwa)
- * @author Willem Lambooy (wlambooy)
- * @author Jan Drewniok (Drewniok)
  */
 
 #pragma once
@@ -47,23 +45,6 @@ inline const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::bla
                                                          fmt::fg(fmt::color::black) | fmt::bg(fmt::color::light_gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::dark_gray)}};
-// Escape color sequence for negatively charged SiDB colors (cyan).
-inline const auto SIDB_NEG_COLOR = fmt::fg(fmt::color::cyan);
-// Escape color sequence for positively charged SiDB colors (red).
-inline const auto SIDB_POS_COLOR = fmt::fg(fmt::color::red);
-// Escape color sequence for charge-neutral SiDB colors (white).
-inline const auto SIDB_NEUT_COLOR = fmt::fg(fmt::color::white);
-// Escape color sequence for lattice background colors (grey).
-inline const auto SIDB_LAT_COLOR = fmt::fg(fmt::color::gray);
-
-// Escape color sequence for positively charged defect colors (red).
-inline const auto SIDB_DEF_POS_COLOR = fmt::fg(fmt::color::red);
-// Escape color sequence for negatively charged defect colors (blue).
-inline const auto SIDB_DEF_NEG_COLOR = fmt::fg(fmt::color::blue);
-// Escape color sequence for neutrally charged defect colors (yellow).
-inline const auto SIDB_DEF_NEU_COLOR = fmt::fg(fmt::color::yellow);
-// Empty escape color sequence
-inline constexpr auto NO_COLOR = fmt::text_style{};
 
 }  // namespace detail
 

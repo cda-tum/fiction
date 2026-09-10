@@ -23,9 +23,6 @@
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 
-#include <cstdint>
-#include <limits>
-#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -39,25 +36,6 @@ TEST_CASE("Coordinate to site", "[cell-level-layout-conversion]")
     CHECK(to_lattice_site(coords::offset{3, 7}) == lattice_site{3, 3, 1});
     CHECK(to_lattice_site(coords::cube{-3, -1}) == lattice_site{-3, -1, 1});
     CHECK(to_lattice_site(coords::cube{-3, -2}) == lattice_site{-3, -1, 0});
-
-    CHECK(to_cube(lattice_site{3, 3, 1}) == coords::cube{3, 7});
-    CHECK(to_cube(lattice_site{-3, -1, 1}) == coords::cube{-3, -1});
-    CHECK(to_lattice_site(to_cube(lattice_site{2, -4, 0})) == lattice_site{2, -4, 0});
-    constexpr auto min_coordinate = std::numeric_limits<int32_t>::min();
-    constexpr auto max_coordinate = std::numeric_limits<int32_t>::max();
-    CHECK(to_cube(site_at_row(0, min_coordinate)) == coords::cube{0, min_coordinate});
-    CHECK(to_cube(site_at_row(0, max_coordinate)) == coords::cube{0, max_coordinate});
-    CHECK_THROWS_AS(to_cube(lattice_site{0, min_coordinate, 0}), std::out_of_range);
-    CHECK_THROWS_AS(to_cube(lattice_site{0, max_coordinate, 1}), std::out_of_range);
-    lattice_site invalid{};
-    invalid.z = 2;
-    CHECK_THROWS_AS(to_cube(invalid), std::out_of_range);
-    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt>(invalid), std::out_of_range);
-    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt_cube>(invalid), std::out_of_range);
-    invalid.z = -1;
-    CHECK_THROWS_AS(to_cube(invalid), std::out_of_range);
-    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt>(invalid), std::out_of_range);
-    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt_cube>(invalid), std::out_of_range);
 }
 
 TEST_CASE("Cell-level layout to SiDB layout", "[cell-level-layout-conversion]")
@@ -89,41 +67,4 @@ TEST_CASE("Cell-level layout to SiDB layout", "[cell-level-layout-conversion]")
         CHECK(converted.get_lattice() == lattice::si_111_1x1());
         CHECK(converted.sidbs() == std::vector<lattice_site>{{1, 1, 1}});
     }
-}
-
-TEST_CASE("Cell conversion rejects unrepresentable coordinates", "[cell-level-layout-conversion]")
-{
-    lattice_site invalid{};
-    invalid.z = -1;
-    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt_cube>(invalid), std::out_of_range);
-    constexpr auto max_coordinate = std::numeric_limits<int32_t>::max();
-    const auto     boundary       = site_at_row(max_coordinate, max_coordinate);
-    CHECK(to_cell<sidb_cell_clk_lyt>(boundary) == coords::offset{max_coordinate, max_coordinate});
-    CHECK(to_cell<sidb_cell_clk_lyt_cube>({-1, -1, 0}) == coords::cube{-1, -2});
-    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt>({-1, 0, 0}), std::out_of_range);
-    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt>({0, -1, 0}), std::out_of_range);
-    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt>({0, max_coordinate, 1}), std::out_of_range);
-    CHECK_THROWS_AS(to_cell<sidb_cell_clk_lyt_cube>({0, max_coordinate, 1}), std::out_of_range);
-}
-
-TEST_CASE("Layout conversion rejects unrepresentable cells", "[cell-level-layout-conversion]")
-{
-    layout lyt{};
-    lyt.assign_sidb({-1, -1, 0}, sidb_technology::cell_type::NORMAL);
-    CHECK_THROWS_AS(to_cell_level_layout<sidb_cell_clk_lyt>(lyt), std::out_of_range);
-    CHECK(to_cell_level_layout<sidb_cell_clk_lyt_cube>(lyt).get_cell_type({-1, -2}) ==
-          sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_sidb({0, std::numeric_limits<int32_t>::max(), 1}, sidb_technology::cell_type::NORMAL);
-    CHECK_THROWS_AS(to_cell_level_layout<sidb_cell_clk_lyt_cube>(lyt), std::out_of_range);
-}
-
-TEST_CASE("SiDB layout conversion preserves cell bounds", "[cell-level-layout-conversion]")
-{
-    layout lyt{};
-    lyt.assign_sidb({2, 1, 1}, sidb_technology::cell_type::NORMAL);
-
-    const auto cells = to_cell_level_layout<sidb_cell_clk_lyt>(lyt);
-    CHECK(cells.x() == 2);
-    CHECK(cells.y() == 3);
 }

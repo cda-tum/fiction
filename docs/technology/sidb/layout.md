@@ -71,7 +71,7 @@ described by setting the vectors directly.
 :::{tab-item} C++
 :sync: cpp
 
-**Header:** `fiction/technology/sidb/layout.hpp`
+**Header:** `fiction/technology/sidb/technology.hpp`, `fiction/technology/sidb/layout.hpp`
 
 A dot is one silicon dangling bond. `dot_tag` records its role: `NORMAL`, `INPUT`, `OUTPUT`, or
 `LOGIC`. `assign_sidb` places an SiDB at a lattice site and defaults to `NORMAL` when no tag is
@@ -144,11 +144,5 @@ map such layouts and their coordinates onto lattice sites.
 ```{doxygenfunction} fiction::sidb::to_lattice_site
 ```
 
-```{doxygenfunction} fiction::sidb::to_cube
-```
-
 ```{doxygenfunction} fiction::sidb::to_sidb_layout
-```
-
-```{doxygenfunction} fiction::sidb::to_cell_level_layout
 ```

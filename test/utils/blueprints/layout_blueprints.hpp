@@ -1508,47 +1508,6 @@ CellLyt single_layer_inml_crosswire() noexcept
     return lyt;
 }
 
-[[nodiscard]] inline fiction::sidb::layout bestagon_xor() noexcept
-{
-    fiction::sidb::layout lyt{};
-
-    // input wires
-    lyt.assign_sidb({0, 0, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_sidb({38, 0, 0}, fiction::sidb::dot_tag::INPUT);
-
-    lyt.assign_sidb({2, 1, 0}, fiction::sidb::dot_tag::INPUT);
-    lyt.assign_sidb({36, 1, 0}, fiction::sidb::dot_tag::INPUT);
-
-    lyt.assign_sidb({32, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_sidb({6, 2, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_sidb({30, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_sidb({8, 3, 0}, fiction::sidb::dot_tag::NORMAL);
-
-    lyt.assign_sidb({26, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_sidb({12, 4, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_sidb({24, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_sidb({14, 5, 0}, fiction::sidb::dot_tag::NORMAL);
-
-    // canvas
-    lyt.assign_sidb({15, 7, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_sidb({19, 8, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_sidb({17, 9, 1}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_sidb({20, 11, 0}, fiction::sidb::dot_tag::NORMAL);
-
-    // output wire
-    lyt.assign_sidb({19, 13, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_sidb({20, 14, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_sidb({24, 15, 0}, fiction::sidb::dot_tag::NORMAL);
-    lyt.assign_sidb({26, 16, 0}, fiction::sidb::dot_tag::NORMAL);
-
-    lyt.assign_sidb({30, 17, 0}, fiction::sidb::dot_tag::OUTPUT);
-    lyt.assign_sidb({32, 18, 0}, fiction::sidb::dot_tag::OUTPUT);
-
-    lyt.assign_sidb({36, 19, 0}, fiction::sidb::dot_tag::NORMAL);
-
-    return lyt;
-}
-
 /**
  * This layout represents an AND gate with the typical Bestagon skeleton. However, it shows kinks in the I/O pins for
  * certain input pattern.
