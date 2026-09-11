@@ -22777,10 +22777,12 @@ This serves the same purpose as the two-dimensional Moore contour
 trace — sample only the boundary of an operational region and infer
 its interior — but collects the boundary instead of walking it. A
 closed curve can be walked because its neighbors admit a cyclic order;
-a closed surface cannot, so the boundary is gathered by a breadth-
-first search over the operational points that have at least one non-
-operational Moore neighbor. The resulting set is closed under the
-Moore neighborhood, which is what the interior inference requires.
+a closed surface cannot, so the boundary is gathered by a parallel
+breadth-first search over operational points with a non-operational
+Moore neighbor or a range edge. Workers share the classification cache
+and schedule each point once; interior inference runs after they join.
+The resulting set is closed under the Moore neighborhood, which is
+what the interior inference requires.
 
 Args:
     samples: Maximum number of random samples to be taken before
