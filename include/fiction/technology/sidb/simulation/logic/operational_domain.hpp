@@ -44,6 +44,7 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cassert>
 #include <cmath>
@@ -964,7 +965,8 @@ class operational_domain_impl
      * This serves the same purpose as the two-dimensional Moore contour trace — sample only the boundary of an
      * operational region and infer its interior — but collects the boundary instead of walking it. A closed curve can
      * be walked because its neighbors admit a cyclic order; a closed surface cannot, so the boundary is gathered by a
-     * breadth-first search over the operational points that have at least one non-operational Moore neighbor. The
+     * parallel breadth-first search over operational points with a non-operational Moore neighbor or a range edge.
+     * Workers share the classification cache and schedule each point once; interior inference runs after they join. The
      * resulting set is closed under the Moore neighborhood, which is what the interior inference requires.
      *
      * @param samples Maximum number of random samples to be taken before tracing.
@@ -980,13 +982,28 @@ class operational_domain_impl
 
         simulate_operational_status_in_parallel(step_point_samples);
 
+        // Serialize only overlapping cache misses. Each point always uses the same stripe, so two workers cannot
+        // simulate it twice; cache hits do not take a stripe lock. No worker holds more than one stripe at a time.
+        std::array<std::mutex, 256> simulation_mutexes{};
+        const auto                  classify = [this, &simulation_mutexes](const step_point& sp)
+        {
+            const auto pp = to_parameter_point(sp);
+            if (const auto cached = op_domain.contains(pp); cached.has_value())
+            {
+                return std::get<0>(*cached);
+            }
+            const std::scoped_lock lock{
+                simulation_mutexes[std::hash<parameter_point>{}(pp) % simulation_mutexes.size()]};
+            return is_step_point_operational(sp);
+        };
+
         // a step point is on the boundary if it is operational and borders a non-operational point or the edge of the
         // parameter range. The latter is implied: `moore_neighborhood` does not gather points outside the range, so a
         // point at the edge has fewer than `3^n - 1` neighbors.
         //
         // the neighborhood is returned alongside the verdict so that the expansion below does not have to rebuild it.
         // It grows as `3^n - 1`, so recomputing it once per popped point gets expensive in higher dimensions
-        const auto neighborhood_and_boundary_status = [this](const step_point& sp)
+        const auto neighborhood_and_boundary_status = [this, &classify](const step_point& sp)
         {
             auto neighborhood = moore_neighborhood(sp);
 
@@ -996,8 +1013,8 @@ class operational_domain_impl
             }
 
             const auto on_boundary =
-                std::ranges::any_of(neighborhood, [this](const auto& m)
-                                    { return is_step_point_operational(m) == operational_status::NON_OPERATIONAL; });
+                std::ranges::any_of(neighborhood, [&classify](const auto& m)
+                                    { return classify(m) == operational_status::NON_OPERATIONAL; });
 
             return std::pair{std::move(neighborhood), on_boundary};
         };
@@ -1027,37 +1044,95 @@ class operational_domain_impl
             // region `starting_point` is located in
             phmap::btree_set<step_point> contour{};
 
-            std::queue<step_point>       queue{};
+            std::deque<step_point>       queue{boundary_starting_point};
             phmap::btree_set<step_point> visited{boundary_starting_point};
+            std::mutex                   queue_mutex{};
+            std::condition_variable      queue_cv{};
+            std::size_t                  active_workers = 0;
+            bool                         finished       = false;
 
-            queue.push(boundary_starting_point);
-
-            while (!queue.empty())
+            const auto stop_workers = [&]()
             {
-                const auto sp = queue.front();
-                queue.pop();
+                const std::scoped_lock lock{queue_mutex};
+                finished = true;
+                queue_cv.notify_all();
+            };
 
-                const auto [neighborhood, on_boundary] = neighborhood_and_boundary_status(sp);
-
-                if (!on_boundary)
+            const auto worker = [&]()
+            {
+                try
                 {
-                    continue;
+                    while (true)
+                    {
+                        std::unique_lock lock{queue_mutex};
+                        queue_cv.wait(lock, [&]() { return finished || !queue.empty(); });
+                        if (finished)
+                        {
+                            return;
+                        }
+                        const auto sp = queue.front();
+                        queue.pop_front();
+                        ++active_workers;
+                        lock.unlock();
+
+                        std::vector<step_point> discovered{};
+                        bool                    on_boundary = false;
+                        if (classify(sp) == operational_status::OPERATIONAL)
+                        {
+                            auto neighborhood_status = neighborhood_and_boundary_status(sp);
+                            on_boundary              = neighborhood_status.second;
+                            if (on_boundary)
+                            {
+                                discovered = std::move(neighborhood_status.first);
+                            }
+                        }
+
+                        lock.lock();
+                        if (finished)
+                        {
+                            return;
+                        }
+                        if (on_boundary)
+                        {
+                            contour.insert(sp);
+                        }
+                        for (const auto& m : discovered)
+                        {
+                            if (visited.insert(m).second)
+                            {
+                                queue.push_back(m);
+                            }
+                        }
+                        --active_workers;
+                        finished = queue.empty() && active_workers == 0;
+                        queue_cv.notify_all();
+                    }
                 }
-
-                contour.insert(sp);
-
-                for (const auto& m : neighborhood)
+                catch (...)
                 {
-                    if (!visited.insert(m).second)
-                    {
-                        continue;
-                    }
-
-                    if (is_step_point_operational(m) == operational_status::OPERATIONAL)
-                    {
-                        queue.push(m);
-                    }
+                    stop_workers();
+                    throw;
                 }
+            };
+
+            std::vector<std::future<void>> workers{};
+            workers.reserve(number_of_threads);
+            try
+            {
+                for (std::size_t i = 0; i < number_of_threads; ++i)
+                {
+                    workers.emplace_back(std::async(std::launch::async, worker));
+                }
+                for (auto& result : workers)
+                {
+                    result.get();
+                }
+            }
+            catch (...)
+            {
+                // Wake blocked workers before future destruction waits for them.
+                stop_workers();
+                throw;
             }
 
             infer_operational_status_in_enclosing_contour(starting_point, contour);

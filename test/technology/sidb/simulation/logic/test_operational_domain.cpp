@@ -2178,3 +2178,52 @@ TEST_CASE("Concurrent operational-domain sampling matches grid results", "[opera
             });
     }
 }
+
+TEST_CASE("Parallel contour surfaces preserve classifications and avoid duplicate simulations", "[operational-domain]")
+{
+    layout lyt{lattice::si_100_2x1(), "BDL wire"};
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
+    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
+
+    operational_domain_params params{};
+    params.operational_params.sim_params.base = 2;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.33, .max = -0.31, .step = 0.01}};
+    const auto reference    = operational_domain_grid_search(lyt, std::vector{create_id_tt()}, params);
+    for (const auto threads : {1u, 2u, 8u})
+    {
+        params.number_of_threads = threads;
+        for (auto repetition = 0; repetition < 3; ++repetition)
+        {
+            operational_domain_stats                                                     stats{};
+            sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
+                lyt, std::vector{create_id_tt()}, params, stats};
+            const auto domain = impl.contour_tracing(50);
+            CHECK(stats.num_operational_parameter_combinations > 0);
+            CHECK(stats.num_evaluated_parameter_combinations == domain.size());
+            domain.for_each([&reference](const auto& pp, const auto& status)
+                            { CHECK(reference.contains(pp) == std::optional{status}); });
+            const auto inferred = impl.inferred_operational_parameter_points();
+            for (const auto& pp : inferred)
+            {
+                CHECK(reference.contains(pp) == std::optional{std::tuple{operational_status::OPERATIONAL}});
+            }
+            reference.for_each(
+                [&domain, &inferred](const auto& pp, const auto& status)
+                {
+                    if (std::get<0>(status) == operational_status::OPERATIONAL)
+                    {
+                        CHECK((domain.contains(pp).has_value() || std::ranges::find(inferred, pp) != inferred.end()));
+                    }
+                });
+        }
+    }
+}
