@@ -77,7 +77,7 @@ them automatically. Should the repository have been cloned before, the commands:
 git submodule update --init --recursive
 ```
 
-will fetch the latest version of all external modules used. Additionally, only `CMake` and a C++20 compiler are
+will fetch the latest version of all external modules used. Additionally, only CMake 3.25 or newer and a C++20 compiler are
 required for the C++ part. If you want to work with the Python bindings, you need a Python 3.10+ installation.
 
 At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (`libtbb-dev` on Ubuntu) is
@@ -171,6 +171,18 @@ By default _fiction_'s CLI is enabled and will be built, which can be time-consu
 disable it by passing `-DFICTION_CLI=OFF` to your `cmake` call or adding
 `set(FICTION_CLI OFF CACHE BOOL "" FORCE)` **before** `add_subdirectory(fiction/)`.
 :::
+
+An installed _fiction_ package provides `fiction::libfiction`:
+
+```cmake
+find_package(fiction CONFIG REQUIRED)
+target_link_libraries(fanfiction PRIVATE fiction::libfiction)
+```
+
+The package resolves `mockturtle::sat` through `find_package(mockturtle CONFIG)`.
+_fiction_ installs the `mockturtle` package alongside its own headers; this builds both
+SAT and ESOP archives even though _fiction_ links only SAT. Add the installation prefix
+to `CMAKE_PREFIX_PATH` when it is outside CMake's default search paths.
 
 Then include what you need:
 

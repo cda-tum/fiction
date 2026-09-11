@@ -25,11 +25,7 @@ target_link_system_libraries(libfiction INTERFACE
 install(DIRECTORY ${alice_SOURCE_DIR}/include/ DESTINATION include)
 
 # mockturtle
-target_link_system_libraries(libfiction INTERFACE
-    $<BUILD_INTERFACE:mockturtle>
-    $<INSTALL_INTERFACE:fiction::mockturtle>
-)
-install(DIRECTORY ${mockturtle_SOURCE_DIR}/include/ DESTINATION include)
+target_link_libraries(libfiction INTERFACE mockturtle::sat)
 
 # nlohmann_json
 target_link_system_libraries(libfiction INTERFACE

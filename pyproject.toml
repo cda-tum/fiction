@@ -106,7 +106,7 @@ sdist.exclude = [
 ]
 
 [tool.scikit-build.cmake.define]
-MOCKTURTLE_EXAMPLES = "OFF"
+MOCKTURTLE_BUILD_EXAMPLES = "OFF"
 FICTION_PROGRESS_BARS = "OFF"
 FICTION_CLI = "OFF"
 FICTION_TEST = "OFF"

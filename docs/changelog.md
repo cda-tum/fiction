@@ -88,6 +88,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
     SiDB header dependency
 
+- Build system:
+  - Require CMake 3.25 and link the SAT component of `mockturtle`. Installed packages resolve
+    `mockturtle` through its CMake package, including its compiled dependencies.
+
 - CLI:
   - **Breaking:** SiDB commands use `sidb::layout` and simulation results. `read --sqd` reads the lattice
     from the file; `--lattice_orientation` is removed

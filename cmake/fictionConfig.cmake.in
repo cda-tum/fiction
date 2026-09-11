@@ -1,3 +1,6 @@
+include(CMakeFindDependencyMacro)
+find_dependency(mockturtle CONFIG)
+
 @PACKAGE_INIT@
 
 include("${CMAKE_CURRENT_LIST_DIR}/fictionTargets.cmake")
@@ -15,7 +18,6 @@ endmacro()
 
 # Define dependencies
 fiction_define_imported_target(fiction::alice "")
-fiction_define_imported_target(fiction::mockturtle "")
 fiction_define_imported_target(fiction::nlohmann_json "")
 fiction_define_imported_target(fiction::graph-coloring "graph-coloring")
 fiction_define_imported_target(fiction::undirected_graph "undirected_graph")
