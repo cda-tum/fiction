@@ -48,8 +48,9 @@ foreach(FILE IN LISTS FILENAMES)
     # replacement.
     target_link_libraries(${TEST_NAME} PRIVATE fiction::fiction_options
                                                fiction::fiction_warnings fmt)
-    target_include_directories(${TEST_NAME}
-                               PRIVATE ${PROJECT_SOURCE_DIR}/include)
+    target_include_directories(
+      ${TEST_NAME}
+      PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_INCLUDE_DIRECTORIES>)
     target_compile_options(
       ${TEST_NAME}
       PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_COMPILE_OPTIONS>)
