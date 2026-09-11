@@ -121,6 +121,17 @@ def _clocking_scheme(name: str, topology: str) -> str:
 
 
 def _seconds_to_ms(seconds: float | None) -> int | None:
+    """Convert a positive timeout to whole milliseconds without shortening it.
+
+    Args:
+        seconds: Timeout in seconds, or None for the native default.
+
+    Returns:
+        Timeout rounded up to milliseconds, or None.
+
+    Raises:
+        CommandError: If the timeout is non-finite, non-positive, or exceeds uint32.
+    """
     if seconds is None:
         return None
     if not math.isfinite(seconds) or seconds <= 0 or seconds * MILLISECONDS > 2**32 - 1:

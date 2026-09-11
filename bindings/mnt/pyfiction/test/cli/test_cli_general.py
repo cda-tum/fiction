@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import pytest
@@ -150,7 +151,7 @@ def test_show_uses_the_shell_association_on_windows(
     The branch is forced here rather than skipped off Windows, so that every run covers it.
     """
     opened: list[Path] = []
-    monkeypatch.setattr("mnt.pyfiction.cli.drawing.sys.platform", "win32")
+    monkeypatch.setattr("mnt.pyfiction.cli.drawing.sys", SimpleNamespace(platform="win32"))
     monkeypatch.setattr("os.startfile", opened.append, raising=False)
     started: list[list[str]] = []
     monkeypatch.setattr("mnt.pyfiction.cli.drawing.subprocess.Popen", lambda command, **_: started.append(command))

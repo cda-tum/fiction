@@ -19,7 +19,6 @@
 #include <filesystem>
 #include <fstream>
 #include <random>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -31,11 +30,11 @@ namespace fiction::detail
  * @tparam Writer Callable accepting an output stream.
  * @param filename Destination file.
  * @param writer Serialization callback.
- * @throws std::filesystem::filesystem_error If the destination cannot be replaced.
- * @throws std::ios_base::failure If writing, flushing, or closing fails.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the file fails.
  */
 template <typename Writer>
 void atomic_write(const std::string_view filename, const Writer& writer)
+try
 {
     const std::filesystem::path destination{filename};
     std::filesystem::path       directory{};
@@ -50,7 +49,7 @@ void atomic_write(const std::string_view filename, const Writer& writer)
     }
     if (directory.empty())
     {
-        throw std::runtime_error("could not create a temporary output directory");
+        throw std::ios_base::failure("could not create a temporary output directory");
     }
     try
     {
@@ -71,5 +70,9 @@ void atomic_write(const std::string_view filename, const Writer& writer)
     }
     std::error_code ignored{};
     std::filesystem::remove_all(directory, ignored);
+}
+catch (const std::filesystem::filesystem_error& error)
+{
+    throw std::ios_base::failure(error.what(), error.code());
 }
 }  // namespace fiction::detail

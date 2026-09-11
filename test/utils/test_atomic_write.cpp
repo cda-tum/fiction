@@ -34,6 +34,11 @@ TEST_CASE("Failed serialization preserves the destination", "[atomic-write]")
         std::filesystem::temp_directory_path() / ("fiction-write-test-" + std::to_string(std::random_device{}()));
     REQUIRE(std::filesystem::create_directory(directory));
     const auto destination = directory / "output.fgl";
+    CHECK_THROWS_AS(detail::atomic_write((directory / "missing" / "output.fgl").string(),
+                                         [](std::ostream& stream) { stream << "content"; }),
+                    std::ios_base::failure);
+    CHECK_THROWS_AS(detail::atomic_write(directory.string(), [](std::ostream& stream) { stream << "content"; }),
+                    std::ios_base::failure);
     detail::atomic_write(destination.string(), [](std::ostream& stream) { stream << "original"; });
 
     CHECK_THROWS_AS(detail::atomic_write(destination.string(),

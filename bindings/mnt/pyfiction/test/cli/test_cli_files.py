@@ -199,11 +199,7 @@ def test_tt_random_and_errors(shell: Shell) -> None:
 def test_read_directory_matches_mixed_case_suffixes(
     shell: Shell, tmp_path: Path, resource: Callable[[str], str]
 ) -> None:
-    """A directory read recognizes the same suffixes a single-file read does, whatever their case.
-
-    The library's own reader dispatches on a lower-case extension, so ``MUX21.V`` is refused either
-    way -- but it is now refused with the parser's message rather than skipped without a word.
-    """
+    """Directory and single-file reads accept uppercase network extensions."""
     shutil.copy(resource("mux21.v"), tmp_path / "MUX21.V")
     shutil.copy(resource("xor2.v"), tmp_path / "xor2.v")
     shell.ok(f"read {tmp_path}")

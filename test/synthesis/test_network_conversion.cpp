@@ -33,6 +33,7 @@
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <kitty/operations.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -273,6 +274,7 @@ TEST_CASE("Convert every two- and three-input function without losing the interf
                 REQUIRE(actual.size() == 3u);
                 CHECK(actual[0] == expected);
                 CHECK(actual[1] == ~expected);
+                CHECK(kitty::is_const0(~actual[2]));
             };
             verify(convert_network<mockturtle::names_view<technology_network>>(source));
             verify(convert_network<mockturtle::names_view<mockturtle::aig_network>>(source));

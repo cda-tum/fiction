@@ -43,7 +43,8 @@ def test_pop_selects_predecessor() -> None:
     for value in range(4):
         store.add(value)
     store.select(2)
-    assert store.pop() == 2
+    removed = store.pop()
+    assert removed == 2
     assert store.current() == 1
     store.select(0)
     store.pop()
