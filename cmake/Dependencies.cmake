@@ -146,19 +146,15 @@ FetchContent_MakeAvailable(alice)
 # submodule directories empty, so a tarball build fails on `#include
 # <parallel_hashmap/phmap.h>`. Do not convert this to a `URL` without first
 # arranging for that header to resolve.
-set(MOCKTURTLE_EXAMPLES
-    OFF
-    CACHE BOOL "" FORCE)
-set(MOCKTURTLE_EXPERIMENTS
-    OFF
-    CACHE BOOL "" FORCE)
-set(MOCKTURTLE_TEST
-    OFF
-    CACHE BOOL "" FORCE)
+#
+# mockturtle builds neither its examples, tests nor experiments when it is not
+# the top-level project. It does not install itself either, and _fiction_ needs
+# it to: an installed `libfiction` re-exports mockturtle's headers.
+set(MOCKTURTLE_INSTALL ON)
 FetchContent_Declare(
   mockturtle
   GIT_REPOSITORY https://github.com/marcelwa/mockturtle.git
-  GIT_TAG 59e5b71f6d346ec04116478f045143abbedb32d8 # Head of the mnt branch
+  GIT_TAG e8ac516305ee1e9174d7d9f401881cdbddb5fec6 # Head of the mnt branch
 )
 FetchContent_MakeAvailable(mockturtle)
 

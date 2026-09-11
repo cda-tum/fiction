@@ -94,6 +94,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `print`, `show`, and statistics use stored ground states; `sqd` exports geometry and defects
   - SiDB shell descriptions and JSON statistics report dot counts as `dots`.
 
+- Build system:
+  - **Fixed:** an installed _fiction_ shipped mockturtle's own headers but none of the vendored
+    dependencies they include, so `find_package(fiction)` produced a package that failed on
+    `#include <kitty/...>`. mockturtle now installs itself into the same prefix and
+    `fictionConfig.cmake` resolves it from there ([#1204](https://github.com/cda-tum/fiction/pull/1204))
+  - **Fixed:** the installed `libfiction` referenced `include/parallel_hashmap` without declaring it
+
 - Continuous integration:
   - Reusable workflows now use GitHub's self-repository reference syntax.
   - Clang-Tidy skips Python-only changes in the bindings tree.

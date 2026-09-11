@@ -172,6 +172,16 @@ disable it by passing `-DFICTION_CLI=OFF` to your `cmake` call or adding
 `set(FICTION_CLI OFF CACHE BOOL "" FORCE)` **before** `add_subdirectory(fiction/)`.
 :::
 
+An installed _fiction_ package provides `fiction::libfiction`:
+
+```cmake
+find_package(fiction CONFIG REQUIRED)
+target_link_libraries(fanfiction PRIVATE fiction::libfiction)
+```
+
+_fiction_ installs mockturtle into the same prefix and its package configuration finds it there,
+so no extra `CMAKE_PREFIX_PATH` entry is needed for it.
+
 Then include what you need:
 
 ```c++
