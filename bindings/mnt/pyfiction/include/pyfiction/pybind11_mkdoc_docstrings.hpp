@@ -35,9 +35,8 @@ Template Args:
     Writer: Callable accepting an output stream.
 
 Raises:
-    std::filesystem::filesystem_error: If the destination cannot be
-                                       replaced.
-    std::ios_base::failure: If writing, flushing, or closing fails.
+    std::ios_base::failure: If creating, writing, closing, or
+                            replacing the file fails.
 
 )doc";
 
