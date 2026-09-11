@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -254,18 +255,21 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
     else:
         temperature = critical_temperature_non_gate_based(layout, params, stats)
 
+    # the statistics leave the energy gap at infinity when no erroneous state exists, and JSON has no infinity
+    energy_gap = stats.energy_between_ground_state_and_first_erroneous
+    gap = energy_gap if math.isfinite(energy_gap) else None
+
     if stats.num_valid_lyt == 0:
         session.info(f"the ground state of '{layout.get_layout_name()}' could not be determined")
     else:
         bound = "> " if temperature >= args.max_temperature else ""
         session.info(f"critical temperature of '{layout.get_layout_name()}': {bound}{temperature:.2f} K")
-        if stats.num_valid_lyt > 1:
-            gap = stats.energy_between_ground_state_and_first_erroneous
+        if stats.num_valid_lyt > 1 and gap is not None:
             session.info(f"energy between the ground state and the first erroneous state: {gap:.2f} meV")
     return {
         "critical_temperature_k": temperature,
         "stable_states": stats.num_valid_lyt,
-        "energy_gap_mev": stats.energy_between_ground_state_and_first_erroneous,
+        "energy_gap_mev": gap,
         "engine": stats.algorithm_name,
         "gate_based": args.gate_based,
         "parameters": parameters,
