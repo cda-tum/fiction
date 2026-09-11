@@ -108,8 +108,8 @@ jobs:
         name: Install external ABC for CLI integration tests
         run: |
           sudo apt-get update
-          sudo apt-get install --yes berkeley-abc graphviz
-          echo "AIGVERSE_ABC=/usr/bin/berkeley-abc" >> "$GITHUB_ENV"
+          sudo apt-get install --yes yosys-abc graphviz
+          echo "AIGVERSE_ABC=/usr/bin/yosys-abc" >> "$GITHUB_ENV"
           echo "FICTION_REQUIRE_ABC=1" >> "$GITHUB_ENV"
 
       # A declared floor is only a claim until something installs it. Pinned to Python 3.10, so
