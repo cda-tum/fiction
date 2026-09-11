@@ -187,8 +187,8 @@ struct graph_oriented_layout_design_params
      */
     bool verbose = false;
     /**
-     * Random seed used for random fanout substitution and random topological ordering in maximum-effort mode,
-     * generated randomly if not specified.
+     * Random seed for PI spacing, fanout substitution, and topological ordering.
+     * Generated randomly if not specified.
      */
     std::optional<uint32_t> seed = std::nullopt;
     /**
@@ -210,7 +210,8 @@ struct graph_oriented_layout_design_params
     uint64_t tiles_to_skip_between_pis = 0;
     /**
      * When enabled, randomizes the tiles_to_skip_between_pis value for each PI placement.
-     * The random value will be chosen from `0` to `tiles_to_skip_between_pis` (inclusive).
+     * The random value is chosen from `tiles_to_skip_between_pis - 1` to `tiles_to_skip_between_pis`
+     * (inclusive). A zero limit always selects zero.
      * This can help explore different placement strategies and potentially find better layouts.
      * Uses the same random seed as other randomization features for reproducibility.
      * Defaults to `false`.
@@ -477,7 +478,6 @@ enum class pi_locations : std::uint8_t
  * network, nodes to be placed, and other relevant information.
  *
  * @tparam Lyt The layout type.
- * @tparam Ntk The network type.
  */
 template <typename Lyt>
 struct search_space_graph
@@ -498,6 +498,10 @@ struct search_space_graph
      * Enum indicating if primary inputs (PIs) can be placed at the top or left.
      */
     pi_locations pi_locs = pi_locations::TOP_AND_LEFT;
+    /**
+     * Random engine for this search space graph's PI spacing.
+     */
+    std::mt19937 pi_placement_rng{};  // NOLINT(cert-msc32-c, cert-msc51-cpp) Seeded before first use.
     /**
      * Flag indicating if this graph's frontier is active.
      */
@@ -792,6 +796,7 @@ class graph_oriented_layout_design_impl
      * @param src The source network to be placed, already converted to a `technology_network`.
      * @param p The parameters for the graph-enhanced layout search algorithm.
      * @param st The statistics object to record execution details.
+     * @param custom The custom layout cost function.
      */
     graph_oriented_layout_design_impl(const tec_nt& src, const graph_oriented_layout_design_params& p,
                                       graph_oriented_layout_design_stats&       st,
@@ -802,7 +807,7 @@ class graph_oriented_layout_design_impl
             custom_cost_objective{custom},
             timeout{ps.timeout},
             start{std::chrono::high_resolution_clock::now()},
-            seed{p.seed.value_or(std::random_device{}())}
+            seed{p.seed ? *p.seed : std::random_device{}()}
     {
         ntk.substitute_po_signals();
     }
@@ -1117,36 +1122,13 @@ class graph_oriented_layout_design_impl
      */
     const uint64_t num_search_space_graphs_maximum_effort_custom = 2u * num_search_space_graphs_highest_effort_custom;
     /**
-     * Random seed used for random fanout substitution and random topological ordering in maximum-effort mode.
+     * Random seed for PI spacing, fanout substitution, and topological ordering.
      */
     std::uint32_t seed;
     /**
      * Thread pool for multithreaded execution to avoid thread creation overhead.
      */
     mutable std::vector<std::future<std::optional<Lyt>>> futures_pool{};
-    /**
-     * Get thread-local random number generator for `tiles_to_skip_between_pis` randomization.
-     * Each thread will have its own RNG to avoid mutex contention.
-     *
-     * @return Reference to a thread-local Mersenne Twister random number generator.
-     */
-    [[nodiscard]] std::mt19937& get_thread_local_rng() const
-    {
-        thread_local std::mt19937 rng{seed};
-        return rng;
-    }
-    /**
-     * Get thread-local distribution for generating random `tiles_to_skip_between_pis` values.
-     *
-     * @return Reference to a thread-local uniform integer distribution for generating random skip values.
-     */
-    [[nodiscard]] std::uniform_int_distribution<uint64_t>& get_thread_local_dist() const
-    {
-        // Handle edge case where tiles_to_skip_between_pis is 0
-        const auto min_val = ps.tiles_to_skip_between_pis > 0 ? ps.tiles_to_skip_between_pis - 1 : 0;
-        thread_local std::uniform_int_distribution<uint64_t> dist{min_val, ps.tiles_to_skip_between_pis};
-        return dist;
-    }
     /**
      * Determines the number of search space graphs to generate based on the selected effort mode and cost objective.
      *
@@ -1246,11 +1228,12 @@ class graph_oriented_layout_design_impl
      * criteria of positioning at the top or left side, with a limit on the number of possible positions.
      *
      * @param layout The layout in which to find the possible positions for PIs.
-     * @param pi_locs Struct indicating if PIs are allowed at the top or left side of the layout.
+     * @param ssg Search space graph with the allowed PI locations and random engine.
      * @param num_expansions The maximum number of positions to be returned (is doubled for PIs).
      * @return A vector of tiles representing the possible positions for PIs.
      */
-    [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions_pis(ObstrLyt& layout, const pi_locations& pi_locs,
+    [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions_pis(ObstrLyt&                     layout,
+                                                                      search_space_graph<ObstrLyt>& ssg,
                                                                       const uint64_t num_expansions) noexcept
     {
         uint64_t count_expansions = 0ul;
@@ -1263,8 +1246,9 @@ class graph_oriented_layout_design_impl
         {
             if (ps.randomize_tiles_to_skip_between_pis)
             {
-                // generate random skip_tiles for each PI placement using thread-local RNG
-                skip_tiles = get_thread_local_dist()(get_thread_local_rng());
+                const auto min_skip = ps.tiles_to_skip_between_pis == 0 ? 0 : ps.tiles_to_skip_between_pis - 1;
+                skip_tiles          = std::uniform_int_distribution<uint64_t>{min_skip, ps.tiles_to_skip_between_pis}(
+                    ssg.pi_placement_rng);
             }
             else
             {
@@ -1317,11 +1301,11 @@ class graph_oriented_layout_design_impl
 
         uint64_t max_iterations = 0;
 
-        if (pi_locs == pi_locations::TOP_AND_LEFT)
+        if (ssg.pi_locs == pi_locations::TOP_AND_LEFT)
         {
             max_iterations = std::max(layout.x() - min_x, layout.y() - min_y);
         }
-        else if (pi_locs == pi_locations::TOP)
+        else if (ssg.pi_locs == pi_locations::TOP)
         {
             max_iterations = layout.x() - min_x;
         }
@@ -1330,12 +1314,14 @@ class graph_oriented_layout_design_impl
             max_iterations = layout.y() - min_y;
         }
 
-        const uint64_t expansion_limit = (pi_locs == pi_locations::TOP_AND_LEFT) ? 2 * num_expansions : num_expansions;
+        const uint64_t expansion_limit =
+            (ssg.pi_locs == pi_locations::TOP_AND_LEFT) ? 2 * num_expansions : num_expansions;
         possible_positions.reserve(expansion_limit);
 
         for (uint64_t k = 0ul; k < max_iterations; k++)
         {
-            if (((pi_locs == pi_locations::TOP) || (pi_locs == pi_locations::TOP_AND_LEFT)) && min_x + k < layout.x())
+            if (((ssg.pi_locs == pi_locations::TOP) || (ssg.pi_locs == pi_locations::TOP_AND_LEFT)) &&
+                min_x + k < layout.x())
             {
                 if (skip_top == 0)
                 {
@@ -1346,7 +1332,8 @@ class graph_oriented_layout_design_impl
                     --skip_top;
                 }
             }
-            if (((pi_locs == pi_locations::LEFT) || (pi_locs == pi_locations::TOP_AND_LEFT)) && min_y + k < layout.y())
+            if (((ssg.pi_locs == pi_locations::LEFT) || (ssg.pi_locs == pi_locations::TOP_AND_LEFT)) &&
+                min_y + k < layout.y())
             {
                 if (skip_left == 0)
                 {
@@ -1572,15 +1559,14 @@ class graph_oriented_layout_design_impl
      * @param ssg The search space graph.
      * @return A vector of tiles representing the possible positions for the current node.
      */
-    [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions(ObstrLyt&                           layout,
-                                                                  const search_space_graph<ObstrLyt>& ssg,
+    [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions(ObstrLyt& layout, search_space_graph<ObstrLyt>& ssg,
                                                                   const placement_info<ObstrLyt>& place_info) noexcept
     {
         const auto fc = networks::fanins(ssg.network, ssg.nodes_to_place[place_info.current_node]);
 
         if (ssg.network.is_pi(ssg.nodes_to_place[place_info.current_node]))
         {
-            return get_possible_positions_pis(layout, ssg.pi_locs, ssg.network.num_pis());
+            return get_possible_positions_pis(layout, ssg, ssg.network.num_pis());
         }
         if (ssg.network.is_po(ssg.nodes_to_place[place_info.current_node]))
         {
@@ -2203,8 +2189,7 @@ class graph_oriented_layout_design_impl
         return std::nullopt;
     }
     /**
-     * Initializes the allowed positions for primary inputs (PIs), the cost for each search space graph and the maximum
-     * number of expansions.
+     * Initializes each search space graph's PI locations, random engine, and initial cost.
      */
     void initialize_pis_cost_and_num_expansions() noexcept
     {
@@ -2215,6 +2200,7 @@ class graph_oriented_layout_design_impl
         for (auto& graph : ssg_vec)
         {
             graph.pi_locs = pattern.at(idx % pattern.size());
+            graph.pi_placement_rng.seed(seed);
             ++idx;  // move to next pattern element
 
             graph.cost_so_far[graph.current_vertex] = 0;

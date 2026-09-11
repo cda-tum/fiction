@@ -85,9 +85,9 @@ int main()  // NOLINT
     // the sketch's filtering steps are only defined when kinks are rejected
     op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
-    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R},
-                                         {sweep_parameter::LAMBDA_TF},
-                                         {sweep_parameter::MU_MINUS}};
+    op_domain_params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R},
+                                         {.dimension = sweep_parameter::LAMBDA_TF},
+                                         {.dimension = sweep_parameter::MU_MINUS}};
 
     op_domain_params.sweep_dimensions[0].min  = 1.0;
     op_domain_params.sweep_dimensions[0].max  = 10.0;
@@ -124,7 +124,7 @@ int main()  // NOLINT
 
     for (const auto& [truth_table, gate] : truth_tables_and_names)
     {
-        const auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
+        const auto lyt = read_sqd_layout(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // operational domain stats
         operational_domain_stats op_domain_stats_grid_search{};
@@ -171,7 +171,7 @@ int main()  // NOLINT
 
         opdomain_exp(
             // Benchmark
-            gate, lyt.num_cells(),
+            gate, lyt.num_dots(),
 
             // Operational Domain (determine the operation status by simulation)
             op_domain_stats_grid_search.num_operational_parameter_combinations,

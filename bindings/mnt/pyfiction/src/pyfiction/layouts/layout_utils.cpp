@@ -56,15 +56,6 @@ void normalize_layout_coordinates(nanobind::module_& m)
 }
 
 template <typename Lyt>
-void convert_layout_to_siqad_coordinates(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("convert_layout_to_siqad_coordinates", &fiction::layouts::convert_layout_to_siqad_coordinates<Lyt>,
-          py::arg("lyt"), DOC(fiction_layouts_convert_layout_to_siqad_coordinates));
-}
-
-template <typename Lyt>
 void random_coordinate(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
@@ -88,9 +79,6 @@ void layout_utils(nanobind::module_& m)
 
     detail::normalize_layout_coordinates<py_qca_layout>(m);
     detail::normalize_layout_coordinates<py_inml_layout>(m);
-    detail::normalize_layout_coordinates<py_sidb_layout>(m);
-
-    detail::convert_layout_to_siqad_coordinates<py_sidb_layout>(m);
 
     detail::random_coordinate<py_cartesian_obstruction_layout>(m);
     detail::random_coordinate<py_cartesian_gate_layout>(m);
@@ -100,7 +88,6 @@ void layout_utils(nanobind::module_& m)
     detail::random_coordinate<py_hexagonal_gate_layout>(m);
     detail::random_coordinate<py_qca_layout>(m);
     detail::random_coordinate<py_inml_layout>(m);
-    detail::random_coordinate<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction

@@ -212,5 +212,4 @@ generate_multiple_random_layouts(const generate_random_layout_params& params,
 
     return unique_lyts.empty() ? std::nullopt : std::optional{std::move(unique_lyts)};
 }
-
 }  // namespace fiction::sidb::generators

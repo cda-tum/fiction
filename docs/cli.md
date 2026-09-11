@@ -322,7 +322,7 @@ simulators are currently supported:
 - `qca <filename>` creates a [QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/) QCA file
 - `qcc <filename>` creates a [ToPoliNano](https://topolinano.polito.it/) design component QCC file
 - `qll <filename>` creates a [ToPoliNano & MagCAD](https://topolinano.polito.it/) or [SCERPA](https://ieeexplore.ieee.org/document/8935211) layout QLL file
-- `sqd <filename>` creates a [SiQAD](https://github.com/siqad/siqad) SQD file
+- `sqd <filename>` creates a [SiQAD](https://github.com/siqad/siqad) SQD file from an SiDB layout
 - `fqca <filename>` creates a [QCA-STACK](https://github.com/wlambooy/QCA-STACK) FQCA file
 
 If no filename is given, the stored layout name will be used and the file will be written to the current folder.
@@ -416,7 +416,7 @@ Most important parameters:
 
 ### Operational Domain (`opdom`)
 
-Computes the operational domain of the current SiDB cell-level layout in store. The operational domain is the set of all
+Computes the operational domain of the current SiDB layout in store. The operational domain is the set of all
 parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
 implementing the current truth table in store. The input BDL pairs of the layout are assumed to be in the same order as
 the inputs of the truth table.

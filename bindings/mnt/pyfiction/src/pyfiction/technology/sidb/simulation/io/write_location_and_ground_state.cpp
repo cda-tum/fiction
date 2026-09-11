@@ -36,7 +36,7 @@ void write_location_and_ground_state(nanobind::module_& m)
         &fiction::sidb::simulation::io::write_location_and_ground_state;
 
     m.def("write_location_and_ground_state", write_pointer, py::arg("sim_result"), py::arg("filename"),
-          DOC(fiction_sidb_simulation_io_write_location_and_ground_state_4));
+          DOC(fiction_sidb_simulation_io_write_location_and_ground_state_2));
 }
 
 }  // namespace pyfiction

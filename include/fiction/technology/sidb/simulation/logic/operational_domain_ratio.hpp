@@ -17,10 +17,8 @@
 
 #pragma once
 
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
-#include "fiction/traits.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 
@@ -73,25 +71,6 @@ struct operational_domain_ratio_params
     // calculate the ratio of operational parameter pairs to the total number of parameter pairs
     return static_cast<double>(stats.num_operational_parameter_combinations) /
            static_cast<double>(stats.num_total_parameter_points);
-}
-
-/**
- * Transitional overload for SiDB cell-level layouts, converted with `to_sidb_layout`; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout to investigate.
- * @param spec The Boolean function(s) the layout implements.
- * @param pp The parameter point to start the flood fill from.
- * @param params Parameters.
- * @return The ratio of operational parameter points.
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt>)
-[[nodiscard]] double operational_domain_ratio(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
-                                              const parameter_point&                 pp,
-                                              const operational_domain_ratio_params& params = {})
-{
-    return operational_domain_ratio(to_sidb_layout(lyt), spec, pp, params);
 }
 
 }  // namespace fiction::sidb::simulation::logic

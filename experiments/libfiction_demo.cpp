@@ -18,6 +18,8 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>                // Cartesian grid layouts
 #include <fiction/layouts/cell_level_layout.hpp>               // cell-level abstraction of layouts
+#include <fiction/layouts/clocked_layout.hpp>                  // clocked layouts
+#include <fiction/layouts/clocking_scheme.hpp>                 // clocking schemes
 #include <fiction/layouts/coordinates.hpp>                     // coordinate systems
 #include <fiction/layouts/gate_level_layout.hpp>               // gate-level abstraction of layouts
 #include <fiction/layouts/io/layout_drawers.hpp>               // DOT drawers and writer for layouts
@@ -32,16 +34,16 @@
 #include <fiction/technology/qca/io/write_qca_layout_svg.hpp>  // SVG writer for cell-level layout representation
 #include <fiction/technology/qca/qca_one_library.hpp>          // a pre-defined QCA gate library
 #include <fiction/technology/qca/technology.hpp>               // pre-defined cell implementations
-#include <fiction/technology/sidb/io/write_sqd_layout.hpp>     // writer for SiQAD files (physical simulation)
+#include <fiction/traits.hpp>                                  // layout technology traits
 #include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
-#include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
+#include <lorina/common.hpp>                                   // parser return codes
+#include <lorina/verilog.hpp>                                  // Verilog file parsing
 #include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
 #include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
 #include <mockturtle/networks/aig.hpp>                         // AND-inverter graphs
-#include <mockturtle/networks/mig.hpp>                         // MAJ-inverter graphs
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 #include <mockturtle/views/names_view.hpp>                     // to assign names to network signals
 
@@ -58,26 +60,25 @@ using namespace fiction::networks::io;
 using namespace fiction::physical_design;
 using namespace fiction::qca;
 using namespace fiction::qca::io;
-using namespace fiction::sidb::io;
 using namespace fiction::synthesis;
 
 template <typename Ntk>
 void print_network_properties(const Ntk& ntk)
 {
     // determine depth
-    mockturtle::depth_view<Ntk> depth_ntk{ntk};
+    const mockturtle::depth_view<Ntk> depth_ntk{ntk};
 
     // print statistics
     std::cout << fmt::format("[i] Network: inputs = {}, outputs = {}, gates = {}, levels = {}", ntk.num_pis(),
                              ntk.num_pos(), ntk.num_gates(), depth_ntk.depth())
-              << std::endl;
+              << '\n';
 }
 
 template <typename Lyt>
 void print_gate_layout_properties(const Lyt& lyt)
 {
     // determine depth
-    mockturtle::depth_view<Lyt> depth_lyt{lyt};
+    const mockturtle::depth_view<Lyt> depth_lyt{lyt};
 
     // print statistics
     std::cout << fmt::format(
@@ -85,14 +86,14 @@ void print_gate_layout_properties(const Lyt& lyt)
                      "wires = {}, critical path = {}",
                      lyt.x() + 1, lyt.y() + 1, lyt.num_pis(), lyt.num_pos(), lyt.num_gates(), lyt.num_wires(),
                      depth_lyt.depth())
-              << std::endl;
+              << '\n';
 }
 
 template <typename CellLyt>
 void print_cell_layout_properties(const CellLyt& cell_lyt)
 {
-    area_params<technology<CellLyt>> ps{};
-    area_stats                       st{};
+    const area_params<technology<CellLyt>> ps{};
+    area_stats                             st{};
     // determine area
     area(cell_lyt, ps, &st);
 
@@ -102,7 +103,7 @@ void print_cell_layout_properties(const CellLyt& cell_lyt)
                "[i] Cell-level {} layout: aspect ratio = {} × {}, inputs = {}, outputs = {}, cells = {}, area = {}nm²",
                tech_impl_name<technology<CellLyt>>, cell_lyt.x() + 1, cell_lyt.y() + 1, cell_lyt.num_pis(),
                cell_lyt.num_pos(), cell_lyt.num_cells(), st.area)
-        << std::endl;
+        << '\n';
 }
 
 int main(int argc, char* argv[])  // NOLINT
@@ -110,7 +111,7 @@ int main(int argc, char* argv[])  // NOLINT
     // check arguments
     if (argc == 1)
     {
-        std::cout << "[e] file path to a Verilog network must be given" << std::endl;
+        std::cout << "[e] file path to a Verilog network must be given\n";
         return EXIT_FAILURE;
     }
 
@@ -124,14 +125,14 @@ int main(int argc, char* argv[])  // NOLINT
     // check if file path exists
     if (!std::filesystem::exists(file_path))
     {
-        std::cout << fmt::format("[e] given file path '{}' does not exist", file_path.string()) << std::endl;
+        std::cout << fmt::format("[e] given file path '{}' does not exist\n", file_path.string());
         return EXIT_FAILURE;
     }
     // check if file path points to a regular file
     if (!std::filesystem::is_regular_file(file_path))
     {
         std::cout << fmt::format("[e] given file path '{}' does not point to a regular file", file_path.string())
-                  << std::endl;
+                  << '\n';
         return EXIT_FAILURE;
     }
 
@@ -146,12 +147,12 @@ int main(int argc, char* argv[])  // NOLINT
     {
         std::cout << fmt::format("[e] given file '{}' could not be parsed as a valid Verilog network",
                                  file_path.string())
-                  << std::endl;
+                  << '\n';
         return EXIT_FAILURE;
     }
 
     // create a folder for the design files
-    std::string designs{"./designs/" + file_path.stem().string() + "/"};
+    const std::string designs{"./designs/" + file_path.stem().string() + "/"};
     if (!std::filesystem::exists(designs))
     {
         std::filesystem::create_directory(designs);
@@ -164,19 +165,19 @@ int main(int argc, char* argv[])  // NOLINT
     // and draw the network
     write_dot_network(ntk, designs + "ntk.dot");
 
-    std::cout << std::endl;
+    std::cout << '\n';
 
     /**************************************************************/
     /********************* Logic Optimization *********************/
     /**************************************************************/
 
-    std::cout << "[i] cut rewriting" << std::endl;
+    std::cout << "[i] cut rewriting\n";
 
     // instantiate a complete AIG NPN database for node re-synthesis
     mockturtle::xag_npn_resynthesis<logic_network,                              // the input network type
                                     mockturtle::aig_network,                    // the database network type
                                     mockturtle::xag_npn_db_kind::aig_complete>  // the kind of database to use
-        resynthesis_function{};
+        const resynthesis_function{};
 
     mockturtle::cut_rewriting_params cut_params{};
     cut_params.cut_enumeration_ps.cut_size = 4;
@@ -189,13 +190,13 @@ int main(int argc, char* argv[])  // NOLINT
     // draw the network again
     write_dot_network(ntk, designs + "cut_ntk.dot");
 
-    std::cout << std::endl;
+    std::cout << '\n';
 
     /**************************************************************/
     /******************* Network pre-processing *******************/
     /**************************************************************/
 
-    std::cout << "[i] fanout substitution" << std::endl;
+    std::cout << "[i] fanout substitution\n";
 
     // set up parameters for fanout substitution
     fanout_substitution_params fanout_params{};
@@ -211,7 +212,7 @@ int main(int argc, char* argv[])  // NOLINT
     // draw network again
     write_dot_network(top_ntk, designs + "top_ntk.dot");
 
-    std::cout << std::endl;
+    std::cout << '\n';
 
     // how about some layout generation next?
 
@@ -226,7 +227,7 @@ int main(int argc, char* argv[])  // NOLINT
     // defining the type of cell-level layout to use (also already pre-defined in fiction/types.hpp as qca_cell_clk_lyt
     using qca_cell_level_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
 
-    std::cout << "[i] orthogonal physical design" << std::endl;
+    std::cout << "[i] orthogonal physical design\n";
 
     // set up parameters for orthogonal physical design
     orthogonal_physical_design_params ortho_params{};
@@ -252,10 +253,7 @@ int main(int argc, char* argv[])  // NOLINT
     write_qca_layout_svg(ortho_cell_layout, designs + "ortho_qca.svg");
     // write a QCADesigner simulation file
     write_qca_layout(ortho_cell_layout, designs + "ortho_qca.qca");
-    // write a SiQAD simulation file
-    write_sqd_layout(ortho_cell_layout, designs + "ortho_qca.sqd");
-
-    std::cout << std::endl;
+    std::cout << '\n';
 
     /**************************************************************/
     /******************* Exact layout generation ******************/
@@ -264,7 +262,7 @@ int main(int argc, char* argv[])  // NOLINT
     // attempt exact physical design only if the number of gates is manageable
     if (top_ntk.num_gates() < 28)
     {
-        std::cout << "[i] SMT-based physical design" << std::endl;
+        std::cout << "[i] SMT-based physical design\n";
 
         // set up parameters for SMT-based physical design
         exact_physical_design_params exact_params{};
@@ -296,18 +294,16 @@ int main(int argc, char* argv[])  // NOLINT
             write_qca_layout_svg(exact_cell_layout, designs + "exact_qca.svg");
             // write a QCADesigner simulation file
             write_qca_layout(exact_cell_layout, designs + "exact_qca.qca");
-            // write a SiQAD simulation file
-            write_sqd_layout(exact_cell_layout, designs + "exact_qca.sqd");
         }
         // not successful
         else
         {
-            std::cout << "[e] could not generate an exact layout within the given parameters" << std::endl;
+            std::cout << "[e] could not generate an exact layout within the given parameters\n";
         }
     }
     else
     {
-        std::cout << "[w] network is too large to attempt exact physical design" << std::endl;
+        std::cout << "[w] network is too large to attempt exact physical design\n";
     }
 
     return EXIT_SUCCESS;
@@ -320,7 +316,7 @@ int main(int argc, char* argv[])  // NOLINT
 
 int main()  // NOLINT
 {
-    std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
+    std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code\n";
 
     return EXIT_FAILURE;
 }

@@ -27,7 +27,6 @@
 
 #include <array>
 #include <cstdlib>
-#include <filesystem>
 #include <string>
 #include <utility>
 #include <vector>
@@ -64,16 +63,15 @@ int main()  // NOLINT
         std::make_pair("wire", std::vector<tt>{create_id_tt()})};
 
     const simulation_parameters       sim_params{2, -0.32};
-    const critical_temperature_params ct_params{sim_params};
+    const critical_temperature_params ct_params{.operational_params = {.sim_params = sim_params}};
 
     for (const auto& [gate, truth_table] : gates)
     {
-        const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate));
+        const auto layout = read_sqd_layout(fmt::format("{}/{}.sqd", folder, gate));
 
         critical_temperature_stats ct_stats{};
 
-        const auto ct =
-            critical_temperature_gate_based<sidb_100_cell_clk_lyt_siqad>(layout, truth_table, ct_params, &ct_stats);
+        const auto ct = critical_temperature_gate_based(layout, truth_table, ct_params, &ct_stats);
 
         simulation_exp(gate, ct, ct_stats.energy_between_ground_state_and_first_erroneous);
         simulation_exp.save();

@@ -16,15 +16,14 @@
  * @author Willem Lambooy (wlambooy)
  */
 
-#include <fiction/layouts/coordinates.hpp>
-#include <fiction/layouts/layout_utils.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/math/combination_utils.hpp>
 
 #include <fmt/format.h>
@@ -40,7 +39,6 @@
 #include <vector>
 
 using namespace fiction;
-using namespace fiction::layouts;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
@@ -53,10 +51,10 @@ using namespace fiction::utils::math;
 
 int main()  // NOLINT
 {
-    const auto all_cells_in_region = all_coordinates_in_spanned_area<coords::offset>({0, 0}, {10, 10});
+    const auto all_sites_in_region = sites_in_area(site_at_row(0, 0), site_at_row(10, 10));
 
     const auto all_distributions =
-        determine_all_combinations_of_distributing_k_entities_on_n_positions(4, all_cells_in_region.size());
+        determine_all_combinations_of_distributing_k_entities_on_n_positions(4, all_sites_in_region.size());
 
     const auto params = simulation_parameters{3, -0.32};
 
@@ -94,11 +92,11 @@ int main()  // NOLINT
             {
                 for (uint64_t ix = start; ix <= end; ++ix)
                 {
-                    sidb_100_cell_clk_lyt lyt{};
+                    layout lyt{};
 
                     for (const auto idx : *std::next(all_distributions.cbegin(), static_cast<int64_t>(ix)))
                     {
-                        lyt.assign_cell_type(all_cells_in_region[idx], sidb_technology::cell_type::NORMAL);
+                        lyt.assign_sidb(all_sites_in_region[idx], dot_tag::NORMAL);
                     }
 
                     auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);

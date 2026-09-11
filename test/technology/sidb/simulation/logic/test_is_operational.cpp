@@ -21,7 +21,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
@@ -51,7 +50,7 @@ using namespace fiction::synthesis;
 
 TEST_CASE("SiQAD OR gate", "[is-operational]")
 {
-    const auto or_gate = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
+    const auto or_gate = blueprints::siqad_or_gate();
 
     const auto& lat = or_gate;
 
@@ -123,7 +122,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
 
 TEST_CASE("Test is_physical_validity_feasible for empty canvas", "[is-operational]")
 {
-    const auto lyt = to_sidb_layout(blueprints::two_input_two_output_bestagon_skeleton<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton();
 
     const auto op_params =
         is_operational_params{.sim_params                = simulation_parameters{2, -0.32},
@@ -138,7 +137,7 @@ TEST_CASE("Test is_physical_validity_feasible for empty canvas", "[is-operationa
 
 TEST_CASE("Incomplete BDL wire set is non-operational", "[is-operational]")
 {
-    const auto lyt = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::siqad_or_gate();
 
     const auto [status, simulator_invocations] =
         is_operational(lyt, std::vector<tt>{create_id_tt()}, is_operational_params{}, std::vector<bdl_wire>{},
@@ -150,7 +149,7 @@ TEST_CASE("Incomplete BDL wire set is non-operational", "[is-operational]")
 
 TEST_CASE("Canvas filtering rejects SiDBs outside the simulation state", "[is-operational]")
 {
-    const auto                  lyt = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
+    const auto                  lyt = blueprints::siqad_or_gate();
     const is_operational_params params{};
     layout                      canvas{};
     canvas.assign_sidb({1000, 0, 0}, dot_tag::LOGIC);
@@ -164,7 +163,7 @@ TEST_CASE("Canvas filtering rejects SiDBs outside the simulation state", "[is-op
 
 TEST_CASE("SiQAD NAND gate", "[is-operational]")
 {
-    const auto nand_gate = to_sidb_layout(blueprints::siqad_nand_gate<sidb_cell_clk_lyt_siqad>());
+    const auto nand_gate = blueprints::siqad_nand_gate();
 
     const auto& lat = nand_gate;
 
@@ -241,7 +240,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operat
 
 TEST_CASE("Bestagon FO2 gate", "[is-operational]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bestagon_fo2<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::bestagon_fo2();
 
     SECTION("using QuickExact")
     {
@@ -280,7 +279,7 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
 
 TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::bestagon_crossing();
 
     CHECK(lyt.num_dots() == 29);
 
@@ -296,7 +295,7 @@ TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 
 TEST_CASE("Bestagon AND gate", "[is-operational]")
 {
-    auto lyt = to_sidb_layout(blueprints::bestagon_and<sidb_defect_cell_clk_lyt_siqad>());
+    auto lyt = blueprints::bestagon_and();
 
     const simulation_parameters params{2, -0.32};
 
@@ -348,7 +347,7 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
 
 TEST_CASE("SiQAD AND gate", "[is-operational]")
 {
-    auto lyt = to_sidb_layout(blueprints::siqad_and_gate<sidb_defect_cell_clk_lyt_siqad>());
+    auto lyt = blueprints::siqad_and_gate();
 
     simulation_parameters params{2, -0.28};
 
@@ -424,7 +423,7 @@ TEST_CASE("Not working diagonal Wire", "[is-operational]")
 
 TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]")
 {
-    const auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>(), lattice::si_111_1x1());
+    const auto lyt = blueprints::and_gate_111();
 
     SECTION("check operation for different values of mu")
     {
@@ -446,9 +445,8 @@ TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]")
     SECTION("verify the operational status of the AND gate, which is mirrored on the x-axis. Note that the input BDL "
             "pairs are located at the bottom, while the output BDL pairs are at the top.")
     {
-        const auto lyt_mirrored_x = to_sidb_layout(
-            blueprints::and_gate_111_mirrored_on_the_x_axis<sidb_111_cell_clk_lyt_siqad>(), lattice::si_111_1x1());
-        const auto op_inputs = operational_input_patterns(
+        const auto lyt_mirrored_x = blueprints::and_gate_111_mirrored_on_the_x_axis();
+        const auto op_inputs      = operational_input_patterns(
             lyt_mirrored_x, std::vector<tt>{create_and_tt()},
             is_operational_params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT});
         CHECK(op_inputs.size() == 4);
@@ -460,7 +458,7 @@ TEST_CASE(
     "AND gate with Bestagon structure and kink state on right input wire for input 01 and left input wire for input 10",
     "[is-operational]")
 {
-    const auto lyt = to_sidb_layout(blueprints::and_gate_with_kink_states<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::and_gate_with_kink_states();
 
     SECTION("allow kink states")
     {
@@ -582,8 +580,7 @@ TEST_CASE("Special wire that cannot be pruned, but is non-operational when kinks
 #ifdef NDEBUG
 TEST_CASE("flipped CX bestagon gate", "[is-operational]")
 {
-    const auto lyt =
-        to_sidb_layout(blueprints::crossing_bestagon_shape_input_down_output_up<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::crossing_bestagon_shape_input_down_output_up();
 
     CHECK(is_operational(lyt, create_crossing_wire_tt(),
                          is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT,
@@ -612,7 +609,7 @@ TEST_CASE("flipped CX bestagon gate", "[is-operational]")
 
 TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quality]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::bestagon_crossing();
 
     CHECK(lyt.num_dots() == 29);
 
@@ -662,7 +659,7 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
 
 TEST_CASE("is operational check for Bestagon double wire", "[is-operational], [quality]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bestagon_double_wire<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::bestagon_double_wire();
 
     CHECK(lyt.num_dots() == 30);
 
@@ -678,7 +675,7 @@ TEST_CASE("is operational check for Bestagon double wire", "[is-operational], [q
 
 TEST_CASE("is operational check for Bestagon half adder", "[is-operational], [quality]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bestagon_ha<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::bestagon_ha();
 
     CHECK(lyt.num_dots() == 26);
 
@@ -695,7 +692,7 @@ TEST_CASE("is operational check for Bestagon half adder", "[is-operational], [qu
 
 TEST_CASE("Operational checks reject a mismatched input count before simulation", "[is-operational]")
 {
-    const auto                  lyt = to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>());
+    const auto                  lyt = blueprints::siqad_and_gate();
     const is_operational_params params{.sim_params = simulation_parameters{3, -0.32}};
 
     const auto [status, calls] = is_operational(lyt, std::vector{create_id_tt()}, params);
@@ -726,7 +723,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
 
     SECTION("SiQAD AND gate")
     {
-        const layout lat{to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>())};
+        const layout lat{blueprints::siqad_and_gate()};
 
         for (const auto condition : {is_operational_params::operational_condition::TOLERATE_KINKS,
                                      is_operational_params::operational_condition::REJECT_KINKS})
@@ -746,7 +743,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
 
     SECTION("SiQAD OR gate")
     {
-        const layout lat{to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>())};
+        const layout lat{blueprints::siqad_or_gate()};
 
         is_operational_params params{.sim_params = simulation_parameters{2, -0.28}, .sim_engine = engine::QUICKEXACT};
         params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
@@ -756,7 +753,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
 
     SECTION("Bestagon AND gate")
     {
-        const layout lat{to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>())};
+        const layout lat{blueprints::bestagon_and_gate()};
 
         const is_operational_params params{.sim_params = simulation_parameters{2, -0.32},
                                            .sim_engine = engine::QUICKEXACT};
@@ -767,7 +764,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
 
 TEST_CASE("Pre-generated input pattern layouts are validated", "[is-operational]")
 {
-    const layout lat{to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>())};
+    const layout lat{blueprints::siqad_and_gate()};
 
     const is_operational_params params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT};
 

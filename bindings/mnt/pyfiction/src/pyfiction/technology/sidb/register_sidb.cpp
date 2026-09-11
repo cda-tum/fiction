@@ -31,10 +31,15 @@ void lattice(nanobind::module_& m);
  * @param m Python module.
  */
 void layout(nanobind::module_& m);
+/**
+ * @brief Registers SiDB charge distributions.
+ *
+ * @param m Python module.
+ */
 void charge_distribution(nanobind::module_& m);
 
 /**
- * @brief Registers SiDB lattice types before the layouts that use them.
+ * @brief Registers the SiDB lattice, layout, and charge distribution bindings, in dependency order.
  *
  * @param m Python module.
  */

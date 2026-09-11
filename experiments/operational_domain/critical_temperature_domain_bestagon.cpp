@@ -30,7 +30,9 @@
 
 #include <array>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <string>
 #include <utility>
 #include <vector>
@@ -46,7 +48,13 @@ using namespace fiction::synthesis;
 // This script analyzes the critical temperature within the operational domain of the Bestagon gates. It calculates
 // the operational domain at various temperatures relative to the total operational domain at 0 K.
 
-int main()  // NOLINT
+/**
+ * Runs the Bestagon critical-temperature domain experiment with its fixed kink-rejection policy.
+ *
+ * @return `EXIT_SUCCESS` after recording all gates, or `EXIT_FAILURE` if the experiment raises an exception.
+ */
+int main()
+try
 {
     experiments::experiment<std::string, uint64_t, double, double, double, double> opdomain_exp{
         "Critical Temperature Domain Bestagon",
@@ -67,7 +75,8 @@ int main()  // NOLINT
     op_domain_params.operational_params.sim_params = sim_params;
     op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
 
-    op_domain_params.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions         = {{.dimension = sweep_parameter::EPSILON_R},
+                                                 {.dimension = sweep_parameter::LAMBDA_TF}};
     op_domain_params.sweep_dimensions[0].min  = 1.0;
     op_domain_params.sweep_dimensions[0].max  = 10.0;
     op_domain_params.sweep_dimensions[0].step = 0.01;
@@ -95,24 +104,20 @@ int main()  // NOLINT
 
     for (const auto& [truth_table, gate] : gates)
     {
-        auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
+        auto lyt = read_sqd_layout(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // Loop over operational conditions
         for (const auto cond : {is_operational_params::operational_condition::TOLERATE_KINKS,
                                 is_operational_params::operational_condition::REJECT_KINKS})
         {
             operational_domain_stats op_domain_stats_gs{};
-            std::string              gate_name  = gate;
-            double                   ct_default = 0;
-
-            op_domain_params.operational_params.op_condition = cond;
-            ct_default                                       = critical_temperature_gate_based(
-                lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
+            std::string              gate_name = gate;
 
             op_domain_params.operational_params.op_condition =
                 is_operational_params::operational_condition::REJECT_KINKS;
-            ct_default = critical_temperature_gate_based(
-                lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
+            const auto ct_default = critical_temperature_gate_based(
+                lyt, truth_table,
+                critical_temperature_params{.operational_params = op_domain_params.operational_params});
 
             if (cond == is_operational_params::operational_condition::REJECT_KINKS)
             {
@@ -128,13 +133,18 @@ int main()  // NOLINT
             const auto delta_ct = max_ct - min_ct;
 
             // Benchmark and save
-            opdomain_exp(gate_name, lyt.num_cells(), min_ct, ct_default, max_ct, delta_ct);
+            opdomain_exp(gate_name, lyt.num_dots(), min_ct, ct_default, max_ct, delta_ct);
             opdomain_exp.save();
             opdomain_exp.table();
         }
     }
 
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("Critical Temperature Domain Bestagon failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

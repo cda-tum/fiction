@@ -807,7 +807,7 @@ struct potential_projection
      * @brief Constructor for a potential projection from a singleton cluster, thereby lifting a value in the potential
      * matrix to a potential projection.
      * @param inter_sidb_pot Potential value of which the absolute value may be found in the potential matrix in an
-     * associated `charge_distribution_surface` object.
+     * associated `potential_landscape` object.
      * @param cs Charge state associated with the singleton cluster projector for this potential projection.
      */
     potential_projection(const double inter_sidb_pot, const model::charge_state cs) noexcept :
@@ -891,7 +891,7 @@ struct potential_projection_order
      * @brief Constructor for a potential projection from a singleton cluster onto an SiDB.
      *
      * @param inter_sidb_pot The chargeless potential between the SiDB in the singleton cluster and the one projected
-     * onto, as found in the potential matrix in an associated `charge_distribution_surface` object.
+     * onto, as found in the potential matrix in an associated `potential_landscape` object.
      * @param base The simulation base. This defines whether positive charges are considered.
      */
     potential_projection_order(const double inter_sidb_pot, const uint8_t base) noexcept :

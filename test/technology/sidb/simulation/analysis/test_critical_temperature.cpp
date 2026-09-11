@@ -23,7 +23,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
@@ -229,7 +228,7 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Y-shaped SiQAD OR gate")
     {
-        const auto lyt_or_gate = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
+        const auto lyt_or_gate = blueprints::siqad_or_gate();
 
         sim_params.mu_minus = -0.28;
 
@@ -483,7 +482,7 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("Bestagon CX gate")
     {
-        const auto crossing_lyt = to_sidb_layout(blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>());
+        const auto crossing_lyt = blueprints::bestagon_crossing();
 
         params.operational_params.sim_params = sim_params;
         params.confidence_level              = 0.99;
@@ -677,7 +676,7 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
 TEST_CASE("Pre-generated input pattern layouts match the layout-based overload", "[critical-temperature]")
 {
-    const layout lat{to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>())};
+    const layout lat{blueprints::siqad_and_gate()};
 
     for (const auto input_config : {bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED,
                                     bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED})
@@ -723,7 +722,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
 
 TEST_CASE("Pre-generated input pattern layouts reject mismatched BDL data", "[critical-temperature]")
 {
-    const layout lat{to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>())};
+    const layout lat{blueprints::siqad_and_gate()};
 
     const critical_temperature_params params{};
 
@@ -840,7 +839,7 @@ TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical-temperat
 
 TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "[critical-temperature], [quality]")
 {
-    const auto lyt_double_wire_gate = to_sidb_layout(blueprints::bestagon_double_wire<sidb_cell_clk_lyt_siqad>());
+    const auto lyt_double_wire_gate = blueprints::bestagon_double_wire();
 
     critical_temperature_params params{};
     const simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
@@ -901,7 +900,7 @@ TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "[critical
 
 TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact", "[critical-temperature], [quality]")
 {
-    const auto lyt_half_adder_gate = to_sidb_layout(blueprints::bestagon_ha<sidb_cell_clk_lyt_siqad>());
+    const auto lyt_half_adder_gate = blueprints::bestagon_ha();
 
     critical_temperature_params params{};
     const simulation_parameters sim_params{2, -0.32, 5.6, 5.0};

@@ -48,6 +48,13 @@ void layout(nanobind::module_& m)
 
     using fiction::sidb::layout;
 
+    py::enum_<fiction::sidb::dot_tag>(m, "sidb_dot_tag", DOC(fiction_sidb_dot_tag))
+        .value("EMPTY", fiction::sidb::dot_tag::EMPTY, DOC(fiction_sidb_dot_tag_EMPTY))
+        .value("NORMAL", fiction::sidb::dot_tag::NORMAL, DOC(fiction_sidb_dot_tag_NORMAL))
+        .value("INPUT", fiction::sidb::dot_tag::INPUT, DOC(fiction_sidb_dot_tag_INPUT))
+        .value("OUTPUT", fiction::sidb::dot_tag::OUTPUT, DOC(fiction_sidb_dot_tag_OUTPUT))
+        .value("LOGIC", fiction::sidb::dot_tag::LOGIC, DOC(fiction_sidb_dot_tag_LOGIC));
+
     py::class_<layout>(m, "sidb_layout", DOC(fiction_sidb_layout))
         .def(py::init<>(), DOC(fiction_sidb_layout_layout))
         .def(py::init<const fiction::sidb::lattice&, std::string>(), py::arg("lattice"), py::arg("name") = "",

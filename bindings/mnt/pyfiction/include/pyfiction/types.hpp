@@ -29,10 +29,6 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/inml/technology.hpp>
 #include <fiction/technology/qca/technology.hpp>
-#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
-#include <fiction/technology/sidb/surfaces/lattice.hpp>
-#include <fiction/technology/sidb/surfaces/lattice_orientations.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/views/names_view.hpp>
@@ -53,7 +49,6 @@ using py_logic_network = mockturtle::names_view<fiction::networks::technology_ne
  */
 using py_offset_coordinate = fiction::layouts::coords::offset;
 using py_cube_coordinate   = fiction::layouts::coords::cube;
-using py_siqad_coordinate  = fiction::layouts::coords::siqad;
 /**
  * Cartesian layout.
  */
@@ -123,42 +118,5 @@ using py_inml_layout = py_cartesian_cell_layout<fiction::inml::inml_technology>;
  * MolQCA cell layout.
  */
 using py_mol_qca_layout = py_cartesian_cell_layout<fiction::qca::mol_qca_technology>;
-/**
- * SiDB cell layout.
- */
-using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb::sidb_technology>;
-
-/**
- * SiDB lattice layout.
- */
-template <typename LatticeOrientation>
-using py_sidb_lattice = fiction::sidb::surfaces::lattice<LatticeOrientation, py_sidb_layout>;
-/**
- * SiDB cell layout (with specified H-Si(100)-2x1 lattice orientation).
- */
-using py_sidb_100_lattice = py_sidb_lattice<fiction::sidb::surfaces::lattice_100>;
-/**
- * SiDB cell layout (with specified H-Si(111)-1x1 lattice orientation).
- */
-using py_sidb_111_lattice = py_sidb_lattice<fiction::sidb::surfaces::lattice_111>;
-
-/**
- * Charge distribution surface. This is a special SiDB cell-level layout that is used for the SiDB simulation
- * algorithms.
- */
-
-template <typename Lyt>
-using py_charge_distribution_surface_layout = fiction::sidb::surfaces::charge_distribution_surface<Lyt>;
-
-using py_charge_distribution_surface = fiction::sidb::surfaces::charge_distribution_surface<py_sidb_layout>;
-
-/**
- * Charge distribution surface with underlying H-Si(100)-2x1 lattice.
- */
-using py_charge_distribution_surface_100 = py_charge_distribution_surface_layout<py_sidb_100_lattice>;
-/**
- * Charge distribution surface with underlying H-Si(111)-1x1 lattice.
- */
-using py_charge_distribution_surface_111 = py_charge_distribution_surface_layout<py_sidb_111_lattice>;
 
 }  // namespace pyfiction

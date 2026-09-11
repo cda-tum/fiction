@@ -6,6 +6,8 @@ of the unit cell, exactly as SiQAD stores it. Site `(x, y, z)` lies at `x * a1 +
 H-Si(100)-2x1 and H-Si(111)-1x1 reconstructions are predefined; any other reconstruction with a two-site basis can be
 described by setting the vectors directly.
 
+(alternative_hsi_lattices)=
+
 ## Lattice
 
 ::::{tab-set}
@@ -69,7 +71,7 @@ described by setting the vectors directly.
 :::{tab-item} C++
 :sync: cpp
 
-**Header:** `fiction/technology/sidb/layout.hpp`
+**Header:** `fiction/technology/sidb/technology.hpp`, `fiction/technology/sidb/layout.hpp`
 
 A dot is one silicon dangling bond. `dot_tag` records its role: `NORMAL`, `INPUT`, `OUTPUT`, or
 `LOGIC`. `assign_sidb` places an SiDB at a lattice site and defaults to `NORMAL` when no tag is
@@ -90,6 +92,9 @@ Python exposes the tags as `sidb_dot_tag`.
 :sync: python
 
 ```{eval-rst}
+
+.. autoclass:: mnt.pyfiction.sidb_dot_tag
+    :members:
 
 .. autoclass:: mnt.pyfiction.sidb_layout
     :members:
@@ -142,14 +147,5 @@ map such layouts and their coordinates onto lattice sites.
 ```{doxygenfunction} fiction::sidb::to_lattice_site
 ```
 
-```{doxygenfunction} fiction::sidb::to_cube
-```
-
-```{doxygenfunction} fiction::sidb::lattice_of
-```
-
-```{doxygenfunction} fiction::sidb::to_sidb_layout(const CellLyt& lyt, const lattice& lat)
-```
-
-```{doxygenfunction} fiction::sidb::to_sidb_layout(const CellLyt& lyt)
+```{doxygenfunction} fiction::sidb::to_sidb_layout
 ```

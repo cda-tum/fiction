@@ -19,12 +19,12 @@
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 #include <kitty/constructors.hpp>
@@ -64,7 +64,7 @@ namespace
  *
  * @return Vector of truth tables, each representing an output of the 3-input, 2-output function.
  */
-[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i2o() noexcept
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i2o()
 {
     static constexpr const char* truth_table_string1 = "11100100";
     static constexpr const char* truth_table_string2 = "11100100";
@@ -89,7 +89,7 @@ namespace
  *
  * @return Vector of truth tables, each representing an output of the 3-input, 3-output function.
  */
-[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i3o() noexcept
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i3o()
 {
     static constexpr const char* truth_table_string1 = "11100100";
     static constexpr const char* truth_table_string2 = "11100100";
@@ -122,62 +122,61 @@ int main()  // NOLINT
     static const std::string folder_2i =
         fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags/", EXPERIMENTS_PATH);
 
-    const auto skeleton_2i1o = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder_2i, "skeleton_hex_inputsdbp_2i1o.sqd"));
+    const auto skeleton_2i1o = read_sqd_layout(fmt::format("{}/{}", folder_2i, "skeleton_hex_inputsdbp_2i1o.sqd"));
 
-    const auto skeleton_2i2o = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder_2i, "skeleton_hex_inputsdbp_2i2o.sqd"));
+    const auto skeleton_2i2o = read_sqd_layout(fmt::format("{}/{}", folder_2i, "skeleton_hex_inputsdbp_2i2o.sqd"));
 
-    const auto skeleton_3i1o =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder_3i, "3_in_1_out_skeleton_one.sqd"));
+    const auto skeleton_3i1o = read_sqd_layout(fmt::format("{}/{}", folder_3i, "3_in_1_out_skeleton_one.sqd"));
 
-    const auto skeleton_3i2o =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder_3i, "3_in_2_out_skeleton.sqd"));
+    const auto skeleton_3i2o = read_sqd_layout(fmt::format("{}/{}", folder_3i, "3_in_2_out_skeleton.sqd"));
 
-    const auto skeleton_3i3o =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder_3i, "3_in_3_out_skeleton.sqd"));
+    const auto skeleton_3i3o = read_sqd_layout(fmt::format("{}/{}", folder_3i, "3_in_3_out_skeleton.sqd"));
 
     auto two_one = skeleton_2i1o;
-    two_one.assign_cell_type({22, 10}, sidb_technology::cell_type::LOGIC);
-    two_one.assign_cell_type({17, 7}, sidb_technology::cell_type::LOGIC);
+    two_one.assign_sidb({22, 10}, dot_tag::LOGIC);
+    two_one.assign_sidb({17, 7}, dot_tag::LOGIC);
 
     auto two_two = skeleton_2i2o;
-    two_two.assign_cell_type({15, 7}, sidb_technology::cell_type::LOGIC);
-    two_two.assign_cell_type({22, 8}, sidb_technology::cell_type::LOGIC);
-    two_two.assign_cell_type({22, 10}, sidb_technology::cell_type::LOGIC);
-    two_two.assign_cell_type({17, 7}, sidb_technology::cell_type::LOGIC);
+    two_two.assign_sidb({15, 7}, dot_tag::LOGIC);
+    two_two.assign_sidb({22, 8}, dot_tag::LOGIC);
+    two_two.assign_sidb({22, 10}, dot_tag::LOGIC);
+    two_two.assign_sidb({17, 7}, dot_tag::LOGIC);
 
     auto three_one = skeleton_3i1o;
-    three_one.assign_cell_type({25, 7}, sidb_technology::cell_type::LOGIC);
-    three_one.assign_cell_type({32, 8}, sidb_technology::cell_type::LOGIC);
-    three_one.assign_cell_type({36, 11}, sidb_technology::cell_type::LOGIC);
-    three_one.assign_cell_type({40, 7}, sidb_technology::cell_type::LOGIC);
+    three_one.assign_sidb({25, 7}, dot_tag::LOGIC);
+    three_one.assign_sidb({32, 8}, dot_tag::LOGIC);
+    three_one.assign_sidb({36, 11}, dot_tag::LOGIC);
+    three_one.assign_sidb({40, 7}, dot_tag::LOGIC);
 
     auto three_two = skeleton_3i2o;
-    three_two.assign_cell_type({25, 7}, sidb_technology::cell_type::LOGIC);
-    three_two.assign_cell_type({32, 8}, sidb_technology::cell_type::LOGIC);
-    three_two.assign_cell_type({36, 11}, sidb_technology::cell_type::LOGIC);
-    three_two.assign_cell_type({40, 7}, sidb_technology::cell_type::LOGIC);
+    three_two.assign_sidb({25, 7}, dot_tag::LOGIC);
+    three_two.assign_sidb({32, 8}, dot_tag::LOGIC);
+    three_two.assign_sidb({36, 11}, dot_tag::LOGIC);
+    three_two.assign_sidb({40, 7}, dot_tag::LOGIC);
 
     auto three_three = skeleton_3i3o;
-    three_three.assign_cell_type({25, 7}, sidb_technology::cell_type::LOGIC);
-    three_three.assign_cell_type({32, 8}, sidb_technology::cell_type::LOGIC);
-    three_three.assign_cell_type({36, 11}, sidb_technology::cell_type::LOGIC);
-    three_three.assign_cell_type({40, 7}, sidb_technology::cell_type::LOGIC);
+    three_three.assign_sidb({25, 7}, dot_tag::LOGIC);
+    three_three.assign_sidb({32, 8}, dot_tag::LOGIC);
+    three_three.assign_sidb({36, 11}, dot_tag::LOGIC);
+    three_three.assign_sidb({40, 7}, dot_tag::LOGIC);
 
-    const std::vector<std::pair<sidb_100_cell_clk_lyt_siqad, std::vector<kitty::dynamic_truth_table>>>
-        layout_truth_table{{two_one, {create_or_tt()}},
-                           {two_two, create_crossing_wire_tt()},
-                           {three_one, {create_gamble_tt()}},
-                           {three_two, create_truth_tables_3i2o()},
-                           {three_three, create_truth_tables_3i3o()}};
+    const std::vector<std::pair<layout, std::vector<kitty::dynamic_truth_table>>> layout_truth_table{
+        {two_one, {create_or_tt()}},
+        {two_two, create_crossing_wire_tt()},
+        {three_one, {create_gamble_tt()}},
+        {three_two, create_truth_tables_3i2o()},
+        {three_three, create_truth_tables_3i3o()}};
 
     const std::array layout_names{"2i1o", "2i2o", "3i1o", "3i2o", "3i3o"};
 
-    is_operational_params operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT,
-                                             bdl_input_iterator_params{detect_bdl_wires_params{3.0}},
-                                             is_operational_params::operational_condition::REJECT_KINKS,
-                                             is_operational_params::operational_analysis_strategy::SIMULATION_ONLY};
+    is_operational_params operational_params{
+        .sim_params = simulation_parameters{2, -0.32},
+        .sim_engine = engine::QUICKEXACT,
+        .input_bdl_iterator_params =
+            bdl_input_iterator_params{.bdl_wire_params = detect_bdl_wires_params{.threshold_bdl_interdistance = 3.0}},
+        .op_condition = is_operational_params::operational_condition::REJECT_KINKS,
+        .strategy_to_analyze_operational_status =
+            is_operational_params::operational_analysis_strategy::SIMULATION_ONLY};
 
     for (size_t i = 0; i < layout_truth_table.size(); ++i)
     {

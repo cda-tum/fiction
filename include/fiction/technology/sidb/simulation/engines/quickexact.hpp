@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
@@ -29,7 +28,6 @@
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/math/gray_code_iterator.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -413,23 +411,6 @@ class quickexact_impl
     detail::quickexact_impl p{lyt, params};
 
     return p.run();
-}
-
-/**
- * *QuickExact* on a Cartesian SiDB cell-level layout: the layout is converted with `to_sidb_layout`, simulated, and
- * the result converted back with `to_legacy_result`. This overload serves the algorithms that still consume
- * `legacy_result`.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt Layout to simulate.
- * @param params Parameter required for the simulation.
- * @return Simulation result over surfaces of `lyt`.
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] legacy_result<Lyt> quickexact(const Lyt& lyt, const quickexact_params& params = {})
-{
-    return to_legacy_result(quickexact(to_sidb_layout(lyt), params), lyt);
 }
 
 }  // namespace fiction::sidb::simulation::engines

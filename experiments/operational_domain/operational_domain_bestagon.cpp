@@ -81,7 +81,8 @@ int main()  // NOLINT
 
     op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
 
-    op_domain_params.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions         = {{.dimension = sweep_parameter::EPSILON_R},
+                                                 {.dimension = sweep_parameter::LAMBDA_TF}};
     op_domain_params.sweep_dimensions[0].min  = 1.0;
     op_domain_params.sweep_dimensions[0].max  = 10.0;
     op_domain_params.sweep_dimensions[0].step = 0.05;
@@ -129,7 +130,7 @@ int main()  // NOLINT
 
     for (const auto& [gate, truth_table] : gates)
     {
-        auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
+        auto lyt = read_sqd_layout(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // operational domain stats
         operational_domain_stats op_domain_stats_gs{};
@@ -195,7 +196,7 @@ int main()  // NOLINT
 
         opdomain_exp(
             // Benchmark
-            gate, lyt.num_cells(),
+            gate, lyt.num_dots(),
 
             // Grid Search
             op_domain_stats_gs.num_evaluated_parameter_combinations, operational_percentage_gs,

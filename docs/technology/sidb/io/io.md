@@ -26,10 +26,6 @@
 
 .. autofunction:: mnt.pyfiction.read_sqd_layout
 
-.. autofunction:: mnt.pyfiction.read_sqd_layout_100
-
-.. autofunction:: mnt.pyfiction.read_sqd_layout_111
-
 .. autoclass:: mnt.pyfiction.sqd_parsing_error
     :members:
 
@@ -90,12 +86,6 @@
 
 **Header:** `fiction/technology/sidb/io/write_sqd_layout.hpp`
 
-```{doxygenfunction} fiction::sidb::io::write_sqd_layout(const Lyt& lyt, std::ostream& os)
-```
-
-```{doxygenfunction} fiction::sidb::io::write_sqd_layout(const Lyt& lyt, const std::string_view& filename)
-```
-
 ```{doxygenfunction} fiction::sidb::io::write_sqd_layout(const layout& lyt, std::ostream& os)
 ```
 
@@ -129,12 +119,6 @@
 
 ```{doxygenstruct} fiction::sidb::io::write_sidb_layout_svg_params
 :members:
-```
-
-```{doxygenfunction} fiction::sidb::io::write_sidb_layout_svg(const Lyt& lyt, std::ostream& os, const write_sidb_layout_svg_params& ps = {})
-```
-
-```{doxygenfunction} fiction::sidb::io::write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_sidb_layout_svg_params& ps = {})
 ```
 
 ```{doxygenfunction} fiction::sidb::io::write_sidb_layout_svg(const layout& lyt, std::ostream& os, const write_sidb_layout_svg_params& ps = {})

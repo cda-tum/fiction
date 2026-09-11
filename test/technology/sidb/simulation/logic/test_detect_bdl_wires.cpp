@@ -19,13 +19,11 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 
 #include <stdexcept>
 
@@ -395,7 +393,7 @@ TEST_CASE("Output cells at the top and input at the bottom", "[detect-bdl-wires]
 
 TEST_CASE("Determine I/O wires of Bestagon CROSSING gate", "[detect-bdl-wires]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::bestagon_crossing();
 
     SECTION("Determine all wires")
     {
@@ -445,7 +443,7 @@ TEST_CASE("Determine I/O wires of Bestagon CROSSING gate", "[detect-bdl-wires]")
 
 TEST_CASE("Determine I/O wires of 111-AND gate", "[detect-bdl-wires]")
 {
-    const auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>(), lattice::si_111_1x1());
+    const auto lyt = blueprints::and_gate_111();
 
     const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.0};
 

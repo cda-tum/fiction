@@ -16,7 +16,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
@@ -75,17 +74,7 @@ void energy_distribution(nanobind::module_& m)
         &fiction::sidb::simulation::analysis::calculate_energy_distribution;
 
     m.def("calculate_energy_distribution", energy_distribution_pointer, py::arg("charge_distributions"),
-          DOC(fiction_sidb_simulation_analysis_calculate_energy_distribution_2));
-
-    // transitional overloads over charge distribution surfaces; they go away once every consumer takes
-    // `charge_distribution`. NOTE: registered after the `charge_distribution` overload, since Python resolves the
-    // first matching one.
-    m.def("calculate_energy_distribution",
-          &fiction::sidb::simulation::analysis::calculate_energy_distribution<py_sidb_100_lattice>,
-          py::arg("charge_distributions"), DOC(fiction_sidb_simulation_analysis_calculate_energy_distribution));
-    m.def("calculate_energy_distribution",
-          &fiction::sidb::simulation::analysis::calculate_energy_distribution<py_sidb_111_lattice>,
-          py::arg("charge_distributions"), DOC(fiction_sidb_simulation_analysis_calculate_energy_distribution));
+          DOC(fiction_sidb_simulation_analysis_calculate_energy_distribution));
 }
 
 }  // namespace pyfiction

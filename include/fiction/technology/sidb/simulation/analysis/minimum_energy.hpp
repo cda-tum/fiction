@@ -25,34 +25,9 @@
 namespace fiction::sidb::simulation::analysis
 {
 
-namespace detail
-{
-
 /**
- * The energy of a `charge_distribution` or of a `charge_distribution_surface`.
- *
- * @tparam T `charge_distribution` or `charge_distribution_surface`.
- * @param cd The distribution.
- * @return Its electrostatic potential energy (unit: eV).
- */
-template <typename T>
-[[nodiscard]] double energy_of(const T& cd) noexcept
-{
-    if constexpr (requires { cd.energy(); })
-    {
-        return cd.energy();
-    }
-    else
-    {
-        return cd.get_electrostatic_potential_energy();
-    }
-}
-
-}  // namespace detail
-
-/**
- * Returns an iterator to the charge distribution of minimum energy contained in a range of
- * `charge_distribution_surface` objects. If the range is empty, `last` is returned.
+ * Returns an iterator to the charge distribution of minimum energy contained in a range. If the range is empty,
+ * `last` is returned.
  *
  * @tparam InputIt Must meet the requirements of `LegacyInputIterator`.
  * @param first Begin of the range to examine.
@@ -65,13 +40,12 @@ template <typename InputIt>
     static_assert(std::is_base_of_v<std::input_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>,
                   "InputIt must meet the requirements of LegacyInputIterator");
 
-    return std::min_element(first, last, [](const auto& cd1, const auto& cd2)
-                            { return detail::energy_of(cd1) < detail::energy_of(cd2); });
+    return std::min_element(first, last, [](const auto& cd1, const auto& cd2) { return cd1.energy() < cd2.energy(); });
 }
 
 /**
- * Computes the minimum energy of a range of `charge_distribution_surface` objects. If the range is empty, infinity is
- * returned to indicate no valid energy value exists.
+ * Computes the minimum energy of a range of charge distributions. If the range is empty, infinity is returned to
+ * indicate no valid energy value exists.
  *
  * @tparam InputIt Must meet the requirements of `LegacyInputIterator`.
  * @param first Begin of the range to examine.
@@ -87,7 +61,7 @@ template <typename InputIt>
 
     if (first != last)
     {
-        return detail::energy_of(*minimum_energy_distribution(first, last));
+        return minimum_energy_distribution(first, last)->energy();
     }
 
     return std::numeric_limits<double>::infinity();

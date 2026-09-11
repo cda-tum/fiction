@@ -723,7 +723,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB arrangement", "[clusterc
 }
 
 TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
-          "distribution, using siqad coordinates",
+          "distribution",
           "[clustercomplete]")
 {
     layout lyt{};
@@ -761,7 +761,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, c
 }
 
 TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 and local external potential at "
-          "perturber, using siqad coordinates",
+          "perturber",
           "[clustercomplete]")
 {
     layout lyt{};
@@ -1742,7 +1742,7 @@ TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[clustercomp
 {
     SECTION("no input applied")
     {
-        const auto                   lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
+        const auto                   lyt = blueprints::and_gate_111();
         const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
 
         const auto simulation_results = clustercomplete(lyt, params);
@@ -1779,7 +1779,7 @@ TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[clustercomp
 
     SECTION("10 input applied")
     {
-        auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
+        auto lyt = blueprints::and_gate_111();
         lyt.assign_sidb({0, 0, 0}, dot_tag::EMPTY);
         lyt.assign_sidb({23, 1, 1}, dot_tag::EMPTY);
 

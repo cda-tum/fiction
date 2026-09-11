@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/engine.hpp"
 #include "fiction/technology/sidb/simulation/engines/clustercomplete.hpp"
@@ -28,7 +27,6 @@
 #include "fiction/technology/sidb/simulation/engines/quicksim.hpp"
 #include "fiction/technology/sidb/simulation/is_ground_state.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/traits.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -264,21 +262,4 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
         *ps = st;
     }
 }
-/**
- * Transitional overload for SiDB cell-level layouts, converted with `to_sidb_layout`; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout to simulate.
- * @param qs_params *QuickSim* parameters.
- * @param tts_params TTS parameters.
- * @param ps Statistics.
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt>)
-void time_to_solution(const Lyt& lyt, const engines::quicksim_params& qs_params,
-                      const time_to_solution_params& tts_params = {}, time_to_solution_stats* ps = nullptr)
-{
-    time_to_solution(to_sidb_layout(lyt), qs_params, tts_params, ps);
-}
-
 }  // namespace fiction::sidb::simulation::analysis

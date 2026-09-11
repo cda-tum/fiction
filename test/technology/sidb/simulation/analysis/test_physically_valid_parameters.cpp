@@ -19,7 +19,6 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -29,7 +28,6 @@
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 
 #include <limits>
 #include <stdexcept>
@@ -142,7 +140,7 @@ TEST_CASE(
     "Determine physical parameters for CDS (default physical parameters) of Bestagon AND gate, 10 input combination",
     "[determine-physically-valid-parameters], [quality]")
 {
-    auto bestagon_and = to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>());
+    auto bestagon_and = blueprints::bestagon_and_gate();
 
     bestagon_and.assign_sidb({36, 1, 0}, dot_tag::EMPTY);
     bestagon_and.assign_sidb({0, 0, 0}, dot_tag::EMPTY);

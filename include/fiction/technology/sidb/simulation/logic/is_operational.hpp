@@ -21,7 +21,6 @@
 
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
@@ -40,7 +39,6 @@
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
 #include <fmt/format.h>
@@ -779,7 +777,7 @@ class is_operational_impl
     /**
      * The output BDL pairs.
      */
-    std::vector<bdl_pair<lattice_site>> output_bdl_pairs;
+    std::vector<bdl_pair> output_bdl_pairs;
     /**
      * Iterator over the input patterns.
      */
@@ -974,7 +972,7 @@ class is_operational_impl
      * @param port The wire's port.
      * @return `true` if the pair encodes `0`.
      */
-    [[nodiscard]] static bool encodes_bit_zero(const charge_distribution& cd, const bdl_pair<lattice_site>& bdl,
+    [[nodiscard]] static bool encodes_bit_zero(const charge_distribution& cd, const bdl_pair& bdl,
                                                const fcn::port_direction port) noexcept
     {
         if (port.dir == fcn::port_direction::SOUTH || port.dir == fcn::port_direction::EAST ||
@@ -995,7 +993,7 @@ class is_operational_impl
      * @param port The wire's port.
      * @return `true` if the pair encodes `1`.
      */
-    [[nodiscard]] static bool encodes_bit_one(const charge_distribution& cd, const bdl_pair<lattice_site>& bdl,
+    [[nodiscard]] static bool encodes_bit_one(const charge_distribution& cd, const bdl_pair& bdl,
                                               const fcn::port_direction port) noexcept
     {
         if (port.dir == fcn::port_direction::SOUTH || port.dir == fcn::port_direction::EAST ||
@@ -1384,79 +1382,6 @@ kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector
     detail::is_operational_impl p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire};
 
     return run(p);
-}
-
-// ---------------------------------------------------------------------------------------------------------------
-// Transitional: overloads for SiDB cell-level layouts, converted with `to_sidb_layout`. They serve the algorithms
-// that still run on such layouts and disappear once every consumer takes `sidb::layout`.
-// ---------------------------------------------------------------------------------------------------------------
-
-/**
- * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout to check.
- * @param spec The Boolean function(s) it has to implement.
- * @param params Parameters.
- * @return The operational status and the number of simulator invocations.
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
-               const is_operational_params& params = {})
-{
-    return is_operational(to_sidb_layout(lyt), spec, params);
-}
-/**
- * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout to check.
- * @param spec The Boolean function(s) it has to implement.
- * @param params Parameters.
- * @return The operational input patterns.
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt&                                     lyt,
-                                                            const std::vector<kitty::dynamic_truth_table>& spec,
-                                                            const is_operational_params&                   params = {})
-{
-    return operational_input_patterns(to_sidb_layout(lyt), spec, params);
-}
-/**
- * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout to check.
- * @param spec The Boolean function(s) it has to implement.
- * @param params Parameters.
- * @return The kink-induced non-operational input patterns.
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::set<uint64_t>
-kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
-                                            const is_operational_params& params = {})
-{
-    return kink_induced_non_operational_input_patterns(to_sidb_layout(lyt), spec, params);
-}
-/**
- * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout to check.
- * @param spec The Boolean function(s) it has to implement.
- * @param params Parameters.
- * @return `true` if the layout is non-operational because of kinks.
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
-                                                   const is_operational_params& params = {})
-{
-    return is_kink_induced_non_operational(to_sidb_layout(lyt), spec, params);
 }
 
 }  // namespace fiction::sidb::simulation::logic

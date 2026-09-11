@@ -127,6 +127,8 @@ void exact(nanobind::module_& m)
 
 #else  // FICTION_Z3_SOLVER
 
+#include <nanobind/nanobind.h>
+
 namespace pyfiction
 {
 

@@ -18,12 +18,10 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/networks/name_utils.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -33,7 +31,6 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
-#include <cstdlib>
 #include <exception>
 #include <optional>
 #include <stdexcept>
@@ -46,11 +43,11 @@ namespace alice
 {
 
 opdom_command::opdom_command(const environment::ptr& e) :
-        command(e,
-                "Computes the operational domain for the current SiDB cell-level layout in store. An operational "
-                "domain is a set of simulation parameter values for which a given SiDB layout is logically operational."
-                "This means that a layout is deemed operational if the layout's ground state corresponds with a given "
-                "Boolean function at the layout's outputs for all possible input combinations.")
+        command(
+            e, "Computes the operational domain for the current SiDB layout in store. An operational "
+               "domain is a set of simulation parameter values for which a given SiDB layout is logically operational. "
+               "This means that a layout is deemed operational if the layout's ground state corresponds with a given "
+               "Boolean function at the layout's outputs for all possible input combinations.")
 {
     add_option("--random_sampling,-r", num_random_samples,
                "Use random sampling instead of grid search with this many random samples");
@@ -67,7 +64,7 @@ opdom_command::opdom_command(const environment::ptr& e) :
     add_flag("--sketch,-s", sketch,
              "Compute the operational domain sketch: determine the operational status by filtering alone instead of by "
              "physical simulation. Much faster, but reports some non-operational points as operational. Implies kink "
-             "rejection and requires a layout with 'LOGIC' cells");
+             "rejection and requires a layout with 'LOGIC' dots");
 
     add_option("--epsilon_r,-e", params.operational_params.sim_params.epsilon_r,
                "Electric permittivity of the substrate (unit-less)", true);
@@ -266,80 +263,78 @@ void opdom_command::execute()
         sweep_dimensions.pop_back();
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
-
-    const auto opdom = [this, &ts, &get_name](auto&& lyt_ptr)
+    const auto opdom = [this, &ts](auto&& lyt_ptr)
     {
         const auto tt_ptr = ts.current();
 
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        if constexpr (!fiction::has_sidb_technology_v<Lyt>)
+        if constexpr (!fiction::cli::is_sidb_store_v<Lyt>)
         {
-            env->out() << fmt::format("[e] '{}' is not an SiDB layout\n", get_name(lyt_ptr));
+            env->out() << fmt::format("[e] '{}' is not an SiDB layout\n", fiction::cli::name_of(*lyt_ptr));
         }
-
-        if (lyt_ptr->num_pis() == 0 || lyt_ptr->num_pos() == 0)
+        else
         {
-            env->out() << fmt::format("[e] '{}' requires primary input and output cells to simulate its "
-                                      "Boolean function\n",
-                                      get_name(lyt_ptr));
-            reset_params();
-            return;
-        }
+            const auto& lyt = fiction::cli::sidb_layout_of(*lyt_ptr);
 
-        const auto engine = fiction::sidb::simulation::get_engine(sim_engine_str);
+            if (lyt.num_pis() == 0 || lyt.num_pos() == 0)
+            {
+                env->out() << fmt::format("[e] '{}' requires primary input and output dots to simulate its "
+                                          "Boolean function\n",
+                                          fiction::cli::name_of(*lyt_ptr));
+                reset_params();
+                return;
+            }
 
-        if (!engine.has_value())
-        {
-            env->out() << fmt::format("[e] {} is not a supported SiDB simulation engine\n", sim_engine_str);
-            return;
-        }
+            const auto engine = fiction::sidb::simulation::get_engine(sim_engine_str);
 
-        // set parameters
-        params.operational_params.sim_params.base = sim_params.base;
-        params.sweep_dimensions                   = sweep_dimensions;
-        params.operational_params.sim_engine      = engine.value();
+            if (!engine.has_value())
+            {
+                env->out() << fmt::format("[e] {} is not a supported SiDB simulation engine\n", sim_engine_str);
+                return;
+            }
 
-        if (sketch)
-        {
-            params.operational_params.strategy_to_analyze_operational_status =
-                fiction::sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+            // set parameters
+            params.operational_params.sim_params.base = sim_params.base;
+            params.sweep_dimensions                   = sweep_dimensions;
+            params.operational_params.sim_engine      = engine.value();
 
-            // the filtering steps are only defined when kinks are rejected, so the sketch implies the condition rather
-            // than rejecting the request for not having set it by hand
-            params.operational_params.op_condition =
-                fiction::sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
-        }
+            if (sketch)
+            {
+                params.operational_params.strategy_to_analyze_operational_status =
+                    fiction::sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-        // Cache the engine name and the sketch setting for logging before any potential reset
-        last_engine_name = fiction::sidb::simulation::engine_name(params.operational_params.sim_engine);
-        last_sketch      = sketch;
+                // the filtering steps are only defined when kinks are rejected, so the sketch implies the condition
+                // rather than rejecting the request for not having set it by hand
+                params.operational_params.op_condition =
+                    fiction::sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
+            }
 
-        // To aid the compiler
-        if constexpr (fiction::has_sidb_technology_v<Lyt>)
-        {
+            // Cache the engine name and the sketch setting for logging before any potential reset
+            last_engine_name = fiction::sidb::simulation::engine_name(params.operational_params.sim_engine);
+            last_sketch      = sketch;
+
             try
             {
                 if (is_set("random_sampling"))
                 {
                     op_domain = fiction::sidb::simulation::logic::operational_domain_random_sampling(
-                        *lyt_ptr, std::vector{*tt_ptr}, num_random_samples, params, &stats);
+                        lyt, std::vector{*tt_ptr}, num_random_samples, params, &stats);
                 }
                 else if (is_set("flood_fill"))
                 {
                     op_domain = fiction::sidb::simulation::logic::operational_domain_flood_fill(
-                        *lyt_ptr, std::vector{*tt_ptr}, num_random_samples, params, &stats);
+                        lyt, std::vector{*tt_ptr}, num_random_samples, params, &stats);
                 }
                 else if (is_set("contour_tracing"))
                 {
                     op_domain = fiction::sidb::simulation::logic::operational_domain_contour_tracing(
-                        *lyt_ptr, std::vector{*tt_ptr}, num_random_samples, params, &stats);
+                        lyt, std::vector{*tt_ptr}, num_random_samples, params, &stats);
                 }
                 else
                 {
                     op_domain = fiction::sidb::simulation::logic::operational_domain_grid_search(
-                        *lyt_ptr, std::vector{*tt_ptr}, params, &stats);
+                        lyt, std::vector{*tt_ptr}, params, &stats);
                 }
             }
             catch (std::invalid_argument& e)
@@ -410,9 +405,18 @@ void opdom_command::reset_params()
 {
     sim_params       = fiction::sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
     sweep_dimensions = std::vector<fiction::sidb::simulation::logic::operational_domain_value_range>{
-        {fiction::sidb::simulation::logic::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
-        {fiction::sidb::simulation::logic::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
-        {fiction::sidb::simulation::logic::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025}};
+        {.dimension = fiction::sidb::simulation::logic::sweep_parameter::EPSILON_R,
+         .min       = 1.0,
+         .max       = 10.0,
+         .step      = 0.1},
+        {.dimension = fiction::sidb::simulation::logic::sweep_parameter::LAMBDA_TF,
+         .min       = 1.0,
+         .max       = 10.0,
+         .step      = 0.1},
+        {.dimension = fiction::sidb::simulation::logic::sweep_parameter::MU_MINUS,
+         .min       = -0.50,
+         .max       = -0.10,
+         .step      = 0.025}};
     params = {};
 
     x_sweep  = "epsilon_r";

@@ -19,7 +19,6 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
@@ -53,7 +52,6 @@ inline void critical_temperature_functions(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    using fiction::sidb::lattice_site;
     using fiction::sidb::layout;
     using fiction::sidb::simulation::analysis::critical_temperature_params;
     using fiction::sidb::simulation::analysis::critical_temperature_stats;
@@ -70,7 +68,7 @@ inline void critical_temperature_functions(nanobind::module_& m)
     m.def(
         "critical_temperature_gate_based",
         [](const std::vector<layout>& input_pattern_layouts, const std::vector<py_tt>& spec,
-           const critical_temperature_params& params, const std::vector<bdl_pair<lattice_site>>& output_bdl_pairs,
+           const critical_temperature_params& params, const std::vector<bdl_pair>& output_bdl_pairs,
            const std::vector<bdl_wire>& input_bdl_wires, const std::vector<bdl_wire>& output_bdl_wires,
            critical_temperature_stats* stats)
         {

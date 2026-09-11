@@ -8,36 +8,20 @@ io/io
 layout
 model/model
 simulation/simulation
-surfaces/surfaces
 ```
 
 ## Silicon Dangling Bonds (SiDB)
 
-::::{tab-set}
-:sync-group: language
-
-:::{tab-item} C++
-:sync: cpp
-
 **Header:** `fiction/technology/sidb/technology.hpp`
+
+`sidb_technology` is the technology tag of the Cartesian cell-level layout interface, which physical
+design produces before [conversion to an `sidb::layout`](layout.md#conversion-from-cell-level-layouts).
+It has no Python counterpart; Python works on [`sidb_layout`](layout.md#layout) and its
+`sidb_dot_tag` values directly.
 
 ```{doxygenstruct} fiction::sidb::sidb_technology
 :members:
 ```
-
-:::
-
-:::{tab-item} Python
-:sync: python
-
-```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb_technology
-   :members:
-```
-
-:::
-
-::::
 
 (bestagon)=
 

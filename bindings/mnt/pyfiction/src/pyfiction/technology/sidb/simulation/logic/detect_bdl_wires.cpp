@@ -17,7 +17,6 @@
 
 #include "pyfiction/documentation.hpp"
 
-#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
@@ -41,7 +40,6 @@ void detect_bdl_wires(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    using fiction::sidb::lattice_site;
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_wire;
 
@@ -66,7 +64,7 @@ void detect_bdl_wires(nanobind::module_& m)
 
     py::class_<bdl_wire>(m, "bdl_wire", DOC(fiction_sidb_simulation_logic_bdl_wire))
         .def(py::init<>(), DOC(fiction_sidb_simulation_logic_bdl_wire_bdl_wire))
-        .def(py::init<std::vector<fiction::sidb::simulation::logic::bdl_pair<lattice_site>>>(), py::arg("p"),
+        .def(py::init<std::vector<fiction::sidb::simulation::logic::bdl_pair>>(), py::arg("p"),
              DOC(fiction_sidb_simulation_logic_bdl_wire_bdl_wire_2))
         .def_rw("pairs", &bdl_wire::pairs, DOC(fiction_sidb_simulation_logic_bdl_wire_pairs))
         .def_rw("direction", &bdl_wire::port, DOC(fiction_sidb_simulation_logic_bdl_wire_port))

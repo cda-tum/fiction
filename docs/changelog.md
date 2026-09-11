@@ -68,8 +68,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
   - **Breaking:** _QuickExact_, _QuickSim_, _ExGS_, _ClusterComplete_, and _Ground State Space_
-    simulate `sidb::layout` and return the non-template `sidb::simulation::result`. The former
-    result remains available as `legacy_result<Lyt>` while consumers migrate
+    simulate `sidb::layout` and return the non-template `sidb::simulation::result`
   - _QuickSim_ returns `std::nullopt` for layouts with charged surface defects
   - On the same machine, _ClusterComplete_ runs 2–4× faster (29-SiDB crossing: 11.4 → 5.1 ms;
     56-SiDB NAND: 19.7 → 3.3 s). _QuickSim_ improves by one third, _ExGS_ by one quarter with
@@ -80,7 +79,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** SiDB defect analyses, generators, and gate libraries use `sidb::layout`
   - Their parameters use `lattice_site` for canvases, scan areas, and fixed SiDBs
   - Defect-influence and displacement-robustness domains are non-template types
-  - Gate designers retain cell-level overloads while the remaining consumers migrate
   - Random gate design samples at most `maximal_random_design_attempts` candidates without enumerating
     canvas layouts; candidate counts saturate at the largest representable value
   - Gate-design and defect-influence APIs reject empty specifications
@@ -89,6 +87,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `surface_analysis` and `surface_black_list` live in `physical_design/surface_analysis.hpp` and namespace
     `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
     SiDB header dependency
+
+- CLI:
+  - **Breaking:** SiDB commands use `sidb::layout` and simulation results. `read --sqd` reads the lattice
+    from the file; `--lattice_orientation` is removed
+  - `print`, `show`, and statistics use stored ground states; `sqd` exports geometry and defects
+  - SiDB shell descriptions and JSON statistics report dot counts as `dots`.
 
 - Continuous integration:
   - Reusable workflows now use GitHub's self-repository reference syntax.
@@ -252,11 +256,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
-  - **Breaking:** The Python class `sidb_layout` now names the lattice-based `sidb::layout`. The Cartesian
-    SiDB cell-level layout is `sidb_cell_level_layout`
+  - **Breaking:** The Python class `sidb_layout` names the lattice-based `sidb::layout`
 
   - **Breaking:** `critical_temperature_stats.is_ground_state_transparent` is renamed
     `energy_between_ground_state_and_first_erroneous`, the member it always exposed
+
+### Removed
+
+- **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
+  `charge_distribution_surface`, and the lattice orientation tags; `model/nm_position.hpp` and
+  `model/nm_distance.hpp` (use `lattice::nm_position` and `lattice::nm_distance`); the SiQAD coordinate
+  `layouts::coords::siqad` with `from_siqad`/`to_siqad` (an SQD file's `(n, m, l)` triple is a
+  `lattice_site`); the type aliases `sidb_cell_clk_lyt_siqad`, `sidb_100_*`, `sidb_111_*`, `cds_*`, and
+  `sidb_defect_*` (`sidb_cell_clk_lyt` and `sidb_cell_clk_lyt_cube` stay as placement targets, converted with
+  `to_sidb_layout`); the traits `is_siqad_coord_v`, `has_siqad_coord_v`, `is_charge_distribution_surface_v`,
+  `is_sidb_lattice*_v`, `is_sidb_defect_surface_v`, `has_*_sidb_defect_v`, and `has_*_charge_state_v`;
+  `convert_layout_to_siqad_coordinates`, `convert_layout_to_fiction_coordinates`, and
+  `all_coordinates_in_spanned_area` (use `sidb::sites_in_area`); the SiDB branches of `bounding_box_2d` and
+  `print_layout`; every `template <typename Lyt>` overload of the SiDB simulation, analysis, generator, and I/O
+  functions together with `legacy_result`, `legacy_bdl_wire`, and `legacy_bdl_input_iterator`
+- **Breaking:** `layouts::are_cell_layouts_identical`, `layouts::cell_layout_digest`, and
+  `utils::stl::hash_combine_unordered`, which existed only to deduplicate randomly generated SiDB cell-level
+  layouts. `generate_multiple_random_layouts` deduplicates `sidb::layout` values directly
+- **Breaking:** `layouts::coords::to_cube`, the offset-to-cube coordinate conversion, which lost its last caller
+  with the SiQAD coordinate type
+- **Breaking:** `sidb::to_cell_level_layout`, `sidb::to_cell`, and `sidb::to_cube`. Physical design converts in
+  one direction only; use `to_sidb_layout` and `to_lattice_site`
+- **Breaking:** The tuple interface of `sidb::simulation::logic::parameter_point`
+  (`get<I>`, `std::tuple_size`, `std::tuple_element`). It was fixed at two dimensions and would have bound only
+  two of three coordinates in a 3D sweep; use `get_parameters()`
+- The unused pointer aliases `sidb_cell_clk_lyt_ptr` and `sidb_cell_clk_lyt_cube_ptr`
+- **Breaking:** The SQD writer takes an `sidb::layout` and no longer accepts QCA layouts, which it wrote as four
+  dangling bonds per cell. The CLI's `sqd` command also takes an `sidb::layout`
+- **Breaking:** In Python, `sidb_technology` and its `cell_type` alias for `sidb_dot_tag`; no Python API takes
+  an SiDB cell type any more. Use `sidb_dot_tag`
+- **Breaking:** In Python, `sidb_cell_level_layout`, `sidb_100_lattice`, `sidb_111_lattice`,
+  `charge_distribution_surface` and its `_100`/`_111` twins with the `charge_index_mode`,
+  `dependent_cell_mode`, `energy_calculation`, `charge_distribution_history`, and `charge_distribution_mode`
+  enums, `sidb_simulation_result_100`/`_111`, `read_sqd_layout_100`/`_111`, `sidb_lattice_mode`,
+  `sidb_nm_position`, `sidb_nm_distance_100`/`_111`, `siqad_coordinate`, `siqad_area`, `siqad_volume`,
+  `to_siqad_coord`, `to_offset_coord`, `to_cube_coord`, and `convert_layout_to_siqad_coordinates`. Use
+  `sidb_layout`, `lattice`, `lattice_site`, `charge_distribution`, `sidb_simulation_result`, and
+  `read_sqd_layout`; `area` accepts an `sidb_layout`
 
 ### Fixed
 
@@ -268,6 +309,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Canvas filtering now rejects SiDBs missing from the simulation state's layout.
   - Ground State Space reports multiset limits using the potential landscape's charge base.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
+  - GOLD now applies each invocation's seed and PI-spacing limit independently
   - Operational checks and gate pruning now reject mismatched input counts; band-bending resilience rejects unusable inputs.
   - Gate design now propagates worker exceptions to the caller and sets simulation parameters before launching workers.
   - SiDB simulation, logic matching, and energy labeling now propagate errors from checked charge and potential operations.
@@ -284,6 +326,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Population-stability analysis now distinguishes complete charge distributions beyond the charge-index range.
   - Gate design enumerates, counts, and randomly samples only empty, defect-free canvas sites.
   - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
+
+- CLI:
+  - SiDB store descriptions and statistics handle the full column range without integer overflow
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
@@ -302,7 +347,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     allocation failure, and moving a defect from an empty site leaves the target unchanged
   - Moving a defect now preserves its target when the site arguments refer to stored defects.
   - Corrected the SiDB pointer aliases in `types.hpp` and checked their target types.
-  - SiDB-to-cell-level conversion preserves bounds from converted cells and retained defects.
+  - SiDB-to-cell-level conversion preserves bounds from converted cells.
 
 - Documentation:
 
@@ -312,6 +357,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
   - SiDB circuit experiments now reject missing placement and equivalence results before reporting.
+  - SiDB sweep initializers now name their fields, and pruning helpers propagate allocation failures.
+    Experiment parameters, output columns, and calculations remain unchanged.
+  - The Bestagon experiment converts placed SiDB cells to `sidb::layout` before SQD export and reports input parsing
+    or equivalence-checking failures.
+  - The Bestagon critical-temperature domain experiment removes a redundant calculation while preserving its
+    kink-rejection policy and reported temperatures.
+  - The library walkthrough writes QCA layouts only in QCADesigner and SVG formats.
 
 - I/O:
 
@@ -330,8 +382,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Exposed the defect-matrix reader exceptions at the package root.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector
-  - `write_sqd_sim_result` accepts the `sidb_simulation_result_100` and `_111` results
-    Python produces; it was bound for a result type Python cannot construct
+  - The Python bindings compile when Z3 support is disabled
+  - `write_sqd_layout` owns its Python filename during export on Windows
 
 - Tooling:
 

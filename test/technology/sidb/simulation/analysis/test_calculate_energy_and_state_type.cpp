@@ -22,7 +22,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -48,7 +47,7 @@ using namespace fiction::synthesis;
 
 TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
 {
-    const auto bestagon_and = to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>());
+    const auto bestagon_and = blueprints::bestagon_and_gate();
 
     auto bii = bdl_input_iterator{bestagon_and};
 

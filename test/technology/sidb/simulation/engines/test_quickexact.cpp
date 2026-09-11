@@ -22,7 +22,6 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
@@ -32,7 +31,6 @@
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <algorithm>
@@ -398,7 +396,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB arrangement", "[quickexact]"
 }
 
 TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01, check energy and charge "
-          "distribution, using siqad coordinates",
+          "distribution",
           "[quickexact]")
 {
     layout lyt{};
@@ -435,10 +433,8 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01, check
     CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.4662582096, ERROR_MARGIN));
 }
 
-TEST_CASE(
-    "QuickExact simulation of a Y-shaped SiDB OR gate with input 01 and local external potential at perturber, using "
-    "siqad coordinates",
-    "[quickexact]")
+TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01 and local external potential at perturber",
+          "[quickexact]")
 {
     layout lyt{};
 
@@ -1807,7 +1803,7 @@ TEST_CASE("QuickExact AND gate simulation of Si-111 surface", "[quickexact]")
 {
     SECTION("no input applied")
     {
-        const auto              lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
+        const auto              lyt = blueprints::and_gate_111();
         const quickexact_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
 
         const auto simulation_results = quickexact(lyt, params);
@@ -1844,7 +1840,7 @@ TEST_CASE("QuickExact AND gate simulation of Si-111 surface", "[quickexact]")
 
     SECTION("10 input applied")
     {
-        auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
+        auto lyt = blueprints::and_gate_111();
         lyt.assign_sidb({0, 0, 0}, dot_tag::EMPTY);
         lyt.assign_sidb({23, 1, 1}, dot_tag::EMPTY);
 

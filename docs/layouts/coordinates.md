@@ -59,34 +59,6 @@ At the same time, they can be used to address 3-dimensional grids.
 
 ::::
 
-## SiQAD coordinates
-
-SiQAD coordinates are used to describe locations of Silicon Dangling Bonds on the H-Si(100) 2x1 surface were dimer columns and rows are identified by x and y values, respectively,
-while the z value (0,1) points to the top or bottom Si atom in the dimer. The coordinates are originally used in the SiQAD simulator (<https://github.com/siqad>).
-
-::::{tab-set}
-:sync-group: language
-
-:::{tab-item} C++
-:sync: cpp
-
-```{doxygenstruct} fiction::layouts::coords::siqad
-
-```
-
-:::
-
-:::{tab-item} Python
-:sync: python
-
-```{eval-rst}
-.. autoclass:: mnt.pyfiction.siqad_coordinate
-```
-
-:::
-
-::::
-
 ## Coordinate iterator
 
 An iterator type that allows to enumerate coordinates in order within a boundary.
@@ -111,14 +83,6 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 
 ```
 
-```{doxygenfunction} fiction::layouts::coords::from_siqad
-
-```
-
-```{doxygenfunction} fiction::layouts::coords::to_siqad
-
-```
-
 :::
 
 :::{tab-item} Python
@@ -129,19 +93,9 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 
 .. autofunction:: mnt.pyfiction.cube_area
 
-.. autofunction:: mnt.pyfiction.siqad_area
-
 .. autofunction:: mnt.pyfiction.offset_volume
 
 .. autofunction:: mnt.pyfiction.cube_volume
-
-.. autofunction:: mnt.pyfiction.siqad_volume
-
-.. autofunction:: mnt.pyfiction.to_offset_coord
-
-.. autofunction:: mnt.pyfiction.to_cube_coord
-
-.. autofunction:: mnt.pyfiction.to_siqad_coord
 ```
 
 :::

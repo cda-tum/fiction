@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_dot_tag, sidb_technology
+from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_dot_tag
 
 
 def test_qca_technology():
@@ -35,8 +35,7 @@ def test_inml_technology():
     assert str(inml.cell_type.FANOUT_COUPLER_MAGNET) == "cell_type.FANOUT_COUPLER_MAGNET"
 
 
-def test_sidb_technology():
-    assert sidb_technology.cell_type is sidb_dot_tag
+def test_sidb_dot_tag():
     assert str(sidb_dot_tag.EMPTY) == "sidb_dot_tag.EMPTY"
     assert str(sidb_dot_tag.NORMAL) == "sidb_dot_tag.NORMAL"
     assert str(sidb_dot_tag.INPUT) == "sidb_dot_tag.INPUT"

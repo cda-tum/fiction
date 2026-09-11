@@ -77,8 +77,7 @@ TEST_CASE("ExGS simulation of a one BDL pair with one perturber", "[exhaustive-g
     CHECK(simulation_results.charge_distributions.size() == 1);
 }
 
-TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, using siqad coordinates",
-          "[exhaustive-ground-state-simulation]")
+TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber", "[exhaustive-ground-state-simulation]")
 {
     layout lyt{};
 

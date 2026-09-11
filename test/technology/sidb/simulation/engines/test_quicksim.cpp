@@ -21,7 +21,6 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
@@ -29,7 +28,6 @@
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <optional>
@@ -1030,7 +1028,7 @@ TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quicksim]")
 {
     SECTION("no input applied")
     {
-        const auto            lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
+        const auto            lyt = blueprints::and_gate_111();
         const quicksim_params params{.sim_params      = simulation_parameters{2, -0.32, 5.6, 5},
                                      .iteration_steps = 3000,
                                      .alpha           = 0.5};
@@ -1071,7 +1069,7 @@ TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quicksim]")
 
     SECTION("10 input applied")
     {
-        auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
+        auto lyt = blueprints::and_gate_111();
         lyt.assign_sidb({0, 0, 0}, dot_tag::EMPTY);
         lyt.assign_sidb({23, 1, 1}, dot_tag::EMPTY);
 
@@ -1115,7 +1113,7 @@ TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quicksim]")
 
     SECTION("timeout with 100 ms")
     {
-        auto                  lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
+        auto                  lyt = blueprints::and_gate_111();
         const quicksim_params params{.sim_params      = simulation_parameters{2, -0.32, 5.6, 5},
                                      .iteration_steps = 300000,
                                      .alpha           = 0.5,

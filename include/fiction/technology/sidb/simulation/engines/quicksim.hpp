@@ -18,14 +18,12 @@
 
 #pragma once
 
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/detail/simulation_state.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/traits.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -260,28 +258,6 @@ struct quicksim_params
     }
 
     return st;
-}
-
-/**
- * *QuickSim* on a Cartesian SiDB cell-level layout: the layout is converted with `to_sidb_layout`, simulated, and
- * the result converted back with `to_legacy_result`. This overload serves the algorithms that still consume
- * `legacy_result`.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt Layout to simulate.
- * @param ps *QuickSim* parameters.
- * @return Simulation result over surfaces of `lyt`, or `std::nullopt` as the `layout` overload returns it.
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::optional<legacy_result<Lyt>> quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{})
-{
-    if (const auto res = quicksim(to_sidb_layout(lyt), ps); res.has_value())
-    {
-        return to_legacy_result(*res, lyt);
-    }
-
-    return std::nullopt;
 }
 
 }  // namespace fiction::sidb::simulation::engines

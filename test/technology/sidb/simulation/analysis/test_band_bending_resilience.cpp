@@ -22,14 +22,12 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <cmath>
@@ -41,8 +39,6 @@ using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::synthesis;
 using namespace fiction::utils::math;
-
-using test_layout = sidb_cell_clk_lyt_siqad;
 
 TEST_CASE("Band bending resilience rejects unusable input wires", "[band-bending-resilience]")
 {
@@ -63,7 +59,7 @@ TEST_CASE("Band bending resilience rejects unusable input wires", "[band-bending
 
 TEST_CASE("Single SiDB", "[band-bending-resilience]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bestagon_and_gate<test_layout>());
+    const auto lyt = blueprints::bestagon_and_gate();
 
     constexpr auto params =
         band_bending_resilience_params{.assess_population_stability_params = physical_population_stability_params{

@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 # The Bestagon AND gate, evaluated at input pattern 01, has five physically valid charge
 # distributions. The two lowest-energy ones encode AND(0, 1) = 0; the three above them do not.
 # Energies in eV, taken from the C++ suite, which asserts the same five constants against the same
-# layout in `test/algorithms/simulation/sidb/calculate_energy_and_state_type.cpp:71-84`.
+# layout in `test/technology/sidb/simulation/analysis/test_calculate_energy_and_state_type.cpp`.
 EXPECTED_ENERGIES_AND_STATE_TYPES = [
     (0.9915, state_type.ACCEPTED),
     (0.9966, state_type.ACCEPTED),
