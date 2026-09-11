@@ -143,6 +143,6 @@ def test_abc_xag_and_custom_flow(shell: Shell, resource: Callable[[str], str], t
     assert shell.session.networks.current() is original
     path = tmp_path / "custom input.aig"
     shell.ok(f'write -n "{path}"')
-    shell.ok(f"abc --no-read -c 'read_aiger \"{path.as_posix()}\"; strash; balance'")
+    shell.ok(f"abc --no-read --no-strash -c 'read_aiger \"{path.as_posix()}\"; strash; balance'")
     shell.ok("simulate -n")
     assert shell.session.log[-1]["result"] == expected

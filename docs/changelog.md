@@ -42,7 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - The JSON log describes every store element with one schema, in `snake_case` keys with
     numbers where the C++ shell wrote `1/x` strings.
   - `-i` continues into the shell once `-c` or `-f` is done, and `-q` keeps a scripted run to its
-    errors. `ps --all` describes every element of a store and `store --pop` removes the active one.
+    errors and requested results. `ps --all` describes every element of a store and `store --pop` removes the active one.
   - `show` takes `-p COMMAND` for an explicit viewer and `--delete` to drop its temporary file when
     the session ends; `show` and `write` take `--indexes` and `--clock-colors` for the DOT drawers.
   - `write` without a file writes `<element name>.<format>` in the current directory, `-F` names the
@@ -406,8 +406,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
 
 - CLI:
+
+  - Preserved all FGL topologies, hexagonal orthogonal variants, synchronization elements, native random generators, and ABC flow controls.
+  - Rejected invalid mapping, numeric inputs, and conflicting writer options without replacing stored elements.
+  - Added compact help, width-aware stores, Graphviz SVG viewing, piped input, and reliable quiet-mode results and cleanup.
   - The Python shell computes SiDB area from the layout lattice and rejects cell-dimension overrides.
-  - SiDB store descriptions and statistics handle the full column range without integer overflow
+  - SiDB store descriptions and statistics include lattice-based physical area and handle the full column range without integer overflow
   - A script file that exists but cannot be read reports the reason and exits with 2, like a missing one
   - `tt -t 0xD` reads all four bits of a hex digit as the two-variable table the same bits name in binary;
     one digit produced a one-variable table and dropped two of them
@@ -451,6 +455,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
+  - Stacked FQCA imports preserve all layers and cell metadata. Layout readers reject coordinate overflow; writers replace files only after successful serialization.
   - QCA SVG output now uses valid text colors in simple tile mode.
   - SQD readers now reject fractional coordinates and trailing text in numeric attributes.
   - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites
@@ -462,6 +468,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Added ordered `simulate_outputs`, exposed mapper statistics, and validated truth-table sizes and expressions before native operations. Gate-library errors identify unsupported gates and their coordinates.
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
   - Exposed the defect-matrix reader exceptions at the package root.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
