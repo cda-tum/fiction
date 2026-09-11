@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/technology/fcn/area.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -63,6 +64,7 @@ void area(nanobind::module_& m)
 void area(nanobind::module_& m)
 {
     detail::area<py_qca_layout>(m);
+    detail::area<py_stacked_qca_layout>(m);
     detail::area<py_inml_layout>(m);
     detail::area<py_mol_qca_layout>(m);
 

@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `kitty`'s dynamic truth tables.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/types.hpp"
@@ -21,6 +22,7 @@
 #include <kitty/print.hpp>
 
 #include <cstdint>
+#include <new>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -63,8 +65,19 @@ void dynamic_truth_table(nanobind::module_& m)
     namespace py = nanobind;
 
     py::class_<py_tt>(m, "dynamic_truth_table")
-        .def(py::init<>(), "Default constructor. Constructs a truth table of 0 variables.")
-        .def(py::init<uint32_t>(), py::arg("num_vars"), "Constructs a truth table of the given number of variables.")
+        .def(
+            "__init__", [](py_tt* tt) { new (tt) py_tt{0u}; }, "Constructs the constant-zero truth table.")
+        .def(
+            "__init__",
+            [](py_tt* tt, const uint32_t num_vars)
+            {
+                if (num_vars >= 38u)
+                {
+                    throw std::invalid_argument("truth tables require fewer than 38 variables");
+                }
+                new (tt) py_tt{num_vars};
+            },
+            py::arg("num_vars"), "Constructs a truth table with fewer than 38 variables.")
 
         .def("num_vars", &py_tt::num_vars)
         .def("num_blocks", &py_tt::num_blocks)
@@ -112,10 +125,20 @@ void dynamic_truth_table(nanobind::module_& m)
             "create_from_expression",
             [](py_tt& tt, const std::string& expression)
             {
-                if (!kitty::create_from_expression(tt, expression))
+                for (const auto variable : expression)
+                {
+                    if (variable >= 'a' && variable <= 'p' && static_cast<uint32_t>(variable - 'a') >= tt.num_vars())
+                    {
+                        throw std::invalid_argument(
+                            fmt::format("variable '{}' exceeds the table's {} variables", variable, tt.num_vars()));
+                    }
+                }
+                py_tt parsed{tt.num_vars()};
+                if (!kitty::create_from_expression(parsed, expression))
                 {
                     throw std::invalid_argument(fmt::format("could not parse expression '{}'", expression));
                 }
+                tt = std::move(parsed);
             },
             py::arg("expression"),
             "Sets the bits from a Boolean expression over the variables `a` to `p`: constants `0` and `1`, negation "

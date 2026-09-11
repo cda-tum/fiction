@@ -13,6 +13,7 @@
  * @brief Reader for QCA layouts in the FQCA format used by QCA-STACK.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -148,7 +149,18 @@ class read_fqca_layout_impl
                             for (auto i = 0ull, current_cell_column = 0ull; i < line.size();
                                  i += 2, ++current_cell_column)
                             {
-                                parse_cell(line[i], {current_cell_column, current_cell_row, next_cell_layer - 1});
+                                if (line[i] == ' ')
+                                {
+                                    continue;
+                                }
+                                const coordinate<Lyt> position{current_cell_column, current_cell_row,
+                                                               next_cell_layer - 1};
+                                if (position.x != current_cell_column || position.y != current_cell_row ||
+                                    position.z != next_cell_layer - 1)
+                                {
+                                    throw std::out_of_range("FQCA coordinates exceed the destination layout range");
+                                }
+                                parse_cell(line[i], position);
                             }
 
                             // another row done

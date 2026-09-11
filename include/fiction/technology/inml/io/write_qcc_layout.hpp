@@ -12,6 +12,7 @@
  * @file
  * @brief Writer for iNML layouts in the QCC format used by ToPoliNano and MagCAD.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -21,6 +22,7 @@
 #include "fiction/technology/inml/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
@@ -395,17 +397,13 @@ void write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params 
 template <typename Lyt>
 void write_qcc_layout(const Lyt& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
+    fiction::detail::atomic_write(filename,
+                                  [&](std::ostream& os)
+                                  {
+                                      ps.filename = filename;
 
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    ps.filename = filename;
-
-    write_qcc_layout(lyt, os, ps);
-    os.close();
+                                      write_qcc_layout(lyt, os, ps);
+                                  });
 }
 
 }  // namespace fiction::inml::io

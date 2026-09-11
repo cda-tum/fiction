@@ -13,6 +13,7 @@
  * @brief Python bindings for `fiction/technology/fcn/io/write_qll_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -54,6 +55,7 @@ void write_qll_layout(nanobind::module_& m)
 void write_qll_layout(nanobind::module_& m)
 {
     detail::write_qll_layout<py_qca_layout>(m);
+    detail::write_qll_layout<py_stacked_qca_layout>(m);
     detail::write_qll_layout<py_inml_layout>(m);
     detail::write_qll_layout<py_mol_qca_layout>(m);
 }

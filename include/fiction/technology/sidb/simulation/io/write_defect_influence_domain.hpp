@@ -13,12 +13,14 @@
  * @brief Writer that serializes a defect influence domain to CSV.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
 
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
+#include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/io/csv_writer.hpp"
 
 #include <fstream>
@@ -82,16 +84,8 @@ inline void write_defect_influence_domain(const defects::defect_influence_domain
                                           const std::string_view&                     filename,
                                           const write_defect_influence_domain_params& params = {})
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_defect_influence_domain(defect_infdom, os, params);
-
-    os.close();
+    fiction::detail::atomic_write(filename,
+                                  [&](std::ostream& os) { write_defect_influence_domain(defect_infdom, os, params); });
 }
 
 }  // namespace fiction::sidb::simulation::io

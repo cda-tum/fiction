@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/technology/qca/io/read_fqca_layout.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -33,7 +34,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void read_fqca_layout(nanobind::module_& m)
+void read_fqca_layout(nanobind::module_& m, const char* name)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -41,7 +42,7 @@ void read_fqca_layout(nanobind::module_& m)
     Lyt (*const read_fqca_layout_function_pointer)(const std::string_view&, const std::string_view&) =
         &fiction::qca::io::read_fqca_layout<Lyt>;
 
-    m.def("read_fqca_layout", read_fqca_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
+    m.def(name, read_fqca_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
           DOC(fiction_qca_io_read_fqca_layout));
 }
 
@@ -59,7 +60,8 @@ void read_fqca_layout(nanobind::module_& m)
                                                                             "unrecognized_cell_definition_exception");
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    detail::read_fqca_layout<py_qca_layout>(m);
+    detail::read_fqca_layout<py_qca_layout>(m, "read_fqca_layout");
+    detail::read_fqca_layout<py_stacked_qca_layout>(m, "read_stacked_fqca_layout");
 }
 
 }  // namespace pyfiction

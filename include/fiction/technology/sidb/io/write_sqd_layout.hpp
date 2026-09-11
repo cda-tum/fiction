@@ -13,6 +13,7 @@
  * @brief Writer for SiDB layouts in the SQD format used by SiQAD.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -21,6 +22,7 @@
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/technology.hpp"
+#include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -366,15 +368,7 @@ inline void write_sqd_layout(const layout& lyt, std::ostream& os)
  */
 inline void write_sqd_layout(const layout& lyt, const std::string_view& filename)
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_sqd_layout(lyt, os);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_sqd_layout(lyt, os); });
 }
 
 }  // namespace fiction::sidb::io

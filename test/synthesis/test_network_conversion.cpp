@@ -12,6 +12,7 @@
  * @file
  * @brief Tests for `fiction/synthesis/network_conversion.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -30,12 +31,17 @@
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/synthesis/network_conversion.hpp>
 
+#include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/views/names_view.hpp>
+
+#include <cstdint>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -235,4 +241,43 @@ TEST_CASE("Consistent network size after balancing and conversion", "[network-co
         blueprints::fanout_substitution_corner_case_network<technology_network>());
     const auto converted_balanced_tec = convert_network<technology_network>(balanced_tec);
     CHECK(balanced_tec.size() == converted_balanced_tec.size());
+}
+
+TEST_CASE("Convert every two- and three-input function without losing the interface", "[network-conversion]")
+{
+    for (const auto variables : {2u, 3u})
+    {
+        for (auto function = 0u; function < (1u << (1u << variables)); ++function)
+        {
+            mockturtle::names_view<technology_network> source{};
+            std::vector<technology_network::signal>    inputs{};
+            for (auto index = 0u; index < variables; ++index)
+            {
+                inputs.push_back(source.create_pi(std::string(1, static_cast<char>('a' + index))));
+            }
+            kitty::dynamic_truth_table expected{variables};
+            kitty::create_from_words(expected, &function, &function + 1);
+            const auto output = source.create_node(inputs, expected);
+            source.create_po(output, "f");
+            source.create_po(source.create_not(output), "g");
+            source.create_po(source.get_constant(true), "one");
+            const auto verify = [&](const auto& converted)
+            {
+                CHECK(converted.num_pis() == variables);
+                CHECK(converted.num_pos() == 3u);
+                CHECK(converted.get_output_name(0) == "f");
+                CHECK(converted.get_output_name(1) == "g");
+                CHECK(converted.get_output_name(2) == "one");
+                const auto actual = mockturtle::simulate<kitty::dynamic_truth_table>(
+                    converted, mockturtle::default_simulator<kitty::dynamic_truth_table>{variables});
+                REQUIRE(actual.size() == 3u);
+                CHECK(actual[0] == expected);
+                CHECK(actual[1] == ~expected);
+            };
+            verify(convert_network<mockturtle::names_view<technology_network>>(source));
+            verify(convert_network<mockturtle::names_view<mockturtle::aig_network>>(source));
+            verify(convert_network<mockturtle::names_view<mockturtle::xag_network>>(source));
+            verify(convert_network<mockturtle::names_view<mockturtle::mig_network>>(source));
+        }
+    }
 }

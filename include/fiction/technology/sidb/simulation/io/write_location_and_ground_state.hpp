@@ -13,6 +13,7 @@
  * @brief Writer that pairs SiDB positions with their ground state charge distributions.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -21,6 +22,7 @@
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/simulation/analysis/minimum_energy.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 #include "fmt/format.h"
 
@@ -136,15 +138,7 @@ inline void write_location_and_ground_state(const sidb::simulation::result& sim_
 inline void write_location_and_ground_state(const sidb::simulation::result& sim_result,
                                             const std::string_view&         filename)
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_location_and_ground_state(sim_result, os);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_location_and_ground_state(sim_result, os); });
 }
 
 }  // namespace fiction::sidb::simulation::io

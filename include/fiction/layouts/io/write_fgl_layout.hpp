@@ -13,12 +13,14 @@
  * @brief Writer for gate-level layouts in the FGL file format.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
 
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -26,6 +28,7 @@
 #include <fmt/format.h>
 #include <kitty/print.hpp>
 #include <mockturtle/views/topo_view.hpp>
+#include <tinyxml2.h>
 
 #include <cstdint>
 #include <ctime>
@@ -42,6 +45,18 @@ namespace detail
 
 namespace fgl
 {
+
+/**
+ * @brief Escape user-provided text for an XML element.
+ * @param value Layout or port name.
+ * @return XML text preserving the original label when parsed.
+ */
+inline std::string xml_text(const std::string& value)
+{
+    tinyxml2::XMLPrinter printer{};
+    printer.PushText(value.c_str());
+    return printer.CStr();
+}
 
 inline constexpr const char* FGL_HEADER       = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 inline constexpr const char* OPEN_FGL         = "<fgl>\n";
@@ -156,7 +171,7 @@ class write_fgl_layout_impl
             }
         }
 
-        os << fmt::format(fgl::LAYOUT_METADATA, layout_name, topology, lyt.x(), lyt.y(), lyt.z());
+        os << fmt::format(fgl::LAYOUT_METADATA, fgl::xml_text(layout_name), topology, lyt.x(), lyt.y(), lyt.z());
 
         os << fgl::OPEN_CLOCKING;
         const auto clocking_scheme = lyt.get_clocking_scheme();
@@ -176,6 +191,24 @@ class write_fgl_layout_impl
             }
             os << fgl::CLOSE_CLOCK_ZONES;
         }
+        if constexpr (has_synchronization_elements_v<Lyt>)
+        {
+            if (lyt.num_se() != 0)
+            {
+                os << "      <synchronization_elements>\n";
+                lyt.foreach_coordinate(
+                    [this](const auto& coordinate)
+                    {
+                        if (const auto delay = lyt.get_synchronization_element(coordinate); delay != 0)
+                        {
+                            os << fmt::format(
+                                "        <element><x>{}</x><y>{}</y><z>{}</z><delay>{}</delay></element>\n",
+                                coordinate.x, coordinate.y, coordinate.z, delay);
+                        }
+                    });
+                os << "      </synchronization_elements>\n";
+            }
+        }
         os << fgl::CLOSE_CLOCKING;
         os << fgl::CLOSE_LAYOUT_METADATA;
 
@@ -191,7 +224,8 @@ class write_fgl_layout_impl
             {
                 const auto coord = lyt.get_tile(gate);
                 os << fgl::OPEN_GATE;
-                os << fmt::format(fgl::GATE, gate_id, "PI", lyt.get_name(gate), coord.x, coord.y, coord.z);
+                os << fmt::format(fgl::GATE, gate_id, "PI", fgl::xml_text(lyt.get_name(gate)), coord.x, coord.y,
+                                  coord.z);
                 os << fgl::CLOSE_GATE;
                 gate_id++;
             });
@@ -208,7 +242,8 @@ class write_fgl_layout_impl
 
                     if (lyt.is_po(gate))
                     {
-                        os << fmt::format(fgl::GATE, gate_id, "PO", lyt.get_name(gate), coord.x, coord.y, coord.z);
+                        os << fmt::format(fgl::GATE, gate_id, "PO", fgl::xml_text(lyt.get_name(gate)), coord.x, coord.y,
+                                          coord.z);
                     }
                     else if (lyt.is_wire(gate))
                     {
@@ -371,15 +406,7 @@ void write_fgl_layout(const Lyt& lyt, std::ostream& os)
 template <typename Lyt>
 void write_fgl_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_fgl_layout(lyt, os);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_fgl_layout(lyt, os); });
 }
 
 }  // namespace fiction::layouts::io

@@ -13,6 +13,7 @@
  * @brief Python bindings for `fiction/layouts/clocked_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -124,6 +125,14 @@ void clocked_layout(nanobind::module_& m)
     detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian");
     detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian");
     detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "hexagonal");
+    detail::clocked_layout<py_odd_row_cartesian_layout, py_odd_row_cartesian_clocked_layout>(m, "odd_row_cartesian");
+    detail::clocked_layout<py_even_row_cartesian_layout, py_even_row_cartesian_clocked_layout>(m, "even_row_cartesian");
+    detail::clocked_layout<py_even_column_cartesian_layout, py_even_column_cartesian_clocked_layout>(
+        m, "even_column_cartesian");
+    detail::clocked_layout<py_odd_row_hex_layout, py_odd_row_hex_clocked_layout>(m, "odd_row_hex");
+    detail::clocked_layout<py_odd_column_hex_layout, py_odd_column_hex_clocked_layout>(m, "odd_column_hex");
+    detail::clocked_layout<py_even_column_hex_layout, py_even_column_hex_clocked_layout>(m, "even_column_hex");
+    detail::clocked_layout<py_stacked_cartesian_layout, py_stacked_cartesian_clocked_layout>(m, "stacked_cartesian");
 }
 
 }  // namespace pyfiction

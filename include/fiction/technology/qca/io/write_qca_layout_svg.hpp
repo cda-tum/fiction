@@ -15,12 +15,14 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
 
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
@@ -1001,15 +1003,7 @@ void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layo
 template <typename Lyt>
 void write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
 {
-    std::ofstream os{std::string(filename), std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_qca_layout_svg(lyt, os, ps);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_qca_layout_svg(lyt, os, ps); });
 }
 
 /**
@@ -1054,15 +1048,7 @@ template <typename Lyt>
 void write_mol_qca_layout_svg(const Lyt& lyt, const std::string_view& filename,
                               const write_qca_layout_svg_params& ps = {})
 {
-    std::ofstream os{std::string(filename), std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_mol_qca_layout_svg(lyt, os, ps);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_mol_qca_layout_svg(lyt, os, ps); });
 }
 
 }  // namespace fiction::qca::io

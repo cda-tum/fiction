@@ -17,6 +17,7 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 if sys.platform == "win32":
     if "Z3_ROOT" in os.environ:
@@ -69,10 +70,15 @@ from .pyfiction import (  # type: ignore[import-not-found]
     check_simulation_results_for_equivalence,
     clear_routing,
     clocked_cartesian_layout,
+    clocked_even_column_cartesian_layout,
+    clocked_even_column_hex_layout,
+    clocked_even_row_cartesian_layout,
     clocked_hexagonal_layout,
+    clocked_odd_column_hex_layout,
+    clocked_odd_row_cartesian_layout,
+    clocked_odd_row_hex_layout,
     clocked_shifted_cartesian_layout,
-    clustercomplete,
-    clustercomplete_params,
+    clocked_stacked_cartesian_layout,
     color_mode,
     color_routing,
     color_routing_params,
@@ -142,12 +148,13 @@ from .pyfiction import (  # type: ignore[import-not-found]
     equivalence_checking,
     equivalence_checking_stats,
     euclidean_distance,
-    exact_cartesian,
-    exact_hexagonal,
-    exact_params,
-    exact_shifted_cartesian,
+    even_column_cartesian_gate_layout,
+    even_column_cartesian_layout,
+    even_column_hex_gate_layout,
+    even_column_hex_layout,
+    even_row_cartesian_gate_layout,
+    even_row_cartesian_layout,
     exact_sidb_simulation_engine,
-    exact_stats,
     exhaustive_ground_state_simulation,
     extract_routing_objectives,
     fanout_substitution,
@@ -167,7 +174,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     graph_oriented_layout_design,
     graph_oriented_layout_design_params,
     graph_oriented_layout_design_stats,
-    ground_state_space_reporting,
     has_high_degree_fanin_nodes,
     heuristic_sidb_simulation_engine,
     hexagonal_gate_layout,
@@ -212,6 +218,12 @@ from .pyfiction import (  # type: ignore[import-not-found]
     num_clks,
     occupation_probability_gate_based,
     occupation_probability_non_gate_based,
+    odd_column_hex_gate_layout,
+    odd_column_hex_layout,
+    odd_row_cartesian_gate_layout,
+    odd_row_cartesian_layout,
+    odd_row_hex_gate_layout,
+    odd_row_hex_layout,
     offset_area,
     offset_coordinate,
     offset_volume,
@@ -232,6 +244,10 @@ from .pyfiction import (  # type: ignore[import-not-found]
     operational_input_patterns,
     operational_status,
     orthogonal,
+    orthogonal_even_column_hex,
+    orthogonal_hexagonal,
+    orthogonal_odd_column_hex,
+    orthogonal_odd_row_hex,
     orthogonal_params,
     orthogonal_stats,
     out_of_cell_names_exception,
@@ -255,14 +271,25 @@ from .pyfiction import (  # type: ignore[import-not-found]
     quickexact_params,
     quicksim,
     quicksim_params,
+    random_aig_network,
     random_coordinate,
+    random_mig_network,
+    random_tec_network,
+    random_xag_network,
     read_aig_network,
     read_cartesian_fgl_layout,
+    read_even_column_cartesian_fgl_layout,
+    read_even_column_hex_fgl_layout,
+    read_even_row_cartesian_fgl_layout,
     read_fqca_layout,
     read_hexagonal_fgl_layout,
     read_mig_network,
+    read_odd_column_hex_fgl_layout,
+    read_odd_row_cartesian_fgl_layout,
+    read_odd_row_hex_fgl_layout,
     read_shifted_cartesian_fgl_layout,
     read_sqd_layout,
+    read_stacked_fqca_layout,
     read_surface_defects,
     read_technology_network,
     read_xag_network,
@@ -289,14 +316,16 @@ from .pyfiction import (  # type: ignore[import-not-found]
     sidb_simulation_result,
     sign_to_charge_state,
     simulate,
+    simulate_outputs,
     site_at_row,
     sites_in_area,
     sqd_parsing_error,
     squared_euclidean_distance,
+    stacked_cartesian_layout,
+    stacked_qca_layout,
     state_type,
     substitution_strategy,
     sweep_parameter,
-    technology_constraints,
     technology_mapping,
     technology_mapping_params,
     technology_mapping_stats,
@@ -387,10 +416,15 @@ __all__ = [
     "check_simulation_results_for_equivalence",
     "clear_routing",
     "clocked_cartesian_layout",
+    "clocked_even_column_cartesian_layout",
+    "clocked_even_column_hex_layout",
+    "clocked_even_row_cartesian_layout",
     "clocked_hexagonal_layout",
+    "clocked_odd_column_hex_layout",
+    "clocked_odd_row_cartesian_layout",
+    "clocked_odd_row_hex_layout",
     "clocked_shifted_cartesian_layout",
-    "clustercomplete",
-    "clustercomplete_params",
+    "clocked_stacked_cartesian_layout",
     "color_mode",
     "color_routing",
     "color_routing_params",
@@ -460,12 +494,13 @@ __all__ = [
     "equivalence_checking",
     "equivalence_checking_stats",
     "euclidean_distance",
-    "exact_cartesian",
-    "exact_hexagonal",
-    "exact_params",
-    "exact_shifted_cartesian",
+    "even_column_cartesian_gate_layout",
+    "even_column_cartesian_layout",
+    "even_column_hex_gate_layout",
+    "even_column_hex_layout",
+    "even_row_cartesian_gate_layout",
+    "even_row_cartesian_layout",
     "exact_sidb_simulation_engine",
-    "exact_stats",
     "exhaustive_ground_state_simulation",
     "extract_routing_objectives",
     "fanout_substitution",
@@ -485,7 +520,6 @@ __all__ = [
     "graph_oriented_layout_design",
     "graph_oriented_layout_design_params",
     "graph_oriented_layout_design_stats",
-    "ground_state_space_reporting",
     "has_high_degree_fanin_nodes",
     "heuristic_sidb_simulation_engine",
     "hexagonal_gate_layout",
@@ -530,6 +564,12 @@ __all__ = [
     "num_clks",
     "occupation_probability_gate_based",
     "occupation_probability_non_gate_based",
+    "odd_column_hex_gate_layout",
+    "odd_column_hex_layout",
+    "odd_row_cartesian_gate_layout",
+    "odd_row_cartesian_layout",
+    "odd_row_hex_gate_layout",
+    "odd_row_hex_layout",
     "offset_area",
     "offset_coordinate",
     "offset_volume",
@@ -550,6 +590,10 @@ __all__ = [
     "operational_input_patterns",
     "operational_status",
     "orthogonal",
+    "orthogonal_even_column_hex",
+    "orthogonal_hexagonal",
+    "orthogonal_odd_column_hex",
+    "orthogonal_odd_row_hex",
     "orthogonal_params",
     "orthogonal_stats",
     "out_of_cell_names_exception",
@@ -573,14 +617,25 @@ __all__ = [
     "quickexact_params",
     "quicksim",
     "quicksim_params",
+    "random_aig_network",
     "random_coordinate",
+    "random_mig_network",
+    "random_tec_network",
+    "random_xag_network",
     "read_aig_network",
     "read_cartesian_fgl_layout",
+    "read_even_column_cartesian_fgl_layout",
+    "read_even_column_hex_fgl_layout",
+    "read_even_row_cartesian_fgl_layout",
     "read_fqca_layout",
     "read_hexagonal_fgl_layout",
     "read_mig_network",
+    "read_odd_column_hex_fgl_layout",
+    "read_odd_row_cartesian_fgl_layout",
+    "read_odd_row_hex_fgl_layout",
     "read_shifted_cartesian_fgl_layout",
     "read_sqd_layout",
+    "read_stacked_fqca_layout",
     "read_surface_defects",
     "read_technology_network",
     "read_xag_network",
@@ -607,14 +662,16 @@ __all__ = [
     "sidb_simulation_result",
     "sign_to_charge_state",
     "simulate",
+    "simulate_outputs",
     "site_at_row",
     "sites_in_area",
     "sqd_parsing_error",
     "squared_euclidean_distance",
+    "stacked_cartesian_layout",
+    "stacked_qca_layout",
     "state_type",
     "substitution_strategy",
     "sweep_parameter",
-    "technology_constraints",
     "technology_mapping",
     "technology_mapping_params",
     "technology_mapping_stats",
@@ -664,3 +721,74 @@ __all__ = [
     "yen_k_shortest_paths",
     "yen_k_shortest_paths_params",
 ]
+
+# Solver-specific bindings are absent from builds without the corresponding solver.
+from . import pyfiction as _native
+
+for _name in (
+    "ground_state_space_reporting",
+    "exact_cartesian",
+    "exact_hexagonal",
+    "exact_shifted_cartesian",
+    "exact_params",
+    "exact_stats",
+    "technology_constraints",
+    "clustercomplete",
+    "clustercomplete_params",
+    "exact_odd_row_cartesian",
+    "exact_even_row_cartesian",
+    "exact_even_column_cartesian",
+    "exact_odd_row_hex",
+    "exact_odd_column_hex",
+    "exact_even_column_hex",
+):
+    if hasattr(_native, _name):
+        globals()[_name] = getattr(_native, _name)
+        __all__ += [_name]  # ruff: ignore[invalid-all-object] -- names come from the literal optional-export list
+
+if TYPE_CHECKING:
+    from .pyfiction import (
+        clustercomplete as clustercomplete,
+    )
+    from .pyfiction import (
+        clustercomplete_params as clustercomplete_params,
+    )
+    from .pyfiction import (
+        exact_cartesian as exact_cartesian,
+    )
+    from .pyfiction import (
+        exact_even_column_cartesian as exact_even_column_cartesian,
+    )
+    from .pyfiction import (
+        exact_even_column_hex as exact_even_column_hex,
+    )
+    from .pyfiction import (
+        exact_even_row_cartesian as exact_even_row_cartesian,
+    )
+    from .pyfiction import (
+        exact_hexagonal as exact_hexagonal,
+    )
+    from .pyfiction import (
+        exact_odd_column_hex as exact_odd_column_hex,
+    )
+    from .pyfiction import (
+        exact_odd_row_cartesian as exact_odd_row_cartesian,
+    )
+    from .pyfiction import (
+        exact_odd_row_hex as exact_odd_row_hex,
+    )
+    from .pyfiction import (
+        exact_params as exact_params,
+    )
+    from .pyfiction import (
+        exact_shifted_cartesian as exact_shifted_cartesian,
+    )
+    from .pyfiction import (
+        exact_stats as exact_stats,
+    )
+    from .pyfiction import (
+        ground_state_space_reporting as ground_state_space_reporting,
+    )
+    from .pyfiction import (
+        technology_constraints as technology_constraints,
+    )

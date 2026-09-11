@@ -13,6 +13,7 @@
  * @brief Converts a logic network into an equivalent one of another network type.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -21,12 +22,14 @@
 #include "fiction/traits.hpp"
 
 #include <mockturtle/algorithms/cleanup.hpp>
+#include <mockturtle/algorithms/node_resynthesis/shannon.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
 #include <cassert>
 #include <cstdint>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
 
@@ -52,7 +55,7 @@ class convert_network_impl<NtkDest, NtkSrc, true>
 
     NtkDest run()
     {
-        return mockturtle::cleanup_dangling<NtkSrc, NtkDest>(ntk, true, false);
+        return mockturtle::cleanup_dangling<NtkSrc, NtkDest>(ntk, false, false);
     }
 
   private:
@@ -183,7 +186,15 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                     return true;
                 }
 
-                return true;
+                if constexpr (mockturtle::has_node_function_v<TopoNtkSrc>)
+                {
+                    mockturtle::shannon_resynthesis<NtkDest>{}(ntk_dest, ntk.node_function(g), children.begin(),
+                                                               children.end(),
+                                                               [&](const auto& signal) { old2new[g] = signal; });
+                    return true;
+                }
+
+                throw std::invalid_argument("network conversion requires a supported gate or its truth table");
             });
 
         ntk.foreach_po(

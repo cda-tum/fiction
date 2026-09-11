@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/technology/qca/io/write_fqca_layout.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -69,6 +70,7 @@ void write_fqca_layout(nanobind::module_& m)
         ;
 
     detail::write_fqca_layout<py_qca_layout>(m);
+    detail::write_fqca_layout<py_stacked_qca_layout>(m);
 }
 
 }  // namespace pyfiction

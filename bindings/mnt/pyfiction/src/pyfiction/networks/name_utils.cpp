@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/networks/name_utils.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -62,7 +63,14 @@ void name_utils(nanobind::module_& m)
     detail::get_name<py_shifted_cartesian_gate_layout>(m);
     detail::get_name<py_hexagonal_obstruction_layout>(m);
     detail::get_name<py_hexagonal_gate_layout>(m);
+    detail::get_name<py_odd_row_cartesian_gate_layout>(m);
+    detail::get_name<py_even_row_cartesian_gate_layout>(m);
+    detail::get_name<py_even_column_cartesian_gate_layout>(m);
+    detail::get_name<py_odd_row_hex_gate_layout>(m);
+    detail::get_name<py_odd_column_hex_gate_layout>(m);
+    detail::get_name<py_even_column_hex_gate_layout>(m);
     detail::get_name<py_qca_layout>(m);
+    detail::get_name<py_stacked_qca_layout>(m);
     detail::get_name<py_inml_layout>(m);
     detail::get_name<fiction::sidb::layout>(m);
     detail::get_name<py_logic_network>(m);
@@ -76,7 +84,14 @@ void name_utils(nanobind::module_& m)
     detail::set_name<py_shifted_cartesian_gate_layout>(m);
     detail::set_name<py_hexagonal_obstruction_layout>(m);
     detail::set_name<py_hexagonal_gate_layout>(m);
+    detail::set_name<py_odd_row_cartesian_gate_layout>(m);
+    detail::set_name<py_even_row_cartesian_gate_layout>(m);
+    detail::set_name<py_even_column_cartesian_gate_layout>(m);
+    detail::set_name<py_odd_row_hex_gate_layout>(m);
+    detail::set_name<py_odd_column_hex_gate_layout>(m);
+    detail::set_name<py_even_column_hex_gate_layout>(m);
     detail::set_name<py_qca_layout>(m);
+    detail::set_name<py_stacked_qca_layout>(m);
     detail::set_name<py_inml_layout>(m);
     detail::set_name<fiction::sidb::layout>(m);
     detail::set_name<py_logic_network>(m);

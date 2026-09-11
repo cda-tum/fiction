@@ -12,12 +12,14 @@
  * @file
  * @brief Writer for QCA layouts in the FQCA format used by QCA-STACK.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
 
 #include "fiction/technology/qca/technology.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
@@ -333,15 +335,7 @@ void write_fqca_layout(const Lyt& lyt, std::ostream& os, write_fqca_layout_param
 template <typename Lyt>
 void write_fqca_layout(const Lyt& lyt, const std::string_view& filename, write_fqca_layout_params ps = {})
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_fqca_layout(lyt, os, ps);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_fqca_layout(lyt, os, ps); });
 }
 
 }  // namespace fiction::qca::io

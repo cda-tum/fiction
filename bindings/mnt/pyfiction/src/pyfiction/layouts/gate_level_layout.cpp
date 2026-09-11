@@ -13,6 +13,7 @@
  * @brief Python bindings for `fiction/layouts/gate_level_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -51,7 +52,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout", topology).c_str(),
+    auto cls = py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout", topology).c_str(),
                                  DOC(fiction_layouts_gate_level_layout))
         .def(py::init<>(), DOC(fiction_layouts_gate_level_layout_gate_level_layout))
         .def(py::init<const fiction::aspect_ratio<GateLyt>&>(), py::arg("dimension"),
@@ -337,6 +338,13 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             "Returns a string representation of the layout.")
 
         ;
+    if constexpr (fiction::has_synchronization_elements_v<GateLyt>)
+    {
+        cls.def("assign_synchronization_element", &GateLyt::assign_synchronization_element, py::arg("coordinate"),
+                py::arg("delay"))
+            .def("get_synchronization_element", &GateLyt::get_synchronization_element, py::arg("coordinate"))
+            .def("num_se", &GateLyt::num_se);
+    }
 }
 
 }  // namespace detail
@@ -356,6 +364,15 @@ void gate_level_layout(nanobind::module_& m)
      * Gate-level clocked hexagonal layout.
      */
     detail::gate_level_layout<py_hexagonal_clocked_layout, py_hexagonal_gate_layout>(m, "hexagonal");
+    detail::gate_level_layout<py_odd_row_cartesian_clocked_layout, py_odd_row_cartesian_gate_layout>(
+        m, "odd_row_cartesian");
+    detail::gate_level_layout<py_even_row_cartesian_clocked_layout, py_even_row_cartesian_gate_layout>(
+        m, "even_row_cartesian");
+    detail::gate_level_layout<py_even_column_cartesian_clocked_layout, py_even_column_cartesian_gate_layout>(
+        m, "even_column_cartesian");
+    detail::gate_level_layout<py_odd_row_hex_clocked_layout, py_odd_row_hex_gate_layout>(m, "odd_row_hex");
+    detail::gate_level_layout<py_odd_column_hex_clocked_layout, py_odd_column_hex_gate_layout>(m, "odd_column_hex");
+    detail::gate_level_layout<py_even_column_hex_clocked_layout, py_even_column_hex_gate_layout>(m, "even_column_hex");
 }
 
 }  // namespace pyfiction

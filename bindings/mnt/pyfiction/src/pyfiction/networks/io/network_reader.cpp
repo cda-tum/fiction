@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for reading logic networks from Verilog, AIGER, and BLIF files.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/types.hpp"
@@ -42,11 +43,11 @@ void network_reader(nanobind::module_& m, const char* function_name)
 
     m.def(
         function_name,
-        [](const std::string& filename) -> Ntk
+        [](const std::string& filename, const std::string& format) -> Ntk
         {
             std::ostringstream diagnostics{};
 
-            auto reader = fiction::networks::io::network_reader<std::shared_ptr<Ntk>>(filename, diagnostics);
+            auto reader = fiction::networks::io::network_reader<std::shared_ptr<Ntk>>(filename, diagnostics, format);
 
             if (const auto ntks = reader.get_networks(); !ntks.empty())
             {
@@ -62,7 +63,7 @@ void network_reader(nanobind::module_& m, const char* function_name)
 
             throw std::runtime_error(fmt::format("could not parse '{}': {}", filename, diagnostics.str()));
         },
-        py::arg("filename"),
+        py::arg("filename"), py::arg("format") = "",
         "Reads a logic network from a Verilog (`.v`), AIGER (`.aig`), or BLIF (`.blif`) file, or the first "
         "network from a directory of such files. Raises `RuntimeError` with the parser's diagnostics when no "
         "network can be read.");

@@ -13,12 +13,14 @@
  * @brief Writer that serializes an operational domain to CSV.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
 
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
+#include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/io/csv_writer.hpp"
 
 #include <cstdint>
@@ -275,15 +277,7 @@ template <typename OpDomain>
 void write_operational_domain(const OpDomain& opdom, const std::string_view& filename,
                               const write_operational_domain_params& params = {})
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_operational_domain(opdom, os, params);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_operational_domain(opdom, os, params); });
 }
 
 }  // namespace fiction::sidb::simulation::io

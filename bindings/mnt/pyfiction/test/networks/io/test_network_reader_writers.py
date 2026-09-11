@@ -99,6 +99,6 @@ def test_writers_report_unwritable_files(
     """A file under a directory that does not exist cannot be opened, which the writers report."""
     aig = read_aig_network(str(resources_dir / "mux21.v"))
     target = tmp_path / "missing" / f"out{suffix}"
-    with pytest.raises(RuntimeError, match="could not open file"):
+    with pytest.raises(RuntimeError, match="missing"):
         writer(aig, str(target))
     assert not target.exists()

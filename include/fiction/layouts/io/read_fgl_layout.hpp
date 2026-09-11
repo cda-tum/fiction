@@ -13,6 +13,7 @@
  * @brief Reader for gate-level layouts stored in the FGL file format.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -38,14 +39,17 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <charconv>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
 #include <istream>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <vector>
 
 namespace fiction::layouts::io
@@ -222,38 +226,7 @@ class read_fgl_layout_impl
         // set layout size
         if (auto* const size = layout->FirstChildElement("size"); size != nullptr)
         {
-            int x = 0;
-            if (auto* const size_x = size->FirstChildElement("x"); size_x != nullptr && (size_x->GetText() != nullptr))
-            {
-                x = std::stoi(size_x->GetText());
-            }
-            else
-            {
-                throw fgl_parsing_error("Error parsing FGL file: no element 'x' in 'size'");
-            }
-
-            int y = 0;
-            if (auto* const size_y = size->FirstChildElement("y"); size_y != nullptr && (size_y->GetText() != nullptr))
-            {
-                y = std::stoi(size_y->GetText());
-            }
-            else
-            {
-                throw fgl_parsing_error("Error parsing FGL file: no element 'y' in 'size'");
-            }
-
-            int z = 0;
-            if (auto* const size_z = size->FirstChildElement("z"); size_z != nullptr && (size_z->GetText() != nullptr))
-            {
-                z = std::stoi(size_z->GetText());
-            }
-            else
-            {
-                throw fgl_parsing_error("Error parsing FGL file: no element 'z' in 'size'");
-            }
-
-            const aspect_ratio<Lyt> ar{x, y, z};
-            lyt.resize(ar);
+            lyt.resize(read_position(size));
         }
         else
         {
@@ -263,6 +236,29 @@ class read_fgl_layout_impl
         // set clocking scheme
         if (auto* const clocking = layout->FirstChildElement("clocking"); clocking != nullptr)
         {
+            if (const auto* elements = clocking->FirstChildElement("synchronization_elements"); elements != nullptr)
+            {
+                if constexpr (has_synchronization_elements_v<Lyt>)
+                {
+                    for (const auto* element = elements->FirstChildElement("element"); element != nullptr;
+                         element             = element->NextSiblingElement("element"))
+                    {
+                        const auto delay = read_number(element, "delay");
+                        if (delay > std::numeric_limits<typename Lyt::sync_elem_t>::max())
+                        {
+                            throw fgl_parsing_error(
+                                "Error parsing FGL file: synchronization delay exceeds the target range");
+                        }
+                        lyt.assign_synchronization_element(read_position(element),
+                                                           static_cast<typename Lyt::sync_elem_t>(delay));
+                    }
+                }
+                else
+                {
+                    throw fgl_parsing_error(
+                        "Error parsing FGL file: target layout does not support synchronization elements");
+                }
+            }
             if (auto* const clocking_scheme_name = clocking->FirstChildElement("name");
                 clocking_scheme_name != nullptr && (clocking_scheme_name->GetText() != nullptr))
             {
@@ -277,40 +273,13 @@ class read_fgl_layout_impl
                         for (const auto* clock_zone = clock_zones->FirstChildElement("zone"); clock_zone != nullptr;
                              clock_zone             = clock_zone->NextSiblingElement("zone"))
                         {
-                            int x_coord = 0;
-                            if (const auto* const clocking_zone_x = clock_zone->FirstChildElement("x");
-                                clocking_zone_x != nullptr && (clocking_zone_x->GetText() != nullptr))
+                            const auto position = read_position(clock_zone, false);
+                            const auto clock    = read_number(clock_zone, "clock");
+                            if (clock >= lyt.num_clocks())
                             {
-                                x_coord = std::stoi(clocking_zone_x->GetText());
+                                throw fgl_parsing_error("Error parsing FGL file: clock exceeds the phase count");
                             }
-                            else
-                            {
-                                throw fgl_parsing_error("Error parsing FGL file: no element 'x' in 'zone'");
-                            }
-
-                            int y_coord = 0;
-                            if (const auto* const clocking_zone_y = clock_zone->FirstChildElement("y");
-                                clocking_zone_y != nullptr && (clocking_zone_y->GetText() != nullptr))
-                            {
-                                y_coord = std::stoi(clocking_zone_y->GetText());
-                            }
-                            else
-                            {
-                                throw fgl_parsing_error("Error parsing FGL file: no element 'y' in 'zone'");
-                            }
-
-                            uint8_t clock = 0;
-                            if (const auto* const clocking_zone_clock = clock_zone->FirstChildElement("clock");
-                                clocking_zone_clock != nullptr && (clocking_zone_clock->GetText() != nullptr))
-                            {
-                                clock = static_cast<uint8_t>(*clocking_zone_clock->GetText());
-                            }
-                            else
-                            {
-                                throw fgl_parsing_error("Error parsing FGL file: no element 'clock' in 'zone'");
-                            }
-
-                            lyt.assign_clock_number({x_coord, y_coord}, clock);
+                            lyt.assign_clock_number(position, static_cast<uint8_t>(clock));
                         }
                     }
                     else if (std::ranges::find(open_clocking_schemes,
@@ -384,40 +353,7 @@ class read_fgl_layout_impl
                     throw fgl_parsing_error("Error parsing FGL file: no element 'loc'");
                 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-                // get x-coordinate
-                if (const auto* const loc_x = loc->FirstChildElement("x");
-                    loc_x != nullptr && (loc_x->GetText() != nullptr))
-                {
-                    gate.loc.x = static_cast<decltype(gate.loc.x)>(std::stoull(loc_x->GetText()));
-                }
-                else
-                {
-                    throw fgl_parsing_error("Error parsing FGL file: no element 'x' in 'loc'");
-                }
-
-                // get y-coordinate
-                if (const auto* const loc_y = loc->FirstChildElement("y");
-                    loc_y != nullptr && (loc_y->GetText() != nullptr))
-                {
-                    gate.loc.y = static_cast<decltype(gate.loc.y)>(std::stoull(loc_y->GetText()));
-                }
-                else
-                {
-                    throw fgl_parsing_error("Error parsing FGL file: no element 'y' in 'loc'");
-                }
-
-                // get z-coordinate
-                if (const auto* const loc_z = loc->FirstChildElement("z");
-                    loc_z != nullptr && (loc_z->GetText() != nullptr))
-                {
-                    gate.loc.z = static_cast<decltype(gate.loc.z)>(std::stoull(loc_z->GetText()));
-                }
-                else
-                {
-                    throw fgl_parsing_error("Error parsing FGL file: no element 'z' in 'loc'");
-                }
+                gate.loc = read_position(loc);
 
                 if (const auto* const incoming_signals = gate_xml->FirstChildElement("incoming");
                     incoming_signals != nullptr)
@@ -425,45 +361,9 @@ class read_fgl_layout_impl
                     for (const auto* incoming_signal                 = incoming_signals->FirstChildElement("signal");
                          incoming_signal != nullptr; incoming_signal = incoming_signal->NextSiblingElement("signal"))
                     {
-                        tile<Lyt> incoming{};
-
-                        // get x-coordinate of incoming signal
-                        if (const auto* const incoming_signal_x = incoming_signal->FirstChildElement("x");
-                            incoming_signal_x != nullptr && (incoming_signal_x->GetText() != nullptr))
-                        {
-                            incoming.x = static_cast<decltype(incoming.x)>(std::stoull(incoming_signal_x->GetText()));
-                        }
-                        else
-                        {
-                            throw fgl_parsing_error("Error parsing FGL file: no element 'x' in 'signal'");
-                        }
-
-                        // get y-coordinate of incoming signal
-                        if (const auto* const incoming_signal_y = incoming_signal->FirstChildElement("y");
-                            incoming_signal_y != nullptr && (incoming_signal_y->GetText() != nullptr))
-                        {
-                            incoming.y = static_cast<decltype(incoming.y)>(std::stoull(incoming_signal_y->GetText()));
-                        }
-                        else
-                        {
-                            throw fgl_parsing_error("Error parsing FGL file: no element 'y' in 'signal'");
-                        }
-
-                        // get z-coordinate of incoming signal
-                        if (const auto* const incoming_signal_z = incoming_signal->FirstChildElement("z");
-                            incoming_signal_z != nullptr && (incoming_signal_z->GetText() != nullptr))
-                        {
-                            incoming.z = static_cast<decltype(incoming.z)>(std::stoull(incoming_signal_z->GetText()));
-                        }
-                        else
-                        {
-                            throw fgl_parsing_error("Error parsing FGL file: no element 'z' in 'signal'");
-                        }
-
-                        gate.incoming.push_back(incoming);
+                        gate.incoming.push_back(read_position(incoming_signal));
                     }
                 }
-#pragma GCC diagnostic pop
 
                 gates.push_back(gate);
             }
@@ -704,6 +604,56 @@ class read_fgl_layout_impl
      * The input stream from which the gate-level layout is read.
      */
     std::istream& is;
+    /**
+     * @brief Read a nonnegative integer without truncation or trailing characters.
+     * @param parent XML element containing the number.
+     * @param name Child element name.
+     * @return Parsed integer.
+     * @throws fgl_parsing_error If the element is missing or the number is invalid.
+     */
+    static uint64_t read_number(const tinyxml2::XMLElement* parent, const char* name)
+    {
+        const auto* child = parent->FirstChildElement(name);
+        if (child == nullptr || child->GetText() == nullptr)
+        {
+            throw fgl_parsing_error(
+                fmt::format("Error parsing FGL file: no element '{}' in '{}'", name, parent->Name()));
+        }
+        const std::string_view text{child->GetText()};
+        const auto             first = text.find_first_not_of(" \t\r\n");
+        const auto             last  = text.find_last_not_of(" \t\r\n");
+        if (first == std::string_view::npos)
+        {
+            throw fgl_parsing_error("Error parsing FGL file: empty coordinate");
+        }
+        uint64_t   value{};
+        const auto result = std::from_chars(text.data() + first, text.data() + last + 1, value);
+        if (result.ec != std::errc{} || result.ptr != text.data() + last + 1)
+        {
+            throw fgl_parsing_error(fmt::format("Error parsing FGL file: invalid nonnegative integer '{}'", text));
+        }
+        return value;
+    }
+    /**
+     * @brief Read a position and reject values the layout's coordinate type cannot represent.
+     * @param element XML element containing x, y, and optionally z.
+     * @param with_z Whether the z child is required.
+     * @return Losslessly represented coordinate.
+     * @throws fgl_parsing_error If an axis is invalid or overflows.
+     */
+    static tile<Lyt> read_position(const tinyxml2::XMLElement* element, const bool with_z = true)
+    {
+        const auto      x = read_number(element, "x");
+        const auto      y = read_number(element, "y");
+        const auto      z = with_z ? read_number(element, "z") : 0u;
+        const tile<Lyt> position{x, y, z};
+        if (static_cast<uint64_t>(position.x) != x || static_cast<uint64_t>(position.y) != y ||
+            static_cast<uint64_t>(position.z) != z)
+        {
+            throw fgl_parsing_error("Error parsing FGL file: coordinate exceeds the target layout's range");
+        }
+        return position;
+    }
     /**
      * @struct gate_storage
      *

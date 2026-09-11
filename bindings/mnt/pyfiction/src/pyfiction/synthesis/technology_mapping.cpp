@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Simon Hofmann (simon1hofmann)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -22,8 +23,10 @@
 #include <fiction/synthesis/technology_mapping.hpp>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/chrono.h>
 #include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -105,6 +108,17 @@ void technology_mapping(nanobind::module_& m)
                 DOC(fiction_synthesis_technology_mapping_params_and_xor))
 
         ;
+
+    py::class_<mockturtle::emap_stats>(m, "mapper_stats", "Technology mapper results, including failure status.")
+        .def_ro("mapping_error", &mockturtle::emap_stats::mapping_error)
+        .def_ro("area", &mockturtle::emap_stats::area)
+        .def_ro("delay", &mockturtle::emap_stats::delay)
+        .def_ro("power", &mockturtle::emap_stats::power)
+        .def_ro("inverters", &mockturtle::emap_stats::inverters)
+        .def_ro("multioutput_gates", &mockturtle::emap_stats::multioutput_gates)
+        .def_ro("time_multioutput", &mockturtle::emap_stats::time_multioutput)
+        .def_ro("time_total", &mockturtle::emap_stats::time_total)
+        .def_ro("round_stats", &mockturtle::emap_stats::round_stats);
 
     py::class_<fiction::synthesis::technology_mapping_stats>(m, "technology_mapping_stats",
                                                              DOC(fiction_synthesis_technology_mapping_stats))

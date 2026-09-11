@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/verification/critical_path_length_and_throughput.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -55,6 +56,12 @@ void critical_path_length_and_throughput(nanobind::module_& m)
     detail::critical_path_length_and_throughput_impl<py_cartesian_gate_layout>(m);
     detail::critical_path_length_and_throughput_impl<py_shifted_cartesian_gate_layout>(m);
     detail::critical_path_length_and_throughput_impl<py_hexagonal_gate_layout>(m);
+    detail::critical_path_length_and_throughput_impl<py_odd_row_cartesian_gate_layout>(m);
+    detail::critical_path_length_and_throughput_impl<py_even_row_cartesian_gate_layout>(m);
+    detail::critical_path_length_and_throughput_impl<py_even_column_cartesian_gate_layout>(m);
+    detail::critical_path_length_and_throughput_impl<py_odd_row_hex_gate_layout>(m);
+    detail::critical_path_length_and_throughput_impl<py_odd_column_hex_gate_layout>(m);
+    detail::critical_path_length_and_throughput_impl<py_even_column_hex_gate_layout>(m);
 }
 
 }  // namespace pyfiction

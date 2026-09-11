@@ -13,6 +13,7 @@
  * @brief Writer for SiDB simulation results in SiQAD's XML format.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -20,6 +21,7 @@
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -273,15 +275,7 @@ inline void write_sqd_sim_result(const sidb::simulation::result& sim_result, std
  */
 inline void write_sqd_sim_result(const sidb::simulation::result& sim_result, const std::string_view& filename)
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_sqd_sim_result(sim_result, os);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_sqd_sim_result(sim_result, os); });
 }
 
 }  // namespace fiction::sidb::simulation::io
