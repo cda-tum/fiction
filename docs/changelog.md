@@ -409,6 +409,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Preserved all FGL topologies, hexagonal orthogonal variants, synchronization elements, native random generators, and ABC flow controls.
   - Rejected invalid mapping, numeric inputs, and conflicting writer options without replacing stored elements.
+  - Logic simulation builds output bits without an intermediate binary string.
   - Added compact help, width-aware stores, Graphviz SVG viewing, piped input, and reliable quiet-mode results and cleanup.
   - The Python shell computes SiDB area from the layout lattice and rejects cell-dimension overrides.
   - SiDB store descriptions and statistics include lattice-based physical area and handle the full column range without integer overflow
@@ -440,6 +441,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation:
 
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
+  - Nanobind API documentation now keeps its custom class renderer with Sphinx's deferred registration.
+    Removed duplicate bounding-box entries and corrected the critical-temperature overload reference.
   - Restored Python API entries and method signatures, and formatted generated docstrings.
   - SiDB reader documentation now lists every overload without ambiguous signatures.
 
@@ -456,6 +459,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - I/O:
 
   - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
+  - Transactional writers now report filesystem setup and replacement errors as stream failures.
   - Stacked FQCA imports preserve all layers and cell metadata. Layout readers reject coordinate overflow; writers replace files only after successful serialization.
   - QCA SVG output now uses valid text colors in simple tile mode.
   - SQD readers now reject fractional coordinates and trailing text in numeric attributes.
