@@ -39,6 +39,36 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * Writes a gate-level layout as DOT with the drawer its topology needs.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @tparam ClockColors Color the tiles by clock number instead of by gate type.
+ * @tparam DrawIndexes Label the tiles with their node indices.
+ * @param lyt The layout to draw.
+ * @param filename Path of the file to write.
+ */
+template <typename Lyt, bool ClockColors, bool DrawIndexes>
+void draw(const Lyt& lyt, const std::string_view& filename)
+{
+    if constexpr (fiction::is_cartesian_layout_v<Lyt>)
+    {
+        fiction::layouts::io::write_dot_layout<
+            Lyt, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename);
+    }
+    else if constexpr (fiction::is_shifted_cartesian_layout_v<Lyt>)
+    {
+        fiction::layouts::io::write_dot_layout<
+            Lyt, fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt,
+                                                                                                            filename);
+    }
+    else if constexpr (fiction::is_hexagonal_layout_v<Lyt>)
+    {
+        fiction::layouts::io::write_dot_layout<
+            Lyt, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename);
+    }
+}
+
 template <typename Lyt>
 void write_dot_layout(nanobind::module_& m)
 {
@@ -46,26 +76,27 @@ void write_dot_layout(nanobind::module_& m)
 
     m.def(
         "write_dot_layout",
-        [](const Lyt& lyt, const std::string_view& filename)
+        [](const Lyt& lyt, const std::string_view& filename, const bool clock_colors, const bool indexes)
         {
-            if constexpr (fiction::is_cartesian_layout_v<Lyt>)
+            if (clock_colors && indexes)
             {
-                fiction::layouts::io::write_dot_layout<Lyt, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt>>(
-                    lyt, filename);
+                draw<Lyt, true, true>(lyt, filename);
             }
-            else if constexpr (fiction::is_shifted_cartesian_layout_v<Lyt>)
+            else if (clock_colors)
             {
-                fiction::layouts::io::write_dot_layout<Lyt,
-                                                       fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt>>(
-                    lyt, filename);
+                draw<Lyt, true, false>(lyt, filename);
             }
-            else if constexpr (fiction::is_hexagonal_layout_v<Lyt>)
+            else if (indexes)
             {
-                fiction::layouts::io::write_dot_layout<Lyt, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt>>(
-                    lyt, filename);
+                draw<Lyt, false, true>(lyt, filename);
+            }
+            else
+            {
+                draw<Lyt, false, false>(lyt, filename);
             }
         },
-        py::arg("layout"), py::arg("filename"), DOC(fiction_layouts_io_write_dot_layout));
+        py::arg("layout"), py::arg("filename"), py::arg("clock_colors") = false, py::arg("indexes") = false,
+        DOC(fiction_layouts_io_write_dot_layout));
 }
 
 }  // namespace detail

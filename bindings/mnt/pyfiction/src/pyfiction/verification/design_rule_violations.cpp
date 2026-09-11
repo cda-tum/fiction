@@ -25,8 +25,9 @@
 #include <utility>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>   // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/array.h>   // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -41,8 +42,8 @@ void gate_level_drvs_impl(nanobind::module_& m)
 
     m.def(
         "gate_level_drvs",
-        [](const Lyt& lyt, fiction::verification::gate_level_drv_params params = {},
-           const bool print_report = false) -> std::pair<std::size_t, std::size_t>
+        [](const Lyt& lyt, fiction::verification::gate_level_drv_params params = {}, const bool print_report = false,
+           fiction::verification::gate_level_drv_stats* statistics = nullptr) -> std::pair<std::size_t, std::size_t>
         {
             std::ostringstream report_stream{};
             params.out = &report_stream;
@@ -56,10 +57,15 @@ void gate_level_drvs_impl(nanobind::module_& m)
                 nanobind::print(report_stream.str().c_str());
             }
 
+            if (statistics != nullptr)
+            {
+                *statistics = stats;
+            }
+
             return {stats.warnings, stats.drvs};
         },
         py::arg("layout"), py::arg("params") = fiction::verification::gate_level_drv_params{},
-        py::arg("print_report") = false, DOC(fiction_verification_gate_level_drvs));
+        py::arg("print_report") = false, py::arg("statistics") = nullptr, DOC(fiction_verification_gate_level_drvs));
 }
 
 }  // namespace detail
@@ -91,6 +97,19 @@ void design_rule_violations(nanobind::module_& m)
                 DOC(fiction_verification_gate_level_drv_params_io_pins))
         .def_rw("border_io", &fiction::verification::gate_level_drv_params::border_io,
                 DOC(fiction_verification_gate_level_drv_params_border_io))
+
+        ;
+
+    py::class_<fiction::verification::gate_level_drv_stats>(m, "gate_level_drv_stats",
+                                                            DOC(fiction_verification_gate_level_drv_stats))
+        .def(py::init<>(), "Default constructor.")
+        .def_ro("drvs", &fiction::verification::gate_level_drv_stats::drvs,
+                DOC(fiction_verification_gate_level_drv_stats_drvs))
+        .def_ro("warnings", &fiction::verification::gate_level_drv_stats::warnings,
+                DOC(fiction_verification_gate_level_drv_stats_warnings))
+        .def_prop_ro(
+            "report", [](const fiction::verification::gate_level_drv_stats& stats) { return stats.report.dump(); },
+            "The full design rule check report as a JSON string.")
 
         ;
 

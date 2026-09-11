@@ -18,6 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 
 #include <sstream>
@@ -40,9 +41,16 @@ void orthogonal(nanobind::module_& m)
 {
     namespace py = nanobind;
 
+    py::enum_<fiction::layouts::clocking::num_clks>(m, "num_clks", DOC(fiction_layouts_clocking_num_clks))
+        .value("THREE", fiction::layouts::clocking::num_clks::THREE, DOC(fiction_layouts_clocking_num_clks_THREE))
+        .value("FOUR", fiction::layouts::clocking::num_clks::FOUR, DOC(fiction_layouts_clocking_num_clks_FOUR));
+
     py::class_<fiction::physical_design::orthogonal_physical_design_params>(
         m, "orthogonal_params", DOC(fiction_physical_design_orthogonal_physical_design_params))
-        .def(py::init<>(), "Default constructor.");
+        .def(py::init<>(), "Default constructor.")
+        .def_rw("number_of_clock_phases",
+                &fiction::physical_design::orthogonal_physical_design_params::number_of_clock_phases,
+                DOC(fiction_physical_design_orthogonal_physical_design_params_number_of_clock_phases));
 
     py::class_<fiction::physical_design::orthogonal_physical_design_stats>(
         m, "orthogonal_stats", DOC(fiction_physical_design_orthogonal_physical_design_stats))

@@ -37,8 +37,20 @@ void write_dot_network(nanobind::module_& m)
 
     m.def(
         "write_dot_network",
-        [](const Ntk& ntk, const std::string& filename) { fiction::networks::io::write_dot_network(ntk, filename); },
-        py::arg("network"), py::arg("filename"), DOC(fiction_networks_io_write_dot_network));
+        [](const Ntk& ntk, const std::string& filename, const bool indexes)
+        {
+            if (indexes)
+            {
+                fiction::networks::io::write_dot_network<Ntk, fiction::networks::io::technology_dot_drawer<Ntk, true>>(
+                    ntk, filename);
+            }
+            else
+            {
+                fiction::networks::io::write_dot_network<Ntk, fiction::networks::io::technology_dot_drawer<Ntk, false>>(
+                    ntk, filename);
+            }
+        },
+        py::arg("network"), py::arg("filename"), py::arg("indexes") = true, DOC(fiction_networks_io_write_dot_network));
 }
 
 }  // namespace detail

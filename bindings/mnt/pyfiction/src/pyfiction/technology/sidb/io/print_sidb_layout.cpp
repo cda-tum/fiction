@@ -37,14 +37,15 @@ void print_sidb_layout(nanobind::module_& m)
     m.def(
         "print_sidb_layout",
         [](const fiction::sidb::layout& lyt, const std::optional<fiction::sidb::charge_distribution>& cd,
-           const bool draw_lattice)
+           const bool lat_color, const bool crop_layout, const bool draw_lattice)
         {
             std::ostringstream os{};
-            fiction::sidb::io::print_sidb_layout(os, lyt, cd.has_value() ? &*cd : nullptr, false, false, draw_lattice);
+            fiction::sidb::io::print_sidb_layout(os, lyt, cd.has_value() ? &*cd : nullptr, lat_color, crop_layout,
+                                                 draw_lattice);
             return os.str();
         },
-        py::arg("layout"), py::arg("charge_distribution") = py::none(), py::arg("draw_lattice") = false,
-        DOC(fiction_sidb_io_print_sidb_layout));
+        py::arg("layout"), py::arg("charge_distribution") = py::none(), py::arg("lat_color") = true,
+        py::arg("crop_layout") = false, py::arg("draw_lattice") = true, DOC(fiction_sidb_io_print_sidb_layout));
 }
 
 }  // namespace pyfiction
