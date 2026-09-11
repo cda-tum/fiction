@@ -343,6 +343,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
   - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.
+  - Clocked-layout clones preserve clock overrides without sharing later clock-number edits.
   - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
     Potential landscapes validate basis indices even for isolated SiDBs and defects.
   - SiDB cell conversion now rejects coordinates outside the target coordinate range.

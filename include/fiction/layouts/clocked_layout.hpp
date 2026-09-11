@@ -126,6 +126,7 @@ class clocked_layout : public CoordinateLayout
     {
         auto copy = clocked_layout(CoordinateLayout::clone());
         copy.strg = std::make_shared<clocked_layout_storage>(*strg);
+        copy.replace_clocking_scheme(*strg->clocking);
 
         return copy;
     }

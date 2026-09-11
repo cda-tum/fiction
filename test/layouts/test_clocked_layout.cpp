@@ -40,9 +40,16 @@ TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<coords::offset>>;
 
-    const clk_lyt original{{5, 5, 0}, clocking::twoddwave<clk_lyt>()};
+    clk_lyt original{{5, 5, 0}, clocking::twoddwave<clk_lyt>()};
+    original.assign_clock_number({0, 0}, 3);
 
     auto copy = original.clone();
+
+    CHECK(copy.get_clock_number({0, 0}) == 3);
+    original.assign_clock_number({0, 0}, 1);
+    CHECK(copy.get_clock_number({0, 0}) == 3);
+    copy.assign_clock_number({0, 0}, 2);
+    CHECK(original.get_clock_number({0, 0}) == 1);
 
     copy.resize({10, 10, 1});
     copy.replace_clocking_scheme(clocking::use<clk_lyt>());
