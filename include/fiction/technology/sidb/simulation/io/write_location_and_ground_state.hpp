@@ -13,7 +13,6 @@
  * @brief Writer that pairs SiDB positions with their ground state charge distributions.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

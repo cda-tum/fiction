@@ -12,7 +12,6 @@
  * @file
  * @brief Writer for QCA layouts in the QCA format used by QCADesigner.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

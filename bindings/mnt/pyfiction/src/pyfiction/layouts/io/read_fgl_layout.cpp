@@ -13,7 +13,6 @@
  * @brief Python bindings for `fiction/layouts/io/read_fgl_layout.hpp`.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"

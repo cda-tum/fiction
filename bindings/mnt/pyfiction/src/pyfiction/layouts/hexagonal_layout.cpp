@@ -12,7 +12,6 @@
  * @file
  * @brief Python bindings for `fiction/layouts/hexagonal_layout.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"

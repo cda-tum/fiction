@@ -12,7 +12,6 @@
  * @file
  * @brief Python bindings for counting the gate types of logic networks and gate-level layouts.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"

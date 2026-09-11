@@ -13,7 +13,6 @@
  * @brief Python bindings for `fiction/layouts/gate_level_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"

@@ -12,7 +12,6 @@
  * @file
  * @brief Python bindings for writing logic networks to Verilog, BLIF, and AIGER files.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/types.hpp"

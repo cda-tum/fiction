@@ -12,7 +12,6 @@
  * @file
  * @brief Tests for `fiction/synthesis/network_conversion.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>

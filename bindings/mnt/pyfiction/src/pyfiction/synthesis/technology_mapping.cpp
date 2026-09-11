@@ -14,7 +14,6 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Simon Hofmann (simon1hofmann)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"

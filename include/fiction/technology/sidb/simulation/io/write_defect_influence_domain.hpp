@@ -13,7 +13,6 @@
  * @brief Writer that serializes a defect influence domain to CSV.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

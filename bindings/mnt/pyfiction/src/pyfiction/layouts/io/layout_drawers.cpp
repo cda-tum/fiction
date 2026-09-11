@@ -12,7 +12,6 @@
  * @file
  * @brief Python bindings for `fiction/layouts/io/layout_drawers.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"

@@ -11,7 +11,7 @@
 /**
  * @file
  * @brief Tests transactional file replacement and serialization failure handling.
- * @author OpenAI (Codex)
+ * @author Marcel Walter (marcelwa)
  */
 
 #include <catch2/catch_test_macros.hpp>

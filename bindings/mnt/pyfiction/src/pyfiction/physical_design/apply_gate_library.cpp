@@ -13,7 +13,6 @@
  * @brief Python bindings for `fiction/physical_design/apply_gate_library.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"

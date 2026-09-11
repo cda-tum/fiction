@@ -13,7 +13,6 @@
  * @brief Converts a logic network into an equivalent one of another network type.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
- * @author OpenAI (Codex)
  */
 
 #pragma once

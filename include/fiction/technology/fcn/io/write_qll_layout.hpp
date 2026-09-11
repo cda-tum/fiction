@@ -13,7 +13,6 @@
  * @brief Writer for QCA, molQCA, and iNML layouts in the QLL format of ToPoliNano and MagCAD.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
- * @author OpenAI (Codex)
  */
 
 #pragma once

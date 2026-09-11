@@ -13,7 +13,6 @@
  * @brief Python bindings for `fiction/verification/equivalence_checking.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"

@@ -13,7 +13,6 @@
  * @brief Python bindings for `fiction/technology/fcn/io/write_qll_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"

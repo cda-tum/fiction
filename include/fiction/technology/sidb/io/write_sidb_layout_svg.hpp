@@ -13,7 +13,6 @@
  * @brief SVG writer for SiDB layouts.
  * @author Sophia Kuhn
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

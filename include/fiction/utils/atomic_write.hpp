@@ -11,7 +11,7 @@
 /**
  * @file
  * @brief Writes files transactionally and checks stream failures.
- * @author OpenAI (Codex)
+ * @author Marcel Walter (marcelwa)
  */
 
 #pragma once

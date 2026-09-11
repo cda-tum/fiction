@@ -13,7 +13,6 @@
  * @brief Reader for gate-level layouts stored in the FGL file format.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #pragma once

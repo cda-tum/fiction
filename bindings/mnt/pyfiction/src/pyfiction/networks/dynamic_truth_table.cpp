@@ -12,7 +12,6 @@
  * @file
  * @brief Python bindings for `kitty`'s dynamic truth tables.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI (Codex)
  */
 
 #include "pyfiction/types.hpp"
