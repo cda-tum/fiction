@@ -39,7 +39,9 @@ The Python call accepts `hexagonal_gate_layout` and returns `sidb_layout`.
 The call leaves its input unchanged and releases the GIL during circuit design.
 An unsupported gate type or orientation raises `ValueError`; an unsuccessful gate search
 raises `RuntimeError`. This interface does not accept defective surfaces or logic networks.
-The `PRUNING_ONLY` gate-design mode skips operational simulation and returns candidates.
+
+Choose the gate-search algorithm through `design_gate_params.design_mode`, as shown below.
+The `PRUNING_ONLY` mode skips operational simulation, so it does not verify the designed gates' functionality.
 
 ```python
 from mnt.pyfiction import (
@@ -65,7 +67,7 @@ write_sqd_layout(circuit, "and.sqd")
 ```
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.complex_gate_design_policy
+.. autoclass:: mnt.pyfiction.sidb_complex_gate_design_policy
    :members:
 
 .. autoclass:: mnt.pyfiction.sidb_on_the_fly_gate_library_params

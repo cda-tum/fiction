@@ -16,12 +16,12 @@ import pytest
 
 from mnt.pyfiction import (
     cartesian_gate_layout,
-    complex_gate_design_policy,
     design_sidb_gates_mode,
     hexagonal_gate_layout,
     on_the_fly_sidb_circuit_design,
     on_the_fly_sidb_circuit_design_params,
     read_sqd_layout,
+    sidb_complex_gate_design_policy,
     sidb_layout,
     sidb_on_the_fly_gate_library_params,
     site_at_row,
@@ -54,19 +54,26 @@ def test_parameters() -> None:
     assert library.design_gate_params.number_of_canvas_sidbs == 1
     assert library.design_gate_params.termination_cond == termination_condition.AFTER_FIRST_SOLUTION
     assert library.canvas_sidb_complex_gates == 3
-    assert library.using_predefined_crossing_and_double_wire_if_possible == complex_gate_design_policy.USING_PREDEFINED
+    assert (
+        library.using_predefined_crossing_and_double_wire_if_possible
+        == sidb_complex_gate_design_policy.USING_PREDEFINED
+    )
     assert library.influence_radius_charged_defects == 15
 
     library.design_gate_params.number_of_canvas_sidbs = 2
     library.canvas_sidb_complex_gates = 4
-    library.using_predefined_crossing_and_double_wire_if_possible = complex_gate_design_policy.DESIGN_ON_THE_FLY
+    library.using_predefined_crossing_and_double_wire_if_possible = sidb_complex_gate_design_policy.DESIGN_ON_THE_FLY
     library.influence_radius_charged_defects = 10
     assert params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs == 2
     assert library.canvas_sidb_complex_gates == 4
-    assert library.using_predefined_crossing_and_double_wire_if_possible == complex_gate_design_policy.DESIGN_ON_THE_FLY
+    assert (
+        library.using_predefined_crossing_and_double_wire_if_possible
+        == sidb_complex_gate_design_policy.DESIGN_ON_THE_FLY
+    )
     assert library.influence_radius_charged_defects == 10
 
 
+@pytest.mark.slow
 def test_design_and_export(and_circuit: hexagonal_gate_layout, tmp_path: Path) -> None:
     """A real circuit produces SiDBs without modifying its gate-level input."""
     params = on_the_fly_sidb_circuit_design_params()

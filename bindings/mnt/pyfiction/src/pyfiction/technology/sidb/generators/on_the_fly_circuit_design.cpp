@@ -53,7 +53,7 @@ void on_the_fly_circuit_design(nanobind::module_& m)
      */
     using circuit_params = fiction::sidb::generators::on_the_fly_circuit_design_params;
 
-    py::enum_<complex_policy>(m, "complex_gate_design_policy",
+    py::enum_<complex_policy>(m, "sidb_complex_gate_design_policy",
                               DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy))
         .value("USING_PREDEFINED", complex_policy::USING_PREDEFINED,
                DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_USING_PREDEFINED))
@@ -81,7 +81,7 @@ void on_the_fly_circuit_design(nanobind::module_& m)
 
     m.def(
         "on_the_fly_sidb_circuit_design",
-        [](const py_hexagonal_gate_layout& layout, const circuit_params params)
+        [](const py_hexagonal_gate_layout& layout, circuit_params params)
         {
             // Gate layouts share storage on copy; clone before releasing the GIL so Python edits cannot race the
             // design.

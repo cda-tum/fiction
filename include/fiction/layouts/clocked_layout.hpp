@@ -123,6 +123,7 @@ class clocked_layout : public CoordinateLayout
     {
         auto copy = clocked_layout(CoordinateLayout::clone());
         copy.strg = std::make_shared<clocked_layout_storage>(*strg);
+        // The storage copy shares the clocking scheme pointer; detach it so clock-number overrides stay independent.
         copy.replace_clocking_scheme(*strg->clocking);
 
         return copy;

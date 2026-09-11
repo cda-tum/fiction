@@ -18,27 +18,34 @@
 #pragma once
 
 #include "fiction/physical_design/apply_gate_library.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/layout.hpp"
+#include "fiction/technology/sidb/on_the_fly_gate_library.hpp"
+#include "fiction/traits.hpp"
+#include "fiction/types.hpp"
+
+#include <stdexcept>
+#include <string>
+#include <string_view>
+
+#if (FICTION_Z3_SOLVER)
+
 #include "fiction/physical_design/exact.hpp"
 #include "fiction/physical_design/surface_analysis.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
-#include "fiction/technology/sidb/layout.hpp"
-#include "fiction/technology/sidb/on_the_fly_gate_library.hpp"
 #include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
-#include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <fmt/format.h>
+#include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
 #include <cstdio>
 #include <optional>
-#include <stdexcept>
-#include <string>
-#include <string_view>
 #include <utility>
+
+#endif
 
 namespace fiction::sidb::generators
 {
