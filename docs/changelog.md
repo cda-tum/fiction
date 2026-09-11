@@ -59,6 +59,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `displacement_robustness_domain`, and defect-domain writers return `None`
   - `displacement_robustness_domain` replaces its `_100` and `_111` variants
   - `apply_bestagon_library` returns `sidb_layout`
+  - Added `on_the_fly_sidb_circuit_design` to design SiDB circuits from placed and routed
+    hexagonal gate-level layouts, with configurable gate-design parameters
 
 - Tooling:
 

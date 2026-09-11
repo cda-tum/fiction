@@ -21,11 +21,18 @@ namespace pyfiction
 
 void random_layout_generator(nanobind::module_& m);
 void design_gates(nanobind::module_& m);
+/**
+ * @brief Registers SiDB circuit design and its gate-library parameters.
+ *
+ * @param m Python module.
+ */
+void on_the_fly_circuit_design(nanobind::module_& m);
 
 void register_sidb_generators(nanobind::module_& m)
 {
     random_layout_generator(m);
     design_gates(m);
+    on_the_fly_circuit_design(m);
 }
 
 }  // namespace pyfiction
