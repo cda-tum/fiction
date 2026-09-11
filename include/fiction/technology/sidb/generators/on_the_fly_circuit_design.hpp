@@ -18,27 +18,34 @@
 #pragma once
 
 #include "fiction/physical_design/apply_gate_library.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/layout.hpp"
+#include "fiction/technology/sidb/on_the_fly_gate_library.hpp"
+#include "fiction/traits.hpp"
+#include "fiction/types.hpp"
+
+#include <stdexcept>
+#include <string>
+#include <string_view>
+
+#if (FICTION_Z3_SOLVER)
+
 #include "fiction/physical_design/exact.hpp"
 #include "fiction/physical_design/surface_analysis.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
-#include "fiction/technology/sidb/layout.hpp"
-#include "fiction/technology/sidb/on_the_fly_gate_library.hpp"
 #include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
-#include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <fmt/format.h>
+#include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
 #include <cstdio>
 #include <optional>
-#include <stdexcept>
-#include <string>
-#include <string_view>
 #include <utility>
+
+#endif
 
 namespace fiction::sidb::generators
 {
@@ -71,6 +78,8 @@ class unsuccessful_gate_design_error : public std::runtime_error
      */
     explicit unsuccessful_gate_design_error(const std::string_view msg) : std::runtime_error(std::string{msg}) {}
 };
+#if (FICTION_Z3_SOLVER)
+
 /**
  * This struct stores the parameters to design an SiDB circuit on a defective surface.
  *
@@ -87,6 +96,8 @@ struct on_the_fly_circuit_design_on_defective_surface_params
     physical_design::exact_physical_design_params exact_design_parameters = {};
 };
 
+#endif
+
 /**
  * This struct stores the parameters to design an SiDB circuit.
  *
@@ -98,6 +109,8 @@ struct on_the_fly_circuit_design_params
      */
     sidb::on_the_fly_gate_library_params sidb_on_the_fly_gate_library_parameters = {};
 };
+
+#if (FICTION_Z3_SOLVER)
 
 /**
  * Statistics for the on-the-fly defect-aware circuit design.
@@ -229,6 +242,8 @@ template <typename Ntk, typename GateLyt>
 
     return result;
 }
+
+#endif
 
 /**
  * @brief Designs a lattice-based SiDB circuit for a placed and routed gate-level layout.

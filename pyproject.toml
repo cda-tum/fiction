@@ -159,6 +159,7 @@ strict = true
 filterwarnings = ["error"]
 addopts = [
     "-ra",
+    "--durations=10",
     "--numprocesses=auto", # Automatically use all available CPU cores for parallel testing
 ]
 log_level = "INFO"
@@ -175,6 +176,7 @@ markers = [
     "simulation: SiDB simulation engines and analysis",
     "io: input and output formats across modules",
     "generators: SiDB layout and gate generation",
+    "slow: physical integration tests; exclude with -m 'not slow' for a quick run",
 ]
 
 

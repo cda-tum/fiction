@@ -45,6 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Python bindings:
 
   - Added directory-based test markers, including `pytest -m simulation`.
+  - Marked the SiDB circuit-design integration test as `slow`; `pytest -m 'not slow'` skips it.
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
   - `lattice`, `lattice_site`, `sidb_layout` (the lattice-based layout), `read_sqd_layout`,
     `read_surface_defects`, and the `sidb_layout` overloads of `write_sqd_layout` and
@@ -59,6 +60,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `displacement_robustness_domain`, and defect-domain writers return `None`
   - `displacement_robustness_domain` replaces its `_100` and `_111` variants
   - `apply_bestagon_library` returns `sidb_layout`
+  - Added `on_the_fly_sidb_circuit_design` to design SiDB circuits from placed and routed
+    hexagonal gate-level layouts, with configurable gate-design parameters
 
 - Tooling:
 
@@ -327,6 +330,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Gate design enumerates, counts, and randomly samples only empty, defect-free canvas sites.
   - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
 
+- Build system:
+
+  - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
+
 - CLI:
   - SiDB store descriptions and statistics handle the full column range without integer overflow
 
@@ -337,6 +344,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
   - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.
+  - Clocked-layout clones preserve clock overrides without sharing later clock-number edits.
   - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
     Potential landscapes validate basis indices even for isolated SiDBs and defects.
   - SiDB cell conversion now rejects coordinates outside the target coordinate range.
