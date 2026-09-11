@@ -27,7 +27,7 @@ from .registry import REGISTRY
 from .session import Session
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Callable, Iterable, Sequence
 
     from prompt_toolkit.completion import CompleteEvent
 
@@ -96,20 +96,68 @@ class CommandCompleter(Completer):
         return cmd.parser.completions.get(previous) or None
 
 
+class ForgivingFileHistory(FileHistory):
+    """A file history that gives up on the file instead of ending the shell.
+
+    ``prompt_toolkit`` logs a history it cannot read, but an append that fails leaves ``prompt``
+    through an ``OSError``, which would end the session on the first command a user types. A home
+    directory that is read-only or full costs the history alone here.
+
+    Attributes:
+        report: Called with the first failure; the shell prints it once.
+    """
+
+    def __init__(self, filename: str, report: Callable[[str], None]) -> None:
+        """Create the history.
+
+        Args:
+            filename: The history file.
+            report: Called with the message of the first failure.
+        """
+        super().__init__(filename)
+        self.report = report
+        self._path = filename
+        self._broken = False
+
+    def store_string(self, string: str) -> None:
+        """Append one accepted command to the history file, once and if that works at all.
+
+        Args:
+            string: The command line to remember.
+        """
+        if self._broken:
+            return
+        try:
+            super().store_string(string)
+        except OSError as error:
+            self._broken = True
+            self.report(f"cannot write the command history '{self._path}': {error.strerror}")
+
+
+def _history(session: Session) -> History | None:
+    """Return the command history of the interactive shell.
+
+    Args:
+        session: The session, for the message when the file cannot be used.
+
+    Returns:
+        The history, or ``None`` when even opening the file is impossible.
+    """
+    try:
+        return ForgivingFileHistory(str(HISTORY_FILE), session.error)
+    except OSError as error:  # an unusable home costs the history, not the shell
+        session.error(f"cannot use the command history '{HISTORY_FILE}': {error.strerror}")
+        return None
+
+
 def repl(session: Session) -> None:
     """Run the interactive shell until ``quit`` or end of input.
 
     Args:
         session: The session to run commands in.
     """
-    history: History | None
-    try:
-        history = FileHistory(str(HISTORY_FILE))
-    except OSError as error:  # an unwritable home costs the history, not the shell
-        session.error(f"cannot use the command history '{HISTORY_FILE}': {error.strerror}")
-        history = None
     prompt: PromptSession[str] = PromptSession(
-        history=history,
+        history=_history(session),
         completer=CommandCompleter(),
         complete_while_typing=False,
         bottom_toolbar=session.status_line,

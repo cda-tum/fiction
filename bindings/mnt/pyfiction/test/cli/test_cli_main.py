@@ -21,12 +21,13 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.application import create_app_session
 from prompt_toolkit.completion import CompleteEvent
 from prompt_toolkit.document import Document
+from prompt_toolkit.history import FileHistory
 from prompt_toolkit.input import DummyInput
 from prompt_toolkit.output import DummyOutput
 
 from mnt.pyfiction import __version__
+from mnt.pyfiction.cli import Session, main
 from mnt.pyfiction.cli import app as cli_app
-from mnt.pyfiction.cli import main
 
 
 def test_commands_succeed() -> None:
@@ -159,3 +160,32 @@ def test_quiet_keeps_errors_but_drops_informational_output(capsys: pytest.Captur
     assert not capsys.readouterr().out
     assert main(["-q", "-c", "frobnicate"]) == 1
     assert "unknown command" in capsys.readouterr().err
+
+
+def test_history_write_failure_is_reported_once_and_swallowed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """`prompt_toolkit` appends to the history file inside `prompt`, so a failing append would end
+    the shell on the first command a user types. It costs the history alone instead."""
+
+    def refuse(_self: object, _string: str) -> None:
+        msg = "no space left on device"
+        raise OSError(28, msg)
+
+    monkeypatch.setattr(FileHistory, "store_string", refuse)
+    reported: list[str] = []
+    history = cli_app.ForgivingFileHistory(str(tmp_path / "history"), reported.append)
+    history.store_string("version")
+    history.store_string("ortho")
+    assert len(reported) == 1
+    assert "cannot write the command history" in reported[0]
+
+
+def test_an_unusable_history_file_still_starts_the_shell(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A home the history cannot even be opened in leaves the shell without one, not without a prompt."""
+    monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
+    monkeypatch.setattr(cli_app, "ForgivingFileHistory", Mock(side_effect=OSError(13, "permission denied")))
+    monkeypatch.setattr(PromptSession, "prompt", Mock(side_effect=["version", EOFError]))
+    session = Session()
+    with create_app_session(input=DummyInput(), output=DummyOutput()):
+        cli_app.repl(session)
+    session.close()
+    assert [entry["command"] for entry in session.log] == ["version"]

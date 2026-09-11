@@ -144,20 +144,15 @@ def store(session: Session, args: argparse.Namespace) -> Result:
     """List the elements of the selected stores, or of all stores.
 
     The active element, the one commands work on, is marked with '*'. With --pop, the active
-    element is removed instead and the one before it becomes active.
+    element of every selected store is removed instead and the one before it becomes active.
+    --pop needs the stores spelled out, so that it cannot empty one the user did not mean.
     """
     stores = stores_of(session)
-    names = selected_stores(args) or list(stores)
     if args.pop:
-        removed: dict[str, object] = {}
-        for name in names:
-            element = stores[name].pop()
-            removed[name] = describe(element)
-            session.info(f"removed {one_line(describe(element))}")
-        return removed
+        return _pop(session, stores, selected_stores(args))
 
     listed: dict[str, object] = {}
-    for name in names:
+    for name in selected_stores(args) or list(stores):
         current = stores[name]
         session.console.print(f"[bold]{STORE_FLAGS[name][2]}[/]")
         descriptions = [describe(element) for element in current]
@@ -168,6 +163,39 @@ def store(session: Session, args: argparse.Namespace) -> Result:
             session.info(f"{marker} {index}: {one_line(description)}")
         listed[name] = descriptions
     return listed
+
+
+def _pop(session: Session, stores: dict[str, Store], names: list[str]) -> Result:  # type: ignore[type-arg]
+    """Remove the active element of every named store.
+
+    Every store is checked before any is touched, so a command that cannot run leaves the session
+    exactly as it found it.
+
+    Args:
+        session: The session, for the message.
+        stores: The stores by their flag name.
+        names: The stores the flags selected.
+
+    Returns:
+        The removed elements by store.
+
+    Raises:
+        CommandError: When no store was selected, or one of them is empty.
+    """
+    if not names:
+        flags = ", ".join(short for short, _, _ in STORE_FLAGS.values())
+        msg = f"select the stores to remove from: {flags}"
+        raise CommandError(msg)
+    empty = [stores[name].kind for name in names if stores[name].active is None]
+    if empty:
+        msg = f"no {' and no '.join(empty)} in store"
+        raise CommandError(msg)
+    removed: dict[str, object] = {}
+    for name in names:
+        description = describe(stores[name].pop())
+        removed[name] = description
+        session.info(f"removed {one_line(description)}")
+    return removed
 
 
 def _current_arguments(parser: Parser) -> None:

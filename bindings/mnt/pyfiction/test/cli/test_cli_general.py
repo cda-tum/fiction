@@ -242,6 +242,18 @@ def test_store_pop_removes_the_active_element(mux21_shell: Shell, resource: Call
     assert "no network in store" in mux21_shell.fails("store -n --pop")
 
 
+def test_store_pop_needs_a_store(mux21_shell: Shell) -> None:
+    """Without a flag, --pop would empty stores the user did not name."""
+    assert "select the stores to remove from" in mux21_shell.fails("store --pop")
+    assert len(mux21_shell.session.networks) == 1
+
+
+def test_store_pop_removes_nothing_when_one_store_is_empty(mux21_shell: Shell) -> None:
+    """Every selected store is checked before any is touched, so a failure changes nothing."""
+    assert "no gate-level layout in store" in mux21_shell.fails("store -n -g --pop")
+    assert len(mux21_shell.session.networks) == 1
+
+
 def test_exit_is_an_alias_of_quit(shell: Shell) -> None:
     """`exit` and `quit` are one command, and `help` lists it once."""
     listing = shell.ok("help")

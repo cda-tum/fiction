@@ -29,10 +29,10 @@ paths. The command history persists in `~/.fiction_history` between sessions; an
 history, not the shell. The line below the prompt shows how many elements each store holds and which one is
 active.
 
-`fiction --version` prints the version and exits. Two pieces are optional: an
-[aigverse](https://github.com/marcelwa/aigverse) installation, which `aig`, `abc`, `generate`, `random`, and the
-`.aag` and `.pla` readers need, and an external ABC, which {ref}`abc <abc-cli>` needs. Informational output goes
-to standard output and every error to standard error, so `fiction -c '...' > out.txt` still shows what failed.
+`fiction --version` prints the version and exits. [aigverse](https://github.com/marcelwa/aigverse), which `aig`,
+`abc`, `generate`, `random`, and the `.aag` and `.pla` readers need, comes with the package. The one piece that
+does not is an external ABC, which {ref}`abc <abc-cli>` needs. Informational output goes to standard output and
+every error to standard error, so `fiction -c '...' > out.txt` still shows what failed.
 
 Several commands may follow one another on a line, separated by `;`, and a `#` starts a comment. Quotes group
 words: `tt -e "[(ab)(!ac)]"`. When a command fails, the shell prints the reason and drops the rest of the line;
