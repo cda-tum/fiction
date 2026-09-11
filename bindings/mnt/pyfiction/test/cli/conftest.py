@@ -39,8 +39,10 @@ class Shell:
             log_path: Where the session writes its JSON log on close.
         """
         self.buffer = io.StringIO()
+        self.error_buffer = io.StringIO()
         console = Console(file=self.buffer, width=200, force_terminal=False, color_system=None)
-        self.session = Session(console=console, log_path=log_path)
+        errors = Console(file=self.error_buffer, width=200, force_terminal=False, color_system=None)
+        self.session = Session(console=console, log_path=log_path, errors=errors)
 
     def run(self, line: str) -> bool:
         """Run a command line and forget the output so far.
@@ -51,18 +53,37 @@ class Shell:
         Returns:
             Whether every command on the line succeeded.
         """
-        self.buffer.seek(0)
-        self.buffer.truncate()
+        for buffer in (self.buffer, self.error_buffer):
+            buffer.seek(0)
+            buffer.truncate()
         return self.session.execute(line)
 
     @property
-    def output(self) -> str:
-        """Everything printed since the last :meth:`run`.
+    def stdout(self) -> str:
+        """What went to standard output since the last :meth:`run`.
 
         Returns:
-            The recorded output.
+            The recorded informational output.
         """
         return self.buffer.getvalue()
+
+    @property
+    def stderr(self) -> str:
+        """What went to standard error since the last :meth:`run`.
+
+        Returns:
+            The recorded error messages.
+        """
+        return self.error_buffer.getvalue()
+
+    @property
+    def output(self) -> str:
+        """Everything printed since the last :meth:`run`, errors included.
+
+        Returns:
+            The recorded output of both consoles.
+        """
+        return self.stdout + self.stderr
 
     def ok(self, line: str) -> str:
         """Run a line that must succeed and return its output.
@@ -86,7 +107,7 @@ class Shell:
             The output, which contains the error message.
         """
         assert not self.run(line), self.output
-        assert "error:" in self.output
+        assert "error:" in self.stderr, f"the error went to standard output: {self.stdout}"
         return self.output
 
 

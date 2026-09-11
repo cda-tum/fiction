@@ -17,7 +17,7 @@ from aigverse import abc
 from aigverse.algorithms import equivalence_checking as aig_equivalent
 
 from mnt.pyfiction import aig_network, technology_network
-from mnt.pyfiction.cli.commands.logic import from_aigverse, to_aigverse
+from mnt.pyfiction.cli.aigverse_bridge import from_aigverse, to_aigverse
 
 if TYPE_CHECKING:
     from collections.abc import Callable

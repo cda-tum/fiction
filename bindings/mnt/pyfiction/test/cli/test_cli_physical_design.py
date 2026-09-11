@@ -28,7 +28,17 @@ def test_ortho(mux21_shell: Shell) -> None:
     layout = mux21_shell.session.gate_layouts.current()
     assert isinstance(layout, cartesian_gate_layout)
     assert layout.get_clocking_scheme_name() == "2DDWAVE"
-    assert "num. gates" in mux21_shell.output
+    assert "num_gates" in mux21_shell.output
+
+
+def test_ortho_three_clock_phases(mux21_shell: Shell) -> None:
+    """-n 3 asks the heuristic for the three-phase clocking the library also supports."""
+    mux21_shell.ok("ortho -n 3")
+    three = mux21_shell.session.gate_layouts.current()
+    mux21_shell.ok("ortho -n 4")
+    four = mux21_shell.session.gate_layouts.current()
+    assert three.num_clocks() == 3
+    assert four.num_clocks() == 4
 
 
 def test_ortho_converts_other_network_types(shell: Shell, resource: Callable[[str], str]) -> None:

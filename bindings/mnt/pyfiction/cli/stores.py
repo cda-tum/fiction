@@ -167,6 +167,22 @@ class Store(Generic[T]):
             raise CommandError(msg)
         self.active = index
 
+    def pop(self) -> T:
+        """Remove the active element and make its predecessor, or the new last element, active.
+
+        Returns:
+            The removed element.
+
+        Raises:
+            CommandError: When the store is empty.
+        """
+        if self.active is None:
+            msg = f"no {self.kind} in store"
+            raise CommandError(msg)
+        item = self.items.pop(self.active)
+        self.active = min(self.active, len(self.items) - 1) if self.items else None
+        return item
+
     def clear(self) -> None:
         """Remove every element."""
         self.items.clear()
@@ -187,6 +203,9 @@ class Store(Generic[T]):
 
 def element_name(element: object) -> str:
     """Return the name of a store element, or an empty string for elements without one.
+
+    This is where every ``name`` in a description comes from, so the status line, ``store``, and the
+    log never disagree. It stays cheap, because the status line asks for it on every keystroke.
 
     Args:
         element: A truth table, network, layout, or cell entry.
@@ -234,7 +253,7 @@ def describe_network(network: Network) -> dict[str, object]:
         ``name``, ``type``, ``inputs``, ``outputs``, ``gates``, and ``depth``.
     """
     return {
-        "name": get_name(network),
+        "name": element_name(network),
         "type": NETWORK_TYPES[type(network)],
         "inputs": network.num_pis(),
         "outputs": network.num_pos(),
@@ -255,7 +274,7 @@ def describe_gate_layout(layout: GateLayout) -> dict[str, object]:
     """
     critical_path, throughput = critical_path_length_and_throughput(layout)
     return {
-        "name": layout.get_layout_name(),
+        "name": element_name(layout),
         "topology": TOPOLOGIES[type(layout)],
         "clocking": layout.get_clocking_scheme_name(),
         "size": {"x": layout.x() + 1, "y": layout.y() + 1, "area": layout.area()},
@@ -281,7 +300,7 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
     """
     layout = entry.layout
     description: dict[str, object] = {
-        "name": layout.get_layout_name(),
+        "name": element_name(entry),
         "technology": TECHNOLOGIES[type(layout)],
     }
     if isinstance(layout, sidb_layout):
@@ -385,7 +404,7 @@ def one_line(description: dict[str, object]) -> str:
     head = f"{name} ({kind})" if name else str(kind or "")
     size = description.get("size")
     if isinstance(size, dict):
-        dims = [str(size[axis]) for axis in ("x", "y", "z") if size.get(axis, 1) != 1 or axis != "z"]
+        dims = [str(size[axis]) for axis in ("x", "y", "z") if axis in size and (axis != "z" or size[axis] != 1)]
         parts.append(" x ".join(dims))
     if "inputs" in description:
         parts.append(f"I/O: {description['inputs']}/{description['outputs']}")

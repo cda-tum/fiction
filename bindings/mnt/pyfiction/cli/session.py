@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import os
 import shlex
 import shutil
 import tempfile
@@ -79,22 +80,28 @@ def stats_to_dict(stats: object) -> dict[str, object]:
         stats: A ``*_stats`` object of ``mnt.pyfiction``.
 
     Returns:
-        The attributes as a dictionary.
+        The attributes as a dictionary; members whose C++ type has no caster are named under
+        ``_unsupported`` instead of being dropped silently.
     """
     result: dict[str, object] = {}
+    unsupported: list[str] = []
     for name in dir(stats):
         if name.startswith("_"):
             continue
         try:
             value = getattr(stats, name)
         except TypeError:
-            continue  # a member whose C++ type has no Python binding
+            # a member whose C++ type has no caster; naming it here makes the missing one visible
+            unsupported.append(name)
+            continue
         if callable(value):
             continue
         if isinstance(value, datetime.timedelta):
             result[f"{name}_s"] = value.total_seconds()
         else:
             result[name] = json_value(value)
+    if unsupported:
+        result["_unsupported"] = unsupported
     return result
 
 
@@ -126,7 +133,9 @@ class Session:
     """The state of one shell session.
 
     Attributes:
-        console: Where every message goes.
+        console: Where informational output goes.
+        errors: Where error messages go.
+        quiet: Set by ``--quiet``; :meth:`info` stays silent while it holds.
         truth_tables: The truth table store.
         networks: The logic network store.
         gate_layouts: The gate-level layout store.
@@ -134,15 +143,24 @@ class Session:
         running: Cleared by ``quit``; the interactive loop stops when it is ``False``.
     """
 
-    def __init__(self, console: Console | None = None, log_path: Path | None = None) -> None:
+    def __init__(
+        self,
+        console: Console | None = None,
+        log_path: Path | None = None,
+        errors: Console | None = None,
+    ) -> None:
         """Create an empty session.
 
         Args:
-            console: The console to print to; defaults to the terminal.
+            console: The console informational output goes to; defaults to standard output.
             log_path: Where :meth:`close` writes the JSON statistics log; ``None`` disables the log.
+            errors: The console error messages go to; defaults to standard error, so that
+                ``fiction -c '...' > out`` still shows what went wrong.
         """
         # soft wrapping keeps file paths and layout drawings on one line in narrow terminals
         self.console = console if console is not None else Console(soft_wrap=True)
+        self.errors = errors if errors is not None else Console(soft_wrap=True, stderr=True)
+        self.quiet = False
         self.truth_tables: Store[dynamic_truth_table] = Store("truth table")
         self.networks: Store[Network] = Store("network")
         self.gate_layouts: Store[GateLayout] = Store("gate-level layout")
@@ -152,9 +170,11 @@ class Session:
         self.log: list[dict[str, object]] = []
         self._script_depth = 0
         self._temp_dir: Path | None = None
+        self._temp_index = 0
+        self._to_delete: list[Path] = []
 
     def execute(self, line: str) -> bool:
-        """Run every command on a line, stopping at the first failure.
+        """Run every command on a line, stopping at the first failure or at ``quit``.
 
         Args:
             line: The input line.
@@ -167,7 +187,12 @@ class Session:
         except ValueError as error:
             self.error(str(error))
             return False
-        return all(self.run_command(argv) for argv in commands)
+        for argv in commands:
+            if not self.running:  # 'quit' earlier on the line ends it
+                return True
+            if not self.run_command(argv):
+                return False
+        return True
 
     def run_command(self, argv: list[str]) -> bool:
         """Run one command and record it in the log.
@@ -207,7 +232,7 @@ class Session:
         return True
 
     def run_script(self, path: Path) -> bool:
-        """Run the commands in a file, one line at a time, stopping at the first failure.
+        """Run the commands in a file, one line at a time, stopping at the first failure or at ``quit``.
 
         Args:
             path: The script file.
@@ -230,7 +255,12 @@ class Session:
 
         self._script_depth += 1
         try:
-            return all(self.execute(line) for line in lines)
+            for line in lines:
+                if not self.running:  # 'quit' in the script ends it
+                    return True
+                if not self.execute(line):
+                    return False
+            return True
         finally:
             self._script_depth -= 1
 
@@ -240,6 +270,9 @@ class Session:
             with self.log_path.open("w", encoding="utf-8") as file:
                 json.dump(self.log, file, indent=2, default=str)
                 file.write("\n")
+        for path in self._to_delete:
+            path.unlink(missing_ok=True)
+        self._to_delete.clear()
         if self._temp_dir is not None:
             shutil.rmtree(self._temp_dir, ignore_errors=True)
             self._temp_dir = None
@@ -255,8 +288,28 @@ class Session:
         """
         if self._temp_dir is None:
             self._temp_dir = Path(tempfile.mkdtemp(prefix="fiction-"))
-        index = len(list(self._temp_dir.iterdir()))
-        return self._temp_dir / f"{index}{suffix}"
+        self._temp_index += 1
+        return self._temp_dir / f"{self._temp_index}{suffix}"
+
+    def viewer_file(self, suffix: str, *, delete: bool) -> Path:
+        """Return a fresh path for a file that is handed to an external viewer.
+
+        Viewers return immediately and read the file afterwards, so the file must outlive the
+        command that wrote it. It is kept until the process ends unless ``delete`` asks for it back.
+
+        Args:
+            suffix: The file suffix, including the dot.
+            delete: Remove the file when the session ends, as ``show --delete`` asks.
+
+        Returns:
+            An empty file that exists.
+        """
+        handle, name = tempfile.mkstemp(prefix="fiction-", suffix=suffix)
+        os.close(handle)
+        path = Path(name)
+        if delete:
+            self._to_delete.append(path)
+        return path
 
     def error(self, message: str) -> None:
         """Print an error message.
@@ -264,15 +317,16 @@ class Session:
         Args:
             message: The message; printed verbatim.
         """
-        self.console.print(f"[red]error:[/] {escape(message)}")
+        self.errors.print(f"[red]error:[/] {escape(message)}")
 
     def info(self, message: str) -> None:
-        """Print an informational message.
+        """Print an informational message, unless the session is quiet.
 
         Args:
             message: The message; printed verbatim.
         """
-        self.console.print(escape(message))
+        if not self.quiet:
+            self.console.print(escape(message))
 
     def status_line(self) -> str:
         """Return the store summary shown below the prompt.

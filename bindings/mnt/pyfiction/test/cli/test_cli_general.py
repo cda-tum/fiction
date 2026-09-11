@@ -10,16 +10,17 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
 from mnt.pyfiction import inml_layout, mol_qca_layout, mol_qca_technology
-from mnt.pyfiction.cli.stores import CellEntry
+from mnt.pyfiction.cli.stores import CellEntry, element_name
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from pathlib import Path
 
     from .conftest import Shell
 
@@ -131,12 +132,47 @@ def test_show_rejects_inml_svg(shell: Shell, tmp_path: Path) -> None:
 
 
 def test_show_opens_the_written_file(mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    opened: list[str] = []
-    monkeypatch.setattr("mnt.pyfiction.cli.commands.general.webbrowser.open", opened.append)
+    """The viewer is the platform's file opener, which takes the path itself, not a browser URL."""
+    opened: list[list[str]] = []
+    monkeypatch.setattr("mnt.pyfiction.cli.drawing.subprocess.Popen", lambda command, **_: opened.append(command))
     path = tmp_path / "network.dot"
     mux21_shell.ok(f"show -n -o {path}")
-    assert opened == [path.resolve().as_uri()]
+    assert opened == [[platform_opener(), str(path)]]
     assert "digraph" in path.read_text(encoding="utf-8")
+
+
+def platform_opener() -> str:
+    """Return the opener binary `show` reaches for on this platform.
+
+    Returns:
+        ``open`` on macOS, ``xdg-open`` elsewhere.
+    """
+    return "open" if sys.platform == "darwin" else "xdg-open"
+
+
+def test_show_takes_an_explicit_program(mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """--program replaces the platform opener, substituting '{}' when the command carries one."""
+    opened: list[list[str]] = []
+    monkeypatch.setattr("mnt.pyfiction.cli.drawing.subprocess.Popen", lambda command, **_: opened.append(command))
+    path = tmp_path / "network.dot"
+    mux21_shell.ok(f"show -n -o {path} --program 'dot -Tpng'")
+    mux21_shell.ok(f"show -n -o {path} --program 'viewer --file {{}} --wait'")
+    assert opened == [["dot", "-Tpng", str(path)], ["viewer", "--file", str(path), "--wait"]]
+
+
+def test_show_keeps_its_temporary_file_after_the_session_closes(
+    mux21_shell: Shell, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The viewer reads the file after `show` returns, so the file must outlive the session."""
+    monkeypatch.setattr("mnt.pyfiction.cli.drawing.subprocess.Popen", lambda *_, **__: None)
+    mux21_shell.ok("show -n")
+    kept = Path(str(mux21_shell.session.log[-1]["result"]["file"]))  # type: ignore[index]
+    mux21_shell.ok("show -n --delete")
+    deleted = Path(str(mux21_shell.session.log[-1]["result"]["file"]))  # type: ignore[index]
+    mux21_shell.session.close()
+    assert kept.is_file()
+    assert not deleted.exists()
+    kept.unlink()
 
 
 def test_clear(mux21_shell: Shell) -> None:
@@ -167,3 +203,49 @@ def test_source_stops_at_a_failure(shell: Shell, tmp_path: Path) -> None:
 @pytest.mark.parametrize("flag", ["-t", "-g", "-c"])
 def test_print_of_an_empty_store_fails(shell: Shell, flag: str) -> None:
     assert "in store" in shell.fails(f"print {flag}")
+
+
+def test_print_of_a_simulated_sidb_layout_draws_one_picture(shell: Shell, resource: Callable[[str], str]) -> None:
+    """The charge symbols replace the dots in a single picture, as the C++ shell printed it."""
+    shell.ok(f"read {resource('siqad_or_gate.sqd')}")
+    plain = shell.ok("print -c")
+    shell.ok("quickexact")
+    charged = shell.ok("print -c")
+    assert "●" not in plain
+    assert "●" in charged, charged
+    assert "ground state energy" in charged
+    # one lattice drawing, not the layout followed by a second one
+    assert charged.count("⋅") <= plain.count("⋅")
+
+
+def test_ps_all_describes_every_element(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
+    """--all walks the store instead of describing only the active element."""
+    mux21_shell.ok(f"read {resource('xor2.v')}")
+    output = mux21_shell.ok("ps -n --all")
+    assert "mux21" in output
+    assert "xor2" in output
+    result = mux21_shell.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert [entry["name"] for entry in result["network"]] == ["mux21", "xor2"]
+
+
+def test_store_pop_removes_the_active_element(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
+    """--pop drops the active element and leaves the one before it active, as the C++ shell did."""
+    mux21_shell.ok(f"read {resource('xor2.v')}")
+    assert len(mux21_shell.session.networks) == 2
+    mux21_shell.ok("store -n --pop")
+    assert len(mux21_shell.session.networks) == 1
+    assert element_name(mux21_shell.session.networks.current()) == "mux21"
+    mux21_shell.ok("store -n --pop")
+    assert len(mux21_shell.session.networks) == 0
+    assert mux21_shell.session.networks.active is None
+    assert "no network in store" in mux21_shell.fails("store -n --pop")
+
+
+def test_exit_is_an_alias_of_quit(shell: Shell) -> None:
+    """`exit` and `quit` are one command, and `help` lists it once."""
+    listing = shell.ok("help")
+    assert listing.count("quit, exit") == 1
+    assert "\n  exit " not in listing
+    shell.ok("exit")
+    assert not shell.session.running

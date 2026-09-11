@@ -16,7 +16,7 @@ import pytest
 
 from mnt.pyfiction import orthogonal, orthogonal_stats
 from mnt.pyfiction.cli.errors import CommandError
-from mnt.pyfiction.cli.registry import REGISTRY, Category
+from mnt.pyfiction.cli.registry import REGISTRY, STORE_FLAGS, Category
 from mnt.pyfiction.cli.session import stats_to_dict, tokenize
 from mnt.pyfiction.cli.stores import Store
 
@@ -80,10 +80,27 @@ def test_command_error_keeps_the_shell_running(shell: Shell) -> None:
 
 def test_every_command_has_a_category_and_summary() -> None:
     for name, cmd in REGISTRY.items():
-        assert cmd.name == name
+        assert name == cmd.name or name in cmd.aliases
         assert isinstance(cmd.category, Category)
         assert cmd.summary
         assert "-h" in cmd.options
+
+
+def test_store_flag_letters_are_reserved() -> None:
+    """On a command that selects a store, -t, -n, -g, and -c mean the store and nothing else.
+
+    A command that selects no store is free to spend the letters, as 'tt -t' and 'exact -c' do.
+    """
+    selects_a_store = [
+        cmd
+        for cmd in dict.fromkeys(REGISTRY.values())
+        if any(long in cmd.options for _, long, _ in STORE_FLAGS.values())
+    ]
+    assert selects_a_store, "the registry lost every store-selecting command"
+    for cmd in selects_a_store:
+        for short, long, _ in STORE_FLAGS.values():
+            if short in cmd.options:
+                assert long in cmd.options, f"'{cmd.name}' uses {short} for something other than a store"
 
 
 def test_store() -> None:

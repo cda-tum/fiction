@@ -69,13 +69,19 @@ DEFAULT_SWEEPS = {
 """The default sweep of each axis of ``opdom``."""
 
 
-def _physical_arguments(parser: Parser, *, base: bool) -> None:
-    physics = parser.add_argument_group("physical parameters")
+def _physical_arguments(parser: Parser, *, base: bool, base_default: int = 2) -> None:
+    physics = parser.group("physical parameters")
     physics.add_argument("-e", "--epsilon-r", type=float, default=5.6, help="relative permittivity (default: 5.6)")
     physics.add_argument("-l", "--lambda-tf", type=float, default=5.0, help="Thomas-Fermi screening length in nm")
     physics.add_argument("-m", "--mu-minus", type=float, default=-0.32, help="energy transition level (0/-) in eV")
     if base:
-        physics.add_argument("--base", type=int, choices=[2, 3], default=2, help="charge states per SiDB (default: 2)")
+        physics.add_argument(
+            "--base",
+            type=int,
+            choices=[2, 3],
+            default=base_default,
+            help=f"charge states per SiDB (default: {base_default})",
+        )
 
 
 def _apply_physical(params: object, args: argparse.Namespace) -> dict[str, object]:
@@ -100,13 +106,37 @@ def _apply_physical(params: object, args: argparse.Namespace) -> dict[str, objec
     return description
 
 
-def _active_sidb_layout(session: Session) -> sidb_layout:
+def _active_sidb_layout(session: Session, *, unsimulated: bool = False) -> sidb_layout:
+    """Return the active SiDB layout.
+
+    Args:
+        session: The session.
+        unsimulated: Refuse an element that already carries a simulation result, because running an
+            engine on it would store the same layout a second time. ``temp`` and ``opdom`` push
+            nothing, so they do not ask for this.
+
+    Returns:
+        The layout.
+
+    Raises:
+        CommandError: When the active element is of another technology, or is already simulated
+            while ``unsimulated`` asks for a fresh one.
+    """
     entry = session.cell_layouts.current()
     if not isinstance(entry.layout, sidb_layout):
         msg = f"the active layout is {TECHNOLOGIES[type(entry.layout)]}; an SiDB layout is needed"
         raise CommandError(msg)
-    if entry.result is not None:
-        msg = "the active element is already simulated; select the layout with 'current -c'"
+    if unsimulated and entry.result is not None:
+        index = next(
+            (
+                position
+                for position, candidate in enumerate(session.cell_layouts)
+                if candidate.result is None and candidate.layout == entry.layout
+            ),
+            None,
+        )
+        where = f"select it with 'current -c {index}'" if index is not None else "read or design it again"
+        msg = f"the active element is already simulated; {where}"
         raise CommandError(msg)
     return entry.layout
 
@@ -140,7 +170,7 @@ def quickexact_command(session: Session, args: argparse.Namespace) -> Result:
 
     The number of charge states per SiDB (2 or 3) is detected automatically.
     """
-    layout = _active_sidb_layout(session)
+    layout = _active_sidb_layout(session, unsimulated=True)
     params = quickexact_params()
     parameters = _apply_physical(params.simulation_parameters, args)
     params.global_potential = args.global_potential
@@ -157,7 +187,7 @@ def _quicksim_arguments(parser: Parser) -> None:
 @command("quicksim", Category.SIMULATION, _quicksim_arguments)
 def quicksim_command(session: Session, args: argparse.Namespace) -> Result:
     """Simulate the active SiDB layout heuristically with QuickSim, approximating the ground state."""
-    layout = _active_sidb_layout(session)
+    layout = _active_sidb_layout(session, unsimulated=True)
     if args.iterations < 1:
         msg = "the number of iterations must be at least 1"
         raise CommandError(msg)
@@ -173,7 +203,8 @@ def quicksim_command(session: Session, args: argparse.Namespace) -> Result:
 
 
 def _clustercomplete_arguments(parser: Parser) -> None:
-    _physical_arguments(parser, base=True)
+    # base 3 is what ClusterComplete is for, and what the C++ shell defaulted to
+    _physical_arguments(parser, base=True, base_default=3)
     parser.add_argument("-g", "--global-potential", type=float, default=0.0, help="global external potential in V")
     parser.add_argument("-w", "--witness-limit", type=int, default=6, help="witness partitioning limit (default: 6)")
     parser.add_argument("-o", "--overlap-limit", type=int, default=6, help="overlapping witnesses limit (default: 6)")
@@ -189,7 +220,7 @@ def clustercomplete_command(session: Session, args: argparse.Namespace) -> Resul
     if not hasattr(pyfiction, "clustercomplete"):
         msg = "this build of pyfiction has no ALGLIB, which 'clustercomplete' needs"
         raise CommandError(msg)
-    layout = _active_sidb_layout(session)
+    layout = _active_sidb_layout(session, unsimulated=True)
     params = pyfiction.clustercomplete_params()
     parameters = _apply_physical(params.simulation_parameters, args)
     params.global_potential = args.global_potential
@@ -278,7 +309,7 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
 
 def _opdom_arguments(parser: Parser) -> None:
     parser.add_argument("file", type=Path, help="the CSV file to write the domain to")
-    algorithm = parser.add_mutually_exclusive_group()
+    algorithm = parser.exclusive_group()
     algorithm.add_argument("-r", "--random-sampling", type=int, metavar="N", help="sample N random points")
     algorithm.add_argument("-f", "--flood-fill", type=int, metavar="N", help="flood fill from N random points")
     algorithm.add_argument("-c", "--contour-tracing", type=int, metavar="N", help="trace contours from N random points")
@@ -290,7 +321,7 @@ def _opdom_arguments(parser: Parser) -> None:
         help="judge points by filtering alone, without simulation; implies kink rejection",
     )
     for axis in ("x", "y", "z"):
-        sweep = parser.add_argument_group(f"{axis} axis")
+        sweep = parser.group(f"{axis} axis")
         default = DEFAULT_SWEEPS[axis]
         sweep.add_argument(
             f"-{axis}",
@@ -328,10 +359,15 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
         params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
         params.operational_params.op_condition = operational_condition.REJECT_KINKS
     sweeps = []
+    swept: set[str] = set()
     for axis in ("x", "y", "z"):
         name = getattr(args, f"{axis}_sweep")
         if name is None:
             continue
+        if name in swept:
+            msg = f"'{name}' is swept on more than one axis; every axis needs its own parameter"
+            raise CommandError(msg)
+        swept.add(name)
         low, high, step = (getattr(args, f"{axis}_{key}") for key in ("min", "max", "step"))
         if step <= 0 or low > high:
             msg = f"the {axis} axis needs min <= max and a positive step"

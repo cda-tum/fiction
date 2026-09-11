@@ -16,6 +16,9 @@ from typing import TYPE_CHECKING
 from mnt import pyfiction
 from mnt.pyfiction import (
     cartesian_gate_layout,
+    clocked_cartesian_layout,
+    clocked_hexagonal_layout,
+    clocked_shifted_cartesian_layout,
     exact_params,
     exact_stats,
     gold_cost_objective,
@@ -27,6 +30,7 @@ from mnt.pyfiction import (
     hexagonalization_io_pin_extension_mode,
     hexagonalization_params,
     hexagonalization_stats,
+    num_clks,
     orthogonal,
     orthogonal_params,
     orthogonal_stats,
@@ -40,6 +44,7 @@ from mnt.pyfiction import (
 )
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command
+from mnt.pyfiction.cli.render import table as render_table
 from mnt.pyfiction.cli.session import stats_to_dict
 from mnt.pyfiction.cli.stores import TOPOLOGIES, describe
 
@@ -50,34 +55,61 @@ if TYPE_CHECKING:
     from mnt.pyfiction.cli.session import Session
     from mnt.pyfiction.cli.stores import GateLayout
 
-CLOCKING_SCHEMES = (
-    "OPEN",
-    "OPEN3",
-    "OPEN4",
-    "COLUMNAR",
-    "COLUMNAR3",
-    "COLUMNAR4",
-    "ROW",
-    "ROW3",
-    "ROW4",
-    "2DDWAVE",
-    "2DDWAVE3",
-    "2DDWAVE4",
-    "2DDWAVEHEX",
-    "2DDWAVEHEX3",
-    "2DDWAVEHEX4",
-    "USE",
-    "RES",
-    "ESR",
-    "CFE",
-    "RIPPLE",
-    "SRS",
-    "BANCS",
-)
-"""The clocking scheme names ``exact`` accepts; a bare name uses four clock phases."""
+CLOCKED_LAYOUTS = {
+    "cartesian": clocked_cartesian_layout,
+    "shifted_cartesian": clocked_shifted_cartesian_layout,
+    "hexagonal": clocked_hexagonal_layout,
+}
+"""The smallest clocked layout of each topology, which is what validates a clocking scheme name."""
 
 MILLISECONDS = 1000
 """The bindings take timeouts in milliseconds; the commands take seconds."""
+
+THREE_CLOCK_PHASES = 3
+"""``ortho -n 3`` asks for the three-phase clocking the library also supports."""
+
+
+def _added(session: Session, layout: GateLayout, stats: object, *, verbose: bool) -> Result:
+    """Describe a layout a command just added, printing its statistics as the shared table when asked.
+
+    Args:
+        session: The session, for the console.
+        layout: The layout that was added to the store.
+        stats: The algorithm's statistics object.
+        verbose: Print the statistics.
+
+    Returns:
+        The log entry of the command.
+    """
+    statistics = stats_to_dict(stats)
+    if verbose:
+        session.console.print(render_table(statistics))
+    return {"gate_layout": describe(layout), "stats": statistics}
+
+
+def _clocking_scheme(name: str, topology: str) -> str:
+    """Return a clocking scheme name the library knows for a topology.
+
+    The library owns the list of schemes, so it is asked rather than a table here that would drift
+    away from it: a one-tile clocked layout of the topology accepts exactly the supported names.
+
+    Args:
+        name: The name the user typed.
+        topology: The layout topology the scheme has to exist for.
+
+    Returns:
+        The name, upper-cased as the solver expects it.
+
+    Raises:
+        CommandError: When the library knows no such scheme for the topology.
+    """
+    scheme = name.upper()
+    try:
+        CLOCKED_LAYOUTS[topology]((0, 0), scheme)
+    except RuntimeError as error:
+        msg = f"'{name}' is not a clocking scheme for {topology} layouts; see the CLI documentation for the list"
+        raise CommandError(msg) from error
+    return scheme
 
 
 def _seconds_to_ms(seconds: float | None) -> int | None:
@@ -115,6 +147,7 @@ def _exact_arguments(parser: Parser) -> None:
         action="store_true",
         help="apply ToPoliNano's iNML constraints; implies --topology shifted_cartesian",
     )
+    parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
 
 
 @command("exact", Category.PHYSICAL_DESIGN, _exact_arguments)
@@ -128,14 +161,8 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
     if not hasattr(pyfiction, "exact_cartesian"):
         msg = "this build of pyfiction has no Z3 solver, which 'exact' needs"
         raise CommandError(msg)
-    scheme = args.scheme.upper()
-    if scheme not in CLOCKING_SCHEMES:
-        msg = f"'{args.scheme}' is not a clocking scheme; choose from {', '.join(CLOCKING_SCHEMES)}"
-        raise CommandError(msg)
-
-    params = _exact_parameters(args, scheme)
-
     topology = "shifted_cartesian" if args.topolinano else args.topology
+    params = _exact_parameters(args, _clocking_scheme(args.scheme, topology))
     design = getattr(pyfiction, f"exact_{topology}")
 
     network = session.as_technology_network(session.networks.current())
@@ -145,7 +172,7 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
         msg = f"impossible to place and route '{pyfiction.get_name(network)}' within the given parameters"
         raise CommandError(msg)
     session.gate_layouts.add(layout)
-    return {"gate_layout": describe(layout), "stats": stats_to_dict(stats)}
+    return _added(session, layout, stats, verbose=args.verbose)
 
 
 def _exact_parameters(args: argparse.Namespace, scheme: str) -> exact_params:
@@ -180,6 +207,14 @@ def _exact_parameters(args: argparse.Namespace, scheme: str) -> exact_params:
 
 
 def _ortho_arguments(parser: Parser) -> None:
+    parser.add_argument(
+        "-n",
+        "--clock-phases",
+        type=int,
+        choices=[3, 4],
+        default=4,
+        help="the number of clock phases of the result (default: 4)",
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
 
 
@@ -191,12 +226,12 @@ def ortho(session: Session, args: argparse.Namespace) -> Result:
     must not have gates with more than two inputs.
     """
     network = session.as_technology_network(session.networks.current())
+    params = orthogonal_params()
+    params.number_of_clock_phases = num_clks.THREE if args.clock_phases == THREE_CLOCK_PHASES else num_clks.FOUR
     stats = orthogonal_stats()
-    layout = orthogonal(network, orthogonal_params(), stats)
+    layout = orthogonal(network, params, stats)
     session.gate_layouts.add(layout)
-    if args.verbose:
-        session.info(repr(stats))
-    return {"gate_layout": describe(layout), "stats": stats_to_dict(stats)}
+    return _added(session, layout, stats, verbose=args.verbose)
 
 
 def _gold_arguments(parser: Parser) -> None:
@@ -224,6 +259,11 @@ def _gold_arguments(parser: Parser) -> None:
     parser.add_argument("-g", "--skip-tiles", type=int, default=0, metavar="N", help="empty tiles kept after each PI")
     parser.add_argument("-j", "--randomize-skip-tiles", action="store_true", help="randomize the tiles kept after PIs")
     parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
+    parser.add_argument(
+        "--progress",
+        action="store_true",
+        help="let the search write its own progress to the terminal, bypassing the shell",
+    )
 
 
 @command("gold", Category.PHYSICAL_DESIGN, _gold_arguments)
@@ -246,7 +286,7 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
     params.straight_inverters = args.straight_inverters
     params.tiles_to_skip_between_pis = args.skip_tiles
     params.randomize_tiles_to_skip_between_pis = args.randomize_skip_tiles
-    params.verbose = args.verbose
+    params.verbose = args.progress
     if args.seed is not None:
         params.seed = args.seed
     timeout = _seconds_to_ms(args.timeout)
@@ -260,9 +300,7 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
         msg = f"no layout found for '{pyfiction.get_name(network)}' within the given parameters"
         raise CommandError(msg)
     session.gate_layouts.add(layout)
-    if args.verbose:
-        session.info(repr(stats))
-    return {"gate_layout": describe(layout), "stats": stats_to_dict(stats)}
+    return _added(session, layout, stats, verbose=args.verbose)
 
 
 def _hex_arguments(parser: Parser) -> None:
@@ -294,9 +332,7 @@ def hex_command(session: Session, args: argparse.Namespace) -> Result:
     stats = hexagonalization_stats()
     hexagonal = hexagonalization(layout, params, stats)
     session.gate_layouts.add(hexagonal)
-    if args.verbose:
-        session.info(repr(stats))
-    return {"gate_layout": describe(hexagonal), "stats": stats_to_dict(stats)}
+    return _added(session, hexagonal, stats, verbose=args.verbose)
 
 
 def _optimize_arguments(parser: Parser) -> None:
@@ -333,9 +369,7 @@ def optimize(session: Session, args: argparse.Namespace) -> Result:
         stats = post_layout_optimization_stats()
         post_layout_optimization(layout, params, stats)
     session.gate_layouts.add(layout)
-    if args.verbose:
-        session.info(repr(stats))
-    return {"gate_layout": describe(layout), "stats": stats_to_dict(stats)}
+    return _added(session, layout, stats, verbose=args.verbose)
 
 
 def _cartesian_2ddwave(session: Session) -> GateLayout:

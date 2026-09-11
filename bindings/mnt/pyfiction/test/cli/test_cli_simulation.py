@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt import pyfiction
+from mnt.pyfiction.cli.registry import REGISTRY
 from mnt.pyfiction.cli.stores import CellEntry
 
 if TYPE_CHECKING:
@@ -119,3 +120,34 @@ def test_opdom_sampling_and_errors(xor_gate: Shell, tmp_path: Path) -> None:
     assert "at least 1" in xor_gate.fails(f"opdom {csv} -f 0")
     assert "positive step" in xor_gate.fails(f"opdom {csv} --x-step 0")
     assert "usage" in xor_gate.fails(f"opdom {csv} -x foo")
+
+
+def test_clustercomplete_defaults_to_base_three() -> None:
+    """Base-3 multi-gate simulation is what ClusterComplete is for, and what the C++ shell defaulted to."""
+    parser = REGISTRY["clustercomplete"].parser
+    assert parser.parse_args([]).base == 3
+    assert "default: 3" in parser.format_help()
+
+
+@pytest.mark.parametrize("command", ["quickexact", "quicksim"])
+def test_two_state_engines_keep_base_two(command: str) -> None:
+    """The two-state engines do not offer --base at all, and temp and opdom still default to 2."""
+    assert not hasattr(REGISTRY[command].parser.parse_args([]), "base")
+    for gate_based in ("temp", "opdom"):
+        arguments = [] if gate_based == "temp" else ["domain.csv"]
+        assert REGISTRY[gate_based].parser.parse_args(arguments).base == 2
+
+
+def test_temp_runs_on_a_simulated_layout(shell: Shell, resource: Callable[[str], str]) -> None:
+    """`temp` and `opdom` push nothing, so a simulated element is no obstacle for them."""
+    shell.ok(f"read {resource('siqad_or_gate.sqd')}; quickexact")
+    shell.ok("temp")
+    assert "critical temperature" in shell.output
+    assert "already simulated" in shell.fails("quickexact")
+    assert "current -c 0" in shell.stderr
+
+
+def test_opdom_rejects_a_repeated_sweep(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:
+    """Sweeping one parameter on two axes would produce a degenerate domain."""
+    shell.ok(f"read {resource('siqad_or_gate.sqd')}; tt -t 1110")
+    assert "more than one axis" in shell.fails(f"opdom {tmp_path / 'domain.csv'} -x epsilon_r -y epsilon_r")

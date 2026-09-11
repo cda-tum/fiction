@@ -10,13 +10,20 @@
 
 from __future__ import annotations
 
-import contextlib
-import io
+import json
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import eq_type, equivalence_checking, equivalence_checking_stats, gate_level_drvs, get_name
+from mnt.pyfiction import (
+    eq_type,
+    equivalence_checking,
+    equivalence_checking_stats,
+    gate_level_drv_stats,
+    gate_level_drvs,
+    get_name,
+)
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command, store_flags
+from mnt.pyfiction.cli.render import table as render_table
 from mnt.pyfiction.cli.session import stats_to_dict
 
 if TYPE_CHECKING:
@@ -72,11 +79,11 @@ def _last_two(session: Session, store: str) -> tuple[object, object]:
 
 @command("check", Category.VERIFICATION)
 def check(session: Session, args: argparse.Namespace) -> Result:
-    """Check the active gate-level layout for design rule violations and print the report."""
+    """Check the active gate-level layout for design rule violations and print the full report."""
     del args
     layout = session.gate_layouts.current()
-    report = io.StringIO()
-    with contextlib.redirect_stdout(report):
-        warnings, violations = gate_level_drvs(layout, print_report=True)
-    session.info(report.getvalue().rstrip())
-    return {"warnings": warnings, "violations": violations}
+    stats = gate_level_drv_stats()
+    gate_level_drvs(layout, statistics=stats)
+    report: dict[str, object] = json.loads(stats.report)
+    session.console.print(render_table(report))
+    return report

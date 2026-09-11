@@ -37,7 +37,12 @@ def test_equiv_two_layouts(mux21_shell: Shell) -> None:
 
 
 def test_check(mux21_shell: Shell) -> None:
+    """`check` logs the whole nested design rule report, as the C++ shell did, and prints it."""
     mux21_shell.ok("ortho; check")
     result = mux21_shell.session.log[-1]["result"]
-    assert result["violations"] == 0  # type: ignore[index]
-    assert "DRV" in mux21_shell.output or "violation" in mux21_shell.output.lower()
+    assert isinstance(result, dict)
+    assert result["DRVs"] == 0
+    assert result["Warnings"] == 0
+    for section in ("Unplaced nodes", "Dead placed nodes", "Missing connections", "I/O counts"):
+        assert section in result, f"the report lost '{section}'"
+    assert "DRVs" in mux21_shell.output

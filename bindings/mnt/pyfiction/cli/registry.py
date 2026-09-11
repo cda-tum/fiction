@@ -37,17 +37,49 @@ if TYPE_CHECKING:
 class Category(Enum):
     """The groups the ``help`` command lists commands under."""
 
-    GENERAL = "General"
     IO = "Input and output"
     LOGIC = "Logic"
     PHYSICAL_DESIGN = "Physical design"
     TECHNOLOGY = "Technology"
     SIMULATION = "Simulation"
     VERIFICATION = "Verification"
+    GENERAL = "General"
+
+
+class Group:
+    """An argument group that records the options it adds on the parser that owns it."""
+
+    def __init__(self, parser: Parser, group: argparse._ArgumentGroup) -> None:
+        """Wrap one ``argparse`` group.
+
+        Args:
+            parser: The parser that records the options.
+            group: The group to add the arguments to.
+        """
+        self._parser = parser
+        self._group = group
+
+    def add_argument(self, *names: str, **kwargs: Any) -> argparse.Action:  # ruff: ignore[any-type]
+        """Add an argument to the group and record it on the parser.
+
+        Args:
+            names: The option strings, or the name of a positional argument.
+            kwargs: The keyword arguments of ``argparse.ArgumentParser.add_argument``.
+
+        Returns:
+            The created action.
+        """
+        action = self._group.add_argument(*names, **kwargs)
+        self._parser.record(action)
+        return action
 
 
 class Parser(argparse.ArgumentParser):
-    """An argument parser that reports through exceptions instead of exiting the process."""
+    """An argument parser that reports through exceptions instead of exiting the process.
+
+    Attributes:
+        completions: Every option string of the command, mapped onto the values it accepts.
+    """
 
     def __init__(self, name: str, description: str) -> None:
         """Create the parser of one command.
@@ -56,12 +88,62 @@ class Parser(argparse.ArgumentParser):
             name: The command name, shown as the program name in usage lines.
             description: The command's docstring, shown by ``-h``.
         """
+        self.completions: dict[str, tuple[str, ...]] = {}
         super().__init__(
             prog=name,
             description=description,
             allow_abbrev=False,
             formatter_class=argparse.RawDescriptionHelpFormatter,
         )
+
+    def record(self, action: argparse.Action) -> None:
+        """Remember an action's option strings and the values they accept, for tab completion.
+
+        Args:
+            action: The action ``add_argument`` created.
+        """
+        values = tuple(str(choice) for choice in action.choices) if action.choices else ()
+        for option in action.option_strings:
+            self.completions[option] = values
+
+    def add_argument(self, *names: str, **kwargs: Any) -> argparse.Action:  # ruff: ignore[any-type]
+        """Add an argument and record it for tab completion.
+
+        Args:
+            names: The option strings, or the name of a positional argument.
+            kwargs: The keyword arguments of ``argparse.ArgumentParser.add_argument``.
+
+        Returns:
+            The created action.
+        """
+        action = super().add_argument(*names, **kwargs)
+        self.record(action)
+        return action
+
+    def group(self, title: str) -> Group:
+        """Create an argument group whose options this parser records.
+
+        ``add_argument_group`` itself is left alone, because ``argparse`` builds its own groups with
+        it while constructing and those must stay the plain ones.
+
+        Args:
+            title: The heading the help text shows the group under.
+
+        Returns:
+            The group.
+        """
+        return Group(self, self.add_argument_group(title))
+
+    def exclusive_group(self, *, required: bool = False) -> Group:
+        """Create a mutually exclusive group whose options this parser records.
+
+        Args:
+            required: Whether one of the group's options has to be given.
+
+        Returns:
+            The group.
+        """
+        return Group(self, self.add_mutually_exclusive_group(required=required))
 
     def error(self, message: str) -> NoReturn:
         """Turn a usage error into a :class:`CommandError` that carries the usage line.
@@ -113,8 +195,17 @@ class Command:
     summary: str
     run: Runner
     parser: Parser
-    options: tuple[str, ...]
-    """The option strings, for tab completion."""
+    aliases: tuple[str, ...] = ()
+    """Other names the command also answers to; ``help`` lists it under ``name`` alone."""
+
+    @property
+    def options(self) -> tuple[str, ...]:
+        """The command's option strings, for tab completion.
+
+        Returns:
+            Every option string of the command's parser.
+        """
+        return tuple(self.parser.completions)
 
 
 REGISTRY: dict[str, Command] = {}
@@ -125,6 +216,7 @@ def command(
     name: str,
     category: Category,
     arguments: Callable[[Parser], None] | None = None,
+    aliases: tuple[str, ...] = (),
 ) -> Callable[[Runner], Runner]:
     """Register a function as a shell command.
 
@@ -134,6 +226,7 @@ def command(
         name: The command name typed at the prompt.
         category: The group ``help`` lists the command under.
         arguments: Adds the command's options to its parser.
+        aliases: Other names the command answers to; ``help`` lists only ``name``.
 
     Returns:
         The decorator, which returns the function unchanged.
@@ -144,16 +237,17 @@ def command(
         parser = Parser(name, description=doc)
         if arguments is not None:
             arguments(parser)
-        # argparse offers no public enumeration of the registered options
-        options = tuple(option for action in parser._actions for option in action.option_strings)  # ruff: ignore[private-member-access]
-        REGISTRY[name] = Command(
+        cmd = Command(
             name=name,
             category=category,
             summary=doc.splitlines()[0],
             run=run,
             parser=parser,
-            options=options,
+            aliases=aliases,
         )
+        REGISTRY[name] = cmd
+        for alias in aliases:
+            REGISTRY[alias] = cmd
         return run
 
     return register

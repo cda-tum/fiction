@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import argparse
 import math
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -18,9 +19,11 @@ from aigverse.io import read_ascii_aiger_into_aig, read_pla_into_aig
 
 from mnt.pyfiction import (
     aig_network,
+    convert_network,
     dynamic_truth_table,
     inml_layout,
     mol_qca_layout,
+    network_target,
     qca_layout,
     read_aig_network,
     read_cartesian_fgl_layout,
@@ -31,31 +34,28 @@ from mnt.pyfiction import (
     read_sqd_layout,
     read_technology_network,
     read_xag_network,
+    set_name,
     sidb_layout,
     write_aiger,
     write_blif,
-    write_dot_layout,
-    write_dot_network,
     write_fgl_layout,
     write_fqca_layout,
     write_fqca_layout_params,
     write_qca_layout,
     write_qca_layout_params,
     write_qcc_layout,
+    write_qcc_layout_params,
     write_qll_layout,
     write_sqd_layout,
     write_verilog,
 )
+from mnt.pyfiction.cli.aigverse_bridge import from_aigverse
+from mnt.pyfiction.cli.drawing import drawing_flags, write_dot, write_svg
 from mnt.pyfiction.cli.errors import CommandError
-from mnt.pyfiction.cli.registry import Category, command
-from mnt.pyfiction.cli.stores import CellEntry, describe
-
-from .general import write_svg
-from .logic import from_aigverse
+from mnt.pyfiction.cli.registry import Category, command, store_flags
+from mnt.pyfiction.cli.stores import CellEntry, describe, element_name
 
 if TYPE_CHECKING:
-    import argparse
-
     from mnt.pyfiction.cli.registry import Parser, Result
     from mnt.pyfiction.cli.session import Session
     from mnt.pyfiction.cli.stores import Network
@@ -68,8 +68,17 @@ NETWORK_READERS = {
 }
 """The ``--type`` names and the readers that produce them."""
 
-NETWORK_SUFFIXES = {".v", ".aig", ".blif"}
-"""The file suffixes the network readers accept."""
+NATIVE_NETWORK_SUFFIXES = {".v", ".aig", ".blif"}
+"""The file suffixes the ``mnt.pyfiction`` network readers accept."""
+
+AIGVERSE_NETWORK_SUFFIXES = {".aag", ".pla"}
+"""The file suffixes that are read through ``aigverse``, which only produces AIGs."""
+
+AIGVERSE_TARGETS = {"xag": network_target.XAG, "mig": network_target.MIG, "tec": network_target.TEC}
+"""What ``--type`` converts an AIG read through ``aigverse`` into."""
+
+NETWORK_SUFFIXES = NATIVE_NETWORK_SUFFIXES | AIGVERSE_NETWORK_SUFFIXES
+"""Every file suffix ``read`` recognizes as a logic network."""
 
 FGL_READERS = {
     "cartesian": read_cartesian_fgl_layout,
@@ -78,6 +87,18 @@ FGL_READERS = {
 }
 """The ``--topology`` names and the FGL readers that produce them."""
 
+NETWORK_WRITE_SUFFIXES = {".v", ".blif", ".aig"}
+"""The file suffixes ``write`` writes a logic network to."""
+
+GATE_LAYOUT_WRITE_SUFFIXES = {".fgl"}
+"""The file suffixes ``write`` writes a gate-level layout to."""
+
+CELL_LAYOUT_WRITE_SUFFIXES = {".qca", ".fqca", ".qcc", ".qll", ".sqd", ".svg"}
+"""The file suffixes ``write`` writes a cell-level layout to."""
+
+WRITE_SUFFIXES = NETWORK_WRITE_SUFFIXES | GATE_LAYOUT_WRITE_SUFFIXES | CELL_LAYOUT_WRITE_SUFFIXES | {".dot"}
+"""Every file suffix ``write`` accepts, and the values of its --format option."""
+
 
 def _read_arguments(parser: Parser) -> None:
     parser.add_argument("path", type=Path, help="the file, or a directory of network files")
@@ -85,7 +106,7 @@ def _read_arguments(parser: Parser) -> None:
         "--type",
         choices=list(NETWORK_READERS),
         default="tec",
-        help="the network type to read .v, .aig, .aag, .blif, and .pla files as (default: tec)",
+        help="the network type; .blif can only be tec, and .aag and .pla are read as AIGs and converted (default: tec)",
     )
     parser.add_argument(
         "--topology",
@@ -102,28 +123,19 @@ def read(session: Session, args: argparse.Namespace) -> Result:
 
     Networks: .v (Verilog), .aig and .aag (AIGER), .blif, and .pla; the type defaults to a
     technology network. Gate-level layouts: .fgl. Cell-level layouts: .sqd (SiDB) and .fqca (QCA).
-    A directory reads every network file in it.
+    A directory reads every network file in it; a file it cannot read is reported and skipped.
     """
     path: Path = args.path
     if path.is_dir():
-        files = sorted(file for file in path.iterdir() if file.suffix in NETWORK_SUFFIXES)
-        if not files:
-            msg = f"no network files in '{path}'"
-            raise CommandError(msg)
-        networks = [_read_network(file, args.type) for file in files]
-        if args.sort:
-            networks.sort(key=lambda network: network.num_gates())
-        for network in networks:
-            session.networks.add(network)
-        return {"networks": [describe(network) for network in networks]}
+        return _read_directory(session, path, args)
 
     if not path.is_file():
         msg = f"no such file: '{path}'"
         raise CommandError(msg)
 
     suffix = path.suffix.lower()
-    if suffix in NETWORK_SUFFIXES or suffix in {".aag", ".pla"}:
-        network = _read_network(path, args.type, session=session)
+    if suffix in NETWORK_SUFFIXES:
+        network = _read_network(session, path, args.type)
         session.networks.add(network)
         return {"network": describe(network)}
     if suffix == ".fgl":
@@ -142,15 +154,59 @@ def read(session: Session, args: argparse.Namespace) -> Result:
     raise CommandError(msg)
 
 
-def _read_network(path: Path, network_type: str, session: Session | None = None) -> Network:
+def _read_directory(session: Session, path: Path, args: argparse.Namespace) -> Result:
+    """Read every network file of a directory, reporting the ones that fail without stopping."""
+    files = sorted(file for file in path.iterdir() if file.suffix.lower() in NETWORK_SUFFIXES)
+    if not files:
+        msg = f"no network files in '{path}'"
+        raise CommandError(msg)
+    networks: list[Network] = []
+    failed: list[dict[str, str]] = []
+    for file in files:
+        network = _read_or_report(session, file, args.type, failed)
+        if network is not None:
+            networks.append(network)
+    if not networks:
+        msg = f"none of the {len(files)} network files in '{path}' could be read"
+        raise CommandError(msg)
+    if args.sort:
+        networks.sort(key=lambda network: network.num_gates())
+    for network in networks:
+        session.networks.add(network)
+    return {"networks": [describe(network) for network in networks], "failed": failed}
+
+
+def _read_or_report(session: Session, path: Path, network_type: str, failed: list[dict[str, str]]) -> Network | None:
+    """Read one file of a directory, reporting a failure instead of raising it.
+
+    Args:
+        session: The session, for the error message.
+        path: The file to read.
+        network_type: What ``--type`` asked for.
+        failed: Collects the files that could not be read, for the log.
+
+    Returns:
+        The network, or ``None`` when the file could not be read.
+    """
+    try:
+        return _read_network(session, path, network_type)
+    except Exception as error:  # ruff: ignore[blind-except] -- one unreadable file must not abort the directory
+        session.error(f"read: {path.name}: {error}")
+        failed.append({"file": str(path), "error": str(error)})
+        return None
+
+
+def _read_network(session: Session, path: Path, network_type: str) -> Network:
     suffix = path.suffix.lower()
-    if suffix in {".aag", ".pla"}:
-        if session is None or network_type not in {"aig", "tec"}:
-            msg = f"'{suffix}' files are read as AIGs; use --type aig or --type tec"
-            raise CommandError(msg)
+    if suffix in AIGVERSE_NETWORK_SUFFIXES:
+        # aigverse reads these two formats, and it only produces AIGs; --type converts from there
         aig = read_ascii_aiger_into_aig(str(path)) if suffix == ".aag" else read_pla_into_aig(str(path))
         network = from_aigverse(session, aig, path.stem)
-        return session.as_technology_network(network) if network_type == "tec" else network
+        if network_type == "aig":
+            return network
+        converted = convert_network(network, AIGVERSE_TARGETS[network_type])
+        set_name(converted, path.stem)
+        return converted
     if suffix == ".blif" and network_type != "tec":
         msg = "BLIF files are read as technology networks only; drop --type"
         raise CommandError(msg)
@@ -158,31 +214,47 @@ def _read_network(path: Path, network_type: str, session: Session | None = None)
 
 
 def _write_arguments(parser: Parser) -> None:
-    parser.add_argument("file", type=Path, help="the output file; its suffix selects the format")
     parser.add_argument(
-        "-n", "--network", action="store_true", help="write the active network to a .dot file instead of the layout"
+        "file",
+        type=Path,
+        nargs="?",
+        help="the output file; its suffix selects the format. Defaults to the active element's name plus --format",
     )
     parser.add_argument(
+        "-F",
+        "--format",
+        choices=sorted(suffix.lstrip(".") for suffix in WRITE_SUFFIXES),
+        help="the format, when no file is given or its suffix is to be overridden",
+    )
+    store_flags(parser, "network", "gate_layout")
+    parser.add_argument(
         "--via-layers",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         default=None,
         help="add inter-layer via cells to .qca and .fqca files (.qca default: on, .fqca default: off)",
     )
-    parser.add_argument("--no-via-layers", dest="via_layers", action="store_false", help="omit the via cells")
-    parser.add_argument("--simple", action="store_true", help="draw .svg QCA cells without dots and clock numbers")
+    parser.add_argument(
+        "--component-name", action="store_true", help="use the .qcc file name as the component identifier"
+    )
+    drawing_flags(parser)
 
 
 @command("write", Category.IO, _write_arguments)
 def write(session: Session, args: argparse.Namespace) -> Result:
     """Write the active network or layout to a file, in the format its suffix names.
 
-    Networks: .v, .blif, .aig (AIGs only), .dot (with -n). Gate-level layouts: .fgl, .dot.
-    Cell-level layouts: .qca (QCADesigner), .fqca (QCA-STACK), .qcc and .qll (ToPoliNano and
-    MagCAD), .sqd (SiQAD), .svg.
+    Networks: .v, .blif, .aig (AIGs only), .dot (with -n). Gate-level layouts: .fgl, .dot (with -g,
+    the default). Cell-level layouts: .qca (QCADesigner), .fqca (QCA-STACK), .qcc and .qll
+    (ToPoliNano and MagCAD), .sqd (SiQAD), .svg. Without a file, the active element's name and
+    --format make one in the current directory.
     """
-    path: Path = args.file
-    suffix = path.suffix.lower()
-    if suffix in {".v", ".blif", ".aig"} or (suffix == ".dot" and args.network):
+    suffix = f".{args.format}" if args.format is not None else (args.file.suffix.lower() if args.file else "")
+    if suffix not in WRITE_SUFFIXES:
+        msg = f"cannot write '{suffix}' files" if suffix else "give a file with a known suffix, or --format"
+        raise CommandError(msg)
+    path = _output_path(session, args, suffix)
+
+    if suffix in NETWORK_WRITE_SUFFIXES or (suffix == ".dot" and args.network):
         network = session.networks.current()
         if suffix == ".v":
             write_verilog(network, str(path))
@@ -194,27 +266,48 @@ def write(session: Session, args: argparse.Namespace) -> Result:
                 raise CommandError(msg)
             write_aiger(network, str(path))
         else:
-            write_dot_network(network, str(path))
-    elif suffix in {".fgl", ".dot"}:
+            write_dot(network, path, network=True, indexes=args.indexes, clock_colors=args.clock_colors)
+    elif suffix in GATE_LAYOUT_WRITE_SUFFIXES or suffix == ".dot":
         layout = session.gate_layouts.current()
         if suffix == ".fgl":
             write_fgl_layout(layout, str(path))
         else:
-            write_dot_layout(layout, str(path))
-    elif suffix in {".qca", ".fqca", ".qcc", ".qll", ".sqd", ".svg"}:
-        _write_cell_layout(session, path, suffix, via_layers=args.via_layers, simple=args.simple)
+            write_dot(layout, path, network=False, indexes=args.indexes, clock_colors=args.clock_colors)
     else:
-        msg = f"cannot write '{path.suffix}' files"
-        raise CommandError(msg)
+        _write_cell_layout(session, path, suffix, args)
     session.info(f"wrote {path}")
     return {"file": str(path)}
 
 
-def _write_cell_layout(session: Session, path: Path, suffix: str, *, via_layers: bool | None, simple: bool) -> None:
+def _output_path(session: Session, args: argparse.Namespace, suffix: str) -> Path:
+    """Return where to write, defaulting to the active element's name in the current directory."""
+    if args.file is None:
+        name = element_name(_target_element(session, suffix, args))
+        if not name:
+            msg = "the active element has no name; give a file to write to"
+            raise CommandError(msg)
+        return Path(f"{name}{suffix}")
+    path: Path = args.file
+    if path.is_dir():
+        msg = f"'{path}' is a directory; give a file to write to"
+        raise CommandError(msg)
+    return path.with_suffix(suffix) if args.format is not None else path
+
+
+def _target_element(session: Session, suffix: str, args: argparse.Namespace) -> object:
+    """Return the store element the given format writes, so its name can become the file name."""
+    if suffix in NETWORK_WRITE_SUFFIXES or (suffix == ".dot" and args.network):
+        return session.networks.current()
+    if suffix in GATE_LAYOUT_WRITE_SUFFIXES or suffix == ".dot":
+        return session.gate_layouts.current()
+    return session.cell_layouts.current()
+
+
+def _write_cell_layout(session: Session, path: Path, suffix: str, args: argparse.Namespace) -> None:
     entry = session.cell_layouts.current()
     layout = entry.layout
     if suffix == ".svg":
-        write_svg(entry, path, simple=simple)
+        write_svg(entry, path, simple=args.simple)
         return
     if suffix == ".sqd":
         _require(layout, sidb_layout, suffix)
@@ -222,7 +315,9 @@ def _write_cell_layout(session: Session, path: Path, suffix: str, *, via_layers:
         return
     if suffix == ".qcc":
         _require(layout, inml_layout, suffix)
-        write_qcc_layout(layout, str(path))
+        qcc_params = write_qcc_layout_params()
+        qcc_params.use_filename_as_component_name = args.component_name
+        write_qcc_layout(layout, str(path), qcc_params)
         return
     if suffix == ".qll":
         _require(layout, (inml_layout, qca_layout, mol_qca_layout), suffix)
@@ -231,11 +326,11 @@ def _write_cell_layout(session: Session, path: Path, suffix: str, *, via_layers:
     _require(layout, qca_layout, suffix)
     if suffix == ".qca":
         qca_params = write_qca_layout_params()
-        qca_params.create_inter_layer_via_cells = via_layers if via_layers is not None else True
+        qca_params.create_inter_layer_via_cells = args.via_layers if args.via_layers is not None else True
         write_qca_layout(layout, str(path), qca_params)
     else:
         fqca_params = write_fqca_layout_params()
-        fqca_params.create_inter_layer_via_cells = via_layers if via_layers is not None else False
+        fqca_params.create_inter_layer_via_cells = args.via_layers if args.via_layers is not None else False
         write_fqca_layout(layout, str(path), fqca_params)
 
 
@@ -247,7 +342,7 @@ def _require(layout: object, types: type | tuple[type, ...], suffix: str) -> Non
 
 
 def _tt_arguments(parser: Parser) -> None:
-    source = parser.add_mutually_exclusive_group(required=True)
+    source = parser.exclusive_group(required=True)
     source.add_argument("-t", "--table", metavar="BITS", help="a binary string, or a hex string with a 0x prefix")
     source.add_argument(
         "-e",

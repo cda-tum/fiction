@@ -50,7 +50,7 @@ def test_missing_script_returns_two(tmp_path: Path) -> None:
 def test_unreadable_script_returns_two(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """A path that exists but cannot be read as a file reports the reason and exits with 2."""
     assert main(["-f", str(tmp_path)]) == 2
-    assert "cannot read script" in capsys.readouterr().out
+    assert "cannot read script" in capsys.readouterr().err
 
 
 def test_log_is_written_on_failure(tmp_path: Path) -> None:
@@ -108,3 +108,54 @@ def test_file_completion(tmp_path: Path) -> None:
     text = f"read {tmp_path.as_posix()}/circ"
     completions = cli_app.CommandCompleter().get_completions(Document(text), CompleteEvent(completion_requested=True))
     assert "uit.v" in {completion.text for completion in completions}
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [("read --type ", "tec"), ("read --topology hex", "hexagonal"), ("gold -e ", "high_effort")],
+)
+def test_choice_completion(text: str, expected: str) -> None:
+    """An option that only accepts certain values offers them instead of falling through to paths."""
+    completions = cli_app.CommandCompleter().get_completions(Document(text), CompleteEvent(completion_requested=True))
+    assert expected in {completion.text for completion in completions}
+
+
+def test_quit_stops_the_rest_of_a_command_string() -> None:
+    """`quit` ends the run without failing, and the commands after it are not attempted."""
+    assert main(["-c", "version; quit; frobnicate"]) == 0
+
+
+def test_quit_stops_the_rest_of_a_script(tmp_path: Path) -> None:
+    """`quit` in a script ends it, and the lines below it are not attempted."""
+    script = tmp_path / "script.fs"
+    script.write_text("version\nquit\nfrobnicate\n", encoding="utf-8")
+    assert main(["-f", str(script)]) == 0
+
+
+def test_interactive_continues_after_commands(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """-i runs the shell once -c is done, as the C++ shell did."""
+    monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
+    monkeypatch.setattr(PromptSession, "prompt", Mock(side_effect=["version", EOFError]))
+    log = tmp_path / "interactive.json"
+    with create_app_session(input=DummyInput(), output=DummyOutput()):
+        assert main(["-i", "--log", str(log), "-c", "version"]) == 0
+    entries = json.loads(log.read_text(encoding="utf-8"))
+    assert [entry["command"] for entry in entries] == ["version", "version"]
+
+
+def test_interactive_is_not_entered_after_quit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """`quit` behind -c means it, even with -i."""
+    monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
+    prompt = Mock(side_effect=[EOFError])
+    monkeypatch.setattr(PromptSession, "prompt", prompt)
+    with create_app_session(input=DummyInput(), output=DummyOutput()):
+        assert main(["-i", "-c", "version; quit"]) == 0
+    assert prompt.call_count == 0
+
+
+def test_quiet_keeps_errors_but_drops_informational_output(capsys: pytest.CaptureFixture[str]) -> None:
+    """--quiet is for scripted runs: the result lines go, the errors stay."""
+    assert main(["-q", "-c", "version"]) == 0
+    assert not capsys.readouterr().out
+    assert main(["-q", "-c", "frobnicate"]) == 1
+    assert "unknown command" in capsys.readouterr().err

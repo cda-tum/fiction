@@ -8,10 +8,8 @@
 
 """Logic commands: technology mapping, network transformations, simulation, and AIG optimization.
 
-AIG optimization runs in ``aigverse``. Its networks are not the same Python objects as
-``mnt.pyfiction``'s, so :func:`to_aigverse` and :func:`from_aigverse` hand an AIG across through
-files in the session's temporary directory: AIGER on the way out, gate-level Verilog on the way
-back, because binary AIGER written through a text stream is corrupt on Windows.
+AIG optimization runs in ``aigverse``; :mod:`~mnt.pyfiction.cli.aigverse_bridge` hands networks
+between the two packages.
 """
 
 from __future__ import annotations
@@ -30,8 +28,6 @@ from aigverse.generators import (
     ripple_carry_adder,
     ripple_carry_multiplier,
 )
-from aigverse.io import read_aiger_into_aig
-from aigverse.io import write_verilog as aigverse_write_verilog
 from rich.table import Table
 
 from mnt.pyfiction import (
@@ -39,6 +35,7 @@ from mnt.pyfiction import (
     all_standard_2_input_functions,
     all_standard_3_input_functions,
     all_supported_standard_functions,
+    convert_network,
     count_gate_types,
     dynamic_truth_table,
     fanout_substitution,
@@ -46,7 +43,7 @@ from mnt.pyfiction import (
     get_name,
     network_balancing,
     network_balancing_params,
-    read_aig_network,
+    network_target,
     set_name,
     simulate,
     substitution_strategy,
@@ -54,10 +51,11 @@ from mnt.pyfiction import (
     technology_mapping_params,
     technology_mapping_stats,
     technology_network,
-    write_aiger,
 )
+from mnt.pyfiction.cli.aigverse_bridge import from_aigverse, to_aigverse
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command, one_store, store_flags
+from mnt.pyfiction.cli.render import table as render_table
 from mnt.pyfiction.cli.session import stats_to_dict
 from mnt.pyfiction.cli.stores import describe
 
@@ -94,6 +92,9 @@ GATE_FLAGS = (
 )
 """The ``map`` flags and the ``technology_mapping_params`` fields they set."""
 
+GATE_SHORT_FLAGS = {"and": "a", "or": "o", "xor": "x", "inv": "i", "maj": "m", "dot": "d"}
+"""The six gate flags that also have the short form the C++ shell offered."""
+
 # resubstitution and refactoring return ``None`` only for ``inplace=True``, which the passes never set
 AIG_PASSES: dict[str, Callable[[Aig], Aig | None]] = {
     "rewrite": aig_cut_rewriting,
@@ -117,57 +118,21 @@ ABC_SCRIPTS = ("resyn", "resyn2", "resyn3", "compress", "compress2", "resyn2rs",
 """The named ABC scripts ``aigverse.abc`` provides."""
 
 
-def to_aigverse(session: Session, network: aig_network) -> Aig:
-    """Hand an AIG to ``aigverse``.
-
-    Args:
-        session: The session, for a temporary file.
-        network: The AIG.
-
-    Returns:
-        The same network as an ``aigverse`` AIG with its names.
-    """
-    path = session.temp_file(".aig")
-    write_aiger(network, str(path))
-    return read_aiger_into_aig(str(path))
-
-
-def from_aigverse(session: Session, aig: Aig, name: str, like: aig_network | None = None) -> aig_network:
-    """Take an AIG back from ``aigverse``.
-
-    Verilog carries no input or output names, so they are copied from ``like`` when given.
-
-    Args:
-        session: The session, for a temporary file.
-        aig: The ``aigverse`` AIG.
-        name: The network name to assign.
-        like: A network with the same inputs and outputs whose names the result takes over.
-
-    Returns:
-        The same network as an ``mnt.pyfiction`` AIG.
-    """
-    path = session.temp_file(".v")
-    aigverse_write_verilog(aig, str(path))
-    network = read_aig_network(str(path))
-    set_name(network, name)
-    if like is not None:
-        for source, target in zip(like.pis(), network.pis(), strict=True):
-            if like.has_name(source):
-                network.set_name(target, like.get_name(source))
-        for index in range(like.num_pos()):
-            if like.has_output_name(index):
-                network.set_output_name(index, like.get_output_name(index))
-    return network
-
-
 def _map_arguments(parser: Parser) -> None:
-    gates = parser.add_argument_group("gate types")
+    gates = parser.group("gate types")
     for flag, _ in GATE_FLAGS:
-        gates.add_argument(f"--{flag}", action="store_true", help=f"allow {flag.upper().replace('-', ' and ')}")
-    gates.add_argument("--all2", action="store_true", help="every 2-input function")
-    gates.add_argument("--all3", action="store_true", help="every 3-input function")
-    gates.add_argument("--all", action="store_true", help="every supported function")
-    parser.add_argument("--decay", action="store_true", help="also try to reduce the gate count")
+        names = (f"-{GATE_SHORT_FLAGS[flag]}", f"--{flag}") if flag in GATE_SHORT_FLAGS else (f"--{flag}",)
+        gates.add_argument(*names, action="store_true", help=f"allow {flag.upper().replace('-', ' and ')}")
+    every = parser.exclusive_group()
+    every.add_argument("--all2", action="store_true", help="every 2-input function")
+    every.add_argument("--all3", action="store_true", help="every 3-input function")
+    every.add_argument("--all", action="store_true", help="every supported function")
+    parser.add_argument(
+        "--decay",
+        action="store_true",
+        help="enforce at least one constant input on three-input gates",
+    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
 
 
 @command("map", Category.LOGIC, _map_arguments)
@@ -197,7 +162,10 @@ def map_command(session: Session, args: argparse.Namespace) -> Result:
     if not get_name(mapped):
         set_name(mapped, get_name(network))
     session.networks.add(mapped)
-    return {"network": describe(mapped), "stats": stats_to_dict(stats)}
+    statistics = stats_to_dict(stats)
+    if args.verbose:
+        session.console.print(render_table(statistics))
+    return {"network": describe(mapped), "stats": statistics}
 
 
 def _fanouts_arguments(parser: Parser) -> None:
@@ -257,9 +225,10 @@ def gates(session: Session, args: argparse.Namespace) -> Result:
     """Count the gate types of the active network or gate-level layout."""
     store = one_store(args, "network", "gate_layout")
     element = session.networks.current() if store == "network" else session.gate_layouts.current()
-    counts = stats_to_dict(count_gate_types(element))
+    gate_types = count_gate_types(element)
+    counts = stats_to_dict(gate_types)
     table = Table(box=None, show_header=False, padding=(0, 2))
-    for line in count_gate_types(element).report(args.detailed).splitlines():
+    for line in gate_types.report(args.detailed).splitlines():
         name, _, value = line.removeprefix("[i] ").partition("=")
         table.add_row(name.strip(), value.strip())
     session.console.print(table)
@@ -293,17 +262,41 @@ def simulate_command(session: Session, args: argparse.Namespace) -> Result:
     return {"tables": tables}
 
 
+NETWORK_TARGETS = {
+    "aig": None,
+    "xag": network_target.XAG,
+    "mig": network_target.MIG,
+    "tec": network_target.TEC,
+}
+"""The ``random --type`` names and the conversion target that turns the generated AIG into them."""
+
+
 def _random_arguments(parser: Parser) -> None:
     parser.add_argument("-n", "--inputs", type=int, required=True, help="number of primary inputs")
     parser.add_argument("-g", "--gates", type=int, required=True, help="number of AND gates")
+    parser.add_argument(
+        "--type",
+        type=str.lower,
+        choices=list(NETWORK_TARGETS),
+        default="aig",
+        help="the network type to produce (default: aig)",
+    )
     parser.add_argument("--seed", type=int, help="random seed; a fresh one is drawn when omitted")
 
 
 @command("random", Category.LOGIC, _random_arguments)
 def random_command(session: Session, args: argparse.Namespace) -> Result:
-    """Generate a random AIG; the seed becomes its name."""
+    """Generate a random network; the seed becomes its name.
+
+    The generator produces an AIG, which --type converts into an XAG, an MIG, or a technology
+    network.
+    """
     seed = args.seed if args.seed is not None else secrets.randbelow(2**32)
     network = from_aigverse(session, random_aig(num_pis=args.inputs, num_gates=args.gates, seed=seed), str(seed))
+    target = NETWORK_TARGETS[args.type]
+    if target is not None:
+        network = convert_network(network, target)
+        set_name(network, str(seed))
     session.networks.add(network)
     return {"network": describe(network), "seed": seed}
 
@@ -347,7 +340,7 @@ def aig_command(session: Session, args: argparse.Namespace) -> Result:
 
 
 def _abc_arguments(parser: Parser) -> None:
-    source = parser.add_mutually_exclusive_group(required=True)
+    source = parser.exclusive_group(required=True)
     source.add_argument("-c", "--commands", metavar="COMMANDS", help="a ';'-separated ABC command string")
     source.add_argument("-s", "--script", choices=ABC_SCRIPTS, help="a named ABC script")
 

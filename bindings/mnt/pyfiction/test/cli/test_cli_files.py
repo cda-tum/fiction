@@ -15,7 +15,15 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction import aig_network, mig_network, technology_network, xag_network
+from mnt.pyfiction import (
+    aig_network,
+    inml_layout,
+    inml_technology,
+    mig_network,
+    technology_network,
+    xag_network,
+)
+from mnt.pyfiction.cli.stores import CellEntry, describe
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -40,7 +48,7 @@ def test_read_defaults_to_a_technology_network(mux21_shell: Shell) -> None:
     assert isinstance(mux21_shell.session.networks.current(), technology_network)
 
 
-@pytest.mark.parametrize("network_type", ["aig", "tec"])
+@pytest.mark.parametrize(("network_type", "expected"), [("aig", "AIG"), ("xag", "XAG"), ("mig", "MIG"), ("tec", "TEC")])
 @pytest.mark.parametrize(
     ("suffix", "text"),
     [
@@ -48,12 +56,16 @@ def test_read_defaults_to_a_technology_network(mux21_shell: Shell) -> None:
         (".pla", ".i 2\n.o 1\n11 1\n.e\n"),
     ],
 )
-def test_read_aiger_and_pla(shell: Shell, tmp_path: Path, network_type: str, suffix: str, text: str) -> None:
+def test_read_aiger_and_pla(
+    shell: Shell, tmp_path: Path, network_type: str, expected: str, suffix: str, text: str
+) -> None:
+    """aigverse reads .aag and .pla as AIGs, and --type converts the result into any network type."""
     path = tmp_path / f"and{suffix}"
     path.write_text(text, encoding="utf-8")
     shell.ok(f"read {path} --type {network_type}; simulate -n --store")
     assert shell.session.truth_tables.current().to_binary() == "1000"
-    assert "use --type aig or --type tec" in shell.fails(f"read {path} --type xag")
+    assert describe(shell.session.networks.current())["type"] == expected
+    assert describe(shell.session.networks.current())["name"] == "and"
 
 
 def test_read_blif_rejects_other_types(shell: Shell, tmp_path: Path, mux21_shell: Shell) -> None:
@@ -178,3 +190,108 @@ def test_tt_random_and_errors(shell: Shell) -> None:
     assert "power of two" in shell.fails("tt -t 0xabc")
     assert "could not parse" in shell.fails("tt -e '(a'")
     assert "usage" in shell.fails("tt")
+
+
+def test_read_directory_matches_mixed_case_suffixes(
+    shell: Shell, tmp_path: Path, resource: Callable[[str], str]
+) -> None:
+    """A directory read recognizes the same suffixes a single-file read does, whatever their case.
+
+    The library's own reader dispatches on a lower-case extension, so ``MUX21.V`` is refused either
+    way -- but it is now refused with the parser's message rather than skipped without a word.
+    """
+    shutil.copy(resource("mux21.v"), tmp_path / "MUX21.V")
+    shutil.copy(resource("xor2.v"), tmp_path / "xor2.v")
+    shell.ok(f"read {tmp_path}")
+    assert len(shell.session.networks) == 1
+    assert "MUX21.V" in shell.stderr
+    assert "could not parse" in shell.fails(f"read {tmp_path / 'MUX21.V'}")
+
+
+def test_read_directory_reports_a_broken_file_and_continues(
+    shell: Shell, tmp_path: Path, resource: Callable[[str], str]
+) -> None:
+    """One unparsable file is reported and skipped; the rest of the directory still lands in the store."""
+    shutil.copy(resource("mux21.v"), tmp_path / "mux21.v")
+    (tmp_path / "broken.v").write_text("this is not Verilog", encoding="utf-8")
+    shell.ok(f"read {tmp_path}")
+    assert len(shell.session.networks) == 1
+    assert "broken.v" in shell.stderr
+    result = shell.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert [failure["file"] for failure in result["failed"]] == [str(tmp_path / "broken.v")]
+
+
+def test_read_directory_of_only_broken_files_fails(shell: Shell, tmp_path: Path) -> None:
+    (tmp_path / "broken.v").write_text("this is not Verilog", encoding="utf-8")
+    assert "none of the 1 network files" in shell.fails(f"read {tmp_path}")
+
+
+def test_write_defaults_to_the_element_name(
+    mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Without a file, the active element's name and --format make one in the current directory."""
+    monkeypatch.chdir(tmp_path)
+    mux21_shell.ok("write -F v")
+    assert (tmp_path / "mux21.v").is_file()
+    mux21_shell.ok("ortho; cell; write -F qca")
+    assert (tmp_path / "mux21.qca").is_file()
+
+
+def test_write_refuses_a_directory(mux21_shell: Shell, tmp_path: Path) -> None:
+    assert "is a directory" in mux21_shell.fails(f"write {tmp_path} -F v")
+
+
+def test_write_needs_a_known_format(mux21_shell: Shell, tmp_path: Path) -> None:
+    assert "cannot write" in mux21_shell.fails(f"write {tmp_path / 'mux21.xyz'}")
+    assert "give a file with a known suffix" in mux21_shell.fails("write")
+
+
+def test_write_dot_selects_the_store(mux21_shell: Shell, tmp_path: Path) -> None:
+    """-n and -g read as ordinary store selection on a .dot file; a layout is the default."""
+    mux21_shell.ok("ortho")
+    for flag, expected in (("-n", "digraph"), ("-g", "digraph"), ("", "digraph")):
+        path = tmp_path / f"out{flag or 'default'}.dot"
+        mux21_shell.ok(f"write {path} {flag}")
+        assert expected in path.read_text(encoding="utf-8")
+
+
+def test_write_dot_indexes_and_clock_colors(mux21_shell: Shell, tmp_path: Path) -> None:
+    """The drawer flags the C++ shell exposed reach the DOT writers again."""
+    mux21_shell.ok("ortho")
+    plain = tmp_path / "plain.dot"
+    colored = tmp_path / "colored.dot"
+    mux21_shell.ok(f"write {plain} -g")
+    mux21_shell.ok(f"write {colored} -g --clock-colors --indexes")
+    assert plain.read_text(encoding="utf-8") != colored.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("suffix", [".qll", ".sqd"])
+def test_write_more_cell_formats(shell: Shell, resource: Callable[[str], str], tmp_path: Path, suffix: str) -> None:
+    """The happy paths of the cell-level writers, not only their type errors."""
+    if suffix == ".sqd":
+        shell.ok(f"read {resource('siqad_or_gate.sqd')}")
+    else:
+        shell.ok(f"read {resource('mux21.v')}; ortho; cell")
+    path = tmp_path / f"out{suffix}"
+    shell.ok(f"write {path}")
+    assert path.stat().st_size > 0
+
+
+def test_write_qcc_component_name(shell: Shell, tmp_path: Path) -> None:
+    """--component-name names the QCC component after the file, as the C++ `qcc -c` did."""
+    layout = inml_layout((3, 0))
+    layout.set_layout_name("mygate")
+    cell = inml_technology.cell_type
+    layout.assign_cell_type((0, 0), cell.INPUT)
+    layout.assign_cell_type((1, 0), cell.NORMAL)
+    layout.assign_cell_type((2, 0), cell.NORMAL)
+    layout.assign_cell_type((3, 0), cell.OUTPUT)
+    shell.session.cell_layouts.add(CellEntry(layout))
+
+    named_after_the_layout = tmp_path / "wire.qcc"
+    named_after_the_file = tmp_path / "component.qcc"
+    shell.ok(f"write {named_after_the_layout}")
+    shell.ok(f"write {named_after_the_file} --component-name")
+    assert 'name="mygate"' in named_after_the_layout.read_text(encoding="utf-8")
+    assert 'name="component"' in named_after_the_file.read_text(encoding="utf-8")

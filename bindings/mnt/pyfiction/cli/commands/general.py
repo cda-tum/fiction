@@ -10,7 +10,6 @@
 
 from __future__ import annotations
 
-import webbrowser
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -22,27 +21,14 @@ from mnt.pyfiction import (
     __compiled_time__,
     __repo__,
     __version__,
-    mol_qca_layout,
-    qca_layout,
+    print_sidb_layout,
     sidb_layout,
-    write_dot_layout,
-    write_dot_network,
-    write_mol_qca_layout_svg,
-    write_qca_layout_svg,
-    write_qca_layout_svg_params,
-    write_sidb_layout_svg,
 )
+from mnt.pyfiction.cli.drawing import drawing_flags, open_viewer, write_dot, write_svg
 from mnt.pyfiction.cli.errors import CommandError
-from mnt.pyfiction.cli.registry import (
-    REGISTRY,
-    STORE_FLAGS,
-    Category,
-    command,
-    one_store,
-    selected_stores,
-    store_flags,
-)
-from mnt.pyfiction.cli.stores import CellEntry, Store, describe, ground_state, one_line
+from mnt.pyfiction.cli.registry import REGISTRY, STORE_FLAGS, Category, command, one_store, selected_stores, store_flags
+from mnt.pyfiction.cli.render import table as render_table
+from mnt.pyfiction.cli.stores import Store, describe, ground_state, one_line
 
 if TYPE_CHECKING:
     import argparse
@@ -88,12 +74,14 @@ def help_command(session: Session, args: argparse.Namespace) -> Result:
 
     table = Table(box=None, show_header=False, padding=(0, 2))
     for category in Category:
-        commands = [cmd for cmd in REGISTRY.values() if cmd.category is category]
+        # a command registered under an alias appears in the registry twice; list it once
+        commands = [cmd for name, cmd in REGISTRY.items() if cmd.category is category and cmd.name == name]
         if not commands:
             continue
         table.add_row(f"[bold]{category.value}[/]", "")
         for cmd in commands:
-            table.add_row(f"  {cmd.name}", escape(cmd.summary))
+            names = ", ".join((cmd.name, *cmd.aliases))
+            table.add_row(f"  {names}", escape(cmd.summary))
     session.console.print(table)
     return None
 
@@ -106,10 +94,12 @@ def version(session: Session, args: argparse.Namespace) -> Result:
     return {"version": __version__, "compiled": f"{__compiled_date__} {__compiled_time__}"}
 
 
-@command("quit", Category.GENERAL)
-@command("exit", Category.GENERAL)
+@command("quit", Category.GENERAL, aliases=("exit",))
 def quit_command(session: Session, args: argparse.Namespace) -> Result:
-    """Leave the shell."""
+    """Leave the shell; also spelled 'exit'.
+
+    In a script or behind -c, the commands after it are not run.
+    """
     del args
     session.running = False
     return None
@@ -144,23 +134,39 @@ def clear(session: Session, args: argparse.Namespace) -> Result:
     return None
 
 
-@command("store", Category.GENERAL, _all_stores)
+def _store_arguments(parser: Parser) -> None:
+    store_flags(parser)
+    parser.add_argument("--pop", action="store_true", help="remove the active element of the selected stores")
+
+
+@command("store", Category.GENERAL, _store_arguments)
 def store(session: Session, args: argparse.Namespace) -> Result:
     """List the elements of the selected stores, or of all stores.
 
-    The active element, the one commands work on, is marked with '*'.
+    The active element, the one commands work on, is marked with '*'. With --pop, the active
+    element is removed instead and the one before it becomes active.
     """
     stores = stores_of(session)
+    names = selected_stores(args) or list(stores)
+    if args.pop:
+        removed: dict[str, object] = {}
+        for name in names:
+            element = stores[name].pop()
+            removed[name] = describe(element)
+            session.info(f"removed {one_line(describe(element))}")
+        return removed
+
     listed: dict[str, object] = {}
-    for name in selected_stores(args) or list(stores):
+    for name in names:
         current = stores[name]
         session.console.print(f"[bold]{STORE_FLAGS[name][2]}[/]")
-        if not current.items:
+        descriptions = [describe(element) for element in current]
+        if not descriptions:
             session.info("  (empty)")
-        for index, element in enumerate(current):
+        for index, description in enumerate(descriptions):
             marker = "*" if index == current.active else " "
-            session.info(f"{marker} {index}: {one_line(describe(element))}")
-        listed[name] = [describe(element) for element in current]
+            session.info(f"{marker} {index}: {one_line(description)}")
+        listed[name] = descriptions
     return listed
 
 
@@ -173,30 +179,36 @@ def _current_arguments(parser: Parser) -> None:
 def current(session: Session, args: argparse.Namespace) -> Result:
     """Make an element of a store the active one."""
     name = one_store(args)
-    stores_of(session)[name].select(args.index)
-    return {name: describe(stores_of(session)[name].current())}
+    selected = stores_of(session)[name]
+    selected.select(args.index)
+    return {name: describe(selected.current())}
 
 
-@command("ps", Category.GENERAL, _all_stores)
+def _ps_arguments(parser: Parser) -> None:
+    store_flags(parser)
+    parser.add_argument("--all", action="store_true", help="describe every element, not only the active one")
+
+
+@command("ps", Category.GENERAL, _ps_arguments)
 def ps(session: Session, args: argparse.Namespace) -> Result:
     """Print the statistics of the active element of a store."""
-    name = one_store(args)
-    description = describe(stores_of(session)[name].current())
-    table = Table(box=None, show_header=False, padding=(0, 2))
-    for key, value in _flatten(description):
-        table.add_row(f"[bold]{key}[/]", escape(str(value)))
-    session.console.print(table)
-    return {name: description}
+    stores = stores_of(session)
+    if not args.all:
+        name = one_store(args)
+        description = describe(stores[name].current())
+        session.console.print(render_table(description))
+        return {name: description}
 
-
-def _flatten(description: dict[str, object], prefix: str = "") -> list[tuple[str, object]]:
-    rows: list[tuple[str, object]] = []
-    for key, value in description.items():
-        if isinstance(value, dict):
-            rows.extend(_flatten(value, f"{prefix}{key} "))
-        else:
-            rows.append((f"{prefix}{key}", value))
-    return rows
+    listed: dict[str, object] = {}
+    for name in selected_stores(args) or list(stores):
+        current_store = stores[name]
+        descriptions = [describe(element) for element in current_store]
+        for index, description in enumerate(descriptions):
+            marker = "*" if index == current_store.active else " "
+            session.console.print(f"[bold]{STORE_FLAGS[name][2]}[/] {marker}{index}")
+            session.console.print(render_table(description))
+        listed[name] = descriptions
+    return listed
 
 
 def _print_arguments(parser: Parser) -> None:
@@ -207,8 +219,8 @@ def _print_arguments(parser: Parser) -> None:
 def print_command(session: Session, args: argparse.Namespace) -> Result:
     """Print the active truth table, gate-level layout, or cell-level layout.
 
-    A simulated SiDB layout also prints its ground state charge configuration. Networks have no
-    textual form; use 'show -n' to draw one.
+    A simulated SiDB layout is drawn once, with its ground state charges in place of the dots.
+    Networks have no textual form; use 'show -n' to draw one.
     """
     if args.network:
         msg = "networks have no textual form; use 'show -n' to draw the active network"
@@ -222,10 +234,17 @@ def print_command(session: Session, args: argparse.Namespace) -> Result:
         session.info(repr(session.gate_layouts.current()))
         return None
     entry = session.cell_layouts.current()
-    session.info(repr(entry.layout))
+    if not isinstance(entry.layout, sidb_layout):
+        session.info(repr(entry.layout))
+        return None
     state = ground_state(entry)
+    # one picture: the charge symbols replace the dots rather than being drawn a second time. Only
+    # the color tells a negative charge from a positive one, so it is kept whenever a terminal reads
+    # the output and dropped when it is redirected into a file.
+    picture = print_sidb_layout(entry.layout, state, lat_color=session.console.is_terminal)
+    session.console.print(picture.rstrip(), markup=False, highlight=False)
     if state is not None:
-        session.info(f"ground state: {state!r} ({state.energy():.6f} eV)")
+        session.info(f"ground state energy: {state.energy():.6f} eV")
     return None
 
 
@@ -233,56 +252,34 @@ def _show_arguments(parser: Parser) -> None:
     store_flags(parser, "network", "gate_layout", "cell_layout")
     parser.add_argument("-o", "--output", type=Path, metavar="FILE", help="write here instead of a temporary file")
     parser.add_argument("--silent", action="store_true", help="only write the file, do not open a viewer")
-    parser.add_argument("--simple", action="store_true", help="draw QCA cells without dots and clock numbers")
+    parser.add_argument(
+        "-p",
+        "--program",
+        metavar="COMMAND",
+        help="open the file with this command instead of the platform's viewer; '{}' becomes the file",
+    )
+    parser.add_argument("--delete", action="store_true", help="remove the temporary file when the session ends")
+    drawing_flags(parser)
 
 
 @command("show", Category.GENERAL, _show_arguments)
 def show(session: Session, args: argparse.Namespace) -> Result:
-    """Draw the active network or layout and open it in the default viewer.
+    """Draw the active network or layout and open it in the platform's viewer.
 
     Networks and gate-level layouts become Graphviz DOT files, cell-level layouts SVG files. A
-    simulated SiDB layout is drawn with its ground state charges.
+    simulated SiDB layout is drawn with its ground state charges. The viewer returns at once and
+    reads the file afterwards, so a temporary file is kept until the process ends; --delete asks
+    for it back when the session closes.
     """
     name = one_store(args, "network", "gate_layout", "cell_layout")
     suffix = ".svg" if name == "cell_layout" else ".dot"
-    path: Path = args.output if args.output is not None else session.temp_file(suffix)
-    if name == "network":
-        write_dot_network(session.networks.current(), str(path))
-    elif name == "gate_layout":
-        write_dot_layout(session.gate_layouts.current(), str(path))
-    else:
+    path: Path = args.output if args.output is not None else session.viewer_file(suffix, delete=args.delete)
+    if name == "cell_layout":
         write_svg(session.cell_layouts.current(), path, simple=args.simple)
+    else:
+        element = session.networks.current() if name == "network" else session.gate_layouts.current()
+        write_dot(element, path, network=name == "network", indexes=args.indexes, clock_colors=args.clock_colors)
     session.info(f"wrote {path}")
     if not args.silent:
-        webbrowser.open(path.resolve().as_uri())
+        open_viewer(path, args.program)
     return {"file": str(path)}
-
-
-def write_svg(entry: CellEntry, path: Path, *, simple: bool) -> None:
-    """Draw a cell-level layout as an SVG file.
-
-    Args:
-        entry: The store element; a simulated SiDB layout is drawn with its ground state charges.
-        path: The output file.
-        simple: Draw QCA cells without dots and clock numbers.
-
-    Raises:
-        CommandError: For iNML layouts, which have no SVG drawer.
-    """
-    layout = entry.layout
-    if isinstance(layout, qca_layout | mol_qca_layout):
-        params = write_qca_layout_svg_params()
-        params.simple = simple
-        if isinstance(layout, qca_layout):
-            write_qca_layout_svg(layout, str(path), params)
-        else:
-            write_mol_qca_layout_svg(layout, str(path), params)
-    elif isinstance(layout, sidb_layout):
-        state = ground_state(entry)
-        if state is not None:
-            write_sidb_layout_svg(layout, state, str(path))
-        else:
-            write_sidb_layout_svg(layout, str(path))
-    else:
-        msg = f"no SVG drawer for {type(layout).__name__} layouts"
-        raise CommandError(msg)
