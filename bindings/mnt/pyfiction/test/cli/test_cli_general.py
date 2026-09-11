@@ -131,23 +131,33 @@ def test_show_rejects_inml_svg(shell: Shell, tmp_path: Path) -> None:
     assert "no SVG drawer" in shell.fails(f"show -c --silent -o {tmp_path / 'inml.svg'}")
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows opens a file through os.startfile, not a command")
 def test_show_opens_the_written_file(mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """The viewer is the platform's file opener, which takes the path itself, not a browser URL."""
     opened: list[list[str]] = []
     monkeypatch.setattr("mnt.pyfiction.cli.drawing.subprocess.Popen", lambda command, **_: opened.append(command))
     path = tmp_path / "network.dot"
     mux21_shell.ok(f"show -n -o {path}")
-    assert opened == [[platform_opener(), str(path)]]
+    assert opened == [["open" if sys.platform == "darwin" else "xdg-open", str(path)]]
     assert "digraph" in path.read_text(encoding="utf-8")
 
 
-def platform_opener() -> str:
-    """Return the opener binary `show` reaches for on this platform.
+def test_show_uses_the_shell_association_on_windows(
+    mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Windows has no opener binary, so the file goes to the shell association through os.startfile.
 
-    Returns:
-        ``open`` on macOS, ``xdg-open`` elsewhere.
+    The branch is forced here rather than skipped off Windows, so that every run covers it.
     """
-    return "open" if sys.platform == "darwin" else "xdg-open"
+    opened: list[Path] = []
+    monkeypatch.setattr("mnt.pyfiction.cli.drawing.sys.platform", "win32")
+    monkeypatch.setattr("os.startfile", opened.append, raising=False)
+    started: list[list[str]] = []
+    monkeypatch.setattr("mnt.pyfiction.cli.drawing.subprocess.Popen", lambda command, **_: started.append(command))
+    path = tmp_path / "network.dot"
+    mux21_shell.ok(f"show -n -o {path}")
+    assert opened == [path]
+    assert started == []
 
 
 def test_show_takes_an_explicit_program(mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -160,14 +170,11 @@ def test_show_takes_an_explicit_program(mux21_shell: Shell, tmp_path: Path, monk
     assert opened == [["dot", "-Tpng", str(path)], ["viewer", "--file", str(path), "--wait"]]
 
 
-def test_show_keeps_its_temporary_file_after_the_session_closes(
-    mux21_shell: Shell, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_show_keeps_its_temporary_file_after_the_session_closes(mux21_shell: Shell) -> None:
     """The viewer reads the file after `show` returns, so the file must outlive the session."""
-    monkeypatch.setattr("mnt.pyfiction.cli.drawing.subprocess.Popen", lambda *_, **__: None)
-    mux21_shell.ok("show -n")
+    mux21_shell.ok("show -n --silent")
     kept = Path(str(mux21_shell.session.log[-1]["result"]["file"]))  # type: ignore[index]
-    mux21_shell.ok("show -n --delete")
+    mux21_shell.ok("show -n --silent --delete")
     deleted = Path(str(mux21_shell.session.log[-1]["result"]["file"]))  # type: ignore[index]
     mux21_shell.session.close()
     assert kept.is_file()
