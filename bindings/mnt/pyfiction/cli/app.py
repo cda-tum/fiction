@@ -22,6 +22,7 @@ from prompt_toolkit.history import FileHistory
 
 from mnt.pyfiction import __version__
 
+from .errors import CommandError
 from .registry import REGISTRY
 from .session import Session
 
@@ -129,10 +130,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.commands is not None:
             return 0 if session.execute(args.commands) else EXIT_FAILURE
         if args.file is not None:
-            if not args.file.is_file():
-                session.error(f"cannot read script '{args.file}'")
+            try:
+                return 0 if session.run_script(args.file) else EXIT_FAILURE
+            except CommandError as error:
+                session.error(str(error))
                 return EXIT_USAGE
-            return 0 if session.run_script(args.file) else EXIT_FAILURE
         repl(session)
     finally:
         session.close()

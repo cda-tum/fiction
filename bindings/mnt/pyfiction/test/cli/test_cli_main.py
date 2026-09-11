@@ -47,6 +47,12 @@ def test_missing_script_returns_two(tmp_path: Path) -> None:
     assert main(["-f", str(tmp_path / "missing.fs")]) == 2
 
 
+def test_unreadable_script_returns_two(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """A path that exists but cannot be read as a file reports the reason and exits with 2."""
+    assert main(["-f", str(tmp_path)]) == 2
+    assert "cannot read script" in capsys.readouterr().out
+
+
 def test_log_is_written_on_failure(tmp_path: Path) -> None:
     log = tmp_path / "log.json"
     assert main(["-l", str(log), "-c", "version; ortho"]) == 1
