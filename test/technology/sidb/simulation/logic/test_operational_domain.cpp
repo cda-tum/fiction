@@ -2196,12 +2196,12 @@ TEST_CASE("Parallel contour surfaces preserve classifications and avoid duplicat
     for (const auto threads : {1u, 2u, 8u})
     {
         params.number_of_threads = threads;
-        for (auto repetition = 0; repetition < 3; ++repetition)
+        for (const auto samples : {1u, 2000u})
         {
             operational_domain_stats                                                     stats{};
             sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
                 lyt, std::vector{create_and_tt()}, params, stats};
-            const auto domain = impl.contour_tracing(1);
+            const auto domain = impl.contour_tracing(samples);
             CHECK(stats.num_operational_parameter_combinations > 0);
             CHECK(stats.num_evaluated_parameter_combinations == domain.size());
             domain.for_each([&reference](const auto& pp, const auto& status)

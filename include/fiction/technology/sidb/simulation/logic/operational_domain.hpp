@@ -1018,6 +1018,8 @@ class operational_domain_impl
             return std::pair{std::move(neighborhood), on_boundary};
         };
 
+        // Retain completed surfaces so another seed on the same surface does not retrace it.
+        std::vector<phmap::btree_set<step_point>> completed_contours{};
         for (const auto& starting_point : step_point_samples)
         {
             // if the current starting point is non-operational, skip to the next one
@@ -1038,6 +1040,15 @@ class operational_domain_impl
 
             // find an operational point on the boundary starting from the randomly determined starting point
             const auto boundary_starting_point = find_operational_contour_step_point(starting_point);
+
+            const auto completed =
+                std::ranges::find_if(completed_contours, [&boundary_starting_point](const auto& contour)
+                                     { return contour.contains(boundary_starting_point); });
+            if (completed != completed_contours.end())
+            {
+                infer_operational_status_in_enclosing_contour(starting_point, *completed);
+                continue;
+            }
 
             // all step points visited by the boundary trace; they form a closed surface that encloses the operational
             // region `starting_point` is located in
@@ -1135,6 +1146,7 @@ class operational_domain_impl
             }
 
             infer_operational_status_in_enclosing_contour(starting_point, contour);
+            completed_contours.push_back(std::move(contour));
         }
 
         log_stats();
