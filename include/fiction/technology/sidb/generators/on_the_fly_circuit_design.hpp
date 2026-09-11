@@ -71,6 +71,8 @@ class unsuccessful_gate_design_error : public std::runtime_error
      */
     explicit unsuccessful_gate_design_error(const std::string_view msg) : std::runtime_error(std::string{msg}) {}
 };
+#if (FICTION_Z3_SOLVER)
+
 /**
  * This struct stores the parameters to design an SiDB circuit on a defective surface.
  *
@@ -87,6 +89,8 @@ struct on_the_fly_circuit_design_on_defective_surface_params
     physical_design::exact_physical_design_params exact_design_parameters = {};
 };
 
+#endif
+
 /**
  * This struct stores the parameters to design an SiDB circuit.
  *
@@ -98,6 +102,8 @@ struct on_the_fly_circuit_design_params
      */
     sidb::on_the_fly_gate_library_params sidb_on_the_fly_gate_library_parameters = {};
 };
+
+#if (FICTION_Z3_SOLVER)
 
 /**
  * Statistics for the on-the-fly defect-aware circuit design.
@@ -229,6 +235,8 @@ template <typename Ntk, typename GateLyt>
 
     return result;
 }
+
+#endif
 
 /**
  * @brief Designs a lattice-based SiDB circuit for a placed and routed gate-level layout.

@@ -327,6 +327,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Gate design enumerates, counts, and randomly samples only empty, defect-free canvas sites.
   - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
 
+- Build system:
+
+  - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
+
 - CLI:
   - SiDB store descriptions and statistics handle the full column range without integer overflow
 
