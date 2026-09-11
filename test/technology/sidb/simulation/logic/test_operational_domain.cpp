@@ -2181,23 +2181,18 @@ TEST_CASE("Concurrent operational-domain sampling matches grid results", "[opera
 
 TEST_CASE("Parallel contour surfaces preserve classifications and avoid duplicate simulations", "[operational-domain]")
 {
-    layout lyt{lattice::si_100_2x1(), "BDL wire"};
-    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
-    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
+    const layout lyt{blueprints::siqad_and_gate()};
 
     operational_domain_params params{};
-    params.operational_params.sim_params.base = 2;
-    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
-                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25},
-                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.33, .max = -0.31, .step = 0.01}};
-    const auto reference    = operational_domain_grid_search(lyt, std::vector{create_id_tt()}, params);
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6004, .step = 0.0001},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0004, .step = 0.0001},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.3196, .step = 0.0001}};
+    const auto reference    = operational_domain_grid_search(lyt, std::vector{create_and_tt()}, params);
+    // Every sample reaches this full region; its five-step extent puts every point within the boundary search.
+    REQUIRE(reference.size() == 125);
+    reference.for_each([](const auto&, const auto& value)
+                       { REQUIRE(std::get<0>(value) == operational_status::OPERATIONAL); });
     for (const auto threads : {1u, 2u, 8u})
     {
         params.number_of_threads = threads;
@@ -2205,8 +2200,8 @@ TEST_CASE("Parallel contour surfaces preserve classifications and avoid duplicat
         {
             operational_domain_stats                                                     stats{};
             sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
-                lyt, std::vector{create_id_tt()}, params, stats};
-            const auto domain = impl.contour_tracing(50);
+                lyt, std::vector{create_and_tt()}, params, stats};
+            const auto domain = impl.contour_tracing(1);
             CHECK(stats.num_operational_parameter_combinations > 0);
             CHECK(stats.num_evaluated_parameter_combinations == domain.size());
             domain.for_each([&reference](const auto& pp, const auto& status)
