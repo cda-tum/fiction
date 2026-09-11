@@ -364,6 +364,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - The Python shell computes SiDB area from the layout lattice and rejects cell-dimension overrides.
   - SiDB store descriptions and statistics handle the full column range without integer overflow
   - A script file that exists but cannot be read reports the reason and exits with 2, like a missing one
+  - `tt -t 0xD` reads all four bits of a hex digit as the two-variable table the same bits name in binary;
+    one digit produced a one-variable table and dropped two of them
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.

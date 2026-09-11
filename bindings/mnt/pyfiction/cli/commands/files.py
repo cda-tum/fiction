@@ -283,7 +283,7 @@ def _table_from_string(text: str) -> dynamic_truth_table:
     if text.lower().startswith("0x"):
         digits = text[2:]
         bits = len(digits) * 4
-        num_vars = 1 if len(digits) == 1 else _log2(bits, what="hex digits times four")
+        num_vars = _log2(bits, what="hex digits times four")
         table = dynamic_truth_table(num_vars)
         table.create_from_hex_string(digits)
         return table

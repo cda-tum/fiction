@@ -155,9 +155,18 @@ def test_write_technology_mismatch(mux21_shell: Shell, tmp_path: Path) -> None:
 
 @pytest.mark.parametrize(
     ("arguments", "hex_string"),
-    [("-t 1000", "8"), ("-t 0xe8", "e8"), ("-e '<abc>'", "e8"), ("-e '[(ab)(!ac)]'", "d8"), ("-t 01", "1")],
+    [
+        ("-t 1000", "8"),
+        ("-t 0xe8", "e8"),
+        ("-e '<abc>'", "e8"),
+        ("-e '[(ab)(!ac)]'", "d8"),
+        ("-t 01", "1"),
+        ("-t 0xe", "e"),
+        ("-t 1110", "e"),
+    ],
 )
 def test_tt(shell: Shell, arguments: str, hex_string: str) -> None:
+    """Every source produces the table its argument names; one hex digit carries the four bits of two variables."""
     shell.ok(f"tt {arguments}")
     assert shell.session.truth_tables.current().to_hex() == hex_string
 
