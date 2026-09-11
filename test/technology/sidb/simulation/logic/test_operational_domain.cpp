@@ -2227,3 +2227,59 @@ TEST_CASE("Parallel contour surfaces preserve classifications and avoid duplicat
         }
     }
 }
+
+TEST_CASE("Contour surface tracing propagates a worker's storage failure", "[operational-domain]")
+{
+    /**
+     * @brief Accepts sampling and the first-axis boundary search, then rejects surface expansion.
+     */
+    class failing_surface_domain : public operational_domain
+    {
+      public:
+        /**
+         * @brief Stores points on the seed's first-axis line.
+         * @param point Parameter point to store.
+         * @param value Operational status of the point.
+         * @throws std::bad_alloc when a worker expands beyond that line.
+         */
+        void add_value(const parameter_point& point, const std::tuple<operational_status>& value)
+        {
+            if (!seed.has_value())
+            {
+                seed = point;
+            }
+            if (point.get_parameters().at(1) != seed->get_parameters().at(1) ||
+                point.get_parameters().at(2) != seed->get_parameters().at(2))
+            {
+                throw std::bad_alloc{};
+            }
+            operational_domain::add_value(point, value);
+        }
+
+      private:
+        /**
+         * @brief The single random sample, written before surface workers start.
+         */
+        std::optional<parameter_point> seed{};
+    };
+
+    const layout              lyt{blueprints::siqad_and_gate()};
+    operational_domain_params params{};
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6001, .step = 0.0001},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0001, .step = 0.0001},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.3199, .step = 0.0001}};
+    const auto reference    = operational_domain_grid_search(lyt, std::vector{create_and_tt()}, params);
+    REQUIRE(reference.size() == 8);
+    reference.for_each([](const auto&, const auto& value)
+                       { REQUIRE(std::get<0>(value) == operational_status::OPERATIONAL); });
+
+    for (const auto threads : {1u, 2u, 8u})
+    {
+        params.number_of_threads = threads;
+        operational_domain_stats                                                         stats{};
+        sidb::simulation::logic::detail::operational_domain_impl<failing_surface_domain> impl{
+            lyt, std::vector{create_and_tt()}, params, stats};
+        CHECK_THROWS_AS(impl.contour_tracing(1), std::bad_alloc);
+    }
+}
