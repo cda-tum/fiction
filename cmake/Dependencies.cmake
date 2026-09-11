@@ -159,7 +159,7 @@ set(MOCKTURTLE_INSTALL ON)
 FetchContent_Declare(
   mockturtle
   GIT_REPOSITORY https://github.com/marcelwa/mockturtle.git
-  GIT_TAG d99744f6803802e750014471e3a1db1bdfe74aca # Head of the mnt branch
+  GIT_TAG dcd9791644734897d0ac3ca07cf3a3d7762b1a76 # Head of the mnt branch
 )
 FetchContent_MakeAvailable(mockturtle)
 
