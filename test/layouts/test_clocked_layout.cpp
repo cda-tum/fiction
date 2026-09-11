@@ -19,6 +19,8 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/traits.hpp>
 
 #include <set>

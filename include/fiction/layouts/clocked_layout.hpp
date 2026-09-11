@@ -20,12 +20,9 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 
-#include <mockturtle/networks/detail/foreach.hpp>
-
 #include <algorithm>
 #include <cstdint>
 #include <functional>
-#include <iterator>
 #include <memory>
 #include <string_view>
 #include <utility>
