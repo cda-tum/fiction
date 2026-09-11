@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import math
 import secrets
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from aigverse import abc
@@ -376,7 +377,7 @@ def abc_command(session: Session, args: argparse.Namespace) -> Result:
         flow.extend(abc.SCRIPTS[args.script] if args.script else [args.commands])
         if not args.no_write:
             flow.append(f'write_aiger -s "{output_path.as_posix()}"')
-        output = abc.run_commands("; ".join(flow))
+        output = abc.run_commands("; ".join(flow), cwd=Path.cwd())
         if args.no_write:
             session.output(output.rstrip())
             return {"replacement": False, "output": output}

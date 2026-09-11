@@ -174,6 +174,7 @@ runs one of the named scripts `resyn`, `resyn2`, `resyn3`, `compress`, `compress
 and `dc2`; `abc -c "balance; rewrite; refactor"` runs a command string. The read and write steps are added around
 the given commands, and the network travels as an AIGER file, so every gate arrives in ABC as ANDs and inverters.
 
+Custom ABC commands resolve relative paths from the shell's current directory.
 `--no-read` lets custom ABC commands supply their input, `--no-strash` omits the initial structural hashing,
 and `--no-write` leaves the network store unchanged. For example, `abc --no-read --no-strash --no-write -c version`
 runs ABC without needing a stored network.

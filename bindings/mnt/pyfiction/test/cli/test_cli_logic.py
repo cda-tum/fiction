@@ -129,7 +129,9 @@ def test_abc(shell: Shell, resource: Callable[[str], str]) -> None:
     assert isinstance(shell.session.networks.current(), aig_network)
 
 
-def test_abc_xag_and_custom_flow(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:
+def test_abc_xag_and_custom_flow(
+    shell: Shell, resource: Callable[[str], str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     if not abc.is_available():
         assert not os.environ.get("FICTION_REQUIRE_ABC"), "the integration job requires external ABC"
         pytest.skip("ABC is not installed")
@@ -143,6 +145,7 @@ def test_abc_xag_and_custom_flow(shell: Shell, resource: Callable[[str], str], t
     assert shell.session.networks.current() is original
     path = tmp_path / "custom input.aig"
     shell.ok(f'write -n "{path}"')
-    shell.ok(f"abc --no-read --no-strash -c 'read_aiger \"{path.as_posix()}\"; strash; balance'")
+    monkeypatch.chdir(tmp_path)
+    shell.ok(f"abc --no-read --no-strash -c 'read_aiger \"{path.name}\"; strash; balance'")
     shell.ok("simulate -n")
     assert shell.session.log[-1]["result"] == expected
