@@ -248,6 +248,8 @@ class Session:
         }
         if self.log_path is not None:
             self.log.append(entry)
+        stores = (self.truth_tables, self.networks, self.gate_layouts, self.cell_layouts)
+        before = [(len(store), store.active) for store in stores]
         long_operation = name in {
             "exact",
             "ortho",
@@ -281,6 +283,9 @@ class Session:
         entry["status"] = "partial" if result and result.get("status") == "partial" else "ok"
         if result is not None and self.log_path is not None:
             entry["result"] = json_value(result)
+        for store, previous in zip(stores, before, strict=False):
+            if store.active is not None and (len(store), store.active) != previous:
+                self.info(f"{store.kind} [{store.active}]: {one_line(describe(store.current()))}")
         if long_operation:
             self.info(f"{name}: completed in {time.perf_counter() - clock:.3f} s")
         return True
@@ -441,14 +446,27 @@ class Session:
         self.console.print(Text.from_ansi(message), highlight=False)
 
     def status_line(self) -> str:
-        """Return the store summary shown below the prompt.
+        """Return compact store counts and active indices within the terminal width.
 
         Returns:
-            One entry per store with its element count and the active element's name.
+            Store identifiers and counts, with names only when space permits.
         """
-        return " · ".join(
-            store.summary() for store in (self.truth_tables, self.networks, self.gate_layouts, self.cell_layouts)
-        )
+        stores = (self.truth_tables, self.networks, self.gate_layouts, self.cell_layouts)
+        parts = [
+            f"{label}[{store.active if store.active is not None else '-'}]/{len(store)}"
+            for label, store in zip(("tt", "net", "gate", "cell"), stores, strict=False)
+        ]
+        width = self.console.width
+        remaining = max(0, width - len(" · ".join(parts)))
+        for index, store in enumerate(stores):
+            if store.active is not None and remaining >= len(" name"):
+                name = element_name(store.current())
+                budget = min(20, remaining - 1)
+                if name:
+                    text = name if len(name) <= budget else name[: budget - 1] + "…"
+                    parts[index] += " " + text
+                    remaining -= len(text) + 1
+        return " · ".join(parts)
 
     @staticmethod
     def as_technology_network(network: Network) -> technology_network:

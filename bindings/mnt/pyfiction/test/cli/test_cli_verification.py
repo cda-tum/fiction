@@ -45,4 +45,4 @@ def test_check(mux21_shell: Shell) -> None:
     assert result["Warnings"] == 0
     for section in ("Unplaced nodes", "Dead placed nodes", "Missing connections", "I/O counts"):
         assert section in result, f"the report lost '{section}'"
-    assert "DRVs" in mux21_shell.output
+    assert "violations" in mux21_shell.output

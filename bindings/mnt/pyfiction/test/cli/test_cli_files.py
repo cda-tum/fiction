@@ -20,6 +20,7 @@ from mnt.pyfiction import (
     inml_layout,
     inml_technology,
     mig_network,
+    shifted_cartesian_gate_layout,
     technology_network,
     xag_network,
 )
@@ -126,7 +127,10 @@ def test_fgl_round_trip(shell: Shell, resource: Callable[[str], str], tmp_path: 
     if topology == "hexagonal":
         shell.ok("hex")
     if topology == "shifted_cartesian":
-        pytest.skip("no heuristic produces shifted-Cartesian layouts; exact is too slow for the suite")
+        layout = shifted_cartesian_gate_layout((1, 0), "2DDWave", "wire")
+        source = layout.create_pi("a", (0, 0))
+        layout.create_po(source, "f", (1, 0))
+        shell.session.gate_layouts.add(layout)
     gates = shell.session.gate_layouts.current().num_gates()
     shell.ok(f"write {fgl}; clear -g; read {fgl} --topology {topology}")
     assert shell.session.gate_layouts.current().num_gates() == gates
@@ -203,9 +207,9 @@ def test_read_directory_matches_mixed_case_suffixes(
     shutil.copy(resource("mux21.v"), tmp_path / "MUX21.V")
     shutil.copy(resource("xor2.v"), tmp_path / "xor2.v")
     shell.ok(f"read {tmp_path}")
-    assert len(shell.session.networks) == 1
-    assert "MUX21.V" in shell.stderr
-    assert "could not parse" in shell.fails(f"read {tmp_path / 'MUX21.V'}")
+    assert len(shell.session.networks) == 2
+    assert not shell.stderr
+    shell.ok(f"read {tmp_path / 'MUX21.V'}")
 
 
 def test_read_directory_reports_a_broken_file_and_continues(

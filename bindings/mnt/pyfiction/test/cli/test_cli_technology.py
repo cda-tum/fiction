@@ -33,13 +33,13 @@ def test_cell_bestagon(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho; hex; cell -l bestagon")
     entry = mux21_shell.session.cell_layouts.current()
     assert isinstance(entry.layout, sidb_layout)
-    assert "lattice" in mux21_shell.ok("ps -c")
+    assert "Lattice" in mux21_shell.ok("ps -c")
 
 
 def test_cell_topology_mismatch(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho")
-    assert "needs a hexagonal layout" in mux21_shell.fails("cell -l bestagon")
-    assert "needs a shifted_cartesian layout" in mux21_shell.fails("cell -l topolinano")
+    assert "needs a even_row_hex layout" in mux21_shell.fails("cell -l bestagon")
+    assert "needs a odd_column_cartesian layout" in mux21_shell.fails("cell -l topolinano")
     mux21_shell.ok("hex")
     assert "needs a cartesian layout" in mux21_shell.fails("cell")
 

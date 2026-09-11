@@ -91,11 +91,24 @@ def help_command(session: Session, args: argparse.Namespace) -> Result:
         commands = [cmd for name, cmd in REGISTRY.items() if cmd.category is category and cmd.name == name]
         if not commands:
             continue
-        table.add_row(f"[bold]{category.value}[/]", "")
-        for cmd in commands:
-            names = ", ".join((cmd.name, *cmd.aliases))
-            table.add_row(f"  {names}", escape(cmd.summary))
-    session.console.print(table)
+        if args.all:
+            table.add_row(f"[bold]{category.value}[/]", "")
+            for cmd in commands:
+                table.add_row(cmd.name, escape(cmd.summary))
+        else:
+            table.add_row(
+                f"[bold]{category.value}[/]", "  ".join(", ".join((cmd.name, *cmd.aliases)) for cmd in commands)
+            )
+    pager = (
+        session.console.pager() if args.all and session.console.is_terminal and sys.stdin.isatty() else nullcontext()
+    )
+    with pager:
+        session.console.print(table)
+        session.output("\nExample: read circuit.v; ortho; check; cell; write circuit.qca")
+        session.output("Use help COMMAND for options and restrictions; help --all for descriptions.")
+        for name in ("exact", "clustercomplete"):
+            if reason := unavailable_reason(name):
+                session.output(f"{name}: {reason}")
     return None
 
 
@@ -167,13 +180,29 @@ def store(session: Session, args: argparse.Namespace) -> Result:
     listed: dict[str, object] = {}
     for name in selected_stores(args) or list(stores):
         current = stores[name]
-        session.console.print(f"[bold]{STORE_FLAGS[name][2]}[/]")
         descriptions = [describe(element) for element in current]
-        if not descriptions:
-            session.info("  (empty)")
+        empty = " (empty)" if not descriptions else ""
+        session.console.print(f"[bold]{STORE_FLAGS[name][2]}[/]{empty}")
+        table = Table(box=None, padding=(0, 1), expand=True)
+        table.add_column("", width=1)
+        table.add_column("Index", justify="right", no_wrap=True)
+        table.add_column("Name", overflow="ellipsis", ratio=1, no_wrap=True)
+        table.add_column("Type", no_wrap=True)
+        table.add_column("Size", no_wrap=True)
         for index, description in enumerate(descriptions):
-            marker = "*" if index == current.active else " "
-            session.info(f"{marker} {index}: {one_line(description)}")
+            marker = "*" if index == current.active else ""
+            label = " / ".join(
+                str(description[key]) for key in ("type", "technology", "topology", "lattice") if description.get(key)
+            )
+            if description.get("simulation"):
+                label += " / simulated"
+            counts = f"{description['inputs']}/{description['outputs']} I/O, " if "inputs" in description else ""
+            size = counts + ", ".join(
+                f"{description[key]} {key}" for key in ("gates", "cells", "dots", "vars") if key in description
+            )
+            table.add_row(marker, str(index), escape(str(description.get("name", "—"))), escape(label), escape(size))
+        if descriptions:
+            session.console.print(table)
         listed[name] = descriptions
     return listed
 

@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 import pytest
@@ -21,6 +22,7 @@ from mnt.pyfiction.cli.aigverse_bridge import from_aigverse, to_aigverse
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from pathlib import Path
 
     from .conftest import Shell
 
@@ -76,7 +78,8 @@ def test_simulate(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f"read {resource('xor2.v')}; simulate -n --store")
     assert "0110" in shell.output
     assert shell.session.truth_tables.current().to_binary() == "0110"
-    shell.ok("ortho; simulate -g --silent")
+    shell.ok("ortho")
+    shell.ok("simulate -g --silent")
     assert not shell.output
     assert shell.session.log[-1]["result"]["tables"][0]["binary"] == "0110"  # type: ignore[index]
 
@@ -119,7 +122,27 @@ def test_bridge_round_trip(mux21_shell: Shell, resource: Callable[[str], str]) -
 def test_abc(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f"read {resource('mux21.v')} --type aig")
     if not abc.is_available():
+        assert not os.environ.get("FICTION_REQUIRE_ABC"), "the integration job requires external ABC"
         assert "AIGVERSE_ABC" in shell.fails("abc -s resyn2")
         pytest.skip("ABC is not installed")
     shell.ok("abc -s resyn2; abc -c 'balance; rewrite'")
     assert isinstance(shell.session.networks.current(), aig_network)
+
+
+def test_abc_xag_and_custom_flow(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:
+    if not abc.is_available():
+        assert not os.environ.get("FICTION_REQUIRE_ABC"), "the integration job requires external ABC"
+        pytest.skip("ABC is not installed")
+    shell.ok(f'read "{resource("xor2.v")}" --type xag')
+    shell.ok("simulate -n")
+    expected = shell.session.log[-1]["result"]
+    shell.ok("abc -c balance --no-strash; simulate -n")
+    assert shell.session.log[-1]["result"] == expected
+    original = shell.session.networks.current()
+    shell.ok("abc -c print_stats --no-write")
+    assert shell.session.networks.current() is original
+    path = tmp_path / "custom input.aig"
+    shell.ok(f'write -n "{path}"')
+    shell.ok(f"abc --no-read -c 'read_aiger \"{path.as_posix()}\"; strash; balance'")
+    shell.ok("simulate -n")
+    assert shell.session.log[-1]["result"] == expected

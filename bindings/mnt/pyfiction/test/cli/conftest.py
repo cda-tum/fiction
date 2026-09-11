@@ -112,13 +112,13 @@ class Shell:
 
 
 @pytest.fixture
-def shell() -> Iterator[Shell]:
+def shell(tmp_path: Path) -> Iterator[Shell]:
     """An empty shell, closed after the test.
 
     Yields:
         A session with a recording console.
     """
-    current = Shell()
+    current = Shell(log_path=tmp_path / "session.json")
     yield current
     current.session.close()
 

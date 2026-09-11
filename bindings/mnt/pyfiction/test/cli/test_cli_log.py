@@ -25,9 +25,9 @@ def test_one_entry_per_command(make_shell: Callable[[], Shell], resource: Callab
     shell.session.close()
     assert shell.session.log_path is not None
     entries = json.loads(shell.session.log_path.read_text(encoding="utf-8"))
-    assert [entry["command"] for entry in entries] == ["read", "ortho"]
-    assert all(entry["status"] == "ok" for entry in entries)
-    for entry in entries:
+    assert [entry["command"] for entry in entries] == ["read", "ortho", "frobnicate"]
+    assert [entry["status"] for entry in entries] == ["ok", "ok", "error"]
+    for entry in entries[:2]:
         assert set(entry) >= {"command", "args", "started", "runtime_s", "status", "result"}
         assert entry["runtime_s"] >= 0
 
@@ -65,6 +65,7 @@ def test_store_schemas(shell: Shell, resource: Callable[[str], str]) -> None:
         "crossings",
         "critical_path",
         "throughput",
+        "synchronization_elements",
     }
     assert layout["clocking"] == "2DDWAVE"
     assert isinstance(layout["throughput"], int)
@@ -73,12 +74,12 @@ def test_store_schemas(shell: Shell, resource: Callable[[str], str]) -> None:
     assert isinstance(stats["time_total_s"], float)
     cell = log[3]["result"]["cell_layout"]  # type: ignore[index]
     assert cell["technology"] == "QCA"
-    assert set(cell) == {"name", "technology", "size", "inputs", "outputs", "cells"}
+    assert set(cell) == {"name", "technology", "size", "inputs", "outputs", "cells", "area_nm2"}
 
 
-def test_help_is_not_logged(shell: Shell) -> None:
+def test_help_is_logged(shell: Shell) -> None:
     shell.ok("ortho -h")
-    assert shell.session.log == []
+    assert shell.session.log[-1]["status"] == "help"
 
 
 def test_log_survives_values_json_cannot_encode(make_shell: Callable[[], Shell]) -> None:
@@ -97,5 +98,5 @@ def test_sidb_statistics_use_dots(shell: Shell, resource: Callable[[str], str]) 
     description = shell.session.log[-1]["result"]["cell_layout"]  # type: ignore[index]
     assert description["dots"] == shell.session.cell_layouts.current().layout.num_dots()
     assert "cells" not in description
-    assert "dots:" in shell.ok("store -c")
-    assert "dots" in shell.ok("ps -c")
+    assert "dots" in shell.ok("store -c")
+    assert "Dots" in shell.ok("ps -c")

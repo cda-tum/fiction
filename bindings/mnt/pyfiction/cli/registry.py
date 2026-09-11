@@ -298,12 +298,29 @@ class Parser(argparse.ArgumentParser):
         raise HelpRequested(message or "")
 
     def format_help(self) -> str:
-        """Return detailed command help.
+        """Render options, actual defaults, restrictions, and a shell example.
 
         Returns:
-            The parser's plain-text help.
+            Detailed plain-text command help.
         """
-        return super().format_help()
+        defaults = [
+            f"{action.dest.replace('_', '-')}={action.default}"
+            for action in self.actions
+            if action.default is not None
+            and action.default != argparse.SUPPRESS
+            and not isinstance(action.default, bool)
+        ]
+        defaults_text = ", ".join(defaults) or "Flags are off unless an option states otherwise."
+        restrictions = unavailable_reason(self.prog) or self.restrictions
+        example = EXAMPLES.get(self.prog, self.prog)
+        return (
+            super().format_help()
+            + "\nDefaults:\n"
+            + textwrap.fill(defaults_text, width=76, initial_indent="  ", subsequent_indent="  ")
+            + "\n\nRestrictions:\n"
+            + textwrap.indent(restrictions, "  ")
+            + f"\n\nExample:\n  {example}\n"
+        )
 
     def print_help(self, file: SupportsWrite[str] | None = None) -> None:
         """Hand the help text to the session instead of writing it to a stream.

@@ -28,7 +28,7 @@ def test_ortho(mux21_shell: Shell) -> None:
     layout = mux21_shell.session.gate_layouts.current()
     assert isinstance(layout, cartesian_gate_layout)
     assert layout.get_clocking_scheme_name() == "2DDWAVE"
-    assert "num_gates" in mux21_shell.output
+    assert "Num gates" in mux21_shell.output
 
 
 def test_ortho_three_clock_phases(mux21_shell: Shell) -> None:
@@ -87,4 +87,4 @@ def test_exact(shell: Shell, resource: Callable[[str], str]) -> None:
 def test_exact_topolinano(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f"read {resource('xor2.v')}; exact -x -b -s columnar --topolinano -t 60")
     assert isinstance(shell.session.gate_layouts.current(), shifted_cartesian_gate_layout)
-    assert shell.session.log[-1]["result"]["gate_layout"]["topology"] == "shifted_cartesian"  # type: ignore[index]
+    assert shell.session.log[-1]["result"]["gate_layout"]["topology"] == "odd_column_cartesian"  # type: ignore[index]

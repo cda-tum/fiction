@@ -48,6 +48,27 @@ def table(description: dict[str, object]) -> Table:
         The table, ready to print on a console.
     """
     rendered = Table(box=None, show_header=False, padding=(0, 2))
+    labels = {
+        "size x": "Width",
+        "size y": "Height",
+        "size z": "Layers",
+        "size area": "Grid area",
+        "critical_path": "Critical path",
+        "runtime_s": "Runtime (s)",
+        "time_total_s": "Runtime (s)",
+        "area_nm2": "Area (nm²)",
+        "ground_state_energy_ev": "Ground state energy (eV)",
+    }
     for key, value in flatten(description):
-        rendered.add_row(f"[bold]{key}[/]", escape(str(value)))
+        prefix, _, leaf = key.rpartition(" ")
+        label = labels.get(key) or (
+            f"{prefix.capitalize()} {labels[leaf]}" if leaf in labels else key.replace("_", " ").capitalize()
+        )
+        if key == "throughput":
+            display = f"1/{value}"
+        elif value is None:
+            display = "—"
+        else:
+            display = str(value)
+        rendered.add_row(f"[bold]{label}[/]", escape(display))
     return rendered

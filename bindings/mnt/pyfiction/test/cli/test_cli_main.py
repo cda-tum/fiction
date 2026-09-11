@@ -88,6 +88,7 @@ def test_console_script_is_installed() -> None:
 
 def test_interactive_interrupt_continues_and_eof_closes_log(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
+    monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
     monkeypatch.setattr(PromptSession, "prompt", Mock(side_effect=[KeyboardInterrupt, "version", EOFError]))
     log = tmp_path / "interactive.json"
     with create_app_session(input=DummyInput(), output=DummyOutput()):
@@ -136,6 +137,7 @@ def test_quit_stops_the_rest_of_a_script(tmp_path: Path) -> None:
 def test_interactive_continues_after_commands(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """-i runs the shell once -c is done, as the C++ shell did."""
     monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
+    monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
     monkeypatch.setattr(PromptSession, "prompt", Mock(side_effect=["version", EOFError]))
     log = tmp_path / "interactive.json"
     with create_app_session(input=DummyInput(), output=DummyOutput()):
@@ -148,6 +150,7 @@ def test_interactive_is_not_entered_after_quit(tmp_path: Path, monkeypatch: pyte
     """`quit` behind -c means it, even with -i."""
     monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
     prompt = Mock(side_effect=[EOFError])
+    monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
     monkeypatch.setattr(PromptSession, "prompt", prompt)
     with create_app_session(input=DummyInput(), output=DummyOutput()):
         assert main(["-i", "-c", "version; quit"]) == 0
@@ -155,9 +158,9 @@ def test_interactive_is_not_entered_after_quit(tmp_path: Path, monkeypatch: pyte
 
 
 def test_quiet_keeps_errors_but_drops_informational_output(capsys: pytest.CaptureFixture[str]) -> None:
-    """--quiet is for scripted runs: the result lines go, the errors stay."""
+    """--quiet is for scripted runs: requested results and errors remain visible."""
     assert main(["-q", "-c", "version"]) == 0
-    assert not capsys.readouterr().out
+    assert "compiled" in capsys.readouterr().out
     assert main(["-q", "-c", "frobnicate"]) == 1
     assert "unknown command" in capsys.readouterr().err
 
@@ -183,8 +186,9 @@ def test_an_unusable_history_file_still_starts_the_shell(tmp_path: Path, monkeyp
     """A home the history cannot even be opened in leaves the shell without one, not without a prompt."""
     monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
     monkeypatch.setattr(cli_app, "ForgivingFileHistory", Mock(side_effect=OSError(13, "permission denied")))
+    monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
     monkeypatch.setattr(PromptSession, "prompt", Mock(side_effect=["version", EOFError]))
-    session = Session()
+    session = Session(log_path=tmp_path / "log.json")
     with create_app_session(input=DummyInput(), output=DummyOutput()):
         cli_app.repl(session)
     session.close()

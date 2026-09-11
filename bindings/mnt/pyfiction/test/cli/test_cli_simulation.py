@@ -58,7 +58,7 @@ def test_ground_state_engines(or_gate: Shell, engine: str) -> None:
     simulation = or_gate.session.log[-1]["result"]["cell_layout"]["simulation"]  # type: ignore[index]
     assert simulation["stable_states"] >= 1
     assert simulation["ground_state_energy_ev"] is not None
-    assert "ground state" in or_gate.ok("print -c")
+    assert "Ground state" in or_gate.ok("print -c")
     assert "already simulated" in or_gate.fails(engine)
 
 
@@ -151,3 +151,18 @@ def test_opdom_rejects_a_repeated_sweep(shell: Shell, resource: Callable[[str], 
     """Sweeping one parameter on two axes would produce a degenerate domain."""
     shell.ok(f"read {resource('siqad_or_gate.sqd')}; tt -t 1110")
     assert "more than one axis" in shell.fails(f"opdom {tmp_path / 'domain.csv'} -x epsilon_r -y epsilon_r")
+
+
+@pytest.mark.parametrize("sampling", ["-f 4", "-c 4"])
+def test_opdom_sampling_methods_filter_nonoperational_points(xor_gate: Shell, tmp_path: Path, sampling: str) -> None:
+    path = tmp_path / "domain.csv"
+    xor_gate.ok(
+        f'opdom "{path}" {sampling} --operational-only --x-min 5.6 --x-max 5.7 --x-step 0.1'
+        " --y-min 5 --y-max 5.1 --y-step 0.1"
+    )
+    rows = path.read_text(encoding="utf-8").splitlines()
+    assert rows[0].startswith("epsilon_r,lambda_tf")
+    result = xor_gate.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert len(rows) - 1 == result["num_operational_parameter_combinations"]
+    assert 0 < result["num_evaluated_parameter_combinations"] <= 4

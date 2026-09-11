@@ -50,27 +50,27 @@ def test_quit_stops_the_session(shell: Shell) -> None:
 def test_store_lists_elements_and_marks_the_active_one(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
     mux21_shell.ok(f"read {resource('xor2.v')}")
     output = mux21_shell.ok("store -n")
-    assert "  0: mux21 (TEC)" in output
-    assert "* 1: xor2 (TEC)" in output
+    assert any("mux21" in line and "TEC" in line for line in output.splitlines())
+    assert any("*" in line and "xor2" in line and "TEC" in line for line in output.splitlines())
     assert "(empty)" in mux21_shell.ok("store -g")
 
 
 def test_current_selects_an_element(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
     mux21_shell.ok(f"read {resource('xor2.v')}")
     mux21_shell.ok("current -n 0")
-    assert "* 0: mux21" in mux21_shell.ok("store -n")
+    assert any("*" in line and "mux21" in line for line in mux21_shell.ok("store -n").splitlines())
     assert "out of range" in mux21_shell.fails("current -n 7")
     assert "exactly one store" in mux21_shell.fails("current 0")
 
 
 def test_ps_prints_statistics(mux21_shell: Shell) -> None:
     output = mux21_shell.ok("ps -n")
-    assert "gates" in output
-    assert "depth" in output
+    assert "Gates" in output
+    assert "Depth" in output
     mux21_shell.ok("ortho")
     output = mux21_shell.ok("ps -g")
-    assert "clocking" in output
-    assert "throughput" in output
+    assert "Clocking" in output
+    assert "Throughput" in output
 
 
 def test_print_layout(mux21_shell: Shell) -> None:
@@ -157,6 +157,7 @@ def test_show_uses_the_shell_association_on_windows(
     path = tmp_path / "network.dot"
     mux21_shell.ok(f"show -n -o {path}")
     assert opened == [path]
+    assert path.read_text(encoding="utf-8").startswith("digraph")
     assert started == []
 
 
@@ -220,7 +221,7 @@ def test_print_of_a_simulated_sidb_layout_draws_one_picture(shell: Shell, resour
     charged = shell.ok("print -c")
     assert "●" not in plain
     assert "●" in charged, charged
-    assert "ground state energy" in charged
+    assert "Ground state energy" in charged
     # one lattice drawing, not the layout followed by a second one
     assert charged.count("⋅") <= plain.count("⋅")
 
