@@ -37,6 +37,7 @@ install(DIRECTORY ${nlohmann_json_SOURCE_DIR}/include/ DESTINATION include)
 # parallel-hashmap
 target_include_directories(libfiction SYSTEM INTERFACE
     $<BUILD_INTERFACE:${parallel-hashmap_SOURCE_DIR}/parallel_hashmap>
+    $<INSTALL_INTERFACE:include/parallel_hashmap>
 )
 install(DIRECTORY ${parallel-hashmap_SOURCE_DIR}/parallel_hashmap DESTINATION include)
 
