@@ -81,10 +81,14 @@ def test_help_is_not_logged(shell: Shell) -> None:
     assert shell.session.log == []
 
 
-def test_log_survives_values_json_cannot_encode(shell: Shell) -> None:
+def test_log_survives_values_json_cannot_encode(make_shell: Callable[[], Shell]) -> None:
+    """A value no encoder handles is written as its string form instead of failing the whole log."""
+    shell = make_shell()
     shell.session.log.append({"command": "x", "result": {"value": object()}})
-    shell.session.log_path = None
     shell.session.close()
+    assert shell.session.log_path is not None
+    entries = json.loads(shell.session.log_path.read_text(encoding="utf-8"))
+    assert entries[-1]["result"]["value"].startswith("<object object")
 
 
 def test_sidb_statistics_use_dots(shell: Shell, resource: Callable[[str], str]) -> None:
