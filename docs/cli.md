@@ -339,17 +339,19 @@ done
 holds a list with one object per command:
 
 ```json
-{
-  "command": "ortho",
-  "args": {"verbose": false},
-  "started": "2026-09-05T10:12:03+00:00",
-  "runtime_s": 0.41,
-  "status": "ok",
-  "result": {
-    "gate_layout": {"name": "c17", "topology": "cartesian", "clocking": "2DDWAVE", "size": {"x": 5, "y": 7, "area": 35}, "inputs": 5, "outputs": 2, "gates": 8, "wires": 28, "crossings": 0, "critical_path": 11, "throughput": 1},
-    "stats": {"time_total_s": 0.39, "x_size": 5, "y_size": 7, "num_gates": 8, "num_wires": 28, "num_crossings": 0}
+[
+  {
+    "command": "ortho",
+    "args": {"verbose": false},
+    "started": "2026-09-05T10:12:03+00:00",
+    "runtime_s": 0.41,
+    "status": "ok",
+    "result": {
+      "gate_layout": {"name": "c17", "topology": "cartesian", "clocking": "2DDWAVE", "size": {"x": 5, "y": 7, "area": 35}, "inputs": 5, "outputs": 2, "gates": 8, "wires": 28, "crossings": 0, "critical_path": 11, "throughput": 1},
+      "stats": {"time_total_s": 0.39, "x_size": 5, "y_size": 7, "num_gates": 8, "num_wires": 28, "num_crossings": 0}
+    }
   }
-}
+]
 ```
 
 `args` holds the parsed options. A failing command has `"status": "error"` and an `error` message instead of a
