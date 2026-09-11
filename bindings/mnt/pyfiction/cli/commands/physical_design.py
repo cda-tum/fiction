@@ -145,8 +145,10 @@ def _exact_arguments(parser: Parser) -> None:
     parser.add_argument(
         "--topology",
         choices=list(FGL_READERS),
+        metavar="TOPOLOGY",
         default="cartesian",
-        help="layout topology; hexagonal is even-row, shifted_cartesian is odd-column (default: cartesian)",
+        help="layout topology (default: %(default)s); choices: %(choices)s. "
+        "hexagonal is even-row, shifted_cartesian is odd-column",
     )
     parser.add_argument("--upper-x", type=int, metavar="N", help="maximum layout width in tiles")
     parser.add_argument("--upper-y", type=int, metavar="N", help="maximum layout height in tiles")
@@ -239,8 +241,9 @@ def _ortho_arguments(parser: Parser) -> None:
     parser.add_argument(
         "--topology",
         choices=["cartesian", "hexagonal", "even_row_hex", "odd_row_hex", "odd_column_hex", "even_column_hex"],
+        metavar="TOPOLOGY",
         default="cartesian",
-        help="direct output topology (default: cartesian)",
+        help="direct output topology (default: %(default)s); choices: %(choices)s",
     )
     parser.add_argument(
         "-n",

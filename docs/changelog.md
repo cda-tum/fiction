@@ -411,6 +411,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Rejected invalid mapping, numeric inputs, and conflicting writer options without replacing stored elements.
   - Logic simulation builds output bits without an intermediate binary string.
   - Added compact help, width-aware stores, Graphviz SVG viewing, piped input, and reliable quiet-mode results and cleanup.
+  - Topology help now lists choices in wrapped descriptions and keeps usage lines compact.
   - The Python shell computes SiDB area from the layout lattice and rejects cell-dimension overrides.
   - SiDB store descriptions and statistics include lattice-based physical area and handle the full column range without integer overflow
   - A script file that exists but cannot be read reports the reason and exits with 2, like a missing one

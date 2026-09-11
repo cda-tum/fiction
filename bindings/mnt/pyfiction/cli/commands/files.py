@@ -162,8 +162,9 @@ def _read_arguments(parser: Parser) -> None:
     parser.add_argument(
         "--topology",
         choices=list(FGL_READERS),
+        metavar="TOPOLOGY",
         default="cartesian",
-        help="the layout topology to read .fgl files as (default: cartesian)",
+        help="FGL layout topology (default: %(default)s); choices: %(choices)s",
     )
     parser.add_argument("--sort", action="store_true", help="read a directory's networks in order of gate count")
 
