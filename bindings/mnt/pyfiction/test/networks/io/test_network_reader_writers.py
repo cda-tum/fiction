@@ -87,3 +87,18 @@ def test_aiger_round_trip_keeps_names(resources_dir: Path, tmp_path: Path) -> No
     assert back.num_gates() == aig.num_gates()
     assert [back.get_name(pi) for pi in back.pis()] == [aig.get_name(pi) for pi in aig.pis()]
     assert equivalence_checking(convert_network(aig), convert_network(back)) == eq_type.STRONG
+
+
+WRITERS = [(write_verilog, ".v"), (write_blif, ".blif"), (write_aiger, ".aig")]
+
+
+@pytest.mark.parametrize(("writer", "suffix"), WRITERS)
+def test_writers_report_unwritable_files(
+    resources_dir: Path, tmp_path: Path, writer: Callable[[Any, str], None], suffix: str
+) -> None:
+    """A file under a directory that does not exist cannot be opened, which the writers report."""
+    aig = read_aig_network(str(resources_dir / "mux21.v"))
+    target = tmp_path / "missing" / f"out{suffix}"
+    with pytest.raises(RuntimeError, match="could not open file"):
+        writer(aig, str(target))
+    assert not target.exists()

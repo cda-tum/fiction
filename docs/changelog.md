@@ -430,6 +430,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `energy_state` and `sidb_lattice_mode` are importable from `mnt.pyfiction`
   - `create_from_binary_string` and `create_from_hex_string` raise `ValueError` for a character outside
     their alphabet; `kitty` read such a character as a bit pattern and built a wrong truth table
+  - `write_verilog`, `write_blif`, and `write_aiger` raise `RuntimeError` when the file cannot be opened
+    or written; they returned as if they had written it
 
 - Tooling:
 
