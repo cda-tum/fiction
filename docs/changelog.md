@@ -90,7 +90,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
   - Require CMake 3.25 and link the SAT component of `mockturtle`. Installed packages resolve
-    `mockturtle` through its CMake package, including its compiled dependencies.
+    `mockturtle` through its CMake package, including its compiled dependencies ([#1204](https://github.com/cda-tum/fiction/pull/1204)).
 
 - CLI:
   - **Breaking:** SiDB commands use `sidb::layout` and simulation results. `read --sqd` reads the lattice
