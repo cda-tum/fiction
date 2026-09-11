@@ -41,6 +41,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     AIG, `abc` runs an external ABC's scripts, and `generate` builds adders and multiplexers.
   - The JSON log describes every store element with one schema, in `snake_case` keys with
     numbers where the C++ shell wrote `1/x` strings.
+  - `-i` continues into the shell once `-c` or `-f` is done, and `-q` keeps a scripted run to its
+    errors. `ps --all` describes every element of a store and `store --pop` removes the active one.
+  - `show` takes `-p COMMAND` for an explicit viewer and `--delete` to drop its temporary file when
+    the session ends; `show` and `write` take `--indexes` and `--clock-colors` for the DOT drawers.
+  - `write` without a file writes `<element name>.<format>` in the current directory, `-F` names the
+    format, and `--component-name` names a `.qcc` component after the file.
+  - `ortho -n 3|4` sets the number of clock phases, `random --type` produces XAGs, MIGs, and
+    technology networks, `map` regains its six short gate flags, and `cell -l` accepts `QCA ONE`,
+    `SIM7_MOL`, and the other spellings the C++ shell took.
 
 - Dependencies:
 
@@ -86,6 +95,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `upper_bound_area`
   - `technology_mapping`, `simulate`, `count_gate_types`, and `write_dot_network` accept every
     network type; `technology_mapping_params` exposes `lt2`, `gt2`, `le2`, and `ge2`
+  - `area` accepts a `mol_qca_layout`, `orthogonal_params` exposes `number_of_clock_phases` with the
+    `num_clks` enum, `write_qcc_layout_params` exposes `use_filename_as_component_name`, and
+    `gate_level_drvs` fills a `gate_level_drv_stats` whose `report` is the full check as JSON
+  - `convert_network` takes a `target` of the new `network_target` enum, so it produces AIGs, XAGs,
+    and MIGs as well as technology networks
+  - `print_sidb_layout` exposes `lat_color` and `crop_layout`, and `write_dot_network` and
+    `write_dot_layout` expose `indexes` and `clock_colors`
 
 - Tooling:
 
@@ -94,6 +110,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Algorithms:
+  - `convert_network` maps a technology network's inverters to `create_not` on a target without
+    `create_node`, so AIG, XAG, and MIG conversions keep the inverters they used to lose
   - **Breaking:** _QuickExact_, _QuickSim_, _ExGS_, _ClusterComplete_, and _Ground State Space_
     simulate `sidb::layout` and return the non-template `sidb::simulation::result`
   - _QuickSim_ returns `std::nullopt` for layouts with charged surface defects
@@ -120,6 +138,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     from the file; `--lattice_orientation` is removed
   - `print`, `show`, and statistics use stored ground states; `sqd` exports geometry and defects
   - SiDB shell descriptions and JSON statistics report dot counts as `dots`.
+  - Errors go to standard error instead of standard output, so a redirected run still shows them.
+  - `show` hands its file to the platform's opener rather than to a web browser, and keeps the file
+    until the process ends, because the viewer reads it after the command returns.
+  - `print -c` draws a simulated SiDB layout once, with the charge symbols in place of the dots.
+  - `check` prints and logs the full design rule report again, not only the two counts.
+  - `area` applies the cell dimensions to every technology, SiDB included, and defaults each one it
+    is not given to the technology's own value.
+  - `clustercomplete --base` defaults to 3 again, the base the engine is built for.
+  - `quit` ends a script and a `-c` string, leaving the commands after it unrun.
+  - `temp` and `opdom` run on an already simulated element, which they only read.
+  - `-v` prints the same aligned statistics table everywhere; `gold --progress` is now what lets the
+    search write its own progress past the shell.
+  - `map` renames `--xor_and`, `--or_and`, and `--and_xor` to `--xor-and`, `--or-and`, and
+    `--and-xor`; `--all2`, `--all3`, and `--all` are mutually exclusive.
+  - `read DIRECTORY` reports a file it cannot parse and reads the rest, and recognizes a suffix
+    whatever its case; `.aag` and `.pla` files honor `--type` by conversion.
+  - `help` lists the categories in reading order and ends with the general commands.
 
 - Continuous integration:
   - Reusable workflows now use GitHub's self-repository reference syntax.
@@ -290,6 +325,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+- CLI:
+
+  - `exact --sync_elems` and the `sync. elems.` field of `ps -g`. Synchronization elements need a
+    gate-layout type that wraps `synchronization_element_layout`, which the bindings do not have.
+  - `akers`, together with `miginvopt` and `miginvprop`. The truth table store now feeds the
+    gate-based SiDB simulations, `temp -g` and `opdom`, alone.
+  - Six of the nine FGL topologies. `--topology` offers `cartesian`, `shifted_cartesian`
+    (odd-column), and `hexagonal` (even-row), which is what the bindings instantiate.
+  - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
+    `help --docs`.
 - **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
   `charge_distribution_surface`, and the lattice orientation tags; `model/nm_position.hpp` and
   `model/nm_distance.hpp` (use `lattice::nm_position` and `lattice::nm_distance`); the SiQAD coordinate

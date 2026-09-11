@@ -23,10 +23,16 @@ $ fiction
 fiction> help
 ```
 
-lists the commands by category, `help <command>` shows one command's options, and `quit` or `Ctrl-D` leaves the
-shell. The Tab key completes command names, options, and file paths. The command history persists in
-`~/.fiction_history` between sessions. The line below the prompt shows how many elements each store holds and
-which one is active.
+lists the commands by category, `help <command>` shows one command's options, and `quit`, its alias `exit`, or
+`Ctrl-D` leaves the shell. The Tab key completes command names, options, the values an option accepts, and file
+paths. The command history persists in `~/.fiction_history` between sessions; an unwritable home costs the
+history, not the shell. The line below the prompt shows how many elements each store holds and which one is
+active.
+
+`fiction --version` prints the version and exits. Two pieces are optional: an
+[aigverse](https://github.com/marcelwa/aigverse) installation, which `aig`, `abc`, `generate`, `random`, and the
+`.aag` and `.pla` readers need, and an external ABC, which {ref}`abc <abc-cli>` needs. Informational output goes
+to standard output and every error to standard error, so `fiction -c '...' > out.txt` still shows what failed.
 
 Several commands may follow one another on a line, separated by `;`, and a `#` starts a comment. Quotes group
 words: `tt -e "[(ab)(!ac)]"`. When a command fails, the shell prints the reason and drops the rest of the line;
@@ -44,14 +50,23 @@ Stores hold what the shell has read, created, or designed. There are four of the
 Each store has one _active_ element, the one commands work on, which is the most recently added element unless
 `current` selects another one. The generic commands take store flags:
 
-- `store [-t -n -g -c]` lists the elements of the given stores, or of all stores, and marks the active one
+- `store [-t -n -g -c]` lists the elements of the given stores, or of all stores, and marks the active one;
+  `store --pop` removes the active element instead and makes the one before it active
 - `current -t|-n|-g|-c INDEX` makes an element the active one
-- `ps -t|-n|-g|-c` prints the statistics of the active element
-- `print -t|-g|-c` prints the active element as text; a simulated SiDB layout prints its ground state charges too
-- `show -n|-g|-c [-o FILE] [--silent] [--simple]` draws the active element and opens it in the default viewer:
-  networks and gate-level layouts as Graphviz `.dot` files, cell-level layouts as `.svg` files. `--silent` only
-  writes the file, `-o` chooses where, and `--simple` draws QCA cells without dots and clock numbers
+- `ps -t|-n|-g|-c` prints the statistics of the active element, and `ps --all` those of every element
+- `print -t|-g|-c` prints the active element as text; a simulated SiDB layout is drawn once, with its ground
+  state charges in place of the dots
+- `show -n|-g|-c [-o FILE] [--silent] [-p COMMAND] [--delete]` draws the active element and opens it in the
+  platform's viewer: networks and gate-level layouts as Graphviz `.dot` files, cell-level layouts as `.svg`
+  files. `-o` chooses where to write, `--silent` only writes the file, `--simple` draws QCA cells without dots
+  and clock numbers, and `--indexes` and `--clock-colors` steer the `.dot` drawers
 - `clear [-t -n -g -c]` empties the given stores, or all of them
+
+`show` hands the file to the platform's own opener — `xdg-open` on Linux, `open` on macOS, and the shell
+association on Windows — because a Graphviz file is not a web page. `-p COMMAND` overrides it: `{}` in the
+command becomes the file path, and the path is appended when the command carries no `{}`. The viewer returns at
+once and reads the file afterwards, so a temporary drawing is kept until the process ends; `--delete` asks for it
+back when the session closes.
 
 ## Reading and writing files
 
@@ -65,10 +80,11 @@ Each store has one _active_ element, the one commands work on, which is the most
 | `.sqd`                 | SiDB layout         | `-c`  |
 | `.fqca`                | QCA layout          | `-c`  |
 
-Networks are read as technology networks unless `--type aig|xag|mig|tec` says otherwise; `.aag` and `.pla` files
-always yield AIGs and BLIF files always technology networks. Gate-level layouts are read with the topology
-`--topology cartesian|shifted_cartesian|hexagonal` names, Cartesian by default, because an FGL file does not
-record it. `read DIRECTORY` reads every network file in a directory, in order of gate count with `--sort`. The
+Networks are read as technology networks unless `--type aig|xag|mig|tec` says otherwise. BLIF files are always
+technology networks; `.aag` and `.pla` files are read as AIGs by _aigverse_ and converted from there. Gate-level
+layouts are read with the topology `--topology cartesian|shifted_cartesian|hexagonal` names, Cartesian by
+default, because an FGL file does not record it. `read DIRECTORY` reads every network file in a directory, in
+order of gate count with `--sort`, and reports a file it cannot parse without abandoning the rest. The
 `benchmarks` folder of the repository holds many networks to start from.
 
 `write FILE` writes the active element in the format the suffix names:
@@ -87,8 +103,14 @@ record it. `read DIRECTORY` reads every network file in a directory, in order of
 | `.svg`           | drawing                                                    | cell-level layout |
 
 `--via-layers` and `--no-via-layers` add or omit the inter-layer via cells of `.qca` and `.fqca` files, which
-`.qca` files carry by default and `.fqca` files do not. Verilog files name their module `top`, as the readers
-expect, and a technology network is written as an equivalent XAG, because gate-level Verilog has no buffers.
+`.qca` files carry by default and `.fqca` files do not. `--component-name` names a `.qcc` component after the
+file instead of after the layout. `--indexes` and `--clock-colors` steer the `.dot` drawers. Verilog files name
+their module `top`, as the readers expect, and a technology network is written as an equivalent XAG, because
+gate-level Verilog has no buffers.
+
+Without a file, `write -F FORMAT` writes `<name>.<format>` in the current directory, where `<name>` is the active
+element's name: `read c17.v; ortho; cell; write -F qca` produces `c17.qca`. On a `.dot` file, `-n` and `-g` select
+the network or the gate-level layout store as everywhere else; a gate-level layout is the default.
 
 ### Truth tables
 
@@ -106,10 +128,11 @@ The network store holds AND-inverter graphs (AIG), XOR-AND-inverter graphs (XAG)
 them. Physical design and verification work on technology networks; when the active network is of another type,
 the command converts it on the fly and says so in its help.
 
-- `map` maps the active network onto a set of gate types, producing a technology network: `map --and --or --inv`
-  yields AND-OR-inverter networks, `--all2`, `--all3`, and `--all` select every standard 2-input, 3-input, or
-  supported function, and `--decay` also tries to reduce the gate count. This is what makes a network fit an FCN
-  gate library that lacks some gate types.
+- `map` maps the active network onto a set of gate types, producing a technology network: `map --and --or --inv`,
+  or `map -aoi` with the short flags `-a`, `-o`, `-x`, `-i`, `-m`, and `-d`, yields AND-OR-inverter networks.
+  `--all2`, `--all3`, and `--all` select every standard 2-input, 3-input, or supported function, `--decay`
+  enforces at least one constant input on three-input gates, and `-v` prints the statistics. This is what makes a
+  network fit an FCN gate library that lacks some gate types.
 - `fanouts [-d 2|3] [-s breadth|depth|random]` replaces high-degree outputs by fan-out nodes. Physical design does
   this with default settings; run it beforehand to choose them.
 - `balance [-u]` balances every path with buffers. No physical design algorithm needs it, and balanced networks
@@ -117,8 +140,8 @@ the command converts it on the fly and says so in its help.
 - `gates -n|-g [--detailed]` counts the gate types of the active network or gate-level layout.
 - `simulate -n|-g [--store] [--silent]` computes the truth table of every output; `--store` adds them to the truth
   table store. Layouts are simulated on the logic level, following the clocking; timing is not considered.
-- `random -n INPUTS -g GATES [--seed N]` generates a random AIG named after its seed, and
-  `generate rca|cla|multiplier|mux|decoder -b WIDTH` an adder, multiplier, multiplexer, or decoder.
+- `random -n INPUTS -g GATES [--type aig|xag|mig|tec] [--seed N]` generates a random network named after its
+  seed, and `generate rca|cla|multiplier|mux|decoder -b WIDTH` an adder, multiplier, multiplexer, or decoder.
 
 ### AIG optimization
 
@@ -190,7 +213,8 @@ Solutions are found fastest with crossings, desynchronization, and 2DDWave: `exa
 `ortho` places and routes with a linear-time orthogonal graph drawing heuristic, see
 [the paper](https://dl.acm.org/doi/10.1145/3287624.3287705). It handles large networks, always produces a
 2DDWave-clocked Cartesian layout, and needs a network whose gates have at most two inputs (AND, OR, and inverters
-after `map --and --or --inv`).
+after `map --and --or --inv`). `-n 3|4` sets the number of clock phases, four by default, and `-v` prints the
+statistics.
 
 ### Graph-oriented layout design (`gold`)
 
@@ -221,8 +245,9 @@ crossing results, and `-t SECONDS` stops after a timeout.
 ## Verification
 
 `check` runs the design rule checker on the active gate-level layout, which tests topological and structural
-properties, prints every violation, and reports the number of warnings and violations. It is the quickest way
-to find bugs in layouts produced by custom algorithms.
+properties. It prints the full report — unplaced nodes, dead placed nodes, non-adjacent and missing connections,
+wires crossing gates, improperly clocked tiles, and the I/O counts — and logs the same report under `-l`. It is
+the quickest way to find bugs in layouts produced by custom algorithms.
 
 `equiv` checks a gate-level layout against a network or two store elements against each other, see
 [the paper](https://ieeexplore.ieee.org/abstract/document/9218641). `equiv -n -g` takes the active network as the
@@ -248,15 +273,19 @@ Cell-level layouts are much larger than gate-level ones, so `show -c` is the bet
 `print -c`. `write` exports them for the simulators listed above.
 
 `area [-x WIDTH] [-y HEIGHT] [--hspace H] [--vspace V]` computes the physical area of the active cell-level layout
-in nm². Unset dimensions default to the technology's values from [QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/),
-and [NMLSim](https://dl.acm.org/doi/10.1145/3338852.3339856):
+in nm². Every unset dimension is the technology's own, from
+[QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/), [NMLSim](https://dl.acm.org/doi/10.1145/3338852.3339856),
+and the H-Si(100) 2x1 lattice:
 
-| Technology | Width | Height | Horizontal spacing | Vertical spacing |
-| ---------- | ----- | ------ | ------------------ | ---------------- |
-| QCA        | 18 nm | 18 nm  | 2 nm               | 2 nm             |
-| iNML       | 50 nm | 100 nm | 10 nm              | 25 nm            |
+| Technology | Width    | Height   | Horizontal spacing | Vertical spacing |
+| ---------- | -------- | -------- | ------------------ | ---------------- |
+| QCA        | 18 nm    | 18 nm    | 2 nm               | 2 nm             |
+| molQCA     | 2 nm     | 2 nm     | 0 nm               | 0 nm             |
+| iNML       | 50 nm    | 100 nm   | 10 nm              | 25 nm            |
+| SiDB       | 0 nm     | 0 nm     | 0.384 nm           | 0.384 nm         |
 
-SiDB area uses the layout's lattice geometry. Cell-dimension overrides do not apply to SiDB layouts.
+SiDB area is measured over the layout's bounding box rather than over its aspect ratio, but the cell dimensions
+apply there too.
 
 ## Physical simulation of SiDBs
 
@@ -279,7 +308,8 @@ It detects whether two or three charge states per SiDB are needed. `-g` applies 
 _ClusterComplete_ is exact as well and scales to layouts with several gates in base 3 by pruning charge
 assignments to clusters of SiDBs in a hierarchy. `--base 2|3` sets the charge states, `-w` and `-o` set the
 witness partitioning limits of the first pruning stage, and `-r` reports its statistics, which indicate the
-complexity of the remaining problem. The command exists when `pyfiction` was built with ALGLIB, as the PyPI wheels
+complexity of the remaining problem. `--base` defaults to 3 here, the base ClusterComplete is built for, while
+`temp` and `opdom` default to 2. The command exists when `pyfiction` was built with ALGLIB, as the PyPI wheels
 are.
 
 ### QuickSim (`quicksim`)
@@ -306,7 +336,8 @@ assumed to be in the order of the truth table's inputs.
 The x and y axes sweep `epsilon_r` from 1 to 10 and `lambda_tf` from 1 to 10 in steps of 0.1 by default;
 `-x`, `-y`, and `-z` name the swept parameter of each axis (`epsilon_r`, `lambda_tf`, or `mu_minus`), and
 `--x-min`, `--x-max`, `--x-step` and their `y` and `z` counterparts set the ranges. The z axis is unused unless
-`-z` names a parameter; its default range is -0.5 to -0.1 in steps of 0.025, made for `mu_minus`.
+`-z` names a parameter; its default range is -0.5 to -0.1 in steps of 0.025, made for `mu_minus`. Every axis
+needs its own parameter; sweeping one on two axes would produce a degenerate domain and is refused.
 
 Grid search evaluates every point. `-r N`, `-f N`, and `-c N` start random sampling, flood fill, and contour
 tracing from `N` random samples instead. Grid search and random sampling accept any number of dimensions; flood
@@ -321,8 +352,10 @@ the operational points, and `--engine` chooses the simulator.
 
 `fiction -c "read c17.v; ortho; cell; write c17.qca"` runs a `;`-separated command string and exits. The exit
 status is `1` when a command fails, which stops the string at that command. `fiction -f FLOW` runs the commands
-of a file, one line per line, in the same way; a missing file exits with `2`. Inside the shell and inside
-scripts, `source FILE` runs another script, and scripts may source one another.
+of a file, one line per line, in the same way; a missing file exits with `2`. `quit` ends either without failing,
+leaving the commands after it unrun. `-i` continues into the interactive shell once the commands are done, and
+`-q` keeps a scripted run to its errors by dropping the informational lines. Inside the shell and inside scripts,
+`source FILE` runs another script, and scripts may source one another.
 
 Shell loops turn this into batch runs:
 
@@ -335,8 +368,8 @@ done
 
 ### Statistics log
 
-`fiction -l LOG.json ...` writes the statistics of every command to a JSON file when the shell ends. The file
-holds a list with one object per command:
+`fiction -l LOG.json ...` writes the statistics of every command to a JSON file when the shell ends — the file
+appears once the session closes, not while it runs. It holds a list with one object per command:
 
 ```json
 [
