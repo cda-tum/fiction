@@ -23,12 +23,40 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
+
+namespace detail
+{
+
+/**
+ * Rejects a string that holds a character outside the alphabet of the respective truth table constructor.
+ *
+ * `kitty` reads every character it is given: a binary character other than `1` becomes a `0`, and an invalid
+ * hexadecimal character becomes `-1`, which sets every bit of its block. Both produce a wrong truth table
+ * instead of an error, so the characters are checked here.
+ *
+ * @param text The string to check.
+ * @param alphabet The characters the constructor accepts.
+ * @param what The name of the string in the error message.
+ * @throws std::invalid_argument If `text` holds a character outside `alphabet`.
+ */
+inline void check_alphabet(const std::string& text, const std::string_view alphabet, const std::string_view what)
+{
+    const auto pos = text.find_first_not_of(alphabet);
+
+    if (pos != std::string::npos)
+    {
+        throw std::invalid_argument(fmt::format("'{}' is not a {} character", text.at(pos), what));
+    }
+}
+
+}  // namespace detail
 
 void dynamic_truth_table(nanobind::module_& m)
 {
@@ -52,11 +80,13 @@ void dynamic_truth_table(nanobind::module_& m)
                                                             tt.num_vars(), tt.num_bits(), binary.size()));
                 }
 
+                detail::check_alphabet(binary, "01", "binary");
+
                 kitty::create_from_binary_string(tt, binary);
             },
             py::arg("binary"),
             "Sets the bits from a string of `0` and `1` characters, most significant bit first. The string must "
-            "hold exactly `num_bits()` characters.")
+            "hold exactly `num_bits()` characters. Any other character raises a `ValueError`.")
         .def(
             "create_from_hex_string",
             [](py_tt& tt, const std::string& hex)
@@ -70,11 +100,14 @@ void dynamic_truth_table(nanobind::module_& m)
                                                             tt.num_vars(), expected, hex.size()));
                 }
 
+                detail::check_alphabet(hex, "0123456789abcdefABCDEF", "hexadecimal");
+
                 kitty::create_from_hex_string(tt, hex);
             },
             py::arg("hex"),
             "Sets the bits from a hexadecimal string, most significant digit first. The string must hold exactly "
-            "`num_bits() / 4` digits, or one digit for fewer than two variables.")
+            "`num_bits() / 4` digits, or one digit for fewer than two variables. Any non-hexadecimal character "
+            "raises a `ValueError`.")
         .def(
             "create_from_expression",
             [](py_tt& tt, const std::string& expression)

@@ -46,9 +46,13 @@ def test_random_has_the_requested_size() -> None:
         ("create_from_binary_string", "101", "needs 8 bits"),
         ("create_from_hex_string", "abc", "needs 2 hex digits"),
         ("create_from_expression", "(a", "could not parse"),
+        ("create_from_binary_string", "1110100x", "not a binary character"),
+        ("create_from_binary_string", "11101002", "not a binary character"),
+        ("create_from_hex_string", "eg", "not a hexadecimal character"),
     ],
 )
 def test_invalid_input_raises(method: str, argument: str, message: str) -> None:
+    """A string of the right length but the wrong alphabet raises instead of producing a wrong table."""
     tt = dynamic_truth_table(3)
     with pytest.raises(ValueError, match=message):
         getattr(tt, method)(argument)
