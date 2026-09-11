@@ -157,7 +157,7 @@ TEST_CASE("Test parameter point", "[operational-domain]")
 
     SECTION("Parameter values - invalid index")
     {
-        REQUIRE_THROWS_AS(p1.get_parameters().at(3), std::out_of_range);
+        REQUIRE_THROWS_AS(static_cast<void>(p1.get_parameters().at(3)), std::out_of_range);
     }
 
     SECTION("Equal parameter points hash equally")

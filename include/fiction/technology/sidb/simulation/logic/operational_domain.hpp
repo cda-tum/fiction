@@ -18,7 +18,6 @@
 #pragma once
 
 #include "fiction/technology/sidb/charge_distribution.hpp"
-#include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/critical_temperature.hpp"
@@ -993,7 +992,7 @@ class operational_domain_impl
                 return std::get<0>(*cached);
             }
             const std::scoped_lock lock{
-                simulation_mutexes[std::hash<parameter_point>{}(pp) % simulation_mutexes.size()]};
+                simulation_mutexes.at(std::hash<parameter_point>{}(pp) % simulation_mutexes.size())};
             return is_step_point_operational(sp);
         };
 
