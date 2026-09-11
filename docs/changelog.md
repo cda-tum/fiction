@@ -461,6 +461,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
   - Transactional writers now report filesystem setup and replacement errors as stream failures.
+  - FQCA imports with at most two layers retain SVG export and viewing.
   - Stacked FQCA imports preserve all layers and cell metadata. Layout readers reject coordinate overflow; writers replace files only after successful serialization.
   - QCA SVG output now uses valid text colors in simple tile mode.
   - SQD readers now reject fractional coordinates and trailing text in numeric attributes.

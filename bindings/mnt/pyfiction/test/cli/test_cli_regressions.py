@@ -230,6 +230,24 @@ def test_stacked_fqca_preserves_all_cells(shell: Shell, resource: Callable[[str]
         fiction.read_fqca_layout(filename)
 
 
+@pytest.mark.parametrize("simple", [False, True])
+def test_fqca_import_preserves_svg_drawing(mux21_shell: Shell, tmp_path: Path, *, simple: bool) -> None:
+    """CLI FQCA imports render like native imports at both drawing detail levels."""
+    mux21_shell.ok("ortho; cell --library qca-one")
+    before = tmp_path / "before.svg"
+    after = tmp_path / "after.svg"
+    fqca = tmp_path / "layout.fqca"
+    option = " --simple" if simple else ""
+    mux21_shell.ok(f'write -c "{fqca}"; read "{fqca}"')
+    params = fiction.write_qca_layout_svg_params()
+    params.simple = simple
+    fiction.write_qca_layout_svg(fiction.read_fqca_layout(str(fqca)), str(before), params)
+    mux21_shell.ok(f'write -c "{after}"{option}')
+    assert after.read_text(encoding="utf-8") == before.read_text(encoding="utf-8")
+    mux21_shell.ok(f'show -c --silent -o "{after}"{option}')
+    assert after.read_text(encoding="utf-8") == before.read_text(encoding="utf-8")
+
+
 @pytest.mark.parametrize("options", ["--inv", "--xnor --inv"])
 def test_incomplete_mapping_is_bounded_and_preserves_store(resource: Callable[[str], str], options: str) -> None:
     code = """

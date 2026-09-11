@@ -93,7 +93,8 @@ order of gate count with `--sort`, and reports a file it cannot parse without ab
 `benchmarks` folder of the repository holds many networks to start from. Directory imports consider only regular
 files and report imported and failed counts; a mixed result is logged as `partial`. With `--format`, every regular
 file in the directory is attempted with that reader. FQCA imports preserve stacked layouts, including via cells,
-I/O labels, clocks, and cell modes. Readers reject coordinates the requested layout type cannot represent.
+I/O labels, clocks, and cell modes. Imports with at most two layers support SVG drawing; deeper layouts support
+QCA, FQCA, and QLL export. Readers reject coordinates the requested layout type cannot represent.
 
 `write FILE` writes the active element in the format the suffix names:
 

@@ -31,6 +31,7 @@ from mnt.pyfiction import (
     read_even_column_cartesian_fgl_layout,
     read_even_column_hex_fgl_layout,
     read_even_row_cartesian_fgl_layout,
+    read_fqca_layout,
     read_hexagonal_fgl_layout,
     read_mig_network,
     read_odd_column_hex_fgl_layout,
@@ -199,7 +200,9 @@ def read(session: Session, args: argparse.Namespace) -> Result:
         session.cell_layouts.add(entry)
         return {"cell_layout": describe(entry)}
     if suffix == ".fqca":
-        entry = CellEntry(read_stacked_fqca_layout(str(path), path.stem))
+        stacked = read_stacked_fqca_layout(str(path), path.stem)
+        # The SVG renderer supports unsigned coordinates, whose layer index is one bit.
+        entry = CellEntry(read_fqca_layout(str(path), path.stem) if stacked.z() <= 1 else stacked)
         session.cell_layouts.add(entry)
         return {"cell_layout": describe(entry)}
     msg = f"cannot read '{path.suffix}' files"
