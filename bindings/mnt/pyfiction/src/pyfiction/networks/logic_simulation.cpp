@@ -20,7 +20,7 @@
 #include <fiction/networks/name_utils.hpp>
 
 #include <fmt/format.h>
-#include <kitty/print.hpp>
+#include <kitty/bit_operations.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 
 #include <cassert>
@@ -63,21 +63,25 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
         const auto tables = mockturtle::simulate<py_tt>(
             ntk, mockturtle::default_simulator<py_tt>{static_cast<unsigned>(ntk.num_pis())});
         std::vector<std::pair<std::string, std::vector<bool>>> result{};
+        result.reserve(ntk.num_pos());
         ntk.foreach_po(
             [&](const auto&, const auto i)
             {
                 const auto        name = ntk.has_output_name(i) ? ntk.get_output_name(i) : fmt::format("po{}", i);
                 std::vector<bool> bits{};
-                for (const auto bit : kitty::to_binary(tables[i]))
+                bits.reserve(tables[i].num_bits());
+                for (auto bit = tables[i].num_bits(); bit != 0u; --bit)
                 {
-                    bits.push_back(bit == '1');
+                    bits.push_back(kitty::get_bit(tables[i], bit - 1u));
                 }
                 result.emplace_back(name, std::move(bits));
             });
         return result;
     };
     m.def("simulate_outputs", outputs, py::arg(type_name.c_str()),
-          "Return (name, bits) pairs in output declaration order, preserving duplicate labels.");
+          "Return (name, bits) pairs in output declaration order, preserving duplicate labels. "
+          "Truth-table storage grows exponentially with the input count; fewer than 38 inputs "
+          "is a representation bound, not a memory guarantee.");
     m.def(
         "simulate",
         [outputs](const NtkOrLyt& ntk)

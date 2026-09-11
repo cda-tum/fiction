@@ -151,6 +151,8 @@ the command converts it on the fly and says so in its help.
 - `gates -n|-g [--detailed]` counts the gate types of the active network or gate-level layout.
 - `simulate -n|-g [--store] [--silent]` computes the truth table of every output; `--store` adds them to the truth
   table store. Layouts are simulated on the logic level, following the clocking; timing is not considered.
+  Storage grows exponentially with the input count and also depends on intermediate nodes and outputs.
+  The representation requires fewer than 38 inputs; available memory can impose a much smaller limit.
 - `random -n INPUTS -g GATES [--type aig|xag|mig|tec] [--seed N]` generates a random network named after its
   seed, and `generate rca|cla|multiplier|mux|decoder -b WIDTH` an adder, multiplier, multiplexer, or decoder.
 

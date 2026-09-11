@@ -346,8 +346,11 @@ def show(session: Session, args: argparse.Namespace) -> Result:
     reads the file afterwards, so a temporary file is retained on disk; --delete removes it when the session closes.
     """
     name = one_store(args, "network", "gate_layout", "cell_layout")
-    suffix = ".svg" if name == "cell_layout" or shutil.which("dot") else ".dot"
-    path: Path = args.output if args.output is not None else session.viewer_file(suffix, delete=args.delete)
+    if args.output is not None:
+        path: Path = args.output
+    else:
+        suffix = ".svg" if name == "cell_layout" or shutil.which("dot") else ".dot"
+        path = session.viewer_file(suffix, delete=args.delete)
     suffix = path.suffix.lower()
     if name == "cell_layout":
         if suffix != ".svg":
