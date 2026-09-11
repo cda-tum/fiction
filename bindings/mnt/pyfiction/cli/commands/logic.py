@@ -24,12 +24,12 @@ from aigverse.generators import (
     binary_decoder,
     carry_lookahead_adder,
     multiplexer,
-    random_aig,
     ripple_carry_adder,
     ripple_carry_multiplier,
 )
 from rich.table import Table
 
+from mnt import pyfiction
 from mnt.pyfiction import (
     aig_network,
     all_standard_2_input_functions,
@@ -45,7 +45,7 @@ from mnt.pyfiction import (
     network_balancing_params,
     network_target,
     set_name,
-    simulate,
+    simulate_outputs,
     substitution_strategy,
     technology_mapping,
     technology_mapping_params,
@@ -159,6 +159,11 @@ def map_command(session: Session, args: argparse.Namespace) -> Result:
     network = session.networks.current()
     stats = technology_mapping_stats()
     mapped = technology_mapping(network, params, stats)
+    if stats.mapper_stats.mapping_error:
+        msg_0 = "mapping failed: the selected gate library cannot cover this network; the store is unchanged"
+        error = CommandError(msg_0)
+        error.stats = stats_to_dict(stats)
+        raise error
     if not get_name(mapped):
         set_name(mapped, get_name(network))
     session.networks.add(mapped)
@@ -228,9 +233,10 @@ def gates(session: Session, args: argparse.Namespace) -> Result:
     gate_types = count_gate_types(element)
     counts = stats_to_dict(gate_types)
     table = Table(box=None, show_header=False, padding=(0, 2))
-    for line in gate_types.report(args.detailed).splitlines():
-        name, _, value = line.removeprefix("[i] ").partition("=")
-        table.add_row(name.strip(), value.strip())
+    common = {"num_fanout", "num_buf", "num_inv", "num_and2", "num_or2", "num_xor2", "num_maj3"}
+    for field, count in counts.items():
+        if args.detailed or field in common or count:
+            table.add_row(field.removeprefix("num_").replace("_", " ").upper(), str(count))
     session.console.print(table)
     return counts
 
@@ -250,14 +256,14 @@ def simulate_command(session: Session, args: argparse.Namespace) -> Result:
     store = one_store(args, "network", "gate_layout")
     element = session.networks.current() if store == "network" else session.gate_layouts.current()
     tables: list[dict[str, object]] = []
-    for output, bits in simulate(element).items():
+    for output, bits in simulate_outputs(element):
         binary = "".join("1" if bit else "0" for bit in bits)
         table = dynamic_truth_table(int(math.log2(len(binary))))
         table.create_from_binary_string(binary)
         if args.store:
             session.truth_tables.add(table)
         if not args.silent:
-            session.info(f"{output}: {binary} (0x{table.to_hex()})")
+            session.output(f"{output}: {binary} (0x{table.to_hex()})")
         tables.append({"output": output, **describe(table)})
     return {"tables": tables}
 
@@ -268,12 +274,12 @@ NETWORK_TARGETS = {
     "mig": network_target.MIG,
     "tec": network_target.TEC,
 }
-"""The ``random --type`` names and the conversion target that turns the generated AIG into them."""
+"""The network types available to the native random generators."""
 
 
 def _random_arguments(parser: Parser) -> None:
     parser.add_argument("-n", "--inputs", type=int, required=True, help="number of primary inputs")
-    parser.add_argument("-g", "--gates", type=int, required=True, help="number of AND gates")
+    parser.add_argument("-g", "--gates", type=int, required=True, help="number of gates")
     parser.add_argument(
         "--type",
         type=str.lower,
@@ -288,15 +294,10 @@ def _random_arguments(parser: Parser) -> None:
 def random_command(session: Session, args: argparse.Namespace) -> Result:
     """Generate a random network; the seed becomes its name.
 
-    The generator produces an AIG, which --type converts into an XAG, an MIG, or a technology
-    network.
+    Each type uses its native gate distribution; technology networks use the mixed generator.
     """
     seed = args.seed if args.seed is not None else secrets.randbelow(2**32)
-    network = from_aigverse(session, random_aig(num_pis=args.inputs, num_gates=args.gates, seed=seed), str(seed))
-    target = NETWORK_TARGETS[args.type]
-    if target is not None:
-        network = convert_network(network, target)
-        set_name(network, str(seed))
+    network = getattr(pyfiction, f"random_{args.type}_network")(args.inputs, args.gates, seed)
     session.networks.add(network)
     return {"network": describe(network), "seed": seed}
 
@@ -340,6 +341,9 @@ def aig_command(session: Session, args: argparse.Namespace) -> Result:
 
 
 def _abc_arguments(parser: Parser) -> None:
+    parser.add_argument("--no-read", action="store_true", help="let the custom flow provide its input")
+    parser.add_argument("--no-strash", action="store_true", help="omit the initial strash command")
+    parser.add_argument("--no-write", action="store_true", help="leave the network store unchanged")
     source = parser.exclusive_group(required=True)
     source.add_argument("-c", "--commands", metavar="COMMANDS", help="a ';'-separated ABC command string")
     source.add_argument("-s", "--script", choices=ABC_SCRIPTS, help="a named ABC script")
@@ -347,7 +351,7 @@ def _abc_arguments(parser: Parser) -> None:
 
 @command("abc", Category.LOGIC, _abc_arguments)
 def abc_command(session: Session, args: argparse.Namespace) -> Result:
-    """Optimize the active AIG with an external ABC installation.
+    """Optimize the active AIG or XAG with an external ABC installation.
 
     ABC is found on PATH as 'abc' or through the AIGVERSE_ABC environment variable. The read and
     write steps are added around the given commands.
@@ -355,16 +359,38 @@ def abc_command(session: Session, args: argparse.Namespace) -> Result:
     if not abc.is_available():
         msg = "ABC was not found; install it on PATH or point AIGVERSE_ABC at the binary"
         raise CommandError(msg)
-    aig = _active_aig(session)
-    original = to_aigverse(session, aig)
-    if args.script is not None:
-        optimized = getattr(abc, args.script)(original)
-    else:
-        optimized = abc.run_script(original, args.commands)
-    network = from_aigverse(session, optimized, get_name(aig), like=aig)
-    session.networks.add(network)
-    session.info(f"{aig.num_gates()} -> {network.num_gates()} gates")
-    return {"network": describe(network), "gates_before": aig.num_gates()}
+    network = None if args.no_read else session.networks.current()
+    if network is not None and not isinstance(network, (aig_network, pyfiction.xag_network)):
+        msg_0 = "ABC requires an AIG or XAG; use read --type aig or --type xag"
+        raise CommandError(msg_0)
+    aig = convert_network(network, network_target.AIG) if isinstance(network, pyfiction.xag_network) else network
+    input_path = session.temp_file(".aig")
+    output_path = session.temp_file(".aig")
+    flow: list[str] = []
+    try:
+        if aig is not None:
+            pyfiction.write_aiger(aig, str(input_path))
+            flow.append(f'read_aiger "{input_path.as_posix()}"')
+        if not args.no_strash:
+            flow.append("strash")
+        flow.extend(abc.SCRIPTS[args.script] if args.script else [args.commands])
+        if not args.no_write:
+            flow.append(f'write_aiger -s "{output_path.as_posix()}"')
+        output = abc.run_commands("; ".join(flow))
+        if args.no_write:
+            session.output(output.rstrip())
+            return {"replacement": False, "output": output}
+        if not output_path.is_file() or not output_path.stat().st_size:
+            msg_0 = "ABC produced no output network; the store is unchanged"
+            raise CommandError(msg_0)
+        result = pyfiction.read_aig_network(str(output_path))
+        if aig is not None:
+            set_name(result, get_name(aig))
+        session.networks.add(result)
+        return {"network": describe(result), "output": output}
+    finally:
+        input_path.unlink(missing_ok=True)
+        output_path.unlink(missing_ok=True)
 
 
 def _active_aig(session: Session) -> aig_network:

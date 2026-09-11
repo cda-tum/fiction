@@ -358,22 +358,7 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
     if args.sketch:
         params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
         params.operational_params.op_condition = operational_condition.REJECT_KINKS
-    sweeps = []
-    swept: set[str] = set()
-    for axis in ("x", "y", "z"):
-        name = getattr(args, f"{axis}_sweep")
-        if name is None:
-            continue
-        if name in swept:
-            msg = f"'{name}' is swept on more than one axis; every axis needs its own parameter"
-            raise CommandError(msg)
-        swept.add(name)
-        low, high, step = (getattr(args, f"{axis}_{key}") for key in ("min", "max", "step"))
-        if step <= 0 or low > high:
-            msg = f"the {axis} axis needs min <= max and a positive step"
-            raise CommandError(msg)
-        sweeps.append(operational_domain_value_range(SWEEPS[name], low, high, step))
-    params.sweep_dimensions = sweeps
+    params.sweep_dimensions = _sweep_dimensions(args)
 
     stats = operational_domain_stats()
     if args.random_sampling is not None:
@@ -404,3 +389,36 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
         "file": str(args.file),
         "parameters": parameters,
     }
+
+
+def _sweep_dimensions(args: argparse.Namespace) -> list[operational_domain_value_range]:
+    """Validate and construct the physical parameter sweeps.
+
+    Args:
+        args: Operational-domain options.
+
+    Returns:
+        Distinct, bounded sweeps with positive steps.
+
+    Raises:
+        CommandError: An axis is repeated or has invalid bounds.
+    """
+    sweeps = []
+    swept: set[str] = set()
+    for axis in ("x", "y", "z"):
+        name = getattr(args, f"{axis}_sweep")
+        if name is None:
+            continue
+        if name in swept:
+            msg = f"'{name}' is swept on more than one axis; every axis needs its own parameter"
+            raise CommandError(msg)
+        swept.add(name)
+        low, high, step = (getattr(args, f"{axis}_{key}") for key in ("min", "max", "step"))
+        if name in {"epsilon_r", "lambda_tf"} and low <= 0:
+            msg = f"the {axis} axis needs positive {name} values"
+            raise CommandError(msg)
+        if step <= 0 or low > high:
+            msg = f"the {axis} axis needs min <= max and a positive step"
+            raise CommandError(msg)
+        sweeps.append(operational_domain_value_range(SWEEPS[name], low, high, step))
+    return sweeps

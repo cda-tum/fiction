@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 
 from aigverse.io import read_aiger_into_aig
 from aigverse.io import write_verilog as aigverse_write_verilog
+from aigverse.networks import NamedAig
 
 from mnt.pyfiction import read_aig_network, set_name, write_aiger
 
@@ -42,8 +43,11 @@ def to_aigverse(session: Session, network: aig_network) -> Aig:
         The same network as an ``aigverse`` AIG with its names.
     """
     path = session.temp_file(".aig")
-    write_aiger(network, str(path))
-    return read_aiger_into_aig(str(path))
+    try:
+        write_aiger(network, str(path))
+        return read_aiger_into_aig(str(path))
+    finally:
+        path.unlink(missing_ok=True)
 
 
 def from_aigverse(session: Session, aig: Aig, name: str, like: aig_network | None = None) -> aig_network:
@@ -61,14 +65,20 @@ def from_aigverse(session: Session, aig: Aig, name: str, like: aig_network | Non
         The same network as an ``mnt.pyfiction`` AIG.
     """
     path = session.temp_file(".v")
-    aigverse_write_verilog(aig, str(path))
-    network = read_aig_network(str(path))
+    try:
+        aigverse_write_verilog(aig, str(path))
+        network = read_aig_network(str(path))
+    finally:
+        path.unlink(missing_ok=True)
     set_name(network, name)
+    if like is None and hasattr(aig, "has_name"):
+        like = aig
     if like is not None:
         for source, target in zip(like.pis(), network.pis(), strict=True):
-            if like.has_name(source):
-                network.set_name(target, like.get_name(source))
-        for index in range(like.num_pos()):
+            source_signal = like.make_signal(source) if isinstance(like, NamedAig) else source
+            if like.has_name(source_signal):
+                network.set_name(target, like.get_name(source_signal))
+        for index in range(network.num_pos()):
             if like.has_output_name(index):
                 network.set_output_name(index, like.get_output_name(index))
     return network

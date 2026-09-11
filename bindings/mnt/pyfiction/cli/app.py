@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -24,7 +25,7 @@ from mnt.pyfiction import __version__
 
 from .errors import CommandError
 from .registry import REGISTRY
-from .session import Session
+from .session import Session, tokenize
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
@@ -61,39 +62,50 @@ class CommandCompleter(Completer):
         Yields:
             The matching completions.
         """
-        segment = document.text_before_cursor.rsplit(";", 1)[-1].lstrip()
-        words = segment.split()
-        word = document.get_word_before_cursor(WORD=True)
-        candidates = self._candidates(segment, words, word)
-        if candidates is None:
-            yield from self._paths.get_completions(Document(word, len(word)), complete_event)
-            return
+        candidates: Iterable[str]
+        words = tokenize(document.text_before_cursor, incomplete=True)[-1]
+        word = words[-1]
+        if len(words) == 1:
+            candidates = sorted(REGISTRY)
+        else:
+            cmd = REGISTRY.get(words[0])
+            if cmd is None:
+                return
+            if word.startswith("-"):
+                candidates = cmd.options
+            elif words[0] == "help":
+                candidates = sorted(REGISTRY)
+            else:
+                yield from self._argument_completions(words, complete_event)
+                return
         for candidate in candidates:
             if candidate.startswith(word):
                 yield Completion(candidate, start_position=-len(word))
 
-    @staticmethod
-    def _candidates(segment: str, words: list[str], word: str) -> Iterable[str] | None:
-        """Return what may follow the cursor, or ``None`` when a file path may.
+    def _argument_completions(self, words: list[str], event: CompleteEvent) -> Iterable[Completion]:
+        """Complete an option value or positional argument from the registered parser.
 
         Args:
-            segment: The command being typed, without the ones before it on the line.
-            words: The words of that command.
-            word: The word before the cursor.
+            words: Decoded words of the current command, including the incomplete word.
+            event: Completion request passed to the path completer.
 
-        Returns:
-            The command names, option strings, or option values that fit, or ``None``.
+        Yields:
+            Enum values or paths, restricted to the argument's declared type.
         """
-        if not words or (len(words) == 1 and not segment.endswith(" ")):
-            return sorted(REGISTRY)
-        cmd = REGISTRY.get(words[0])
-        if cmd is None:
-            return None
-        if word.startswith("-"):
-            return cmd.parser.completions
-        # the word before the cursor may be the option whose values are the only ones that fit
-        previous = words[-1] if segment.endswith(" ") else (words[-2] if len(words) > 1 else "")
-        return cmd.parser.completions.get(previous) or None
+        actions = REGISTRY[words[0]].parser.actions
+        action = next((action for action in actions if words[-2] in action.option_strings), None)
+        if action is None:
+            action = next((action for action in actions if not action.option_strings), None)
+        if action is None:
+            return
+        word = words[-1]
+        if action.choices:
+            for choice in action.choices:
+                candidate = str(choice)
+                if candidate.startswith(word):
+                    yield Completion(candidate, start_position=-len(word))
+        elif action.type is Path:
+            yield from self._paths.get_completions(Document(word, len(word)), event)
 
 
 class ForgivingFileHistory(FileHistory):
@@ -205,18 +217,54 @@ def main(argv: Sequence[str] | None = None) -> int:
     session = Session(log_path=args.log)
     session.quiet = args.quiet
     try:
-        if args.commands is not None and not session.execute(args.commands):
-            return EXIT_FAILURE
-        if args.file is not None:
-            try:
-                if not session.run_script(args.file):
-                    return EXIT_FAILURE
-            except CommandError as error:
-                session.error(str(error))
-                return EXIT_USAGE
-        if (args.commands is None and args.file is None) or (args.interactive and session.running):
-            session.quiet = False
-            repl(session)
+        status = _run_input(session, args)
+    except (UnicodeError, OSError) as error:
+        session.error(f"input: {error}")
+        status = EXIT_USAGE
     finally:
         session.close()
+    return status or (EXIT_FAILURE if session.close_failed else 0)
+
+
+def _run_input(session: Session, args: argparse.Namespace) -> int:
+    """Execute the selected command source and optional interactive continuation.
+
+    Args:
+        session: The current stores and output streams.
+        args: Parsed application options.
+
+    Returns:
+        An exit status for command or input failures.
+    """
+    if args.commands is not None and not session.execute(args.commands):
+        return EXIT_FAILURE
+    if args.file is not None:
+        try:
+            if not session.run_script(args.file):
+                return EXIT_FAILURE
+        except CommandError as error:
+            session.error(str(error))
+            return EXIT_USAGE
+    if (args.commands is None and args.file is None) or (args.interactive and session.running):
+        return _read_stdin(session)
+    return 0
+
+
+def _read_stdin(session: Session) -> int:
+    """Read a terminal interactively or execute piped lines without a console session.
+
+    Args:
+        session: The session that receives each command.
+
+    Returns:
+        Zero on success, or a command failure status.
+    """
+    if sys.stdin.isatty():
+        repl(session)
+        return 0
+    for line in sys.stdin:
+        if not session.execute(line):
+            return EXIT_FAILURE
+        if not session.running:
+            break
     return 0

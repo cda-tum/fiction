@@ -14,6 +14,9 @@ from __future__ import annotations
 class CommandError(Exception):
     """A failure the shell reports and recovers from: a usage error, an empty store, a wrong layout type."""
 
+    stats: dict[str, object] | None = None
+    """Available algorithm statistics when a search fails."""
+
 
 class HelpRequested(SystemExit):
     """Raised by the command parser in place of ``sys.exit`` once ``-h`` has produced the help text.

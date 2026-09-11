@@ -19,20 +19,28 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from mnt.pyfiction import (
     aig_network,
+    area,
     cartesian_gate_layout,
     charge_distribution,
     critical_path_length_and_throughput,
     dynamic_truth_table,
+    even_column_cartesian_gate_layout,
+    even_column_hex_gate_layout,
+    even_row_cartesian_gate_layout,
     get_name,
     hexagonal_gate_layout,
     inml_layout,
     mig_network,
     mol_qca_layout,
+    odd_column_hex_gate_layout,
+    odd_row_cartesian_gate_layout,
+    odd_row_hex_gate_layout,
     qca_layout,
     row_of,
     shifted_cartesian_gate_layout,
     sidb_layout,
     sidb_simulation_result,
+    stacked_qca_layout,
     technology_network,
     xag_network,
 )
@@ -47,9 +55,9 @@ if TYPE_CHECKING:
 Network = Any
 """``aig_network | xag_network | mig_network | technology_network``."""
 GateLayout = Any
-"""``cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout``."""
+"""Any of the nine supported gate-level layout topologies."""
 CellLayout = Any
-"""``qca_layout | inml_layout | mol_qca_layout | sidb_layout``."""
+"""``qca_layout | stacked_qca_layout | inml_layout | mol_qca_layout | sidb_layout``."""
 
 NETWORK_TYPES: dict[type, str] = {
     aig_network: "AIG",
@@ -61,13 +69,20 @@ NETWORK_TYPES: dict[type, str] = {
 
 TOPOLOGIES: dict[type, str] = {
     cartesian_gate_layout: "cartesian",
-    shifted_cartesian_gate_layout: "shifted_cartesian",
-    hexagonal_gate_layout: "hexagonal",
+    odd_row_cartesian_gate_layout: "odd_row_cartesian",
+    even_row_cartesian_gate_layout: "even_row_cartesian",
+    even_column_cartesian_gate_layout: "even_column_cartesian",
+    odd_row_hex_gate_layout: "odd_row_hex",
+    odd_column_hex_gate_layout: "odd_column_hex",
+    even_column_hex_gate_layout: "even_column_hex",
+    shifted_cartesian_gate_layout: "odd_column_cartesian",
+    hexagonal_gate_layout: "even_row_hex",
 }
 """The gate-level layout classes and the names ``--topology`` accepts."""
 
 TECHNOLOGIES: dict[type, str] = {
     qca_layout: "QCA",
+    stacked_qca_layout: "QCA",
     inml_layout: "iNML",
     mol_qca_layout: "molQCA",
     sidb_layout: "SiDB",
@@ -168,7 +183,7 @@ class Store(Generic[T]):
         self.active = index
 
     def pop(self) -> T:
-        """Remove the active element and make its predecessor, or the new last element, active.
+        """Remove the active element and select its predecessor, or the first remaining element.
 
         Returns:
             The removed element.
@@ -180,7 +195,7 @@ class Store(Generic[T]):
             msg = f"no {self.kind} in store"
             raise CommandError(msg)
         item = self.items.pop(self.active)
-        self.active = min(self.active, len(self.items) - 1) if self.items else None
+        self.active = max(self.active - 1, 0) if self.items else None
         return item
 
     def clear(self) -> None:
@@ -237,8 +252,9 @@ def describe_truth_table(tt: dynamic_truth_table) -> dict[str, object]:
     Returns:
         ``vars`` and ``hex``, plus ``binary`` for up to :data:`MAX_PRINTED_TRUTH_TABLE_VARS` variables.
     """
-    description: dict[str, object] = {"vars": tt.num_vars(), "hex": tt.to_hex()}
+    description: dict[str, object] = {"vars": tt.num_vars()}
     if tt.num_vars() <= MAX_PRINTED_TRUTH_TABLE_VARS:
+        description["hex"] = tt.to_hex()
         description["binary"] = tt.to_binary()
     return description
 
@@ -283,6 +299,7 @@ def describe_gate_layout(layout: GateLayout) -> dict[str, object]:
         "gates": layout.num_gates(),
         "wires": layout.num_wires(),
         "crossings": layout.num_crossings(),
+        "synchronization_elements": layout.num_se() if hasattr(layout, "num_se") else 0,
         "critical_path": critical_path,
         "throughput": throughput,
     }
@@ -302,6 +319,7 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
     description: dict[str, object] = {
         "name": element_name(entry),
         "technology": TECHNOLOGIES[type(layout)],
+        "area_nm2": area(layout),
     }
     if isinstance(layout, sidb_layout):
         description["lattice"] = layout.get_lattice().name
@@ -390,7 +408,7 @@ def describe(element: object) -> dict[str, object]:
 
 
 def one_line(description: dict[str, object]) -> str:
-    """Render a description as the one line ``store`` prints.
+    """Render a compact confirmation for a created or selected element.
 
     Args:
         description: A dictionary from :func:`describe`.
@@ -400,7 +418,7 @@ def one_line(description: dict[str, object]) -> str:
     """
     parts: list[str] = []
     name = description.get("name")
-    kind = description.get("type") or description.get("technology") or description.get("clocking")
+    kind = description.get("type") or description.get("technology") or description.get("topology")
     head = f"{name} ({kind})" if name else str(kind or "")
     size = description.get("size")
     if isinstance(size, dict):
@@ -408,13 +426,7 @@ def one_line(description: dict[str, object]) -> str:
         parts.append(" x ".join(dims))
     if "inputs" in description:
         parts.append(f"I/O: {description['inputs']}/{description['outputs']}")
-    parts.extend(
-        f"{key}: {description[key]}"
-        for key in ("gates", "wires", "crossings", "depth", "dots", "cells", "vars", "hex")
-        if key in description
-    )
-    if "critical_path" in description:
-        parts.append(f"CP: {description['critical_path']}, TP: 1/{description['throughput']}")
+    parts.extend(f"{key}: {description[key]}" for key in ("gates", "dots", "cells", "vars") if key in description)
     simulation = description.get("simulation")
     if isinstance(simulation, dict):
         parts.append(f"simulated with {simulation['engine']}: {simulation['stable_states']} stable states")

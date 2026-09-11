@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import math
 import os
 from typing import TYPE_CHECKING
 
@@ -19,8 +20,6 @@ from mnt.pyfiction import (
     clocked_cartesian_layout,
     clocked_hexagonal_layout,
     clocked_shifted_cartesian_layout,
-    exact_params,
-    exact_stats,
     gold_cost_objective,
     gold_effort_mode,
     graph_oriented_layout_design,
@@ -37,11 +36,11 @@ from mnt.pyfiction import (
     post_layout_optimization,
     post_layout_optimization_params,
     post_layout_optimization_stats,
-    technology_constraints,
     wiring_reduction,
     wiring_reduction_params,
     wiring_reduction_stats,
 )
+from mnt.pyfiction.cli.commands.files import FGL_READERS
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.render import table as render_table
@@ -51,12 +50,21 @@ from mnt.pyfiction.cli.stores import TOPOLOGIES, describe
 if TYPE_CHECKING:
     import argparse
 
+    from mnt.pyfiction import exact_params
     from mnt.pyfiction.cli.registry import Parser, Result
     from mnt.pyfiction.cli.session import Session
     from mnt.pyfiction.cli.stores import GateLayout
 
 CLOCKED_LAYOUTS = {
     "cartesian": clocked_cartesian_layout,
+    "odd_column_cartesian": clocked_shifted_cartesian_layout,
+    "even_row_hex": clocked_hexagonal_layout,
+    "odd_row_cartesian": pyfiction.clocked_odd_row_cartesian_layout,
+    "even_row_cartesian": pyfiction.clocked_even_row_cartesian_layout,
+    "even_column_cartesian": pyfiction.clocked_even_column_cartesian_layout,
+    "odd_row_hex": pyfiction.clocked_odd_row_hex_layout,
+    "odd_column_hex": pyfiction.clocked_odd_column_hex_layout,
+    "even_column_hex": pyfiction.clocked_even_column_hex_layout,
     "shifted_cartesian": clocked_shifted_cartesian_layout,
     "hexagonal": clocked_hexagonal_layout,
 }
@@ -115,17 +123,17 @@ def _clocking_scheme(name: str, topology: str) -> str:
 def _seconds_to_ms(seconds: float | None) -> int | None:
     if seconds is None:
         return None
-    if seconds <= 0:
+    if not math.isfinite(seconds) or seconds <= 0 or seconds * MILLISECONDS > 2**32 - 1:
         msg = "the timeout must be positive"
         raise CommandError(msg)
-    return int(seconds * MILLISECONDS)
+    return math.ceil(seconds * MILLISECONDS)
 
 
 def _exact_arguments(parser: Parser) -> None:
     parser.add_argument("-s", "--scheme", default="2DDWave", help="clocking scheme (default: 2DDWave)")
     parser.add_argument(
         "--topology",
-        choices=list(TOPOLOGIES.values()),
+        choices=list(FGL_READERS),
         default="cartesian",
         help="layout topology; hexagonal is even-row, shifted_cartesian is odd-column (default: cartesian)",
     )
@@ -136,6 +144,9 @@ def _exact_arguments(parser: Parser) -> None:
     parser.add_argument("-t", "--timeout", type=float, metavar="SECONDS", help="give up after this long")
     parser.add_argument("-a", "--threads", type=int, metavar="N", help="solve N aspect ratios in parallel")
     parser.add_argument("--async-max", action="store_true", help="use every processor core for -a")
+    parser.add_argument(
+        "--synchronization-elements", action="store_true", help="allow Cartesian synchronization elements"
+    )
     parser.add_argument("-x", "--crossings", action="store_true", help="allow wire crossings")
     parser.add_argument("-b", "--border-io", action="store_true", help="route all I/Os to the layout border")
     parser.add_argument("-n", "--straight-inverters", action="store_true", help="forbid bent inverters")
@@ -163,21 +174,28 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
         raise CommandError(msg)
     topology = "shifted_cartesian" if args.topolinano else args.topology
     params = _exact_parameters(args, _clocking_scheme(args.scheme, topology))
-    design = getattr(pyfiction, f"exact_{topology}")
+    native_topology = {"odd_column_cartesian": "shifted_cartesian", "even_row_hex": "hexagonal"}.get(topology, topology)
+    design = getattr(pyfiction, f"exact_{native_topology}")
+    if args.synchronization_elements and topology != "cartesian":
+        msg_0 = "synchronization elements require Cartesian topology"
+        raise CommandError(msg_0)
 
     network = session.as_technology_network(session.networks.current())
-    stats = exact_stats()
+    stats = pyfiction.exact_stats()
     layout = design(network, params, stats)
     if layout is None:
-        msg = f"impossible to place and route '{pyfiction.get_name(network)}' within the given parameters"
-        raise CommandError(msg)
+        msg = f"no layout found for '{pyfiction.get_name(network)}' within the search bounds or timeout"
+        error = CommandError(msg)
+        error.stats = stats_to_dict(stats)
+        raise error
     session.gate_layouts.add(layout)
     return _added(session, layout, stats, verbose=args.verbose)
 
 
 def _exact_parameters(args: argparse.Namespace, scheme: str) -> exact_params:
-    params = exact_params()
+    params = pyfiction.exact_params()
     params.scheme = scheme
+    params.synchronization_elements = args.synchronization_elements
     params.crossings = args.crossings
     params.border_io = args.border_io
     params.straight_inverters = args.straight_inverters
@@ -202,11 +220,17 @@ def _exact_parameters(args: argparse.Namespace, scheme: str) -> exact_params:
     elif args.threads is not None:
         params.num_threads = args.threads
     if args.topolinano:
-        params.technology_specifics = technology_constraints.TOPOLINANO
+        params.technology_specifics = pyfiction.pyfiction.technology_constraints.TOPOLINANO
     return params
 
 
 def _ortho_arguments(parser: Parser) -> None:
+    parser.add_argument(
+        "--topology",
+        choices=["cartesian", "hexagonal", "even_row_hex", "odd_row_hex", "odd_column_hex", "even_column_hex"],
+        default="cartesian",
+        help="direct output topology (default: cartesian)",
+    )
     parser.add_argument(
         "-n",
         "--clock-phases",
@@ -222,14 +246,16 @@ def _ortho_arguments(parser: Parser) -> None:
 def ortho(session: Session, args: argparse.Namespace) -> Result:
     """Place and route the active network with the scalable orthogonal graph drawing heuristic.
 
-    The result is a 2DDWave-clocked Cartesian layout; run 'hex' to turn it hexagonal. The network
+    The result uses 2DDWave clocking and the selected Cartesian or hexagonal topology. The network
     must not have gates with more than two inputs.
     """
     network = session.as_technology_network(session.networks.current())
     params = orthogonal_params()
     params.number_of_clock_phases = num_clks.THREE if args.clock_phases == THREE_CLOCK_PHASES else num_clks.FOUR
     stats = orthogonal_stats()
-    layout = orthogonal(network, params, stats)
+    topology = "hexagonal" if args.topology == "even_row_hex" else args.topology
+    design = orthogonal if topology == "cartesian" else getattr(pyfiction, f"orthogonal_{topology}")
+    layout = design(network, params, stats)
     session.gate_layouts.add(layout)
     return _added(session, layout, stats, verbose=args.verbose)
 
@@ -297,8 +323,10 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
     stats = graph_oriented_layout_design_stats()
     layout = graph_oriented_layout_design(network, params, stats)
     if layout is None:
-        msg = f"no layout found for '{pyfiction.get_name(network)}' within the given parameters"
-        raise CommandError(msg)
+        msg = f"no layout found for '{pyfiction.get_name(network)}' within the search bounds or timeout"
+        error = CommandError(msg)
+        error.stats = stats_to_dict(stats)
+        raise error
     session.gate_layouts.add(layout)
     return _added(session, layout, stats, verbose=args.verbose)
 

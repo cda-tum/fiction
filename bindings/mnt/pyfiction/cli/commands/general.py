@@ -10,6 +10,9 @@
 
 from __future__ import annotations
 
+import shutil
+import sys
+from contextlib import nullcontext
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -24,9 +27,18 @@ from mnt.pyfiction import (
     print_sidb_layout,
     sidb_layout,
 )
-from mnt.pyfiction.cli.drawing import drawing_flags, open_viewer, write_dot, write_svg
+from mnt.pyfiction.cli.drawing import drawing_flags, open_viewer, render_dot, write_dot, write_svg
 from mnt.pyfiction.cli.errors import CommandError
-from mnt.pyfiction.cli.registry import REGISTRY, STORE_FLAGS, Category, command, one_store, selected_stores, store_flags
+from mnt.pyfiction.cli.registry import (
+    REGISTRY,
+    STORE_FLAGS,
+    Category,
+    command,
+    one_store,
+    selected_stores,
+    store_flags,
+    unavailable_reason,
+)
 from mnt.pyfiction.cli.render import table as render_table
 from mnt.pyfiction.cli.stores import Store, describe, ground_state, one_line
 
@@ -55,6 +67,7 @@ def stores_of(session: Session) -> dict[str, Store]:  # type: ignore[type-arg]
 
 
 def _help_arguments(parser: Parser) -> None:
+    parser.add_argument("--all", action="store_true", help="list command descriptions; page in interactive terminals")
     parser.add_argument("name", nargs="?", help="a command to show the full help of")
 
 
@@ -90,7 +103,7 @@ def help_command(session: Session, args: argparse.Namespace) -> Result:
 def version(session: Session, args: argparse.Namespace) -> Result:
     """Print the fiction version and build date."""
     del args
-    session.info(f"{__version__} ({__repo__}), compiled {__compiled_date__} {__compiled_time__}")
+    session.output(f"{__version__} ({__repo__}), compiled {__compiled_date__} {__compiled_time__}")
     return {"version": __version__, "compiled": f"{__compiled_date__} {__compiled_time__}"}
 
 
@@ -194,7 +207,7 @@ def _pop(session: Session, stores: dict[str, Store], names: list[str]) -> Result
     for name in names:
         description = describe(stores[name].pop())
         removed[name] = description
-        session.info(f"removed {one_line(description)}")
+        session.output(f"removed {one_line(description)}")
     return removed
 
 
@@ -256,23 +269,27 @@ def print_command(session: Session, args: argparse.Namespace) -> Result:
     name = one_store(args, "truth_table", "gate_layout", "cell_layout")
     if name == "truth_table":
         tt = session.truth_tables.current()
-        session.info(f"hex: {tt.to_hex()}\nbin: {tt.to_binary()}")
+        session.output(f"hex: {tt.to_hex()}\nbin: {tt.to_binary()}")
         return None
     if name == "gate_layout":
-        session.info(repr(session.gate_layouts.current()))
+        session.output(repr(session.gate_layouts.current()))
         return None
     entry = session.cell_layouts.current()
     if not isinstance(entry.layout, sidb_layout):
-        session.info(repr(entry.layout))
+        session.output(repr(entry.layout))
         return None
     state = ground_state(entry)
-    # one picture: the charge symbols replace the dots rather than being drawn a second time. Only
-    # the color tells a negative charge from a positive one, so it is kept whenever a terminal reads
-    # the output and dropped when it is redirected into a file.
-    picture = print_sidb_layout(entry.layout, state, lat_color=session.console.is_terminal)
-    session.console.print(picture.rstrip(), markup=False, highlight=False)
+    # The charge list below preserves the sign when terminal colors are unavailable.
+    picture = print_sidb_layout(
+        entry.layout, state, lat_color=session.console.is_terminal and not session.console.no_color
+    )
+    session.output(picture.rstrip())
     if state is not None:
-        session.info(f"ground state energy: {state.energy():.6f} eV")
+        session.output(f"Ground state energy: {state.energy():.6f} eV")
+        signs = {"NEGATIVE": "-", "NEUTRAL": "0", "POSITIVE": "+"}
+        session.output("Charges (- negative, 0 neutral, + positive):")
+        for site in state.sites():
+            session.output(f"  {site}: {signs.get(state.get_charge_state(site).name, '?')}")
     return None
 
 
@@ -294,20 +311,36 @@ def _show_arguments(parser: Parser) -> None:
 def show(session: Session, args: argparse.Namespace) -> Result:
     """Draw the active network or layout and open it in the platform's viewer.
 
-    Networks and gate-level layouts become Graphviz DOT files, cell-level layouts SVG files. A
+    Networks and gate-level layouts become SVG images through optional Graphviz; .dot keeps raw DOT.
+    Cell-level layouts become SVG images. A
     simulated SiDB layout is drawn with its ground state charges. The viewer returns at once and
-    reads the file afterwards, so a temporary file is kept until the process ends; --delete asks
-    for it back when the session closes.
+    reads the file afterwards, so a temporary file is retained on disk; --delete removes it when the session closes.
     """
     name = one_store(args, "network", "gate_layout", "cell_layout")
-    suffix = ".svg" if name == "cell_layout" else ".dot"
+    suffix = ".svg" if name == "cell_layout" or shutil.which("dot") else ".dot"
     path: Path = args.output if args.output is not None else session.viewer_file(suffix, delete=args.delete)
+    suffix = path.suffix.lower()
     if name == "cell_layout":
+        if suffix != ".svg":
+            msg = "cell drawings require an .svg output filename"
+            raise CommandError(msg)
         write_svg(session.cell_layouts.current(), path, simple=args.simple)
     else:
+        if suffix not in {".svg", ".dot"}:
+            msg = "network and gate-layout drawings require .svg or .dot"
+            raise CommandError(msg)
         element = session.networks.current() if name == "network" else session.gate_layouts.current()
-        write_dot(element, path, network=name == "network", indexes=args.indexes, clock_colors=args.clock_colors)
-    session.info(f"wrote {path}")
-    if not args.silent:
+        dot_path = path
+        if suffix == ".svg":
+            dot_path = (
+                session.viewer_file(".dot", delete=args.delete) if args.output is None else path.with_suffix(".dot")
+            )
+        write_dot(element, dot_path, network=name == "network", indexes=args.indexes, clock_colors=args.clock_colors)
+        if suffix == ".svg":
+            render_dot(dot_path, path)
+        elif args.output is None and not shutil.which("dot"):
+            session.output(f"Install Graphviz for SVG viewing; DOT retained at '{path}'")
+    session.output(f"wrote {path}")
+    if not args.silent and (suffix != ".dot" or args.program or args.output is not None):
         open_viewer(path, args.program)
     return {"file": str(path)}

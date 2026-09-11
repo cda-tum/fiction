@@ -17,9 +17,13 @@ from __future__ import annotations
 
 import argparse
 import inspect
+import math
+import textwrap
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any, NoReturn
+
+from mnt import pyfiction
 
 from .errors import CommandError, HelpRequested
 
@@ -44,6 +48,78 @@ class Category(Enum):
     SIMULATION = "Simulation"
     VERIFICATION = "Verification"
     GENERAL = "General"
+
+
+EXAMPLES = {
+    "help": "help read",
+    "version": "version",
+    "quit": "quit",
+    "source": 'source "workflow.fiction"',
+    "clear": "clear -g -c",
+    "store": "store -n -g",
+    "current": "current -n 0",
+    "ps": "ps -n",
+    "print": 'tt -e "<abc>"; print -t',
+    "show": "generate mux -b 1; show -n --silent -o mux.dot",
+    "read": 'read "circuit.v" --type tec',
+    "write": "generate mux -b 1; write mux.v",
+    "tt": 'tt -e "<abc>"',
+    "map": "generate mux -b 1; map --and --inv",
+    "fanouts": "generate mux -b 1; fanouts --degree 2",
+    "balance": "generate mux -b 1; balance",
+    "gates": "generate mux -b 1; gates -n",
+    "simulate": "generate mux -b 1; simulate -n --store",
+    "random": "random -n 3 -g 10 --type xag --seed 42",
+    "generate": "generate rca -b 2",
+    "aig": "generate mux -b 1; aig rewrite cleanup",
+    "abc": "generate mux -b 1; abc -c strash",
+    "exact": "generate mux -b 1; exact --timeout 10",
+    "ortho": "generate mux -b 1; ortho",
+    "gold": "generate mux -b 1; gold --timeout 10",
+    "hex": "generate mux -b 1; ortho; hex",
+    "optimize": "generate mux -b 1; ortho; optimize",
+    "cell": "generate mux -b 1; ortho; cell --library qca-one",
+    "area": "read layout.fqca; area",
+    "check": "generate mux -b 1; ortho; check",
+    "equiv": "generate mux -b 1; ortho; equiv -n -g",
+    "quickexact": "read layout.sqd; quickexact",
+    "quicksim": "read layout.sqd; quicksim",
+    "clustercomplete": "read layout.sqd; clustercomplete",
+    "temp": 'read and.sqd; tt -e "(ab)"; temp --gate-based',
+    "opdom": 'read and.sqd; tt -e "(ab)"; opdom domain.csv',
+}
+"""Shell examples; referenced files must exist in the current directory."""
+
+INPUTS = {
+    **dict.fromkeys(("map", "fanouts", "balance", "aig", "abc", "exact", "ortho", "gold"), "Active network."),
+    **dict.fromkeys(("hex", "optimize", "cell", "check"), "Active gate-level layout."),
+    **dict.fromkeys(("area", "quickexact", "quicksim", "clustercomplete"), "Active cell-level layout."),
+    **dict.fromkeys(("temp", "opdom"), "Active SiDB layout; gate checks also use the active truth table."),
+    **dict.fromkeys(
+        ("write", "store", "current", "ps", "print", "show", "clear", "gates", "simulate", "equiv"),
+        "Store elements selected by the flags below.",
+    ),
+    "read": "A file or directory of files.",
+    "source": "A UTF-8 command file.",
+}
+"""Store prerequisites displayed before command options."""
+
+
+def unavailable_reason(name: str) -> str | None:
+    """Identify an optional native capability missing from this build.
+
+    Args:
+        name: Command name.
+
+    Returns:
+        The build requirement, or None when no native capability is missing.
+    """
+    required = {"exact": ("exact_cartesian", "Z3"), "clustercomplete": ("clustercomplete", "ALGLIB")}
+    if name in required:
+        symbol, dependency = required[name]
+        if not hasattr(pyfiction, symbol):
+            return f"unavailable: this build has no {dependency} support"
+    return None
 
 
 class Group:
@@ -79,6 +155,7 @@ class Parser(argparse.ArgumentParser):
 
     Attributes:
         completions: Every option string of the command, mapped onto the values it accepts.
+        actions: Arguments in declaration order, for help and completion.
     """
 
     def __init__(self, name: str, description: str) -> None:
@@ -88,10 +165,13 @@ class Parser(argparse.ArgumentParser):
             name: The command name, shown as the program name in usage lines.
             description: The command's docstring, shown by ``-h``.
         """
+        summary, _, restrictions = description.partition("\n\n")
+        self.restrictions = restrictions or "No additional restrictions."
         self.completions: dict[str, tuple[str, ...]] = {}
+        self.actions: list[argparse.Action] = []
         super().__init__(
             prog=name,
-            description=description,
+            description=f"{summary}\n\nInputs:\n  {INPUTS.get(name, 'No store input.')}",
             allow_abbrev=False,
             formatter_class=argparse.RawDescriptionHelpFormatter,
         )
@@ -102,6 +182,7 @@ class Parser(argparse.ArgumentParser):
         Args:
             action: The action ``add_argument`` created.
         """
+        self.actions.append(action)
         values = tuple(str(choice) for choice in action.choices) if action.choices else ()
         for option in action.option_strings:
             self.completions[option] = values
@@ -145,6 +226,49 @@ class Parser(argparse.ArgumentParser):
         """
         return Group(self, self.add_mutually_exclusive_group(required=required))
 
+    def validate(self, parsed: argparse.Namespace) -> None:
+        """Validate numeric arguments before entering native code.
+
+        Args:
+            parsed: The parsed command arguments.
+        """
+        positive = {
+            "inputs",
+            "bitwidth",
+            "threads",
+            "upper_x",
+            "upper_y",
+            "upper_area",
+            "fixed_size",
+            "iterations",
+            "expansions",
+            "epsilon_r",
+            "lambda_tf",
+            "timeout",
+            "max_temperature",
+            "random_sampling",
+            "flood_fill",
+            "contour_tracing",
+        }
+        for name, value in vars(parsed).items():
+            if isinstance(value, bool) or value is None:
+                continue
+            maximum = 2**64 - 1 if name == "seed" else 2**32 - 1
+            if isinstance(value, int) and not 0 <= value <= maximum:
+                self.error(f"{name.replace('_', '-')}: expected an integer from 0 to {maximum}")
+            if isinstance(value, float) and not math.isfinite(value):
+                self.error(f"{name.replace('_', '-')}: expected a finite number")
+            if name in positive and value <= 0:
+                self.error(
+                    f"{name.replace('_', '-')}: must be at least 1"
+                    if isinstance(value, int)
+                    else f"{name.replace('_', '-')}: must be positive"
+                )
+            if name in {"width", "height", "hspace", "vspace", "alpha"} and value < 0:
+                self.error(f"{name.replace('_', '-')}: cannot be negative")
+            if name == "confidence" and not 0 < value <= 1:
+                self.error("confidence must be in (0, 1]")
+
     def error(self, message: str) -> NoReturn:
         """Turn a usage error into a :class:`CommandError` that carries the usage line.
 
@@ -172,6 +296,14 @@ class Parser(argparse.ArgumentParser):
         if status:
             raise CommandError(message or "invalid arguments")
         raise HelpRequested(message or "")
+
+    def format_help(self) -> str:
+        """Return detailed command help.
+
+        Returns:
+            The parser's plain-text help.
+        """
+        return super().format_help()
 
     def print_help(self, file: SupportsWrite[str] | None = None) -> None:
         """Hand the help text to the session instead of writing it to a stream.

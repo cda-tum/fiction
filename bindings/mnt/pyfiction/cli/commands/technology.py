@@ -66,6 +66,8 @@ def _cell_arguments(parser: Parser) -> None:
         "--library",
         default="qca-one",
         metavar="LIBRARY",
+        type=lambda name: LIBRARY_ALIASES.get(_library_key(name), name),
+        choices=list(GATE_LIBRARIES),
         help=f"the gate library: {', '.join(GATE_LIBRARIES)} (default: qca-one); "
         "hyphens, underscores, spaces, and case are ignored",
     )
@@ -111,5 +113,5 @@ def area_command(session: Session, args: argparse.Namespace) -> Result:
     # the binding defaults every dimension to the layout's own technology, so only pass overrides
     overrides = {name: getattr(args, name) for name in AREA_OVERRIDES if getattr(args, name) is not None}
     result = area(layout, **overrides)
-    session.info(f"area: {result:.2f} nm²")
+    session.output(f"Area: {result:.2f} nm²")
     return {"area_nm2": result, **{f"{name}_nm": value for name, value in overrides.items()}}

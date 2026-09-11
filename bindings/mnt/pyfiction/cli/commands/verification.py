@@ -60,12 +60,29 @@ def equiv(session: Session, args: argparse.Namespace) -> Result:
     stats = equivalence_checking_stats()
     result = equivalence_checking(specification, implementation, stats)
     spec_name, impl_name = get_name(specification), get_name(implementation)
+    blocked = [
+        operand
+        for operand, report in (("specification", stats.spec_drv_stats), ("implementation", stats.impl_drv_stats))
+        if report.drvs
+    ]
+    if blocked:
+        reason = f"design rule violations in {' and '.join(blocked)}"
+        session.output(f"{spec_name} and {impl_name}: not checked ({reason})")
+        return {
+            "specification": spec_name,
+            "implementation": impl_name,
+            **stats_to_dict(stats),
+            "eq": "NOT_CHECKED",
+            "reason": reason,
+        }
     if result == eq_type.NO:
-        session.info(f"{spec_name} and {impl_name} are not equivalent")
+        session.output(f"{spec_name} and {impl_name} are not equivalent")
     elif result == eq_type.WEAK:
-        session.info(f"{spec_name} and {impl_name} are weakly equivalent with a delay of {stats.tp_diff} clock cycles")
+        session.output(
+            f"{spec_name} and {impl_name} are weakly equivalent with a delay of {stats.tp_diff} clock cycles"
+        )
     else:
-        session.info(f"{spec_name} and {impl_name} are strongly equivalent")
+        session.output(f"{spec_name} and {impl_name} are strongly equivalent")
     return {"specification": spec_name, "implementation": impl_name, **stats_to_dict(stats)}
 
 
@@ -85,5 +102,10 @@ def check(session: Session, args: argparse.Namespace) -> Result:
     stats = gate_level_drv_stats()
     gate_level_drvs(layout, statistics=stats)
     report: dict[str, object] = json.loads(stats.report)
-    session.console.print(render_table(report))
+    session.output(f"{stats.drvs} violations, {stats.warnings} warnings")
+    issues = {key: value for key, value in report.items() if value}
+    if (stats.drvs or stats.warnings) and issues:
+        session.console.print(render_table(issues))
+    else:
+        session.output("No design rule violations or warnings.")
     return report
