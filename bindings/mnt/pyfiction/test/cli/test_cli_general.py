@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction import inml_layout, mol_qca_layout, mol_qca_technology
+from mnt.pyfiction.cli.registry import REGISTRY
 from mnt.pyfiction.cli.stores import CellEntry, element_name
 
 if TYPE_CHECKING:
@@ -270,3 +271,12 @@ def test_exit_is_an_alias_of_quit(shell: Shell) -> None:
     assert "\n  exit " not in listing
     shell.ok("exit")
     assert not shell.session.running
+
+
+def test_full_help_includes_command_descriptions(shell: Shell) -> None:
+    """Redirected full help lists each command with its description without paging."""
+    output = shell.ok("help --all")
+    for command in dict.fromkeys(REGISTRY.values()):
+        assert command.name in output
+        assert command.summary in output
+    assert "help COMMAND" in output

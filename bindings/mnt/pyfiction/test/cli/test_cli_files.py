@@ -20,6 +20,7 @@ from mnt.pyfiction import (
     inml_layout,
     inml_technology,
     mig_network,
+    set_name,
     shifted_cartesian_gate_layout,
     technology_network,
     xag_network,
@@ -295,3 +296,49 @@ def test_write_qcc_component_name(shell: Shell, tmp_path: Path) -> None:
     shell.ok(f"write {named_after_the_file} --component-name")
     assert 'name="mygate"' in named_after_the_layout.read_text(encoding="utf-8")
     assert 'name="component"' in named_after_the_file.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    ("options", "message"),
+    [
+        ("--via-layers -F v", "--via-layers applies only"),
+        ("--simple -F v", "--simple applies only"),
+        ("--indexes -F v", "drawing indices and clock colors apply only"),
+        ("--clock-colors -n -F dot", "--clock-colors requires a gate-level layout"),
+    ],
+)
+def test_rejected_writer_options_preserve_destination(
+    mux21_shell: Shell, tmp_path: Path, options: str, message: str
+) -> None:
+    """Irrelevant drawing options must fail before replacing an existing file."""
+    path = tmp_path / "output"
+    path.write_text("keep this file", encoding="utf-8")
+    assert message in mux21_shell.fails(f"write {path} {options}")
+    assert path.read_text(encoding="utf-8") == "keep this file"
+
+
+@pytest.mark.parametrize("name", ["", "../escape", "folder/name", r"folder\name", "C:escape"])
+def test_implicit_output_requires_a_simple_name(
+    shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, name: str
+) -> None:
+    """An embedded name cannot choose an output directory."""
+    monkeypatch.chdir(tmp_path)
+    network = technology_network()
+    set_name(network, name)
+    shell.session.networks.add(network)
+    message = "explicit output path" if name else "no name"
+    assert message in shell.fails("write -F v")
+    assert not list(tmp_path.glob("*.v"))
+
+
+def test_implicit_gate_layout_filename(mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """FGL uses the active gate layout name when no filename is supplied."""
+    monkeypatch.chdir(tmp_path)
+    mux21_shell.ok("ortho; write -F fgl")
+    assert (tmp_path / "mux21.fgl").is_file()
+
+
+def test_directory_import_rejects_layout_formats(shell: Shell, tmp_path: Path) -> None:
+    """Directory imports cannot silently ignore an explicit layout reader."""
+    assert "network formats only" in shell.fails(f"read {tmp_path} -F fgl")
+    assert len(shell.session.gate_layouts) == 0
