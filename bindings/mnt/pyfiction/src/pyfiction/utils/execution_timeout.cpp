@@ -19,6 +19,7 @@
 #include <exception>
 
 #include <nanobind/nanobind.h>
+#include <pyerrors.h>
 
 namespace pyfiction
 {

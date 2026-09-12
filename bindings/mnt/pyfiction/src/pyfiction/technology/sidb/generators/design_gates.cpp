@@ -98,6 +98,7 @@ void design_gates(nanobind::module_& m)
 
     m.def(
         "design_sidb_gates",
+        // NOLINTNEXTLINE(performance-unnecessary-value-param): Own inputs while Python can mutate the originals.
         [](const layout skeleton, const std::vector<py_tt> spec, const design_gates_params params,
            design_gates_stats* stats)
         {
