@@ -98,7 +98,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Fixed:** an installed _fiction_ shipped mockturtle's own headers but none of the vendored
     dependencies they include, so `find_package(fiction)` produced a package that failed on
     `#include <kitty/...>`. mockturtle now installs itself into the same prefix and
-    `fictionConfig.cmake` resolves it from there ([#1204](https://github.com/cda-tum/fiction/pull/1204))
+    `fictionConfig.cmake` resolves it from there ([#1206](https://github.com/cda-tum/fiction/pull/1206))
   - **Fixed:** the installed `libfiction` referenced `include/parallel_hashmap` without declaring it
 
 - Continuous integration:
