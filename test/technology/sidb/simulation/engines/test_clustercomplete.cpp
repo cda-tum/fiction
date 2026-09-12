@@ -14,6 +14,7 @@
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author GPT-6 via Codex
  */
 
 #if (FICTION_ALGLIB_ENABLED)
@@ -1846,9 +1847,12 @@ TEST_CASE("ClusterComplete reports progress", "[clustercomplete]")
 
     CHECK(simulation_results.charge_distributions.size() == 1);
 
-    // the number of compositions is unknown in advance; a layout this small may need no unfolding at all
+    // the number of compositions is unknown in advance
     CHECK(rec.is_consistent("compositions"));
-    CHECK(rec.reports_of("compositions").back().total == 0);
+    CHECK(rec.final_count("compositions") > 0);
+    const auto reports = rec.reports_of("compositions");
+    REQUIRE(!reports.empty());
+    CHECK(reports.back().total == 0);
 }
 
 #else  // FICTION_ALGLIB_ENABLED
