@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "fiction/utils/version_info.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -982,9 +983,9 @@ TEST_CASE("Network DOT export preserves files and symbolic links", "[dot-drawers
         std::ofstream stream{target};
         stream << "original";
     }
-    auto destination = target;
-    SECTION("Regular output") {}
-    SECTION("Symbolic output")
+    auto       destination = target;
+    const auto symbolic    = GENERATE(false, true);
+    if (symbolic)
     {
         destination = directory / "latest.dot";
         std::error_code link_error{};
