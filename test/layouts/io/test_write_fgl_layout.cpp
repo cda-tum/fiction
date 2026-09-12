@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
@@ -192,7 +193,11 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
         }
         INFO(name);
         const auto scheme = clocking::get_scheme<TestType>(name);
-        REQUIRE(scheme.has_value());
+        if (!scheme.has_value())
+        {
+            FAIL("Unknown clocking scheme");
+            return;
+        }
         TestType original{{3, 2, 0}, *scheme, "clock phases"};
         if (!scheme->is_regular())
         {
