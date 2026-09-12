@@ -14,6 +14,7 @@ import io
 import json
 import os
 import shutil
+import stat
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native crash regressions
 import sys
 import xml.etree.ElementTree as ET  # ruff: ignore[suspicious-xml-etree-import] -- parse files produced by tested writers
@@ -432,14 +433,37 @@ def test_fgl_preserves_labels_and_synchronization(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize("flags", ["-n", "-g"])
-def test_real_graphviz_renders_svg(mux21_shell: Shell, tmp_path: Path, flags: str) -> None:
+@pytest.mark.parametrize("symbolic", [False, True])
+def test_real_graphviz_renders_svg(mux21_shell: Shell, tmp_path: Path, flags: str, *, symbolic: bool) -> None:
     if shutil.which("dot") is None:
         pytest.skip("Graphviz is not installed")
     mux21_shell.ok("ortho")
     destination = tmp_path / "drawing with spaces.svg"
+    target = tmp_path / "target.svg"
+    if symbolic:
+        target.write_text("original", encoding="utf-8")
+        try:
+            destination.symlink_to(target.name)
+        except OSError as error:
+            if sys.platform == "win32" and error.winerror == 1314:
+                pytest.skip("Windows did not grant symbolic-link creation privileges")
+            raise
+    else:
+        destination.write_text("original", encoding="utf-8")
+    if os.name == "posix":
+        destination.chmod(0o600)
     mux21_shell.ok(f'show {flags} --silent -o "{destination}"')
     assert "<svg" in destination.read_text(encoding="utf-8")
     assert "digraph" in destination.with_suffix(".dot").read_text(encoding="utf-8")
+    if os.name == "posix":
+        assert stat.S_IMODE(destination.stat().st_mode) == 0o600
+    if symbolic:
+        assert destination.is_symlink()
+        assert "<svg" in target.read_text(encoding="utf-8")
+        target.unlink()
+        mux21_shell.fails(f'show {flags} --silent -o "{destination}"')
+        assert destination.is_symlink()
+        assert not target.exists()
 
 
 def test_graphviz_failure_preserves_destination(

@@ -327,12 +327,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
-  - `exact --sync_elems` and the `sync. elems.` field of `ps -g`. Synchronization elements need a
-    gate-layout type that wraps `synchronization_element_layout`, which the bindings do not have.
   - `akers`, together with `miginvopt` and `miginvprop`. The truth table store now feeds the
     gate-based SiDB simulations, `temp -g` and `opdom`, alone.
-  - Six of the nine FGL topologies. `--topology` offers `cartesian`, `shifted_cartesian`
-    (odd-column), and `hexagonal` (even-row), which is what the bindings instantiate.
   - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
     `help --docs`.
 - **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
@@ -412,7 +408,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Logic simulation builds output bits without an intermediate binary string.
   - Added compact help, width-aware stores, Graphviz SVG viewing, piped input, and reliable quiet-mode results and cleanup.
   - Topology help now lists choices in wrapped descriptions and keeps usage lines compact.
-  - The Python shell computes SiDB area from the layout lattice and rejects cell-dimension overrides.
   - SiDB store descriptions and statistics include lattice-based physical area and handle the full column range without integer overflow
   - A script file that exists but cannot be read reports the reason and exits with 2, like a missing one
   - `tt -t 0xD` reads all four bits of a hex digit as the two-variable table the same bits name in binary;
@@ -460,7 +455,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - I/O:
 
   - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
-  - Transactional writers now report filesystem setup and replacement errors as stream failures.
+  - Transactional writers now report filesystem setup and replacement errors as stream failures. They preserve output permissions and symbolic links to existing files, and reject dangling links.
   - FQCA imports with at most two layers retain SVG export and viewing.
   - Stacked FQCA imports preserve all layers and cell metadata. Layout readers reject coordinate overflow; writers replace files only after successful serialization.
   - QCA SVG output now uses valid text colors in simple tile mode.

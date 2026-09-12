@@ -117,6 +117,9 @@ file instead of after the layout. `--indexes` and `--clock-colors` steer the `.d
 their module `top`, as the readers expect, and a technology network is written as an equivalent XAG, because
 gate-level Verilog has no buffers.
 
+Writers replace destination files after successful serialization. Symbolic links to existing files remain links,
+and their targets receive the output. Dangling symbolic links are rejected.
+
 Without a file, `write -F FORMAT` writes `<name>.<format>` in the current directory, where `<name>` is the active
 element's name: `read c17.v; ortho; cell; write -F qca` produces `c17.qca`. On a `.dot` file, `-n` and `-g` select
 the network or the gate-level layout store; a gate-level layout is the default. `-c` selects cell layouts.
@@ -221,8 +224,8 @@ The most important options:
 - `-b` routes every input and output to the layout border
 - `-d` drops global synchronization, which high-fanin networks with border I/O need
 - `-t SECONDS` gives up after a timeout
-- `--topology cartesian|shifted_cartesian|hexagonal` chooses the layout topology, and `--topolinano` applies
-  ToPoliNano's iNML constraints on a shifted Cartesian layout
+- `--topology NAME` chooses any of the nine [supported topologies](#topology-and-synchronization-support), and
+  `--topolinano` applies ToPoliNano's iNML constraints on a shifted Cartesian layout
 
 Solutions are found fastest with crossings, desynchronization, and 2DDWave: `exact -xd -s 2ddwave`. Multi-threading
 (`-a THREADS`, `--async-max`) can help for larger networks, but it stops the solver runs from sharing information.
@@ -230,10 +233,10 @@ Solutions are found fastest with crossings, desynchronization, and 2DDWave: `exa
 ### OGD-based (`ortho`)
 
 `ortho` places and routes with a linear-time orthogonal graph drawing heuristic, see
-[the paper](https://dl.acm.org/doi/10.1145/3287624.3287705). It handles large networks, always produces a
-2DDWave-clocked Cartesian layout, and needs a network whose gates have at most two inputs (AND, OR, and inverters
-after `map --and --or --inv`). `-n 3|4` sets the number of clock phases, four by default, and `-v` prints the
-statistics.
+[the paper](https://dl.acm.org/doi/10.1145/3287624.3287705). It handles large networks and produces a 2DDWave-clocked
+Cartesian layout by default; `--topology` also selects any of the four [hexagonal variants](#topology-and-synchronization-support).
+It needs a network whose gates have at most two inputs (AND, OR, and inverters after `map --and --or --inv`).
+`-n 3|4` sets the number of clock phases, four by default, and `-v` prints the statistics.
 
 ### Graph-oriented layout design (`gold`)
 

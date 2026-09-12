@@ -173,6 +173,8 @@ def render_dot(source: Path, destination: Path) -> None:
     if executable is None:
         msg = f"Graphviz 'dot' is required for SVG rendering; DOT retained at '{source}'"
         raise CommandError(msg)
+    if destination.is_symlink():
+        destination = destination.resolve(strict=True)
     with tempfile.TemporaryDirectory(prefix=".fiction-", dir=destination.parent) as directory:
         temporary = Path(directory) / destination.name
         result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- pass paths as arguments, never shell code
@@ -181,4 +183,6 @@ def render_dot(source: Path, destination: Path) -> None:
         if result.returncode or not temporary.is_file():
             msg = f"Graphviz failed: {result.stderr.strip()}; DOT retained at '{source}'"
             raise CommandError(msg)
+        if destination.exists():
+            shutil.copymode(destination, temporary)
         temporary.replace(destination)

@@ -36,8 +36,10 @@ template <typename Writer>
 void atomic_write(const std::string_view filename, const Writer& writer)
 try
 {
-    const std::filesystem::path destination{filename};
-    std::filesystem::path       directory{};
+    const std::filesystem::path requested{filename};
+    // Follow existing symbolic links; canonical rejects dangling links and cycles before writing.
+    const auto destination = std::filesystem::is_symlink(requested) ? std::filesystem::canonical(requested) : requested;
+    std::filesystem::path directory{};
     for (auto attempt = 0u; attempt < 16u; ++attempt)
     {
         directory = destination.parent_path() / (".fiction-" + std::to_string(std::random_device{}()));
@@ -53,10 +55,16 @@ try
     }
     try
     {
+        std::filesystem::permissions(directory, std::filesystem::perms::owner_all);
         const auto    temporary = directory / destination.filename();
         std::ofstream stream{};
         stream.exceptions(std::ios::badbit | std::ios::failbit);
         stream.open(temporary, std::ios::out | std::ios::binary);
+        const auto status = std::filesystem::status(destination);
+        if (std::filesystem::exists(status))
+        {
+            std::filesystem::permissions(temporary, status.permissions());
+        }
         writer(stream);
         stream.flush();
         stream.close();
