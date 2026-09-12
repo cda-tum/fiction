@@ -19,6 +19,8 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/apply_gate_library.hpp>
+#include <fiction/technology/fcn/cell_ports.hpp>
+#include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/qca/sim7_mol_library.hpp>

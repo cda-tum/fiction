@@ -135,7 +135,7 @@ void cartesian_layout(nanobind::module_& m, const char* name)
             [](const Lyt& lyt)
             {
                 std::vector<fiction::coordinate<Lyt>> coords{};
-                coords.reserve(lyt.area() * (lyt.z() + 1));
+                coords.reserve(lyt.area() * (static_cast<uint64_t>(lyt.z()) + 1u));
                 lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); });
                 return coords;
             },

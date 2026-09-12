@@ -18,22 +18,17 @@
 #pragma once
 
 #include "fiction/networks/io/dot_drawers.hpp"
-#include "fiction/networks/network_utils.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
-#include <kitty/print.hpp>
-#include <mockturtle/io/write_dot.hpp>
 #include <mockturtle/traits.hpp>
 
-#include <algorithm>
 #include <array>
 #include <cctype>
 #include <cstdint>
-#include <fstream>
 #include <ostream>
 #include <sstream>
 #include <string>

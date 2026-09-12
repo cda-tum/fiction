@@ -32,7 +32,6 @@
 
 #include <cassert>
 #include <ctime>
-#include <fstream>
 #include <ostream>
 #include <sstream>
 #include <string>

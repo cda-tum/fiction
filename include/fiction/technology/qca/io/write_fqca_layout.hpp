@@ -23,7 +23,6 @@
 
 #include <fmt/format.h>
 
-#include <fstream>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>

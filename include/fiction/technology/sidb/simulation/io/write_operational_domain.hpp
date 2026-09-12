@@ -23,7 +23,6 @@
 #include "fiction/utils/io/csv_writer.hpp"
 
 #include <cstdint>
-#include <fstream>
 #include <ostream>
 #include <stdexcept>
 #include <string>

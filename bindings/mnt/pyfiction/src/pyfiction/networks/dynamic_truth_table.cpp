@@ -25,6 +25,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner)

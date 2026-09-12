@@ -19,7 +19,6 @@
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
-#include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
@@ -30,12 +29,9 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
-#include <cstdint>
 #include <ostream>
-#include <sstream>
 #include <string>
 #include <string_view>
-#include <vector>
 
 namespace fiction::networks::io
 {

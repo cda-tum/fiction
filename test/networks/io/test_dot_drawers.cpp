@@ -30,9 +30,11 @@
 
 #include <fmt/format.h>
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/traits.hpp>
 
 #include <filesystem>
 #include <fstream>
+#include <ios>
 #include <iterator>
 #include <random>
 #include <sstream>

@@ -16,14 +16,11 @@
 
 #include "pyfiction/types.hpp"
 
-#include <fiction/networks/name_utils.hpp>
-
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 
 #include <cassert>
-#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -31,9 +28,9 @@
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>     // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner): Required by nanobind return-value conversion.
 #include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)

@@ -21,11 +21,13 @@
 
 #include <fiction/synthesis/technology_mapping.hpp>
 
+#include <mockturtle/algorithms/emap.hpp>
+
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/chrono.h>
+#include <nanobind/stl/chrono.h>      // NOLINT(misc-include-cleaner): Required by nanobind return-value conversion.
 #include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string.h>
-#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner): Required by nanobind return-value conversion.
+#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {

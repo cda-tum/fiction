@@ -25,7 +25,6 @@
 
 #include <cmath>
 #include <cstdint>
-#include <fstream>
 #include <ostream>
 #include <string>
 #include <string_view>
@@ -471,8 +470,8 @@ class write_qca_layout_impl
 
         // calculate cell position
         const qcad::cell_pos pos{
-            static_cast<float>((c.x * static_cast<decltype(c.x)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET),
-            static_cast<float>((c.y * static_cast<decltype(c.y)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET)};
+            .x = static_cast<float>((c.x * static_cast<decltype(c.x)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET),
+            .y = static_cast<float>((c.y * static_cast<decltype(c.y)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET)};
 
         // write cell position
         os << qcad::X_POS << std::to_string(pos.x) << '\n';

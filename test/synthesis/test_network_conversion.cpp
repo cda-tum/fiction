@@ -40,7 +40,7 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/views/names_view.hpp>
 
-#include <cstdint>
+#include <array>
 #include <vector>
 
 using namespace fiction;
@@ -251,12 +251,14 @@ TEST_CASE("Convert every two- and three-input function without losing the interf
         {
             mockturtle::names_view<technology_network> source{};
             std::vector<technology_network::signal>    inputs{};
+            inputs.reserve(variables);
             for (auto index = 0u; index < variables; ++index)
             {
                 inputs.push_back(source.create_pi(std::string(1, static_cast<char>('a' + index))));
             }
             kitty::dynamic_truth_table expected{variables};
-            kitty::create_from_words(expected, &function, &function + 1);
+            const std::array           words{function};
+            kitty::create_from_words(expected, words.begin(), words.end());
             const auto output = source.create_node(inputs, expected);
             source.create_po(output, "f");
             source.create_po(source.create_not(output), "g");
