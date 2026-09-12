@@ -13,12 +13,12 @@
  * @brief The parameter region in which an SiDB layout stays operational.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author GPT-6 via Codex
  */
 
 #pragma once
 
 #include "fiction/technology/sidb/charge_distribution.hpp"
-#include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/critical_temperature.hpp"
