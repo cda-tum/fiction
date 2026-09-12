@@ -151,24 +151,34 @@ def test_script_depth_limit(shell: Shell, tmp_path_factory: pytest.TempPathFacto
     assert "deeper than" in output
 
 
-def test_progress_shows_on_terminal(resource: Callable[[str], str], monkeypatch: pytest.MonkeyPatch) -> None:
-    """On a terminal, a running command shows its spinner and the tasks its algorithm reports."""
+@pytest.mark.parametrize("topology", ["cartesian", "even_row_hex", "odd_row_hex", "odd_column_hex", "even_column_hex"])
+@pytest.mark.parametrize("quiet", [False, True])
+def test_progress_respects_quiet_on_terminal(
+    resource: Callable[[str], str], monkeypatch: pytest.MonkeyPatch, topology: str, *, quiet: bool
+) -> None:
+    """Terminal progress respects quiet mode for every orthogonal topology."""
     monkeypatch.setenv("TERM", "xterm")
     buffer = io.StringIO()
     console = Console(file=buffer, width=100, force_terminal=True, color_system=None)
     session = Session(console=console)
+    session.quiet = quiet
     try:
-        assert session.execute(f"read {resource('mux21.v')}; ortho")
+        assert session.execute(f'read "{resource("mux21.v")}"; ortho --topology {topology}')
     finally:
         session.close()
-    assert "ortho" in buffer.getvalue()
-    assert "placing gates" in buffer.getvalue()
+    if quiet:
+        assert not buffer.getvalue()
+    else:
+        assert "ortho" in buffer.getvalue()
+        assert "placing gates" in buffer.getvalue()
     assert session.report_progress is ignore_progress
 
 
 def test_progress_is_silent_without_terminal(mux21_shell: Shell) -> None:
     """Without a terminal, the progress display writes nothing."""
-    assert not mux21_shell.ok("ortho")
+    output = mux21_shell.ok("ortho")
+    assert "placing gates" not in output
+    assert "completed" in output
 
 
 def test_progress_resets_a_restarted_task(monkeypatch: pytest.MonkeyPatch) -> None:

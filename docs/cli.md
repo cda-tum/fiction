@@ -41,8 +41,8 @@ the shell itself keeps running. Quoted `;` and `#` are literal characters; Windo
 `--quiet` suppresses notices while retaining requested command results. `NO_COLOR` disables drawing colors.
 
 While a command runs, the shell shows a spinner with the elapsed time, and the algorithms that report their
-progress add a bar per task below it. The display disappears when the command finishes, and it is not rendered
-at all when the output is piped into a file or another program.
+progress add a bar per task below it. The display disappears when the command finishes. Quiet mode and
+nonterminal output disable the display.
 
 ## Stores
 

@@ -508,8 +508,8 @@ class Session:
     def progress(self, label: str) -> Iterator[ProgressCallback]:
         """Show a spinner for a running command and a bar for every task its algorithms report.
 
-        The display is transient and only rendered on a terminal; when the output is piped or
-        recorded, no display is started and the reports are dropped. While the context is open,
+        The display is transient. Quiet mode and nonterminal output disable the display and
+        discard the reports. While the context is open,
         :attr:`report_progress` is the callback that feeds the bars, so commands hand it to the
         algorithms they run.
 
