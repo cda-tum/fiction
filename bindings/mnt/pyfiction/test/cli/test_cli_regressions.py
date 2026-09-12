@@ -398,6 +398,7 @@ def test_quiet_retains_requested_results(mux21_shell: Shell, command: str, expec
     assert expected in mux21_shell.ok(command)
 
 
+@pytest.mark.skipif(not hasattr(fiction, "exact_cartesian"), reason="pyfiction was built without Z3")
 def test_failed_search_preserves_store_and_statistics(mux21_shell: Shell) -> None:
     before = len(mux21_shell.session.gate_layouts)
     output = mux21_shell.fails("exact --fixed-size 1 --timeout 0.0001")
@@ -533,6 +534,8 @@ def test_completion_respects_path_context(tmp_path: Path) -> None:
 
 @pytest.mark.parametrize("library", ["qca-one", "sim7-mol", "bestagon", "topolinano"])
 def test_complete_design_and_export_workflows(shell: Shell, tmp_path: Path, library: str) -> None:
+    if library == "topolinano" and not hasattr(fiction, "exact_cartesian"):
+        pytest.skip("pyfiction was built without Z3")
     source = tmp_path / "inverter.v"
     source.write_text("module top(a, f);\ninput a;\noutput f;\nassign f = ~a;\nendmodule\n", encoding="utf-8")
     shell.ok(f'read "{source}"')
@@ -626,6 +629,7 @@ def test_interrupted_command_is_logged_and_session_continues(shell: Shell, monke
 
 
 @pytest.mark.parametrize("topology", [name for name in FGL_READERS if name not in {"shifted_cartesian", "hexagonal"}])
+@pytest.mark.skipif(not hasattr(fiction, "exact_cartesian"), reason="pyfiction was built without Z3")
 def test_exact_topologies_preserve_function(shell: Shell, tmp_path: Path, topology: str) -> None:
     source = tmp_path / "wire.v"
     source.write_text("module top(a,f);\ninput a;\noutput f;\nassign f = a;\nendmodule\n", encoding="utf-8")
