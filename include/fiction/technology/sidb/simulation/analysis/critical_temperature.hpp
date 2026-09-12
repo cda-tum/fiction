@@ -14,7 +14,6 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
- * @author GPT-6 via Codex
  */
 
 #pragma once

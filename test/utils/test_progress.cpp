@@ -12,7 +12,6 @@
  * @file
  * @brief Tests for `fiction/utils/progress.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author GPT-6 via Codex
  */
 
 #include <catch2/catch_test_macros.hpp>
