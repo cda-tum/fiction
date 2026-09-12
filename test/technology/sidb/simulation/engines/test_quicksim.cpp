@@ -28,8 +28,10 @@
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/technology/sidb/technology.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <chrono>
 #include <optional>
 #include <stdexcept>
 
@@ -40,6 +42,26 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::utils::math;
+
+TEST_CASE("QuickSim joins its workers before reporting the caller deadline", "[quicksim]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+    quicksim_params params{.iteration_steps = 1'000'000, .number_threads = 2, .timeout = 1000};
+
+    SECTION("Already expired")
+    {
+        params.deadline = std::chrono::steady_clock::now();
+    }
+    SECTION("Expires while workers search")
+    {
+        params.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{1};
+    }
+
+    CHECK_THROWS_AS(quicksim(lyt, params), utils::timeout_error);
+}
 
 /**
  * @brief Returns the result contained in a successful QuickSim invocation.

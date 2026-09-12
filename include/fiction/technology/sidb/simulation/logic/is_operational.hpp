@@ -39,6 +39,7 @@
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
 #include <fmt/format.h>
@@ -47,6 +48,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -155,10 +157,35 @@ struct is_operational_params
      */
     operational_analysis_strategy strategy_to_analyze_operational_status{
         operational_analysis_strategy::SIMULATION_ONLY};
+    /**
+     * Shared caller deadline for pruning and simulation. `time_point::max()` leaves the check unlimited.
+     * Finite deadlines support QuickExact, ExGS, and QuickSim; ClusterComplete is unsupported.
+     */
+    std::chrono::steady_clock::time_point deadline{std::chrono::steady_clock::time_point::max()};
 };
 
 namespace detail
 {
+
+/**
+ * Validates the shared deadline before setting up an operational check.
+ *
+ * @param params Operational parameters.
+ * @return The validated parameters.
+ * @throws utils::timeout_error if the deadline expires.
+ * @throws std::invalid_argument if ClusterComplete is selected with a finite deadline.
+ */
+[[nodiscard]] inline const is_operational_params& checked_parameters(const is_operational_params& params)
+{
+    utils::check_deadline(params.deadline);
+#if (FICTION_ALGLIB_ENABLED)
+    if (params.deadline != std::chrono::steady_clock::time_point::max() && params.sim_engine == engine::CLUSTERCOMPLETE)
+    {
+        throw std::invalid_argument("ClusterComplete does not support a shared deadline");
+    }
+#endif  // FICTION_ALGLIB_ENABLED
+    return params;
+}
 
 /**
  * Reasons why a layout is not operational.
@@ -223,7 +250,7 @@ class is_operational_impl
                         const is_operational_params& params) :
             sidb_layout{lyt},
             truth_table{spec},
-            parameters{params},
+            parameters{checked_parameters(params)},
             output_bdl_pairs{detect_bdl_pairs(lyt, dot_tag::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             bii{lyt, params.input_bdl_iterator_params},
@@ -248,7 +275,7 @@ class is_operational_impl
                         const std::vector<bdl_wire>& output_wires, const bool initialize_bii = true) :
             sidb_layout{lyt},
             truth_table{spec},
-            parameters{params},
+            parameters{checked_parameters(params)},
             output_bdl_pairs{detect_bdl_pairs(lyt, dot_tag::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             bii{initialize_bii ? bdl_input_iterator{lyt, params.input_bdl_iterator_params, input_wires} :
@@ -271,7 +298,7 @@ class is_operational_impl
                         const std::vector<bdl_wire>& output_wires, layout c_lyt) :
             sidb_layout{lyt},
             truth_table{spec},
-            parameters{params},
+            parameters{checked_parameters(params)},
             output_bdl_pairs{detect_bdl_pairs(lyt, dot_tag::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             bii{lyt, params.input_bdl_iterator_params, input_wires},
@@ -291,7 +318,7 @@ class is_operational_impl
                         const is_operational_params& params, layout c_lyt) :
             sidb_layout{lyt},
             truth_table{spec},
-            parameters{params},
+            parameters{checked_parameters(params)},
             output_bdl_pairs{detect_bdl_pairs(lyt, dot_tag::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             bii{lyt, params.input_bdl_iterator_params},
@@ -316,7 +343,7 @@ class is_operational_impl
                         const std::vector<bdl_wire>& input_wires, const std::vector<bdl_wire>& output_wires,
                         layout c_lyt) :
             truth_table{spec},
-            parameters{params},
+            parameters{checked_parameters(params)},
             output_bdl_pairs{detect_bdl_pairs(input_pattern_lyts.front(), dot_tag::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             // the input pattern layouts make the iterator redundant
@@ -335,6 +362,7 @@ class is_operational_impl
      */
     [[nodiscard]] std::optional<layout_invalidity_reason> is_layout_invalid(const uint64_t input_pattern)
     {
+        utils::check_deadline(parameters.deadline);
         if (!has_valid_bdl_configuration())
         {
             return layout_invalidity_reason::IO_INSTABILITY;
@@ -344,8 +372,11 @@ class is_operational_impl
 
         const potential_landscape land{lyt_with_input_pattern, parameters.sim_params};
 
+        utils::check_deadline(parameters.deadline);
+
         if (parameters.sim_params.base == 2 && analysis::can_positive_charges_occur(land))
         {
+            utils::check_deadline(parameters.deadline);
             return layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES;
         }
 
@@ -365,6 +396,7 @@ class is_operational_impl
             return std::nullopt;
         }
 
+        utils::check_deadline(parameters.deadline);
         return layout_invalidity_reason::PHYSICAL_INFEASIBILITY;
     }
     /**
@@ -374,6 +406,7 @@ class is_operational_impl
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason> run()
     {
+        utils::check_deadline(parameters.deadline);
         if (parameters.sim_engine == engine::QUICKSIM && sidb_layout.num_charged_defects() > 0)
         {
             throw std::invalid_argument("QuickSim does not support charged defects");
@@ -387,6 +420,7 @@ class is_operational_impl
         {
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
+                utils::check_deadline(parameters.deadline);
                 if (is_layout_invalid(i))
                 {
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
@@ -400,6 +434,7 @@ class is_operational_impl
                 is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
             canvas_filtering_applicable)
         {
+            utils::check_deadline(parameters.deadline);
             return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
         }
 
@@ -411,12 +446,14 @@ class is_operational_impl
         {
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
+                utils::check_deadline(parameters.deadline);
                 const auto& lyt_with_input_pattern = layout_with_input_pattern(i);
 
                 // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
                 if (parameters.sim_params.base == 2 &&
                     analysis::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params))
                 {
+                    utils::check_deadline(parameters.deadline);
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
                 }
 
@@ -432,7 +469,10 @@ class is_operational_impl
 
                 for (const auto& gs : simulation_results.groundstates())
                 {
+                    utils::check_deadline(parameters.deadline);
                     const auto [op_status, non_op_reason] = verify_logic_match_of_cd(gs, i);
+
+                    utils::check_deadline(parameters.deadline);
 
                     if (op_status == operational_status::NON_OPERATIONAL &&
                         non_op_reason == non_operationality_reason::LOGIC_MISMATCH)
@@ -449,6 +489,7 @@ class is_operational_impl
             }
         }
 
+        utils::check_deadline(parameters.deadline);
         return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
     }
     /**
@@ -515,12 +556,14 @@ class is_operational_impl
     [[nodiscard]] std::vector<std::pair<uint64_t, non_operationality_reason>>
     determine_non_operational_input_patterns_and_non_operationality_reason()
     {
+        utils::check_deadline(parameters.deadline);
         std::vector<std::pair<uint64_t, non_operationality_reason>> non_operational{};
 
         if (!has_valid_bdl_configuration())
         {
             for (uint64_t i = 0; i < truth_table.front().num_bits(); ++i)
             {
+                utils::check_deadline(parameters.deadline);
                 non_operational.emplace_back(i, non_operationality_reason::LOGIC_MISMATCH);
             }
 
@@ -529,6 +572,7 @@ class is_operational_impl
 
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
         {
+            utils::check_deadline(parameters.deadline);
             ++simulator_invocations;
 
             const auto& lyt_with_input_pattern = layout_with_input_pattern(i);
@@ -549,6 +593,7 @@ class is_operational_impl
 
             for (const auto& gs : simulation_results.groundstates())
             {
+                utils::check_deadline(parameters.deadline);
                 const auto [op_status, non_op_reason] = verify_logic_match_of_cd(gs, i);
 
                 if (op_status == operational_status::NON_OPERATIONAL)
@@ -558,6 +603,7 @@ class is_operational_impl
             }
         }
 
+        utils::check_deadline(parameters.deadline);
         return non_operational;
     }
     /**
@@ -579,6 +625,7 @@ class is_operational_impl
      */
     [[nodiscard]] std::optional<double> is_physical_validity_feasible(simulation::detail::simulation_state& state)
     {
+        utils::check_deadline(parameters.deadline);
         assert(!canvas_lyt.is_empty() && "The canvas layout must not be empty.");
 
         const auto& lyt = state.landscape().get_layout();
@@ -606,6 +653,7 @@ class is_operational_impl
 
         for (uint64_t canvas_index = 0;; ++canvas_index)
         {
+            utils::check_deadline(parameters.deadline);
             for (std::size_t j = 0; j < num_free; ++j)
             {
                 state.assign_charge_state_by_index(canvas[j + 1],
@@ -634,6 +682,7 @@ class is_operational_impl
             }
         }
 
+        utils::check_deadline(parameters.deadline);
         if (std::isinf(min_energy))
         {
             return std::nullopt;
@@ -741,6 +790,7 @@ class is_operational_impl
         {
             for (uint64_t output_wire_index = 0; output_wire_index < max_output_pattern_index; ++output_wire_index)
             {
+                utils::check_deadline(parameters.deadline);
                 if (output_wire_index == logical_correct_output_pattern && kink_states_input == input_pattern)
                 {
                     continue;
@@ -758,6 +808,7 @@ class is_operational_impl
             }
         }
 
+        utils::check_deadline(parameters.deadline);
         return false;
     }
 
@@ -864,15 +915,18 @@ class is_operational_impl
      */
     [[nodiscard]] result physical_simulation_of_layout(const layout& lyt_with_input_pattern) const
     {
+        utils::check_deadline(parameters.deadline);
         if (parameters.sim_engine == engine::EXGS)
         {
-            return engines::exhaustive_ground_state_simulation(lyt_with_input_pattern, parameters.sim_params);
+            return engines::exhaustive_ground_state_simulation(lyt_with_input_pattern, parameters.sim_params,
+                                                               parameters.deadline);
         }
         if (parameters.sim_engine == engine::QUICKEXACT)
         {
             const engines::quickexact_params qe_params{
                 .sim_params            = parameters.sim_params,
-                .base_number_detection = engines::quickexact_params::automatic_base_number_detection::OFF};
+                .base_number_detection = engines::quickexact_params::automatic_base_number_detection::OFF,
+                .deadline              = parameters.deadline};
 
             return engines::quickexact(lyt_with_input_pattern, qe_params);
         }
@@ -890,7 +944,8 @@ class is_operational_impl
 
             const engines::quicksim_params qs_params{.sim_params      = parameters.sim_params,
                                                      .iteration_steps = 500,
-                                                     .alpha           = 0.6};
+                                                     .alpha           = 0.6,
+                                                     .deadline        = parameters.deadline};
 
             if (const auto qs_result = engines::quicksim(lyt_with_input_pattern, qs_params); qs_result.has_value())
             {

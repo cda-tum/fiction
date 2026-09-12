@@ -34,7 +34,9 @@
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 
+#include <chrono>
 #include <cstdint>
 #include <optional>
 #include <set>
@@ -47,6 +49,25 @@ using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
+
+TEST_CASE("Operational checks honor a shared caller deadline", "[is-operational]")
+{
+    const auto lyt = blueprints::siqad_or_gate();
+
+    for (const auto sim_engine : {engine::QUICKEXACT, engine::EXGS, engine::QUICKSIM})
+    {
+        const is_operational_params params{.sim_params = simulation_parameters{2, -0.32},
+                                           .sim_engine = sim_engine,
+                                           .deadline   = std::chrono::steady_clock::now()};
+        CHECK_THROWS_AS(is_operational(lyt, {create_or_tt()}, params), utils::timeout_error);
+    }
+
+#if (FICTION_ALGLIB_ENABLED)
+    const is_operational_params params{.sim_engine = engine::CLUSTERCOMPLETE,
+                                       .deadline   = std::chrono::steady_clock::now() + std::chrono::hours{1}};
+    CHECK_THROWS_AS(is_operational(lyt, {create_or_tt()}, params), std::invalid_argument);
+#endif  // FICTION_ALGLIB_ENABLED
+}
 
 TEST_CASE("SiQAD OR gate", "[is-operational]")
 {

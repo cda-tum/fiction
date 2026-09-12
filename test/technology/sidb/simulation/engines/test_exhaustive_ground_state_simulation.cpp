@@ -28,13 +28,36 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/technology.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
+
+#include <chrono>
+#include <cstdint>
 
 using namespace fiction;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::utils::math;
+
+TEST_CASE("ExGS rejects incomplete simulations after the caller deadline", "[exhaustive-ground-state-simulation]")
+{
+    layout lyt{};
+    auto   deadline = std::chrono::steady_clock::now();
+
+    SECTION("Already expired") {}
+    SECTION("Expires while enumerating")
+    {
+        for (int64_t i = 0; i < 20; ++i)
+        {
+            lyt.assign_sidb({i, 0, 0}, dot_tag::NORMAL);
+        }
+        deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{1};
+    }
+
+    CHECK_THROWS_AS(exhaustive_ground_state_simulation(lyt, simulation_parameters{2, -0.32}, deadline),
+                    utils::timeout_error);
+}
 
 TEST_CASE("Empty layout ExGS simulation", "[exhaustive-ground-state-simulation]")
 {
