@@ -16,12 +16,14 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #if (FICTION_Z3_SOLVER)
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -794,12 +796,12 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
 TEST_CASE("Exact physical design timeout", "[exact]")
 {
     auto timeout_config    = use(crossings(configuration()));
-    timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
+    timeout_config.timeout = 1u;  // allow one millisecond to find a solution
 
     const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
     const auto layout     = exact<cart_gate_clk_lyt>(half_adder, timeout_config);
 
-    // since a half adder cannot be synthesized in just one second, layout should not have a value
+    // The one-millisecond budget is insufficient for placing and routing the half adder.
     CHECK(!layout.has_value());
 }
 
@@ -808,7 +810,16 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");
 
-    const auto layout = exact<cart_gate_clk_lyt>(maj, res(configuration()));
+    auto params = res(configuration());
+    SECTION("single-threaded")
+    {
+        params.num_threads = 1;
+    }
+    SECTION("multi-threaded")
+    {
+        params.num_threads = 2;
+    }
+    const auto layout = exact<cart_gate_clk_lyt>(maj, params);
 
     REQUIRE(layout.has_value());
 
@@ -824,6 +835,42 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
 
         // PO names
         CHECK(layout->get_output_name(0) == "f");
+    }
+}
+
+TEST_CASE("Exact physical design reports progress", "[exact]")
+{
+    const auto ntk = blueprints::and_or_network<technology_network>();
+
+    auto params = twoddwave(configuration());
+
+    SECTION("single-threaded")
+    {
+        params.num_threads = 1;
+    }
+    SECTION("multi-threaded")
+    {
+        params.num_threads = 2;
+    }
+
+    // Repeated starts cover workers finding a layout while another worker initializes its context.
+    for (unsigned trial = 0; trial < (params.num_threads > 1 ? 8u : 1u); ++trial)
+    {
+        CAPTURE(trial);
+        progress_recorder rec{};
+        params.on_progress = rec.callback();
+
+        exact_physical_design_stats stats{};
+
+        const auto layout = exact<cart_gate_clk_lyt>(ntk, params, &stats);
+
+        REQUIRE(layout.has_value());
+        // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the access
+        check_eq(ntk, *layout);
+
+        // the number of aspect ratios is unknown in advance
+        CHECK(rec.is_consistent("aspect ratios"));
+        CHECK(rec.final_count("aspect ratios") == stats.num_aspect_ratios);
     }
 }
 

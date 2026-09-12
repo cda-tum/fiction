@@ -20,6 +20,8 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "utils/progress_recorder.hpp"
+
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
@@ -64,10 +66,10 @@ TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to-solution
 
     SECTION("layout with no SiDB placed")
     {
-        constexpr simulation_parameters   params{2, -0.30};
-        const quicksim_params             qs_params{.sim_params = params};
-        time_to_solution_stats            tts_stat_quickexact{};
-        constexpr time_to_solution_params tts_params_quickexact{.engine = exact_engine::QUICKEXACT};
+        constexpr simulation_parameters params{2, -0.30};
+        const quicksim_params           qs_params{.sim_params = params};
+        time_to_solution_stats          tts_stat_quickexact{};
+        const time_to_solution_params   tts_params_quickexact{.engine = exact_engine::QUICKEXACT};
         time_to_solution(lyt, qs_params, tts_params_quickexact, &tts_stat_quickexact);
 
         CHECK(tts_stat_quickexact.algorithm == "QuickExact");
@@ -77,8 +79,8 @@ TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to-solution
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        time_to_solution_stats            tts_stat_clustercomplete{};
-        constexpr time_to_solution_params tts_params_clustercomplete{.engine = exact_engine::CLUSTERCOMPLETE};
+        time_to_solution_stats        tts_stat_clustercomplete{};
+        const time_to_solution_params tts_params_clustercomplete{.engine = exact_engine::CLUSTERCOMPLETE};
         time_to_solution(lyt, qs_params, tts_params_clustercomplete, &tts_stat_clustercomplete);
 
         CHECK(tts_stat_clustercomplete.algorithm == "ClusterComplete");
@@ -110,8 +112,8 @@ TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to-solution
         constexpr simulation_parameters params{2, -0.30};
         const quicksim_params           qs_params{.sim_params = params};
 
-        constexpr time_to_solution_params tts_params_exgs{.engine = exact_engine::EXGS};
-        time_to_solution_stats            tts_stat_exgs{};
+        const time_to_solution_params tts_params_exgs{.engine = exact_engine::EXGS};
+        time_to_solution_stats        tts_stat_exgs{};
         time_to_solution(lyt, qs_params, tts_params_exgs, &tts_stat_exgs);
 
         CHECK(tts_stat_exgs.acc == 100.0);
@@ -137,8 +139,8 @@ TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to-solution
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        time_to_solution_stats            tts_stat_clustercomplete{};
-        constexpr time_to_solution_params tts_params_clustercomplete{.engine = exact_engine::CLUSTERCOMPLETE};
+        time_to_solution_stats        tts_stat_clustercomplete{};
+        const time_to_solution_params tts_params_clustercomplete{.engine = exact_engine::CLUSTERCOMPLETE};
         time_to_solution(lyt, qs_params, tts_params_clustercomplete, &tts_stat_clustercomplete);
 
         REQUIRE(tts_stat_clustercomplete.acc == 100);
@@ -273,4 +275,26 @@ TEST_CASE("Time-to-solution averages successful and failed runtimes", "[time-to-
     CHECK_THAT(stats.acc, Catch::Matchers::WithinAbs(50.0, 1e-12));
     CHECK_THAT(stats.mean_single_runtime, Catch::Matchers::WithinAbs(4.0, 1e-12));
     CHECK_THAT(stats.time_to_solution, Catch::Matchers::WithinAbs(4.0 * std::log(0.003) / std::log(0.5), 1e-12));
+}
+
+TEST_CASE("Time-to-solution reports progress", "[time-to-solution]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+
+    progress_recorder rec{};
+
+    const quicksim_params   qs_params{.sim_params = simulation_parameters{2, -0.32}};
+    time_to_solution_params tts_params{.engine = exact_engine::QUICKEXACT, .repetitions = 5};
+    tts_params.on_progress = rec.callback();
+
+    time_to_solution_stats stats{};
+    time_to_solution(lyt, qs_params, tts_params, &stats);
+
+    CHECK(stats.algorithm == "QuickExact");
+
+    CHECK(rec.is_consistent("repetitions"));
+    CHECK(rec.final_count("repetitions") == 5);
 }

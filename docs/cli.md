@@ -40,6 +40,10 @@ words: `tt -e "[(ab)(!ac)]"`. When a command fails, the shell prints the reason 
 the shell itself keeps running. Quoted `;` and `#` are literal characters; Windows backslashes stay intact.
 `--quiet` suppresses notices while retaining requested command results. `NO_COLOR` disables drawing colors.
 
+While a command runs, the shell shows a spinner with the elapsed time, and the algorithms that report their
+progress add a bar per task below it. The display disappears when the command finishes. Quiet mode and
+nonterminal output disable the display.
+
 ## Stores
 
 Stores hold what the shell has read, created, or designed. There are four of them, each selected by a flag:

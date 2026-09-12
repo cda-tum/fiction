@@ -29,6 +29,7 @@
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/utils/math/gray_code_iterator.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -79,6 +80,10 @@ struct quickexact_params
      * Global external electrostatic potential (unit: V). Value is applied on each SiDB.
      */
     double global_potential = 0;
+    /**
+     * Callback that receives the number of enumerated charge configurations.
+     */
+    utils::progress_callback on_progress{};
 };
 
 namespace detail
@@ -307,6 +312,9 @@ class quickexact_impl
 
         fiction::utils::math::gray_code_iterator gci{0};
 
+        utils::progress_reporter progress{params.on_progress, "charge configurations",
+                                          reduced_state.max_charge_index() + 1};
+
         for (gci = 0; gci <= reduced_state.max_charge_index(); ++gci)
         {
             reduced_state.assign_charge_index_by_gray_code(
@@ -320,6 +328,8 @@ class quickexact_impl
             {
                 record(reduced_state);
             }
+
+            progress.advance();
         }
     }
     /**
@@ -336,6 +346,10 @@ class quickexact_impl
         // charged (important to speed up the simulation).
         [[maybe_unused]] const auto required = reduced_state.is_three_state_simulation_required();
         reduced_state.update_after_charge_change(simulation::detail::dependent_dot_mode::VARIABLE);
+
+        // one step per charge index of the main layout; each step enumerates the whole sub-layout
+        utils::progress_reporter progress{params.on_progress, "charge configurations",
+                                          reduced_state.max_charge_index() + 1};
 
         while (reduced_state.charge_index() < reduced_state.max_charge_index())
         {
@@ -364,6 +378,8 @@ class quickexact_impl
 
             reduced_state.increase_charge_index_by_one(simulation::detail::dependent_dot_mode::VARIABLE,
                                                        simulation::detail::energy_calculation::KEEP_OLD_ENERGY_VALUE);
+
+            progress.advance();
         }
 
         // charge configurations of the sublayout are iterated
@@ -384,6 +400,8 @@ class quickexact_impl
         {
             record(reduced_state);
         }
+
+        progress.advance();
     }
 };
 

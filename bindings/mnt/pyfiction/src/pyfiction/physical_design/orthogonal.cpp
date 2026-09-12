@@ -31,6 +31,7 @@
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
@@ -50,7 +51,9 @@ void orthogonal(nanobind::module_& m)
         .def(py::init<>(), "Default constructor.")
         .def_rw("number_of_clock_phases",
                 &fiction::physical_design::orthogonal_physical_design_params::number_of_clock_phases,
-                DOC(fiction_physical_design_orthogonal_physical_design_params_number_of_clock_phases));
+                DOC(fiction_physical_design_orthogonal_physical_design_params_number_of_clock_phases))
+        .def_rw("on_progress", &fiction::physical_design::orthogonal_physical_design_params::on_progress,
+                DOC(fiction_physical_design_orthogonal_physical_design_params_on_progress));
 
     py::class_<fiction::physical_design::orthogonal_physical_design_stats>(
         m, "orthogonal_stats", DOC(fiction_physical_design_orthogonal_physical_design_stats))
@@ -81,21 +84,26 @@ void orthogonal(nanobind::module_& m)
 
     m.def("orthogonal", &fiction::physical_design::orthogonal<py_cartesian_gate_layout, py_logic_network>,
           py::arg("network"), py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
-          py::arg("statistics") = nullptr, DOC(fiction_physical_design_orthogonal));
+          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          DOC(fiction_physical_design_orthogonal));
     m.def("orthogonal_hexagonal", &fiction::physical_design::orthogonal<py_hexagonal_gate_layout, py_logic_network>,
           py::arg("network"), py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
-          py::arg("statistics") = nullptr, DOC(fiction_physical_design_orthogonal));
+          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          DOC(fiction_physical_design_orthogonal));
     m.def("orthogonal_odd_row_hex", &fiction::physical_design::orthogonal<py_odd_row_hex_gate_layout, py_logic_network>,
           py::arg("network"), py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
-          py::arg("statistics") = nullptr, DOC(fiction_physical_design_orthogonal));
+          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          DOC(fiction_physical_design_orthogonal));
     m.def("orthogonal_odd_column_hex",
           &fiction::physical_design::orthogonal<py_odd_column_hex_gate_layout, py_logic_network>, py::arg("network"),
           py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
-          py::arg("statistics") = nullptr, DOC(fiction_physical_design_orthogonal));
+          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          DOC(fiction_physical_design_orthogonal));
     m.def("orthogonal_even_column_hex",
           &fiction::physical_design::orthogonal<py_even_column_hex_gate_layout, py_logic_network>, py::arg("network"),
           py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
-          py::arg("statistics") = nullptr, DOC(fiction_physical_design_orthogonal));
+          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          DOC(fiction_physical_design_orthogonal));
 }
 
 }  // namespace pyfiction

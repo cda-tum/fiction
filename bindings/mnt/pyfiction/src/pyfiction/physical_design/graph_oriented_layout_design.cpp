@@ -31,6 +31,7 @@
 #include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/tuple.h>          // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
@@ -100,7 +101,9 @@ void graph_oriented_layout_design(nanobind::module_& m)
                 DOC(fiction_physical_design_graph_oriented_layout_design_params_tiles_to_skip_between_pis))
         .def_rw("randomize_tiles_to_skip_between_pis",
                 &fiction::physical_design::graph_oriented_layout_design_params::randomize_tiles_to_skip_between_pis,
-                DOC(fiction_physical_design_graph_oriented_layout_design_params_randomize_tiles_to_skip_between_pis));
+                DOC(fiction_physical_design_graph_oriented_layout_design_params_randomize_tiles_to_skip_between_pis))
+        .def_rw("on_progress", &fiction::physical_design::graph_oriented_layout_design_params::on_progress,
+                DOC(fiction_physical_design_graph_oriented_layout_design_params_on_progress));
 
     py::class_<fiction::physical_design::graph_oriented_layout_design_stats>(
         m, "graph_oriented_layout_design_stats", DOC(fiction_physical_design_graph_oriented_layout_design_stats))
@@ -131,7 +134,7 @@ void graph_oriented_layout_design(nanobind::module_& m)
           &fiction::physical_design::graph_oriented_layout_design<py_cartesian_gate_layout, py_logic_network>,
           py::arg("network"), py::arg("parameters") = fiction::physical_design::graph_oriented_layout_design_params{},
           py::arg("statistics") = nullptr, py::arg("custom_cost_objective") = nullptr,
-          DOC(fiction_physical_design_graph_oriented_layout_design));
+          py::call_guard<py::gil_scoped_release>(), DOC(fiction_physical_design_graph_oriented_layout_design));
 }
 
 }  // namespace pyfiction

@@ -24,7 +24,9 @@
 #include <optional>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
@@ -47,15 +49,15 @@ void quicksim(nanobind::module_& m)
         .def_rw("number_threads", &quicksim_params::number_threads,
                 DOC(fiction_sidb_simulation_engines_quicksim_params_number_threads))
         .def_rw("timeout", &quicksim_params::timeout, DOC(fiction_sidb_simulation_engines_quicksim_params_timeout))
-
-        ;
+        .def_rw("on_progress", &quicksim_params::on_progress,
+                DOC(fiction_sidb_simulation_engines_quicksim_params_on_progress));
 
     // NOLINTNEXTLINE(misc-const-correctness)
     std::optional<fiction::sidb::simulation::result> (*const quicksim_pointer)(
         const fiction::sidb::layout&, const quicksim_params&) = &fiction::sidb::simulation::engines::quicksim;
 
     m.def("quicksim", quicksim_pointer, py::arg("lyt"), py::arg("params") = quicksim_params{},
-          DOC(fiction_sidb_simulation_engines_quicksim));
+          py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_quicksim));
 }
 
 }  // namespace pyfiction

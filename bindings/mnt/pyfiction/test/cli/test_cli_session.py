@@ -10,17 +10,22 @@
 
 from __future__ import annotations
 
+import io
 from typing import TYPE_CHECKING
 
 import pytest
+from rich.console import Console
 
 from mnt.pyfiction import orthogonal, orthogonal_stats
+from mnt.pyfiction.cli import Session
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import REGISTRY, STORE_FLAGS, Category
-from mnt.pyfiction.cli.session import stats_to_dict, tokenize
+from mnt.pyfiction.cli.session import ignore_progress, stats_to_dict, tokenize
 from mnt.pyfiction.cli.stores import Store
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from mnt.pyfiction import technology_network
 
     from .conftest import Shell
@@ -144,3 +149,57 @@ def test_script_depth_limit(shell: Shell, tmp_path_factory: pytest.TempPathFacto
     script.write_text(f"source {script}\n", encoding="utf-8")
     output = shell.fails(f"source {script}")
     assert "deeper than" in output
+
+
+@pytest.mark.parametrize("topology", ["cartesian", "even_row_hex", "odd_row_hex", "odd_column_hex", "even_column_hex"])
+@pytest.mark.parametrize("quiet", [False, True])
+def test_progress_respects_quiet_on_terminal(
+    resource: Callable[[str], str], monkeypatch: pytest.MonkeyPatch, topology: str, *, quiet: bool
+) -> None:
+    """Terminal progress respects quiet mode for every orthogonal topology."""
+    monkeypatch.setenv("TERM", "xterm")
+    buffer = io.StringIO()
+    console = Console(file=buffer, width=100, force_terminal=True, color_system=None)
+    session = Session(console=console)
+    session.quiet = quiet
+    try:
+        assert session.execute(f'read "{resource("mux21.v")}"; ortho --topology {topology}')
+    finally:
+        session.close()
+    if quiet:
+        assert not buffer.getvalue()
+    else:
+        assert "ortho" in buffer.getvalue()
+        assert "placing gates" in buffer.getvalue()
+    assert session.report_progress is ignore_progress
+
+
+def test_progress_is_silent_without_terminal(mux21_shell: Shell) -> None:
+    """Without a terminal, the progress display writes nothing."""
+    output = mux21_shell.ok("ortho")
+    assert "placing gates" not in output
+    assert "completed" in output
+
+
+def test_progress_resets_a_restarted_task(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A task whose count drops is shown from the start again instead of counting backwards."""
+    monkeypatch.setenv("TERM", "xterm")
+    buffer = io.StringIO()
+    session = Session(console=Console(file=buffer, width=100, force_terminal=True, color_system=None))
+    with session.progress("optimize") as report:
+        report("gate relocations", 0, 4)
+        report("gate relocations", 4, 4)
+        report("gate relocations", 0, 3)
+        report("gate relocations", 3, 3)
+        report("wire paths", 7, 0)
+    session.close()
+    assert "gate relocations" in buffer.getvalue()
+    assert "wire paths" in buffer.getvalue()
+
+
+def test_progress_reports_are_dropped_without_terminal(shell: Shell) -> None:
+    """Without a terminal, the callback handed to the algorithms discards the reports."""
+    with shell.session.progress("optimize") as report:
+        report("gate relocations", 0, 4)
+        report("gate relocations", 4, 4)
+    assert not shell.output

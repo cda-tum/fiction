@@ -24,8 +24,10 @@
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/pair.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -87,7 +89,9 @@ void design_gates(nanobind::module_& m)
         .def_rw("maximal_random_design_attempts", &design_gates_params::maximal_random_design_attempts,
                 DOC(fiction_sidb_generators_design_gates_params_maximal_random_design_attempts))
         .def_rw("termination_cond", &design_gates_params::termination_cond,
-                DOC(fiction_sidb_generators_design_gates_params_termination_condition));
+                DOC(fiction_sidb_generators_design_gates_params_termination_condition))
+        .def_rw("on_progress", &design_gates_params::on_progress,
+                DOC(fiction_sidb_generators_design_gates_params_on_progress));
 
     m.def(
         "design_sidb_gates",
@@ -95,7 +99,7 @@ void design_gates(nanobind::module_& m)
            design_gates_stats* stats)
         { return fiction::sidb::generators::design_gates(skeleton, spec, params, stats); },
         py::arg("skeleton"), py::arg("spec"), py::arg("params") = design_gates_params{}, py::arg("stats") = nullptr,
-        DOC(fiction_sidb_generators_design_gates));
+        py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_generators_design_gates));
 }
 
 }  // namespace pyfiction

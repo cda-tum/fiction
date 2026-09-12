@@ -24,10 +24,12 @@
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/chrono.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>     // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/chrono.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -81,7 +83,9 @@ void displacement_robustness_domain(nanobind::module_& m)
         .def_rw("dimer_policy", &displacement_robustness_domain_params::dimer_policy,
                 DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_dimer_policy))
         .def_rw("number_of_threads", &displacement_robustness_domain_params::number_of_threads,
-                DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_number_of_threads));
+                DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_number_of_threads))
+        .def_rw("on_progress", &displacement_robustness_domain_params::on_progress,
+                DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_on_progress));
 
     py::class_<displacement_robustness_domain_stats>(
         m, "displacement_robustness_domain_stats",
@@ -113,7 +117,8 @@ void displacement_robustness_domain(nanobind::module_& m)
                                                                                                 stats);
         },
         py::arg("layout"), py::arg("spec"), py::arg("params") = displacement_robustness_domain_params{},
-        py::arg("stats") = nullptr, DOC(fiction_sidb_simulation_defects_determine_displacement_robustness_domain));
+        py::arg("stats") = nullptr, py::call_guard<py::gil_scoped_release>(),
+        DOC(fiction_sidb_simulation_defects_determine_displacement_robustness_domain));
 }
 
 }  // namespace pyfiction

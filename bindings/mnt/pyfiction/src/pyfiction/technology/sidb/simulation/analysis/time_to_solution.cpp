@@ -24,10 +24,12 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
@@ -50,7 +52,9 @@ void time_to_solution(nanobind::module_& m)
         .def_rw("repetitions", &fiction::sidb::simulation::analysis::time_to_solution_params::repetitions,
                 DOC(fiction_sidb_simulation_analysis_time_to_solution_params_repetitions))
         .def_rw("confidence_level", &fiction::sidb::simulation::analysis::time_to_solution_params::confidence_level,
-                DOC(fiction_sidb_simulation_analysis_time_to_solution_params_confidence_level));
+                DOC(fiction_sidb_simulation_analysis_time_to_solution_params_confidence_level))
+        .def_rw("on_progress", &fiction::sidb::simulation::analysis::time_to_solution_params::on_progress,
+                DOC(fiction_sidb_simulation_analysis_time_to_solution_params_on_progress));
     /**
      * Statistics.
      */
@@ -93,7 +97,7 @@ void time_to_solution(nanobind::module_& m)
         { fiction::sidb::simulation::analysis::time_to_solution(lyt, qs_params, tts_params, ps); },
         py::arg("lyt"), py::arg("quicksim_params"),
         py::arg("tts_params") = fiction::sidb::simulation::analysis::time_to_solution_params{}, py::arg("ps") = nullptr,
-        DOC(fiction_sidb_simulation_analysis_time_to_solution));
+        py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_analysis_time_to_solution));
     m.def("time_to_solution_for_given_simulation_results",
           &fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results, py::arg("results_exact"),
           py::arg("results_heuristic"), py::arg("confidence_level") = 0.997, py::arg("ps") = nullptr,

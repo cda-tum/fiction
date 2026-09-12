@@ -22,6 +22,7 @@
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
 #include "fiction/utils/math/math_utils.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -116,6 +117,10 @@ struct displacement_robustness_domain_params
      * Number of threads to use.
      */
     std::size_t number_of_threads{std::max(std::size_t{std::thread::hardware_concurrency()}, std::size_t{1})};
+    /**
+     * Callback that receives the number of analyzed displaced layouts.
+     */
+    utils::progress_callback on_progress{};
 };
 
 /**
@@ -213,12 +218,18 @@ class displacement_robustness_domain_impl
         displacement_robustness_domain domain{};
         std::mutex                     mutex{};
 
-        const auto check_operational_status = [this, &mutex, &domain](const layout& lyt)
+        utils::progress_reporter progress{params.on_progress, "displaced layouts", layouts.size()};
+
+        const auto check_operational_status = [this, &mutex, &domain, &progress](const layout& lyt)
         {
             const auto op_status = logic::is_operational(lyt, truth_table, params.operational_params);
 
-            const std::scoped_lock lock{mutex};
-            update_displacement_robustness_domain(domain, lyt, op_status.first);
+            {
+                const std::scoped_lock lock{mutex};
+                update_displacement_robustness_domain(domain, lyt, op_status.first);
+            }
+
+            progress.advance();
         };
 
         const std::size_t requested_threads = std::max(params.number_of_threads, std::size_t{1});

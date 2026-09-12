@@ -31,6 +31,7 @@
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -217,6 +218,10 @@ struct graph_oriented_layout_design_params
      * Defaults to `false`.
      */
     bool randomize_tiles_to_skip_between_pis = false;
+    /**
+     * Callback that receives the number of search space graph expansions performed so far.
+     */
+    utils::progress_callback on_progress{};
 };
 
 /**
@@ -499,7 +504,7 @@ struct search_space_graph
      */
     pi_locations pi_locs = pi_locations::TOP_AND_LEFT;
     /**
-     * Random engine for this search space graph's PI spacing.
+     * Random engine for this search space graph's PI spacing. It is seeded from the parameters before use.
      */
     std::mt19937 pi_placement_rng{};  // NOLINT(cert-msc32-c, cert-msc51-cpp) Seeded before first use.
     /**
@@ -816,10 +821,13 @@ class graph_oriented_layout_design_impl
      *
      * @return The best layout found by the algorithm.
      */
-    std::optional<Lyt> run() noexcept
+    std::optional<Lyt> run()
     {
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
+
+        // the number of expansions is unbounded, so the total stays unknown
+        utils::progress_reporter progress{ps.on_progress, "expansions"};
 
         // calculate number of search space graphs
         num_search_space_graphs = calculate_num_search_space_graphs(ps.mode, ps.cost);
@@ -851,6 +859,31 @@ class graph_oriented_layout_design_impl
                 // separate mutexes for better concurrency
                 std::mutex update_best_layout_mutex{};
 
+                // the workers reference the mutex, the best layout, and the progress reporter, so every exit path
+                // of this round has to wait for them before those objects are destroyed
+                struct worker_joiner
+                {
+                    std::vector<std::future<std::optional<Lyt>>>& pool;
+
+                    explicit worker_joiner(std::vector<std::future<std::optional<Lyt>>>& p) noexcept : pool{p} {}
+
+                    worker_joiner(const worker_joiner&)            = delete;
+                    worker_joiner(worker_joiner&&)                 = delete;
+                    worker_joiner& operator=(const worker_joiner&) = delete;
+                    worker_joiner& operator=(worker_joiner&&)      = delete;
+
+                    ~worker_joiner()
+                    {
+                        for (auto& f : pool)
+                        {
+                            if (f.valid())
+                            {
+                                f.wait();
+                            }
+                        }
+                    }
+                } const join_workers{futures_pool};
+
                 // reuse futures pool to avoid allocation overhead
                 futures_pool.clear();
                 futures_pool.reserve(ssg_vec.size());
@@ -859,24 +892,27 @@ class graph_oriented_layout_design_impl
                 for (auto& ssg : ssg_vec)
                 {
                     auto* ssg_ptr = &ssg;
-                    futures_pool.emplace_back(
-                        std::async(std::launch::async,
-                                   [this, ssg_ptr, &update_best_layout_mutex, &best_lyt]() -> std::optional<Lyt>
-                                   {
-                                       if (auto result = process_ssg(*ssg_ptr); result)
-                                       {
-                                           const std::scoped_lock lock(update_best_layout_mutex);
-                                           best_lyt = std::move(*result);
-                                           networks::restore_names(ssg_ptr->network, best_lyt);
-                                           update_stats(best_lyt);
+                    futures_pool.emplace_back(std::async(
+                        std::launch::async,
+                        [this, ssg_ptr, &update_best_layout_mutex, &best_lyt, &progress]() -> std::optional<Lyt>
+                        {
+                            auto result = process_ssg(*ssg_ptr);
+                            progress.advance();
 
-                                           if (ps.return_first)
-                                           {
-                                               return best_lyt;
-                                           }
-                                       }
-                                       return std::nullopt;
-                                   }));
+                            if (result)
+                            {
+                                const std::scoped_lock lock(update_best_layout_mutex);
+                                best_lyt = std::move(*result);
+                                networks::restore_names(ssg_ptr->network, best_lyt);
+                                update_stats(best_lyt);
+
+                                if (ps.return_first)
+                                {
+                                    return best_lyt;
+                                }
+                            }
+                            return std::nullopt;
+                        }));
                 }
 
                 // check the futures for the result - poll for readiness to support return_first
@@ -929,6 +965,8 @@ class graph_oriented_layout_design_impl
                 for (auto& ssg : ssg_vec)
                 {
                     auto result = process_ssg(ssg);
+                    progress.advance();
+
                     if (result)
                     {
                         best_lyt = *result;

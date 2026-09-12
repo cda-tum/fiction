@@ -30,6 +30,7 @@
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/physical_design/wiring_reduction.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -74,6 +75,10 @@ struct post_layout_optimization_params
      * at every algorithm step and the functional correctness has to be ensured by completing essential algorithm steps.
      */
     uint64_t timeout = std::numeric_limits<uint64_t>::max();
+    /**
+     * Callback that receives the progress of the gate relocations and of the nested wiring reduction.
+     */
+    utils::progress_callback on_progress{};
 };
 
 /**
@@ -436,13 +441,15 @@ template <typename Lyt>
 class post_layout_optimization_impl
 {
   public:
-    post_layout_optimization_impl(const Lyt& lyt, const post_layout_optimization_params& p,
+    post_layout_optimization_impl(const Lyt& lyt, post_layout_optimization_params p,
                                   post_layout_optimization_stats& st) :
             plyt{lyt},
-            ps{p},
+            ps{std::move(p)},
             pst{st},
             start{std::chrono::high_resolution_clock::now()}
-    {}
+    {
+        wiring_reduction_params.on_progress = ps.on_progress;
+    }
 
     void run()
     {
@@ -463,6 +470,9 @@ class post_layout_optimization_impl
 
         // create an obstruction layout based on the original layout
         auto layout = layouts::obstruction_layout<Lyt>(plyt);
+
+        // the number of gate tiles is only known per pass; the reporter is reset for each of them
+        utils::progress_reporter progress{ps.on_progress, "gate relocations"};
 
         // initialize flags to control the optimization loop
         bool moved_at_least_one_gate = true;
@@ -520,6 +530,8 @@ class post_layout_optimization_impl
                 // sort the gate tiles using the custom comparator
                 std::ranges::sort(gate_tiles, compare_gate_tiles<Lyt>);
 
+                progress.reset(gate_tiles.size());
+
                 max_non_po = tile<Lyt>{0, 0};
                 // determine minimal border for POs
                 for (const auto& gate_tile : gate_tiles)
@@ -551,6 +563,8 @@ class post_layout_optimization_impl
                         // update the remaining timeout after each relocation attempt
                         update_timeout();
                     }
+
+                    progress.advance();
                 }
 
                 // resize the layout to fit within the new bounding box after relocations
@@ -1246,7 +1260,7 @@ class post_layout_optimization_impl
  */
 template <typename Lyt>
 void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps = {},
-                              post_layout_optimization_stats* pst = nullptr) noexcept
+                              post_layout_optimization_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
