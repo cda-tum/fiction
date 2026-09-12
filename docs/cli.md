@@ -118,7 +118,8 @@ their module `top`, as the readers expect, and a technology network is written a
 gate-level Verilog has no buffers.
 
 Writers replace destination files after successful serialization. Symbolic links to existing files remain links,
-and their targets receive the output. Dangling symbolic links are rejected.
+and their targets receive the output. Dangling links and non-regular outputs, such as named pipes or devices,
+are rejected.
 
 Without a file, `write -F FORMAT` writes `<name>.<format>` in the current directory, where `<name>` is the active
 element's name: `read c17.v; ortho; cell; write -F qca` produces `c17.qca`. On a `.dot` file, `-n` and `-g` select

@@ -175,6 +175,9 @@ def render_dot(source: Path, destination: Path) -> None:
         raise CommandError(msg)
     if destination.is_symlink():
         destination = destination.resolve(strict=True)
+    if destination.exists() and not destination.is_file():
+        msg = f"output path is not a regular file: '{destination}'"
+        raise CommandError(msg)
     with tempfile.TemporaryDirectory(prefix=".fiction-", dir=destination.parent) as directory:
         temporary = Path(directory) / destination.name
         result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- pass paths as arguments, never shell code

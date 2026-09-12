@@ -39,6 +39,11 @@ try
     const std::filesystem::path requested{filename};
     // Follow existing symbolic links; canonical rejects dangling links and cycles before writing.
     const auto destination = std::filesystem::is_symlink(requested) ? std::filesystem::canonical(requested) : requested;
+    const auto status      = std::filesystem::status(destination);
+    if (std::filesystem::exists(status) && !std::filesystem::is_regular_file(status))
+    {
+        throw std::ios_base::failure("output path is not a regular file");
+    }
     std::filesystem::path directory{};
     for (auto attempt = 0u; attempt < 16u; ++attempt)
     {
@@ -60,7 +65,6 @@ try
         std::ofstream stream{};
         stream.exceptions(std::ios::badbit | std::ios::failbit);
         stream.open(temporary, std::ios::out | std::ios::binary);
-        const auto status = std::filesystem::status(destination);
         if (std::filesystem::exists(status))
         {
             std::filesystem::permissions(temporary, status.permissions());

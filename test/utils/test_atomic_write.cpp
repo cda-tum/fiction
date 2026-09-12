@@ -27,6 +27,10 @@
 #include <string>
 #include <system_error>
 
+#ifndef _WIN32
+#include <sys/stat.h>
+#endif
+
 using namespace fiction;
 
 TEST_CASE("Failed serialization preserves the destination", "[atomic-write]")
@@ -73,6 +77,12 @@ TEST_CASE("Failed serialization preserves the destination", "[atomic-write]")
     }
 #ifndef _WIN32
     CHECK(std::filesystem::status(destination).permissions() == permissions);
+#else
+    std::filesystem::permissions(destination, std::filesystem::perms::owner_read);
+    CHECK_THROWS_AS(detail::atomic_write(destination.string(), [](std::ostream& stream) { stream << "replacement"; }),
+                    std::ios_base::failure);
+    CHECK(std::distance(std::filesystem::directory_iterator{directory}, std::filesystem::directory_iterator{}) == 1);
+    std::filesystem::permissions(destination, std::filesystem::perms::owner_all);
 #endif
     std::filesystem::remove_all(directory);
 }
@@ -122,3 +132,16 @@ TEST_CASE("Transactional output preserves symbolic links", "[atomic-write]")
     CHECK_FALSE(std::filesystem::exists(destination));
     std::filesystem::remove_all(directory);
 }
+
+#ifndef _WIN32
+TEST_CASE("Transactional output rejects named pipes", "[atomic-write]")
+{
+    const auto destination =
+        std::filesystem::temp_directory_path() / ("fiction-fifo-test-" + std::to_string(std::random_device{}()));
+    REQUIRE(::mkfifo(destination.c_str(), 0600) == 0);
+    CHECK_THROWS_AS(detail::atomic_write(destination.string(), [](std::ostream& stream) { stream << "content"; }),
+                    std::ios_base::failure);
+    CHECK(std::filesystem::is_fifo(destination));
+    std::filesystem::remove(destination);
+}
+#endif

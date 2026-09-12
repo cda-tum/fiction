@@ -479,6 +479,23 @@ def test_graphviz_failure_preserves_destination(
     assert "digraph" in destination.with_suffix(".dot").read_text(encoding="utf-8")
 
 
+@pytest.mark.parametrize("kind", ["directory", "fifo"])
+def test_graphviz_rejects_special_outputs(
+    mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str
+) -> None:
+    """Rendering rejects special output files before invoking Graphviz."""
+    monkeypatch.setattr("mnt.pyfiction.cli.drawing.shutil.which", lambda _: "dot")
+    destination = tmp_path / "output.svg"
+    if kind == "fifo":
+        if not hasattr(os, "mkfifo"):
+            pytest.skip("POSIX named pipes")
+        os.mkfifo(destination)
+    else:
+        destination.mkdir()
+    assert "not a regular file" in mux21_shell.fails(f'show -n --silent -o "{destination}"')
+    assert destination.is_fifo() if kind == "fifo" else destination.is_dir()
+
+
 def test_installed_console_script() -> None:
     binary = Path(sys.executable).parent / ("fiction.exe" if os.name == "nt" else "fiction")
     assert binary.is_file(), "install the wheel before running the console-script contract"
