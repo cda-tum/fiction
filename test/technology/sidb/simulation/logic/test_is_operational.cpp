@@ -183,13 +183,14 @@ TEST_CASE("Incomplete BDL wire set is non-operational", "[is-operational]")
 TEST_CASE("Canvas filtering rejects SiDBs outside the simulation state", "[is-operational]")
 {
     const auto                  lyt = blueprints::siqad_or_gate();
+    const std::vector<tt>       spec{create_or_tt()};
     const is_operational_params params{};
     layout                      canvas{};
     canvas.assign_sidb({1000, 0, 0}, dot_tag::LOGIC);
 
     const potential_landscape                            landscape{lyt, params.sim_params};
     sidb::simulation::detail::simulation_state           state{landscape, charge_state::NEGATIVE};
-    sidb::simulation::logic::detail::is_operational_impl implementation{lyt, {create_or_tt()}, params, canvas};
+    sidb::simulation::logic::detail::is_operational_impl implementation{lyt, spec, params, canvas};
 
     CHECK_THROWS_AS(implementation.is_physical_validity_feasible(state), std::invalid_argument);
 }
