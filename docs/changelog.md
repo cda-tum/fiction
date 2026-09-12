@@ -415,6 +415,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
   - Installed CMake packages include the `fmt` headers and their header-only compile definition.
+  - CMake installation includes ALGLIB's generated version metadata.
 
 - CLI:
 
