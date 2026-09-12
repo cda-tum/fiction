@@ -12,7 +12,6 @@
  * @file
  * @brief A throttled, thread-safe progress hook for long-running algorithms.
  * @author Marcel Walter (marcelwa)
- * @author GPT-6 via Codex
  */
 
 #pragma once

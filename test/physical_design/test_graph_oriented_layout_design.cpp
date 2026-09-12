@@ -13,7 +13,6 @@
  * @brief Tests for `fiction/physical_design/graph_oriented_layout_design.hpp`.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
- * @author GPT-6 via Codex
  */
 
 #include <catch2/catch_message.hpp>

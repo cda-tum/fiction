@@ -13,7 +13,6 @@
  * @brief Tests for `fiction/technology/sidb/simulation/logic/operational_domain.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
- * @author GPT-6 via Codex
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -2203,7 +2202,7 @@ TEST_CASE("Operational domain reports progress", "[operational-domain]")
         const auto op_domain = operational_domain_grid_search(lyt, std::vector{create_or_tt()}, params, &stats);
 
         CHECK(op_domain.size() == 15);
-        CHECK(rec.is_consistent("parameter points"));
+        REQUIRE(rec.is_consistent("parameter points"));
         CHECK(rec.final_count("parameter points") == stats.num_evaluated_parameter_combinations);
         CHECK(rec.reports_of("parameter points").back().total == 15);
     }
@@ -2212,7 +2211,7 @@ TEST_CASE("Operational domain reports progress", "[operational-domain]")
     {
         const auto op_domain = operational_domain_random_sampling(lyt, std::vector{create_or_tt()}, 5, params, &stats);
 
-        CHECK(rec.is_consistent("parameter points"));
+        REQUIRE(rec.is_consistent("parameter points"));
         CHECK(rec.final_count("parameter points") == stats.num_evaluated_parameter_combinations);
         CHECK(rec.reports_of("parameter points").back().total == op_domain.size());
     }
@@ -2222,7 +2221,7 @@ TEST_CASE("Operational domain reports progress", "[operational-domain]")
         const auto op_domain = operational_domain_flood_fill(lyt, std::vector{create_or_tt()}, 1, params, &stats);
 
         // the number of points to evaluate is unknown in advance
-        CHECK(rec.is_consistent("parameter points"));
+        REQUIRE(rec.is_consistent("parameter points"));
         CHECK(rec.final_count("parameter points") == stats.num_evaluated_parameter_combinations);
         CHECK(rec.reports_of("parameter points").back().total == 0);
     }
