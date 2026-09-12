@@ -12,10 +12,10 @@ include(FetchContent)
 # hash is what keeps the switch from weakening the supply chain.
 #
 # A version and its hash have to move together. Renovate bumps the `*_VERSION`
-# and `ALICE_REV` variables but cannot compute a hash, so a bump arrives with a
-# stale `*_SHA256` and fails the configure step with `Hash mismatch`. Run
-# `python3 scripts/update_dependency_hashes.py` to bring the hashes back in
-# line, and `--check` to verify them without writing.
+# variables but cannot compute a hash, so a bump arrives with a stale `*_SHA256`
+# and fails the configure step with `Hash mismatch`. Run `python3
+# scripts/update_dependency_hashes.py` to bring the hashes back in line, and
+# `--check` to verify them without writing.
 #
 # Each `*_URL` and `*_SHA256` default is guarded by `if(NOT DEFINED ...)` so a
 # caller can point the build at an internal mirror with `-D<DEP>_URL=...`. A
@@ -116,28 +116,34 @@ FetchContent_Declare(
   URL_HASH SHA256=${TINYXML2_SHA256})
 FetchContent_MakeAvailable(tinyxml2)
 
-# alice
-set(ALICE_REV
-    6b7f941ca44f38226f5e2545224fa1194940cd73
-    CACHE STRING "alice revision -- head of the master branch")
-if(NOT DEFINED ALICE_URL)
-  set(ALICE_URL https://github.com/marcelwa/alice/archive/${ALICE_REV}.tar.gz)
+# fmt
+#
+# mockturtle bundles fmt 11.0.2 and creates a header-only `fmt` target unless
+# one exists. That copy does not compile with clang 20, so fiction fetches a
+# release and defines the target first; mockturtle and lorina then link this
+# one.
+set(FMT_VERSION
+    12.1.0
+    CACHE STRING "fmt version")
+if(NOT DEFINED FMT_URL)
+  set(FMT_URL
+      https://github.com/fmtlib/fmt/archive/refs/tags/${FMT_VERSION}.tar.gz)
 endif()
-if(NOT DEFINED ALICE_SHA256)
-  set(ALICE_SHA256
-      38709e50db916639c4baf7b2a7e56449baa65d6b17e6616d62439853e65163d2)
+if(NOT DEFINED FMT_SHA256)
+  set(FMT_SHA256
+      ea7de4299689e12b6dddd392f9896f08fb0777ac7168897a244a6d6085043fea)
 endif()
-set(ALICE_EXAMPLES
-    OFF
-    CACHE BOOL "" FORCE)
-set(ALICE_TEST
-    OFF
-    CACHE BOOL "" FORCE)
+# `SOURCE_SUBDIR` names a directory without a CMakeLists.txt, so the archive is
+# only populated; fmt's own CMake would build a library and install rules
 FetchContent_Declare(
-  alice
-  URL ${ALICE_URL}
-  URL_HASH SHA256=${ALICE_SHA256})
-FetchContent_MakeAvailable(alice)
+  fmt
+  URL ${FMT_URL}
+  URL_HASH SHA256=${FMT_SHA256}
+  SOURCE_SUBDIR headers-only)
+FetchContent_MakeAvailable(fmt)
+add_library(fmt INTERFACE)
+target_include_directories(fmt SYSTEM INTERFACE ${fmt_SOURCE_DIR}/include)
+target_compile_definitions(fmt INTERFACE FMT_HEADER_ONLY)
 
 # mockturtle
 #

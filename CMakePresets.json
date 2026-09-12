@@ -19,7 +19,7 @@
     {
       "name": "dev",
       "displayName": "Development",
-      "description": "Quick Debug build for local development: CLI + tests only, no optional third-party solvers",
+      "description": "Quick Debug build for local development: tests only, no optional third-party solvers",
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
@@ -54,11 +54,10 @@
     {
       "name": "tests-slim",
       "displayName": "Tests (slim)",
-      "description": "Fastest test-only iteration loop: no CLI, no optional third-party solvers",
+      "description": "Fastest test-only iteration loop: no optional third-party solvers",
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "FICTION_CLI": "OFF",
         "FICTION_TEST": "ON",
         "FICTION_WARNINGS_AS_ERRORS": "OFF",
         "FICTION_ENABLE_PCH": "ON",
@@ -85,7 +84,6 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "MOCKTURTLE_EXAMPLES": "OFF",
         "FICTION_PROGRESS_BARS": "OFF",
-        "FICTION_CLI": "OFF",
         "FICTION_TEST": "OFF",
         "FICTION_Z3": "ON",
         "FICTION_ALGLIB": "ON",
@@ -105,30 +103,12 @@
       }
     },
     {
-      "name": "deploy",
-      "displayName": "Deploy",
-      "description": "Mirrors the Dockerfile: lean Release build of the CLI only, without tests or experiments",
-      "binaryDir": "${sourceDir}/build",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "FICTION_CLI": "ON",
-        "FICTION_TEST": "OFF",
-        "FICTION_EXPERIMENTS": "OFF",
-        "FICTION_Z3": "ON",
-        "FICTION_ALGLIB": "ON",
-        "FICTION_PROGRESS_BARS": "ON",
-        "FICTION_WARNINGS_AS_ERRORS": "OFF",
-        "MOCKTURTLE_EXAMPLES": "OFF"
-      }
-    },
-    {
       "name": "coverage",
       "displayName": "Coverage",
       "description": "Mirrors the ☂️ Coverage CI workflow: Debug build instrumented for lcov-based coverage reporting",
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "FICTION_CLI": "OFF",
         "FICTION_TEST": "ON",
         "FICTION_Z3": "ON",
         "FICTION_ALGLIB": "ON",
@@ -143,7 +123,6 @@
       "description": "Baseline shared by all 🐧/🍎/🪟 CI workflows; each job layers its own compiler and platform-specific flags (e.g. Z3 on ARM, jemalloc) on top via -D overrides. Experiments are off here and covered by one dedicated 🐧 job instead of all 22 of them",
       "inherits": "base",
       "cacheVariables": {
-        "FICTION_CLI": "ON",
         "FICTION_TEST": "ON",
         "FICTION_BENCHMARK": "OFF",
         "FICTION_EXPERIMENTS": "OFF",
@@ -178,10 +157,9 @@
     {
       "name": "ci-codeql",
       "displayName": "CI (CodeQL)",
-      "description": "Mirrors the 📝 CodeQL CI workflow: no CLI",
+      "description": "Mirrors the 📝 CodeQL CI workflow",
       "inherits": "ci-debug",
       "cacheVariables": {
-        "FICTION_CLI": "OFF",
         "FICTION_ENABLE_PCH": "OFF"
       }
     },
@@ -191,7 +169,6 @@
       "description": "Mirrors the Clang-Tidy Review CI workflow: everything enabled to maximize static analysis coverage",
       "inherits": "base",
       "cacheVariables": {
-        "FICTION_CLI": "ON",
         "FICTION_TEST": "ON",
         "FICTION_BENCHMARK": "ON",
         "FICTION_EXPERIMENTS": "ON",
@@ -231,10 +208,6 @@
     {
       "name": "release",
       "configurePreset": "release"
-    },
-    {
-      "name": "deploy",
-      "configurePreset": "deploy"
     },
     {
       "name": "coverage",

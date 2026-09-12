@@ -503,7 +503,7 @@ and `-c/--cell-layout`; `--logic_network` becomes `--network`.
 
 `akers`, `miginvopt`, and `miginvprop` have no Python-shell counterpart. The shell also omits alice aliases,
 settings, shell escapes, echo/counter switches, and its documentation launcher. Shell scripts provide loops
-and process invocation. The legacy CLI source remains available during the parity transition.
+and process invocation.
 
 A migrated QCA workflow is `read circuit.v; map --and --or --inv; ortho; check; equiv -n -g; cell; write circuit.qca`.
 For Bestagon, use `ortho; hex; cell --library bestagon; write circuit.sqd` after reading a supported network.

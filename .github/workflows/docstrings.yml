@@ -54,7 +54,7 @@ jobs:
       - name: Install build dependencies
         run: >
           sudo apt-get update && sudo apt-get install -y
-          cmake ninja-build libreadline-dev libtbb-dev python3-dev
+          cmake ninja-build libtbb-dev python3-dev
           "libclang-${LLVM_VERSION}-dev"
 
       - name: Setup Z3 Solver

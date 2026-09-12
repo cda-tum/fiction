@@ -14,7 +14,8 @@ macro(fiction_define_imported_target target_name include_subdir)
 endmacro()
 
 # Define dependencies
-fiction_define_imported_target(fiction::alice "")
+fiction_define_imported_target(fiction::fmt "")
+target_compile_definitions(fiction::fmt INTERFACE FMT_HEADER_ONLY)
 fiction_define_imported_target(fiction::mockturtle "")
 fiction_define_imported_target(fiction::nlohmann_json "")
 fiction_define_imported_target(fiction::graph-coloring "graph-coloring")

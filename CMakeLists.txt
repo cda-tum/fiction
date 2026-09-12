@@ -69,13 +69,6 @@ if(NOT WIN32)
   endif()
 endif()
 
-# CLI
-option(FICTION_CLI "Build fiction CLI" ON)
-if(FICTION_CLI)
-  message(STATUS "Building fiction CLI")
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cli)
-endif()
-
 # Experiments
 option(FICTION_EXPERIMENTS "Build fiction experiments" OFF)
 if(FICTION_EXPERIMENTS)

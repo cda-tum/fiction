@@ -51,13 +51,13 @@ creating an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
 
 To help you get started with _fiction_, pick the interface that best fits your use case:
 
-| Goal                                   | Recommended Path          | Section                              |
-| -------------------------------------- | ------------------------- | ------------------------------------ |
-| Try the tool immediately               | 🐍 `pip install`          | [CLI (pip)](#-cli-pip)               |
-| Run the CLI without installing Python  | 🐳 Docker CLI image       | [CLI (Docker)](#-cli-docker)         |
-| Develop the C++ library                | 💻 Native build           | [CLI (Source)](#-cli-source)         |
-| Integrate into a C++ project           | 📚 Header-only library    | [C++ Library](#-c-library)           |
-| Script / notebooks / rapid prototyping | 🐍 Python bindings (PyPI) | [Python Bindings](#-python-bindings) |
+| Goal                                   | Recommended Path          | Section                                        |
+| -------------------------------------- | ------------------------- | ---------------------------------------------- |
+| Try the tool immediately               | 🐍 `pip install`          | [CLI (pip)](#-cli-pip)                         |
+| Run the CLI without installing Python  | 🐳 Docker CLI image       | [CLI (Docker)](#-cli-docker)                   |
+| Develop the C++ library                | 💻 Native build           | [Building from source](#-building-from-source) |
+| Integrate into a C++ project           | 📚 Header-only library    | [C++ Library](#-c-library)                     |
+| Script / notebooks / rapid prototyping | 🐍 Python bindings (PyPI) | [Python Bindings](#-python-bindings)           |
 
 For a
 full [getting started guide](https://fiction.readthedocs.io/en/latest/getting_started.html), [CLI command list](https://fiction.readthedocs.io/en/latest/cli.html),
@@ -98,34 +98,24 @@ docker run --rm -it mawalter/fiction
 
 Internally, the repository lives at `/app/fiction`.
 
-### 💻 CLI (Source)
+### 💻 Building from source
 
 When you want to add your own algorithms or contribute to the project, you should build _fiction_ from source.
 
-Clone the project with its submodules:
+Clone the project:
 
 ```bash
-git clone --recursive https://github.com/cda-tum/fiction.git
+git clone https://github.com/cda-tum/fiction.git
 cd fiction
 ```
 
-Configure and build with CMake:
+Configure, build, and test with CMake:
 
 ```bash
 cmake -S . -B build
 cmake --build build --parallel
+ctest --test-dir build
 ```
-
-Run the CLI:
-
-```bash
-build/cli/fiction
-```
-
-Here is an example of running _fiction_ to perform a full physical design flow on a QCA circuit layout that can
-afterward be simulated in QCADesigner:
-
-![CLI example](https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/fiction_cli_example.gif)
 
 ### 📚 C++ Library
 

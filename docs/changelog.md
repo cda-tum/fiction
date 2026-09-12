@@ -133,14 +133,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
     SiDB header dependency
 
+- Build system:
+
+  - The Docker image installs the `mnt.pyfiction` wheel and starts the Python `fiction` shell.
+
 - CLI:
   - **Breaking:** SiDB commands use `sidb::layout` and simulation results. `read --sqd` reads the lattice
     from the file; `--lattice_orientation` is removed
   - `print`, `show`, and statistics use stored ground states; `sqd` exports geometry and defects
   - SiDB shell descriptions and JSON statistics report dot counts as `dots`.
   - Errors go to standard error instead of standard output, so a redirected run still shows them.
-  - `show` hands its file to the platform's opener rather than to a web browser, and keeps the file
-    until the process ends, because the viewer reads it after the command returns.
+  - `show` opens files with the platform's opener and retains default viewer files after the session;
+    `--delete` requests cleanup.
   - `print -c` draws a simulated SiDB layout once, with the charge symbols in place of the dots.
   - `check` prints and logs the full design rule report again, not only the two counts.
   - `area` applies the cell dimensions to every technology, SiDB included, and defaults each one it
@@ -170,6 +174,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     take `int32_t` coordinates and an `int8_t` basis index.
   - Simulation results store charge states and energy beside one shared layout and potential
     landscape instead of copying a `charge_distribution_surface` for every configuration
+
+- Dependencies:
+
+  - `fmt` is fetched as the 12.1.0 release, the version alice carried; mockturtle's bundled
+    11.0.2 does not compile with clang 20.
 
 - Documentation:
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
@@ -325,8 +334,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+- Build system:
+
+  - **Breaking:** `FICTION_CLI`, `FICTION_ABC`, `ABC_ROOT`, the `deploy` preset, and the `alice`
+    dependency are gone with the C++ command-line interface.
 - CLI:
 
+  - **Breaking:** The C++ command-line interface and `shortcuts.fs`. Use the Python `fiction` shell.
   - `akers`, together with `miginvopt` and `miginvprop`. The truth table store now feeds the
     gate-based SiDB simulations, `temp -g` and `opdom`, alone.
   - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
@@ -400,6 +414,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Build system:
 
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
+  - Installed CMake packages include the `fmt` headers and their header-only compile definition.
+  - CMake installation includes ALGLIB's generated version metadata.
 
 - CLI:
 

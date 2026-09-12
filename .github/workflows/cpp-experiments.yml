@@ -72,7 +72,6 @@ jobs:
           -DCMAKE_CXX_COMPILER=g++-14
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_TEST=OFF
-          -DFICTION_CLI=OFF
 
       - name: Build
         run: cmake --build --preset ci-debug
