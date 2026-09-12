@@ -97,8 +97,8 @@ TEST_CASE("Defect-aware circuit design propagates gate timeouts", "[on-the-fly-c
 
     on_the_fly_circuit_design_on_defective_surface_params params{};
     params.exact_design_parameters.scheme                                     = "Row";
-    params.exact_design_parameters.upper_bound_x                              = 2;
-    params.exact_design_parameters.upper_bound_y                              = 2;
+    params.exact_design_parameters.upper_bound_x                              = 3;
+    params.exact_design_parameters.upper_bound_y                              = 3;
     params.exact_design_parameters.fixed_size                                 = true;
     params.exact_design_parameters.timeout                                    = 10'000;
     params.sidb_on_the_fly_gate_library_parameters.design_gate_params.timeout = 0;

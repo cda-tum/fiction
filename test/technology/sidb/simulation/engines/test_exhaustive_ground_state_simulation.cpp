@@ -48,7 +48,7 @@ TEST_CASE("ExGS rejects incomplete simulations after the caller deadline", "[exh
     SECTION("Already expired") {}
     SECTION("Expires while enumerating")
     {
-        for (int64_t i = 0; i < 20; ++i)
+        for (int32_t i = 0; i < 20; ++i)
         {
             lyt.assign_sidb({i, 0, 0}, dot_tag::NORMAL);
         }

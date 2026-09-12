@@ -23,7 +23,10 @@
 #include "fiction/technology/sidb/on_the_fly_gate_library.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 
+#include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -108,6 +111,12 @@ struct on_the_fly_circuit_design_params
      * Parameters for the SiDB on-the-fly gate library.
      */
     sidb::on_the_fly_gate_library_params sidb_on_the_fly_gate_library_parameters = {};
+    /**
+     * Total timeout in milliseconds for all gates and layout conversion. The maximum value means unlimited;
+     * zero expires immediately. Every gate shares the same deadline, including crossings and double wires.
+     * Timeout checks are cooperative; allocation and non-interruptible setup can exceed the budget.
+     */
+    uint64_t timeout = std::numeric_limits<uint64_t>::max();
 };
 
 #if (FICTION_Z3_SOLVER)
@@ -219,6 +228,11 @@ template <typename Ntk, typename GateLyt>
                     break;
                 }
 
+                catch (const utils::timeout_error&)
+                {
+                    throw;
+                }
+
                 catch (...)
                 {
                     fmt::print(stderr, "[e] An unexpected error occurred during gate design.\n");
@@ -257,6 +271,8 @@ template <typename Ntk, typename GateLyt>
  * `on_the_fly_circuit_design_params` object.
  * @return Layout representing the designed SiDB circuit.
  * @throws unsuccessful_gate_design_error if a gate cannot be designed.
+ * @throws utils::timeout_error if the shared circuit budget or an individual gate budget expires. No partial circuit
+ * is returned. Deadline checks are cooperative and do not interrupt allocation or layout conversion.
  */
 template <typename GateLyt>
 [[nodiscard]] layout on_the_fly_circuit_design(const GateLyt&                          gate_lyt,
@@ -264,11 +280,17 @@ template <typename GateLyt>
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt is not a hexagonal");
+    auto  library_params = params.sidb_on_the_fly_gate_library_parameters;
+    auto& deadline       = library_params.design_gate_params.operational_params.deadline;
+    deadline             = utils::make_deadline(params.timeout, deadline);
+    utils::check_deadline(deadline);
     try
     {
-        return to_sidb_layout(
+        auto result = to_sidb_layout(
             physical_design::apply_parameterized_gate_library<sidb_cell_clk_lyt_cube, sidb::on_the_fly_gate_library>(
-                gate_lyt, params.sidb_on_the_fly_gate_library_parameters));
+                gate_lyt, library_params));
+        utils::check_deadline(deadline);
+        return result;
     }
 
     // Report an unsuccessful gate design to the circuit-design caller.

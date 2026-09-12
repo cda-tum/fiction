@@ -60,7 +60,7 @@ TEST_CASE("QuickExact rejects incomplete simulations after the caller deadline",
     }
     SECTION("Expires while enumerating")
     {
-        for (int64_t i = 0; i < 20; ++i)
+        for (int32_t i = 0; i < 20; ++i)
         {
             lyt.assign_sidb({i, 0, 0}, dot_tag::NORMAL);
         }
