@@ -9,7 +9,7 @@
 
 """Recompute the ``URL_HASH`` values in ``cmake/Dependencies.cmake``.
 
-Renovate bumps the ``*_VERSION`` and ``ALICE_REV`` variables in that file but
+Renovate bumps the ``*_VERSION`` variables in that file but
 cannot compute an archive hash, so a dependency bump arrives with a stale
 ``*_SHA256`` and fails the CMake configure step with ``Hash mismatch``. This
 script downloads each declared archive and writes the hash that matches it.

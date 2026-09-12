@@ -12,10 +12,10 @@ include(FetchContent)
 # hash is what keeps the switch from weakening the supply chain.
 #
 # A version and its hash have to move together. Renovate bumps the `*_VERSION`
-# and `ALICE_REV` variables but cannot compute a hash, so a bump arrives with a
-# stale `*_SHA256` and fails the configure step with `Hash mismatch`. Run
-# `python3 scripts/update_dependency_hashes.py` to bring the hashes back in
-# line, and `--check` to verify them without writing.
+# variables but cannot compute a hash, so a bump arrives with a stale `*_SHA256`
+# and fails the configure step with `Hash mismatch`. Run `python3
+# scripts/update_dependency_hashes.py` to bring the hashes back in line, and
+# `--check` to verify them without writing.
 #
 # Each `*_URL` and `*_SHA256` default is guarded by `if(NOT DEFINED ...)` so a
 # caller can point the build at an internal mirror with `-D<DEP>_URL=...`. A

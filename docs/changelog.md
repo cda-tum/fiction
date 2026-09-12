@@ -96,12 +96,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-
-- Dependencies:
-
-  - `fmt` is fetched as the 12.1.0 release, the version alice carried; mockturtle's bundled
-    11.0.2 does not compile with clang 20.
-
 - Algorithms:
   - `convert_network` maps a technology network's inverters to `create_not` on a target without
     `create_node`, so AIG, XAG, and MIG conversions keep the inverters they used to lose
@@ -164,6 +158,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     take `int32_t` coordinates and an `int8_t` basis index.
   - Simulation results store charge states and energy beside one shared layout and potential
     landscape instead of copying a `charge_distribution_surface` for every configuration
+
+- Dependencies:
+
+  - `fmt` is fetched as the 12.1.0 release, the version alice carried; mockturtle's bundled
+    11.0.2 does not compile with clang 20.
 
 - Documentation:
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
