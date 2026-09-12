@@ -1,0 +1,403 @@
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
+"""Logic commands: technology mapping, network transformations, simulation, and AIG optimization.
+
+AIG optimization runs in ``aigverse``; :mod:`~mnt.pyfiction.cli.aigverse_bridge` hands networks
+between the two packages.
+"""
+
+from __future__ import annotations
+
+import math
+import secrets
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+from aigverse import abc
+from aigverse.algorithms import aig_cut_rewriting, aig_resubstitution, balancing, cleanup_dangling, sop_refactoring
+from aigverse.generators import (
+    binary_decoder,
+    carry_lookahead_adder,
+    multiplexer,
+    ripple_carry_adder,
+    ripple_carry_multiplier,
+)
+from rich.table import Table
+
+from mnt import pyfiction
+from mnt.pyfiction import (
+    aig_network,
+    all_standard_2_input_functions,
+    all_standard_3_input_functions,
+    all_supported_standard_functions,
+    convert_network,
+    count_gate_types,
+    dynamic_truth_table,
+    fanout_substitution,
+    fanout_substitution_params,
+    get_name,
+    network_balancing,
+    network_balancing_params,
+    network_target,
+    set_name,
+    simulate_outputs,
+    substitution_strategy,
+    technology_mapping,
+    technology_mapping_params,
+    technology_mapping_stats,
+    technology_network,
+)
+from mnt.pyfiction.cli.aigverse_bridge import from_aigverse, to_aigverse
+from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.registry import Category, command, one_store, store_flags
+from mnt.pyfiction.cli.render import table as render_table
+from mnt.pyfiction.cli.session import stats_to_dict
+from mnt.pyfiction.cli.stores import describe
+
+if TYPE_CHECKING:
+    import argparse
+    from collections.abc import Callable
+
+    from aigverse.networks import Aig
+
+    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.session import Session
+
+GATE_FLAGS = (
+    ("and", "and2"),
+    ("nand", "nand2"),
+    ("or", "or2"),
+    ("nor", "nor2"),
+    ("xor", "xor2"),
+    ("xnor", "xnor2"),
+    ("lt", "lt2"),
+    ("gt", "gt2"),
+    ("le", "le2"),
+    ("ge", "ge2"),
+    ("inv", "inv"),
+    ("maj", "maj3"),
+    ("dot", "dot"),
+    ("and3", "and3"),
+    ("xor-and", "xor_and"),
+    ("or-and", "or_and"),
+    ("onehot", "onehot"),
+    ("gamble", "gamble"),
+    ("mux", "mux"),
+    ("and-xor", "and_xor"),
+)
+"""The ``map`` flags and the ``technology_mapping_params`` fields they set."""
+
+GATE_SHORT_FLAGS = {"and": "a", "or": "o", "xor": "x", "inv": "i", "maj": "m", "dot": "d"}
+"""The six gate flags that also have the short form the C++ shell offered."""
+
+# resubstitution and refactoring return ``None`` only for ``inplace=True``, which the passes never set
+AIG_PASSES: dict[str, Callable[[Aig], Aig | None]] = {
+    "rewrite": aig_cut_rewriting,
+    "resub": aig_resubstitution,
+    "refactor": sop_refactoring,
+    "balance": balancing,
+    "cleanup": cleanup_dangling,
+}
+"""The ``aig`` passes and the ``aigverse`` algorithms that run them."""
+
+GENERATORS: dict[str, Callable[[int], Aig]] = {
+    "rca": ripple_carry_adder,
+    "cla": carry_lookahead_adder,
+    "multiplier": ripple_carry_multiplier,
+    "mux": multiplexer,
+    "decoder": binary_decoder,
+}
+"""The ``generate`` kinds and the ``aigverse`` generators that build them."""
+
+ABC_SCRIPTS = ("resyn", "resyn2", "resyn3", "compress", "compress2", "resyn2rs", "compress2rs", "dc2")
+"""The named ABC scripts ``aigverse.abc`` provides."""
+
+
+def _map_arguments(parser: Parser) -> None:
+    gates = parser.group("gate types")
+    for flag, _ in GATE_FLAGS:
+        names = (f"-{GATE_SHORT_FLAGS[flag]}", f"--{flag}") if flag in GATE_SHORT_FLAGS else (f"--{flag}",)
+        gates.add_argument(*names, action="store_true", help=f"allow {flag.upper().replace('-', ' and ')}")
+    every = parser.exclusive_group()
+    every.add_argument("--all2", action="store_true", help="every 2-input function")
+    every.add_argument("--all3", action="store_true", help="every 3-input function")
+    every.add_argument("--all", action="store_true", help="every supported function")
+    parser.add_argument(
+        "--decay",
+        action="store_true",
+        help="enforce at least one constant input on three-input gates",
+    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
+
+
+@command("map", Category.LOGIC, _map_arguments)
+def map_command(session: Session, args: argparse.Namespace) -> Result:
+    """Map the active network onto a set of gate types, producing a technology network.
+
+    Select at least one gate type, e.g. 'map --and --or --inv' for AND-OR-inverter networks.
+    """
+    params = technology_mapping_params()
+    if args.all:
+        params = all_supported_standard_functions()
+    elif args.all3:
+        params = all_standard_3_input_functions()
+    elif args.all2:
+        params = all_standard_2_input_functions()
+    selected = [field for flag, field in GATE_FLAGS if getattr(args, flag.replace("-", "_"))]
+    for field in selected:
+        setattr(params, field, True)
+    if not selected and not (args.all or args.all2 or args.all3):
+        msg = "select at least one gate type, e.g. 'map --and --or --inv'"
+        raise CommandError(msg)
+    params.decay = args.decay
+
+    network = session.networks.current()
+    stats = technology_mapping_stats()
+    mapped = technology_mapping(network, params, stats)
+    if stats.mapper_stats.mapping_error:
+        msg_0 = "mapping failed: the selected gate library cannot cover this network; the store is unchanged"
+        error = CommandError(msg_0)
+        error.stats = stats_to_dict(stats)
+        raise error
+    if not get_name(mapped):
+        set_name(mapped, get_name(network))
+    session.networks.add(mapped)
+    statistics = stats_to_dict(stats)
+    if args.verbose:
+        session.console.print(render_table(statistics))
+    return {"network": describe(mapped), "stats": statistics}
+
+
+def _fanouts_arguments(parser: Parser) -> None:
+    parser.add_argument("-d", "--degree", type=int, choices=[2, 3], default=2, help="fan-out nodes' output degree")
+    parser.add_argument(
+        "-s",
+        "--strategy",
+        choices=["breadth", "depth", "random"],
+        default="breadth",
+        help="how cascaded fan-outs are arranged (default: breadth)",
+    )
+    parser.add_argument("-t", "--threshold", type=int, default=1, help="maximum output degree left unsubstituted")
+    parser.add_argument("--seed", type=int, help="seed for the random strategy")
+
+
+@command("fanouts", Category.LOGIC, _fanouts_arguments)
+def fanouts(session: Session, args: argparse.Namespace) -> Result:
+    """Replace high-degree outputs of the active network by fan-out nodes.
+
+    Physical design does this with default settings; run it beforehand to choose the settings.
+    """
+    params = fanout_substitution_params()
+    params.degree = args.degree
+    params.threshold = args.threshold
+    params.strategy = getattr(substitution_strategy, args.strategy.upper())
+    if args.seed is not None:
+        params.seed = args.seed
+    network = fanout_substitution(session.as_technology_network(session.networks.current()), params)
+    session.networks.add(network)
+    return {"network": describe(network)}
+
+
+def _balance_arguments(parser: Parser) -> None:
+    parser.add_argument("-u", "--unify-outputs", action="store_true", help="balance the outputs against each other")
+
+
+@command("balance", Category.LOGIC, _balance_arguments)
+def balance(session: Session, args: argparse.Namespace) -> Result:
+    """Balance the paths of the active network with buffers, so every path to a gate has the same length.
+
+    Physical design does not need this and balanced networks produce much larger layouts.
+    """
+    params = network_balancing_params()
+    params.unify_outputs = args.unify_outputs
+    network = network_balancing(session.as_technology_network(session.networks.current()), params)
+    session.networks.add(network)
+    return {"network": describe(network)}
+
+
+def _gates_arguments(parser: Parser) -> None:
+    store_flags(parser, "network", "gate_layout")
+    parser.add_argument("--detailed", action="store_true", help="also list the rarer gate types")
+
+
+@command("gates", Category.LOGIC, _gates_arguments)
+def gates(session: Session, args: argparse.Namespace) -> Result:
+    """Count the gate types of the active network or gate-level layout."""
+    store = one_store(args, "network", "gate_layout")
+    element = session.networks.current() if store == "network" else session.gate_layouts.current()
+    gate_types = count_gate_types(element)
+    counts = stats_to_dict(gate_types)
+    table = Table(box=None, show_header=False, padding=(0, 2))
+    common = {"num_fanout", "num_buf", "num_inv", "num_and2", "num_or2", "num_xor2", "num_maj3"}
+    for field, count in counts.items():
+        if args.detailed or field in common or count:
+            table.add_row(field.removeprefix("num_").replace("_", " ").upper(), str(count))
+    session.console.print(table)
+    return counts
+
+
+def _simulate_arguments(parser: Parser) -> None:
+    store_flags(parser, "network", "gate_layout")
+    parser.add_argument("--store", action="store_true", help="add the output functions to the truth table store")
+    parser.add_argument("--silent", action="store_true", help="do not print the truth tables")
+
+
+@command("simulate", Category.LOGIC, _simulate_arguments)
+def simulate_command(session: Session, args: argparse.Namespace) -> Result:
+    """Compute the truth table of every output of the active network or gate-level layout.
+
+    Layouts are simulated on the logic level, following the clocking; timing is not considered.
+    """
+    store = one_store(args, "network", "gate_layout")
+    element = session.networks.current() if store == "network" else session.gate_layouts.current()
+    tables: list[dict[str, object]] = []
+    for output, bits in simulate_outputs(element):
+        binary = "".join("1" if bit else "0" for bit in bits)
+        table = dynamic_truth_table(int(math.log2(len(binary))))
+        table.create_from_binary_string(binary)
+        if args.store:
+            session.truth_tables.add(table)
+        if not args.silent:
+            session.output(f"{output}: {binary} (0x{table.to_hex()})")
+        tables.append({"output": output, **describe(table)})
+    return {"tables": tables}
+
+
+NETWORK_TARGETS = {
+    "aig": None,
+    "xag": network_target.XAG,
+    "mig": network_target.MIG,
+    "tec": network_target.TEC,
+}
+"""The network types available to the native random generators."""
+
+
+def _random_arguments(parser: Parser) -> None:
+    parser.add_argument("-n", "--inputs", type=int, required=True, help="number of primary inputs")
+    parser.add_argument("-g", "--gates", type=int, required=True, help="number of gates")
+    parser.add_argument(
+        "--type",
+        type=str.lower,
+        choices=list(NETWORK_TARGETS),
+        default="aig",
+        help="the network type to produce (default: aig)",
+    )
+    parser.add_argument("--seed", type=int, help="random seed; a fresh one is drawn when omitted")
+
+
+@command("random", Category.LOGIC, _random_arguments)
+def random_command(session: Session, args: argparse.Namespace) -> Result:
+    """Generate a random network; the seed becomes its name.
+
+    Each type uses its native gate distribution; technology networks use the mixed generator.
+    """
+    seed = args.seed if args.seed is not None else secrets.randbelow(2**32)
+    network = getattr(pyfiction, f"random_{args.type}_network")(args.inputs, args.gates, seed)
+    session.networks.add(network)
+    return {"network": describe(network), "seed": seed}
+
+
+def _generate_arguments(parser: Parser) -> None:
+    parser.add_argument("kind", choices=list(GENERATORS), help="rca and cla are adders, multiplier, mux, decoder")
+    parser.add_argument("-b", "--bitwidth", type=int, required=True, help="operand width, or select bits for decoder")
+
+
+@command("generate", Category.LOGIC, _generate_arguments)
+def generate(session: Session, args: argparse.Namespace) -> Result:
+    """Generate an arithmetic or control circuit as an AIG."""
+    network = from_aigverse(session, GENERATORS[args.kind](args.bitwidth), f"{args.kind}{args.bitwidth}")
+    session.networks.add(network)
+    return {"network": describe(network)}
+
+
+def _aig_arguments(parser: Parser) -> None:
+    parser.add_argument("passes", nargs="+", choices=list(AIG_PASSES), metavar="PASS", help=", ".join(AIG_PASSES))
+
+
+@command("aig", Category.LOGIC, _aig_arguments)
+def aig_command(session: Session, args: argparse.Namespace) -> Result:
+    """Run optimization passes on the active AIG, in the given order.
+
+    Passes: rewrite (cut rewriting), resub (resubstitution), refactor (SOP refactoring), balance
+    (ESOP balancing), cleanup (remove dangling nodes). Only AIGs read with '--type aig' qualify.
+    """
+    aig = _active_aig(session)
+    optimized = to_aigverse(session, aig)
+    for name in args.passes:
+        result = AIG_PASSES[name](optimized)
+        if result is None:
+            msg = f"pass '{name}' produced no network"
+            raise CommandError(msg)
+        optimized = result
+    network = from_aigverse(session, optimized, get_name(aig), like=aig)
+    session.networks.add(network)
+    session.info(f"{aig.num_gates()} -> {network.num_gates()} gates")
+    return {"network": describe(network), "passes": list(args.passes), "gates_before": aig.num_gates()}
+
+
+def _abc_arguments(parser: Parser) -> None:
+    parser.add_argument("--no-read", action="store_true", help="let the custom flow provide its input")
+    parser.add_argument("--no-strash", action="store_true", help="omit the initial strash command")
+    parser.add_argument("--no-write", action="store_true", help="leave the network store unchanged")
+    source = parser.exclusive_group(required=True)
+    source.add_argument("-c", "--commands", metavar="COMMANDS", help="a ';'-separated ABC command string")
+    source.add_argument("-s", "--script", choices=ABC_SCRIPTS, help="a named ABC script")
+
+
+@command("abc", Category.LOGIC, _abc_arguments)
+def abc_command(session: Session, args: argparse.Namespace) -> Result:
+    """Optimize the active AIG or XAG with an external ABC installation.
+
+    ABC is found on PATH as 'abc' or through the AIGVERSE_ABC environment variable. The read and
+    write steps are added around the given commands.
+    """
+    if not abc.is_available():
+        msg = "ABC was not found; install it on PATH or point AIGVERSE_ABC at the binary"
+        raise CommandError(msg)
+    network = None if args.no_read else session.networks.current()
+    if network is not None and not isinstance(network, (aig_network, pyfiction.xag_network)):
+        msg_0 = "ABC requires an AIG or XAG; use read --type aig or --type xag"
+        raise CommandError(msg_0)
+    aig = convert_network(network, network_target.AIG) if isinstance(network, pyfiction.xag_network) else network
+    input_path = session.temp_file(".aig")
+    output_path = session.temp_file(".aig")
+    flow: list[str] = []
+    try:
+        if aig is not None:
+            pyfiction.write_aiger(aig, str(input_path))
+            flow.append(f'read_aiger "{input_path.as_posix()}"')
+        if not args.no_strash:
+            flow.append("strash")
+        flow.extend(abc.SCRIPTS[args.script] if args.script else [args.commands])
+        if not args.no_write:
+            flow.append(f'write_aiger -s "{output_path.as_posix()}"')
+        output = abc.run_commands("; ".join(flow), cwd=Path.cwd())
+        if args.no_write:
+            session.output(output.rstrip())
+            return {"replacement": False, "output": output}
+        if not output_path.is_file() or not output_path.stat().st_size:
+            msg_0 = "ABC produced no output network; the store is unchanged"
+            raise CommandError(msg_0)
+        result = pyfiction.read_aig_network(str(output_path))
+        if aig is not None:
+            set_name(result, get_name(aig))
+        session.networks.add(result)
+        return {"network": describe(result), "output": output}
+    finally:
+        input_path.unlink(missing_ok=True)
+        output_path.unlink(missing_ok=True)
+
+
+def _active_aig(session: Session) -> aig_network:
+    network = session.networks.current()
+    if not isinstance(network, aig_network):
+        kind = "technology network" if isinstance(network, technology_network) else type(network).__name__
+        msg = f"the active network is a {kind}; read the file with '--type aig'"
+        raise CommandError(msg)
+    return network

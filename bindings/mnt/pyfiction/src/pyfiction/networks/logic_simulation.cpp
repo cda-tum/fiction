@@ -16,22 +16,21 @@
 
 #include "pyfiction/types.hpp"
 
-#include <fiction/networks/name_utils.hpp>
-
 #include <fmt/format.h>
-#include <kitty/print.hpp>
+#include <kitty/bit_operations.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 
 #include <cassert>
-#include <iostream>
-#include <new>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner): Required by nanobind return-value conversion.
 #include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
@@ -48,72 +47,47 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
+    /**
+     * Simulate outputs in declaration order, including repeated labels.
+     */
+    const auto outputs = [](const NtkOrLyt& ntk)
+    {
+        if (ntk.num_pis() >= 38u)
+        {
+            throw std::invalid_argument("simulation requires fewer than 38 inputs");
+        }
+        const auto tables = mockturtle::simulate<py_tt>(
+            ntk, mockturtle::default_simulator<py_tt>{static_cast<unsigned>(ntk.num_pis())});
+        std::vector<std::pair<std::string, std::vector<bool>>> result{};
+        result.reserve(ntk.num_pos());
+        ntk.foreach_po(
+            [&](const auto&, const auto i)
+            {
+                const auto        name = ntk.has_output_name(i) ? ntk.get_output_name(i) : fmt::format("po{}", i);
+                std::vector<bool> bits{};
+                bits.reserve(tables[i].num_bits());
+                for (auto bit = tables[i].num_bits(); bit != 0u; --bit)
+                {
+                    bits.push_back(kitty::get_bit(tables[i], bit - 1u));
+                }
+                result.emplace_back(name, std::move(bits));
+            });
+        return result;
+    };
+    m.def("simulate_outputs", outputs, py::arg(type_name.c_str()),
+          "Return (name, bits) pairs in output declaration order, preserving duplicate labels. "
+          "Truth-table storage grows exponentially with the input count; fewer than 38 inputs "
+          "is a representation bound, not a memory guarantee.");
     m.def(
         "simulate",
-        [](const NtkOrLyt& ntk_or_lyt) -> std::unordered_map<std::string, std::vector<bool>>
+        [outputs](const NtkOrLyt& ntk)
         {
-            /**
-             * Stores truth tables.
-             */
-            std::vector<py_tt> tables;
-            tables.reserve(ntk_or_lyt.num_pos());
-            /**
-             * Stores PO names in order.
-             */
-            std::vector<std::string> po_names;
-            po_names.reserve(ntk_or_lyt.num_pos());
-
-            const auto store_po_names = [&po_names](const NtkOrLyt& network_or_layout)
+            std::unordered_map<std::string, std::vector<bool>> result{};
+            for (auto&& [name, bits] : outputs(ntk))
             {
-                network_or_layout.foreach_po(
-                    [&network_or_layout, &po_names]([[maybe_unused]] const auto& po, auto i)
-                    {
-                        po_names.emplace_back(network_or_layout.has_output_name(i) ?
-                                                  network_or_layout.get_output_name(i) :
-                                                  fmt::format("po{}", i));
-                    });
-            };
-
-            const auto simulate = [&tables](const NtkOrLyt& network_or_layout)
-            {
-                tables = mockturtle::simulate<py_tt>(
-                    network_or_layout,
-                    // NOLINTNEXTLINE
-                    mockturtle::default_simulator<py_tt>{static_cast<unsigned>(network_or_layout.num_pis())});
-            };
-
-            store_po_names(ntk_or_lyt);
-
-            try
-            {
-                simulate(ntk_or_lyt);
+                result[name] = std::move(bits);
             }
-            catch (const std::bad_alloc&)
-            {
-                std::cout << "[e] " << fiction::networks::get_name(ntk_or_lyt)
-                          << " has too many inputs to store its truth table" << std::endl;
-                throw;
-            }
-
-            std::unordered_map<std::string, std::vector<bool>> tts{};
-            assert(tables.size() == po_names.size() && "Number of POs and truth tables must be equal");
-
-            for (auto i = 0ul; i < tables.size(); ++i)
-            {
-                const auto binary_repr = kitty::to_binary(tables[i]);
-
-                std::vector<bool> binary{};
-                binary.reserve(binary_repr.size());
-
-                for (const auto& c : binary_repr)
-                {
-                    binary.emplace_back(c == '1');
-                }
-
-                tts[po_names[i]] = binary;
-            }
-
-            return tts;
+            return result;
         },
         py::arg(type_name.c_str()));
 }
@@ -123,9 +97,18 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
 void logic_simulation(nanobind::module_& m)
 {
     detail::logic_simulation_impl<py_logic_network>(m, "network");
+    detail::logic_simulation_impl<py_aig_network>(m, "network");
+    detail::logic_simulation_impl<py_xag_network>(m, "network");
+    detail::logic_simulation_impl<py_mig_network>(m, "network");
     detail::logic_simulation_impl<py_cartesian_gate_layout>(m, "layout");
     detail::logic_simulation_impl<py_shifted_cartesian_gate_layout>(m, "layout");
     detail::logic_simulation_impl<py_hexagonal_gate_layout>(m, "layout");
+    detail::logic_simulation_impl<py_odd_row_cartesian_gate_layout>(m, "layout");
+    detail::logic_simulation_impl<py_even_row_cartesian_gate_layout>(m, "layout");
+    detail::logic_simulation_impl<py_even_column_cartesian_gate_layout>(m, "layout");
+    detail::logic_simulation_impl<py_odd_row_hex_gate_layout>(m, "layout");
+    detail::logic_simulation_impl<py_odd_column_hex_gate_layout>(m, "layout");
+    detail::logic_simulation_impl<py_even_column_hex_gate_layout>(m, "layout");
 }
 
 }  // namespace pyfiction

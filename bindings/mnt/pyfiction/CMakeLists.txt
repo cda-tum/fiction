@@ -42,6 +42,11 @@ find_package(nanobind CONFIG REQUIRED PATHS "${nanobind_ROOT}" NO_DEFAULT_PATH)
 # Python 3.10 up. It implies STABLE_ABI. Free-threaded interpreters need the
 # `abi3t` of Python 3.15 (PEP 803); below that, nanobind stops the configure
 # with a message naming the version.
+#
+# The domain keeps pyfiction's type registry apart from every other nanobind
+# extension in the process. `aigverse` binds `kitty::dynamic_truth_table` and
+# `mockturtle::names_view<mockturtle::aig_network>` as well, and in a shared
+# registry the module imported second does not get its class at all.
 nanobind_add_module(
   pyfiction
   BACKEND_MODULE
@@ -49,6 +54,8 @@ nanobind_add_module(
   FREE_THREADED
   LTO
   NB_SUPPRESS_WARNINGS
+  NB_DOMAIN
+  pyfiction
   pyfiction.cpp)
 target_link_libraries(pyfiction PRIVATE libfiction)
 target_include_directories(pyfiction

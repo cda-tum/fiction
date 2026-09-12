@@ -31,6 +31,7 @@ void register_sidb_model(nanobind::module_& m);
 void register_sidb_simulation(nanobind::module_& m);
 void register_fcn(nanobind::module_& m);
 void register_layouts_io(nanobind::module_& m);
+void register_networks_io(nanobind::module_& m);
 void register_fcn_io(nanobind::module_& m);
 void register_qca_io(nanobind::module_& m);
 void register_inml_io(nanobind::module_& m);
@@ -65,6 +66,7 @@ NB_MODULE(pyfiction, m)
     pyfiction::register_sidb_simulation(m);
     pyfiction::register_fcn(m);
     pyfiction::register_layouts_io(m);
+    pyfiction::register_networks_io(m);
     pyfiction::register_fcn_io(m);
     pyfiction::register_qca_io(m);
     pyfiction::register_inml_io(m);

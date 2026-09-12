@@ -26,6 +26,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/chrono.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
@@ -55,6 +56,8 @@ void exact(nanobind::module_& m)
         .def(py::init<>(), "Default constructor.")
         .def_rw("scheme", &fiction::physical_design::exact_physical_design_params::scheme,
                 DOC(fiction_physical_design_exact_physical_design_params_scheme))
+        .def_rw("upper_bound_area", &fiction::physical_design::exact_physical_design_params::upper_bound_area,
+                DOC(fiction_physical_design_exact_physical_design_params_upper_bound_area))
         .def_rw("upper_bound_x", &fiction::physical_design::exact_physical_design_params::upper_bound_x,
                 DOC(fiction_physical_design_exact_physical_design_params_upper_bound_x))
         .def_rw("upper_bound_y", &fiction::physical_design::exact_physical_design_params::upper_bound_y,
@@ -63,6 +66,8 @@ void exact(nanobind::module_& m)
                 DOC(fiction_physical_design_exact_physical_design_params_fixed_size))
         .def_rw("num_threads", &fiction::physical_design::exact_physical_design_params::num_threads,
                 DOC(fiction_physical_design_exact_physical_design_params_num_threads))
+        .def_rw("synchronization_elements",
+                &fiction::physical_design::exact_physical_design_params::synchronization_elements)
         .def_rw("crossings", &fiction::physical_design::exact_physical_design_params::crossings,
                 DOC(fiction_physical_design_exact_physical_design_params_crossings))
         .def_rw("border_io", &fiction::physical_design::exact_physical_design_params::border_io,
@@ -119,6 +124,33 @@ void exact(nanobind::module_& m)
           py::arg("statistics") = nullptr, DOC(fiction_physical_design_exact));
 
     m.def("exact_hexagonal", &fiction::physical_design::exact<py_hexagonal_gate_layout, py_logic_network>,
+          py::arg("network"), py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+          py::arg("statistics") = nullptr, DOC(fiction_physical_design_exact));
+
+    m.def("exact_odd_row_cartesian",
+          &fiction::physical_design::exact<py_odd_row_cartesian_gate_layout, py_logic_network>, py::arg("network"),
+          py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+          py::arg("statistics") = nullptr, DOC(fiction_physical_design_exact));
+
+    m.def("exact_even_row_cartesian",
+          &fiction::physical_design::exact<py_even_row_cartesian_gate_layout, py_logic_network>, py::arg("network"),
+          py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+          py::arg("statistics") = nullptr, DOC(fiction_physical_design_exact));
+
+    m.def("exact_even_column_cartesian",
+          &fiction::physical_design::exact<py_even_column_cartesian_gate_layout, py_logic_network>, py::arg("network"),
+          py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+          py::arg("statistics") = nullptr, DOC(fiction_physical_design_exact));
+
+    m.def("exact_odd_row_hex", &fiction::physical_design::exact<py_odd_row_hex_gate_layout, py_logic_network>,
+          py::arg("network"), py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+          py::arg("statistics") = nullptr, DOC(fiction_physical_design_exact));
+
+    m.def("exact_odd_column_hex", &fiction::physical_design::exact<py_odd_column_hex_gate_layout, py_logic_network>,
+          py::arg("network"), py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+          py::arg("statistics") = nullptr, DOC(fiction_physical_design_exact));
+
+    m.def("exact_even_column_hex", &fiction::physical_design::exact<py_even_column_hex_gate_layout, py_logic_network>,
           py::arg("network"), py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
           py::arg("statistics") = nullptr, DOC(fiction_physical_design_exact));
 }

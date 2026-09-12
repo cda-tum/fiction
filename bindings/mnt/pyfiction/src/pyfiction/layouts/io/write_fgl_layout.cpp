@@ -55,6 +55,12 @@ void write_fgl_layout(nanobind::module_& m)
     detail::write_fgl_layout<py_cartesian_gate_layout>(m);
     detail::write_fgl_layout<py_shifted_cartesian_gate_layout>(m);
     detail::write_fgl_layout<py_hexagonal_gate_layout>(m);
+    detail::write_fgl_layout<py_odd_row_cartesian_gate_layout>(m);
+    detail::write_fgl_layout<py_even_row_cartesian_gate_layout>(m);
+    detail::write_fgl_layout<py_even_column_cartesian_gate_layout>(m);
+    detail::write_fgl_layout<py_odd_row_hex_gate_layout>(m);
+    detail::write_fgl_layout<py_odd_column_hex_gate_layout>(m);
+    detail::write_fgl_layout<py_even_column_hex_gate_layout>(m);
 }
 
 }  // namespace pyfiction

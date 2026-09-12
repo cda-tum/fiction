@@ -104,6 +104,14 @@ jobs:
         name: Install sccache
         run: uv tool install sccache
 
+      - if: runner.os == 'Linux'
+        name: Install external ABC for CLI integration tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes yosys-abc graphviz
+          echo "AIGVERSE_ABC=/usr/bin/yosys-abc" >> "$GITHUB_ENV"
+          echo "FICTION_REQUIRE_ABC=1" >> "$GITHUB_ENV"
+
       # A declared floor is only a claim until something installs it. Pinned to Python 3.10, so
       # it runs first and fails fastest.
       - name: ⬇️ Test the lowest supported dependency versions
@@ -113,6 +121,18 @@ jobs:
         env:
           RUNS_ON: ${{ inputs.runs-on }}
         run: uvx nox -s tests --verbose -- --cov --cov-config=pyproject.toml --cov-append --cov-report=xml:coverage-$RUNS_ON.xml
+
+      - if: runner.os == 'Linux'
+        name: Test an installed wheel without optional native solvers
+        run: |
+          uv build --wheel --python 3.10 --out-dir .ai/solver-free-wheels \
+            -Cbuild-dir=build-pyfiction -Ccmake.args=--preset=pyfiction \
+            -Ccmake.define.FICTION_Z3=OFF -Ccmake.define.FICTION_ALGLIB=OFF
+          uv venv --python 3.10 .ai/solver-free-env
+          uv pip install --python .ai/solver-free-env/bin/python .ai/solver-free-wheels/*.whl
+          .ai/solver-free-env/bin/python -c "from mnt import pyfiction as f; assert not hasattr(f, 'exact_cartesian'); assert not hasattr(f, 'clustercomplete')"
+          .ai/solver-free-env/bin/fiction --quiet -c "version; generate mux -b 1; ortho; help exact; help clustercomplete"
+          .ai/solver-free-env/bin/python -m mnt.pyfiction.cli --quiet -c "version"
 
       - name: Upload Python coverage report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

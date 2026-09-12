@@ -21,12 +21,14 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/qca/io/read_fqca_layout.hpp>
 #include <fiction/technology/qca/io/write_fqca_layout.hpp>
 #include <fiction/technology/qca/technology.hpp>
 
+#include <ios>
 #include <sstream>
-#include <string>
+#include <stdexcept>
 #include <type_traits>
 
 using namespace fiction;
@@ -212,6 +214,10 @@ TEST_CASE("Read multi-layer wire crossing", "[fqca]")
     using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::cube>>>;
 
     const auto layout = read_fqca_layout<qca_layout>(layout_stream, "Crossover");
+
+    using limited_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    std::istringstream limited_stream{fqca_layout};
+    CHECK_THROWS_AS(read_fqca_layout<limited_layout>(limited_stream), std::out_of_range);
 
     CHECK(layout.get_layout_name() == "Crossover");
 

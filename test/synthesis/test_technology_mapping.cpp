@@ -21,6 +21,7 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
+#include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/technology_mapping.hpp>
 #include <fiction/verification/count_gate_types.hpp>
 
@@ -31,6 +32,7 @@
 #include <mockturtle/views/names_view.hpp>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
@@ -396,4 +398,29 @@ TEST_CASE("No exception when all required gates are present", "[technology-mappi
 
         CHECK_NOTHROW(technology_mapping(mig, params));
     }
+}
+
+TEST_CASE("Incomplete technology libraries report mapping failure", "[technology-mapping]")
+{
+    technology_network network{};
+    const auto         a = network.create_pi();
+    const auto         b = network.create_pi();
+    const auto         c = network.create_pi();
+    SECTION("Missing two-input function")
+    {
+        network.create_po(network.create_xor(a, b));
+    }
+    SECTION("Source gate exceeds library arity")
+    {
+        network.create_po(network.create_maj(a, b, c));
+    }
+    technology_mapping_params params{};
+    params.and2 = true;
+    params.inv  = true;
+    technology_mapping_stats stats{};
+    const auto               mapped = technology_mapping(network, params, &stats);
+    CHECK(stats.mapper_stats.mapping_error);
+    CHECK(mapped.num_pos() == 0);
+    CHECK(network.num_pis() == 3);
+    CHECK(network.num_pos() == 1);
 }

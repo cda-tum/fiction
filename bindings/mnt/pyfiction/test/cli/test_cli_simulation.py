@@ -1,0 +1,168 @@
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
+"""Tests of the SiDB simulation commands."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+import pytest
+
+from mnt import pyfiction
+from mnt.pyfiction.cli.registry import REGISTRY
+from mnt.pyfiction.cli.stores import CellEntry
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+
+    from .conftest import Shell
+
+
+@pytest.fixture
+def or_gate(shell: Shell, resource: Callable[[str], str]) -> Shell:
+    """A shell holding SiQAD's OR gate and the OR truth table.
+
+    Returns:
+        The shell.
+    """
+    shell.ok(f"read {resource('siqad_or_gate.sqd')}; tt -t 1110")
+    return shell
+
+
+@pytest.fixture
+def xor_gate(shell: Shell, resource: Callable[[str], str]) -> Shell:
+    """A shell holding a Bestagon XOR gate and the XOR truth table.
+
+    Returns:
+        The shell.
+    """
+    shell.ok(f"read {resource('hex_21_inputsdbp_xor_v1.sqd')}; tt -t 0110")
+    return shell
+
+
+@pytest.mark.parametrize("engine", ["quickexact", "quicksim", "clustercomplete"])
+def test_ground_state_engines(or_gate: Shell, engine: str) -> None:
+    if engine == "clustercomplete" and not hasattr(pyfiction, "clustercomplete"):
+        pytest.skip("pyfiction was built without ALGLIB")
+    or_gate.ok(f"{engine} -e 5.6 -l 5 -m -0.28")
+    entry = or_gate.session.cell_layouts.current()
+    assert entry.result is not None
+    assert entry.engine
+    simulation = or_gate.session.log[-1]["result"]["cell_layout"]["simulation"]  # type: ignore[index]
+    assert simulation["stable_states"] >= 1
+    assert simulation["ground_state_energy_ev"] is not None
+    assert "Ground state" in or_gate.ok("print -c")
+    assert "already simulated" in or_gate.fails(engine)
+
+
+def test_simulation_needs_an_sidb_layout(mux21_shell: Shell) -> None:
+    mux21_shell.ok("ortho; cell")
+    assert "SiDB layout is needed" in mux21_shell.fails("quickexact")
+
+
+def test_physical_parameter_validation(or_gate: Shell) -> None:
+    assert "must be positive" in or_gate.fails("quickexact -e 0")
+    assert "at least 1" in or_gate.fails("quicksim -i 0")
+    assert "usage" in or_gate.fails("quickexact --base 4")
+
+
+@pytest.mark.parametrize("command", ["quickexact -l 0", "quicksim -a 0", "quicksim -a 2"])
+def test_simulation_rejects_invalid_physical_parameters(or_gate: Shell, command: str) -> None:
+    count = len(or_gate.session.cell_layouts)
+    or_gate.fails(command)
+    assert len(or_gate.session.cell_layouts) == count
+    assert or_gate.session.cell_layouts.current().result is None
+
+
+def test_simulation_reports_an_empty_result(shell: Shell) -> None:
+    shell.session.cell_layouts.add(CellEntry(pyfiction.sidb_layout()))
+    assert "no physically valid charge distribution" in shell.ok("quickexact")
+    simulation = shell.session.log[-1]["result"]["cell_layout"]["simulation"]  # type: ignore[index]
+    assert simulation["stable_states"] == 0
+    assert simulation["ground_state_energy_ev"] is None
+
+
+def test_temp_rejects_missing_gate_ports_and_invalid_temperature(shell: Shell) -> None:
+    shell.session.cell_layouts.add(CellEntry(pyfiction.sidb_layout()))
+    assert "must be positive" in shell.fails("temp -t 0")
+    assert "input and output dots" in shell.fails("temp -g")
+
+
+def test_temp(shell: Shell, resource: Callable[[str], str]) -> None:
+    shell.ok(f"read {resource('hex_21_inputsdbp_xor_v1.sqd')}; tt -t 0110; temp -g --engine quickexact")
+    result = shell.session.log[-1]["result"]
+    assert 0 < result["critical_temperature_k"] <= 400  # type: ignore[index]
+    assert result["gate_based"] is True  # type: ignore[index]
+    assert "critical temperature" in shell.output
+    shell.ok("current -c 0; temp -t 50")
+    assert "in (0, 1]" in shell.fails("temp -c 2")
+
+
+def test_opdom_grid_search(xor_gate: Shell, tmp_path: Path) -> None:
+    csv = tmp_path / "opdom.csv"
+    xor_gate.ok(f"opdom {csv} --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1")
+    result = xor_gate.session.log[-1]["result"]
+    assert result["num_evaluated_parameter_combinations"] == 9  # type: ignore[index]
+    assert "epsilon_r,lambda_tf" in csv.read_text(encoding="utf-8")
+
+
+def test_opdom_sampling_and_errors(xor_gate: Shell, tmp_path: Path) -> None:
+    csv = tmp_path / "opdom.csv"
+    xor_gate.ok(f"opdom {csv} -r 4 -o --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1")
+    assert "usage" in xor_gate.fails(f"opdom {csv} -r 2 -f 2")
+    assert "at least 1" in xor_gate.fails(f"opdom {csv} -f 0")
+    assert "positive step" in xor_gate.fails(f"opdom {csv} --x-step 0")
+    assert "usage" in xor_gate.fails(f"opdom {csv} -x foo")
+
+
+def test_clustercomplete_defaults_to_base_three() -> None:
+    """Base-3 multi-gate simulation is what ClusterComplete is for, and what the C++ shell defaulted to."""
+    parser = REGISTRY["clustercomplete"].parser
+    assert parser.parse_args([]).base == 3
+    assert "default: 3" in parser.format_help()
+
+
+@pytest.mark.parametrize("command", ["quickexact", "quicksim"])
+def test_two_state_engines_keep_base_two(command: str) -> None:
+    """The two-state engines do not offer --base at all, and temp and opdom still default to 2."""
+    assert not hasattr(REGISTRY[command].parser.parse_args([]), "base")
+    for gate_based in ("temp", "opdom"):
+        arguments = [] if gate_based == "temp" else ["domain.csv"]
+        assert REGISTRY[gate_based].parser.parse_args(arguments).base == 2
+
+
+def test_temp_runs_on_a_simulated_layout(shell: Shell, resource: Callable[[str], str]) -> None:
+    """`temp` and `opdom` push nothing, so a simulated element is no obstacle for them."""
+    shell.ok(f"read {resource('siqad_or_gate.sqd')}; quickexact")
+    shell.ok("temp")
+    assert "critical temperature" in shell.output
+    assert "already simulated" in shell.fails("quickexact")
+    assert "current -c 0" in shell.stderr
+
+
+def test_opdom_rejects_a_repeated_sweep(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:
+    """Sweeping one parameter on two axes would produce a degenerate domain."""
+    shell.ok(f"read {resource('siqad_or_gate.sqd')}; tt -t 1110")
+    assert "more than one axis" in shell.fails(f"opdom {tmp_path / 'domain.csv'} -x epsilon_r -y epsilon_r")
+
+
+@pytest.mark.parametrize("sampling", ["-f 4", "-c 4"])
+def test_opdom_sampling_methods_filter_nonoperational_points(xor_gate: Shell, tmp_path: Path, sampling: str) -> None:
+    path = tmp_path / "domain.csv"
+    xor_gate.ok(
+        f'opdom "{path}" {sampling} --operational-only --x-min 5.6 --x-max 5.7 --x-step 0.1'
+        " --y-min 5 --y-max 5.1 --y-step 0.1"
+    )
+    rows = path.read_text(encoding="utf-8").splitlines()
+    assert rows[0].startswith("epsilon_r,lambda_tf")
+    result = xor_gate.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert len(rows) - 1 == result["num_operational_parameter_combinations"]
+    assert 0 < result["num_evaluated_parameter_combinations"] <= 4

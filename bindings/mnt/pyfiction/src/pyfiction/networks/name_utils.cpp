@@ -21,9 +21,11 @@
 #include <fiction/technology/sidb/layout.hpp>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>   // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -60,10 +62,20 @@ void name_utils(nanobind::module_& m)
     detail::get_name<py_shifted_cartesian_gate_layout>(m);
     detail::get_name<py_hexagonal_obstruction_layout>(m);
     detail::get_name<py_hexagonal_gate_layout>(m);
+    detail::get_name<py_odd_row_cartesian_gate_layout>(m);
+    detail::get_name<py_even_row_cartesian_gate_layout>(m);
+    detail::get_name<py_even_column_cartesian_gate_layout>(m);
+    detail::get_name<py_odd_row_hex_gate_layout>(m);
+    detail::get_name<py_odd_column_hex_gate_layout>(m);
+    detail::get_name<py_even_column_hex_gate_layout>(m);
     detail::get_name<py_qca_layout>(m);
+    detail::get_name<py_stacked_qca_layout>(m);
     detail::get_name<py_inml_layout>(m);
     detail::get_name<fiction::sidb::layout>(m);
     detail::get_name<py_logic_network>(m);
+    detail::get_name<py_aig_network>(m);
+    detail::get_name<py_xag_network>(m);
+    detail::get_name<py_mig_network>(m);
 
     detail::set_name<py_cartesian_obstruction_layout>(m);
     detail::set_name<py_cartesian_gate_layout>(m);
@@ -71,10 +83,20 @@ void name_utils(nanobind::module_& m)
     detail::set_name<py_shifted_cartesian_gate_layout>(m);
     detail::set_name<py_hexagonal_obstruction_layout>(m);
     detail::set_name<py_hexagonal_gate_layout>(m);
+    detail::set_name<py_odd_row_cartesian_gate_layout>(m);
+    detail::set_name<py_even_row_cartesian_gate_layout>(m);
+    detail::set_name<py_even_column_cartesian_gate_layout>(m);
+    detail::set_name<py_odd_row_hex_gate_layout>(m);
+    detail::set_name<py_odd_column_hex_gate_layout>(m);
+    detail::set_name<py_even_column_hex_gate_layout>(m);
     detail::set_name<py_qca_layout>(m);
+    detail::set_name<py_stacked_qca_layout>(m);
     detail::set_name<py_inml_layout>(m);
     detail::set_name<fiction::sidb::layout>(m);
     detail::set_name<py_logic_network>(m);
+    detail::set_name<py_aig_network>(m);
+    detail::set_name<py_xag_network>(m);
+    detail::set_name<py_mig_network>(m);
 }
 
 }  // namespace pyfiction

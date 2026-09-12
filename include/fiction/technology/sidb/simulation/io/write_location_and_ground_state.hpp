@@ -21,15 +21,14 @@
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/simulation/analysis/minimum_energy.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 #include "fmt/format.h"
 
 #include <cmath>
 #include <cstddef>
-#include <fstream>
 #include <ostream>
 #include <ranges>
-#include <string>
 #include <string_view>
 #include <vector>
 
@@ -136,15 +135,7 @@ inline void write_location_and_ground_state(const sidb::simulation::result& sim_
 inline void write_location_and_ground_state(const sidb::simulation::result& sim_result,
                                             const std::string_view&         filename)
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_location_and_ground_state(sim_result, os);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_location_and_ground_state(sim_result, os); });
 }
 
 }  // namespace fiction::sidb::simulation::io

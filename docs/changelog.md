@@ -30,6 +30,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `sidb::simulation::potential_landscape` stores static electrostatics for reuse across
     charge configurations and simulation worker threads
 
+- CLI:
+
+  - The `fiction` command-line interface is now a Python shell in `mnt.pyfiction.cli`;
+    `pip install mnt.pyfiction` installs the `fiction` script. It keeps the stores, the `-c`
+    command strings, script files with `source`, and the `-l` JSON log of the C++ shell.
+  - `write FILE` writes networks and layouts in the format the suffix names, replacing the
+    eight format commands; `read` reads `.aag` and `.pla` files as well.
+  - `aig PASS...` runs aigverse's rewriting, resubstitution, refactoring, and balancing on an
+    AIG, `abc` runs an external ABC's scripts, and `generate` builds adders and multiplexers.
+  - The JSON log describes every store element with one schema, in `snake_case` keys with
+    numbers where the C++ shell wrote `1/x` strings.
+  - `-i` continues into the shell once `-c` or `-f` is done, and `-q` keeps a scripted run to its
+    errors and requested results. `ps --all` describes every element of a store and `store --pop` removes the active one.
+  - `show` takes `-p COMMAND` for an explicit viewer and `--delete` to drop its temporary file when
+    the session ends; `show` and `write` take `--indexes` and `--clock-colors` for the DOT drawers.
+  - `write` without a file writes `<element name>.<format>` in the current directory, `-F` names the
+    format, and `--component-name` names a `.qcc` component after the file.
+  - `ortho -n 3|4` sets the number of clock phases, `random --type` produces XAGs, MIGs, and
+    technology networks, `map` regains its six short gate flags, and `cell -l` accepts `QCA ONE`,
+    `SIM7_MOL`, and the other spellings the C++ shell took.
+
+- Dependencies:
+
+  - `mnt.pyfiction` depends on `prompt_toolkit`, `rich`, and `aigverse` for the shell.
+
 - Documentation:
 
   - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
@@ -62,6 +87,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `apply_bestagon_library` returns `sidb_layout`
   - Added `on_the_fly_sidb_circuit_design` to design SiDB circuits from placed and routed
     hexagonal gate-level layouts, with configurable gate-design parameters
+  - `aig_network`, `xag_network`, and `mig_network` with their readers, `write_verilog`,
+    `write_blif`, `write_aiger`, `convert_network`, `count_gate_types`, and `print_sidb_layout`
+  - `dynamic_truth_table` gains `create_from_binary_string`, `create_from_hex_string`,
+    `create_from_expression`, `create_random`, `to_binary`, and `to_hex`; networks gain `depth`,
+    gate-level layouts `clone`, clocked layouts `get_clocking_scheme_name`, and `exact_params`
+    `upper_bound_area`
+  - `technology_mapping`, `simulate`, `count_gate_types`, and `write_dot_network` accept every
+    network type; `technology_mapping_params` exposes `lt2`, `gt2`, `le2`, and `ge2`
+  - `area` accepts a `mol_qca_layout`, `orthogonal_params` exposes `number_of_clock_phases` with the
+    `num_clks` enum, `write_qcc_layout_params` exposes `use_filename_as_component_name`, and
+    `gate_level_drvs` fills a `gate_level_drv_stats` whose `report` is the full check as JSON
+  - `convert_network` takes a `target` of the new `network_target` enum, so it produces AIGs, XAGs,
+    and MIGs as well as technology networks
+  - `print_sidb_layout` exposes `lat_color` and `crop_layout`, and `write_dot_network` and
+    `write_dot_layout` expose `indexes` and `clock_colors`
 
 - Tooling:
 
@@ -70,6 +110,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Algorithms:
+  - `convert_network` maps a technology network's inverters to `create_not` on a target without
+    `create_node`, so AIG, XAG, and MIG conversions keep the inverters they used to lose
   - **Breaking:** _QuickExact_, _QuickSim_, _ExGS_, _ClusterComplete_, and _Ground State Space_
     simulate `sidb::layout` and return the non-template `sidb::simulation::result`
   - _QuickSim_ returns `std::nullopt` for layouts with charged surface defects
@@ -96,6 +138,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     from the file; `--lattice_orientation` is removed
   - `print`, `show`, and statistics use stored ground states; `sqd` exports geometry and defects
   - SiDB shell descriptions and JSON statistics report dot counts as `dots`.
+  - Errors go to standard error instead of standard output, so a redirected run still shows them.
+  - `show` hands its file to the platform's opener rather than to a web browser, and keeps the file
+    until the process ends, because the viewer reads it after the command returns.
+  - `print -c` draws a simulated SiDB layout once, with the charge symbols in place of the dots.
+  - `check` prints and logs the full design rule report again, not only the two counts.
+  - `area` applies the cell dimensions to every technology, SiDB included, and defaults each one it
+    is not given to the technology's own value.
+  - `clustercomplete --base` defaults to 3 again, the base the engine is built for.
+  - `quit` ends a script and a `-c` string, leaving the commands after it unrun.
+  - `temp` and `opdom` run on an already simulated element, which they only read.
+  - `-v` prints the same aligned statistics table everywhere; `gold --progress` is now what lets the
+    search write its own progress past the shell.
+  - `map` renames `--xor_and`, `--or_and`, and `--and_xor` to `--xor-and`, `--or-and`, and
+    `--and-xor`; `--all2`, `--all3`, and `--all` are mutually exclusive.
+  - `read DIRECTORY` reports a file it cannot parse and reads the rest, and recognizes a suffix
+    whatever its case; `.aag` and `.pla` files honor `--type` by conversion.
+  - `help` lists the categories in reading order and ends with the general commands.
 
 - Continuous integration:
   - Reusable workflows now use GitHub's self-repository reference syntax.
@@ -266,6 +325,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+- CLI:
+
+  - `akers`, together with `miginvopt` and `miginvprop`. The truth table store now feeds the
+    gate-based SiDB simulations, `temp -g` and `opdom`, alone.
+  - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
+    `help --docs`.
 - **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
   `charge_distribution_surface`, and the lattice orientation tags; `model/nm_position.hpp` and
   `model/nm_distance.hpp` (use `lattice::nm_position` and `lattice::nm_distance`); the SiQAD coordinate
@@ -329,13 +394,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Population-stability analysis now distinguishes complete charge distributions beyond the charge-index range.
   - Gate design enumerates, counts, and randomly samples only empty, defect-free canvas sites.
   - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
+  - `convert_network` keeps the inverters of a technology network when the target network
+    type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
 
 - Build system:
 
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
 
 - CLI:
-  - SiDB store descriptions and statistics handle the full column range without integer overflow
+
+  - Preserved all FGL topologies, hexagonal orthogonal variants, synchronization elements, native random generators, and ABC flow controls.
+  - Rejected invalid mapping, numeric inputs, and conflicting writer options without replacing stored elements.
+  - Logic simulation builds output bits without an intermediate binary string.
+  - Added compact help, width-aware stores, Graphviz SVG viewing, piped input, and reliable quiet-mode results and cleanup.
+  - Topology help now lists choices in wrapped descriptions and keeps usage lines compact.
+  - SiDB store descriptions and statistics include lattice-based physical area and handle the full column range without integer overflow
+  - A script file that exists but cannot be read reports the reason and exits with 2, like a missing one
+  - `tt -t 0xD` reads all four bits of a hex digit as the two-variable table the same bits name in binary;
+    one digit produced a one-variable table and dropped two of them
+  - `temp` logs a missing energy gap as `null`; the JSON carried `Infinity`, which strict parsers reject
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
@@ -360,6 +437,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation:
 
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
+  - Nanobind API documentation now keeps its custom class renderer with Sphinx's deferred registration.
+    Removed duplicate bounding-box entries and corrected the critical-temperature overload reference.
   - Restored Python API entries and method signatures, and formatted generated docstrings.
   - SiDB reader documentation now lists every overload without ambiguous signatures.
 
@@ -375,6 +454,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.
+  - FGL round trips now preserve three-phase clocking across all supported topologies.
+  - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
+  - Transactional writers now report filesystem setup and replacement errors as stream failures. They preserve output permissions and symbolic links to existing files, and reject dangling links and non-regular output files.
+  - Network DOT export uses transactional replacement, including intermediate drawings produced by `show`.
+  - FQCA imports with at most two layers retain SVG export and viewing.
+  - Stacked FQCA imports preserve all layers and cell metadata. Layout readers reject coordinate overflow; writers replace files only after successful serialization.
   - QCA SVG output now uses valid text colors in simple tile mode.
   - SQD readers now reject fractional coordinates and trailing text in numeric attributes.
   - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites
@@ -386,12 +472,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Added ordered `simulate_outputs`, exposed mapper statistics, and validated truth-table sizes and expressions before native operations. Gate-library errors identify unsupported gates and their coordinates.
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
   - Exposed the defect-matrix reader exceptions at the package root.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector
   - The Python bindings compile when Z3 support is disabled
   - `write_sqd_layout` owns its Python filename during export on Windows
+  - `is_clocking_scheme`, `set_name`, and `get_name` accept Python strings, and the `time_total`
+    and `runtime` members of the statistics classes are readable; the casters were missing
+  - `write_dot_layout` draws shifted-Cartesian layouts instead of writing nothing
+  - The readers raise `RuntimeError` with the parser's diagnostics instead of printing them
+  - `energy_state` and `sidb_lattice_mode` are importable from `mnt.pyfiction`
+  - `create_from_binary_string` and `create_from_hex_string` raise `ValueError` for a character outside
+    their alphabet; `kitty` read such a character as a bit pattern and built a wrong truth table
+  - `write_verilog`, `write_blif`, and `write_aiger` raise `RuntimeError` when the file cannot be opened
+    or written; they returned as if they had written it
 
 - Tooling:
 

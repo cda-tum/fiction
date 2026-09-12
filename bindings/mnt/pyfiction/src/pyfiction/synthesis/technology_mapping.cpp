@@ -21,8 +21,12 @@
 
 #include <fiction/synthesis/technology_mapping.hpp>
 
+#include <mockturtle/algorithms/emap.hpp>
+
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/chrono.h>      // NOLINT(misc-include-cleaner): Required by nanobind return-value conversion.
 #include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner): Required by nanobind return-value conversion.
 #include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
@@ -77,6 +81,14 @@ void technology_mapping(nanobind::module_& m)
         .def_rw("xnor2", &fiction::synthesis::technology_mapping_params::xnor2,
                 DOC(fiction_synthesis_technology_mapping_params_xnor2))
 
+        .def_rw("lt2", &fiction::synthesis::technology_mapping_params::lt2,
+                DOC(fiction_synthesis_technology_mapping_params_lt2))
+        .def_rw("gt2", &fiction::synthesis::technology_mapping_params::gt2,
+                DOC(fiction_synthesis_technology_mapping_params_gt2))
+        .def_rw("le2", &fiction::synthesis::technology_mapping_params::le2,
+                DOC(fiction_synthesis_technology_mapping_params_le2))
+        .def_rw("ge2", &fiction::synthesis::technology_mapping_params::ge2,
+                DOC(fiction_synthesis_technology_mapping_params_ge2))
         .def_rw("and3", &fiction::synthesis::technology_mapping_params::and3,
                 DOC(fiction_synthesis_technology_mapping_params_and3))
         .def_rw("xor_and", &fiction::synthesis::technology_mapping_params::xor_and,
@@ -97,6 +109,17 @@ void technology_mapping(nanobind::module_& m)
                 DOC(fiction_synthesis_technology_mapping_params_and_xor))
 
         ;
+
+    py::class_<mockturtle::emap_stats>(m, "mapper_stats", "Technology mapper results, including failure status.")
+        .def_ro("mapping_error", &mockturtle::emap_stats::mapping_error)
+        .def_ro("area", &mockturtle::emap_stats::area)
+        .def_ro("delay", &mockturtle::emap_stats::delay)
+        .def_ro("power", &mockturtle::emap_stats::power)
+        .def_ro("inverters", &mockturtle::emap_stats::inverters)
+        .def_ro("multioutput_gates", &mockturtle::emap_stats::multioutput_gates)
+        .def_ro("time_multioutput", &mockturtle::emap_stats::time_multioutput)
+        .def_ro("time_total", &mockturtle::emap_stats::time_total)
+        .def_ro("round_stats", &mockturtle::emap_stats::round_stats);
 
     py::class_<fiction::synthesis::technology_mapping_stats>(m, "technology_mapping_stats",
                                                              DOC(fiction_synthesis_technology_mapping_stats))
@@ -120,6 +143,9 @@ void technology_mapping(nanobind::module_& m)
           DOC(fiction_synthesis_all_supported_standard_functions));
 
     detail::technology_mapping_impl<py_logic_network>(m);
+    detail::technology_mapping_impl<py_aig_network>(m);
+    detail::technology_mapping_impl<py_xag_network>(m);
+    detail::technology_mapping_impl<py_mig_network>(m);
 }
 
 }  // namespace pyfiction

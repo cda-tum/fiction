@@ -21,6 +21,7 @@
 #include "fiction/technology/inml/technology.hpp"
 #include "fiction/technology/qca/technology.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
@@ -28,11 +29,9 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <fstream>
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
-#include <string>
 #include <string_view>
 #include <unordered_map>
 #include <unordered_set>
@@ -479,15 +478,7 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os)
 template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_qll_layout(lyt, os);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_qll_layout(lyt, os); });
 }
 
 }  // namespace fiction::fcn::io

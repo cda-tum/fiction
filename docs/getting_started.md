@@ -24,14 +24,34 @@ To help you getting started with _fiction_, pick the interface that best fits yo
 
 | Goal                                   | Recommended Path          | Section                                  |
 | -------------------------------------- | ------------------------- | ---------------------------------------- |
-| Try the tool immediately               | 🐳 Docker CLI image       | {ref}`CLI (Docker) <cli-docker>`         |
-| Full-featured local CLI build          | 💻 Native build           | {ref}`CLI (Source) <cli-source>`         |
+| Try the tool immediately               | 🐍 `pip install`          | {ref}`CLI (pip) <cli-pip>`               |
+| Run the CLI without installing Python  | 🐳 Docker CLI image       | {ref}`CLI (Docker) <cli-docker>`         |
+| Develop the C++ library                | 💻 Native build           | {ref}`Building from source <cli-source>` |
 | Integrate into a C++ project           | 📚 Header-only library    | {ref}`C++ Library <header-only>`         |
 | Script / notebooks / rapid prototyping | 🐍 Python bindings (PyPI) | {ref}`Python Bindings <python-bindings>` |
 
 For a full CLI command list or API reference, see the respective documentation sections.
 
 <span id="cli"></span>
+
+(cli-pip)=
+
+## CLI (pip)
+
+The `fiction` command-line interface is part of the `mnt.pyfiction` Python package:
+
+```console
+$ pip install mnt.pyfiction
+$ fiction
+```
+
+Type `help` at the prompt for the list of commands, or run a flow without entering the shell:
+
+```console
+$ fiction -c "read c17.v; ortho; cell; write c17.qca"
+```
+
+See {ref}`cli` for the full user guide.
 
 (cli-docker)=
 
@@ -275,9 +295,10 @@ re-running `cmake` picks up new files on its own — you only need to wire the n
 
 :::{note}
 The Python-facing `mnt.pyfiction` namespace must not change shape when adding new bindings. In particular, do
-not introduce new Python-level submodules (e.g. `mnt.pyfiction.algorithms`) — all registration functions attach
-their bindings to the single top-level module object that is threaded through the call chain, matching the
-existing flat API that user scripts depend on.
+not introduce new Python-level submodules for bound symbols (e.g. `mnt.pyfiction.algorithms`) — all registration
+functions attach their bindings to the single top-level module object that is threaded through the call chain,
+matching the existing flat API that user scripts depend on. The one pure-Python subpackage is `mnt.pyfiction.cli`,
+the {ref}`command-line interface <cli>`, which only calls the bindings.
 :::
 
 :::{note}

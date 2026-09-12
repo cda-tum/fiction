@@ -37,9 +37,19 @@ void write_qcc_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 
+    py::class_<fiction::inml::io::write_qcc_layout_params>(m, "write_qcc_layout_params",
+                                                           DOC(fiction_inml_io_write_qcc_layout_params))
+        .def(py::init<>(), "Default constructor.")
+        .def_rw("use_filename_as_component_name",
+                &fiction::inml::io::write_qcc_layout_params::use_filename_as_component_name,
+                DOC(fiction_inml_io_write_qcc_layout_params_use_filename_as_component_name));
+
     m.def(
-        "write_qcc_layout", [](const py_inml_layout& lyt, const std::string_view& filename)
-        { fiction::inml::io::write_qcc_layout(lyt, filename); }, py::arg("layout"), py::arg("filename"),
+        "write_qcc_layout",
+        [](const py_inml_layout& lyt, const std::string_view& filename,
+           const fiction::inml::io::write_qcc_layout_params& params)
+        { fiction::inml::io::write_qcc_layout(lyt, filename, params); },
+        py::arg("layout"), py::arg("filename"), py::arg("params") = fiction::inml::io::write_qcc_layout_params{},
         DOC(fiction_inml_io_write_qcc_layout));
 }
 

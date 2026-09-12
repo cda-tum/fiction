@@ -22,6 +22,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>   // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/chrono.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/pair.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
 
@@ -31,6 +32,12 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * Bind equivalence checking for a pair of network or layout types.
+ * @tparam Spec Specification type.
+ * @tparam Impl Implementation type.
+ * @param m Python module.
+ */
 template <typename Spec, typename Impl>
 void equivalence_checking_impl(nanobind::module_& m)
 {
@@ -55,8 +62,31 @@ void equivalence_checking_impl(nanobind::module_& m)
         DOC(fiction_verification_equivalence_checking));
 }
 
+/**
+ * Bind one specification type against every supported implementation type.
+ * @tparam Spec Specification network or layout type.
+ * @param m Python module.
+ */
+template <typename Spec>
+void equivalence_checking_for(nanobind::module_& m)
+{
+    equivalence_checking_impl<Spec, py_logic_network>(m);
+    equivalence_checking_impl<Spec, py_cartesian_gate_layout>(m);
+    equivalence_checking_impl<Spec, py_shifted_cartesian_gate_layout>(m);
+    equivalence_checking_impl<Spec, py_hexagonal_gate_layout>(m);
+    equivalence_checking_impl<Spec, py_odd_row_cartesian_gate_layout>(m);
+    equivalence_checking_impl<Spec, py_even_row_cartesian_gate_layout>(m);
+    equivalence_checking_impl<Spec, py_even_column_cartesian_gate_layout>(m);
+    equivalence_checking_impl<Spec, py_odd_row_hex_gate_layout>(m);
+    equivalence_checking_impl<Spec, py_odd_column_hex_gate_layout>(m);
+    equivalence_checking_impl<Spec, py_even_column_hex_gate_layout>(m);
+}
+
 }  // namespace detail
 
+/** Register equivalence checking, its result enum, and statistics.
+ * @param m Python module.
+ */
 void equivalence_checking(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
@@ -93,25 +123,16 @@ void equivalence_checking(nanobind::module_& m)
 
         ;
 
-    detail::equivalence_checking_impl<py_logic_network, py_logic_network>(m);
-    detail::equivalence_checking_impl<py_logic_network, py_cartesian_gate_layout>(m);
-    detail::equivalence_checking_impl<py_logic_network, py_shifted_cartesian_gate_layout>(m);
-    detail::equivalence_checking_impl<py_logic_network, py_hexagonal_gate_layout>(m);
-
-    detail::equivalence_checking_impl<py_cartesian_gate_layout, py_logic_network>(m);
-    detail::equivalence_checking_impl<py_cartesian_gate_layout, py_cartesian_gate_layout>(m);
-    detail::equivalence_checking_impl<py_cartesian_gate_layout, py_shifted_cartesian_gate_layout>(m);
-    detail::equivalence_checking_impl<py_cartesian_gate_layout, py_hexagonal_gate_layout>(m);
-
-    detail::equivalence_checking_impl<py_shifted_cartesian_gate_layout, py_logic_network>(m);
-    detail::equivalence_checking_impl<py_shifted_cartesian_gate_layout, py_cartesian_gate_layout>(m);
-    detail::equivalence_checking_impl<py_shifted_cartesian_gate_layout, py_shifted_cartesian_gate_layout>(m);
-    detail::equivalence_checking_impl<py_shifted_cartesian_gate_layout, py_hexagonal_gate_layout>(m);
-
-    detail::equivalence_checking_impl<py_hexagonal_gate_layout, py_logic_network>(m);
-    detail::equivalence_checking_impl<py_hexagonal_gate_layout, py_cartesian_gate_layout>(m);
-    detail::equivalence_checking_impl<py_hexagonal_gate_layout, py_shifted_cartesian_gate_layout>(m);
-    detail::equivalence_checking_impl<py_hexagonal_gate_layout, py_hexagonal_gate_layout>(m);
+    detail::equivalence_checking_for<py_logic_network>(m);
+    detail::equivalence_checking_for<py_cartesian_gate_layout>(m);
+    detail::equivalence_checking_for<py_shifted_cartesian_gate_layout>(m);
+    detail::equivalence_checking_for<py_hexagonal_gate_layout>(m);
+    detail::equivalence_checking_for<py_odd_row_cartesian_gate_layout>(m);
+    detail::equivalence_checking_for<py_even_row_cartesian_gate_layout>(m);
+    detail::equivalence_checking_for<py_even_column_cartesian_gate_layout>(m);
+    detail::equivalence_checking_for<py_odd_row_hex_gate_layout>(m);
+    detail::equivalence_checking_for<py_odd_column_hex_gate_layout>(m);
+    detail::equivalence_checking_for<py_even_column_hex_gate_layout>(m);
 }
 
 }  // namespace pyfiction

@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "fiction/utils/version_info.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -26,19 +27,52 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/networks/io/dot_drawers.hpp>
 
 #include <fmt/format.h>
+#include <mockturtle/networks/aig.hpp>
+#include <mockturtle/traits.hpp>
 
+#include <filesystem>
+#include <fstream>
+#include <ios>
+#include <iterator>
+#include <random>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
+#include <system_error>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::layouts::io;
+using namespace fiction::networks::io;
 
 namespace
 {
+
+/**
+ * @brief Raises a serialization error after DOT output has started.
+ */
+class failing_dot_drawer : public technology_dot_drawer<mockturtle::aig_network>
+{
+  public:
+    /**
+     * @brief Reject a node label to exercise failed serialization.
+     * @param ntk Network being drawn.
+     * @param n Node being drawn.
+     * @return No label; always throws.
+     * @throws std::runtime_error On every call.
+     */
+    [[nodiscard]] std::string node_label(const mockturtle::aig_network&                   ntk,
+                                         const mockturtle::node<mockturtle::aig_network>& n) const override
+    {
+        static_cast<void>(ntk);
+        static_cast<void>(n);
+        throw std::runtime_error("drawing failed");
+    }
+};
 
 template <typename Lyt, typename Drawer>
 void compare_dot_layout(const Lyt& lyt, const std::string_view& layout_print)
@@ -937,4 +971,64 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                                                                                                      layout_print);
         }
     }
+}
+
+TEST_CASE("Network DOT export preserves files and symbolic links", "[dot-drawers]")
+{
+    const auto directory =
+        std::filesystem::temp_directory_path() / ("fiction-dot-test-" + std::to_string(std::random_device{}()));
+    REQUIRE(std::filesystem::create_directory(directory));
+    const auto target = directory / "network.dot";
+    {
+        std::ofstream stream{target};
+        stream << "original";
+    }
+    auto       destination = target;
+    const auto symbolic    = GENERATE(false, true);
+    if (symbolic)
+    {
+        destination = directory / "latest.dot";
+        std::error_code link_error{};
+        std::filesystem::create_symlink(target.filename(), destination, link_error);
+#ifdef _WIN32
+        if (link_error.value() == 1314)  // Windows requires symbolic-link creation privileges.
+        {
+            std::filesystem::remove_all(directory);
+            SKIP("Windows did not grant symbolic-link creation privileges");
+        }
+#endif
+        REQUIRE_FALSE(link_error);
+    }
+#ifndef _WIN32
+    const auto permissions = std::filesystem::perms::owner_read | std::filesystem::perms::owner_write;
+    std::filesystem::permissions(target, permissions);
+#endif
+    mockturtle::aig_network network{};
+    network.create_po(network.create_pi());
+    CHECK_THROWS_AS(write_dot_network(network, destination.string(), failing_dot_drawer{}), std::runtime_error);
+    {
+        std::ifstream     stream{target};
+        const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
+        CHECK(content == "original");
+    }
+    write_dot_network(network, destination.string());
+    {
+        std::stringstream expected{};
+        write_dot_network(network, expected);
+        std::ifstream     stream{target};
+        const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
+        CHECK(content == expected.str());
+    }
+#ifndef _WIN32
+    CHECK(std::filesystem::status(target).permissions() == permissions);
+#endif
+    if (destination != target)
+    {
+        CHECK(std::filesystem::is_symlink(destination));
+        std::filesystem::remove(target);
+        CHECK_THROWS_AS(write_dot_network(network, destination.string()), std::ios_base::failure);
+        CHECK(std::filesystem::is_symlink(destination));
+        CHECK_FALSE(std::filesystem::exists(target));
+    }
+    std::filesystem::remove_all(directory);
 }
