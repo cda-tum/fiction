@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -67,6 +68,17 @@ TEST_CASE("Operational checks honor a shared caller deadline", "[is-operational]
                                        .deadline   = std::chrono::steady_clock::now() + std::chrono::hours{1}};
     CHECK_THROWS_AS(is_operational(lyt, {create_or_tt()}, params), std::invalid_argument);
 #endif  // FICTION_ALGLIB_ENABLED
+}
+
+TEST_CASE("Operational checks retain their validated parameters", "[is-operational]")
+{
+    const auto                                           lyt = blueprints::siqad_or_gate();
+    const std::vector<tt>                                spec{create_or_tt()};
+    is_operational_params                                params{.sim_params = simulation_parameters{2, -0.32}};
+    sidb::simulation::logic::detail::is_operational_impl implementation{lyt, spec, params};
+
+    params.deadline = std::chrono::steady_clock::now();
+    CHECK_NOTHROW(implementation.run());
 }
 
 TEST_CASE("SiQAD OR gate", "[is-operational]")

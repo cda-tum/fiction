@@ -175,7 +175,7 @@ namespace detail
  * @throws utils::timeout_error if the deadline expires.
  * @throws std::invalid_argument if ClusterComplete is selected with a finite deadline.
  */
-[[nodiscard]] inline const is_operational_params& checked_parameters(const is_operational_params& params)
+[[nodiscard]] inline is_operational_params checked_parameters(const is_operational_params& params)
 {
     utils::check_deadline(params.deadline);
 #if (FICTION_ALGLIB_ENABLED)
@@ -824,7 +824,7 @@ class is_operational_impl
     /**
      * Parameters.
      */
-    const is_operational_params& parameters;
+    const is_operational_params parameters;
     /**
      * The output BDL pairs.
      */

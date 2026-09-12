@@ -43,9 +43,12 @@ using namespace fiction::utils::math;
 TEST_CASE("ExGS rejects incomplete simulations after the caller deadline", "[exhaustive-ground-state-simulation]")
 {
     layout lyt{};
-    auto   deadline = std::chrono::steady_clock::now();
+    auto   deadline = std::chrono::steady_clock::time_point::max();
 
-    SECTION("Already expired") {}
+    SECTION("Already expired")
+    {
+        deadline = std::chrono::steady_clock::now();
+    }
     SECTION("Expires while enumerating")
     {
         for (int32_t i = 0; i < 20; ++i)

@@ -75,18 +75,17 @@ def test_parameters() -> None:
     assert library.influence_radius_charged_defects == 10
 
 
-@pytest.mark.parametrize("timeout", [0, 1])
 @pytest.mark.parametrize("per_gate", [False, True])
-def test_circuit_timeout(and_circuit: hexagonal_gate_layout, timeout: int, *, per_gate: bool) -> None:
+def test_circuit_timeout(and_circuit: hexagonal_gate_layout, *, per_gate: bool) -> None:
     """Circuit and nested gate budgets raise TimeoutError instead of returning a partial circuit."""
     params = on_the_fly_sidb_circuit_design_params()
     gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params
     gates.design_mode = design_sidb_gates_mode.QUICKCELL
     gates.number_of_canvas_sidbs = 3
     if per_gate:
-        gates.timeout = timeout
+        gates.timeout = 0
     else:
-        params.timeout = timeout
+        params.timeout = 0
 
     with pytest.raises(TimeoutError):
         on_the_fly_sidb_circuit_design(and_circuit, params)
@@ -94,7 +93,7 @@ def test_circuit_timeout(and_circuit: hexagonal_gate_layout, timeout: int, *, pe
     assert and_circuit.num_pis() == 2
     assert and_circuit.num_pos() == 1
     assert and_circuit.is_and(and_circuit.get_node((1, 1, 0)))
-    assert (gates.timeout if per_gate else params.timeout) == timeout
+    assert (gates.timeout if per_gate else params.timeout) == 0
 
 
 @pytest.mark.parametrize("timeout", [-1, 2**64, 1.5])

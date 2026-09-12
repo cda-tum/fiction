@@ -11,6 +11,8 @@
 /**
  * @file
  * @brief Tests for SiDB circuit design and bounded exception messages.
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #include <catch2/catch_template_test_macros.hpp>
@@ -18,6 +20,8 @@
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 

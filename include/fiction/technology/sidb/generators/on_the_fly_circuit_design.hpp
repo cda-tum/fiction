@@ -43,7 +43,6 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
-#include <cstdint>
 #include <cstdio>
 #include <optional>
 #include <utility>
