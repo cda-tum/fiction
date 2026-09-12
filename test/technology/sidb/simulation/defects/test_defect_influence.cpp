@@ -578,12 +578,14 @@ TEST_CASE("Defect influence reports progress", "[defect-influence]")
 
     SECTION("QuickTrace")
     {
-        const auto domain = defect_influence_quicktrace(lyt, 1, params);
+        params.additional_scanning_area = {20, 0};
+        const auto domain               = defect_influence_quicktrace(lyt, 1, params);
 
         // the contour length is unknown in advance
         CHECK(rec.is_consistent("contour points"));
         const auto reports = rec.reports_of("contour points");
         REQUIRE(!reports.empty());
+        CHECK(rec.final_count("contour points") > 0);
         CHECK(reports.back().total == 0);
     }
 }

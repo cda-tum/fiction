@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
   - `utils::progress_callback` and `utils::progress_reporter` let long-running algorithms report
-    progress through the `on_progress` parameter.
+    progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
 
 - Code quality:
 

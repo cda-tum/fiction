@@ -1094,6 +1094,7 @@ class operational_domain_impl
 
         // Cartesian product of all step point indices
         const auto all_index_combinations = fiction::utils::math::cartesian_combinations(indices);
+        progress.set_total(all_index_combinations.size());
 
         // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
         // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
