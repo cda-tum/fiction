@@ -156,7 +156,8 @@ def test_conflicting_writer_options_do_not_touch_files(shell: Shell, tmp_path: P
 
 
 @pytest.mark.parametrize("topology", list(FGL_READERS))
-def test_all_topologies_round_trip_small_fixture(tmp_path: Path, topology: str) -> None:
+@pytest.mark.parametrize("phases", [3, 4])
+def test_all_topologies_round_trip_small_fixture(tmp_path: Path, topology: str, phases: int) -> None:
     native = {
         "cartesian": "cartesian",
         "shifted_cartesian": "shifted_cartesian",
@@ -164,12 +165,13 @@ def test_all_topologies_round_trip_small_fixture(tmp_path: Path, topology: str) 
         "odd_column_cartesian": "shifted_cartesian",
         "even_row_hex": "hexagonal",
     }.get(topology, topology)
-    layout = getattr(fiction, f"{native}_gate_layout")((2, 1), "2DDWave", topology)
+    layout = getattr(fiction, f"{native}_gate_layout")((2, 1), f"2DDWave{phases}", topology)
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (1, 0))
     path = tmp_path / f"{topology}.fgl"
     fiction.write_fgl_layout(layout, str(path))
     restored = FGL_READERS[topology](str(path))
+    assert restored.num_clocks() == phases
     assert restored.num_pis() == restored.num_pos() == 1
     assert fiction.simulate_outputs(restored) == fiction.simulate_outputs(layout)
 
@@ -331,12 +333,18 @@ def test_named_extensionless_bridges(shell: Shell, tmp_path: Path, format_name: 
 @pytest.mark.parametrize("topology", ["odd_row_hex", "even_row_hex", "odd_column_hex", "even_column_hex"])
 @pytest.mark.parametrize("phases", [3, 4])
 def test_direct_hexagonal_ortho_variants(
-    shell: Shell, resource: Callable[[str], str], topology: str, phases: int
+    shell: Shell, resource: Callable[[str], str], tmp_path: Path, topology: str, phases: int
 ) -> None:
     shell.ok(f'read "{resource("mux21.v")}"; ortho --topology {topology} --clock-phases {phases}')
     layout = shell.session.gate_layouts.current()
     assert layout.num_clocks() == phases
-    assert fiction.simulate_outputs(layout) == fiction.simulate_outputs(shell.session.networks.current())
+    expected = fiction.simulate_outputs(layout)
+    assert expected == fiction.simulate_outputs(shell.session.networks.current())
+    path = tmp_path / "hex.fgl"
+    shell.ok(f'write "{path}"; read --topology {topology} "{path}"')
+    restored = shell.session.gate_layouts.current()
+    assert restored.num_clocks() == phases
+    assert fiction.simulate_outputs(restored) == expected
 
 
 def test_decoding_failure_reports_file_and_line(shell: Shell, tmp_path: Path) -> None:

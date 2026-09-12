@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -23,22 +24,23 @@
 
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <sstream>
+#include <string_view>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -52,7 +54,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt) noexcep
     CHECK(wlyt.get_layout_name() == rlyt.get_layout_name());
 
     const bounding_box_2d<WLyt> wbb{wlyt};
-    const bounding_box_2d<RLyt> rbb{wlyt};
+    const bounding_box_2d<RLyt> rbb{rlyt};
 
     CHECK(wbb.get_min() == rbb.get_min());
     CHECK(wbb.get_max() == rbb.get_max());
@@ -171,4 +173,40 @@ TEST_CASE("Write and read layouts", "[write-fgl-layout]")
 
     check_parsing_equiv_all<gate_layout>();
     check_parsing_equiv_layout_all();
+}
+
+TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fgl-layout]", cart_gate_clk_lyt,
+                   cart_odd_row_gate_clk_lyt, cart_even_row_gate_clk_lyt, cart_odd_col_gate_clk_lyt,
+                   cart_even_col_gate_clk_lyt, hex_odd_row_gate_clk_lyt, hex_even_row_gate_clk_lyt,
+                   hex_odd_col_gate_clk_lyt, hex_even_col_gate_clk_lyt)
+{
+    for (const auto* const name : {"OPEN3", "OPEN4", "COLUMNAR3", "COLUMNAR4", "ROW3", "ROW4", "2DDWAVE3", "2DDWAVE4",
+                                   "2DDWAVEHEX3", "2DDWAVEHEX4"})
+    {
+        if constexpr (!is_hexagonal_layout_v<TestType>)
+        {
+            if (std::string_view{name}.starts_with("2DDWAVEHEX"))
+            {
+                continue;
+            }
+        }
+        INFO(name);
+        const auto scheme = clocking::get_scheme<TestType>(name);
+        REQUIRE(scheme.has_value());
+        TestType original{{3, 2, 0}, *scheme, "clock phases"};
+        if (!scheme->is_regular())
+        {
+            original.assign_clock_number({1, 1, 0}, 2);
+        }
+        original.create_pi("a", {0, 0, 0});
+        std::stringstream stream{};
+        write_fgl_layout(original, stream);
+        const auto restored = read_fgl_layout<TestType>(stream);
+        CHECK(restored.num_clocks() == original.num_clocks());
+        CHECK(restored.get_clocking_scheme().name == original.get_clocking_scheme().name);
+        original.foreach_coordinate(
+            [&](const auto& coordinate)
+            { CHECK(restored.get_clock_number(coordinate) == original.get_clock_number(coordinate)); });
+        compare_written_and_read_layout(original, restored);
+    }
 }

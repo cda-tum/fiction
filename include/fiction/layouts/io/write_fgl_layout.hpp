@@ -76,7 +76,7 @@ inline constexpr const char* LAYOUT_METADATA       = "    <name>{}</name>\n"
                                                      "    </size>\n";
 inline constexpr const char* OPEN_CLOCKING         = "    <clocking>\n";
 inline constexpr const char* CLOSE_CLOCKING        = "    </clocking>\n";
-inline constexpr const char* CLOCKING_SCHEME_NAME  = "      <name>{}</name>\n";
+inline constexpr const char* CLOCKING_SCHEME_NAME  = "      <name>{}{}</name>\n";
 inline constexpr const char* OPEN_CLOCK_ZONES      = "      <zones>\n";
 inline constexpr const char* CLOSE_CLOCK_ZONES     = "      </zones>\n";
 inline constexpr const char* CLOCK_ZONE            = "        <zone>\n"
@@ -173,7 +173,8 @@ class write_fgl_layout_impl
 
         os << fgl::OPEN_CLOCKING;
         const auto clocking_scheme = lyt.get_clocking_scheme();
-        os << fmt::format(fgl::CLOCKING_SCHEME_NAME, clocking_scheme.name);
+        // Three-phase factories share their base name with the four-phase variant.
+        os << fmt::format(fgl::CLOCKING_SCHEME_NAME, clocking_scheme.name, clocking_scheme.num_clocks == 3u ? "3" : "");
 
         // if clocking scheme is irregular, overwrite clock zones
         if (!clocking_scheme.is_regular())
