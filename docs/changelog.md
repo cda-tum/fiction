@@ -391,6 +391,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Python bindings:
 
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
+  - `design_sidb_gates_stats.__repr__` now converts the statistics string to Python.
   - Exposed the defect-matrix reader exceptions at the package root.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector
