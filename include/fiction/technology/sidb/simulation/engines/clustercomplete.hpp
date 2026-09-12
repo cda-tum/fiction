@@ -14,6 +14,7 @@
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author GPT-6 via Codex
  */
 
 #pragma once
@@ -581,6 +582,8 @@ class clustercomplete_impl
         // specialise for all compositions of max_pst
         for (const charge_space_composition& max_pst_composition : get_projector_state_compositions(*max_pst))
         {
+            progress.advance();
+
             // specialise parent to a specific composition of its children
             add_composition(cl_state, max_pst_composition);
 
@@ -609,6 +612,8 @@ class clustercomplete_impl
         {
             for (const charge_space_composition& composition : ccs.compositions)
             {
+                progress.advance();
+
                 // convert charge space composition to clustering state
                 clustering_state cl_state{landscape.num_sidbs()};
                 add_composition(cl_state, composition);

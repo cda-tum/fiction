@@ -13,6 +13,7 @@
  * @brief Determines at which positions a defect disturbs an SiDB layout.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author GPT-6 via Codex
  */
 
 #pragma once
@@ -191,21 +192,18 @@ class defect_influence_impl
 
         const mockturtle::stopwatch stop{stats.time_total};
 
-        const auto positions = all_positions();
+        auto positions = all_positions();
+        std::erase_if(positions,
+                      [step_size](const auto& p)
+                      {
+                          return static_cast<std::size_t>(std::abs(int64_t{p.x})) % step_size != 0 ||
+                                 static_cast<std::size_t>(std::abs(row_of(p))) % step_size != 0;
+                      });
 
         utils::progress_reporter progress{params.on_progress, "defect positions", positions.size()};
 
         run_in_parallel(positions.size(), progress,
-                        [this, &positions, step_size, &spec](const std::size_t i)
-                        {
-                            const auto& p = positions[i];
-
-                            if (static_cast<std::size_t>(std::abs(int64_t{p.x})) % step_size == 0 &&
-                                static_cast<std::size_t>(std::abs(row_of(p))) % step_size == 0)
-                            {
-                                is_defect_influential(spec, p);
-                            }
-                        });
+                        [this, &positions, &spec](const std::size_t i) { is_defect_influential(spec, positions[i]); });
 
         log_stats();
 

@@ -12,6 +12,7 @@
  * @file
  * @brief Tests for `fiction/utils/progress.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author GPT-6 via Codex
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -21,6 +22,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -199,6 +201,42 @@ TEST_CASE("A reporter can be reset for a new pass", "[progress]")
 
     CHECK(rec.records.front() == record{0, 3});
     CHECK(rec.records.back() == record{4, 4});
+}
+
+TEST_CASE("Every reset reports a new pass", "[progress]")
+{
+    recorder                 rec{};
+    utils::progress_reporter reporter{rec.callback(), "items", 3};
+
+    reporter.reset(3);
+    reporter.reset(3);
+
+    CHECK(rec.records == std::vector<record>{{0, 3}, {0, 3}, {0, 3}});
+}
+
+TEST_CASE("Two reporters share a caller-synchronized callback", "[progress]")
+{
+    recorder                       rec{};
+    std::mutex                     callback_mutex{};
+    const utils::progress_callback callback =
+        [&rec, &callback_mutex](const std::string_view, const std::size_t done, const std::size_t total)
+    {
+        const std::scoped_lock lock{callback_mutex};
+        rec.records.emplace_back(done, total);
+    };
+    const auto run = [&callback]
+    {
+        utils::progress_reporter reporter{callback, "items", 3};
+        reporter.advance(3);
+    };
+
+    std::thread first{run};
+    std::thread second{run};
+    first.join();
+    second.join();
+
+    CHECK(std::ranges::count(rec.records, record{0, 3}) == 2);
+    CHECK(std::ranges::count(rec.records, record{3, 3}) == 2);
 }
 
 TEST_CASE("Concurrent advances are counted exactly once", "[progress]")

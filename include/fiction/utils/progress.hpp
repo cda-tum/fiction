@@ -12,6 +12,7 @@
  * @file
  * @brief A throttled, thread-safe progress hook for long-running algorithms.
  * @author Marcel Walter (marcelwa)
+ * @author GPT-6 via Codex
  */
 
 #pragma once
@@ -37,8 +38,8 @@ namespace fiction::utils
  * total is unknown. Every task is reported with `done == 0` first, and the final report of a task carries its final
  * count. In between, reports are throttled, so consumers must not rely on seeing every intermediate value.
  *
- * The callback may be invoked from any thread the algorithm spawns, but never concurrently with itself. It must not
- * throw.
+ * The callback may be invoked from any thread the algorithm spawns. Each reporter serializes its own invocations;
+ * callbacks shared by multiple reporters must synchronize access to shared state. The callback must not throw.
  */
 using progress_callback = std::function<void(std::string_view task, std::size_t done, std::size_t total)>;
 
@@ -184,6 +185,7 @@ class progress_reporter
         count.store(0, std::memory_order_relaxed);
         total_items = total;
         step        = step_for(total);
+        reported    = false;
 
         report_locked(0);
     }

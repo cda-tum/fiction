@@ -14,7 +14,7 @@ turns the reporting off.
 **Header:** `fiction/utils/progress.hpp`
 
 ```cpp
-fiction::orthogonal_physical_design_params params{};
+fiction::physical_design::orthogonal_physical_design_params params{};
 params.on_progress = [](const std::string_view task, const std::size_t done, const std::size_t total)
 { std::cout << task << ": " << done << '/' << total << '\n'; };
 ```
@@ -46,5 +46,6 @@ worker threads while the call is in flight.
 
 ::::
 
-Algorithms use a `progress_reporter` to forward their progress. It throttles the reports to whole percents and to at
-most ten reports per second, and it always forwards the first and the final count of a task.
+Algorithms use a `progress_reporter` to forward their progress. Each reporter serializes its callbacks and throttles
+intermediate reports to whole percents and at most ten reports per second. It always forwards the first and final count
+of a task. C++ callbacks shared by multiple reporters must synchronize access to shared state.
