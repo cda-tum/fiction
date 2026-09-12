@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/technology/sidb/simulation/logic/operational_domain.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author GPT-6 via Codex
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -158,7 +159,7 @@ TEST_CASE("Test parameter point", "[operational-domain]")
 
     SECTION("Parameter values - invalid index")
     {
-        REQUIRE_THROWS_AS(p1.get_parameters().at(3), std::out_of_range);
+        REQUIRE_THROWS_AS(std::ignore = p1.get_parameters().at(3), std::out_of_range);
     }
 
     SECTION("Equal parameter points hash equally")
