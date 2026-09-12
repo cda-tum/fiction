@@ -12,11 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
   - `utils::progress_callback` and `utils::progress_reporter` let long-running algorithms report
-    their progress through an `on_progress` member of their parameters: `exact`, `orthogonal`,
-    `graph_oriented_layout_design`, `hexagonalization`, `post_layout_optimization`,
-    `wiring_reduction`, the four SiDB simulation engines, `critical_temperature`,
-    `operational_domain`, `time_to_solution`, `design_gates`, the random layout generators,
-    `defect_influence`, and `displacement_robustness_domain`
+    progress through the `on_progress` parameter.
 
 - Code quality:
 

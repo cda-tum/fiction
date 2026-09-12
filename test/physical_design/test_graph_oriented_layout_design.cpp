@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/physical_design/graph_oriented_layout_design.hpp`.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
+ * @author GPT-6 via Codex
  */
 
 #include <catch2/catch_message.hpp>
@@ -613,7 +614,9 @@ TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layo
     // the number of expansions is unknown in advance
     CHECK(rec.is_consistent("expansions"));
     CHECK(rec.final_count("expansions") > 0);
-    CHECK(rec.reports_of("expansions").back().total == 0);
+    const auto reports = rec.reports_of("expansions");
+    REQUIRE(!reports.empty());
+    CHECK(reports.back().total == 0);
 }
 
 // NOLINTEND(bugprone-unchecked-optional-access)

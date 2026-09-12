@@ -14,6 +14,7 @@
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author GPT-6 via Codex
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -252,5 +253,7 @@ TEST_CASE("Wiring reduction reports progress", "[wiring_reduction]")
 
     // the number of wire paths is unknown in advance
     CHECK(rec.is_consistent("wire paths"));
-    CHECK(rec.reports_of("wire paths").back().total == 0);
+    const auto reports = rec.reports_of("wire paths");
+    REQUIRE(!reports.empty());
+    CHECK(reports.back().total == 0);
 }
