@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
+  - SiDB gate and circuit design accept cooperative millisecond timeouts; circuit budgets
+    cover all gates and expired searches throw `utils::timeout_error`.
 
 - Code quality:
 
@@ -44,6 +46,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - SiDB gate and circuit timeouts raise Python's `TimeoutError`; gate design releases the GIL
+    after copying its inputs.
   - Added directory-based test markers, including `pytest -m simulation`.
   - Marked the SiDB circuit-design integration test as `slow`; `pytest -m 'not slow'` skips it.
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered

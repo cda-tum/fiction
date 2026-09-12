@@ -76,6 +76,8 @@ void on_the_fly_circuit_design(nanobind::module_& m)
     py::class_<circuit_params>(m, "on_the_fly_sidb_circuit_design_params",
                                DOC(fiction_sidb_generators_on_the_fly_circuit_design_params))
         .def(py::init<>(), "Default constructor.")
+        .def_rw("timeout", &circuit_params::timeout,
+                DOC(fiction_sidb_generators_on_the_fly_circuit_design_params_timeout))
         .def_rw("sidb_on_the_fly_gate_library_parameters", &circuit_params::sidb_on_the_fly_gate_library_parameters,
                 DOC(fiction_sidb_generators_on_the_fly_circuit_design_params_sidb_on_the_fly_gate_library_parameters));
 
@@ -107,7 +109,8 @@ void on_the_fly_circuit_design(nanobind::module_& m)
 
 The layout and parameters are copied before releasing the GIL. The input layout is not modified.
 This function does not perform placement and routing or accept a defective surface.
-The search has no timeout; use a separate process when cancellation is required.
+The optional timeout bounds the whole circuit search in milliseconds. Deadline checks are cooperative;
+use a separate process when an exact cutoff is required. A timeout never returns a partial circuit.
 
 Args:
     layout: A hexagonal gate-level layout with supported Bestagon port orientations.
@@ -117,6 +120,7 @@ Returns:
     An SiDB layout that can be exported with write_sqd_layout or write_sidb_layout_svg.
 
 Raises:
+    TimeoutError: The circuit or an individual gate exceeds its timeout.
     RuntimeError: A gate cannot be designed with the supplied parameters.
     ValueError: A gate type or orientation is unsupported, or gate parameters are invalid.
 )doc");
