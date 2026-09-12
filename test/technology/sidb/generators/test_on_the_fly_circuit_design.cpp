@@ -18,11 +18,16 @@
 
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 
 #include <array>
+#include <chrono>
+#include <cstdint>
+#include <limits>
 #include <string_view>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 
 TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-design]")
@@ -34,6 +39,43 @@ TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-de
     params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs = 0;
 
     CHECK_THROWS_AS(on_the_fly_circuit_design(gate_layout, params), unsuccessful_gate_design_error);
+}
+
+TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-circuit-design]")
+{
+    hex_even_row_gate_clk_lyt gate_layout{{2, 2}};
+    const auto                first  = gate_layout.create_pi("a", {0, 0});
+    const auto                second = gate_layout.create_pi("b", {1, 0});
+    const auto                gate   = gate_layout.create_and(first, second, {1, 1});
+    gate_layout.create_po(gate, "f", {0, 2});
+
+    on_the_fly_circuit_design_params params{};
+    auto&                            gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params;
+    CHECK(params.timeout == std::numeric_limits<uint64_t>::max());
+    CHECK(gates.timeout == std::numeric_limits<uint64_t>::max());
+
+    SECTION("Zero circuit budget expires with unlimited gate budgets")
+    {
+        params.timeout = 0;
+    }
+    SECTION("Zero gate budget expires within a positive circuit budget")
+    {
+        params.timeout = 10'000;
+        gates.timeout  = 0;
+    }
+    SECTION("Unlimited gate budgets cannot override a finite circuit budget")
+    {
+        params.timeout               = 1;
+        gates.canvas                 = {site_at_row(0, 0), site_at_row(1'000, 1'000)};
+        gates.number_of_canvas_sidbs = 0;
+    }
+
+    const auto start = std::chrono::steady_clock::now();
+    CHECK_THROWS_AS(on_the_fly_circuit_design(gate_layout, params), utils::timeout_error);
+    CHECK(std::chrono::steady_clock::now() - start < std::chrono::seconds{10});
+    CHECK(gate_layout.num_pis() == 2);
+    CHECK(gate_layout.num_pos() == 1);
+    CHECK(gate_layout.is_and(gate_layout.get_node({1, 1})));
 }
 
 TEMPLATE_TEST_CASE("Circuit-design exceptions copy the supplied message view", "[on-the-fly-circuit-design]",
