@@ -314,15 +314,12 @@ class read_fgl_layout_impl
             {
                 gate_storage gate{};
 
-                if (const auto* const gate_id = gate_xml->FirstChildElement("id");
-                    gate_id != nullptr && (gate_id->GetText() != nullptr))
+                const auto id = read_number(gate_xml, "id");
+                if (id > static_cast<uint64_t>(std::numeric_limits<decltype(gate.id)>::max()))
                 {
-                    gate.id = std::stoi(gate_id->GetText());
+                    throw fgl_parsing_error("Error parsing FGL file: gate ID exceeds the target range");
                 }
-                else
-                {
-                    throw fgl_parsing_error("Error parsing FGL file: no element 'id' in 'gate'");
-                }
+                gate.id = static_cast<decltype(gate.id)>(id);
 
                 if (const auto* const gate_type = gate_xml->FirstChildElement("type");
                     gate_type != nullptr && (gate_type->GetText() != nullptr))

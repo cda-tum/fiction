@@ -1930,6 +1930,31 @@ TEST_CASE("FGL rejects invalid numeric metadata", "[read-fgl-layout]")
     std::string x{"0"};
     std::string clock{"0"};
     std::string delay{"0"};
+    std::string id{"0"};
+    SECTION("Negative gate ID")
+    {
+        id = "-1";
+    }
+    SECTION("Trailing gate ID data")
+    {
+        id = "1oops";
+    }
+    SECTION("Non-numeric gate ID")
+    {
+        id = "gate";
+    }
+    SECTION("Empty gate ID")
+    {
+        id = " ";
+    }
+    SECTION("Gate ID storage overflow")
+    {
+        id = "2147483648";
+    }
+    SECTION("Gate ID integer overflow")
+    {
+        id = "18446744073709551616";
+    }
     SECTION("Negative coordinate")
     {
         x = "-1";
@@ -1962,6 +1987,7 @@ TEST_CASE("FGL rejects invalid numeric metadata", "[read-fgl-layout]")
         "<fgl><layout><name>invalid</name><topology>cartesian</topology><size><x>" + x +
         "</x><y>0</y><z>0</z></size><clocking><name>OPEN4</name><zones><zone><x>0</x><y>0</y><clock>" + clock +
         "</clock></zone></zones><synchronization_elements><element><x>0</x><y>0</y><z>0</z><delay>" + delay +
-        "</delay></element></synchronization_elements></clocking></layout></fgl>"};
+        "</delay></element></synchronization_elements></clocking></layout><gates><gate><id>" + id +
+        "</id><type>PI</type><name>input</name><loc><x>0</x><y>0</y><z>0</z></loc></gate></gates></fgl>"};
     CHECK_THROWS_AS(read_fgl_layout<sync_layout>(stream), fgl_parsing_error);
 }
