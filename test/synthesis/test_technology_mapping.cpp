@@ -32,6 +32,7 @@
 #include <mockturtle/views/names_view.hpp>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
@@ -401,10 +402,10 @@ TEST_CASE("No exception when all required gates are present", "[technology-mappi
 
 TEST_CASE("Incomplete technology libraries report mapping failure", "[technology-mapping]")
 {
-    networks::technology_network network{};
-    const auto                   a = network.create_pi();
-    const auto                   b = network.create_pi();
-    const auto                   c = network.create_pi();
+    technology_network network{};
+    const auto         a = network.create_pi();
+    const auto         b = network.create_pi();
+    const auto         c = network.create_pi();
     SECTION("Missing two-input function")
     {
         network.create_po(network.create_xor(a, b));

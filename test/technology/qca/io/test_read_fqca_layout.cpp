@@ -21,13 +21,14 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/qca/io/read_fqca_layout.hpp>
 #include <fiction/technology/qca/io/write_fqca_layout.hpp>
 #include <fiction/technology/qca/technology.hpp>
 
+#include <ios>
 #include <sstream>
 #include <stdexcept>
-#include <string>
 #include <type_traits>
 
 using namespace fiction;

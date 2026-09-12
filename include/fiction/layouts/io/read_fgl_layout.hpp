@@ -623,10 +623,10 @@ class read_fgl_layout_impl
         {
             throw fgl_parsing_error("Error parsing FGL file: empty coordinate");
         }
-        const auto trimmed = text.substr(first, last - first + 1);
-        const auto end     = std::to_address(trimmed.end());
-        uint64_t   value{};
-        const auto result = std::from_chars(trimmed.data(), end, value);
+        const auto        trimmed = text.substr(first, last - first + 1);
+        const auto* const end     = std::to_address(trimmed.end());
+        uint64_t          value{};
+        const auto        result = std::from_chars(std::to_address(trimmed.begin()), end, value);
         if (result.ec != std::errc{} || result.ptr != end)
         {
             throw fgl_parsing_error(fmt::format("Error parsing FGL file: invalid nonnegative integer '{}'", text));

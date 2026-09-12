@@ -20,9 +20,12 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
