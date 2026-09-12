@@ -132,11 +132,10 @@ void exact(nanobind::module_& m)
           py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
           DOC(fiction_physical_design_exact));
 
-    m.def("exact_odd_row_cartesian",
-          &fiction::physical_design::exact<py_odd_row_cartesian_gate_layout, py_logic_network>, py::arg("network"),
-          py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
-          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
-          DOC(fiction_physical_design_exact));
+    m.def(
+        "exact_odd_row_cartesian", &fiction::physical_design::exact<py_odd_row_cartesian_gate_layout, py_logic_network>,
+        py::arg("network"), py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+        py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(), DOC(fiction_physical_design_exact));
 
     m.def("exact_even_row_cartesian",
           &fiction::physical_design::exact<py_even_row_cartesian_gate_layout, py_logic_network>, py::arg("network"),
