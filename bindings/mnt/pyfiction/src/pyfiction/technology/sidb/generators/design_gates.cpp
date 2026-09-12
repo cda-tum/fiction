@@ -25,11 +25,17 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/pair.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner): Converts the statistics representation.
 #include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
 
+/**
+ * @brief Registers SiDB gate design, its parameters, and statistics.
+ *
+ * @param m Python module.
+ */
 void design_gates(nanobind::module_& m)
 {
     namespace py = nanobind;
@@ -86,14 +92,29 @@ void design_gates(nanobind::module_& m)
                 DOC(fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs))
         .def_rw("maximal_random_design_attempts", &design_gates_params::maximal_random_design_attempts,
                 DOC(fiction_sidb_generators_design_gates_params_maximal_random_design_attempts))
+        .def_rw("timeout", &design_gates_params::timeout, DOC(fiction_sidb_generators_design_gates_params_timeout))
         .def_rw("termination_cond", &design_gates_params::termination_cond,
                 DOC(fiction_sidb_generators_design_gates_params_termination_condition));
 
     m.def(
         "design_sidb_gates",
-        [](const layout& skeleton, const std::vector<py_tt>& spec, const design_gates_params& params,
+        // NOLINTNEXTLINE(performance-unnecessary-value-param): Own inputs while Python can mutate the originals.
+        [](const layout skeleton, const std::vector<py_tt> spec, const design_gates_params params,
            design_gates_stats* stats)
-        { return fiction::sidb::generators::design_gates(skeleton, spec, params, stats); },
+        {
+            // Copy Python-owned inputs before releasing the GIL; publish statistics after reacquiring it.
+            design_gates_stats  local_stats{};
+            std::vector<layout> result{};
+            {
+                const py::gil_scoped_release release{};
+                result = fiction::sidb::generators::design_gates(skeleton, spec, params, &local_stats);
+            }
+            if (stats != nullptr)
+            {
+                *stats = local_stats;
+            }
+            return result;
+        },
         py::arg("skeleton"), py::arg("spec"), py::arg("params") = design_gates_params{}, py::arg("stats") = nullptr,
         DOC(fiction_sidb_generators_design_gates));
 }

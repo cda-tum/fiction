@@ -49,6 +49,8 @@ def test_parameters() -> None:
     """Circuit parameters retain the native defaults and writable nested fields."""
     params = on_the_fly_sidb_circuit_design_params()
     library = params.sidb_on_the_fly_gate_library_parameters
+    assert params.timeout == 2**64 - 1
+    assert library.design_gate_params.timeout == 2**64 - 1
     assert isinstance(library, sidb_on_the_fly_gate_library_params)
     assert library.design_gate_params.design_mode == design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
     assert library.design_gate_params.number_of_canvas_sidbs == 1
@@ -71,6 +73,37 @@ def test_parameters() -> None:
         == sidb_complex_gate_design_policy.DESIGN_ON_THE_FLY
     )
     assert library.influence_radius_charged_defects == 10
+
+
+@pytest.mark.parametrize("per_gate", [False, True])
+def test_circuit_timeout(and_circuit: hexagonal_gate_layout, *, per_gate: bool) -> None:
+    """Circuit and nested gate budgets raise TimeoutError instead of returning a partial circuit."""
+    params = on_the_fly_sidb_circuit_design_params()
+    gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params
+    gates.design_mode = design_sidb_gates_mode.QUICKCELL
+    gates.number_of_canvas_sidbs = 3
+    if per_gate:
+        gates.timeout = 0
+    else:
+        params.timeout = 0
+
+    with pytest.raises(TimeoutError):
+        on_the_fly_sidb_circuit_design(and_circuit, params)
+
+    assert and_circuit.num_pis() == 2
+    assert and_circuit.num_pos() == 1
+    assert and_circuit.is_and(and_circuit.get_node((1, 1, 0)))
+    assert (gates.timeout if per_gate else params.timeout) == 0
+
+
+@pytest.mark.parametrize("timeout", [-1, 2**64, 1.5])
+def test_invalid_timeout(timeout: float) -> None:
+    """The Python API accepts only unsigned 64-bit millisecond budgets."""
+    params = on_the_fly_sidb_circuit_design_params()
+    with pytest.raises(TypeError):
+        params.timeout = timeout
+    with pytest.raises(TypeError):
+        params.sidb_on_the_fly_gate_library_parameters.design_gate_params.timeout = timeout
 
 
 @pytest.mark.slow

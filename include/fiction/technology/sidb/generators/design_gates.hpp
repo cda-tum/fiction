@@ -24,6 +24,7 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/technology.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
@@ -115,6 +116,12 @@ struct design_gates_params
      * When to stop.
      */
     termination_condition termination_cond = termination_condition::AFTER_FIRST_SOLUTION;
+    /**
+     * Timeout in milliseconds, including candidate generation and simulation. The maximum value means unlimited;
+     * zero expires immediately. Checks are cooperative, so allocation and non-interruptible setup can exceed the
+     * budget. Finite budgets support QUICKEXACT, EXGS, and QUICKSIM, but not CLUSTERCOMPLETE.
+     */
+    uint64_t timeout = std::numeric_limits<uint64_t>::max();
 };
 
 /**
@@ -186,18 +193,20 @@ class design_gates_impl
             skeleton_layout{skeleton},
             truth_table{spec},
             params{ps},
-            available_sidbs_in_canvas{[this]
-                                      {
-                                          auto sites = sites_in_area(params.canvas.first, params.canvas.second);
-                                          std::erase_if(sites,
-                                                        [this](const auto& s)
-                                                        {
-                                                            return !skeleton_layout.is_empty_site(s) ||
-                                                                   skeleton_layout.get_defect(s).type !=
-                                                                       model::defect_type::NONE;
-                                                        });
-                                          return sites;
-                                      }()},
+            available_sidbs_in_canvas{
+                [this]
+                {
+                    auto sites =
+                        sites_in_area(params.canvas.first, params.canvas.second, params.operational_params.deadline);
+                    std::erase_if(sites,
+                                  [this](const auto& s)
+                                  {
+                                      utils::check_deadline(params.operational_params.deadline);
+                                      return !skeleton_layout.is_empty_site(s) ||
+                                             skeleton_layout.get_defect(s).type != model::defect_type::NONE;
+                                  });
+                    return sites;
+                }()},
             stats{st},
             input_bdl_wires{simulation::logic::detect_bdl_wires(
                 skeleton_layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
@@ -234,7 +243,7 @@ class design_gates_impl
         const mockturtle::stopwatch stop{stats.time_total};
 
         auto all_combinations = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params.number_of_canvas_sidbs, available_sidbs_in_canvas.size());
+            params.number_of_canvas_sidbs, available_sidbs_in_canvas.size(), params.operational_params.deadline);
 
         std::vector<layout> designed_gate_layouts{};
 
@@ -317,6 +326,7 @@ class design_gates_impl
                         {
                             while (!gate_layout_is_found)
                             {
+                                utils::check_deadline(params.operational_params.deadline);
                                 if (attempt_counter.fetch_add(1, std::memory_order_relaxed) >=
                                     params.maximal_random_design_attempts)
                                 {
@@ -520,6 +530,7 @@ class design_gates_impl
 
         for (std::size_t i = 0; i < num_threads; ++i)
         {
+            utils::check_deadline(params.operational_params.deadline);
             workers.emplace_back(
                 std::async(std::launch::async,
                            [this, i, chunk_size, &items, &fn, &done]
@@ -529,6 +540,7 @@ class design_gates_impl
 
                                for (std::size_t j = start_index; j < end_index; ++j)
                                {
+                                   utils::check_deadline(params.operational_params.deadline);
                                    if (done && params.termination_cond ==
                                                    design_gates_params::termination_condition::AFTER_FIRST_SOLUTION)
                                    {
@@ -579,6 +591,7 @@ class design_gates_impl
 
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
+                utils::check_deadline(params.operational_params.deadline);
                 const auto reason = is_operational_impl.is_layout_invalid(i);
 
                 if (!reason.has_value())
@@ -625,13 +638,14 @@ class design_gates_impl
     [[nodiscard]] std::vector<layout> determine_all_possible_canvas_layouts() const
     {
         const auto all_combinations = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params.number_of_canvas_sidbs, available_sidbs_in_canvas.size());
+            params.number_of_canvas_sidbs, available_sidbs_in_canvas.size(), params.operational_params.deadline);
 
         std::vector<layout> canvas_layouts{};
         canvas_layouts.reserve(all_combinations.size());
 
         for (const auto& combination : all_combinations)
         {
+            utils::check_deadline(params.operational_params.deadline);
             canvas_layouts.push_back(design_canvas_layout(combination));
         }
 
@@ -690,6 +704,8 @@ class design_gates_impl
  * combination of canvas SiDBs, *QuickCell*'s pruning followed by simulation, random placement, and pruning only.
  * Worker exceptions propagate to the caller after all started workers finish.
  * Random placement samples at most `maximal_random_design_attempts` candidates without enumerating canvas layouts.
+ * The timeout covers setup and all search phases. Expiration discards partial results and stops all workers before
+ * throwing. Allocation and non-interruptible setup may exceed the cooperative deadline.
  *
  * *QuickCell* is described in "Towards Fast Automatic Design of Silicon Dangling Bond Logic" by J. Drewniok,
  * M. Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
@@ -706,12 +722,16 @@ class design_gates_impl
  * @param stats Statistics.
  * @return The designed gates.
  * @throws std::invalid_argument if `spec` is empty or the input wire count differs from the specification.
+ * @throws utils::timeout_error if the gate-design deadline is reached.
  */
 [[nodiscard]] inline std::vector<layout> design_gates(const layout&                                  skeleton,
                                                       const std::vector<kitty::dynamic_truth_table>& spec,
                                                       const design_gates_params&                     params = {},
                                                       design_gates_stats*                            stats  = nullptr)
 {
+    auto timed_params                        = params;
+    timed_params.operational_params.deadline = utils::make_deadline(params.timeout, params.operational_params.deadline);
+    utils::check_deadline(timed_params.operational_params.deadline);
     if (spec.empty())
     {
         throw std::invalid_argument{"spec must not be empty"};
@@ -723,7 +743,7 @@ class design_gates_impl
                                       { return a.num_vars() != b.num_vars(); }) == spec.end());
 
     design_gates_stats        st{};
-    detail::design_gates_impl p{skeleton, spec, params, st};
+    detail::design_gates_impl p{skeleton, spec, timed_params, st};
 
     std::vector<layout> result{};
 
@@ -740,6 +760,7 @@ class design_gates_impl
         result = p.run_quickcell();
     }
 
+    utils::check_deadline(timed_params.operational_params.deadline);
     if (stats != nullptr)
     {
         *stats = st;

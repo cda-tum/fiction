@@ -24,8 +24,11 @@
 #include "fiction/technology/sidb/simulation/detail/simulation_state.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
+
+#include <chrono>
 
 namespace fiction::sidb::simulation::engines
 {
@@ -38,13 +41,16 @@ namespace fiction::sidb::simulation::engines
  *
  * @param lyt Layout to simulate.
  * @param params Physical parameters.
+ * @param deadline Shared caller deadline. `time_point::max()` leaves the simulation unlimited.
  * @return The physically valid charge distributions.
  * @throws std::out_of_range if a site has an invalid lattice basis index.
+ * @throws utils::timeout_error if the shared caller deadline expires. No partial result is returned.
  */
-[[nodiscard]] inline result
-exhaustive_ground_state_simulation(const layout&                       lyt,
-                                   const model::simulation_parameters& params = model::simulation_parameters{})
+[[nodiscard]] inline result exhaustive_ground_state_simulation(
+    const layout& lyt, const model::simulation_parameters& params = model::simulation_parameters{},
+    const std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::time_point::max())
 {
+    utils::check_deadline(deadline);
     result simulation_result{};
     simulation_result.algorithm_name = "ExGS";
     simulation_result.sim_params     = params;
@@ -64,6 +70,7 @@ exhaustive_ground_state_simulation(const layout&                       lyt,
 
         while (state.charge_index() < state.max_charge_index())
         {
+            utils::check_deadline(deadline);
             if (state.is_physically_valid())
             {
                 simulation_result.charge_distributions.push_back(state.snapshot());
@@ -78,6 +85,8 @@ exhaustive_ground_state_simulation(const layout&                       lyt,
         }
     }
     simulation_result.simulation_runtime = time_counter;
+
+    utils::check_deadline(deadline);
 
     return simulation_result;
 }
