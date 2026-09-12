@@ -17,6 +17,13 @@ set(FICTION_SECTION_FLAGS
 # Fetched Dependencies (Managed via FetchContent in Dependencies.cmake)
 ################################################################################
 
+# fmt
+target_link_system_libraries(libfiction INTERFACE
+    $<BUILD_INTERFACE:fmt>
+    $<INSTALL_INTERFACE:fiction::fmt>
+)
+install(DIRECTORY ${fmt_SOURCE_DIR}/include/ DESTINATION include)
+
 # mockturtle
 target_link_system_libraries(libfiction INTERFACE
     $<BUILD_INTERFACE:mockturtle>

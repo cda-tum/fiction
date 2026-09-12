@@ -414,6 +414,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Build system:
 
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
+  - Installed CMake packages include the `fmt` headers and their header-only compile definition.
 
 - CLI:
 
