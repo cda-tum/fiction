@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction import inml_layout, mol_qca_layout, mol_qca_technology
+from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import REGISTRY
 from mnt.pyfiction.cli.stores import CellEntry, element_name
 
@@ -59,7 +60,7 @@ def test_store_lists_elements_and_marks_the_active_one(mux21_shell: Shell, resou
 
 def test_current_selects_an_element(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
     mux21_shell.ok(f"read {resource('xor2.v')}")
-    mux21_shell.ok("current -n 0")
+    mux21_shell.ok("current -n 1")
     assert any("*" in line and "mux21" in line for line in mux21_shell.ok("store -n").splitlines())
     assert "out of range" in mux21_shell.fails("current -n 7")
     assert "exactly one store" in mux21_shell.fails("current 0")
@@ -67,12 +68,15 @@ def test_current_selects_an_element(mux21_shell: Shell, resource: Callable[[str]
 
 def test_ps_prints_statistics(mux21_shell: Shell) -> None:
     output = mux21_shell.ok("ps -n")
-    assert "Gates" in output
+    # the grouped block heads with the identity and folds the counts onto shared lines
+    assert "mux21 · TEC" in output
+    assert "gates" in output
     assert "Depth" in output
     mux21_shell.ok("ortho")
     output = mux21_shell.ok("ps -g")
-    assert "Clocking" in output
-    assert "Throughput" in output
+    assert "2DDWAVE" in output
+    assert "throughput" in output
+    assert "critical path" in output
 
 
 def test_print_layout(mux21_shell: Shell) -> None:
@@ -193,21 +197,20 @@ def test_clear(mux21_shell: Shell) -> None:
     assert len(mux21_shell.session.networks) == 0
 
 
-def test_source_runs_nested_scripts(shell: Shell, tmp_path: Path, resource: Callable[[str], str]) -> None:
-    inner = tmp_path / "inner.fs"
-    inner.write_text(f"read {resource('mux21.v')}\n", encoding="utf-8")
-    outer = tmp_path / "outer.fs"
-    outer.write_text(f"source {inner}\northo\n", encoding="utf-8")
-    shell.ok(f"source {outer}")
+def test_run_script_executes_a_file(shell: Shell, tmp_path: Path, resource: Callable[[str], str]) -> None:
+    """A script file, as -f runs it, executes one command per line."""
+    script = tmp_path / "work.fs"
+    script.write_text(f"read {resource('mux21.v')}\northo\n", encoding="utf-8")
+    assert shell.session.run_script(script)
     assert len(shell.session.gate_layouts) == 1
 
 
-def test_source_stops_at_a_failure(shell: Shell, tmp_path: Path) -> None:
+def test_run_script_stops_at_a_failure(shell: Shell, tmp_path: Path) -> None:
     script = tmp_path / "bad.fs"
     script.write_text("version\nfrobnicate\nversion\n", encoding="utf-8")
-    output = shell.fails(f"source {script}")
-    assert "stopped at a failing command" in output
-    assert "cannot read script" in shell.fails(f"source {tmp_path / 'missing.fs'}")
+    assert not shell.session.run_script(script)
+    with pytest.raises(CommandError, match="cannot read script"):
+        shell.session.run_script(tmp_path / "missing.fs")
 
 
 @pytest.mark.parametrize("flag", ["-t", "-g", "-c"])
@@ -264,12 +267,15 @@ def test_store_pop_removes_nothing_when_one_store_is_empty(mux21_shell: Shell) -
     assert len(mux21_shell.session.networks) == 1
 
 
-def test_exit_is_an_alias_of_quit(shell: Shell) -> None:
-    """`exit` and `quit` are one command, and `help` lists it once."""
+def test_quit_is_the_only_leave_command(shell: Shell) -> None:
+    """`quit` leaves the shell; the `exit` alias and the `source` command are gone."""
     listing = shell.ok("help")
-    assert listing.count("quit, exit") == 1
-    assert "\n  exit " not in listing
-    shell.ok("exit")
+    assert listing.count("quit") == 1
+    assert "exit" not in listing
+    assert "source" not in listing
+    assert "unknown command" in shell.fails("exit")
+    assert "unknown command" in shell.fails("source")
+    shell.ok("quit")
     assert not shell.session.running
 
 

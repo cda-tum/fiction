@@ -33,7 +33,7 @@ def test_cell_bestagon(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho; hex; cell -l bestagon")
     entry = mux21_shell.session.cell_layouts.current()
     assert isinstance(entry.layout, sidb_layout)
-    assert "Lattice" in mux21_shell.ok("ps -c")
+    assert "Si(100)" in mux21_shell.ok("ps -c")
 
 
 def test_cell_topology_mismatch(mux21_shell: Shell) -> None:

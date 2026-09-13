@@ -17,7 +17,7 @@ import pytest
 from mnt.pyfiction import orthogonal, orthogonal_stats
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import REGISTRY, STORE_FLAGS, Category
-from mnt.pyfiction.cli.session import stats_to_dict, tokenize
+from mnt.pyfiction.cli.session import Session, stats_to_dict, tokenize
 from mnt.pyfiction.cli.stores import Store
 
 if TYPE_CHECKING:
@@ -110,10 +110,12 @@ def test_store() -> None:
     store.add(1)
     store.add(2)
     assert store.current() == 2
-    store.select(0)
+    store.select(1)
     assert store.current() == 1
     with pytest.raises(CommandError, match="out of range"):
         store.select(5)
+    with pytest.raises(CommandError, match="out of range"):
+        store.select(0)
     assert store.summary() == "things: 2"
     store.clear()
     assert len(store) == 0
@@ -123,10 +125,15 @@ def test_store() -> None:
 def test_status_line_describes_active_store_elements(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho; cell; tt -t 1000")
     status = mux21_shell.session.status_line()
-    assert "net[0]/1 mux21" in status
-    assert "gate[0]/1" in status
-    assert "cell[0]/1" in status
-    assert "tt[0]/1" in status
+    # positions count from 1, the way 'store' lists them and 'current' accepts them
+    assert "networks 1 of 1 · mux21" in status
+    assert "gate layouts 1 of 1" in status
+    assert "cell layouts 1 of 1" in status
+    assert "truth tables 1 of 1" in status
+
+
+def test_status_line_is_empty_without_elements() -> None:
+    assert Session().status_line() == "no elements in store"
 
 
 def test_stats_to_dict(mux21: technology_network) -> None:
@@ -139,8 +146,8 @@ def test_stats_to_dict(mux21: technology_network) -> None:
     assert "report" not in result
 
 
-def test_script_depth_limit(shell: Shell, tmp_path_factory: pytest.TempPathFactory) -> None:
-    script = tmp_path_factory.mktemp("scripts") / "loop.fs"
-    script.write_text(f"source {script}\n", encoding="utf-8")
-    output = shell.fails(f"source {script}")
-    assert "deeper than" in output
+def test_script_reports_an_unreadable_file(shell: Shell, tmp_path_factory: pytest.TempPathFactory) -> None:
+    """A script file that cannot be read is reported, rather than silently doing nothing."""
+    missing = tmp_path_factory.mktemp("scripts") / "absent.fs"
+    with pytest.raises(CommandError, match="cannot read script"):
+        shell.session.run_script(missing)

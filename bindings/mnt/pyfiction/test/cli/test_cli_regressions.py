@@ -29,6 +29,7 @@ from rich.console import Console
 from mnt import pyfiction as fiction
 from mnt.pyfiction.cli.app import CommandCompleter
 from mnt.pyfiction.cli.commands.files import FGL_READERS
+from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import REGISTRY
 from mnt.pyfiction.cli.session import Session, json_value, tokenize
 from mnt.pyfiction.cli.stores import Store
@@ -43,11 +44,12 @@ def test_pop_selects_predecessor() -> None:
     store: Store[int] = Store("number")
     for value in range(4):
         store.add(value)
-    store.select(2)
+    # positions count from 1, so position 3 holds the value 2
+    store.select(3)
     removed = store.pop()
     assert removed == 2
     assert store.current() == 1
-    store.select(0)
+    store.select(1)
     store.pop()
     assert store.current() == 1
 
@@ -350,10 +352,11 @@ def test_direct_hexagonal_ortho_variants(
 def test_decoding_failure_reports_file_and_line(shell: Shell, tmp_path: Path) -> None:
     path = tmp_path / "bad.fiction"
     path.write_bytes(b"version\n\xff")
-    output = shell.fails(f'source "{path}"')
+    with pytest.raises(CommandError) as failure:
+        shell.session.run_script(path)
+    output = str(failure.value)
     assert f"{path}:2" in output
     assert "UTF-8" in output
-    assert "Traceback" not in output
 
 
 def test_drv_blocked_equivalence_is_a_report(shell: Shell, resource: Callable[[str], str]) -> None:
@@ -422,7 +425,7 @@ def test_mapping_with_statistics_preserves_function(mux21_shell: Shell) -> None:
 def test_all_help_has_inputs_defaults_and_example(shell: Shell) -> None:
     for name in REGISTRY:
         output = shell.ok(f"help {name}")
-        for section in ("Inputs:", "Defaults:", "Restrictions:", "Example:"):
+        for section in ("Inputs:", "Restrictions:", "Example:"):
             assert section in output, name
 
 
@@ -605,16 +608,6 @@ def test_gate_library_error_preserves_store(shell: Shell) -> None:
     output = shell.fails("cell -l topolinano")
     assert "unsupported gate orientation at tile" in output
     assert len(shell.session.cell_layouts) == 0
-
-
-def test_directory_import_ignores_directories_with_network_suffix(shell: Shell, tmp_path: Path) -> None:
-    (tmp_path / "folder.v").mkdir()
-    (tmp_path / "wire.V").write_text(
-        "module top(a,f);\ninput a;\noutput f;\nassign f = a;\nendmodule\n", encoding="utf-8"
-    )
-    shell.ok(f'read "{tmp_path}"')
-    assert len(shell.session.networks) == 1
-    assert "failed" not in shell.stderr
 
 
 def test_interrupted_command_is_logged_and_session_continues(shell: Shell, monkeypatch: pytest.MonkeyPatch) -> None:

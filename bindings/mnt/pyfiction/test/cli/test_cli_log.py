@@ -98,5 +98,6 @@ def test_sidb_statistics_use_dots(shell: Shell, resource: Callable[[str], str]) 
     description = shell.session.log[-1]["result"]["cell_layout"]  # type: ignore[index]
     assert description["dots"] == shell.session.cell_layouts.current().layout.num_dots()
     assert "cells" not in description
-    assert "dots" in shell.ok("store -c")
-    assert "Dots" in shell.ok("ps -c")
+    # the store listing shows the layout extent; the dot count is in the ps block
+    assert "17 x 18" in shell.ok("store -c")
+    assert "dots" in shell.ok("ps -c")

@@ -39,7 +39,7 @@ from mnt.pyfiction.cli.registry import (
     store_flags,
     unavailable_reason,
 )
-from mnt.pyfiction.cli.render import table as render_table
+from mnt.pyfiction.cli.render import summary as render_summary
 from mnt.pyfiction.cli.stores import Store, describe, ground_state, one_line
 
 if TYPE_CHECKING:
@@ -47,6 +47,27 @@ if TYPE_CHECKING:
 
     from mnt.pyfiction.cli.registry import Parser, Result
     from mnt.pyfiction.cli.session import Session
+
+
+MAX_NAME_WIDTH = 32
+"""The widest a name column gets before it is shortened; long names must not push the counts away."""
+
+
+def _size_of(description: dict[str, object]) -> str:
+    """Return the size of an element: its extent for a layout, its node count for a network.
+
+    Args:
+        description: A description from :func:`~mnt.pyfiction.cli.stores.describe`.
+
+    Returns:
+        The size as one short string.
+    """
+    size = description.get("size")
+    if isinstance(size, dict):
+        extent = " x ".join(str(size[axis]) for axis in ("x", "y", "z") if axis in size)
+        if extent:
+            return extent
+    return ", ".join(f"{description[key]} {key}" for key in ("gates", "cells", "dots", "vars") if key in description)
 
 
 def stores_of(session: Session) -> dict[str, Store]:  # type: ignore[type-arg]
@@ -85,65 +106,86 @@ def help_command(session: Session, args: argparse.Namespace) -> Result:
         session.console.print(cmd.parser.format_help(), markup=False, highlight=False)
         return None
 
-    table = Table(box=None, show_header=False, padding=(0, 2))
+    pager = (
+        session.console.pager() if args.all and session.console.is_terminal and sys.stdin.isatty() else nullcontext()
+    )
+    with pager:
+        session.console.print(_command_grid(described=args.all))
+        session.output("\nExample: read circuit.v; ortho; check; cell; write circuit.qca", style="note")
+        session.output("Use help COMMAND for options and restrictions; help --all for descriptions.", style="note")
+        for name in ("exact", "clustercomplete"):
+            if reason := unavailable_reason(name):
+                session.output(f"{name}: {reason}", style="note")
+    return None
+
+
+NAME_COLUMNS = 4
+"""How many command names one row of the ``help`` grid holds."""
+
+
+def _command_grid(*, described: bool) -> Table:
+    """Lay every category out in one grid, so the columns align across the whole listing.
+
+    Args:
+        described: List each command with its summary instead of packing names into columns.
+
+    Returns:
+        The grid, ready to print on a console.
+    """
+    grid = Table(box=None, show_header=False, padding=(0, 1), pad_edge=False)
+    grid.add_column("", no_wrap=True)
+    if described:
+        grid.add_column("", overflow="fold")
+    else:
+        for _ in range(NAME_COLUMNS - 1):
+            grid.add_column("", no_wrap=True)
+    blanks = [""] * (len(grid.columns) - 1)
     for category in Category:
         # a command registered under an alias appears in the registry twice; list it once
         commands = [cmd for name, cmd in REGISTRY.items() if cmd.category is category and cmd.name == name]
         if not commands:
             continue
-        if args.all:
-            table.add_row(f"[bold]{category.value}[/]", "")
+        if grid.row_count:
+            grid.add_row("", *blanks)
+        grid.add_row(f"[bold]{category.value}[/]", *blanks)
+        if described:
             for cmd in commands:
-                table.add_row(cmd.name, escape(cmd.summary))
+                grid.add_row(f"  {cmd.name}", escape(cmd.summary))
         else:
-            table.add_row(
-                f"[bold]{category.value}[/]", "  ".join(", ".join((cmd.name, *cmd.aliases)) for cmd in commands)
-            )
-    pager = (
-        session.console.pager() if args.all and session.console.is_terminal and sys.stdin.isatty() else nullcontext()
-    )
-    with pager:
-        session.console.print(table)
-        session.output("\nExample: read circuit.v; ortho; check; cell; write circuit.qca")
-        session.output("Use help COMMAND for options and restrictions; help --all for descriptions.")
-        for name in ("exact", "clustercomplete"):
-            if reason := unavailable_reason(name):
-                session.output(f"{name}: {reason}")
-    return None
+            _add_name_rows(grid, [name for cmd in commands for name in (cmd.name, *cmd.aliases)])
+    return grid
+
+
+def _add_name_rows(grid: Table, names: list[str]) -> None:
+    """Append the command names of one category, wrapped across the grid's columns.
+
+    Args:
+        grid: The grid being built.
+        names: The command names, aliases included.
+    """
+    for start in range(0, len(names), NAME_COLUMNS):
+        row = names[start : start + NAME_COLUMNS]
+        cells = [*row, *[""] * (NAME_COLUMNS - len(row))]
+        cells[0] = f"  {cells[0]}"
+        grid.add_row(*cells)
 
 
 @command("version", Category.GENERAL)
 def version(session: Session, args: argparse.Namespace) -> Result:
     """Print the fiction version and build date."""
     del args
-    session.output(f"{__version__} ({__repo__}), compiled {__compiled_date__} {__compiled_time__}")
+    session.output(f"{__version__} ({__repo__}), compiled {__compiled_date__} {__compiled_time__}", style="result")
     return {"version": __version__, "compiled": f"{__compiled_date__} {__compiled_time__}"}
 
 
-@command("quit", Category.GENERAL, aliases=("exit",))
+@command("quit", Category.GENERAL)
 def quit_command(session: Session, args: argparse.Namespace) -> Result:
-    """Leave the shell; also spelled 'exit'.
+    """Leave the shell.
 
     In a script or behind -c, the commands after it are not run.
     """
     del args
     session.running = False
-    return None
-
-
-def _source_arguments(parser: Parser) -> None:
-    parser.add_argument("file", type=Path, help="the script file, one command line per line")
-
-
-@command("source", Category.GENERAL, _source_arguments)
-def source(session: Session, args: argparse.Namespace) -> Result:
-    """Run the commands of a script file.
-
-    Scripts may source other scripts. The first failing command stops the script.
-    """
-    if not session.run_script(args.file):
-        msg = f"script '{args.file}' stopped at a failing command"
-        raise CommandError(msg)
     return None
 
 
@@ -183,11 +225,12 @@ def store(session: Session, args: argparse.Namespace) -> Result:
         descriptions = [describe(element) for element in current]
         empty = " (empty)" if not descriptions else ""
         session.console.print(f"[bold]{STORE_FLAGS[name][2]}[/]{empty}")
-        table = Table(box=None, padding=(0, 1), expand=True)
+        table = Table(box=None, padding=(0, 1))
         table.add_column("", width=1)
         table.add_column("Index", justify="right", no_wrap=True)
-        table.add_column("Name", overflow="ellipsis", ratio=1, no_wrap=True)
+        table.add_column("Name", overflow="ellipsis", max_width=MAX_NAME_WIDTH, no_wrap=True)
         table.add_column("Type", no_wrap=True)
+        table.add_column("I/O", no_wrap=True)
         table.add_column("Size", no_wrap=True)
         for index, description in enumerate(descriptions):
             marker = "*" if index == current.active else ""
@@ -196,11 +239,15 @@ def store(session: Session, args: argparse.Namespace) -> Result:
             )
             if description.get("simulation"):
                 label += " / simulated"
-            counts = f"{description['inputs']}/{description['outputs']} I/O, " if "inputs" in description else ""
-            size = counts + ", ".join(
-                f"{description[key]} {key}" for key in ("gates", "cells", "dots", "vars") if key in description
+            io = f"{description['inputs']}/{description['outputs']}" if "inputs" in description else ""
+            table.add_row(
+                marker,
+                str(index + 1),
+                escape(str(description.get("name", "—"))),
+                escape(label),
+                io,
+                escape(_size_of(description)),
             )
-            table.add_row(marker, str(index), escape(str(description.get("name", "—"))), escape(label), escape(size))
         if descriptions:
             session.console.print(table)
         listed[name] = descriptions
@@ -242,7 +289,7 @@ def _pop(session: Session, stores: dict[str, Store], names: list[str]) -> Result
 
 def _current_arguments(parser: Parser) -> None:
     store_flags(parser)
-    parser.add_argument("index", type=int, help="the element's number, as 'store' lists it")
+    parser.add_argument("position", type=int, help="the element's position, counting from 1 as 'store' lists it")
 
 
 @command("current", Category.GENERAL, _current_arguments)
@@ -250,7 +297,7 @@ def current(session: Session, args: argparse.Namespace) -> Result:
     """Make an element of a store the active one."""
     name = one_store(args)
     selected = stores_of(session)[name]
-    selected.select(args.index)
+    selected.select(args.position)
     return {name: describe(selected.current())}
 
 
@@ -266,7 +313,7 @@ def ps(session: Session, args: argparse.Namespace) -> Result:
     if not args.all:
         name = one_store(args)
         description = describe(stores[name].current())
-        session.console.print(render_table(description))
+        session.console.print(render_summary(description))
         return {name: description}
 
     listed: dict[str, object] = {}
@@ -275,8 +322,8 @@ def ps(session: Session, args: argparse.Namespace) -> Result:
         descriptions = [describe(element) for element in current_store]
         for index, description in enumerate(descriptions):
             marker = "*" if index == current_store.active else " "
-            session.console.print(f"[bold]{STORE_FLAGS[name][2]}[/] {marker}{index}")
-            session.console.print(render_table(description))
+            session.console.print(f"[bold]{STORE_FLAGS[name][2]}[/] {marker}{index + 1}")
+            session.console.print(render_summary(description))
         listed[name] = descriptions
     return listed
 
@@ -308,17 +355,12 @@ def print_command(session: Session, args: argparse.Namespace) -> Result:
         session.output(repr(entry.layout))
         return None
     state = ground_state(entry)
-    # The charge list below preserves the sign when terminal colors are unavailable.
     picture = print_sidb_layout(
         entry.layout, state, lat_color=session.console.is_terminal and not session.console.no_color
     )
     session.output(picture.rstrip())
     if state is not None:
-        session.output(f"Ground state energy: {state.energy():.6f} eV")
-        signs = {"NEGATIVE": "-", "NEUTRAL": "0", "POSITIVE": "+"}
-        session.output("Charges (- negative, 0 neutral, + positive):")
-        for site in state.sites():
-            session.output(f"  {site}: {signs.get(state.get_charge_state(site).name, '?')}")
+        session.output(f"Ground state energy: {state.energy():.6f} eV", style="result")
     return None
 
 

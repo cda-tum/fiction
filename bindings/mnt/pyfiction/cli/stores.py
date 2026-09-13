@@ -168,19 +168,29 @@ class Store(Generic[T]):
             raise CommandError(msg)
         return self.items[self.active]
 
-    def select(self, index: int) -> None:
+    def select(self, position: int) -> None:
         """Make an element the active one.
 
         Args:
-            index: The element's position, as ``store`` lists it.
+            position: The element's position as the shell numbers it, counting from 1.
 
         Raises:
-            CommandError: When the index is out of range.
+            CommandError: When the position is out of range.
         """
-        if not 0 <= index < len(self.items):
-            msg = f"{self.kind} index {index} is out of range; the store holds {len(self.items)}"
+        if not 1 <= position <= len(self.items):
+            held = f"the store holds {len(self.items)}" if self.items else "the store is empty"
+            msg = f"{self.kind} {position} is out of range; {held}"
             raise CommandError(msg)
-        self.active = index
+        self.active = position - 1
+
+    @property
+    def position(self) -> int | None:
+        """The active element's position as the shell shows it, counting from 1.
+
+        Returns:
+            The position, or ``None`` while the store is empty.
+        """
+        return None if self.active is None else self.active + 1
 
     def pop(self) -> T:
         """Remove the active element and select its predecessor, or the first remaining element.

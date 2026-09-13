@@ -17,9 +17,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from prompt_toolkit import PromptSession
+from prompt_toolkit.application.current import get_app
 from prompt_toolkit.completion import Completer, Completion, PathCompleter
 from prompt_toolkit.document import Document
 from prompt_toolkit.history import FileHistory, History
+from prompt_toolkit.styles import Style
 
 from mnt.pyfiction import __version__
 
@@ -31,9 +33,35 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
 
     from prompt_toolkit.completion import CompleteEvent
+    from prompt_toolkit.formatted_text import StyleAndTextTuples
 
 # importing the commands package registers every command with the registry
 importlib.import_module(".commands", __package__)
+
+PROMPT_STYLE = Style.from_dict({
+    "prompt": "bold",
+    "prompt.done": "#808080",
+})
+"""The active prompt stands out; the ones already answered recede into gray."""
+
+PROMPT_TEXT = "fiction> "
+"""What the interactive shell prompts with."""
+
+
+def _prompt() -> StyleAndTextTuples:
+    """Return the prompt, gray once this line has been accepted.
+
+    ``prompt_toolkit`` renders the prompt one last time after the user presses Enter, with
+    ``is_done`` set; returning a different style for that final paint leaves the finished lines gray
+    in the scrollback while the line being typed stays bright.
+
+    Returns:
+        The styled prompt fragments.
+    """
+    style = "class:prompt.done" if get_app().is_done else "class:prompt"
+    fragments: StyleAndTextTuples = [(style, PROMPT_TEXT)]
+    return fragments
+
 
 HISTORY_FILE = Path.home() / ".fiction_history"
 """Where the interactive shell keeps the command history between sessions."""
@@ -173,11 +201,12 @@ def repl(session: Session) -> None:
         completer=CommandCompleter(),
         complete_while_typing=False,
         bottom_toolbar=session.status_line,
+        style=PROMPT_STYLE,
     )
     session.console.print(f"[bold]{__version__}[/] · type [bold]help[/] for the list of commands")
     while session.running:
         try:
-            line = prompt.prompt("fiction> ")
+            line = prompt.prompt(_prompt)
         except KeyboardInterrupt:
             continue
         except EOFError:

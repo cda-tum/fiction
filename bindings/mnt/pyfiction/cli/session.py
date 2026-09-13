@@ -37,8 +37,12 @@ if TYPE_CHECKING:
 
     from .registry import Result
 
-MAX_SCRIPT_DEPTH = 16
-"""How deeply scripts may ``source`` one another before the session refuses, so a script that sources itself stops."""
+STYLES = {
+    "result": "dim cyan",
+    "note": "dim",
+}
+"""The colors the shell sets command output apart from the prompt with; muted, so a long run of
+command output does not read as a wall of color."""
 
 
 # Keep quote, word, and command state together so execution and completion share one lexer.
@@ -197,7 +201,6 @@ class Session:
         self.running = True
         self.log_path = log_path
         self.log: list[dict[str, object]] = []
-        self._script_depth = 0
         self._source: tuple[str, int] | None = None
         self.close_failed = False
         self._temp_dir: Path | None = None
@@ -250,22 +253,8 @@ class Session:
             self.log.append(entry)
         stores = (self.truth_tables, self.networks, self.gate_layouts, self.cell_layouts)
         before = [(len(store), store.active) for store in stores]
-        long_operation = name in {
-            "exact",
-            "ortho",
-            "gold",
-            "map",
-            "abc",
-            "aig",
-            "optimize",
-            "quickexact",
-            "quicksim",
-            "clustercomplete",
-            "temp",
-            "opdom",
-        }
         try:
-            result = self._invoke(argv, entry, long_operation=long_operation)
+            result = self._invoke(argv, entry)
         except HelpRequested as help_request:
             self.console.print(help_request.text, markup=False, highlight=False)
             entry["status"] = "help"
@@ -285,18 +274,15 @@ class Session:
             entry["result"] = json_value(result)
         for store, previous in zip(stores, before, strict=False):
             if store.active is not None and (len(store), store.active) != previous:
-                self.info(f"{store.kind} [{store.active}]: {one_line(describe(store.current()))}")
-        if long_operation:
-            self.info(f"{name}: completed in {time.perf_counter() - clock:.3f} s")
+                self.info(f"{store.kind} {store.position}: {one_line(describe(store.current()))}", style="result")
         return True
 
-    def _invoke(self, argv: list[str], entry: dict[str, object], *, long_operation: bool) -> Result:
+    def _invoke(self, argv: list[str], entry: dict[str, object]) -> Result:
         """Validate and invoke one registered command.
 
         Args:
             argv: Command name and arguments.
             entry: Log entry that receives parsed options.
-            long_operation: Print a start notice before native work.
 
         Returns:
             The command result.
@@ -312,8 +298,6 @@ class Session:
         args = cmd.parser.parse_args(arguments)
         cmd.parser.validate(args)
         entry["args"] = {key: json_value(value) for key, value in vars(args).items()}
-        if long_operation:
-            self.info(f"{name}: running…")
         return cmd.run(self, args)
 
     def run_script(self, path: Path) -> bool:
@@ -326,12 +310,8 @@ class Session:
             ``True`` when every command succeeded.
 
         Raises:
-            CommandError: When the file cannot be read or scripts nest deeper than
-                :data:`MAX_SCRIPT_DEPTH`.
+            CommandError: When the file cannot be read.
         """
-        if self._script_depth >= MAX_SCRIPT_DEPTH:
-            msg = f"scripts nest deeper than {MAX_SCRIPT_DEPTH} levels; does '{path}' source itself?"
-            raise CommandError(msg)
         try:
             lines = path.read_text(encoding="utf-8").splitlines()
         except (OSError, UnicodeError) as error:
@@ -342,7 +322,6 @@ class Session:
             msg_0 = f"cannot read script '{path}': {error}"
             raise CommandError(msg_0) from error
 
-        self._script_depth += 1
         previous_source = self._source
         try:
             for number, line in enumerate(lines, 1):
@@ -353,7 +332,6 @@ class Session:
                     return False
             return True
         finally:
-            self._script_depth -= 1
             self._source = previous_source
 
     def close(self) -> None:
@@ -428,45 +406,63 @@ class Session:
         context = f"{self._source[0]}:{self._source[1]}: " if self._source else ""
         self.errors.print(f"[red]error:[/] {escape(context + message)}", highlight=False)
 
-    def info(self, message: str) -> None:
+    def info(self, message: str, style: str | None = None) -> None:
         """Print an informational message, unless the session is quiet.
 
         Args:
             message: The message; printed verbatim.
+            style: A key of :data:`STYLES`, to set the message apart from the prompt.
         """
         if not self.quiet:
-            self.output(message)
+            self.output(message, style=style)
 
-    def output(self, message: str) -> None:
+    def output(self, message: str, style: str | None = None) -> None:
         """Print an explicitly requested result, including in quiet mode.
+
+        A drawing that carries its own ANSI colors keeps them; ``style`` applies to plain text only,
+        so that a colored layout picture is never repainted in one color.
 
         Args:
             message: Plain text or a native ANSI drawing.
+            style: A key of :data:`STYLES`, or ``None`` for the terminal's default.
         """
-        self.console.print(Text.from_ansi(message), highlight=False)
+        text = Text.from_ansi(message)
+        if style is not None and "\x1b" not in message:
+            self.console.print(text, highlight=False, style=STYLES[style])
+        else:
+            self.console.print(text, highlight=False)
 
     def status_line(self) -> str:
-        """Return compact store counts and active indices within the terminal width.
+        """Return the store counts, the active element, and its name, within the terminal width.
+
+        Positions count from 1, the way ``store`` lists them and ``current`` accepts them, so the
+        position never looks like it disagrees with the count.
 
         Returns:
-            Store identifiers and counts, with names only when space permits.
+            One line naming each store that holds something, with names as space permits.
         """
         stores = (self.truth_tables, self.networks, self.gate_layouts, self.cell_layouts)
+        labels = ("truth tables", "networks", "gate layouts", "cell layouts")
         parts = [
-            f"{label}[{store.active if store.active is not None else '-'}]/{len(store)}"
-            for label, store in zip(("tt", "net", "gate", "cell"), stores, strict=False)
+            f"{label} {store.position} of {len(store)}"
+            for label, store in zip(labels, stores, strict=False)
+            if len(store)
         ]
+        if not parts:
+            return "no elements in store"
+        shown = [index for index, store in enumerate(stores) if len(store)]
         width = self.console.width
-        remaining = max(0, width - len(" · ".join(parts)))
-        for index, store in enumerate(stores):
+        remaining = max(0, width - len("   ".join(parts)))
+        for slot, index in enumerate(shown):
+            store = stores[index]
             if store.active is not None and remaining >= len(" name"):
                 name = element_name(store.current())
                 budget = min(20, remaining - 1)
                 if name:
                     text = name if len(name) <= budget else name[: budget - 1] + "…"
-                    parts[index] += " " + text
-                    remaining -= len(text) + 1
-        return " · ".join(parts)
+                    parts[slot] += " · " + text
+                    remaining -= len(text) + 3
+        return "   ".join(parts)
 
     @staticmethod
     def as_technology_network(network: Network) -> technology_network:
