@@ -330,3 +330,19 @@ def test_implicit_gate_layout_filename(mux21_shell: Shell, tmp_path: Path, monke
     monkeypatch.chdir(tmp_path)
     mux21_shell.ok("ortho; write -F fgl")
     assert (tmp_path / "mux21.fgl").is_file()
+
+
+def test_read_fgl_round_trips_a_gate_layout(shell: Shell, tmp_path: Path, resource: Callable[[str], str]) -> None:
+    """read_fgl loads a layout written by `write`, under the topology the flag names."""
+    shell.ok(f"read_verilog {resource('mux21.v')}")
+    shell.ok("ortho")
+    path = tmp_path / "mux21.fgl"
+    shell.ok(f"write {path}")
+    shell.ok("clear -g")
+    shell.ok(f"read_fgl {path} --topology cartesian")
+    assert len(shell.session.gate_layouts) == 1
+
+
+def test_split_readers_report_a_missing_file(shell: Shell, tmp_path: Path) -> None:
+    assert "no such file" in shell.fails(f"read_verilog {tmp_path / 'absent.v'}")
+    assert "no such file" in shell.fails(f"read_fgl {tmp_path / 'absent.fgl'}")

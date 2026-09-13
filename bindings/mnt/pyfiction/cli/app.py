@@ -48,7 +48,7 @@ PROMPT_TEXT = "fiction> "
 """What the interactive shell prompts with."""
 
 
-def _prompt() -> StyleAndTextTuples:
+def prompt_message() -> StyleAndTextTuples:
     """Return the prompt, gray once this line has been accepted.
 
     ``prompt_toolkit`` renders the prompt one last time after the user presses Enter, with
@@ -206,7 +206,7 @@ def repl(session: Session) -> None:
     session.console.print(f"[bold]{__version__}[/] · type [bold]help[/] for the list of commands")
     while session.running:
         try:
-            line = prompt.prompt(_prompt)
+            line = prompt.prompt(prompt_message)
         except KeyboardInterrupt:
             continue
         except EOFError:

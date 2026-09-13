@@ -193,3 +193,11 @@ def test_an_unusable_history_file_still_starts_the_shell(tmp_path: Path, monkeyp
         cli_app.repl(session)
     session.close()
     assert [entry["command"] for entry in session.log] == ["version"]
+
+
+def test_prompt_dims_once_the_line_is_accepted(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The prompt is bright while typing and gray on the last paint, which leaves it gray above."""
+    monkeypatch.setattr(cli_app, "get_app", lambda: Mock(is_done=False))
+    assert cli_app.prompt_message() == [("class:prompt", cli_app.PROMPT_TEXT)]
+    monkeypatch.setattr(cli_app, "get_app", lambda: Mock(is_done=True))
+    assert cli_app.prompt_message() == [("class:prompt.done", cli_app.PROMPT_TEXT)]

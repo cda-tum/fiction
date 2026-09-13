@@ -20,6 +20,7 @@ import pytest
 from mnt.pyfiction import inml_layout, mol_qca_layout, mol_qca_technology
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import REGISTRY
+from mnt.pyfiction.cli.render import table_rows
 from mnt.pyfiction.cli.stores import CellEntry, element_name
 
 if TYPE_CHECKING:
@@ -286,3 +287,11 @@ def test_full_help_includes_command_descriptions(shell: Shell) -> None:
         assert command.name in output
         assert command.summary in output
     assert "help COMMAND" in output
+
+
+def test_render_table_shows_missing_and_plain_values() -> None:
+    """A figure without a value renders as a dash; anything else renders as its text."""
+    rows = dict(table_rows({"depth": 3, "runtime_s": None, "throughput": 2}))
+    assert rows["Depth"] == "3"
+    assert rows["Runtime (s)"] == "—"
+    assert rows["Throughput"] == "1/2"
