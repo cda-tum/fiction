@@ -141,14 +141,13 @@ def _seconds_to_ms(seconds: float | None) -> int | None:
 
 
 def _exact_arguments(parser: Parser) -> None:
-    parser.add_argument("-s", "--scheme", default="2DDWave", help="clocking scheme (default: 2DDWave)")
+    parser.add_argument("-s", "--scheme", default="2DDWave", help="clocking scheme")
     parser.add_argument(
         "--topology",
         choices=list(FGL_READERS),
         metavar="TOPOLOGY",
         default="cartesian",
-        help="layout topology (default: %(default)s); choices: %(choices)s. "
-        "hexagonal is even-row, shifted_cartesian is odd-column",
+        help="layout topology; choices: %(choices)s. hexagonal is even-row, shifted_cartesian is odd-column",
     )
     parser.add_argument("--upper-x", type=int, metavar="N", help="maximum layout width in tiles")
     parser.add_argument("--upper-y", type=int, metavar="N", help="maximum layout height in tiles")
@@ -243,7 +242,7 @@ def _ortho_arguments(parser: Parser) -> None:
         choices=["cartesian", "hexagonal", "even_row_hex", "odd_row_hex", "odd_column_hex", "even_column_hex"],
         metavar="TOPOLOGY",
         default="cartesian",
-        help="direct output topology (default: %(default)s); choices: %(choices)s",
+        help="direct output topology; choices: %(choices)s",
     )
     parser.add_argument(
         "-n",
@@ -251,7 +250,7 @@ def _ortho_arguments(parser: Parser) -> None:
         type=int,
         choices=[3, 4],
         default=4,
-        help="the number of clock phases of the result (default: 4)",
+        help="the number of clock phases of the result",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
 
@@ -282,14 +281,14 @@ def _gold_arguments(parser: Parser) -> None:
         "--effort",
         choices=["high_efficiency", "high_effort", "highest_effort", "maximum_effort"],
         default="high_effort",
-        help="how many search space graphs to explore (default: high_effort)",
+        help="how many search space graphs to explore",
     )
     parser.add_argument(
         "-c",
         "--cost",
         choices=["area", "wires", "crossings", "acp"],
         default="area",
-        help="what to minimize; acp is the area-crossing product (default: area)",
+        help="what to minimize; acp is the area-crossing product",
     )
     parser.add_argument("-r", "--return-first", action="store_true", help="stop at the first valid layout")
     parser.add_argument("-p", "--planar", action="store_true", help="forbid crossings")

@@ -54,14 +54,20 @@ EXAMPLES = {
     "help": "help read",
     "version": "version",
     "quit": "quit",
-    "source": 'source "workflow.fiction"',
     "clear": "clear -g -c",
     "store": "store -n -g",
-    "current": "current -n 0",
+    "current": "current -n 1",
     "ps": "ps -n",
     "print": 'tt -e "<abc>"; print -t',
     "show": "generate mux -b 1; show -n --silent -o mux.dot",
     "read": 'read "circuit.v" --type tec',
+    "read_verilog": 'read_verilog "circuit.v" --type tec',
+    "read_aiger": 'read_aiger "circuit.aig"',
+    "read_blif": 'read_blif "circuit.blif"',
+    "read_pla": 'read_pla "circuit.pla" --type aig',
+    "read_fgl": 'read_fgl "layout.fgl" --topology cartesian',
+    "read_sqd": 'read_sqd "layout.sqd"',
+    "read_fqca": 'read_fqca "layout.fqca"',
     "write": "generate mux -b 1; write mux.v",
     "tt": 'tt -e "<abc>"',
     "map": "generate mux -b 1; map --and --inv",
@@ -99,8 +105,10 @@ INPUTS = {
         ("write", "store", "current", "ps", "print", "show", "clear", "gates", "simulate", "equiv"),
         "Store elements selected by the flags below.",
     ),
-    "read": "A file or directory of files.",
-    "source": "A UTF-8 command file.",
+    **dict.fromkeys(
+        ("read", "read_verilog", "read_aiger", "read_blif", "read_pla", "read_fgl", "read_sqd", "read_fqca"),
+        "One file.",
+    ),
 }
 """Store prerequisites displayed before command options."""
 
@@ -120,6 +128,35 @@ def unavailable_reason(name: str) -> str | None:
         if not hasattr(pyfiction, symbol):
             return f"unavailable: this build has no {dependency} support"
     return None
+
+
+class DefaultsFormatter(argparse.RawDescriptionHelpFormatter):
+    """A help formatter that states each option's default next to the option itself.
+
+    ``argparse.ArgumentDefaultsHelpFormatter`` would also append ``(default: False)`` to every flag,
+    which says nothing; only options that take a value and carry a real default get the suffix here.
+    """
+
+    # an override of argparse's method, which does not need the formatter either
+    def _get_help_string(self, action: argparse.Action) -> str:  # ruff: ignore[no-self-use]
+        """Return the option's help, with its default appended when it has a meaningful one.
+
+        Args:
+            action: The action being rendered.
+
+        Returns:
+            The help string shown for the option.
+        """
+        text = action.help or ""
+        if (
+            action.default is None
+            or action.default is argparse.SUPPRESS
+            or isinstance(action.default, bool)
+            or "%(default)" in text
+            or "(default:" in text
+        ):
+            return text
+        return f"{text} (default: %(default)s)"
 
 
 class Group:
@@ -173,7 +210,7 @@ class Parser(argparse.ArgumentParser):
             prog=name,
             description=f"{summary}\n\nInputs:\n  {INPUTS.get(name, 'No store input.')}",
             allow_abbrev=False,
-            formatter_class=argparse.RawDescriptionHelpFormatter,
+            formatter_class=DefaultsFormatter,
         )
 
     def record(self, action: argparse.Action) -> None:
@@ -298,26 +335,16 @@ class Parser(argparse.ArgumentParser):
         raise HelpRequested(message or "")
 
     def format_help(self) -> str:
-        """Render options, actual defaults, restrictions, and a shell example.
+        """Render options with their defaults, the restrictions, and a shell example.
 
         Returns:
             Detailed plain-text command help.
         """
-        defaults = [
-            f"{action.dest.replace('_', '-')}={action.default}"
-            for action in self.actions
-            if action.default is not None
-            and action.default != argparse.SUPPRESS
-            and not isinstance(action.default, bool)
-        ]
-        defaults_text = ", ".join(defaults) or "Flags are off unless an option states otherwise."
         restrictions = unavailable_reason(self.prog) or self.restrictions
         example = EXAMPLES.get(self.prog, self.prog)
         return (
             super().format_help()
-            + "\nDefaults:\n"
-            + textwrap.fill(defaults_text, width=76, initial_indent="  ", subsequent_indent="  ")
-            + "\n\nRestrictions:\n"
+            + "\nRestrictions:\n"
             + textwrap.indent(restrictions, "  ")
             + f"\n\nExample:\n  {example}\n"
         )

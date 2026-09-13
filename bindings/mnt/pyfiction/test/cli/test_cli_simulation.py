@@ -101,7 +101,7 @@ def test_temp(shell: Shell, resource: Callable[[str], str]) -> None:
     assert 0 < result["critical_temperature_k"] <= 400  # type: ignore[index]
     assert result["gate_based"] is True  # type: ignore[index]
     assert "critical temperature" in shell.output
-    shell.ok("current -c 0; temp -t 50")
+    shell.ok("current -c 1; temp -t 50")
     assert "in (0, 1]" in shell.fails("temp -c 2")
 
 
@@ -144,7 +144,7 @@ def test_temp_runs_on_a_simulated_layout(shell: Shell, resource: Callable[[str],
     shell.ok("temp")
     assert "critical temperature" in shell.output
     assert "already simulated" in shell.fails("quickexact")
-    assert "current -c 0" in shell.stderr
+    assert "current -c 1" in shell.stderr
 
 
 def test_opdom_rejects_a_repeated_sweep(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:

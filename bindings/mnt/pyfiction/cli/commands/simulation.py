@@ -69,18 +69,20 @@ DEFAULT_SWEEPS = {
 """The default sweep of each axis of ``opdom``."""
 
 
-def _physical_arguments(parser: Parser, *, base: bool, base_default: int = 2) -> None:
+def _physical_arguments(parser: Parser, *, base: bool, base_default: int = 2, potential: bool = False) -> None:
     physics = parser.group("physical parameters")
-    physics.add_argument("-e", "--epsilon-r", type=float, default=5.6, help="relative permittivity (default: 5.6)")
+    physics.add_argument("-e", "--epsilon-r", type=float, default=5.6, help="relative permittivity")
     physics.add_argument("-l", "--lambda-tf", type=float, default=5.0, help="Thomas-Fermi screening length in nm")
     physics.add_argument("-m", "--mu-minus", type=float, default=-0.32, help="energy transition level (0/-) in eV")
+    if potential:
+        physics.add_argument("-g", "--global-potential", type=float, default=0.0, help="global external potential in V")
     if base:
         physics.add_argument(
             "--base",
             type=int,
             choices=[2, 3],
             default=base_default,
-            help=f"charge states per SiDB (default: {base_default})",
+            help="charge states per SiDB",
         )
 
 
@@ -130,7 +132,7 @@ def _active_sidb_layout(session: Session, *, unsimulated: bool = False) -> sidb_
         index = next(
             (
                 position
-                for position, candidate in enumerate(session.cell_layouts)
+                for position, candidate in enumerate(session.cell_layouts, start=1)
                 if candidate.result is None and candidate.layout == entry.layout
             ),
             None,
@@ -160,8 +162,7 @@ def _store_result(session: Session, layout: sidb_layout, result: object, paramet
 
 
 def _quickexact_arguments(parser: Parser) -> None:
-    _physical_arguments(parser, base=False)
-    parser.add_argument("-g", "--global-potential", type=float, default=0.0, help="global external potential in V")
+    _physical_arguments(parser, base=False, potential=True)
 
 
 @command("quickexact", Category.SIMULATION, _quickexact_arguments)
@@ -180,8 +181,8 @@ def quickexact_command(session: Session, args: argparse.Namespace) -> Result:
 
 def _quicksim_arguments(parser: Parser) -> None:
     _physical_arguments(parser, base=False)
-    parser.add_argument("-i", "--iterations", type=int, default=80, help="iteration steps (default: 80)")
-    parser.add_argument("-a", "--alpha", type=float, default=0.7, help="alpha parameter (default: 0.7)")
+    parser.add_argument("-i", "--iterations", type=int, default=80, help="iteration steps")
+    parser.add_argument("-a", "--alpha", type=float, default=0.7, help="alpha parameter")
 
 
 @command("quicksim", Category.SIMULATION, _quicksim_arguments)
@@ -204,10 +205,9 @@ def quicksim_command(session: Session, args: argparse.Namespace) -> Result:
 
 def _clustercomplete_arguments(parser: Parser) -> None:
     # base 3 is what ClusterComplete is for, and what the C++ shell defaulted to
-    _physical_arguments(parser, base=True, base_default=3)
-    parser.add_argument("-g", "--global-potential", type=float, default=0.0, help="global external potential in V")
-    parser.add_argument("-w", "--witness-limit", type=int, default=6, help="witness partitioning limit (default: 6)")
-    parser.add_argument("-o", "--overlap-limit", type=int, default=6, help="overlapping witnesses limit (default: 6)")
+    _physical_arguments(parser, base=True, base_default=3, potential=True)
+    parser.add_argument("-w", "--witness-limit", type=int, default=6, help="witness partitioning limit")
+    parser.add_argument("-o", "--overlap-limit", type=int, default=6, help="overlapping witnesses limit")
     parser.add_argument("-r", "--report-stats", action="store_true", help="report ground state space statistics")
 
 
@@ -242,12 +242,12 @@ def _engine_argument(parser: Parser) -> None:
         type=str.lower,
         choices=list(ENGINES),
         default="quickexact",
-        help="the simulation engine (default: quickexact)",
+        help="the simulation engine",
     )
 
 
 def _temp_arguments(parser: Parser) -> None:
-    parser.add_argument("-c", "--confidence", type=float, default=0.99, help="confidence level (default: 0.99)")
+    parser.add_argument("-c", "--confidence", type=float, default=0.99, help="confidence level")
     parser.add_argument("-t", "--max-temperature", type=float, default=400.0, help="highest temperature in K to try")
     parser.add_argument(
         "-g", "--gate-based", action="store_true", help="judge stability against the active truth table"
@@ -310,16 +310,19 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
 def _opdom_arguments(parser: Parser) -> None:
     parser.add_argument("file", type=Path, help="the CSV file to write the domain to")
     algorithm = parser.exclusive_group()
+    algorithm.add_argument(
+        "-g", "--grid-search", action="store_true", help="reconstruct the domain by grid search; the default"
+    )
     algorithm.add_argument("-r", "--random-sampling", type=int, metavar="N", help="sample N random points")
     algorithm.add_argument("-f", "--flood-fill", type=int, metavar="N", help="flood fill from N random points")
     algorithm.add_argument("-c", "--contour-tracing", type=int, metavar="N", help="trace contours from N random points")
-    parser.add_argument("-o", "--operational-only", action="store_true", help="write only the operational points")
     parser.add_argument(
         "-s",
         "--sketch",
         action="store_true",
         help="judge points by filtering alone, without simulation; implies kink rejection",
     )
+    parser.add_argument("-o", "--operational-only", action="store_true", help="write only the operational points")
     for axis in ("x", "y", "z"):
         sweep = parser.group(f"{axis} axis")
         default = DEFAULT_SWEEPS[axis]
@@ -328,11 +331,11 @@ def _opdom_arguments(parser: Parser) -> None:
             f"--{axis}-sweep",
             choices=list(SWEEPS),
             default=default[0] if axis != "z" else None,
-            help=f"the parameter (default: {default[0] if axis != 'z' else 'unused'})",
+            help="the parameter",
         )
-        sweep.add_argument(f"--{axis}-min", type=float, default=default[1], help=f"(default: {default[1]})")
-        sweep.add_argument(f"--{axis}-max", type=float, default=default[2], help=f"(default: {default[2]})")
-        sweep.add_argument(f"--{axis}-step", type=float, default=default[3], help=f"(default: {default[3]})")
+        sweep.add_argument(f"--{axis}-min", type=float, default=default[1], help="lower bound of the sweep")
+        sweep.add_argument(f"--{axis}-max", type=float, default=default[2], help="upper bound of the sweep")
+        sweep.add_argument(f"--{axis}-step", type=float, default=default[3], help="step between samples")
     _physical_arguments(parser, base=True)
     _engine_argument(parser)
 
@@ -382,6 +385,7 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
     return {
         **stats_to_dict(stats),
         "engine": args.engine,
+        "grid_search": args.grid_search,
         "sketch": args.sketch,
         "sweeps": [
             {"parameter": getattr(args, f"{axis}_sweep")} for axis in ("x", "y", "z") if getattr(args, f"{axis}_sweep")

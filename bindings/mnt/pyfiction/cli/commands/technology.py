@@ -68,8 +68,7 @@ def _cell_arguments(parser: Parser) -> None:
         metavar="LIBRARY",
         type=lambda name: LIBRARY_ALIASES.get(_library_key(name), name),
         choices=list(GATE_LIBRARIES),
-        help=f"the gate library: {', '.join(GATE_LIBRARIES)} (default: qca-one); "
-        "hyphens, underscores, spaces, and case are ignored",
+        help=f"the gate library: {', '.join(GATE_LIBRARIES)}; hyphens, underscores, spaces, and case are ignored",
     )
 
 

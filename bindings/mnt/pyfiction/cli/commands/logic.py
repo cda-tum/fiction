@@ -70,28 +70,28 @@ if TYPE_CHECKING:
     from mnt.pyfiction.cli.session import Session
 
 GATE_FLAGS = (
+    ("inv", "inv"),
     ("and", "and2"),
-    ("nand", "nand2"),
     ("or", "or2"),
-    ("nor", "nor2"),
     ("xor", "xor2"),
+    ("nand", "nand2"),
+    ("nor", "nor2"),
     ("xnor", "xnor2"),
     ("lt", "lt2"),
     ("gt", "gt2"),
     ("le", "le2"),
     ("ge", "ge2"),
-    ("inv", "inv"),
     ("maj", "maj3"),
     ("dot", "dot"),
+    ("mux", "mux"),
     ("and3", "and3"),
     ("xor-and", "xor_and"),
     ("or-and", "or_and"),
+    ("and-xor", "and_xor"),
     ("onehot", "onehot"),
     ("gamble", "gamble"),
-    ("mux", "mux"),
-    ("and-xor", "and_xor"),
 )
-"""The ``map`` flags and the ``technology_mapping_params`` fields they set."""
+"""The ``map`` flags and the ``technology_mapping_params`` fields they set, in gate-complexity order."""
 
 GATE_SHORT_FLAGS = {"and": "a", "or": "o", "xor": "x", "inv": "i", "maj": "m", "dot": "d"}
 """The six gate flags that also have the short form the C++ shell offered."""
@@ -181,7 +181,7 @@ def _fanouts_arguments(parser: Parser) -> None:
         "--strategy",
         choices=["breadth", "depth", "random"],
         default="breadth",
-        help="how cascaded fan-outs are arranged (default: breadth)",
+        help="how cascaded fan-outs are arranged",
     )
     parser.add_argument("-t", "--threshold", type=int, default=1, help="maximum output degree left unsubstituted")
     parser.add_argument("--seed", type=int, help="seed for the random strategy")
@@ -286,7 +286,7 @@ def _random_arguments(parser: Parser) -> None:
         type=str.lower,
         choices=list(NETWORK_TARGETS),
         default="aig",
-        help="the network type to produce (default: aig)",
+        help="the network type to produce",
     )
     parser.add_argument("--seed", type=int, help="random seed; a fresh one is drawn when omitted")
 
