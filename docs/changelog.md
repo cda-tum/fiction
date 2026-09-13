@@ -141,7 +141,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Errors go to standard error instead of standard output, so a redirected run still shows them.
   - `show` hands its file to the platform's opener rather than to a web browser, and keeps the file
     until the process ends, because the viewer reads it after the command returns.
-  - `print -c` draws a simulated SiDB layout once, with the charge symbols in place of the dots.
+  - `print -c` draws a simulated SiDB layout once, with the charge symbols in place of the dots, and
+    prints the ground state energy; the per-dot charge list the drawing already shows is gone.
+  - **Breaking:** store positions count from 1 in `store`, `ps --all`, the status bar, and `current`,
+    so the position never looks like it disagrees with the element count.
+  - **Breaking:** every input format has a reader of its own: `read_verilog`, `read_aiger`,
+    `read_blif`, `read_pla`, `read_fgl`, `read_sqd`, and `read_fqca`. `read` still chooses by suffix;
+    reading a whole directory and its `--sort` option are gone.
+  - `map` lists the gate types in the order `inv`, `and`, `or`, `xor`, `nand`, `nor`, `xnor`, `lt`,
+    `gt`, `le`, `ge`, `maj`, `dot`, `mux`; the short forms of the C++ shell, `-d` included, remain.
+  - **Breaking:** `quit` has no `exit` alias, and the `source` command is gone; `-f` runs a script
+    file, which can no longer run another one.
+  - `opdom` names its default reconstruction `--grid-search`, alongside `--random-sampling`,
+    `--flood-fill`, and `--contour-tracing`.
+  - `store` lists `Index`, `Name`, `Type`, `I/O`, and `Size`, where the size is the extent of a
+    layout and the node count of a network; a long name no longer stretches the table.
+  - `ps` groups a description into `Size`, `I/O`, `Elements`, and `Timing` lines under the element's
+    identity, instead of one row per figure.
+  - `help` lays the command names out in aligned columns, one block per category.
+  - Command help states each option's default at the option itself, so a long option list no longer
+    ends in a separate `Defaults:` paragraph; `quickexact` and `clustercomplete` list
+    `--global-potential` with the other physical parameters.
+  - The interactive prompt dims once its line is accepted, and command output is colored, so the
+    results of a command are easy to tell from the prompts around them.
+  - Long-running commands no longer announce `running…` and `completed in`.
   - `check` prints and logs the full design rule report again, not only the two counts.
   - `area` applies the cell dimensions to every technology, SiDB included, and defaults each one it
     is not given to the technology's own value.

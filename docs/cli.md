@@ -24,7 +24,7 @@ fiction> help
 ```
 
 shows a compact category overview. `help --all` includes descriptions and pages them in an interactive terminal.
-`help <command>` shows inputs, options, defaults, restrictions, and an example, and `quit`, its alias `exit`, or
+`help <command>` shows inputs, options, defaults, restrictions, and an example, and `quit` or
 `Ctrl-D` leaves the shell. The Tab key completes command names, options, the values an option accepts, and file
 paths. The command history persists in `~/.fiction_history` between sessions; an unwritable home costs the
 history, not the shell. The line below the prompt shows how many elements each store holds and which one is
@@ -54,10 +54,11 @@ Each store has one _active_ element, the one commands work on, which is the most
 
 - `store [-t -n -g -c]` lists the elements of the given stores, or of all stores, and marks the active one;
   `store --pop` removes the active element instead and makes the one before it active
-- `current -t|-n|-g|-c INDEX` makes an element the active one
+- `current -t|-n|-g|-c POSITION` makes an element the active one; positions count from 1, the way `store`
+  lists them and the status bar reports them
 - `ps -t|-n|-g|-c` prints the statistics of the active element, and `ps --all` those of every element
 - `print -t|-g|-c` prints the active element as text; a simulated SiDB layout is drawn once, with its ground
-  state charges in place of the dots
+  state charges in place of the dots, followed by the ground state energy
 - `show -n|-g|-c [-o FILE] [--silent] [-p COMMAND] [--delete]` draws the active element and opens it in the
   platform's viewer: networks and gate-level layouts as SVG through Graphviz, cell-level layouts as SVG.
   An explicit `.dot` output keeps the raw Graphviz source. `-o` chooses where to write, `--silent` only writes the file, `--simple` draws QCA cells without dots
@@ -75,24 +76,28 @@ requests cleanup. Explicit output files are retained. `--silent` exports without
 ## Reading and writing files
 
 `read FILE` reads a file, chosen by its case-insensitive suffix. `read --format FORMAT FILE` selects a reader
-for an extensionless or differently named file:
+for an extensionless or differently named file. Every format also has a command of its own, which takes that
+format alone and never guesses:
 
-| Suffix                 | Reads               | Store |
-| ---------------------- | ------------------- | ----- |
-| `.v`, `.aig`, `.blif`  | logic network       | `-n`  |
-| `.aag`, `.pla`         | logic network (AIG) | `-n`  |
-| `.fgl`                 | gate-level layout   | `-g`  |
-| `.sqd`                 | SiDB layout         | `-c`  |
-| `.fqca`                | QCA layout          | `-c`  |
+| Suffix                 | Command                    | Reads               | Store |
+| ---------------------- | -------------------------- | ------------------- | ----- |
+| `.v`                   | `read_verilog`             | logic network       | `-n`  |
+| `.aig`, `.aag`         | `read_aiger`               | logic network       | `-n`  |
+| `.blif`                | `read_blif`                | logic network       | `-n`  |
+| `.pla`                 | `read_pla`                 | logic network (AIG) | `-n`  |
+| `.fgl`                 | `read_fgl`                 | gate-level layout   | `-g`  |
+| `.sqd`                 | `read_sqd`                 | SiDB layout         | `-c`  |
+| `.fqca`                | `read_fqca`                | QCA layout          | `-c`  |
+
+The format-specific readers take the same `--type` and `--topology` options as `read` where they apply, and
+reject a file of another format rather than falling back to the suffix.
 
 Networks are read as technology networks unless `--type aig|xag|mig|tec` says otherwise. BLIF files are always
 technology networks; `.aag` and `.pla` files are read as AIGs by _aigverse_ and converted from there. Gate-level
 layouts accept all nine explicit topology names listed below; `cartesian` is the default.
-The selected topology must match the FGL metadata. `read DIRECTORY` reads every network file in a directory, in
-order of gate count with `--sort`, and reports a file it cannot parse without abandoning the rest. The
-`benchmarks` folder of the repository holds many networks to start from. Directory imports consider only regular
-files and report imported and failed counts; a mixed result is logged as `partial`. With `--format`, every regular
-file in the directory is attempted with that reader. FQCA imports preserve stacked layouts, including via cells,
+The selected topology must match the FGL metadata. Every reader takes one file; the
+`benchmarks` folder of the repository holds many networks to start from, and a shell loop or a `-f` script
+reads a whole folder of them. FQCA imports preserve stacked layouts, including via cells,
 I/O labels, clocks, and cell modes. Imports with at most two layers support SVG drawing; deeper layouts support
 QCA, FQCA, and QLL export. Readers reject coordinates the requested layout type cannot represent.
 
@@ -400,7 +405,6 @@ of a file, one line per line, in the same way; a missing file exits with `2`. `q
 leaving the commands after it unrun. `-i` continues into the interactive shell once the commands are done, and
 `-q` suppresses notices and keeps requested results, including `version`, `print`, `store`, `simulate`, `equiv`,
 and `area`. Inside the shell and inside scripts,
-`source FILE` runs another script, and scripts may source one another.
 
 Piped standard input runs as a batch stream without constructing an interactive prompt, for example
 `printf 'version\nquit\n' | fiction --quiet` on a POSIX shell. Scripts must use UTF-8; decoding failures identify
@@ -454,8 +458,7 @@ appears once the session closes, not while it runs. It holds a list with one obj
 Algorithm statistics appear under `stats` with the attribute names of the bindings' `*_stats` classes; durations
 carry an `_s` suffix and are in seconds. Machine keys remain stable while tables use human labels and units. Nested DRV reports are JSON objects.
 Non-finite values become JSON `null`. Unknown commands, parsing failures, help, partial imports, and interrupts
-receive explicit statuses. Entries retain execution order and source-file line attribution, including nested
-`source` calls. Logging is opt-in; a session without `-l` does not retain a full command-result history.
+receive explicit statuses. Entries retain execution order and script-file line attribution. Logging is opt-in; a session without `-l` does not retain a full command-result history.
 A log-write failure reports an error, returns a failing exit status, and still cleans temporary files.
 
 ## Migration from the C++ shell
@@ -467,7 +470,7 @@ and `-c/--cell-layout`; `--logic_network` becomes `--network`.
 
 | Original command | Python shell | Option and behavior migration |
 | --- | --- | --- |
-| `read` | `read FILE` | `--aig/--xag/--mig/--tec` become `--type`; format flags become `--format`; positional topology becomes `--topology`; `--sort` remains |
+| `read` | `read FILE`, or `read_verilog`, `read_aiger`, `read_blif`, `read_pla`, `read_fgl`, `read_sqd`, `read_fqca` | `--aig/--xag/--mig/--tec` become `--type`; format flags become `--format`; positional topology becomes `--topology`; reading a whole directory and `--sort` are gone |
 | `verilog` | `write FILE.v` | Optional filename and implicit element naming remain |
 | `blif` | `write FILE.blif` | All network types |
 | `fgl` | `write FILE.fgl` | All nine topologies |
@@ -495,11 +498,11 @@ and `-c/--cell-layout`; `--logic_network` becomes `--network`.
 | `quicksim` | `quicksim` | Physics, iterations, and alpha remain |
 | `clustercomplete` | `clustercomplete` | `--witness_partitioning_limit/--overlapping_witnesses_limit/--report_gss_stats` become `--witness-limit/--overlap-limit/--report-gss` |
 | `temp` | `temp` | Confidence, temperature, gate-based mode, physics, base, and engine remain |
-| `opdom` | `opdom` | All four sampling methods and sweeps remain; `--omit_non_op_samples` becomes `--operational-only` |
+| `opdom` | `opdom` | All four reconstruction methods and sweeps remain; grid search is `--grid-search` and stays the default; `--omit_non_op_samples` becomes `--operational-only` |
 | `check` | `check` | Violation/warning summary; full structured report in the log |
 | `equiv` | `equiv` | Store selection remains; negative and not-checked reports allow scripts to continue |
 | `clear`, `version` | Same names | Store flags use the common spellings |
-| `help`, `store`, `current`, `ps`, `print`, `show`, `source`, `quit` | Same names | Compact help; `help --all` for descriptions; `show` uses optional Graphviz; `exit` aliases `quit` |
+| `help`, `store`, `current`, `ps`, `print`, `show`, `quit` | Same names | Compact help; `help --all` for descriptions; `show` uses optional Graphviz; `source` is gone, `-f` runs a script file; `quit` has no `exit` alias |
 
 `akers`, `miginvopt`, and `miginvprop` have no Python-shell counterpart. The shell also omits alice aliases,
 settings, shell escapes, echo/counter switches, and its documentation launcher. Shell scripts provide loops
