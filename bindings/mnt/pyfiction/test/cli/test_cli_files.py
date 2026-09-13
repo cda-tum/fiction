@@ -10,7 +10,6 @@
 
 from __future__ import annotations
 
-import shutil
 from typing import TYPE_CHECKING
 
 import pytest
@@ -77,15 +76,41 @@ def test_read_blif_rejects_other_types(shell: Shell, tmp_path: Path, mux21_shell
     assert "technology networks only" in shell.fails(f"read {blif} --type aig")
 
 
-def test_read_directory(shell: Shell, tmp_path: Path, resource: Callable[[str], str]) -> None:
-    for name in ("mux21.v", "xor2.v"):
-        shutil.copy(resource(name), tmp_path / name)
-    shell.ok(f"read {tmp_path} --sort")
-    names = [shell.session.networks.items[i] for i in range(2)]
-    assert [n.num_gates() for n in names] == sorted(n.num_gates() for n in names)
-    empty = tmp_path / "empty"
-    empty.mkdir()
-    assert "no network files" in shell.fails(f"read {empty}")
+def test_read_rejects_a_directory(shell: Shell, tmp_path: Path) -> None:
+    """Reading a folder is no longer supported; the message says to name one file."""
+    assert "is a directory" in shell.fails(f"read {tmp_path}")
+    assert len(shell.session.networks) == 0
+
+
+def test_split_readers_take_their_own_format(shell: Shell, resource: Callable[[str], str]) -> None:
+    """Each format-specific reader loads its format into the right store."""
+    shell.ok(f"read_verilog {resource('mux21.v')}")
+    assert len(shell.session.networks) == 1
+    shell.ok(f"read_sqd {resource('siqad_or_gate.sqd')}")
+    assert len(shell.session.cell_layouts) == 1
+    shell.ok(f"read_fqca {resource('stacked_crossing.fqca')}")
+    assert len(shell.session.cell_layouts) == 2
+
+
+def test_split_readers_reject_another_format(shell: Shell, resource: Callable[[str], str]) -> None:
+    """A reader named for one format refuses another, rather than guessing."""
+    assert ".sqd" in shell.fails(f"read_sqd {resource('mux21.v')}")
+    assert ".v" in shell.fails(f"read_verilog {resource('siqad_or_gate.sqd')}")
+    assert len(shell.session.networks) == 0
+
+
+def test_split_readers_reject_a_directory(shell: Shell, tmp_path: Path) -> None:
+    assert "is a directory" in shell.fails(f"read_verilog {tmp_path}")
+
+
+def test_read_aiger_accepts_both_aiger_suffixes(shell: Shell, tmp_path: Path, resource: Callable[[str], str]) -> None:
+    """read_aiger reads binary .aig and ASCII .aag, dispatching on the file's own suffix."""
+    shell.ok(f"read_verilog {resource('mux21.v')} --type aig")
+    binary = tmp_path / "mux21.aig"
+    shell.ok(f"write {binary}")
+    shell.ok("clear -n")
+    shell.ok(f"read_aiger {binary}")
+    assert len(shell.session.networks) == 1
 
 
 def test_read_missing_and_unknown_files(shell: Shell, tmp_path: Path) -> None:
@@ -197,37 +222,6 @@ def test_tt_random_and_errors(shell: Shell) -> None:
     assert "usage" in shell.fails("tt")
 
 
-def test_read_directory_matches_mixed_case_suffixes(
-    shell: Shell, tmp_path: Path, resource: Callable[[str], str]
-) -> None:
-    """Directory and single-file reads accept uppercase network extensions."""
-    shutil.copy(resource("mux21.v"), tmp_path / "MUX21.V")
-    shutil.copy(resource("xor2.v"), tmp_path / "xor2.v")
-    shell.ok(f"read {tmp_path}")
-    assert len(shell.session.networks) == 2
-    assert not shell.stderr
-    shell.ok(f"read {tmp_path / 'MUX21.V'}")
-
-
-def test_read_directory_reports_a_broken_file_and_continues(
-    shell: Shell, tmp_path: Path, resource: Callable[[str], str]
-) -> None:
-    """One unparsable file is reported and skipped; the rest of the directory still lands in the store."""
-    shutil.copy(resource("mux21.v"), tmp_path / "mux21.v")
-    (tmp_path / "broken.v").write_text("this is not Verilog", encoding="utf-8")
-    shell.ok(f"read {tmp_path}")
-    assert len(shell.session.networks) == 1
-    assert "broken.v" in shell.stderr
-    result = shell.session.log[-1]["result"]
-    assert isinstance(result, dict)
-    assert [failure["file"] for failure in result["failed"]] == [str(tmp_path / "broken.v")]
-
-
-def test_read_directory_of_only_broken_files_fails(shell: Shell, tmp_path: Path) -> None:
-    (tmp_path / "broken.v").write_text("this is not Verilog", encoding="utf-8")
-    assert "none of the 1 network files" in shell.fails(f"read {tmp_path}")
-
-
 def test_write_defaults_to_the_element_name(
     mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -336,9 +330,3 @@ def test_implicit_gate_layout_filename(mux21_shell: Shell, tmp_path: Path, monke
     monkeypatch.chdir(tmp_path)
     mux21_shell.ok("ortho; write -F fgl")
     assert (tmp_path / "mux21.fgl").is_file()
-
-
-def test_directory_import_rejects_layout_formats(shell: Shell, tmp_path: Path) -> None:
-    """Directory imports cannot silently ignore an explicit layout reader."""
-    assert "network formats only" in shell.fails(f"read {tmp_path} -F fgl")
-    assert len(shell.session.gate_layouts) == 0

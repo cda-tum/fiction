@@ -146,6 +146,35 @@ WRITE_SUFFIXES = {suffix for suffix, spec in FORMATS.items() if spec.stores}
 """Formats with a writer, used in --format help and completion."""
 
 
+def _type_argument(parser: Parser) -> None:
+    """Add the network type option shared by every network reader.
+
+    Args:
+        parser: The command's parser.
+    """
+    parser.add_argument(
+        "--type",
+        choices=list(NETWORK_READERS),
+        default="tec",
+        help="the network type to build",
+    )
+
+
+def _topology_argument(parser: Parser) -> None:
+    """Add the FGL topology option.
+
+    Args:
+        parser: The command's parser.
+    """
+    parser.add_argument(
+        "--topology",
+        choices=list(FGL_READERS),
+        metavar="TOPOLOGY",
+        default="cartesian",
+        help="FGL layout topology; choices: %(choices)s",
+    )
+
+
 def _read_arguments(parser: Parser) -> None:
     parser.add_argument(
         "-F",
@@ -153,21 +182,9 @@ def _read_arguments(parser: Parser) -> None:
         choices=sorted(suffix[1:] for suffix, spec in FORMATS.items() if spec.reader),
         help="select the reader independently of the filename",
     )
-    parser.add_argument("path", type=Path, help="the file, or a directory of network files")
-    parser.add_argument(
-        "--type",
-        choices=list(NETWORK_READERS),
-        default="tec",
-        help="the network type; .blif can only be tec, and .aag and .pla are read as AIGs and converted (default: tec)",
-    )
-    parser.add_argument(
-        "--topology",
-        choices=list(FGL_READERS),
-        metavar="TOPOLOGY",
-        default="cartesian",
-        help="FGL layout topology (default: %(default)s); choices: %(choices)s",
-    )
-    parser.add_argument("--sort", action="store_true", help="read a directory's networks in order of gate count")
+    parser.add_argument("path", type=Path, help="the file to read")
+    _type_argument(parser)
+    _topology_argument(parser)
 
 
 @command("read", Category.IO, _read_arguments)
@@ -176,12 +193,12 @@ def read(session: Session, args: argparse.Namespace) -> Result:
 
     Networks: .v (Verilog), .aig and .aag (AIGER), .blif, and .pla; the type defaults to a
     technology network. Gate-level layouts: .fgl. Cell-level layouts: .sqd (SiDB) and .fqca (QCA).
-    A directory reads every network file in it; a file it cannot read is reported and skipped.
+    The format-specific commands, such as 'read_verilog', take the same file without guessing.
     """
     path: Path = args.path
     if path.is_dir():
-        return _read_directory(session, path, args)
-
+        msg = f"'{path}' is a directory; give one file to read"
+        raise CommandError(msg)
     if not path.is_file():
         msg = f"no such file: '{path}'"
         raise CommandError(msg)
@@ -209,61 +226,132 @@ def read(session: Session, args: argparse.Namespace) -> Result:
     raise CommandError(msg)
 
 
-def _read_directory(session: Session, path: Path, args: argparse.Namespace) -> Result:
-    """Read every network file of a directory, reporting the ones that fail without stopping."""
-    if args.format and f".{args.format}" not in NETWORK_SUFFIXES:
-        msg = "directory imports accept network formats only"
-        raise CommandError(msg)
-    files = sorted(
-        file for file in path.iterdir() if file.is_file() and (args.format or file.suffix.lower() in NETWORK_SUFFIXES)
-    )
-    if not files:
-        msg = f"no network files in '{path}'"
-        raise CommandError(msg)
-    networks: list[Network] = []
-    failed: list[dict[str, str]] = []
-    for file in files:
-        network = _read_or_report(session, file, args.type, failed, args.format)
-        if network is not None:
-            networks.append(network)
-    if not networks:
-        msg = f"none of the {len(files)} network files in '{path}' could be read"
-        raise CommandError(msg)
-    if args.sort:
-        networks.sort(key=lambda network: network.num_gates())
-    for network in networks:
-        session.networks.add(network)
-    session.info(f"Imported {len(networks)} networks; {len(failed)} failed")
-    return {
-        "networks": [describe(network) for network in networks],
-        "failed": failed,
-        "imported_count": len(networks),
-        "failed_count": len(failed),
-        "status": "partial" if failed else "ok",
-    }
-
-
-def _read_or_report(
-    session: Session, path: Path, network_type: str, failed: list[dict[str, str]], file_format: str | None = None
-) -> Network | None:
-    """Read one file of a directory, reporting a failure instead of raising it.
+def _network_reader(name: str, suffixes: tuple[str, ...], description: str) -> None:
+    """Register one format-specific network reader.
 
     Args:
-        session: The session, for the error message.
-        path: The file to read.
-        network_type: What ``--type`` asked for.
-        failed: Collects the files that could not be read, for the log.
-        file_format: Reader override, or the file extension.
+        name: The command name, such as ``read_verilog``.
+        suffixes: The suffixes the reader accepts; the first names the format in messages.
+        description: The command's help text.
+    """
+
+    def arguments(parser: Parser) -> None:
+        parser.add_argument("path", type=Path, help="the file to read")
+        _type_argument(parser)
+
+    def run(session: Session, args: argparse.Namespace) -> Result:
+        path = _existing_file(args.path, suffixes)
+        network = _read_network(session, path, args.type, path.suffix.lower()[1:])
+        session.networks.add(network)
+        return {"network": describe(network)}
+
+    run.__doc__ = description
+    command(name, Category.IO, arguments)(run)
+
+
+def _existing_file(path: Path, suffixes: tuple[str, ...]) -> Path:
+    """Check that a path is a readable file of an accepted format.
+
+    Args:
+        path: The path the user gave.
+        suffixes: The suffixes the reader accepts.
 
     Returns:
-        The network, or ``None`` when the file could not be read.
+        The path itself.
+
+    Raises:
+        CommandError: The path is missing, a directory, or of another format.
     """
-    try:
-        return _read_network(session, path, network_type, file_format)
-    except Exception as error:  # ruff: ignore[blind-except] -- one unreadable file must not abort the directory
-        session.error(f"read: {path.name}: {error}")
-        failed.append({"file": str(path), "error": str(error)})
-        return None
+    if path.is_dir():
+        msg = f"'{path}' is a directory; give one file to read"
+        raise CommandError(msg)
+    if not path.is_file():
+        msg = f"no such file: '{path}'"
+        raise CommandError(msg)
+    if path.suffix.lower() not in suffixes:
+        accepted = " or ".join(suffixes)
+        msg = f"'{path.suffix}' is not {accepted}; use 'read' to choose the reader by suffix"
+        raise CommandError(msg)
+    return path
+
+
+_network_reader(
+    "read_verilog",
+    (".v",),
+    """Read a logic network from a Verilog file.
+
+    The network type follows --type and defaults to a technology network.""",
+)
+
+_network_reader(
+    "read_aiger",
+    (".aig", ".aag"),
+    """Read a logic network from a binary (.aig) or ASCII (.aag) AIGER file.
+
+    ASCII AIGER is read through aigverse as an AIG and converted to --type from there.""",
+)
+
+_network_reader(
+    "read_blif",
+    (".blif",),
+    """Read a logic network from a BLIF file.
+
+    BLIF is read as a technology network only; --type tec is the only accepted value.""",
+)
+
+_network_reader(
+    "read_pla",
+    (".pla",),
+    """Read a logic network from a PLA file.
+
+    The file is read through aigverse as an AIG and converted to --type from there; .ilb and .ob
+    interface labels are preserved.""",
+)
+
+
+def _read_fgl_arguments(parser: Parser) -> None:
+    parser.add_argument("path", type=Path, help="the file to read")
+    _topology_argument(parser)
+
+
+@command("read_fgl", Category.IO, _read_fgl_arguments)
+def read_fgl(session: Session, args: argparse.Namespace) -> Result:
+    """Read a gate-level layout from an FGL file.
+
+    The file does not record its topology, so --topology selects the reader; it defaults to
+    cartesian.
+    """
+    path = _existing_file(args.path, (".fgl",))
+    layout = FGL_READERS[args.topology](str(path), path.stem)
+    session.gate_layouts.add(layout)
+    return {"gate_layout": describe(layout)}
+
+
+def _read_path_argument(parser: Parser) -> None:
+    parser.add_argument("path", type=Path, help="the file to read")
+
+
+@command("read_sqd", Category.IO, _read_path_argument)
+def read_sqd(session: Session, args: argparse.Namespace) -> Result:
+    """Read an SiDB cell-level layout from a SiQAD file."""
+    path = _existing_file(args.path, (".sqd",))
+    entry = CellEntry(read_sqd_layout(str(path), path.stem))
+    session.cell_layouts.add(entry)
+    return {"cell_layout": describe(entry)}
+
+
+@command("read_fqca", Category.IO, _read_path_argument)
+def read_fqca(session: Session, args: argparse.Namespace) -> Result:
+    """Read a QCA cell-level layout from a QCA-STACK file.
+
+    A file of more than two layers is kept stacked, which the SVG renderer cannot draw.
+    """
+    path = _existing_file(args.path, (".fqca",))
+    stacked = read_stacked_fqca_layout(str(path), path.stem)
+    # The SVG renderer supports unsigned coordinates, whose layer index is one bit.
+    entry = CellEntry(read_fqca_layout(str(path), path.stem) if stacked.z() <= 1 else stacked)
+    session.cell_layouts.add(entry)
+    return {"cell_layout": describe(entry)}
 
 
 def _read_network(session: Session, path: Path, network_type: str, file_format: str | None = None) -> Network:
