@@ -404,15 +404,14 @@ status is `1` when a command fails, which stops the string at that command. `fic
 of a file, one line per line, in the same way; a missing file exits with `2`. `quit` ends either without failing,
 leaving the commands after it unrun. `-i` continues into the interactive shell once the commands are done, and
 `-q` suppresses notices and keeps requested results, including `version`, `print`, `store`, `simulate`, `equiv`,
-and `area`. Inside the shell and inside scripts,
+and `area`.
 
 Piped standard input runs as a batch stream without constructing an interactive prompt, for example
 `printf 'version\nquit\n' | fiction --quiet` on a POSIX shell. Scripts must use UTF-8; decoding failures identify
 the file and line. Interrupts at the prompt or during Python command execution return control to the shell.
 Native calls can defer Python's interrupt until they return; use native timeout options for bounded searches.
 Timeouts are positive seconds, rounded up to whole milliseconds. A bounded search that finds no layout reports
-that limit, preserves available statistics, and leaves the store unchanged. Long operations print start and
-elapsed-time notices unless `--quiet` is set.
+that limit, preserves available statistics, and leaves the store unchanged.
 
 Shell loops turn this into batch runs:
 
