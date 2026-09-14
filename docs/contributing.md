@@ -60,8 +60,9 @@ $ uvx nox -s cpp_lint -- --diff-base origin/main
 $ uvx nox -s cpp_lint -- --all
 ```
 
-The first command checks locally changed C++ files. The second checks files changed from the
-given Git revision. The third checks every eligible C++ file.
+The first command checks staged C++ files when the index contains changes; otherwise, it checks
+the last commit. The second checks files changed from the given Git revision. The third checks
+every eligible C++ file.
 
 ## Pull Request Workflow
 
