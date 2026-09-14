@@ -11,7 +11,8 @@
 from __future__ import annotations
 
 import json
-import subprocess  # ruff: ignore[suspicious-subprocess-import] -- the console script is exercised as a process on purpose
+import os
+import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native crash regressions
 import sys
 from pathlib import Path
 from unittest.mock import Mock
@@ -28,6 +29,7 @@ from prompt_toolkit.output import DummyOutput
 from mnt.pyfiction import __version__
 from mnt.pyfiction.cli import Session, main
 from mnt.pyfiction.cli import app as cli_app
+from mnt.pyfiction.cli.app import CommandCompleter
 
 
 def test_commands_succeed() -> None:
@@ -76,16 +78,6 @@ def test_module_runs_as_a_process() -> None:
     assert __version__ in result.stdout
 
 
-def test_console_script_is_installed() -> None:
-    scripts = Path(sys.executable).parent
-    script = scripts / ("fiction.exe" if sys.platform == "win32" else "fiction")
-    if not script.exists():
-        pytest.skip("the environment has no console script; the package is not installed")
-    result = subprocess.run([str(script), "-c", "version"], check=False, capture_output=True, text=True)  # ruff: ignore[subprocess-without-shell-equals-true]
-    assert result.returncode == 0, result.stderr
-    assert __version__ in result.stdout
-
-
 def test_interactive_interrupt_continues_and_eof_closes_log(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
     monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
@@ -99,7 +91,10 @@ def test_interactive_interrupt_continues_and_eof_closes_log(tmp_path: Path, monk
     assert entries[0]["result"]["version"] == __version__
 
 
-@pytest.mark.parametrize(("text", "expected"), [("", "read"), ("version; rea", "read"), ("read --ty", "--type")])
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [("", "read"), ("version; rea", "read"), ("read --ty", "--type"), ("help;he", "help"), ("help rea", "read")],
+)
 def test_command_and_option_completion(text: str, expected: str) -> None:
     completions = cli_app.CommandCompleter().get_completions(Document(text), CompleteEvent(completion_requested=True))
     assert expected in {completion.text for completion in completions}
@@ -107,14 +102,20 @@ def test_command_and_option_completion(text: str, expected: str) -> None:
 
 def test_file_completion(tmp_path: Path) -> None:
     (tmp_path / "circuit.v").write_text("", encoding="utf-8")
-    text = f"read {tmp_path.as_posix()}/circ"
+    text = f'read "{tmp_path.as_posix()}/circ'
     completions = cli_app.CommandCompleter().get_completions(Document(text), CompleteEvent(completion_requested=True))
     assert "uit.v" in {completion.text for completion in completions}
 
 
 @pytest.mark.parametrize(
     ("text", "expected"),
-    [("read --type ", "tec"), ("read --topology hex", "hexagonal"), ("gold -e ", "high_effort")],
+    [
+        ("read --type ", "tec"),
+        ("read --topology hex", "hexagonal"),
+        ("gold -e ", "high_effort"),
+        ("cell --library bes", "bestagon"),
+        ("ortho --topology odd_row", "odd_row_hex"),
+    ],
 )
 def test_choice_completion(text: str, expected: str) -> None:
     """An option that only accepts certain values offers them instead of falling through to paths."""
@@ -198,6 +199,44 @@ def test_an_unusable_history_file_still_starts_the_shell(tmp_path: Path, monkeyp
 def test_prompt_dims_once_the_line_is_accepted(monkeypatch: pytest.MonkeyPatch) -> None:
     """The prompt is bright while typing and gray on the last paint, which leaves it gray above."""
     monkeypatch.setattr(cli_app, "get_app", lambda: Mock(is_done=False))
-    assert cli_app.prompt_message() == [("class:prompt", cli_app.PROMPT_TEXT)]
+    active_style, text = cli_app.prompt_message()[0][:2]
+    assert text == "fiction> "
+    assert cli_app.PROMPT_STYLE.get_attrs_for_style_str(active_style).bold
     monkeypatch.setattr(cli_app, "get_app", lambda: Mock(is_done=True))
-    assert cli_app.prompt_message() == [("class:prompt.done", cli_app.PROMPT_TEXT)]
+    done_style, text = cli_app.prompt_message()[0][:2]
+    assert text == "fiction> "
+    assert cli_app.PROMPT_STYLE.get_attrs_for_style_str(done_style).color == "808080"
+
+
+def test_piped_entry_point() -> None:
+    result = subprocess.run(
+        [sys.executable, "-m", "mnt.pyfiction.cli", "--quiet"],
+        input="version\nquit\n",
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "compiled" in result.stdout
+    assert "fiction>" not in result.stdout
+
+
+def test_installed_console_script() -> None:
+    binary = Path(sys.executable).parent / ("fiction.exe" if os.name == "nt" else "fiction")
+    assert binary.is_file(), "install the wheel before running the console-script contract"
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- installed console script
+        [str(binary), "--quiet", "-c", "version"], capture_output=True, text=True, timeout=20, check=False
+    )
+    assert result.returncode == 0, result.stderr
+    assert "compiled" in result.stdout
+
+
+def test_completion_respects_path_context(tmp_path: Path) -> None:
+    directory = tmp_path / "with spaces"
+    directory.mkdir()
+    (directory / "circuit.v").write_text("", encoding="utf-8")
+    event = CompleteEvent(completion_requested=True)
+    candidates = list(CommandCompleter().get_completions(Document(f'read "{directory}/circ'), event))
+    assert any("uit.v" in candidate.text for candidate in candidates)
+    assert not list(CommandCompleter().get_completions(Document(f"tt {directory}/circ"), event))

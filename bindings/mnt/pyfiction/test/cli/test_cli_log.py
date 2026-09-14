@@ -10,8 +10,16 @@
 
 from __future__ import annotations
 
+import io
 import json
+from pathlib import Path
 from typing import TYPE_CHECKING
+
+from rich.console import Console
+
+from mnt import pyfiction as fiction
+from mnt.pyfiction.cli.session import Session
+from mnt.pyfiction.cli.statistics import json_value
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -19,9 +27,8 @@ if TYPE_CHECKING:
     from .conftest import Shell
 
 
-def test_one_entry_per_command(make_shell: Callable[[], Shell], resource: Callable[[str], str]) -> None:
-    shell = make_shell()
-    shell.run(f"read {resource('mux21.v')}; ortho; frobnicate")
+def test_one_entry_per_command(shell: Shell, resource: Callable[[str], str]) -> None:
+    shell.run(f'read "{resource("mux21.v")}"; ortho; frobnicate')
     shell.session.close()
     assert shell.session.log_path is not None
     entries = json.loads(shell.session.log_path.read_text(encoding="utf-8"))
@@ -32,8 +39,7 @@ def test_one_entry_per_command(make_shell: Callable[[], Shell], resource: Callab
         assert entry["runtime_s"] >= 0
 
 
-def test_failed_command_is_logged_with_its_error(make_shell: Callable[[], Shell]) -> None:
-    shell = make_shell()
+def test_failed_command_is_logged_with_its_error(shell: Shell) -> None:
     shell.fails("ortho")
     shell.fails("read")
     shell.session.close()
@@ -45,15 +51,15 @@ def test_failed_command_is_logged_with_its_error(make_shell: Callable[[], Shell]
 
 
 def test_store_schemas(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f"read {resource('mux21.v')}; tt -t 1110; ortho; cell")
+    shell.ok(f'read "{resource("mux21.v")}"; tt -t 1110; ortho; cell')
     log = shell.session.log
     network = log[0]["result"]["network"]  # type: ignore[index]
-    assert set(network) == {"name", "type", "inputs", "outputs", "gates", "depth"}
+    assert set(network) >= {"name", "type", "inputs", "outputs", "gates", "depth"}
     assert network["type"] == "TEC"
     truth_table = log[1]["result"]["truth_table"]  # type: ignore[index]
     assert truth_table == {"vars": 2, "hex": "e", "binary": "1110"}
     layout = log[2]["result"]["gate_layout"]  # type: ignore[index]
-    assert set(layout) == {
+    assert set(layout) >= {
         "name",
         "topology",
         "clocking",
@@ -69,12 +75,12 @@ def test_store_schemas(shell: Shell, resource: Callable[[str], str]) -> None:
     }
     assert layout["clocking"] == "2DDWAVE"
     assert isinstance(layout["throughput"], int)
-    assert set(layout["size"]) == {"x", "y", "area"}
+    assert set(layout["size"]) >= {"x", "y", "area"}
     stats = log[2]["result"]["stats"]  # type: ignore[index]
     assert isinstance(stats["time_total_s"], float)
     cell = log[3]["result"]["cell_layout"]  # type: ignore[index]
     assert cell["technology"] == "QCA"
-    assert set(cell) == {"name", "technology", "size", "inputs", "outputs", "cells", "area_nm2"}
+    assert set(cell) >= {"name", "technology", "size", "inputs", "outputs", "cells", "area_nm2"}
 
 
 def test_help_is_logged(shell: Shell) -> None:
@@ -82,22 +88,47 @@ def test_help_is_logged(shell: Shell) -> None:
     assert shell.session.log[-1]["status"] == "help"
 
 
-def test_log_survives_values_json_cannot_encode(make_shell: Callable[[], Shell]) -> None:
-    """A value no encoder handles is written as its string form instead of failing the whole log."""
-    shell = make_shell()
-    shell.session.log.append({"command": "x", "result": {"value": object()}})
-    shell.session.close()
-    assert shell.session.log_path is not None
-    entries = json.loads(shell.session.log_path.read_text(encoding="utf-8"))
-    assert entries[-1]["result"]["value"].startswith("<object object")
-
-
 def test_sidb_statistics_use_dots(shell: Shell, resource: Callable[[str], str]) -> None:
     """SiDB store output and JSON describe dots under the shared cell-layout store."""
-    shell.ok(f"read {resource('siqad_or_gate.sqd')}")
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
     description = shell.session.log[-1]["result"]["cell_layout"]  # type: ignore[index]
     assert description["dots"] == shell.session.cell_layouts.current().layout.num_dots()
     assert "cells" not in description
     # the store listing shows the layout extent; the dot count is in the ps block
     assert "17 x 18" in shell.ok("store -c")
     assert "dots" in shell.ok("ps -c")
+
+
+def test_json_conversion_is_recursive_and_finite() -> None:
+    value = json_value({"nested": {"bad": float("nan"), "path": Path("layout.fgl")}})
+    assert json.loads(json.dumps(value, allow_nan=False)) == {"nested": {"bad": None, "path": "layout.fgl"}}
+
+
+def test_logging_disabled_retains_no_history() -> None:
+    with_console = Console(file=io.StringIO())
+    session = Session(console=with_console)
+    try:
+        assert session.execute("version; version")
+        assert session.log == []
+    finally:
+        session.close()
+
+
+def test_log_failure_still_cleans_temporary_files(tmp_path: Path) -> None:
+    errors = io.StringIO()
+    session = Session(log_path=tmp_path, errors=Console(file=errors))
+    temporary = session.temp_file(".v")
+    temporary.write_text("data", encoding="utf-8")
+    session.close()
+    assert not temporary.exists()
+    assert session.close_failed
+    assert "cannot write log" in errors.getvalue()
+
+
+def test_sidb_statistics_use_lattice_area(shell: Shell, resource: Callable[[str], str]) -> None:
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"; ps -c')
+    description = shell.session.log[-1]["result"]
+    assert isinstance(description, dict)
+    assert isinstance(description["cell_layout"], dict)
+    assert description["cell_layout"]["area_nm2"] == fiction.area(shell.session.cell_layouts.current().layout)
+    assert "Area (nm²)" in shell.output

@@ -6,7 +6,7 @@
 #
 # Licensed under the MIT License
 
-"""Tests of converting networks into technology networks."""
+"""Tests of network conversion and technology mapping."""
 
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
+from mnt import pyfiction as fiction
 from mnt.pyfiction import (
     all_supported_standard_functions,
     convert_network,
@@ -48,3 +49,11 @@ def test_technology_mapping_accepts_every_network_type(resources_dir: Path, read
     mapped = technology_mapping(network, params)
     assert isinstance(mapped, technology_network)
     assert equivalence_checking(convert_network(network), mapped) == eq_type.STRONG
+
+
+@pytest.mark.parametrize("target", ["TEC", "AIG", "XAG", "MIG"])
+def test_conversion_preserves_interfaces(interface_network: technology_network, target: str) -> None:
+    """Conversion retains all inputs, output order, labels, and output functions."""
+    network = fiction.convert_network(interface_network, getattr(fiction.network_target, target))
+    assert [network.get_name(pi) for pi in network.pis()] == ["apple", "banana", "cherry", "unused"]
+    assert fiction.simulate_outputs(network) == fiction.simulate_outputs(interface_network)

@@ -32,7 +32,7 @@ def or_gate(shell: Shell, resource: Callable[[str], str]) -> Shell:
     Returns:
         The shell.
     """
-    shell.ok(f"read {resource('siqad_or_gate.sqd')}; tt -t 1110")
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"; tt -t 1110')
     return shell
 
 
@@ -43,7 +43,7 @@ def xor_gate(shell: Shell, resource: Callable[[str], str]) -> Shell:
     Returns:
         The shell.
     """
-    shell.ok(f"read {resource('hex_21_inputsdbp_xor_v1.sqd')}; tt -t 0110")
+    shell.ok(f'read "{resource("hex_21_inputsdbp_xor_v1.sqd")}"; tt -t 0110')
     return shell
 
 
@@ -100,7 +100,7 @@ def test_temp_rejects_missing_gate_ports_and_invalid_temperature(shell: Shell) -
 
 
 def test_temp(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f"read {resource('hex_21_inputsdbp_xor_v1.sqd')}; tt -t 0110; temp -g --engine quickexact")
+    shell.ok(f'read "{resource("hex_21_inputsdbp_xor_v1.sqd")}"; tt -t 0110; temp -g --engine quickexact')
     result = shell.session.log[-1]["result"]
     assert 0 < result["critical_temperature_k"] <= 400  # type: ignore[index]
     assert result["gate_based"] is True  # type: ignore[index]
@@ -122,14 +122,14 @@ def test_opdom_grid_search(xor_gate: Shell, tmp_path: Path, algorithm: str) -> N
 
 def test_opdom_sampling_and_errors(xor_gate: Shell, tmp_path: Path) -> None:
     csv = tmp_path / "opdom.csv"
-    xor_gate.ok(f"opdom {csv} -r 4 -o --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1")
+    xor_gate.ok(f'opdom "{csv}" -r 4 -o --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1')
     result = xor_gate.session.log[-1]["result"]
     assert isinstance(result, dict)
     assert result["grid_search"] is False
-    assert "usage" in xor_gate.fails(f"opdom {csv} -r 2 -f 2")
-    assert "at least 1" in xor_gate.fails(f"opdom {csv} -f 0")
-    assert "positive step" in xor_gate.fails(f"opdom {csv} --x-step 0")
-    assert "usage" in xor_gate.fails(f"opdom {csv} -x foo")
+    assert "usage" in xor_gate.fails(f'opdom "{csv}" -r 2 -f 2')
+    assert "at least 1" in xor_gate.fails(f'opdom "{csv}" -f 0')
+    assert "positive step" in xor_gate.fails(f'opdom "{csv}" --x-step 0')
+    assert "usage" in xor_gate.fails(f'opdom "{csv}" -x foo')
 
 
 def test_clustercomplete_defaults_to_base_three() -> None:
@@ -150,7 +150,7 @@ def test_two_state_engines_keep_base_two(command: str) -> None:
 
 def test_temp_runs_on_a_simulated_layout(shell: Shell, resource: Callable[[str], str]) -> None:
     """Analysis and another simulation can use the active simulated layout."""
-    shell.ok(f"read {resource('siqad_or_gate.sqd')}; quickexact")
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"; quickexact')
     original = shell.session.cell_layouts.current()
     shell.ok("temp")
     assert "critical temperature" in shell.output
@@ -165,8 +165,8 @@ def test_temp_runs_on_a_simulated_layout(shell: Shell, resource: Callable[[str],
 
 def test_opdom_rejects_a_repeated_sweep(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:
     """Sweeping one parameter on two axes would produce a degenerate domain."""
-    shell.ok(f"read {resource('siqad_or_gate.sqd')}; tt -t 1110")
-    assert "more than one axis" in shell.fails(f"opdom {tmp_path / 'domain.csv'} -x epsilon_r -y epsilon_r")
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"; tt -t 1110')
+    assert "more than one axis" in shell.fails(f'opdom "{tmp_path / "domain.csv"}" -x epsilon_r -y epsilon_r')
 
 
 @pytest.mark.parametrize("sampling", ["-f 4", "-c 4"])

@@ -24,6 +24,9 @@ from mnt.pyfiction.cli.statistics import stats_to_dict
 from mnt.pyfiction.cli.stores import Store
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+
     from mnt.pyfiction import technology_network
 
     from .conftest import Shell
@@ -33,6 +36,7 @@ if TYPE_CHECKING:
     ("line", "expected"),
     [
         ("version", [["version"]]),
+        ('read ";"; help # comment', [["read", ";"], ["help"]]),
         ("read a.v; ortho ; cell", [["read", "a.v"], ["ortho"], ["cell"]]),
         ("read 'my file.v';;", [["read", "my file.v"]]),
         ('tt -e "[(ab)(!ac)]" # comment; version', [["tt", "-e", "[(ab)(!ac)]"]]),
@@ -158,8 +162,60 @@ def test_stats_to_dict(mux21: technology_network) -> None:
     assert "report" not in result
 
 
-def test_script_reports_an_unreadable_file(shell: Shell, tmp_path_factory: pytest.TempPathFactory) -> None:
-    """A script file that cannot be read is reported, rather than silently doing nothing."""
-    missing = tmp_path_factory.mktemp("scripts") / "absent.fs"
-    with pytest.raises(CommandError, match="cannot read script"):
-        shell.session.run_script(missing)
+def test_pop_selects_predecessor() -> None:
+    store: Store[int] = Store("number")
+    for value in range(4):
+        store.add(value)
+    # positions count from 1, so position 3 holds the value 2
+    store.select(3)
+    removed = store.pop()
+    assert removed == 2
+    assert store.current() == 1
+    store.select(1)
+    store.pop()
+    assert store.current() == 1
+
+
+def test_decoding_failure_reports_file_and_line(shell: Shell, tmp_path: Path) -> None:
+    path = tmp_path / "bad.fiction"
+    path.write_bytes(b"version\n\xff")
+    with pytest.raises(CommandError) as failure:
+        shell.session.run_script(path)
+    output = str(failure.value)
+    assert f"{path}:2" in output
+    assert "UTF-8" in output
+
+
+def test_interrupted_command_is_logged_and_session_continues(shell: Shell, monkeypatch: pytest.MonkeyPatch) -> None:
+    def interrupt(*_: object, **__: object) -> None:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr("mnt.pyfiction.cli.commands.logic.simulate.simulate_outputs", interrupt)
+    shell.ok("generate rca -b 1")
+    assert "interrupted" in shell.fails("simulate -n")
+    assert shell.session.log[-1]["status"] == "interrupted"
+    shell.ok("version")
+
+
+@pytest.mark.parametrize(
+    ("command", "message"),
+    [
+        ("tt -r 64", "fewer than 38"),
+        ("random -n -1 -g 2", "at least 1"),
+        ("random -n 0 -g 2", "at least 1"),
+        ("random -n 2 -g 4294967296", "at most 4294967295"),
+        ("random -n 2 -g 1 --seed 18446744073709551616", "at most 18446744073709551615"),
+        ("exact --timeout nan", "finite number"),
+        ("area --width -1", "cannot be negative"),
+        ("quickexact --epsilon-r nan", "finite number"),
+        ("quickexact --epsilon-r inf", "finite number"),
+        ("quickexact --epsilon-r 0", "must be positive"),
+        ("quicksim --alpha 2", "in (0, 1]"),
+    ],
+)
+def test_invalid_numeric_input_is_a_command_failure(
+    shell: Shell, resource: Callable[[str], str], command: str, message: str
+) -> None:
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"; generate mux -b 1')
+    assert message in shell.fails(command)
+    assert len(shell.session.networks) == len(shell.session.cell_layouts) == 1

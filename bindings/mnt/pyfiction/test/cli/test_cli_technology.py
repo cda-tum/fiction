@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from mnt import pyfiction as fiction
 from mnt.pyfiction import mol_qca_layout, qca_layout, sidb_layout
 
 if TYPE_CHECKING:
@@ -64,7 +65,7 @@ def test_area(mux21_shell: Shell, commands: str) -> None:
 
 def test_area_of_a_sidb_layout(shell: Shell, resource: Callable[[str], str]) -> None:
     """SiDB area comes from the bounding box, and the cell dimensions apply to it too."""
-    shell.ok(f"read {resource('siqad_or_gate.sqd')}; area")
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"; area')
     default = shell.session.log[-1]["result"]
     assert isinstance(default, dict)
     assert default["area_nm2"] > 0
@@ -79,3 +80,13 @@ def test_cell_library_spellings(mux21_shell: Shell, spelling: str) -> None:
     """Hyphens, underscores, spaces, and case are ignored in a gate library name, as in the C++ shell."""
     mux21_shell.ok(f"ortho; cell -l '{spelling}'")
     assert len(mux21_shell.session.cell_layouts) == 1
+
+
+def test_gate_library_error_preserves_store(shell: Shell) -> None:
+    layout = fiction.shifted_cartesian_gate_layout((1, 1), "2DDWave", "unsupported routing")
+    source = layout.create_pi("a", (0, 0))
+    layout.create_po(source, "f", (0, 1))
+    shell.session.gate_layouts.add(layout)
+    output = shell.fails("cell -l topolinano")
+    assert "unsupported gate orientation at tile" in output
+    assert len(shell.session.cell_layouts) == 0

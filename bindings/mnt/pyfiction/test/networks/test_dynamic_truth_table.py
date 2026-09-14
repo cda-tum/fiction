@@ -10,8 +10,12 @@
 
 from __future__ import annotations
 
+import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native crash regressions
+import sys
+
 import pytest
 
+from mnt import pyfiction as fiction
 from mnt.pyfiction import create_maj_tt, dynamic_truth_table
 
 
@@ -56,3 +60,42 @@ def test_invalid_input_raises(method: str, argument: str, message: str) -> None:
     tt = dynamic_truth_table(3)
     with pytest.raises(ValueError, match=message):
         getattr(tt, method)(argument)
+
+
+@pytest.mark.parametrize("expression", ["p", "[ap]", "(a"])
+def test_rejected_expression_preserves_contents(expression: str) -> None:
+    table = fiction.dynamic_truth_table(1)
+    table.create_from_binary_string("10")
+    with pytest.raises(ValueError, match=r"expression|variable"):
+        table.create_from_expression(expression)
+    assert table.to_binary() == "10"
+
+
+@pytest.mark.parametrize(
+    "code",
+    [
+        "f.dynamic_truth_table(0).create_from_expression('p')",
+        "f.dynamic_truth_table(38)",
+        "f.dynamic_truth_table(64)",
+        "f.dynamic_truth_table(4294967295)",
+    ],
+)
+def test_invalid_truth_tables_fail_without_native_crash(code: str) -> None:
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed Python interpreter and test input
+        [
+            sys.executable,
+            "-c",
+            "from mnt import pyfiction as f\ntry:\n "
+            + code
+            + "\nexcept ValueError:\n pass\nelse:\n raise AssertionError('accepted unsafe input')",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+def test_default_truth_table_is_zero() -> None:
+    assert fiction.dynamic_truth_table().to_binary() == "0"

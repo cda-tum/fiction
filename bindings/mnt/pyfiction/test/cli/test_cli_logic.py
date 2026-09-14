@@ -11,12 +11,15 @@
 from __future__ import annotations
 
 import os
+import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native crash regressions
+import sys
 from typing import TYPE_CHECKING
 
 import pytest
 from aigverse import abc
 from aigverse.algorithms import equivalence_checking as aig_equivalent
 
+from mnt import pyfiction as fiction
 from mnt.pyfiction import aig_network, technology_network
 from mnt.pyfiction.cli.aigverse_bridge import from_aigverse, to_aigverse
 
@@ -35,7 +38,7 @@ def test_map_on_a_technology_network(mux21_shell: Shell) -> None:
 
 
 def test_map_on_an_aig(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f"read {resource('mux21.v')} --type aig; map --all2")
+    shell.ok(f'read "{resource("mux21.v")}" --type aig; map --all2')
     assert isinstance(shell.session.networks.current(), technology_network)
     assert len(shell.session.networks) == 2
 
@@ -75,7 +78,7 @@ def test_gates(mux21_shell: Shell) -> None:
 
 
 def test_simulate(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f"read {resource('xor2.v')}; simulate -n --store")
+    shell.ok(f'read "{resource("xor2.v")}"; simulate -n --store')
     assert "0110" in shell.output
     assert shell.session.truth_tables.current().to_binary() == "0110"
     shell.ok("ortho")
@@ -96,7 +99,7 @@ def test_random_and_generate(shell: Shell) -> None:
 
 
 def test_aig_passes_preserve_the_function(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f"read {resource('mux21.v')} --type aig")
+    shell.ok(f'read "{resource("mux21.v")}" --type aig')
     original = shell.session.networks.current()
     shell.ok("aig rewrite resub refactor balance cleanup")
     optimized = shell.session.networks.current()
@@ -110,7 +113,7 @@ def test_aig_needs_an_aig(mux21_shell: Shell) -> None:
 
 
 def test_bridge_round_trip(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
-    mux21_shell.ok(f"read {resource('mux21.v')} --type aig")
+    mux21_shell.ok(f'read "{resource("mux21.v")}" --type aig')
     aig = mux21_shell.session.networks.current()
     back = from_aigverse(mux21_shell.session, to_aigverse(mux21_shell.session, aig), "back", like=aig)
     assert back.num_gates() == aig.num_gates()
@@ -120,7 +123,7 @@ def test_bridge_round_trip(mux21_shell: Shell, resource: Callable[[str], str]) -
 
 
 def test_abc(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f"read {resource('mux21.v')} --type aig")
+    shell.ok(f'read "{resource("mux21.v")}" --type aig')
     if not abc.is_available():
         assert not os.environ.get("FICTION_REQUIRE_ABC"), "the integration job requires external ABC"
         assert "AIGVERSE_ABC" in shell.fails("abc -s resyn2")
@@ -149,3 +152,47 @@ def test_abc_xag_and_custom_flow(
     shell.ok(f"abc --no-read --no-strash -c 'read_aiger \"{path.name}\"; strash; balance'")
     shell.ok("simulate -n")
     assert shell.session.log[-1]["result"] == expected
+
+
+@pytest.mark.parametrize("options", ["--inv", "--xnor --inv"])
+def test_incomplete_mapping_is_bounded_and_preserves_store(resource: Callable[[str], str], options: str) -> None:
+    code = """
+import sys
+from mnt.pyfiction.cli import Session
+session = Session()
+assert session.execute('read "' + sys.argv[1] + '"')
+original = session.networks.current()
+assert not session.execute('map ' + sys.argv[2])
+assert session.networks.current() is original
+assert len(session.networks) == 1
+session.close()
+"""
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed Python interpreter and test input
+        [sys.executable, "-c", code, resource("xor2.v"), options],
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_mapping_with_statistics_preserves_function(mux21_shell: Shell) -> None:
+    expected = fiction.simulate_outputs(mux21_shell.session.networks.current())
+    mux21_shell.ok("map --and --inv --verbose")
+    assert fiction.simulate_outputs(mux21_shell.session.networks.current()) == expected
+    result = mux21_shell.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert isinstance(result["stats"], dict)
+    assert isinstance(result["stats"]["mapper_stats"], dict)
+    assert result["stats"]["mapper_stats"]["mapping_error"] is False
+
+
+@pytest.mark.parametrize("kind", ["aig", "xag", "mig", "tec"])
+def test_seeded_random_networks(shell: Shell, kind: str) -> None:
+    shell.ok(f"random --type {kind} -n 4 -g 30 --seed 17")
+    network = shell.session.networks.current()
+    assert network.num_pis() == 4
+    assert isinstance(network, getattr(fiction, "technology_network" if kind == "tec" else f"{kind}_network"))
+    shell.ok(f"random --type {kind} -n 4 -g 30 --seed 17")
+    assert fiction.simulate_outputs(network) == fiction.simulate_outputs(shell.session.networks.current())

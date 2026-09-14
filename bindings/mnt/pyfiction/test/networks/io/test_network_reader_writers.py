@@ -17,18 +17,17 @@ import pytest
 from mnt.pyfiction import (
     aig_network,
     convert_network,
-    eq_type,
-    equivalence_checking,
     get_name,
     mig_network,
+    network_target,
     read_aig_network,
     read_mig_network,
     read_technology_network,
     read_xag_network,
+    simulate_outputs,
     technology_network,
     write_aiger,
     write_blif,
-    write_dot_network,
     write_verilog,
     xag_network,
 )
@@ -36,6 +35,7 @@ from mnt.pyfiction import (
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
+
 
 READERS = [
     (read_technology_network, technology_network),
@@ -65,28 +65,29 @@ def test_reader_reports_diagnostics(tmp_path: Path) -> None:
         read_technology_network(str(broken))
 
 
-@pytest.mark.parametrize(("reader", "cls"), READERS)
-def test_verilog_and_blif_round_trip(
-    resources_dir: Path, tmp_path: Path, reader: Callable[[str], Any], cls: type
+@pytest.mark.parametrize("target", ["TEC", "AIG", "XAG", "MIG"])
+@pytest.mark.parametrize("suffix", ["v", "blif"])
+def test_network_writer_round_trip(
+    interface_network: technology_network, tmp_path: Path, target: str, suffix: str
 ) -> None:
-    del cls
-    network = reader(str(resources_dir / "mux21.v"))
-    write_verilog(network, str(tmp_path / "out.v"))
-    write_blif(network, str(tmp_path / "out.blif"))
-    write_dot_network(network, str(tmp_path / "out.dot"))
-    assert "digraph" in (tmp_path / "out.dot").read_text(encoding="utf-8")
-    for suffix in (".v", ".blif"):
-        back = read_technology_network(str(tmp_path / f"out{suffix}"))
-        assert equivalence_checking(convert_network(network), back) == eq_type.STRONG
+    """Network writers retain functions, names, and unused inputs."""
+    network = convert_network(interface_network, getattr(network_target, target))
+    path = tmp_path / f"out.{suffix}"
+    writer = write_verilog if suffix == "v" else write_blif
+    writer(network, str(path))
+    restored = read_technology_network(str(path))
+    assert [restored.get_name(pi) for pi in restored.pis()] == ["apple", "banana", "cherry", "unused"]
+    assert simulate_outputs(restored) == simulate_outputs(interface_network)
 
 
-def test_aiger_round_trip_keeps_names(resources_dir: Path, tmp_path: Path) -> None:
-    aig = read_aig_network(str(resources_dir / "mux21.v"))
-    write_aiger(aig, str(tmp_path / "out.aig"))
-    back = read_aig_network(str(tmp_path / "out.aig"))
-    assert back.num_gates() == aig.num_gates()
-    assert [back.get_name(pi) for pi in back.pis()] == [aig.get_name(pi) for pi in aig.pis()]
-    assert equivalence_checking(convert_network(aig), convert_network(back)) == eq_type.STRONG
+def test_aiger_round_trip_keeps_names(interface_network: technology_network, tmp_path: Path) -> None:
+    """AIGER preserves interface labels and output functions."""
+    aig = convert_network(interface_network, network_target.AIG)
+    path = tmp_path / "out.aig"
+    write_aiger(aig, str(path))
+    back = read_aig_network(str(path))
+    assert [back.get_name(pi) for pi in back.pis()] == ["apple", "banana", "cherry", "unused"]
+    assert simulate_outputs(back) == simulate_outputs(interface_network)
 
 
 WRITERS = [(write_verilog, ".v"), (write_blif, ".blif"), (write_aiger, ".aig")]

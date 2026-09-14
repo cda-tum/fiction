@@ -15,10 +15,13 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt import pyfiction
+from mnt import pyfiction as fiction
 from mnt.pyfiction import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.cli.topologies import FGL_READERS
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from pathlib import Path
 
     from .conftest import Shell
 
@@ -42,7 +45,7 @@ def test_ortho_three_clock_phases(mux21_shell: Shell) -> None:
 
 
 def test_ortho_converts_other_network_types(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f"read {resource('mux21.v')} --type aig; ortho")
+    shell.ok(f'read "{resource("mux21.v")}" --type aig; ortho')
     assert isinstance(shell.session.gate_layouts.current(), cartesian_gate_layout)
 
 
@@ -76,7 +79,7 @@ def test_optimize_needs_2ddwave(mux21_shell: Shell) -> None:
 
 @pytest.mark.skipif(not hasattr(pyfiction, "exact_cartesian"), reason="pyfiction was built without Z3")
 def test_exact(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f"read {resource('xor2.v')}; exact -x -b -s 2ddwave -t 60")
+    shell.ok(f'read "{resource("xor2.v")}"; exact -x -b -s 2ddwave -t 60')
     layout = shell.session.gate_layouts.current()
     assert isinstance(layout, cartesian_gate_layout)
     assert layout.get_clocking_scheme_name() == "2DDWAVE"
@@ -85,6 +88,44 @@ def test_exact(shell: Shell, resource: Callable[[str], str]) -> None:
 
 @pytest.mark.skipif(not hasattr(pyfiction, "exact_cartesian"), reason="pyfiction was built without Z3")
 def test_exact_topolinano(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f"read {resource('xor2.v')}; exact -x -b -s columnar --topolinano -t 60")
+    shell.ok(f'read "{resource("xor2.v")}"; exact -x -b -s columnar --topolinano -t 60')
     assert isinstance(shell.session.gate_layouts.current(), shifted_cartesian_gate_layout)
     assert shell.session.log[-1]["result"]["gate_layout"]["topology"] == "odd_column_cartesian"  # type: ignore[index]
+
+
+@pytest.mark.parametrize("topology", ["odd_row_hex", "even_row_hex", "odd_column_hex", "even_column_hex"])
+@pytest.mark.parametrize("phases", [3, 4])
+def test_direct_hexagonal_ortho_variants(
+    shell: Shell, resource: Callable[[str], str], tmp_path: Path, topology: str, phases: int
+) -> None:
+    shell.ok(f'read "{resource("mux21.v")}"; ortho --topology {topology} --clock-phases {phases}')
+    layout = shell.session.gate_layouts.current()
+    assert layout.num_clocks() == phases
+    expected = fiction.simulate_outputs(layout)
+    assert expected == fiction.simulate_outputs(shell.session.networks.current())
+    path = tmp_path / "hex.fgl"
+    shell.ok(f'write "{path}"; read --topology {topology} "{path}"')
+    restored = shell.session.gate_layouts.current()
+    assert restored.num_clocks() == phases
+    assert fiction.simulate_outputs(restored) == expected
+
+
+@pytest.mark.skipif(not hasattr(fiction, "exact_cartesian"), reason="pyfiction was built without Z3")
+def test_failed_search_preserves_store_and_statistics(mux21_shell: Shell) -> None:
+    before = len(mux21_shell.session.gate_layouts)
+    output = mux21_shell.fails("exact --fixed-size 1 --timeout 0.0001")
+    assert "bounds or timeout" in output
+    assert "impossible" not in output
+    assert len(mux21_shell.session.gate_layouts) == before
+    assert isinstance(mux21_shell.session.log[-1]["stats"], dict)
+
+
+@pytest.mark.parametrize("topology", [name for name in FGL_READERS if name not in {"shifted_cartesian", "hexagonal"}])
+@pytest.mark.skipif(not hasattr(fiction, "exact_cartesian"), reason="pyfiction was built without Z3")
+def test_exact_topologies_preserve_function(shell: Shell, tmp_path: Path, topology: str) -> None:
+    source = tmp_path / "wire.v"
+    source.write_text("module top(a,f);\ninput a;\noutput f;\nassign f = a;\nendmodule\n", encoding="utf-8")
+    shell.ok(f'read "{source}"; exact --topology {topology} --timeout 5')
+    assert fiction.simulate_outputs(shell.session.gate_layouts.current()) == fiction.simulate_outputs(
+        shell.session.networks.current()
+    )

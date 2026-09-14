@@ -72,6 +72,16 @@ def mux21() -> technology_network:
 
 
 @pytest.fixture
+def interface_network() -> technology_network:
+    """A network with constants, inverted edges, LUTs, labels, and an unused input.
+
+    Returns:
+        The network used to check conversion and file round trips.
+    """
+    return read_technology_network(str(RESOURCES_DIR / "network_interfaces.blif"))
+
+
+@pytest.fixture
 def mux21_layout(mux21: technology_network) -> cartesian_gate_layout:
     """The ``mux21`` network placed and routed with ``orthogonal``.
 

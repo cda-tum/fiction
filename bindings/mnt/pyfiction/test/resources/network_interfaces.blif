@@ -1,0 +1,22 @@
+.model interfaces
+.inputs apple banana cherry unused
+.outputs zero one inverted xor majority lut copy
+.names zero
+.names one
+1
+.names apple inverted
+0 1
+.names apple banana xor
+01 1
+10 1
+.names apple banana cherry majority
+11- 1
+1-1 1
+-11 1
+.names apple banana cherry lut
+001 1
+010 1
+111 1
+.names apple copy
+1 1
+.end

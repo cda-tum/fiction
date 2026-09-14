@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from mnt import pyfiction as fiction
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -25,7 +27,7 @@ def test_equiv_network_against_layout(mux21_shell: Shell) -> None:
 
 
 def test_equiv_two_networks(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f"read {resource('xor2.v')}; read {resource('xnor2.v')}; equiv -n")
+    shell.ok(f'read "{resource("xor2.v")}"; read "{resource("xnor2.v")}"; equiv -n')
     assert "not equivalent" in shell.output
     assert "needs two" in shell.fails("clear; read " + resource("xor2.v") + "; equiv -n")
 
@@ -46,3 +48,16 @@ def test_check(mux21_shell: Shell) -> None:
     for section in ("Unplaced nodes", "Dead placed nodes", "Missing connections", "I/O counts"):
         assert section in result, f"the report lost '{section}'"
     assert "violations" in mux21_shell.output
+
+
+def test_drv_blocked_equivalence_is_a_report(shell: Shell, resource: Callable[[str], str]) -> None:
+    shell.ok(f'read "{resource("mux21.v")}"')
+    layout = fiction.cartesian_gate_layout((1, 0), "2DDWave", "invalid")
+    source = layout.create_pi("a", (0, 0))
+    layout.create_po(source, "f", (0, 1))
+    shell.session.gate_layouts.add(layout)
+    shell.ok("equiv -n -g; version")
+    result = shell.session.log[-2]["result"]
+    assert isinstance(result, dict)
+    assert result["eq"] == "NOT_CHECKED"
+    assert "implementation" in str(result["reason"])

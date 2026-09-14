@@ -22,6 +22,7 @@ from mnt.pyfiction.cli import Session
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
 
+
 RESOURCES_DIR = Path(__file__).resolve().parent.parent / "resources"
 
 
@@ -124,24 +125,6 @@ def shell(tmp_path: Path) -> Iterator[Shell]:
 
 
 @pytest.fixture
-def make_shell(tmp_path: Path) -> Iterator[Callable[[], Shell]]:
-    """A factory for shells whose log goes to a fresh file under ``tmp_path``; all are closed after the test.
-
-    Yields:
-        The factory.
-    """
-    shells: list[Shell] = []
-
-    def factory() -> Shell:
-        shells.append(Shell(log_path=tmp_path / "log.json"))
-        return shells[-1]
-
-    yield factory
-    for current in shells:
-        current.session.close()
-
-
-@pytest.fixture
 def resource() -> Callable[[str], str]:
     """Resolve a file under the shared test resources.
 
@@ -162,5 +145,5 @@ def mux21_shell(shell: Shell, resource: Callable[[str], str]) -> Shell:
     Returns:
         The shell after ``read mux21.v``.
     """
-    shell.ok(f"read {resource('mux21.v')}")
+    shell.ok(f'read "{resource("mux21.v")}"')
     return shell
