@@ -296,9 +296,9 @@ def test_write_qcc_component_name(shell: Shell, tmp_path: Path) -> None:
     ("options", "message"),
     [
         ("--via-layers -F v", "--via-layers applies only"),
-        ("--simple -F v", "--simple applies only"),
-        ("--indexes -F v", "drawing indices and clock colors apply only"),
-        ("--clock-colors -n -F dot", "--clock-colors requires a gate-level layout"),
+        ("--simple -F v", "--simple requires QCA SVG"),
+        ("--indexes -F v", "--indexes requires a DOT drawing"),
+        ("--clock-colors -n -F dot", "--clock-colors requires a gate-level DOT drawing"),
     ],
 )
 def test_rejected_writer_options_preserve_destination(

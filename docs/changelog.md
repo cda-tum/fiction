@@ -430,6 +430,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - `opdom` now logs its default algorithm as grid search.
   - The status bar now fits narrow terminals and names with wide Unicode characters.
+  - `show` and `write` now reject unsupported drawing options before writing output.
   - Preserved all FGL topologies, hexagonal orthogonal variants, synchronization elements, native random generators, and ABC flow controls.
   - Rejected invalid mapping, numeric inputs, and conflicting writer options without replacing stored elements.
   - Logic simulation builds output bits without an intermediate binary string.

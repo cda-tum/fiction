@@ -14,7 +14,15 @@ import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction.cli.drawing import drawing_flags, open_viewer, render_dot, write_dot, write_svg
+from mnt.pyfiction import mol_qca_layout, qca_layout
+from mnt.pyfiction.cli.drawing import (
+    drawing_flags,
+    open_viewer,
+    render_dot,
+    validate_drawing_options,
+    write_dot,
+    write_svg,
+)
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import (
     Category,
@@ -62,21 +70,28 @@ def show(session: Session, args: argparse.Namespace) -> Result:
     reads the file afterwards, so a temporary file is retained on disk; --delete removes it when the session closes.
     """
     name = one_store(args, "network", "gate_layout", "cell_layout")
-    if args.output is not None:
-        path: Path = args.output
+    suffix = (
+        args.output.suffix.lower()
+        if args.output is not None
+        else (".svg" if name == "cell_layout" or shutil.which("dot") else ".dot")
+    )
+    if name == "cell_layout" and suffix != ".svg":
+        msg = "cell drawings require an .svg output filename"
+        raise CommandError(msg)
+    if suffix not in {".svg", ".dot"}:
+        msg = "network and gate-layout drawings require .svg or .dot"
+        raise CommandError(msg)
+    entry = session.cell_layouts.current() if name == "cell_layout" else None
+    validate_drawing_options(
+        args,
+        dot=entry is None,
+        gate_layout=name == "gate_layout",
+        qca_svg=entry is not None and isinstance(entry.layout, qca_layout | mol_qca_layout),
+    )
+    path = args.output if args.output is not None else session.viewer_file(suffix, delete=args.delete)
+    if entry is not None:
+        write_svg(entry, path, simple=args.simple)
     else:
-        suffix = ".svg" if name == "cell_layout" or shutil.which("dot") else ".dot"
-        path = session.viewer_file(suffix, delete=args.delete)
-    suffix = path.suffix.lower()
-    if name == "cell_layout":
-        if suffix != ".svg":
-            msg = "cell drawings require an .svg output filename"
-            raise CommandError(msg)
-        write_svg(session.cell_layouts.current(), path, simple=args.simple)
-    else:
-        if suffix not in {".svg", ".dot"}:
-            msg = "network and gate-layout drawings require .svg or .dot"
-            raise CommandError(msg)
         element = session.networks.current() if name == "network" else session.gate_layouts.current()
         dot_path = path
         if suffix == ".svg":

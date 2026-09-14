@@ -106,6 +106,31 @@ def test_show_writes_files(mux21_shell: Shell, tmp_path: Path) -> None:
     assert "<svg" in (tmp_path / "lyt.svg").read_text(encoding="utf-8")
 
 
+@pytest.mark.parametrize("command", ["show --silent -o", "write"])
+@pytest.mark.parametrize(
+    ("store", "suffix", "option"),
+    [("-n", "dot", "simple"), ("-n", "dot", "clock-colors"), ("-c", "svg", "indexes"), ("-c", "svg", "clock-colors")],
+)
+def test_unsupported_drawing_options_preserve_file(
+    mux21_shell: Shell, tmp_path: Path, command: str, store: str, suffix: str, option: str
+) -> None:
+    mux21_shell.ok("ortho; cell")
+    path = tmp_path / f"drawing.{suffix}"
+    path.write_text("original", encoding="utf-8")
+    assert f"--{option} requires" in mux21_shell.fails(f'{command} "{path}" {store} --{option}')
+    assert path.read_text(encoding="utf-8") == "original"
+
+
+@pytest.mark.parametrize("command", ["show --silent -o", "write"])
+def test_sidb_drawing_rejects_qca_options(
+    shell: Shell, resource: Callable[[str], str], tmp_path: Path, command: str
+) -> None:
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
+    path = tmp_path / "sidb.svg"
+    assert "--simple requires QCA SVG" in shell.fails(f'{command} "{path}" -c --simple')
+    assert not path.exists()
+
+
 def test_show_uses_a_temporary_file(mux21_shell: Shell) -> None:
     output = mux21_shell.ok("show -n --silent")
     assert "wrote " in output

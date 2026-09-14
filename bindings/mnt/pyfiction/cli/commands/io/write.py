@@ -16,6 +16,8 @@ from typing import TYPE_CHECKING
 
 from mnt.pyfiction import (
     aig_network,
+    mol_qca_layout,
+    qca_layout,
     write_aiger,
     write_blif,
     write_fgl_layout,
@@ -29,7 +31,7 @@ from mnt.pyfiction import (
     write_sqd_layout,
     write_verilog,
 )
-from mnt.pyfiction.cli.drawing import drawing_flags, write_dot, write_svg
+from mnt.pyfiction.cli.drawing import drawing_flags, validate_drawing_options, write_dot, write_svg
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command, store_flags
 from mnt.pyfiction.cli.stores import element_name
@@ -98,7 +100,7 @@ def write(session: Session, args: argparse.Namespace) -> Result:
     if suffix not in WRITE_SUFFIXES:
         msg = f"cannot write '{suffix}' files" if suffix else "give a file with a known suffix, or --format"
         raise CommandError(msg)
-    _validate_writer(args, suffix)
+    _validate_writer(session, args, suffix)
     path = _output_path(session, args, suffix)
 
     if suffix in NETWORK_WRITE_SUFFIXES or (suffix == ".dot" and args.network):
@@ -126,10 +128,11 @@ def write(session: Session, args: argparse.Namespace) -> Result:
     return {"file": str(path)}
 
 
-def _validate_writer(args: argparse.Namespace, suffix: str) -> None:
+def _validate_writer(session: Session, args: argparse.Namespace, suffix: str) -> None:
     """Reject store conflicts and options the selected writer cannot honor.
 
     Args:
+        session: The stores containing the output element.
         args: Writer options.
         suffix: Validated format suffix.
 
@@ -148,15 +151,12 @@ def _validate_writer(args: argparse.Namespace, suffix: str) -> None:
     if args.component_name and suffix != ".qcc":
         msg_0 = "--component-name applies only to QCC output"
         raise CommandError(msg_0)
-    if args.simple and suffix != ".svg":
-        msg_0 = "--simple applies only to SVG output"
-        raise CommandError(msg_0)
-    if (args.indexes or args.clock_colors) and suffix != ".dot":
-        msg_0 = "drawing indices and clock colors apply only to DOT output"
-        raise CommandError(msg_0)
-    if args.clock_colors and expected == "network":
-        msg_0 = "--clock-colors requires a gate-level layout"
-        raise CommandError(msg_0)
+    validate_drawing_options(
+        args,
+        dot=suffix == ".dot",
+        gate_layout=expected == "gate_layout",
+        qca_svg=suffix == ".svg" and isinstance(session.cell_layouts.current().layout, qca_layout | mol_qca_layout),
+    )
 
 
 def _output_path(session: Session, args: argparse.Namespace, suffix: str) -> Path:

@@ -40,6 +40,8 @@ from .parsing import tokenize
 from .stores import ground_state
 
 if TYPE_CHECKING:
+    import argparse
+
     from .parsing import Parser
     from .stores import CellEntry, GateLayout, Network
 
@@ -56,6 +58,28 @@ def drawing_flags(parser: Parser) -> None:
     drawing.add_argument(
         "--clock-colors", action="store_true", help="color the .dot tiles by clock number instead of by gate type"
     )
+
+
+def validate_drawing_options(args: argparse.Namespace, *, dot: bool, gate_layout: bool, qca_svg: bool) -> None:
+    """Reject options the selected drawing cannot honor.
+
+    Args:
+        args: Drawing options.
+        dot: The drawing uses a DOT source, including Graphviz-rendered SVG.
+        gate_layout: The source is a gate-level layout.
+        qca_svg: The drawing uses a QCA or molecular QCA SVG writer.
+
+    Raises:
+        CommandError: A requested drawing option is unsupported.
+    """
+    for flag, supported, requirement in (
+        ("simple", qca_svg, "QCA SVG output"),
+        ("indexes", dot, "a DOT drawing"),
+        ("clock_colors", dot and gate_layout, "a gate-level DOT drawing"),
+    ):
+        if getattr(args, flag) and not supported:
+            msg = f"--{flag.replace('_', '-')} requires {requirement}"
+            raise CommandError(msg)
 
 
 def write_dot(element: Network | GateLayout, path: Path, *, network: bool, indexes: bool, clock_colors: bool) -> None:
