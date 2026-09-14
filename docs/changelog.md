@@ -94,6 +94,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Added EditorConfig settings that match the repository's formatters.
   - Prek formats `pyproject.toml` with `pyproject-fmt`.
+  - Added `nox -s cpp_lint` for local Clang-Tidy checks. Nox uses `cmake` as the sole CMake executable.
 
 ### Changed
 
