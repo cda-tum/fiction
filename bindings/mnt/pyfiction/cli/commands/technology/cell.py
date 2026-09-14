@@ -23,7 +23,8 @@ from mnt.pyfiction import (
 )
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command
-from mnt.pyfiction.cli.stores import TOPOLOGIES, CellEntry, describe
+from mnt.pyfiction.cli.stores import CellEntry, describe
+from mnt.pyfiction.cli.topologies import TOPOLOGIES
 
 if TYPE_CHECKING:
     import argparse

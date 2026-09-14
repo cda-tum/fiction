@@ -14,7 +14,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from mnt.pyfiction.cli.registry import Category, command
-from mnt.pyfiction.cli.stores import describe
+
+from ._common import read_file
 
 if TYPE_CHECKING:
     import argparse
@@ -22,7 +23,7 @@ if TYPE_CHECKING:
     from mnt.pyfiction.cli.parsing import Parser
     from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
-from ._common import FGL_READERS, _existing_file, _topology_argument
+from ._common import _topology_argument
 
 
 def _read_fgl_arguments(parser: Parser) -> None:
@@ -44,7 +45,4 @@ def read_fgl(session: Session, args: argparse.Namespace) -> Result:
     The file does not record its topology, so --topology selects the reader; it defaults to
     cartesian.
     """
-    path = _existing_file(args.path, (".fgl",))
-    layout = FGL_READERS[args.topology](str(path), path.stem)
-    session.gate_layouts.add(layout)
-    return {"gate_layout": describe(layout)}
+    return read_file(session, args.path, topology=args.topology, suffixes=(".fgl",))

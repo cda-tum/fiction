@@ -20,30 +20,22 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 from mnt.pyfiction import (
     aig_network,
     area,
-    cartesian_gate_layout,
     charge_distribution,
     critical_path_length_and_throughput,
     dynamic_truth_table,
-    even_column_cartesian_gate_layout,
-    even_column_hex_gate_layout,
-    even_row_cartesian_gate_layout,
     get_name,
-    hexagonal_gate_layout,
     inml_layout,
     mig_network,
     mol_qca_layout,
-    odd_column_hex_gate_layout,
-    odd_row_cartesian_gate_layout,
-    odd_row_hex_gate_layout,
     qca_layout,
     row_of,
-    shifted_cartesian_gate_layout,
     sidb_layout,
     sidb_simulation_result,
     stacked_qca_layout,
     technology_network,
     xag_network,
 )
+from mnt.pyfiction.cli.topologies import TOPOLOGIES
 
 from .errors import CommandError
 
@@ -67,18 +59,6 @@ NETWORK_TYPES: dict[type, str] = {
 }
 """The network classes and the type names ``read --type`` accepts, lowercased."""
 
-TOPOLOGIES: dict[type, str] = {
-    cartesian_gate_layout: "cartesian",
-    odd_row_cartesian_gate_layout: "odd_row_cartesian",
-    even_row_cartesian_gate_layout: "even_row_cartesian",
-    even_column_cartesian_gate_layout: "even_column_cartesian",
-    odd_row_hex_gate_layout: "odd_row_hex",
-    odd_column_hex_gate_layout: "odd_column_hex",
-    even_column_hex_gate_layout: "even_column_hex",
-    shifted_cartesian_gate_layout: "odd_column_cartesian",
-    hexagonal_gate_layout: "even_row_hex",
-}
-"""The gate-level layout classes and the names ``--topology`` accepts."""
 
 TECHNOLOGIES: dict[type, str] = {
     qca_layout: "QCA",

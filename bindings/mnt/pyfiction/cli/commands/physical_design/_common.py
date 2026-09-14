@@ -19,7 +19,8 @@ from mnt.pyfiction import (
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.render import table as render_table
 from mnt.pyfiction.cli.statistics import stats_to_dict
-from mnt.pyfiction.cli.stores import TOPOLOGIES, describe
+from mnt.pyfiction.cli.stores import describe
+from mnt.pyfiction.cli.topologies import TOPOLOGIES
 
 if TYPE_CHECKING:
     from mnt.pyfiction.cli.registry import Result

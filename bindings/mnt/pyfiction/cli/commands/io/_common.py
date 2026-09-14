@@ -23,16 +23,10 @@ from mnt.pyfiction import (
     network_target,
     qca_layout,
     read_aig_network,
-    read_cartesian_fgl_layout,
-    read_even_column_cartesian_fgl_layout,
-    read_even_column_hex_fgl_layout,
-    read_even_row_cartesian_fgl_layout,
-    read_hexagonal_fgl_layout,
+    read_fqca_layout,
     read_mig_network,
-    read_odd_column_hex_fgl_layout,
-    read_odd_row_cartesian_fgl_layout,
-    read_odd_row_hex_fgl_layout,
-    read_shifted_cartesian_fgl_layout,
+    read_sqd_layout,
+    read_stacked_fqca_layout,
     read_technology_network,
     read_xag_network,
     set_name,
@@ -41,11 +35,12 @@ from mnt.pyfiction import (
 )
 from mnt.pyfiction.cli.aigverse_bridge import from_aigverse
 from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.stores import CellEntry, describe
+from mnt.pyfiction.cli.topologies import FGL_READERS
 
 if TYPE_CHECKING:
-    from aigverse.networks import Aig
-
     from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
     from mnt.pyfiction.cli.stores import Network
 
@@ -92,22 +87,6 @@ AIGVERSE_NETWORK_SUFFIXES = {suffix for suffix, spec in FORMATS.items() if spec.
 
 AIGVERSE_TARGETS = {"xag": network_target.XAG, "mig": network_target.MIG, "tec": network_target.TEC}
 """What ``--type`` converts an AIG read through ``aigverse`` into."""
-
-
-FGL_READERS = {
-    "cartesian": read_cartesian_fgl_layout,
-    "odd_column_cartesian": read_shifted_cartesian_fgl_layout,
-    "even_row_hex": read_hexagonal_fgl_layout,
-    "odd_row_cartesian": read_odd_row_cartesian_fgl_layout,
-    "even_row_cartesian": read_even_row_cartesian_fgl_layout,
-    "even_column_cartesian": read_even_column_cartesian_fgl_layout,
-    "odd_row_hex": read_odd_row_hex_fgl_layout,
-    "odd_column_hex": read_odd_column_hex_fgl_layout,
-    "even_column_hex": read_even_column_hex_fgl_layout,
-    "shifted_cartesian": read_shifted_cartesian_fgl_layout,
-    "hexagonal": read_hexagonal_fgl_layout,
-}
-"""The ``--topology`` names and the FGL readers that produce them."""
 
 
 def _type_argument(parser: Parser) -> None:
@@ -158,7 +137,7 @@ def _existing_file(path: Path, suffixes: tuple[str, ...]) -> Path:
     if not path.is_file():
         msg = f"no such file: '{path}'"
         raise CommandError(msg)
-    if path.suffix.lower() not in suffixes:
+    if suffixes and path.suffix.lower() not in suffixes:
         accepted = " or ".join(suffixes)
         msg = f"'{path.suffix}' is not {accepted}; use 'read' to choose the reader by suffix"
         raise CommandError(msg)
@@ -175,10 +154,11 @@ def _read_network(session: Session, path: Path, network_type: str, file_format: 
     suffix = f".{file_format}" if file_format else path.suffix.lower()
     if suffix in AIGVERSE_NETWORK_SUFFIXES:
         # aigverse reads these two formats, and it only produces AIGs; --type converts from there
-        aig = read_ascii_aiger_into_aig(str(path)) if suffix == ".aag" else _read_pla(session, path)
-        network = from_aigverse(session, aig, path.stem)
-        if suffix == ".pla":
-            _restore_pla_labels(network, path)
+        network = (
+            from_aigverse(session, read_ascii_aiger_into_aig(str(path)), path.stem)
+            if suffix == ".aag"
+            else _read_pla(session, path)
+        )
         if network_type == "aig":
             return network
         converted = convert_network(network, AIGVERSE_TARGETS[network_type])
@@ -190,7 +170,7 @@ def _read_network(session: Session, path: Path, network_type: str, file_format: 
     return NETWORK_READERS[network_type](str(path), format=suffix[1:])
 
 
-def _read_pla(session: Session, path: Path) -> Aig:
+def _read_pla(session: Session, path: Path) -> Network:
     """Read a PLA after separating labels unsupported by the AIG reader.
 
     Args:
@@ -198,7 +178,7 @@ def _read_pla(session: Session, path: Path) -> Aig:
         path: PLA source, including optional input and output labels.
 
     Returns:
-        The network; interface labels are restored by the caller.
+        The network with its interface labels.
     """
     lines = path.read_text(encoding="utf-8").splitlines()
     temporary = session.temp_file(".pla")
@@ -207,22 +187,24 @@ def _read_pla(session: Session, path: Path) -> Aig:
             "\n".join(line for line in lines if line.split()[:1] not in ([".ilb"], [".ob"])) + "\n",
             encoding="utf-8",
         )
-        return read_pla_into_aig(str(temporary))
+        network = from_aigverse(session, read_pla_into_aig(str(temporary)), path.stem)
+        _restore_pla_labels(network, lines)
+        return network
     finally:
         temporary.unlink(missing_ok=True)
 
 
-def _restore_pla_labels(network: Network, path: Path) -> None:
+def _restore_pla_labels(network: Network, lines: list[str]) -> None:
     """Restore PLA interface labels omitted by the AIG reader.
 
     Args:
         network: Network with the declaration's input and output order.
-        path: PLA source.
+        lines: Lines of the PLA source.
 
     Raises:
         CommandError: A label list disagrees with the interface size.
     """
-    for line in path.read_text(encoding="utf-8").splitlines():
+    for line in lines:
         labels = line.split()
         if labels and labels[0] == ".ilb":
             if len(labels) - 1 != network.num_pis():
@@ -236,3 +218,51 @@ def _restore_pla_labels(network: Network, path: Path) -> None:
                 raise CommandError(msg)
             for index, label in enumerate(labels[1:]):
                 network.set_output_name(index, label)
+
+
+def read_file(
+    session: Session,
+    path: Path,
+    *,
+    file_format: str | None = None,
+    network_type: str = "tec",
+    topology: str = "cartesian",
+    suffixes: tuple[str, ...] = (),
+) -> Result:
+    """Load one file and append its network or layout to the appropriate store.
+
+    Args:
+        session: The destination stores.
+        path: The source file.
+        file_format: An explicit format, or None to use the suffix.
+        network_type: The type produced by network readers.
+        topology: The topology produced by the FGL reader.
+        suffixes: Accepted filename suffixes for a format-specific command.
+
+    Returns:
+        The description of the imported element.
+
+    Raises:
+        CommandError: The file or selected format is invalid.
+    """
+    _existing_file(path, suffixes)
+    suffix = f".{file_format}" if file_format else path.suffix.lower()
+    if suffix in {".v", ".aig", ".blif", ".aag", ".pla"}:
+        network = _read_network(session, path, network_type, file_format)
+        session.networks.add(network)
+        return {"network": describe(network)}
+    if suffix == ".fgl":
+        layout = FGL_READERS[topology](str(path), path.stem)
+        session.gate_layouts.add(layout)
+        return {"gate_layout": describe(layout)}
+    if suffix == ".sqd":
+        entry = CellEntry(read_sqd_layout(str(path), path.stem))
+    elif suffix == ".fqca":
+        stacked = read_stacked_fqca_layout(str(path), path.stem)
+        # The SVG renderer supports unsigned coordinates, whose layer index is one bit.
+        entry = CellEntry(read_fqca_layout(str(path), path.stem) if stacked.z() <= 1 else stacked)
+    else:
+        msg = f"cannot read '{path.suffix}' files"
+        raise CommandError(msg)
+    session.cell_layouts.add(entry)
+    return {"cell_layout": describe(entry)}

@@ -28,13 +28,13 @@ from rich.console import Console
 
 from mnt import pyfiction as fiction
 from mnt.pyfiction.cli.app import CommandCompleter
-from mnt.pyfiction.cli.commands.io._common import FGL_READERS
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.parsing import tokenize
 from mnt.pyfiction.cli.registry import REGISTRY
 from mnt.pyfiction.cli.session import Session
 from mnt.pyfiction.cli.statistics import json_value
 from mnt.pyfiction.cli.stores import Store
+from mnt.pyfiction.cli.topologies import FGL_READERS
 
 if TYPE_CHECKING:
     from collections.abc import Callable

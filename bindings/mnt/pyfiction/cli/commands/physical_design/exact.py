@@ -14,16 +14,11 @@ import os
 from typing import TYPE_CHECKING
 
 from mnt import pyfiction
-from mnt.pyfiction import (
-    clocked_cartesian_layout,
-    clocked_hexagonal_layout,
-    clocked_shifted_cartesian_layout,
-)
-from mnt.pyfiction.cli.commands.io._common import FGL_READERS
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.parsing import positive_float, positive_int
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.statistics import stats_to_dict
+from mnt.pyfiction.cli.topologies import CLOCKED_LAYOUTS, FGL_READERS
 
 if TYPE_CHECKING:
     import argparse
@@ -33,21 +28,6 @@ if TYPE_CHECKING:
     from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import _added, _seconds_to_ms
-
-CLOCKED_LAYOUTS = {
-    "cartesian": clocked_cartesian_layout,
-    "odd_column_cartesian": clocked_shifted_cartesian_layout,
-    "even_row_hex": clocked_hexagonal_layout,
-    "odd_row_cartesian": pyfiction.clocked_odd_row_cartesian_layout,
-    "even_row_cartesian": pyfiction.clocked_even_row_cartesian_layout,
-    "even_column_cartesian": pyfiction.clocked_even_column_cartesian_layout,
-    "odd_row_hex": pyfiction.clocked_odd_row_hex_layout,
-    "odd_column_hex": pyfiction.clocked_odd_column_hex_layout,
-    "even_column_hex": pyfiction.clocked_even_column_hex_layout,
-    "shifted_cartesian": clocked_shifted_cartesian_layout,
-    "hexagonal": clocked_hexagonal_layout,
-}
-"""The smallest clocked layout of each topology, which is what validates a clocking scheme name."""
 
 
 def _clocking_scheme(name: str, topology: str) -> str:
