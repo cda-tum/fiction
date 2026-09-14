@@ -279,6 +279,15 @@ explicit_package_bases = true
 warn_unreachable = true
 
 
+[tool.pyproject-fmt]
+column_width = 120
+indent = 4
+keep_full_version = true
+max_supported_python = "3.14"
+table_format = "long"
+sub_table_spacing = "\n"
+
+
 [tool.ruff]
 line-length = 120
 namespace-packages = ["mnt"]

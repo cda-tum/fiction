@@ -31,7 +31,8 @@ exclude: "^vendors/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind
 #         `mixed-line-ending`, `trailing-whitespace`, `fix-ligatures`, and `fix-smartquotes`
 #         all take `types: [text]`, so any two of them sharing a tier would read-modify-write
 #         the same file at the same time and lose one of the two edits
-#   6     the language formatters. These share a tier because their file types are disjoint
+#   6     the language and configuration formatters. These share a tier because their file
+#         types are disjoint
 #   7-9   the hooks that must observe the formatters' result
 #
 # Do not collapse tiers 1-5 to win back the wall clock; those hooks are cheap, and the
@@ -137,6 +138,13 @@ repos:
       - id: clang-format
         types_or: [c++, c]
         args: ["-style=file"]
+        priority: 6
+
+  # Format pyproject.toml
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: v2.29.4
+    hooks:
+      - id: pyproject-fmt
         priority: 6
 
   # Ensure uv lock file is up-to-date
