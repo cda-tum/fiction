@@ -39,6 +39,16 @@ if os.environ.get("CI", None):
 nox.options.sessions = ["lint", "tests"]
 
 PYTHON_ALL_VERSIONS = ["3.10", "3.11", "3.12", "3.13", "3.14"]
+CPP_LINT_IGNORED_PATHS = (
+    "build-*",
+    "libs/*",
+    "vendors/*",
+    "docs/*",
+    "benchmarks/*",
+    "bib/*",
+    "bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp",
+    "bindings/mnt/pyfiction/include/pyfiction/documentation.hpp",
+)
 
 
 @contextlib.contextmanager
@@ -76,6 +86,18 @@ def lint(session: nox.Session) -> None:
     session.run("prek", "run", "--all-files", *session.posargs, external=True)
 
 
+def _install_build_tools(session: nox.Session) -> None:
+    """Install CMake and Ninja when they are unavailable on ``PATH``.
+
+    Args:
+        session: Nox session that provides the isolated environment.
+    """
+    if shutil.which("cmake") is None:
+        session.install("cmake")
+    if shutil.which("ninja") is None:
+        session.install("ninja")
+
+
 def _run_tests(
     session: nox.Session,
     *,
@@ -84,10 +106,7 @@ def _run_tests(
     pytest_run_args: Sequence[str] = (),
 ) -> None:
     env = {"UV_PROJECT_ENVIRONMENT": session.virtualenv.location}
-    if shutil.which("cmake") is None:
-        session.install("cmake")
-    if shutil.which("ninja") is None:
-        session.install("ninja")
+    _install_build_tools(session)
 
     # install build and test dependencies on top of the existing environment
     session.run(
@@ -162,6 +181,54 @@ def check_sdist(session: nox.Session) -> None:
     """
     session.install("check-sdist")
     session.run("check-sdist", "--inject-junk", *session.posargs)
+
+
+@nox.session(python="3.12", reuse_venv=True)
+def cpp_lint(session: nox.Session) -> None:
+    """Run the CI Clang-Tidy configuration on changed or all C++ files.
+
+    Args:
+        session: Nox session that supplies the lint scope and isolated environment.
+    """
+    parser = argparse.ArgumentParser(prog="nox -s cpp_lint --")
+    scope = parser.add_mutually_exclusive_group()
+    scope.add_argument("--all", action="store_true", dest="all_files", help="lint every eligible C++ file")
+    scope.add_argument("--diff-base", help="lint files changed from this Git revision")
+    args = parser.parse_args(session.posargs)
+
+    _install_build_tools(session)
+    session.install(
+        "clang-tools==1.2.0",
+        "cpp-linter==1.13.0",
+        "nanobind~=3.0.0",
+        "z3-solver==4.14.1",
+    )
+    session.run("clang-tools", "install", "clang-tidy", "--version", "21")
+    session.run(
+        "cmake",
+        "-S",
+        ".",
+        "--preset",
+        "ci-tidy",
+        "-DSKBUILD_SABI_COMPONENT=Development.SABIModule",
+        external=True,
+    )
+
+    linter_args = [
+        "--style=",
+        "--tidy-checks=",
+        "--database=build-ci-tidy",
+        "--version=21",
+        "--lines-changed-only=false",
+        f"--files-changed-only={'false' if args.all_files else 'true'}",
+        f"--ignore={'|'.join(CPP_LINT_IGNORED_PATHS)}",
+        "--file-annotations=false",
+        "--jobs=0",
+    ]
+    if args.diff_base:
+        linter_args.append(f"--diff-base={args.diff_base}")
+
+    session.run("cpp-linter", *linter_args)
 
 
 @nox.session(python="3.12", reuse_venv=True)

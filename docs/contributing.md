@@ -48,6 +48,21 @@ Nevertheless, please try to follow the guidelines below as well as you can to he
 - Run `clang-format` and `clang-tidy` to check your code for style and linting errors before committing.
 - We recommend installing [prek](https://prek.j178.dev/) and running `prek install` once so that formatting and linting checks run automatically before every commit.
 
+## C++ Static Analysis
+
+The C++ lint session requires [uv](https://docs.astral.sh/uv/) and a C++ compiler. It installs
+CMake, Ninja, Clang-Tidy, and the Python build dependencies in an isolated environment, then
+generates the same compilation database and runs the same Clang-Tidy configuration as CI.
+
+```console
+$ uvx nox -s cpp_lint
+$ uvx nox -s cpp_lint -- --diff-base origin/main
+$ uvx nox -s cpp_lint -- --all
+```
+
+The first command checks locally changed C++ files. The second checks files changed from the
+given Git revision. The third checks every eligible C++ file.
+
 ## Pull Request Workflow
 
 - Create PRs early. It is ok to create work-in-progress PRs. You may mark these as draft PRs on GitHub.
