@@ -28,7 +28,7 @@ from rich.console import Console
 
 from mnt import pyfiction as fiction
 from mnt.pyfiction.cli.app import CommandCompleter
-from mnt.pyfiction.cli.commands.files import FGL_READERS
+from mnt.pyfiction.cli.commands.io._common import FGL_READERS
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import REGISTRY
 from mnt.pyfiction.cli.session import Session, json_value, tokenize
@@ -614,7 +614,7 @@ def test_interrupted_command_is_logged_and_session_continues(shell: Shell, monke
     def interrupt(*_: object, **__: object) -> None:
         raise KeyboardInterrupt
 
-    monkeypatch.setattr("mnt.pyfiction.cli.commands.logic.simulate_outputs", interrupt)
+    monkeypatch.setattr("mnt.pyfiction.cli.commands.logic.simulate.simulate_outputs", interrupt)
     shell.ok("generate rca -b 1")
     assert "interrupted" in shell.fails("simulate -n")
     assert shell.session.log[-1]["status"] == "interrupted"

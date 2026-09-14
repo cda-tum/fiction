@@ -6,24 +6,20 @@
 #
 # Licensed under the MIT License
 
-"""Verification commands: equivalence checking and design rule checking."""
+"""The equiv command."""
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING
 
 from mnt.pyfiction import (
     eq_type,
     equivalence_checking,
     equivalence_checking_stats,
-    gate_level_drv_stats,
-    gate_level_drvs,
     get_name,
 )
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command, store_flags
-from mnt.pyfiction.cli.render import table as render_table
 from mnt.pyfiction.cli.session import stats_to_dict
 
 if TYPE_CHECKING:
@@ -34,6 +30,7 @@ if TYPE_CHECKING:
 
 
 def _equiv_arguments(parser: Parser) -> None:
+    """Add the command's arguments to the parser."""
     store_flags(parser, "network", "gate_layout")
 
 
@@ -87,25 +84,9 @@ def equiv(session: Session, args: argparse.Namespace) -> Result:
 
 
 def _last_two(session: Session, store: str) -> tuple[object, object]:
+    """Add the command's arguments to the parser."""
     items = session.networks.items if store == "network" else session.gate_layouts.items
     if len(items) < 2:  # ruff: ignore[magic-value-comparison] -- two elements are what a comparison needs
         msg = f"comparing two {store.replace('_', ' ')}s needs two of them in store"
         raise CommandError(msg)
     return items[-2], items[-1]
-
-
-@command("check", Category.VERIFICATION)
-def check(session: Session, args: argparse.Namespace) -> Result:
-    """Check the active gate-level layout for design rule violations and print the full report."""
-    del args
-    layout = session.gate_layouts.current()
-    stats = gate_level_drv_stats()
-    gate_level_drvs(layout, statistics=stats)
-    report: dict[str, object] = json.loads(stats.report)
-    session.output(f"{stats.drvs} violations, {stats.warnings} warnings")
-    issues = {key: value for key, value in report.items() if value}
-    if (stats.drvs or stats.warnings) and issues:
-        session.console.print(render_table(issues))
-    else:
-        session.output("No design rule violations or warnings.")
-    return report
