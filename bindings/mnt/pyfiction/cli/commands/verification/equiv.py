@@ -20,12 +20,13 @@ from mnt.pyfiction import (
 )
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command, store_flags
-from mnt.pyfiction.cli.session import stats_to_dict
+from mnt.pyfiction.cli.statistics import stats_to_dict
 
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -34,7 +35,13 @@ def _equiv_arguments(parser: Parser) -> None:
     store_flags(parser, "network", "gate_layout")
 
 
-@command("equiv", Category.VERIFICATION, _equiv_arguments)
+@command(
+    "equiv",
+    Category.VERIFICATION,
+    _equiv_arguments,
+    inputs="Store elements selected by the flags below.",
+    example="generate mux -b 1; ortho; equiv -n -g",
+)
 def equiv(session: Session, args: argparse.Namespace) -> Result:
     """Check the active gate-level layout against the active network, or two store elements against each other.
 

@@ -23,7 +23,8 @@ from mnt.pyfiction.cli.stores import describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -34,7 +35,13 @@ def _simulate_arguments(parser: Parser) -> None:
     parser.add_argument("--silent", action="store_true", help="do not print the truth tables")
 
 
-@command("simulate", Category.LOGIC, _simulate_arguments)
+@command(
+    "simulate",
+    Category.LOGIC,
+    _simulate_arguments,
+    inputs="Store elements selected by the flags below.",
+    example="generate mux -b 1; simulate -n --store",
+)
 def simulate_command(session: Session, args: argparse.Namespace) -> Result:
     """Compute the truth table of every output of the active network or gate-level layout.
 

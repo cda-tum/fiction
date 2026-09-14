@@ -23,7 +23,8 @@ from mnt.pyfiction.cli.stores import describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -41,7 +42,13 @@ def _fanouts_arguments(parser: Parser) -> None:
     parser.add_argument("--seed", type=int, help="seed for the random strategy")
 
 
-@command("fanouts", Category.LOGIC, _fanouts_arguments)
+@command(
+    "fanouts",
+    Category.LOGIC,
+    _fanouts_arguments,
+    inputs="Active network.",
+    example="generate mux -b 1; fanouts --degree 2",
+)
 def fanouts(session: Session, args: argparse.Namespace) -> Result:
     """Replace high-degree outputs of the active network by fan-out nodes.
 

@@ -25,7 +25,8 @@ from mnt.pyfiction.cli.stores import CellEntry, describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import AIGVERSE_NETWORK_SUFFIXES, FGL_READERS, FORMATS, _read_network, _topology_argument, _type_argument
 
@@ -50,7 +51,7 @@ def _read_arguments(parser: Parser) -> None:
     _topology_argument(parser)
 
 
-@command("read", Category.IO, _read_arguments)
+@command("read", Category.IO, _read_arguments, inputs="One file.", example='read "circuit.v" --type tec')
 def read(session: Session, args: argparse.Namespace) -> Result:
     """Read a logic network or a layout from a file, chosen by its suffix.
 

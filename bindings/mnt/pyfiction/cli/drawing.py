@@ -36,11 +36,11 @@ from mnt.pyfiction import (
 )
 
 from .errors import CommandError
-from .session import tokenize
+from .parsing import tokenize
 from .stores import ground_state
 
 if TYPE_CHECKING:
-    from .registry import Parser
+    from .parsing import Parser
     from .stores import CellEntry, GateLayout, Network
 
 
@@ -50,7 +50,7 @@ def drawing_flags(parser: Parser) -> None:
     Args:
         parser: The parser of ``show`` or ``write``.
     """
-    drawing = parser.group("drawing")
+    drawing = parser.add_argument_group("drawing")
     drawing.add_argument("--simple", action="store_true", help="draw .svg QCA cells without dots and clock numbers")
     drawing.add_argument("--indexes", action="store_true", help="label the .dot nodes with their indices")
     drawing.add_argument(

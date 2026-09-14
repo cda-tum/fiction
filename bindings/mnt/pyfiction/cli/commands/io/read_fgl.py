@@ -19,7 +19,8 @@ from mnt.pyfiction.cli.stores import describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import FGL_READERS, _existing_file, _topology_argument
 
@@ -30,7 +31,13 @@ def _read_fgl_arguments(parser: Parser) -> None:
     _topology_argument(parser)
 
 
-@command("read_fgl", Category.IO, _read_fgl_arguments)
+@command(
+    "read_fgl",
+    Category.IO,
+    _read_fgl_arguments,
+    inputs="One file.",
+    example='read_fgl "layout.fgl" --topology cartesian',
+)
 def read_fgl(session: Session, args: argparse.Namespace) -> Result:
     """Read a gate-level layout from an FGL file.
 

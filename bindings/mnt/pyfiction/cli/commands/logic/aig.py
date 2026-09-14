@@ -30,7 +30,8 @@ if TYPE_CHECKING:
 
     from aigverse.networks import Aig
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -49,7 +50,9 @@ def _aig_arguments(parser: Parser) -> None:
     parser.add_argument("passes", nargs="+", choices=list(AIG_PASSES), metavar="PASS", help=", ".join(AIG_PASSES))
 
 
-@command("aig", Category.LOGIC, _aig_arguments)
+@command(
+    "aig", Category.LOGIC, _aig_arguments, inputs="Active network.", example="generate mux -b 1; aig rewrite cleanup"
+)
 def aig_command(session: Session, args: argparse.Namespace) -> Result:
     """Run optimization passes on the active AIG, in the given order.
 

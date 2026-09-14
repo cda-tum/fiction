@@ -28,7 +28,8 @@ from mnt.pyfiction.cli.stores import ground_state
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -37,7 +38,13 @@ def _print_arguments(parser: Parser) -> None:
     store_flags(parser)
 
 
-@command("print", Category.GENERAL, _print_arguments)
+@command(
+    "print",
+    Category.GENERAL,
+    _print_arguments,
+    inputs="Store elements selected by the flags below.",
+    example='tt -e "<abc>"; print -t',
+)
 def print_command(session: Session, args: argparse.Namespace) -> Result:
     """Print the active truth table, gate-level layout, or cell-level layout.
 

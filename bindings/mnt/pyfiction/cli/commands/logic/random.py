@@ -23,7 +23,8 @@ from mnt.pyfiction.cli.stores import describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -50,7 +51,7 @@ def _random_arguments(parser: Parser) -> None:
     parser.add_argument("--seed", type=int, help="random seed; a fresh one is drawn when omitted")
 
 
-@command("random", Category.LOGIC, _random_arguments)
+@command("random", Category.LOGIC, _random_arguments, example="random -n 3 -g 10 --type xag --seed 42")
 def random_command(session: Session, args: argparse.Namespace) -> Result:
     """Generate a random network; the seed becomes its name.
 

@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from mnt.pyfiction.cli.session import Session
 
 
-@command("check", Category.VERIFICATION)
+@command("check", Category.VERIFICATION, inputs="Active gate-level layout.", example="generate mux -b 1; ortho; check")
 def check(session: Session, args: argparse.Namespace) -> Result:
     """Check the active gate-level layout for design rule violations and print the full report."""
     del args

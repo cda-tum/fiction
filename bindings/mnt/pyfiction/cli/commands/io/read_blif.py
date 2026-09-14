@@ -19,7 +19,8 @@ from mnt.pyfiction.cli.stores import describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import _existing_file, _read_network, _type_argument
 
@@ -34,7 +35,7 @@ def _arguments_read_blif(parser: Parser) -> None:
     _type_argument(parser)
 
 
-@command("read_blif", Category.IO, _arguments_read_blif)
+@command("read_blif", Category.IO, _arguments_read_blif, inputs="One file.", example='read_blif "circuit.blif"')
 def read_blif(session: Session, args: argparse.Namespace) -> Result:
     """Read a logic network from a BLIF file.
 

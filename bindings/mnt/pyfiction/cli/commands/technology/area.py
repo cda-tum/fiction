@@ -20,7 +20,8 @@ from mnt.pyfiction.cli.registry import Category, command
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -36,7 +37,9 @@ def _area_arguments(parser: Parser) -> None:
     parser.add_argument("--vspace", type=float, metavar="NM", help="vertical spacing between cells")
 
 
-@command("area", Category.TECHNOLOGY, _area_arguments)
+@command(
+    "area", Category.TECHNOLOGY, _area_arguments, inputs="Active cell-level layout.", example="read layout.fqca; area"
+)
 def area_command(session: Session, args: argparse.Namespace) -> Result:
     """Compute the physical area of the active cell-level layout in nm².
 

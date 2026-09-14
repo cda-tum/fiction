@@ -16,8 +16,10 @@ import pytest
 
 from mnt.pyfiction import orthogonal, orthogonal_stats
 from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.parsing import tokenize
 from mnt.pyfiction.cli.registry import REGISTRY, STORE_FLAGS, Category
-from mnt.pyfiction.cli.session import Session, stats_to_dict, tokenize
+from mnt.pyfiction.cli.session import Session
+from mnt.pyfiction.cli.statistics import stats_to_dict
 from mnt.pyfiction.cli.stores import Store
 
 if TYPE_CHECKING:
@@ -80,7 +82,7 @@ def test_command_error_keeps_the_shell_running(shell: Shell) -> None:
 
 def test_every_command_has_a_category_and_summary() -> None:
     for name, cmd in REGISTRY.items():
-        assert name == cmd.name or name in cmd.aliases
+        assert name == cmd.name
         assert isinstance(cmd.category, Category)
         assert cmd.summary
         assert "-h" in cmd.options
@@ -92,9 +94,7 @@ def test_store_flag_letters_are_reserved() -> None:
     A command that selects no store is free to spend the letters, as 'tt -t' and 'exact -c' do.
     """
     selects_a_store = [
-        cmd
-        for cmd in dict.fromkeys(REGISTRY.values())
-        if any(long in cmd.options for _, long, _ in STORE_FLAGS.values())
+        cmd for cmd in REGISTRY.values() if any(long in cmd.options for _, long, _ in STORE_FLAGS.values())
     ]
     assert selects_a_store, "the registry lost every store-selecting command"
     for cmd in selects_a_store:

@@ -28,7 +28,8 @@ from mnt.pyfiction.cli.stores import Store, describe, one_line
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import stores_of
 
@@ -59,7 +60,13 @@ def _store_arguments(parser: Parser) -> None:
     parser.add_argument("--pop", action="store_true", help="remove the active element of the selected stores")
 
 
-@command("store", Category.GENERAL, _store_arguments)
+@command(
+    "store",
+    Category.GENERAL,
+    _store_arguments,
+    inputs="Store elements selected by the flags below.",
+    example="store -n -g",
+)
 def store(session: Session, args: argparse.Namespace) -> Result:
     """List the elements of the selected stores, or of all stores.
 

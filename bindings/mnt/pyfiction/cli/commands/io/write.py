@@ -35,7 +35,8 @@ from mnt.pyfiction.cli.registry import Category, command, store_flags
 from mnt.pyfiction.cli.stores import element_name
 
 if TYPE_CHECKING:
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import FORMATS
 
@@ -78,7 +79,13 @@ def _write_arguments(parser: Parser) -> None:
     drawing_flags(parser)
 
 
-@command("write", Category.IO, _write_arguments)
+@command(
+    "write",
+    Category.IO,
+    _write_arguments,
+    inputs="Store elements selected by the flags below.",
+    example="generate mux -b 1; write mux.v",
+)
 def write(session: Session, args: argparse.Namespace) -> Result:
     """Write the active network or layout to a file, in the format its suffix names.
 

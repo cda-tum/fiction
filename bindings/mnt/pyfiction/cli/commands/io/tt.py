@@ -23,13 +23,14 @@ from mnt.pyfiction.cli.stores import describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
 def _tt_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
-    source = parser.exclusive_group(required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("-t", "--table", metavar="BITS", help="a binary string, or a hex string with a 0x prefix")
     source.add_argument(
         "-e",
@@ -40,7 +41,7 @@ def _tt_arguments(parser: Parser) -> None:
     source.add_argument("-r", "--random", type=int, metavar="VARS", help="a random function of VARS variables")
 
 
-@command("tt", Category.IO, _tt_arguments)
+@command("tt", Category.IO, _tt_arguments, example='tt -e "<abc>"')
 def tt(session: Session, args: argparse.Namespace) -> Result:
     """Create a truth table from a bit string, a hex string, an expression, or at random.
 

@@ -22,7 +22,8 @@ from mnt.pyfiction.cli.stores import TECHNOLOGIES, CellEntry, describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -32,7 +33,7 @@ ENGINES = {name.lower(): member for name, member in sidb_simulation_engine.__mem
 
 def _physical_arguments(parser: Parser, *, base: bool, base_default: int = 2, potential: bool = False) -> None:
     """Add the shared physical parameters and optional base and potential arguments."""
-    physics = parser.group("physical parameters")
+    physics = parser.add_argument_group("physical parameters")
     physics.add_argument("-e", "--epsilon-r", type=float, default=5.6, help="relative permittivity")
     physics.add_argument("-l", "--lambda-tf", type=float, default=5.0, help="Thomas-Fermi screening length in nm")
     physics.add_argument("-m", "--mu-minus", type=float, default=-0.32, help="energy transition level (0/-) in eV")

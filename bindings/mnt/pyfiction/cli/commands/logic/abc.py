@@ -30,7 +30,8 @@ from mnt.pyfiction.cli.stores import describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -43,12 +44,12 @@ def _abc_arguments(parser: Parser) -> None:
     parser.add_argument("--no-read", action="store_true", help="let the custom flow provide its input")
     parser.add_argument("--no-strash", action="store_true", help="omit the initial strash command")
     parser.add_argument("--no-write", action="store_true", help="leave the network store unchanged")
-    source = parser.exclusive_group(required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("-c", "--commands", metavar="COMMANDS", help="a ';'-separated ABC command string")
     source.add_argument("-s", "--script", choices=ABC_SCRIPTS, help="a named ABC script")
 
 
-@command("abc", Category.LOGIC, _abc_arguments)
+@command("abc", Category.LOGIC, _abc_arguments, inputs="Active network.", example="generate mux -b 1; abc -c strash")
 def abc_command(session: Session, args: argparse.Namespace) -> Result:
     """Optimize the active AIG or XAG with an external ABC installation.
 

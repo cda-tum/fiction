@@ -30,12 +30,13 @@ from mnt.pyfiction import (
 )
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command
-from mnt.pyfiction.cli.session import stats_to_dict
+from mnt.pyfiction.cli.statistics import stats_to_dict
 
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import ENGINES, _active_sidb_layout, _apply_physical, _engine_argument, _physical_arguments
 
@@ -58,7 +59,7 @@ DEFAULT_SWEEPS = {
 def _opdom_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
     parser.add_argument("file", type=Path, help="the CSV file to write the domain to")
-    algorithm = parser.exclusive_group()
+    algorithm = parser.add_mutually_exclusive_group()
     algorithm.add_argument(
         "-g", "--grid-search", action="store_true", help="reconstruct the domain by grid search; the default"
     )
@@ -73,7 +74,7 @@ def _opdom_arguments(parser: Parser) -> None:
     )
     parser.add_argument("-o", "--operational-only", action="store_true", help="write only the operational points")
     for axis in ("x", "y", "z"):
-        sweep = parser.group(f"{axis} axis")
+        sweep = parser.add_argument_group(f"{axis} axis")
         default = DEFAULT_SWEEPS[axis]
         sweep.add_argument(
             f"-{axis}",
@@ -89,7 +90,13 @@ def _opdom_arguments(parser: Parser) -> None:
     _engine_argument(parser)
 
 
-@command("opdom", Category.SIMULATION, _opdom_arguments)
+@command(
+    "opdom",
+    Category.SIMULATION,
+    _opdom_arguments,
+    inputs="Active SiDB layout; gate checks also use the active truth table.",
+    example='read and.sqd; tt -e "(ab)"; opdom domain.csv',
+)
 def opdom(session: Session, args: argparse.Namespace) -> Result:
     """Compute the operational domain of the active SiDB gate and write it as CSV.
 

@@ -23,7 +23,8 @@ from mnt.pyfiction.cli.stores import describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import stores_of
 
@@ -34,7 +35,13 @@ def _current_arguments(parser: Parser) -> None:
     parser.add_argument("position", type=int, help="the element's position, counting from 1 as 'store' lists it")
 
 
-@command("current", Category.GENERAL, _current_arguments)
+@command(
+    "current",
+    Category.GENERAL,
+    _current_arguments,
+    inputs="Store elements selected by the flags below.",
+    example="current -n 1",
+)
 def current(session: Session, args: argparse.Namespace) -> Result:
     """Make an element of a store the active one."""
     name = one_store(args)

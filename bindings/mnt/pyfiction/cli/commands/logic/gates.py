@@ -18,12 +18,13 @@ from mnt.pyfiction import (
     count_gate_types,
 )
 from mnt.pyfiction.cli.registry import Category, command, one_store, store_flags
-from mnt.pyfiction.cli.session import stats_to_dict
+from mnt.pyfiction.cli.statistics import stats_to_dict
 
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -33,7 +34,13 @@ def _gates_arguments(parser: Parser) -> None:
     parser.add_argument("--detailed", action="store_true", help="also list the rarer gate types")
 
 
-@command("gates", Category.LOGIC, _gates_arguments)
+@command(
+    "gates",
+    Category.LOGIC,
+    _gates_arguments,
+    inputs="Store elements selected by the flags below.",
+    example="generate mux -b 1; gates -n",
+)
 def gates(session: Session, args: argparse.Namespace) -> Result:
     """Count the gate types of the active network or gate-level layout."""
     store = one_store(args, "network", "gate_layout")

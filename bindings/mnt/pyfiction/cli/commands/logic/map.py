@@ -25,13 +25,14 @@ from mnt.pyfiction import (
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.render import table as render_table
-from mnt.pyfiction.cli.session import stats_to_dict
+from mnt.pyfiction.cli.statistics import stats_to_dict
 from mnt.pyfiction.cli.stores import describe
 
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -66,11 +67,11 @@ GATE_SHORT_FLAGS = {"and": "a", "or": "o", "xor": "x", "inv": "i", "maj": "m", "
 
 def _map_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
-    gates = parser.group("gate types")
+    gates = parser.add_argument_group("gate types")
     for flag, _ in GATE_FLAGS:
         names = (f"-{GATE_SHORT_FLAGS[flag]}", f"--{flag}") if flag in GATE_SHORT_FLAGS else (f"--{flag}",)
         gates.add_argument(*names, action="store_true", help=f"allow {flag.upper().replace('-', ' and ')}")
-    every = parser.exclusive_group()
+    every = parser.add_mutually_exclusive_group()
     every.add_argument("--all2", action="store_true", help="every 2-input function")
     every.add_argument("--all3", action="store_true", help="every 3-input function")
     every.add_argument("--all", action="store_true", help="every supported function")
@@ -82,7 +83,7 @@ def _map_arguments(parser: Parser) -> None:
     parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
 
 
-@command("map", Category.LOGIC, _map_arguments)
+@command("map", Category.LOGIC, _map_arguments, inputs="Active network.", example="generate mux -b 1; map --and --inv")
 def map_command(session: Session, args: argparse.Namespace) -> Result:
     """Map the active network onto a set of gate types, producing a technology network.
 

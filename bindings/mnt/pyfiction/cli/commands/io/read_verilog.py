@@ -19,7 +19,8 @@ from mnt.pyfiction.cli.stores import describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import _existing_file, _read_network, _type_argument
 
@@ -34,7 +35,13 @@ def _arguments_read_verilog(parser: Parser) -> None:
     _type_argument(parser)
 
 
-@command("read_verilog", Category.IO, _arguments_read_verilog)
+@command(
+    "read_verilog",
+    Category.IO,
+    _arguments_read_verilog,
+    inputs="One file.",
+    example='read_verilog "circuit.v" --type tec',
+)
 def read_verilog(session: Session, args: argparse.Namespace) -> Result:
     """Read a logic network from a Verilog file.
 

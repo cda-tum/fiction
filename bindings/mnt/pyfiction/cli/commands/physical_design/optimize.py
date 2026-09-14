@@ -25,7 +25,8 @@ from mnt.pyfiction.cli.registry import Category, command
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import _added, _cartesian_2ddwave, _seconds_to_ms
 
@@ -39,7 +40,13 @@ def _optimize_arguments(parser: Parser) -> None:
     parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
 
 
-@command("optimize", Category.PHYSICAL_DESIGN, _optimize_arguments)
+@command(
+    "optimize",
+    Category.PHYSICAL_DESIGN,
+    _optimize_arguments,
+    inputs="Active gate-level layout.",
+    example="generate mux -b 1; ortho; optimize",
+)
 def optimize(session: Session, args: argparse.Namespace) -> Result:
     """Shrink the active 2DDWave-clocked Cartesian layout by moving gates and shortening wires.
 

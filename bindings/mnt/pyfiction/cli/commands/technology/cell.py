@@ -28,7 +28,8 @@ from mnt.pyfiction.cli.stores import TOPOLOGIES, CellEntry, describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -70,7 +71,13 @@ def _cell_arguments(parser: Parser) -> None:
     )
 
 
-@command("cell", Category.TECHNOLOGY, _cell_arguments)
+@command(
+    "cell",
+    Category.TECHNOLOGY,
+    _cell_arguments,
+    inputs="Active gate-level layout.",
+    example="generate mux -b 1; ortho; cell --library qca-one",
+)
 def cell(session: Session, args: argparse.Namespace) -> Result:
     """Compile the active gate-level layout into a cell-level layout with a gate library.
 

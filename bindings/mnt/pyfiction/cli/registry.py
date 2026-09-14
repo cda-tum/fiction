@@ -15,22 +15,17 @@ argument parser and registers it under its name.
 
 from __future__ import annotations
 
-import argparse
 import inspect
-import math
-import textwrap
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Any, NoReturn
+from typing import TYPE_CHECKING, Any
 
-from mnt import pyfiction
-
-from .errors import CommandError, HelpRequested
+from .errors import CommandError
+from .parsing import Parser
 
 if TYPE_CHECKING:
+    import argparse
     from collections.abc import Callable
-
-    from _typeshed import SupportsWrite
 
     Result = dict[str, object] | None
     # the first argument is the session; it is not named here so that the session module can import the
@@ -50,318 +45,6 @@ class Category(Enum):
     GENERAL = "General"
 
 
-EXAMPLES = {
-    "help": "help read",
-    "version": "version",
-    "quit": "quit",
-    "clear": "clear -g -c",
-    "store": "store -n -g",
-    "current": "current -n 1",
-    "ps": "ps -n",
-    "print": 'tt -e "<abc>"; print -t',
-    "show": "generate mux -b 1; show -n --silent -o mux.dot",
-    "read": 'read "circuit.v" --type tec',
-    "read_verilog": 'read_verilog "circuit.v" --type tec',
-    "read_aiger": 'read_aiger "circuit.aig"',
-    "read_blif": 'read_blif "circuit.blif"',
-    "read_pla": 'read_pla "circuit.pla" --type aig',
-    "read_fgl": 'read_fgl "layout.fgl" --topology cartesian',
-    "read_sqd": 'read_sqd "layout.sqd"',
-    "read_fqca": 'read_fqca "layout.fqca"',
-    "write": "generate mux -b 1; write mux.v",
-    "tt": 'tt -e "<abc>"',
-    "map": "generate mux -b 1; map --and --inv",
-    "fanouts": "generate mux -b 1; fanouts --degree 2",
-    "balance": "generate mux -b 1; balance",
-    "gates": "generate mux -b 1; gates -n",
-    "simulate": "generate mux -b 1; simulate -n --store",
-    "random": "random -n 3 -g 10 --type xag --seed 42",
-    "generate": "generate rca -b 2",
-    "aig": "generate mux -b 1; aig rewrite cleanup",
-    "abc": "generate mux -b 1; abc -c strash",
-    "exact": "generate mux -b 1; exact --timeout 10",
-    "ortho": "generate mux -b 1; ortho",
-    "gold": "generate mux -b 1; gold --timeout 10",
-    "hex": "generate mux -b 1; ortho; hex",
-    "optimize": "generate mux -b 1; ortho; optimize",
-    "cell": "generate mux -b 1; ortho; cell --library qca-one",
-    "area": "read layout.fqca; area",
-    "check": "generate mux -b 1; ortho; check",
-    "equiv": "generate mux -b 1; ortho; equiv -n -g",
-    "quickexact": "read layout.sqd; quickexact",
-    "quicksim": "read layout.sqd; quicksim",
-    "clustercomplete": "read layout.sqd; clustercomplete",
-    "temp": 'read and.sqd; tt -e "(ab)"; temp --gate-based',
-    "opdom": 'read and.sqd; tt -e "(ab)"; opdom domain.csv',
-}
-"""Shell examples; referenced files must exist in the current directory."""
-
-INPUTS = {
-    **dict.fromkeys(("map", "fanouts", "balance", "aig", "abc", "exact", "ortho", "gold"), "Active network."),
-    **dict.fromkeys(("hex", "optimize", "cell", "check"), "Active gate-level layout."),
-    **dict.fromkeys(("area", "quickexact", "quicksim", "clustercomplete"), "Active cell-level layout."),
-    **dict.fromkeys(("temp", "opdom"), "Active SiDB layout; gate checks also use the active truth table."),
-    **dict.fromkeys(
-        ("write", "store", "current", "ps", "print", "show", "clear", "gates", "simulate", "equiv"),
-        "Store elements selected by the flags below.",
-    ),
-    **dict.fromkeys(
-        ("read", "read_verilog", "read_aiger", "read_blif", "read_pla", "read_fgl", "read_sqd", "read_fqca"),
-        "One file.",
-    ),
-}
-"""Store prerequisites displayed before command options."""
-
-
-def unavailable_reason(name: str) -> str | None:
-    """Identify an optional native capability missing from this build.
-
-    Args:
-        name: Command name.
-
-    Returns:
-        The build requirement, or None when no native capability is missing.
-    """
-    required = {"exact": ("exact_cartesian", "Z3"), "clustercomplete": ("clustercomplete", "ALGLIB")}
-    if name in required:
-        symbol, dependency = required[name]
-        if not hasattr(pyfiction, symbol):
-            return f"unavailable: this build has no {dependency} support"
-    return None
-
-
-class DefaultsFormatter(argparse.RawDescriptionHelpFormatter):
-    """A help formatter that states each option's default next to the option itself.
-
-    ``argparse.ArgumentDefaultsHelpFormatter`` would also append ``(default: False)`` to every flag,
-    which says nothing; only options that take a value and carry a real default get the suffix here.
-    """
-
-    # an override of argparse's method, which does not need the formatter either
-    def _get_help_string(self, action: argparse.Action) -> str:  # ruff: ignore[no-self-use]
-        """Return the option's help, with its default appended when it has a meaningful one.
-
-        Args:
-            action: The action being rendered.
-
-        Returns:
-            The help string shown for the option.
-        """
-        text = action.help or ""
-        if (
-            action.default is None
-            or action.default is argparse.SUPPRESS
-            or isinstance(action.default, bool)
-            or "%(default)" in text
-            or "(default:" in text
-        ):
-            return text
-        return f"{text} (default: %(default)s)"
-
-
-class Group:
-    """An argument group that records the options it adds on the parser that owns it."""
-
-    def __init__(self, parser: Parser, group: argparse._ArgumentGroup) -> None:
-        """Wrap one ``argparse`` group.
-
-        Args:
-            parser: The parser that records the options.
-            group: The group to add the arguments to.
-        """
-        self._parser = parser
-        self._group = group
-
-    def add_argument(self, *names: str, **kwargs: Any) -> argparse.Action:  # ruff: ignore[any-type]
-        """Add an argument to the group and record it on the parser.
-
-        Args:
-            names: The option strings, or the name of a positional argument.
-            kwargs: The keyword arguments of ``argparse.ArgumentParser.add_argument``.
-
-        Returns:
-            The created action.
-        """
-        action = self._group.add_argument(*names, **kwargs)
-        self._parser.record(action)
-        return action
-
-
-class Parser(argparse.ArgumentParser):
-    """An argument parser that reports through exceptions instead of exiting the process.
-
-    Attributes:
-        completions: Every option string of the command, mapped onto the values it accepts.
-        actions: Arguments in declaration order, for help and completion.
-    """
-
-    def __init__(self, name: str, description: str) -> None:
-        """Create the parser of one command.
-
-        Args:
-            name: The command name, shown as the program name in usage lines.
-            description: The command's docstring, shown by ``-h``.
-        """
-        summary, _, restrictions = description.partition("\n\n")
-        self.restrictions = restrictions or "No additional restrictions."
-        self.completions: dict[str, tuple[str, ...]] = {}
-        self.actions: list[argparse.Action] = []
-        super().__init__(
-            prog=name,
-            description=f"{summary}\n\nInputs:\n  {INPUTS.get(name, 'No store input.')}",
-            allow_abbrev=False,
-            formatter_class=DefaultsFormatter,
-        )
-
-    def record(self, action: argparse.Action) -> None:
-        """Remember an action's option strings and the values they accept, for tab completion.
-
-        Args:
-            action: The action ``add_argument`` created.
-        """
-        self.actions.append(action)
-        values = tuple(str(choice) for choice in action.choices) if action.choices else ()
-        for option in action.option_strings:
-            self.completions[option] = values
-
-    def add_argument(self, *names: str, **kwargs: Any) -> argparse.Action:  # ruff: ignore[any-type]
-        """Add an argument and record it for tab completion.
-
-        Args:
-            names: The option strings, or the name of a positional argument.
-            kwargs: The keyword arguments of ``argparse.ArgumentParser.add_argument``.
-
-        Returns:
-            The created action.
-        """
-        action = super().add_argument(*names, **kwargs)
-        self.record(action)
-        return action
-
-    def group(self, title: str) -> Group:
-        """Create an argument group whose options this parser records.
-
-        ``add_argument_group`` itself is left alone, because ``argparse`` builds its own groups with
-        it while constructing and those must stay the plain ones.
-
-        Args:
-            title: The heading the help text shows the group under.
-
-        Returns:
-            The group.
-        """
-        return Group(self, self.add_argument_group(title))
-
-    def exclusive_group(self, *, required: bool = False) -> Group:
-        """Create a mutually exclusive group whose options this parser records.
-
-        Args:
-            required: Whether one of the group's options has to be given.
-
-        Returns:
-            The group.
-        """
-        return Group(self, self.add_mutually_exclusive_group(required=required))
-
-    def validate(self, parsed: argparse.Namespace) -> None:
-        """Validate numeric arguments before entering native code.
-
-        Args:
-            parsed: The parsed command arguments.
-        """
-        positive = {
-            "inputs",
-            "bitwidth",
-            "threads",
-            "upper_x",
-            "upper_y",
-            "upper_area",
-            "fixed_size",
-            "iterations",
-            "expansions",
-            "epsilon_r",
-            "lambda_tf",
-            "timeout",
-            "max_temperature",
-            "random_sampling",
-            "flood_fill",
-            "contour_tracing",
-        }
-        for name, value in vars(parsed).items():
-            if isinstance(value, bool) or value is None:
-                continue
-            maximum = 2**64 - 1 if name == "seed" else 2**32 - 1
-            if isinstance(value, int) and not 0 <= value <= maximum:
-                self.error(f"{name.replace('_', '-')}: expected an integer from 0 to {maximum}")
-            if isinstance(value, float) and not math.isfinite(value):
-                self.error(f"{name.replace('_', '-')}: expected a finite number")
-            if name in positive and value <= 0:
-                self.error(
-                    f"{name.replace('_', '-')}: must be at least 1"
-                    if isinstance(value, int)
-                    else f"{name.replace('_', '-')}: must be positive"
-                )
-            if name in {"width", "height", "hspace", "vspace", "alpha"} and value < 0:
-                self.error(f"{name.replace('_', '-')}: cannot be negative")
-            if name == "confidence" and not 0 < value <= 1:
-                self.error("confidence must be in (0, 1]")
-
-    def error(self, message: str) -> NoReturn:
-        """Turn a usage error into a :class:`CommandError` that carries the usage line.
-
-        Args:
-            message: The error message ``argparse`` produced.
-
-        Raises:
-            CommandError: Always.
-        """
-        msg = f"{message}\n{self.format_usage().rstrip()}"
-        raise CommandError(msg)
-
-    # an override of argparse's method, which does not need the parser either
-    def exit(self, status: int = 0, message: str | None = None) -> NoReturn:  # ruff: ignore[no-self-use]
-        """Never exit the process.
-
-        Args:
-            status: The exit status ``argparse`` intended.
-            message: The message ``argparse`` intended to print.
-
-        Raises:
-            CommandError: When the status signals an error.
-            HelpRequested: Otherwise.
-        """
-        if status:
-            raise CommandError(message or "invalid arguments")
-        raise HelpRequested(message or "")
-
-    def format_help(self) -> str:
-        """Render options with their defaults, the restrictions, and a shell example.
-
-        Returns:
-            Detailed plain-text command help.
-        """
-        restrictions = unavailable_reason(self.prog) or self.restrictions
-        example = EXAMPLES.get(self.prog, self.prog)
-        return (
-            super().format_help()
-            + "\nRestrictions:\n"
-            + textwrap.indent(restrictions, "  ")
-            + f"\n\nExample:\n  {example}\n"
-        )
-
-    def print_help(self, file: SupportsWrite[str] | None = None) -> None:
-        """Hand the help text to the session instead of writing it to a stream.
-
-        Args:
-            file: Ignored; kept for the ``argparse`` signature.
-
-        Raises:
-            HelpRequested: Always, carrying the formatted help.
-        """
-        del file
-        raise HelpRequested(self.format_help())
-
-
 @dataclass(frozen=True)
 class Command:
     """One registered command."""
@@ -371,8 +54,8 @@ class Command:
     summary: str
     run: Runner
     parser: Parser
-    aliases: tuple[str, ...] = ()
-    """Other names the command also answers to; ``help`` lists it under ``name`` alone."""
+    unavailable: str | None = None
+    """The missing capability, or None when the command can run."""
 
     @property
     def options(self) -> tuple[str, ...]:
@@ -381,7 +64,7 @@ class Command:
         Returns:
             Every option string of the command's parser.
         """
-        return tuple(self.parser.completions)
+        return tuple(option for action in self.parser.actions for option in action.option_strings)
 
 
 REGISTRY: dict[str, Command] = {}
@@ -392,7 +75,10 @@ def command(
     name: str,
     category: Category,
     arguments: Callable[[Parser], None] | None = None,
-    aliases: tuple[str, ...] = (),
+    *,
+    inputs: str = "No store input.",
+    example: str | None = None,
+    unavailable: str | None = None,
 ) -> Callable[[Runner], Runner]:
     """Register a function as a shell command.
 
@@ -402,7 +88,9 @@ def command(
         name: The command name typed at the prompt.
         category: The group ``help`` lists the command under.
         arguments: Adds the command's options to its parser.
-        aliases: Other names the command answers to; ``help`` lists only ``name``.
+        inputs: The input requirements shown in help.
+        example: A shell invocation, or the command name when omitted.
+        unavailable: A missing capability reported by help and execution.
 
     Returns:
         The decorator, which returns the function unchanged.
@@ -410,7 +98,7 @@ def command(
 
     def register(run: Runner) -> Runner:
         doc = inspect.getdoc(run) or name
-        parser = Parser(name, description=doc)
+        parser = Parser(name, description=doc, inputs=inputs, example=example or name, unavailable=unavailable)
         if arguments is not None:
             arguments(parser)
         cmd = Command(
@@ -419,11 +107,9 @@ def command(
             summary=doc.splitlines()[0],
             run=run,
             parser=parser,
-            aliases=aliases,
+            unavailable=unavailable,
         )
         REGISTRY[name] = cmd
-        for alias in aliases:
-            REGISTRY[alias] = cmd
         return run
 
     return register

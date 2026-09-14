@@ -26,7 +26,8 @@ from mnt.pyfiction.cli.registry import (
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -45,7 +46,13 @@ def _show_arguments(parser: Parser) -> None:
     drawing_flags(parser)
 
 
-@command("show", Category.GENERAL, _show_arguments)
+@command(
+    "show",
+    Category.GENERAL,
+    _show_arguments,
+    inputs="Store elements selected by the flags below.",
+    example="generate mux -b 1; show -n --silent -o mux.dot",
+)
 def show(session: Session, args: argparse.Namespace) -> Result:
     """Draw the active network or layout and open it in the platform's viewer.
 

@@ -22,7 +22,8 @@ from mnt.pyfiction.cli.stores import describe
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -31,7 +32,7 @@ def _balance_arguments(parser: Parser) -> None:
     parser.add_argument("-u", "--unify-outputs", action="store_true", help="balance the outputs against each other")
 
 
-@command("balance", Category.LOGIC, _balance_arguments)
+@command("balance", Category.LOGIC, _balance_arguments, inputs="Active network.", example="generate mux -b 1; balance")
 def balance(session: Session, args: argparse.Namespace) -> Result:
     """Balance the paths of the active network with buffers, so every path to a gate has the same length.
 

@@ -45,7 +45,7 @@ from mnt.pyfiction.cli.errors import CommandError
 if TYPE_CHECKING:
     from aigverse.networks import Aig
 
-    from mnt.pyfiction.cli.registry import Parser
+    from mnt.pyfiction.cli.parsing import Parser
     from mnt.pyfiction.cli.session import Session
     from mnt.pyfiction.cli.stores import Network
 

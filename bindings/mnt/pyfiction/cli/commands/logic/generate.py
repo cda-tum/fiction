@@ -30,7 +30,8 @@ if TYPE_CHECKING:
 
     from aigverse.networks import Aig
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -50,7 +51,7 @@ def _generate_arguments(parser: Parser) -> None:
     parser.add_argument("-b", "--bitwidth", type=int, required=True, help="operand width, or select bits for decoder")
 
 
-@command("generate", Category.LOGIC, _generate_arguments)
+@command("generate", Category.LOGIC, _generate_arguments, example="generate rca -b 2")
 def generate(session: Session, args: argparse.Namespace) -> Result:
     """Generate an arithmetic or control circuit as an AIG."""
     network = from_aigverse(session, GENERATORS[args.kind](args.bitwidth), f"{args.kind}{args.bitwidth}")

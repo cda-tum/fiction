@@ -26,8 +26,9 @@ from prompt_toolkit.styles import Style
 from mnt.pyfiction import __version__
 
 from .errors import CommandError
+from .parsing import tokenize
 from .registry import REGISTRY
-from .session import Session, tokenize
+from .session import Session
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence

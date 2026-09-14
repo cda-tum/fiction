@@ -24,7 +24,8 @@ from mnt.pyfiction.cli.registry import Category, command
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import _added
 
@@ -52,7 +53,9 @@ def _ortho_arguments(parser: Parser) -> None:
     parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
 
 
-@command("ortho", Category.PHYSICAL_DESIGN, _ortho_arguments)
+@command(
+    "ortho", Category.PHYSICAL_DESIGN, _ortho_arguments, inputs="Active network.", example="generate mux -b 1; ortho"
+)
 def ortho(session: Session, args: argparse.Namespace) -> Result:
     """Place and route the active network with the scalable orthogonal graph drawing heuristic.
 

@@ -13,13 +13,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt import pyfiction
-from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command
 
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import _active_sidb_layout, _apply_physical, _physical_arguments, _store_result
 
@@ -33,15 +33,21 @@ def _clustercomplete_arguments(parser: Parser) -> None:
     parser.add_argument("-r", "--report-stats", action="store_true", help="report ground state space statistics")
 
 
-@command("clustercomplete", Category.SIMULATION, _clustercomplete_arguments)
+@command(
+    "clustercomplete",
+    Category.SIMULATION,
+    _clustercomplete_arguments,
+    inputs="Active cell-level layout.",
+    example="read layout.sqd; clustercomplete",
+    unavailable=None
+    if hasattr(pyfiction, "clustercomplete")
+    else "this build of pyfiction has no ALGLIB, which 'clustercomplete' needs",
+)
 def clustercomplete_command(session: Session, args: argparse.Namespace) -> Result:
     """Simulate the active SiDB layout exactly with ClusterComplete, which scales to multi-gate layouts in base 3.
 
     The witness limits tune the first pruning stage; -r prints its statistics.
     """
-    if not hasattr(pyfiction, "clustercomplete"):
-        msg = "this build of pyfiction has no ALGLIB, which 'clustercomplete' needs"
-        raise CommandError(msg)
     layout = _active_sidb_layout(session, unsimulated=True)
     params = pyfiction.clustercomplete_params()
     parameters = _apply_physical(params.simulation_parameters, args)

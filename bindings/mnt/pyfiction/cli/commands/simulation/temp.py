@@ -25,7 +25,8 @@ from mnt.pyfiction.cli.registry import Category, command
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import ENGINES, _active_sidb_layout, _apply_physical, _engine_argument, _physical_arguments
 
@@ -41,7 +42,13 @@ def _temp_arguments(parser: Parser) -> None:
     _engine_argument(parser)
 
 
-@command("temp", Category.SIMULATION, _temp_arguments)
+@command(
+    "temp",
+    Category.SIMULATION,
+    _temp_arguments,
+    inputs="Active SiDB layout; gate checks also use the active truth table.",
+    example='read and.sqd; tt -e "(ab)"; temp --gate-based',
+)
 def temp(session: Session, args: argparse.Namespace) -> Result:
     """Compute the critical temperature of the active SiDB layout.
 

@@ -10,15 +10,12 @@
 
 from __future__ import annotations
 
-import contextlib
 import datetime
 import json
-import math
 import os
 import shutil
 import tempfile
 import time
-from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -29,7 +26,9 @@ from rich.text import Text
 from mnt.pyfiction import convert_network, technology_network
 
 from .errors import CommandError, HelpRequested
+from .parsing import tokenize
 from .registry import REGISTRY
+from .statistics import json_value
 from .stores import CellEntry, GateLayout, Network, Store, describe, element_name, one_line
 
 if TYPE_CHECKING:
@@ -46,121 +45,6 @@ command output does not read as a wall of color."""
 
 
 # Keep quote, word, and command state together so execution and completion share one lexer.
-def tokenize(line: str, *, incomplete: bool = False) -> list[list[str]]:  # ruff: ignore[complex-structure]
-    """Split commands, preserving quoted separators and literal Windows backslashes.
-
-    Args:
-        line: Commands separated by unquoted semicolons; unquoted # starts a comment.
-        incomplete: Permit an open quote and retain the last empty word for completion.
-
-    Returns:
-        Commands containing decoded words.
-
-    Raises:
-        ValueError: An execution line contains an unclosed quote.
-    """
-    commands: list[list[str]] = []
-    words: list[str] = []
-    word = ""
-    quote = ""
-    started = False
-    for char in line:
-        if quote:
-            if char == quote:
-                quote = ""
-            else:
-                word += char
-        elif char in "\"'":
-            quote = char
-            started = True
-        elif char == "#":
-            break
-        elif char == ";" or char.isspace():
-            if started:
-                words.append(word)
-                word, started = "", False
-            if char == ";":
-                if words:
-                    commands.append(words)
-                words = []
-        else:
-            word += char
-            started = True
-    if quote and not incomplete:
-        msg = "unclosed quote"
-        raise ValueError(msg)
-    if started or incomplete:
-        words.append(word)
-    if words:
-        commands.append(words)
-    return commands
-
-
-def stats_to_dict(stats: object) -> dict[str, object]:
-    """Convert a statistics object of the bindings into JSON-ready values.
-
-    Every public, non-callable attribute becomes a key. Durations become float seconds under the
-    attribute name with an ``_s`` suffix, enumerators become their names, and nested statistics
-    objects recurse.
-
-    Args:
-        stats: A ``*_stats`` object of ``mnt.pyfiction``.
-
-    Returns:
-        The attributes as a dictionary; members whose C++ type has no caster are named under
-        ``_unsupported`` instead of being dropped silently.
-    """
-    result: dict[str, object] = {}
-    unsupported: list[str] = []
-    for name in dir(stats):
-        if name.startswith("_"):
-            continue
-        try:
-            value = getattr(stats, name)
-        except TypeError:
-            # a member whose C++ type has no caster; naming it here makes the missing one visible
-            unsupported.append(name)
-            continue
-        if callable(value):
-            continue
-        if isinstance(value, datetime.timedelta):
-            result[f"{name}_s"] = value.total_seconds()
-        else:
-            if name == "report" and isinstance(value, str):
-                with contextlib.suppress(ValueError):
-                    value = json.loads(value)
-            result[name] = json_value(value)
-    if unsupported:
-        result["_unsupported"] = unsupported
-    return result
-
-
-def json_value(value: object) -> object:
-    """Convert one binding value into a JSON-ready value.
-
-    Args:
-        value: A scalar, an enumerator, a list, a path, or a statistics object.
-
-    Returns:
-        The value as JSON accepts it.
-    """
-    if isinstance(value, dict):
-        return {str(key): json_value(item) for key, item in value.items()}
-    if isinstance(value, float) and not math.isfinite(value):
-        return None
-    if isinstance(value, bool | int | float | str) or value is None:
-        return value
-    if isinstance(value, Enum):
-        return value.name
-    if isinstance(value, datetime.timedelta):
-        return value.total_seconds()
-    if isinstance(value, Path):
-        return str(value)
-    if isinstance(value, list | tuple):
-        return [json_value(item) for item in value]
-    if type(value).__module__.startswith("mnt.pyfiction"):
-        return stats_to_dict(value)
-    return str(value)
 
 
 class Session:
@@ -298,6 +182,8 @@ class Session:
         args = cmd.parser.parse_args(arguments)
         cmd.parser.validate(args)
         entry["args"] = {key: json_value(value) for key, value in vars(args).items()}
+        if cmd.unavailable is not None:
+            raise CommandError(cmd.unavailable)
         return cmd.run(self, args)
 
     def run_script(self, path: Path) -> bool:

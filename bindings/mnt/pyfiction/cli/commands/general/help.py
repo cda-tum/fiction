@@ -22,13 +22,13 @@ from mnt.pyfiction.cli.registry import (
     REGISTRY,
     Category,
     command,
-    unavailable_reason,
 )
 
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 
 
@@ -38,7 +38,7 @@ def _help_arguments(parser: Parser) -> None:
     parser.add_argument("name", nargs="?", help="a command to show the full help of")
 
 
-@command("help", Category.GENERAL, _help_arguments)
+@command("help", Category.GENERAL, _help_arguments, example="help read")
 def help_command(session: Session, args: argparse.Namespace) -> Result:
     """List the commands, or show one command's options.
 
@@ -59,9 +59,9 @@ def help_command(session: Session, args: argparse.Namespace) -> Result:
         session.console.print(_command_grid(described=args.all))
         session.output("\nExample: read circuit.v; ortho; check; cell; write circuit.qca", style="note")
         session.output("Use help COMMAND for options and restrictions; help --all for descriptions.", style="note")
-        for name in ("exact", "clustercomplete"):
-            if reason := unavailable_reason(name):
-                session.output(f"{name}: {reason}", style="note")
+        for cmd in REGISTRY.values():
+            if cmd.unavailable:
+                session.output(f"{cmd.name}: unavailable: {cmd.unavailable}", style="note")
     return None
 
 
@@ -87,8 +87,7 @@ def _command_grid(*, described: bool) -> Table:
             grid.add_column("", no_wrap=True)
     blanks = [""] * (len(grid.columns) - 1)
     for category in Category:
-        # a command registered under an alias appears in the registry twice; list it once
-        commands = [cmd for name, cmd in REGISTRY.items() if cmd.category is category and cmd.name == name]
+        commands = [cmd for cmd in REGISTRY.values() if cmd.category is category]
         if not commands:
             continue
         if grid.row_count:
@@ -98,7 +97,7 @@ def _command_grid(*, described: bool) -> Table:
             for cmd in commands:
                 grid.add_row(f"  {cmd.name}", escape(cmd.summary))
         else:
-            _add_name_rows(grid, [name for cmd in commands for name in (cmd.name, *cmd.aliases)])
+            _add_name_rows(grid, [cmd.name for cmd in commands])
     return grid
 
 
@@ -107,7 +106,7 @@ def _add_name_rows(grid: Table, names: list[str]) -> None:
 
     Args:
         grid: The grid being built.
-        names: The command names, aliases included.
+        names: The command names.
     """
     for start in range(0, len(names), NAME_COLUMNS):
         row = names[start : start + NAME_COLUMNS]

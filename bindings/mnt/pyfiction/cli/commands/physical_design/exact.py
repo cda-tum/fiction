@@ -22,13 +22,14 @@ from mnt.pyfiction import (
 from mnt.pyfiction.cli.commands.io._common import FGL_READERS
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command
-from mnt.pyfiction.cli.session import stats_to_dict
+from mnt.pyfiction.cli.statistics import stats_to_dict
 
 if TYPE_CHECKING:
     import argparse
 
     from mnt.pyfiction import exact_params
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import _added, _seconds_to_ms
 
@@ -107,7 +108,16 @@ def _exact_arguments(parser: Parser) -> None:
     parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
 
 
-@command("exact", Category.PHYSICAL_DESIGN, _exact_arguments)
+@command(
+    "exact",
+    Category.PHYSICAL_DESIGN,
+    _exact_arguments,
+    inputs="Active network.",
+    example="generate mux -b 1; exact --timeout 10",
+    unavailable=None
+    if hasattr(pyfiction, "exact_cartesian")
+    else "this build of pyfiction has no Z3 solver, which 'exact' needs",
+)
 def exact(session: Session, args: argparse.Namespace) -> Result:
     """Place and route the active network exactly, with an SMT solver, into a minimal layout.
 
@@ -115,9 +125,6 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
     desynchronization (-d), and a fixed scheme finds solutions fastest; -b puts the I/Os on the
     border. Only small networks finish in reasonable time.
     """
-    if not hasattr(pyfiction, "exact_cartesian"):
-        msg = "this build of pyfiction has no Z3 solver, which 'exact' needs"
-        raise CommandError(msg)
     topology = "shifted_cartesian" if args.topolinano else args.topology
     params = _exact_parameters(args, _clocking_scheme(args.scheme, topology))
     native_topology = {"odd_column_cartesian": "shifted_cartesian", "even_row_hex": "hexagonal"}.get(topology, topology)

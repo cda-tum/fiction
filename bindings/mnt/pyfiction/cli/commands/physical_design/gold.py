@@ -22,12 +22,13 @@ from mnt.pyfiction import (
 )
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command
-from mnt.pyfiction.cli.session import stats_to_dict
+from mnt.pyfiction.cli.statistics import stats_to_dict
 
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.registry import Parser, Result
+    from mnt.pyfiction.cli.parsing import Parser
+    from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
 from ._common import _added, _seconds_to_ms
 
@@ -65,7 +66,13 @@ def _gold_arguments(parser: Parser) -> None:
     )
 
 
-@command("gold", Category.PHYSICAL_DESIGN, _gold_arguments)
+@command(
+    "gold",
+    Category.PHYSICAL_DESIGN,
+    _gold_arguments,
+    inputs="Active network.",
+    example="generate mux -b 1; gold --timeout 10",
+)
 def gold(session: Session, args: argparse.Namespace) -> Result:
     """Place and route the active network with graph-oriented layout design, an A* search.
 
