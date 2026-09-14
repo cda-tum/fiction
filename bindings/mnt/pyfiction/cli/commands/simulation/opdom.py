@@ -141,7 +141,7 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
     return {
         **stats_to_dict(stats),
         "engine": args.engine,
-        "grid_search": args.grid_search,
+        "grid_search": samples is None,
         "sketch": args.sketch,
         "sweeps": [
             {"parameter": getattr(args, f"{axis}_sweep")} for axis in ("x", "y", "z") if getattr(args, f"{axis}_sweep")

@@ -109,10 +109,13 @@ def test_temp(shell: Shell, resource: Callable[[str], str]) -> None:
     assert "in (0, 1]" in shell.fails("temp -c 2")
 
 
-def test_opdom_grid_search(xor_gate: Shell, tmp_path: Path) -> None:
+@pytest.mark.parametrize("algorithm", ["", "--grid-search"])
+def test_opdom_grid_search(xor_gate: Shell, tmp_path: Path, algorithm: str) -> None:
     csv = tmp_path / "opdom.csv"
-    xor_gate.ok(f"opdom {csv} --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1")
+    xor_gate.ok(f'opdom "{csv}" {algorithm} --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1')
     result = xor_gate.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert result["grid_search"] is True
     assert result["num_evaluated_parameter_combinations"] == 9  # type: ignore[index]
     assert "epsilon_r,lambda_tf" in csv.read_text(encoding="utf-8")
 
@@ -120,6 +123,9 @@ def test_opdom_grid_search(xor_gate: Shell, tmp_path: Path) -> None:
 def test_opdom_sampling_and_errors(xor_gate: Shell, tmp_path: Path) -> None:
     csv = tmp_path / "opdom.csv"
     xor_gate.ok(f"opdom {csv} -r 4 -o --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1")
+    result = xor_gate.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert result["grid_search"] is False
     assert "usage" in xor_gate.fails(f"opdom {csv} -r 2 -f 2")
     assert "at least 1" in xor_gate.fails(f"opdom {csv} -f 0")
     assert "positive step" in xor_gate.fails(f"opdom {csv} --x-step 0")
