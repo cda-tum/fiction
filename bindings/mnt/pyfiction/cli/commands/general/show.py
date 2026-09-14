@@ -24,12 +24,7 @@ from mnt.pyfiction.cli.drawing import (
     write_svg,
 )
 from mnt.pyfiction.cli.errors import CommandError
-from mnt.pyfiction.cli.registry import (
-    Category,
-    command,
-    one_store,
-    store_flags,
-)
+from mnt.pyfiction.cli.registry import Category, command, one_store, store_flags
 
 if TYPE_CHECKING:
     import argparse

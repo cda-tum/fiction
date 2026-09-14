@@ -12,9 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    dynamic_truth_table,
-)
+from mnt.pyfiction import dynamic_truth_table
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.parsing import integer
 from mnt.pyfiction.cli.registry import Category, command

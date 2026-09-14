@@ -14,9 +14,7 @@ from typing import TYPE_CHECKING
 
 from rich.table import Table
 
-from mnt.pyfiction import (
-    count_gate_types,
-)
+from mnt.pyfiction import count_gate_types
 from mnt.pyfiction.cli.registry import Category, command, one_store, store_flags
 from mnt.pyfiction.cli.statistics import stats_to_dict
 

@@ -12,9 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    area,
-)
+from mnt.pyfiction import area
 from mnt.pyfiction.cli.parsing import nonnegative_float
 from mnt.pyfiction.cli.registry import Category, command
 

@@ -14,11 +14,7 @@ from typing import TYPE_CHECKING
 
 from aigverse.algorithms import aig_cut_rewriting, aig_resubstitution, balancing, cleanup_dangling, sop_refactoring
 
-from mnt.pyfiction import (
-    aig_network,
-    get_name,
-    technology_network,
-)
+from mnt.pyfiction import aig_network, get_name, technology_network
 from mnt.pyfiction.cli.aigverse_bridge import from_aigverse, to_aigverse
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command

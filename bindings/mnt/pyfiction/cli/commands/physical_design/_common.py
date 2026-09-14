@@ -13,9 +13,7 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    cartesian_gate_layout,
-)
+from mnt.pyfiction import cartesian_gate_layout
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.render import table as render_table
 from mnt.pyfiction.cli.statistics import stats_to_dict

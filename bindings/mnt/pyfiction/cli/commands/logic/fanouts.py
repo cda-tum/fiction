@@ -12,11 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    fanout_substitution,
-    fanout_substitution_params,
-    substitution_strategy,
-)
+from mnt.pyfiction import fanout_substitution, fanout_substitution_params, substitution_strategy
 from mnt.pyfiction.cli.parsing import integer, seed
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.stores import describe

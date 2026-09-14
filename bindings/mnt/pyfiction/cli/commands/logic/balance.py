@@ -12,10 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    network_balancing,
-    network_balancing_params,
-)
+from mnt.pyfiction import network_balancing, network_balancing_params
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.stores import describe
 

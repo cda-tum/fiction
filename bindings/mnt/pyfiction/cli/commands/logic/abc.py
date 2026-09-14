@@ -16,13 +16,7 @@ from typing import TYPE_CHECKING
 from aigverse import abc
 
 from mnt import pyfiction
-from mnt.pyfiction import (
-    aig_network,
-    convert_network,
-    get_name,
-    network_target,
-    set_name,
-)
+from mnt.pyfiction import aig_network, convert_network, get_name, network_target, set_name
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.stores import describe

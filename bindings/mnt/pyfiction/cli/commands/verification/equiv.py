@@ -12,12 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    eq_type,
-    equivalence_checking,
-    equivalence_checking_stats,
-    get_name,
-)
+from mnt.pyfiction import eq_type, equivalence_checking, equivalence_checking_stats, get_name
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.registry import Category, command, store_flags
 from mnt.pyfiction.cli.statistics import stats_to_dict

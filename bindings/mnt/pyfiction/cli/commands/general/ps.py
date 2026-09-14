@@ -12,14 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction.cli.registry import (
-    STORE_FLAGS,
-    Category,
-    command,
-    one_store,
-    selected_stores,
-    store_flags,
-)
+from mnt.pyfiction.cli.registry import STORE_FLAGS, Category, command, one_store, selected_stores, store_flags
 from mnt.pyfiction.cli.render import summary as render_summary
 from mnt.pyfiction.cli.stores import describe
 

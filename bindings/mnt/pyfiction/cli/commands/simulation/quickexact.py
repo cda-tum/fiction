@@ -12,10 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    quickexact,
-    quickexact_params,
-)
+from mnt.pyfiction import quickexact, quickexact_params
 from mnt.pyfiction.cli.registry import Category, command
 
 if TYPE_CHECKING:

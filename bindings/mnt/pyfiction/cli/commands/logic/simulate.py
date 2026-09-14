@@ -12,10 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    dynamic_truth_table,
-    simulate_outputs,
-)
+from mnt.pyfiction import dynamic_truth_table, simulate_outputs
 from mnt.pyfiction.cli.registry import Category, command, one_store, store_flags
 from mnt.pyfiction.cli.stores import describe
 

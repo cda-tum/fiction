@@ -18,11 +18,7 @@ from rich.markup import escape
 from rich.table import Table
 
 from mnt.pyfiction.cli.errors import CommandError
-from mnt.pyfiction.cli.registry import (
-    REGISTRY,
-    Category,
-    command,
-)
+from mnt.pyfiction.cli.registry import REGISTRY, Category, command
 
 if TYPE_CHECKING:
     import argparse

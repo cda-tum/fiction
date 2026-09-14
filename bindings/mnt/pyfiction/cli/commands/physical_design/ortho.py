@@ -13,12 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt import pyfiction
-from mnt.pyfiction import (
-    num_clks,
-    orthogonal,
-    orthogonal_params,
-    orthogonal_stats,
-)
+from mnt.pyfiction import num_clks, orthogonal, orthogonal_params, orthogonal_stats
 from mnt.pyfiction.cli.parsing import integer
 from mnt.pyfiction.cli.registry import Category, command
 

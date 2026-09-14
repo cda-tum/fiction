@@ -12,17 +12,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    print_sidb_layout,
-    sidb_layout,
-)
+from mnt.pyfiction import print_sidb_layout, sidb_layout
 from mnt.pyfiction.cli.errors import CommandError
-from mnt.pyfiction.cli.registry import (
-    Category,
-    command,
-    one_store,
-    store_flags,
-)
+from mnt.pyfiction.cli.registry import Category, command, one_store, store_flags
 from mnt.pyfiction.cli.stores import ground_state
 
 if TYPE_CHECKING:

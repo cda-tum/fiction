@@ -12,12 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    sidb_layout,
-    sidb_simulation_engine,
-    sidb_simulation_parameters,
-    sidb_simulation_result,
-)
+from mnt.pyfiction import sidb_layout, sidb_simulation_engine, sidb_simulation_parameters, sidb_simulation_result
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.parsing import finite_float, integer, positive_float
 from mnt.pyfiction.cli.stores import TECHNOLOGIES, CellEntry, describe

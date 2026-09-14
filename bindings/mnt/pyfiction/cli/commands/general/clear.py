@@ -12,12 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction.cli.registry import (
-    Category,
-    command,
-    selected_stores,
-    store_flags,
-)
+from mnt.pyfiction.cli.registry import Category, command, selected_stores, store_flags
 
 if TYPE_CHECKING:
     import argparse

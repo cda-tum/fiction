@@ -13,10 +13,7 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    gate_level_drv_stats,
-    gate_level_drvs,
-)
+from mnt.pyfiction import gate_level_drv_stats, gate_level_drvs
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.render import table as render_table
 

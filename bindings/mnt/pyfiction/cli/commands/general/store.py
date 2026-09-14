@@ -16,13 +16,7 @@ from rich.markup import escape
 from rich.table import Table
 
 from mnt.pyfiction.cli.errors import CommandError
-from mnt.pyfiction.cli.registry import (
-    STORE_FLAGS,
-    Category,
-    command,
-    selected_stores,
-    store_flags,
-)
+from mnt.pyfiction.cli.registry import STORE_FLAGS, Category, command, selected_stores, store_flags
 from mnt.pyfiction.cli.stores import Store, describe, one_line
 
 if TYPE_CHECKING:
