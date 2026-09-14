@@ -118,7 +118,9 @@ QCA, FQCA, and QLL export. Readers reject coordinates the requested layout type 
 
 `--via-layers` and `--no-via-layers` add or omit the inter-layer via cells of `.qca` and `.fqca` files, which
 `.qca` files carry by default and `.fqca` files do not. `--component-name` names a `.qcc` component after the
-file instead of after the layout. `--indexes` and `--clock-colors` steer the `.dot` drawers. Verilog files name
+file instead of after the layout. `--indexes` labels DOT nodes; `--clock-colors` colors gate-level DOT
+layouts. Both options also apply to SVGs rendered from DOT by `show`. `--simple` applies only to QCA and
+molQCA SVG drawings. Unsupported drawing options fail before creating output. Verilog files name
 their module `top`, as the readers expect, and a technology network is written as an equivalent XAG, because
 gate-level Verilog has no buffers.
 
@@ -131,7 +133,6 @@ element's name: `read c17.v; ortho; cell; write -F qca` produces `c17.qca`. On a
 the network or the gate-level layout store; a gate-level layout is the default. `-c` selects cell layouts.
 Conflicting store flags and irrelevant format options fail before writing. `--format` changes the serializer,
 not an explicitly supplied filename. Names containing path components require an explicit output path.
-Writers serialize to a sibling temporary file and replace the destination after successful flush and close.
 
 ### Truth tables
 
@@ -458,9 +459,20 @@ appears once the session closes, not while it runs. It holds a list with one obj
 
 Algorithm statistics appear under `stats` with the attribute names of the bindings' `*_stats` classes; durations
 carry an `_s` suffix and are in seconds. Machine keys remain stable while tables use human labels and units. Nested DRV reports are JSON objects.
-Non-finite values become JSON `null`. Unknown commands, parsing failures, help, partial imports, and interrupts
+Non-finite values become JSON `null`. Unknown commands, parsing failures, help, and interrupts
 receive explicit statuses. Entries retain execution order and script-file line attribution. Logging is opt-in; a session without `-l` does not retain a full command-result history.
 A log-write failure reports an error, returns a failing exit status, and still cleans temporary files.
+
+## Adding a command
+
+Each command has one Python module under `bindings/mnt/pyfiction/cli/commands/`, in its help category's
+package. The module defines an argument function and a handler decorated with `@command`. The decorator
+sets the name, category, inputs, example, and any unavailable capability; the handler's docstring supplies
+the help description. Declare numeric constraints with the converters in `cli/parsing.py` at each argument.
+
+Import the module in the category's `__init__.py` to register it. Use the session's stores and output methods,
+and return a dictionary for the optional JSON log. Put shared code in the category's `_common.py` only when
+several commands use it. Add tests for the command's user-visible behavior to the relevant CLI test suite.
 
 ## Migration from the C++ shell
 
@@ -497,7 +509,7 @@ and `-c/--cell-layout`; `--logic_network` becomes `--network`.
 | `area` | `area` | Width, height, horizontal spacing, and vertical spacing overrides remain |
 | `quickexact` | `quickexact` | Physics and global potential options use hyphenated names |
 | `quicksim` | `quicksim` | Physics, iterations, and alpha remain |
-| `clustercomplete` | `clustercomplete` | `--witness_partitioning_limit/--overlapping_witnesses_limit/--report_gss_stats` become `--witness-limit/--overlap-limit/--report-gss` |
+| `clustercomplete` | `clustercomplete` | `--witness_partitioning_limit/--overlapping_witnesses_limit/--report_gss_stats` become `--witness-limit/--overlap-limit/--report-stats` |
 | `temp` | `temp` | Confidence, temperature, gate-based mode, physics, base, and engine remain |
 | `opdom` | `opdom` | All four reconstruction methods and sweeps remain; grid search is `--grid-search` and stays the default; `--omit_non_op_samples` becomes `--operational-only` |
 | `check` | `check` | Violation/warning summary; full structured report in the log |

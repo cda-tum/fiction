@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
 
+- CLI:
+
+  - `pip install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
+    completion, script files, piped input, and JSON statistics.
+  - `write` selects formats by suffix or `--format`; readers support AAG, PLA, and all FGL topologies.
+  - `aig`, `abc`, and `generate` provide AIG optimization, external ABC scripts, and network generators.
+  - `show` supports optional Graphviz SVG rendering, explicit viewers, and temporary-file cleanup.
+
 - Code quality:
 
   - Added QCA SVG regression tests for colors, detail modes, tile labels, and file output.
@@ -29,27 +37,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `sidb::simulation::result` stores one layout plus its physically valid configurations
   - `sidb::simulation::potential_landscape` stores static electrostatics for reuse across
     charge configurations and simulation worker threads
-
-- CLI:
-
-  - The `fiction` command-line interface is now a Python shell in `mnt.pyfiction.cli`;
-    `pip install mnt.pyfiction` installs the `fiction` script. It keeps the stores, the `-c`
-    command strings, script files with `source`, and the `-l` JSON log of the C++ shell.
-  - `write FILE` writes networks and layouts in the format the suffix names, replacing the
-    eight format commands; `read` reads `.aag` and `.pla` files as well.
-  - `aig PASS...` runs aigverse's rewriting, resubstitution, refactoring, and balancing on an
-    AIG, `abc` runs an external ABC's scripts, and `generate` builds adders and multiplexers.
-  - The JSON log describes every store element with one schema, in `snake_case` keys with
-    numbers where the C++ shell wrote `1/x` strings.
-  - `-i` continues into the shell once `-c` or `-f` is done, and `-q` keeps a scripted run to its
-    errors and requested results. `ps --all` describes every element of a store and `store --pop` removes the active one.
-  - `show` takes `-p COMMAND` for an explicit viewer and `--delete` to drop its temporary file when
-    the session ends; `show` and `write` take `--indexes` and `--clock-colors` for the DOT drawers.
-  - `write` without a file writes `<element name>.<format>` in the current directory, `-F` names the
-    format, and `--component-name` names a `.qcc` component after the file.
-  - `ortho -n 3|4` sets the number of clock phases, `random --type` produces XAGs, MIGs, and
-    technology networks, `map` regains its six short gate flags, and `cell -l` accepts `QCA ONE`,
-    `SIM7_MOL`, and the other spellings the C++ shell took.
 
 - Dependencies:
 
@@ -135,51 +122,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
-  - SiDB simulation commands now accept simulated entries and append a result for each run.
-  - **Breaking:** SiDB commands use `sidb::layout` and simulation results. `read --sqd` reads the lattice
-    from the file; `--lattice_orientation` is removed
-  - `print`, `show`, and statistics use stored ground states; `sqd` exports geometry and defects
-  - SiDB shell descriptions and JSON statistics report dot counts as `dots`.
-  - Errors go to standard error instead of standard output, so a redirected run still shows them.
-  - `show` hands its file to the platform's opener rather than to a web browser, and keeps the file
-    until the process ends, because the viewer reads it after the command returns.
-  - `print -c` draws a simulated SiDB layout once, with the charge symbols in place of the dots, and
-    prints the ground state energy; the per-dot charge list the drawing already shows is gone.
-  - **Breaking:** store positions count from 1 in `store`, `ps --all`, the status bar, and `current`,
-    so the position never looks like it disagrees with the element count.
-  - **Breaking:** every input format has a reader of its own: `read_verilog`, `read_aiger`,
-    `read_blif`, `read_pla`, `read_fgl`, `read_sqd`, and `read_fqca`. `read` still chooses by suffix;
-    reading a whole directory and its `--sort` option are gone.
-  - `map` lists the gate types in the order `inv`, `and`, `or`, `xor`, `nand`, `nor`, `xnor`, `lt`,
-    `gt`, `le`, `ge`, `maj`, `dot`, `mux`; the short forms of the C++ shell, `-d` included, remain.
-  - **Breaking:** `quit` has no `exit` alias, and the `source` command is gone; `-f` runs a script
-    file, which can no longer run another one.
-  - `opdom` names its default reconstruction `--grid-search`, alongside `--random-sampling`,
-    `--flood-fill`, and `--contour-tracing`.
-  - `store` lists `Index`, `Name`, `Type`, `I/O`, and `Size`, where the size is the extent of a
-    layout and the node count of a network; a long name no longer stretches the table.
-  - `ps` groups a description into `Size`, `I/O`, `Elements`, and `Timing` lines under the element's
-    identity, instead of one row per figure.
-  - `help` lays the command names out in aligned columns, one block per category.
-  - Command help states each option's default at the option itself, so a long option list no longer
-    ends in a separate `Defaults:` paragraph; `quickexact` and `clustercomplete` list
-    `--global-potential` with the other physical parameters.
-  - The interactive prompt dims once its line is accepted, and command output is colored, so the
-    results of a command are easy to tell from the prompts around them.
-  - Long-running commands no longer announce `running…` and `completed in`.
-  - `check` prints and logs the full design rule report again, not only the two counts.
-  - `area` applies the cell dimensions to every technology, SiDB included, and defaults each one it
-    is not given to the technology's own value.
-  - `clustercomplete --base` defaults to 3 again, the base the engine is built for.
-  - `quit` ends a script and a `-c` string, leaving the commands after it unrun.
-  - `temp` and `opdom` run on an already simulated element, which they only read.
-  - `-v` prints the same aligned statistics table everywhere; `gold --progress` is now what lets the
-    search write its own progress past the shell.
-  - `map` renames `--xor_and`, `--or_and`, and `--and_xor` to `--xor-and`, `--or-and`, and
-    `--and-xor`; `--all2`, `--all3`, and `--all` are mutually exclusive.
-  - `read DIRECTORY` reports a file it cannot parse and reads the rest, and recognizes a suffix
-    whatever its case; `.aag` and `.pla` files honor `--type` by conversion.
-  - `help` lists the categories in reading order and ends with the general commands.
+  - Commands now live in separate modules grouped by help category, with local options and metadata.
+  - **Breaking:** SiDB commands use `sidb::layout` and simulation results. SQD files supply the lattice;
+    `--lattice_orientation` is removed. Descriptions count SiDBs as `dots`.
+  - SiDB simulation commands accept simulated entries and append results; earlier entries remain selectable.
+    `print`, `show`, and statistics use stored ground states; SQD output exports geometry and defects.
+  - **Breaking:** store positions count from 1. `ps --all` describes every entry; `store --pop` removes
+    the active entry from explicitly selected stores.
+  - **Breaking:** format-specific readers complement `read`. Directory imports, `--sort`, `source`, and
+    the `exit` alias are removed; `-f` runs scripts and `quit` ends them.
+  - Help includes command inputs, defaults, restrictions, and examples. Store tables and status text fit
+    terminal widths; `ps` groups related statistics.
+  - Errors use standard error. `--quiet` retains requested results, and `-i` continues scripted runs
+    interactively. `gold --progress` controls search progress separately from verbose statistics.
+  - Long options use hyphens. See the CLI migration table for renamed options, topology choices, clock
+    phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
 - Continuous integration:
   - Reusable workflows now use GitHub's self-repository reference syntax.
@@ -428,19 +385,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
-  - `opdom` now logs its default algorithm as grid search.
-  - The status bar now fits narrow terminals and names with wide Unicode characters.
-  - `show` and `write` now reject unsupported drawing options before writing output.
-  - Preserved all FGL topologies, hexagonal orthogonal variants, synchronization elements, native random generators, and ABC flow controls.
-  - Rejected invalid mapping, numeric inputs, and conflicting writer options without replacing stored elements.
-  - Logic simulation builds output bits without an intermediate binary string.
-  - Added compact help, width-aware stores, Graphviz SVG viewing, piped input, and reliable quiet-mode results and cleanup.
-  - Topology help now lists choices in wrapped descriptions and keeps usage lines compact.
-  - SiDB store descriptions and statistics include lattice-based physical area and handle the full column range without integer overflow
-  - A script file that exists but cannot be read reports the reason and exits with 2, like a missing one
-  - `tt -t 0xD` reads all four bits of a hex digit as the two-variable table the same bits name in binary;
-    one digit produced a one-variable table and dropped two of them
-  - `temp` logs a missing energy gap as `null`; the JSON carried `Infinity`, which strict parsers reject
+  - `opdom` logs its default algorithm as grid search; JSON logs encode non-finite statistics as `null`.
+  - `show` and `write` reject unsupported drawing options before writing output. Invalid mapping and
+    numeric inputs preserve stored elements.
+  - Hex truth tables retain every bit. Area statistics use each technology's cell dimensions and the
+    SiDB lattice's physical extent.
+  - Unreadable scripts report the cause and exit with status 2. Interrupted commands retain a log entry
+    and leave the shell usable. Status text accounts for Unicode display widths.
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.

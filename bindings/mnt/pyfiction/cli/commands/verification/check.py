@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 @command("check", Category.VERIFICATION, inputs="Active gate-level layout.", example="generate mux -b 1; ortho; check")
 def check(session: Session, args: argparse.Namespace) -> Result:
-    """Check the active gate-level layout for design rule violations and print the full report."""
+    """Check the active gate-level layout and print violations and warnings."""
     del args
     layout = session.gate_layouts.current()
     stats = gate_level_drv_stats()

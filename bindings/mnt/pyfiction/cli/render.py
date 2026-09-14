@@ -6,7 +6,7 @@
 #
 # Licensed under the MIT License
 
-"""The one table renderer of the shell, so ``ps``, ``-v``, and ``check`` all look alike."""
+"""Render grouped store descriptions and tables of algorithm statistics."""
 
 from __future__ import annotations
 
