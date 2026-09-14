@@ -49,7 +49,7 @@ def clustercomplete_command(session: Session, args: argparse.Namespace) -> Resul
 
     The witness limits tune the first pruning stage; -r prints its statistics.
     """
-    layout = _active_sidb_layout(session, unsimulated=True)
+    layout = _active_sidb_layout(session)
     params = pyfiction.clustercomplete_params()
     parameters = _apply_physical(params.simulation_parameters, args)
     params.global_potential = args.global_potential

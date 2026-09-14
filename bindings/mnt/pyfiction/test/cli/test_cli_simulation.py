@@ -59,7 +59,11 @@ def test_ground_state_engines(or_gate: Shell, engine: str) -> None:
     assert simulation["stable_states"] >= 1
     assert simulation["ground_state_energy_ev"] is not None
     assert "Ground state" in or_gate.ok("print -c")
-    assert "already simulated" in or_gate.fails(engine)
+    or_gate.ok(f"{engine} -m -0.28")
+    assert len(or_gate.session.cell_layouts) == 3
+    assert or_gate.session.cell_layouts.current() is not entry
+    or_gate.ok("current -c 2")
+    assert or_gate.session.cell_layouts.current() is entry
 
 
 def test_simulation_needs_an_sidb_layout(mux21_shell: Shell) -> None:
@@ -139,12 +143,18 @@ def test_two_state_engines_keep_base_two(command: str) -> None:
 
 
 def test_temp_runs_on_a_simulated_layout(shell: Shell, resource: Callable[[str], str]) -> None:
-    """`temp` and `opdom` push nothing, so a simulated element is no obstacle for them."""
+    """Analysis and another simulation can use the active simulated layout."""
     shell.ok(f"read {resource('siqad_or_gate.sqd')}; quickexact")
+    original = shell.session.cell_layouts.current()
     shell.ok("temp")
     assert "critical temperature" in shell.output
-    assert "already simulated" in shell.fails("quickexact")
-    assert "current -c 1" in shell.stderr
+    shell.ok("quicksim --mu-minus -0.28")
+    result = shell.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert result["parameters"]["mu_minus"] == -0.28
+    assert len(shell.session.cell_layouts) == 3
+    shell.ok("current -c 2")
+    assert shell.session.cell_layouts.current() is original
 
 
 def test_opdom_rejects_a_repeated_sweep(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:

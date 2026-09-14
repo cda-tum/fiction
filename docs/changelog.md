@@ -134,6 +134,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     SiDB header dependency
 
 - CLI:
+
+  - SiDB simulation commands now accept simulated entries and append a result for each run.
   - **Breaking:** SiDB commands use `sidb::layout` and simulation results. `read --sqd` reads the lattice
     from the file; `--lattice_orientation` is removed
   - `print`, `show`, and statistics use stored ground states; `sqd` exports geometry and defects

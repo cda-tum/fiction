@@ -44,7 +44,7 @@ def quickexact_command(session: Session, args: argparse.Namespace) -> Result:
 
     The number of charge states per SiDB (2 or 3) is detected automatically.
     """
-    layout = _active_sidb_layout(session, unsimulated=True)
+    layout = _active_sidb_layout(session)
     params = quickexact_params()
     parameters = _apply_physical(params.simulation_parameters, args)
     params.global_potential = args.global_potential

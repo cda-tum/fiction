@@ -81,37 +81,21 @@ def _apply_physical(params: sidb_simulation_parameters, args: argparse.Namespace
     return description
 
 
-def _active_sidb_layout(session: Session, *, unsimulated: bool = False) -> sidb_layout:
+def _active_sidb_layout(session: Session) -> sidb_layout:
     """Return the active SiDB layout.
 
     Args:
         session: The session.
-        unsimulated: Refuse an element that already carries a simulation result, because running an
-            engine on it would store the same layout a second time. ``temp`` and ``opdom`` push
-            nothing, so they do not ask for this.
 
     Returns:
         The layout.
 
     Raises:
-        CommandError: When the active element is of another technology, or is already simulated
-            while ``unsimulated`` asks for a fresh one.
+        CommandError: When the active element is of another technology.
     """
     entry = session.cell_layouts.current()
     if not isinstance(entry.layout, sidb_layout):
         msg = f"the active layout is {TECHNOLOGIES[type(entry.layout)]}; an SiDB layout is needed"
-        raise CommandError(msg)
-    if unsimulated and entry.result is not None:
-        index = next(
-            (
-                position
-                for position, candidate in enumerate(session.cell_layouts, start=1)
-                if candidate.result is None and candidate.layout == entry.layout
-            ),
-            None,
-        )
-        where = f"select it with 'current -c {index}'" if index is not None else "read or design it again"
-        msg = f"the active element is already simulated; {where}"
         raise CommandError(msg)
     return entry.layout
 

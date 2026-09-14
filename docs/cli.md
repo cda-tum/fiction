@@ -344,6 +344,8 @@ parameters `-e` (relative permittivity $\epsilon_r$, default 5.6), `-l` (Thomas-
 $\lambda_{tf}$ in nm, default 5.0), and `-m` (energy transition level $\mu_-$ in eV, default -0.32). A
 simulation adds a new element to the cell-level layout store that carries the result; `print -c` shows its ground
 state charges, `show -c` draws them, and `ps -c` reports the number of stable states and the ground state energy.
+Run another engine or change the physical parameters on the active entry to append another simulation result.
+Earlier results remain available through `current -c`.
 
 ### QuickExact (`quickexact`)
 
