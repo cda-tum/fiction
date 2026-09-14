@@ -13,8 +13,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
+from rich.cells import cell_len
 
-from mnt.pyfiction import orthogonal, orthogonal_stats
+from mnt.pyfiction import orthogonal, orthogonal_stats, set_name
 from mnt.pyfiction.cli.errors import CommandError
 from mnt.pyfiction.cli.parsing import tokenize
 from mnt.pyfiction.cli.registry import REGISTRY, STORE_FLAGS, Category
@@ -134,6 +135,19 @@ def test_status_line_describes_active_store_elements(mux21_shell: Shell) -> None
 
 def test_status_line_is_empty_without_elements() -> None:
     assert Session().status_line() == "no elements in store"
+
+
+@pytest.mark.parametrize("width", [1, 18, 20, 40, 80, 120])
+def test_status_line_fits_terminal(shell: Shell, width: int) -> None:
+    shell.session.console.width = width
+    assert cell_len(shell.session.status_line()) <= width
+    shell.ok("generate mux -b 1")
+    set_name(shell.session.networks.current(), "长名称 e\u0301\n" * 10)
+    status = shell.session.status_line()
+    assert "\n" not in status
+    assert cell_len(status) <= width
+    shell.ok("ortho; cell; tt -t 1000")
+    assert cell_len(shell.session.status_line()) <= width
 
 
 def test_stats_to_dict(mux21: technology_network) -> None:

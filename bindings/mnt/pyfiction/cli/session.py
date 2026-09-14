@@ -19,6 +19,7 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from rich.cells import cell_len
 from rich.console import Console
 from rich.markup import escape
 from rich.text import Text
@@ -333,21 +334,20 @@ class Session:
             for label, store in zip(labels, stores, strict=False)
             if len(store)
         ]
-        if not parts:
-            return "no elements in store"
         shown = [index for index, store in enumerate(stores) if len(store)]
         width = self.console.width
-        remaining = max(0, width - len("   ".join(parts)))
+        remaining = width - cell_len("   ".join(parts))
         for slot, index in enumerate(shown):
             store = stores[index]
-            if store.active is not None and remaining >= len(" name"):
-                name = element_name(store.current())
-                budget = min(20, remaining - 1)
-                if name:
-                    text = name if len(name) <= budget else name[: budget - 1] + "…"
-                    parts[slot] += " · " + text
-                    remaining -= len(text) + 3
-        return "   ".join(parts)
+            if store.active is not None and remaining > len(" · "):
+                name = Text(" ".join(element_name(store.current()).split()))
+                name.truncate(min(20, remaining - 3), overflow="ellipsis")
+                if name.plain:
+                    parts[slot] += " · " + name.plain
+                    remaining -= name.cell_len + 3
+        text = Text("   ".join(parts) if parts else "no elements in store")
+        text.truncate(width, overflow="ellipsis")
+        return text.plain
 
     @staticmethod
     def as_technology_network(network: Network) -> technology_network:
