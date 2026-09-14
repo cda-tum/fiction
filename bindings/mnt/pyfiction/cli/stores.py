@@ -70,7 +70,7 @@ TECHNOLOGIES: dict[type, str] = {
 """The cell-level layout classes and their technology names."""
 
 MAX_PRINTED_TRUTH_TABLE_VARS = 8
-"""Truth tables of more variables are described by their hex string alone."""
+"""Larger truth tables are described by their variable count alone."""
 
 T = TypeVar("T")
 
@@ -193,18 +193,6 @@ class Store(Generic[T]):
         self.items.clear()
         self.active = None
 
-    def summary(self) -> str:
-        """Return the element count and the active element's name, for the status line.
-
-        Returns:
-            For example ``networks: 2 (mux21)``.
-        """
-        count = f"{self.kind}s: {len(self.items)}"
-        if self.active is None:
-            return count
-        name = element_name(self.items[self.active])
-        return f"{count} ({name})" if name else count
-
 
 def element_name(element: object) -> str:
     """Return the name of a store element, or an empty string for elements without one.
@@ -240,7 +228,7 @@ def describe_truth_table(tt: dynamic_truth_table) -> dict[str, object]:
         tt: The truth table.
 
     Returns:
-        ``vars`` and ``hex``, plus ``binary`` for up to :data:`MAX_PRINTED_TRUTH_TABLE_VARS` variables.
+        ``vars``, plus ``hex`` and ``binary`` for up to :data:`MAX_PRINTED_TRUTH_TABLE_VARS` variables.
     """
     description: dict[str, object] = {"vars": tt.num_vars()}
     if tt.num_vars() <= MAX_PRINTED_TRUTH_TABLE_VARS:

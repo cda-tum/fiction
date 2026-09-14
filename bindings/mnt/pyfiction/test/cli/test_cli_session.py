@@ -117,10 +117,8 @@ def test_store() -> None:
         store.select(5)
     with pytest.raises(CommandError, match="out of range"):
         store.select(0)
-    assert store.summary() == "things: 2"
     store.clear()
     assert len(store) == 0
-    assert store.summary() == "things: 0"
 
 
 def test_status_line_describes_active_store_elements(mux21_shell: Shell) -> None:

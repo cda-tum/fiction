@@ -97,6 +97,14 @@ def command(
     """
 
     def register(run: Runner) -> Runner:
+        """Build the parser and register its command handler.
+
+        Args:
+            run: The command handler.
+
+        Returns:
+            The registered handler.
+        """
         doc = inspect.getdoc(run) or name
         parser = Parser(name, description=doc, inputs=inputs, example=example or name, unavailable=unavailable)
         if arguments is not None:

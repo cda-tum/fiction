@@ -14,9 +14,6 @@ import secrets
 from typing import TYPE_CHECKING
 
 from mnt import pyfiction
-from mnt.pyfiction import (
-    network_target,
-)
 from mnt.pyfiction.cli.parsing import integer, positive_int, seed
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.stores import describe
@@ -29,12 +26,7 @@ if TYPE_CHECKING:
     from mnt.pyfiction.cli.session import Session
 
 
-NETWORK_TARGETS = {
-    "aig": None,
-    "xag": network_target.XAG,
-    "mig": network_target.MIG,
-    "tec": network_target.TEC,
-}
+NETWORK_TARGETS = ("aig", "xag", "mig", "tec")
 """The network types available to the native random generators."""
 
 

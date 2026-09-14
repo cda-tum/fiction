@@ -31,7 +31,6 @@ if TYPE_CHECKING:
     from mnt.pyfiction.cli.parsing import Parser
     from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
-from ._common import stores_of
 
 MAX_NAME_WIDTH = 32
 """The widest a name column gets before it is shortened; long names must not push the counts away."""
@@ -74,7 +73,7 @@ def store(session: Session, args: argparse.Namespace) -> Result:
     element of every selected store is removed instead and the one before it becomes active.
     --pop needs the stores spelled out, so that it cannot empty one the user did not mean.
     """
-    stores = stores_of(session)
+    stores = session.stores
     if args.pop:
         return _pop(session, stores, selected_stores(args))
 

@@ -116,7 +116,7 @@ def test_opdom_grid_search(xor_gate: Shell, tmp_path: Path, algorithm: str) -> N
     result = xor_gate.session.log[-1]["result"]
     assert isinstance(result, dict)
     assert result["grid_search"] is True
-    assert result["num_evaluated_parameter_combinations"] == 9  # type: ignore[index]
+    assert result["num_evaluated_parameter_combinations"] == 9
     assert "epsilon_r,lambda_tf" in csv.read_text(encoding="utf-8")
 
 

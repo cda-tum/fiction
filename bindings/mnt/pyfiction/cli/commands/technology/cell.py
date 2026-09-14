@@ -85,11 +85,8 @@ def cell(session: Session, args: argparse.Namespace) -> Result:
     qca-one and sim7-mol take Cartesian layouts, topolinano takes shifted Cartesian ones (exact
     --topolinano), and bestagon takes hexagonal ones (hex, or exact --topology hexagonal -s row).
     """
-    library = LIBRARY_ALIASES.get(_library_key(args.library))
-    if library is None:
-        msg = f"'{args.library}' is not a gate library; choose from {', '.join(GATE_LIBRARIES)}"
-        raise CommandError(msg)
     layout = session.gate_layouts.current()
+    library = args.library
     needed, apply = GATE_LIBRARIES[library]
     if not isinstance(layout, needed):
         msg = f"{library} needs a {TOPOLOGIES[needed]} layout; the active layout is {TOPOLOGIES[type(layout)]}"

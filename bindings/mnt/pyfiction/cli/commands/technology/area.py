@@ -26,8 +26,8 @@ if TYPE_CHECKING:
     from mnt.pyfiction.cli.session import Session
 
 
-AREA_OVERRIDES = {"width": "-x", "height": "-y", "hspace": "--hspace", "vspace": "--vspace"}
-"""The keyword arguments of the ``area`` binding and the flags that set them."""
+AREA_OVERRIDES = ("width", "height", "hspace", "vspace")
+"""The keyword arguments of the ``area`` binding that CLI options can override."""
 
 
 def _area_arguments(parser: Parser) -> None:

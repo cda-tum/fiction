@@ -29,7 +29,6 @@ if TYPE_CHECKING:
     from mnt.pyfiction.cli.parsing import Parser
     from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
-from ._common import stores_of
 
 
 def _ps_arguments(parser: Parser) -> None:
@@ -41,7 +40,7 @@ def _ps_arguments(parser: Parser) -> None:
 @command("ps", Category.GENERAL, _ps_arguments, inputs="Store elements selected by the flags below.", example="ps -n")
 def ps(session: Session, args: argparse.Namespace) -> Result:
     """Print the statistics of the active element of a store."""
-    stores = stores_of(session)
+    stores = session.stores
     if not args.all:
         name = one_store(args)
         description = describe(stores[name].current())

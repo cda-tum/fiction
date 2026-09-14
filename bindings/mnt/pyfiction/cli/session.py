@@ -17,7 +17,7 @@ import shutil
 import tempfile
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from rich.cells import cell_len
 from rich.console import Console
@@ -43,9 +43,6 @@ STYLES = {
 }
 """The colors the shell sets command output apart from the prompt with; muted, so a long run of
 command output does not read as a wall of color."""
-
-
-# Keep quote, word, and command state together so execution and completion share one lexer.
 
 
 class Session:
@@ -92,6 +89,16 @@ class Session:
         self._temp_index = 0
         self._to_delete: list[Path] = []
 
+    @property
+    def stores(self) -> dict[str, Store[Any]]:
+        """The stores keyed by their command-line flag names."""
+        return {
+            "truth_table": self.truth_tables,
+            "network": self.networks,
+            "gate_layout": self.gate_layouts,
+            "cell_layout": self.cell_layouts,
+        }
+
     def execute(self, line: str) -> bool:
         """Run every command on a line, stopping at the first failure or at ``quit``.
 
@@ -136,8 +143,8 @@ class Session:
         }
         if self.log_path is not None:
             self.log.append(entry)
-        stores = (self.truth_tables, self.networks, self.gate_layouts, self.cell_layouts)
-        before = [(len(store), store.active) for store in stores]
+        stores = self.stores
+        before = {name: (len(store), store.active) for name, store in stores.items()}
         try:
             result = self._invoke(argv, entry)
         except HelpRequested as help_request:
@@ -154,12 +161,16 @@ class Session:
             return False
         finally:
             entry["runtime_s"] = time.perf_counter() - clock
-        entry["status"] = "partial" if result and result.get("status") == "partial" else "ok"
+        entry["status"] = "ok"
         if result is not None and self.log_path is not None:
             entry["result"] = json_value(result)
-        for store, previous in zip(stores, before, strict=False):
+        for name, store in stores.items():
+            previous = before[name]
             if store.active is not None and (len(store), store.active) != previous:
-                self.info(f"{store.kind} {store.position}: {one_line(describe(store.current()))}", style="result")
+                description = result.get(name) if result and len(store) >= previous[0] else None
+                if not isinstance(description, dict):
+                    description = describe(store.current())
+                self.info(f"{store.kind} {store.position}: {one_line(description)}", style="result")
         return True
 
     def _invoke(self, argv: list[str], entry: dict[str, object]) -> Result:
@@ -327,7 +338,7 @@ class Session:
         Returns:
             One line naming each store that holds something, with names as space permits.
         """
-        stores = (self.truth_tables, self.networks, self.gate_layouts, self.cell_layouts)
+        stores = tuple(self.stores.values())
         labels = ("truth tables", "networks", "gate layouts", "cell layouts")
         parts = [
             f"{label} {store.position} of {len(store)}"

@@ -27,7 +27,6 @@ if TYPE_CHECKING:
     from mnt.pyfiction.cli.parsing import Parser
     from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
-from ._common import stores_of
 
 
 def _current_arguments(parser: Parser) -> None:
@@ -46,6 +45,6 @@ def _current_arguments(parser: Parser) -> None:
 def current(session: Session, args: argparse.Namespace) -> Result:
     """Make an element of a store the active one."""
     name = one_store(args)
-    selected = stores_of(session)[name]
+    selected = session.stores[name]
     selected.select(args.position)
     return {name: describe(selected.current())}

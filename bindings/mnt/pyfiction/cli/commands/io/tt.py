@@ -10,7 +10,6 @@
 
 from __future__ import annotations
 
-import math
 from typing import TYPE_CHECKING
 
 from mnt.pyfiction import (
@@ -77,13 +76,9 @@ def _table_from_string(text: str) -> dynamic_truth_table:
     return table
 
 
-SMALLEST_TRUTH_TABLE_BITS = 1
-"""A truth table of one variable has two bits; that is the smallest string ``tt`` accepts."""
-
-
 def _log2(count: int, *, what: str) -> int:
     """Return the variable count for a nonempty power-of-two bit count."""
-    if count < SMALLEST_TRUTH_TABLE_BITS or count & (count - 1):
+    if count == 0 or count & (count - 1):
         msg = f"the number of {what} must be a power of two, got {count}"
         raise CommandError(msg)
-    return int(math.log2(count))
+    return count.bit_length() - 1

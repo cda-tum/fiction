@@ -272,7 +272,9 @@ def test_store_pop_removes_the_active_element(mux21_shell: Shell, resource: Call
     """--pop drops the active element and leaves the one before it active, as the C++ shell did."""
     mux21_shell.ok(f"read {resource('xor2.v')}")
     assert len(mux21_shell.session.networks) == 2
-    mux21_shell.ok("store -n --pop")
+    output = mux21_shell.ok("store -n --pop")
+    assert "network 1: mux21" in output
+    assert "removed xor2" in output
     assert len(mux21_shell.session.networks) == 1
     assert element_name(mux21_shell.session.networks.current()) == "mux21"
     mux21_shell.ok("store -n --pop")

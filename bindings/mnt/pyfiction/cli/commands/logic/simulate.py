@@ -10,7 +10,6 @@
 
 from __future__ import annotations
 
-import math
 from typing import TYPE_CHECKING
 
 from mnt.pyfiction import (
@@ -52,7 +51,7 @@ def simulate_command(session: Session, args: argparse.Namespace) -> Result:
     tables: list[dict[str, object]] = []
     for output, bits in simulate_outputs(element):
         binary = "".join("1" if bit else "0" for bit in bits)
-        table = dynamic_truth_table(int(math.log2(len(binary))))
+        table = dynamic_truth_table(len(bits).bit_length() - 1)
         table.create_from_binary_string(binary)
         if args.store:
             session.truth_tables.add(table)

@@ -28,20 +28,14 @@ from mnt.pyfiction.cli.stores import ground_state
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.pyfiction.cli.parsing import Parser
     from mnt.pyfiction.cli.registry import Result
     from mnt.pyfiction.cli.session import Session
-
-
-def _print_arguments(parser: Parser) -> None:
-    """Add the command's arguments to the parser."""
-    store_flags(parser)
 
 
 @command(
     "print",
     Category.GENERAL,
-    _print_arguments,
+    store_flags,
     inputs="Store elements selected by the flags below.",
     example='tt -e "<abc>"; print -t',
 )
