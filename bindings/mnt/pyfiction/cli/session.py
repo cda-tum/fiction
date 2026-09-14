@@ -180,7 +180,6 @@ class Session:
             msg = f"unknown command '{name}'; type 'help' for the list of commands"
             raise CommandError(msg)
         args = cmd.parser.parse_args(arguments)
-        cmd.parser.validate(args)
         entry["args"] = {key: json_value(value) for key, value in vars(args).items()}
         if cmd.unavailable is not None:
             raise CommandError(cmd.unavailable)

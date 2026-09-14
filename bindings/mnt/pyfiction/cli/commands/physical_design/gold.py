@@ -21,6 +21,7 @@ from mnt.pyfiction import (
     graph_oriented_layout_design_stats,
 )
 from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.parsing import integer, positive_float, positive_int, seed
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.statistics import stats_to_dict
 
@@ -35,8 +36,8 @@ from ._common import _added, _seconds_to_ms
 
 def _gold_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
-    parser.add_argument("-t", "--timeout", type=float, metavar="SECONDS", help="give up after this long")
-    parser.add_argument("-n", "--expansions", type=int, default=4, help="vertex expansions per search node")
+    parser.add_argument("-t", "--timeout", type=positive_float, metavar="SECONDS", help="give up after this long")
+    parser.add_argument("-n", "--expansions", type=positive_int, default=4, help="vertex expansions per search node")
     parser.add_argument(
         "-e",
         "--effort",
@@ -54,9 +55,11 @@ def _gold_arguments(parser: Parser) -> None:
     parser.add_argument("-r", "--return-first", action="store_true", help="stop at the first valid layout")
     parser.add_argument("-p", "--planar", action="store_true", help="forbid crossings")
     parser.add_argument("-m", "--multithreading", action="store_true", help="explore the graphs in parallel")
-    parser.add_argument("-s", "--seed", type=int, help="seed for the randomized strategies")
+    parser.add_argument("-s", "--seed", type=seed, help="seed for the randomized strategies")
     parser.add_argument("-i", "--straight-inverters", action="store_true", help="forbid bent inverters")
-    parser.add_argument("-g", "--skip-tiles", type=int, default=0, metavar="N", help="empty tiles kept after each PI")
+    parser.add_argument(
+        "-g", "--skip-tiles", type=integer, default=0, metavar="N", help="empty tiles kept after each PI"
+    )
     parser.add_argument("-j", "--randomize-skip-tiles", action="store_true", help="randomize the tiles kept after PIs")
     parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
     parser.add_argument(
@@ -79,9 +82,6 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
     The result is a 2DDWave-clocked Cartesian layout. The network must not have gates with more
     than two inputs.
     """
-    if args.expansions < 1:
-        msg = "the number of vertex expansions must be at least 1"
-        raise CommandError(msg)
     params = graph_oriented_layout_design_params()
     params.num_vertex_expansions = args.expansions
     params.mode = getattr(gold_effort_mode, args.effort.upper())

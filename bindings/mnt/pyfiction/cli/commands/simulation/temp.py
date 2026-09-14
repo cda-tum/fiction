@@ -20,6 +20,7 @@ from mnt.pyfiction import (
     critical_temperature_stats,
 )
 from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.parsing import positive_float, probability
 from mnt.pyfiction.cli.registry import Category, command
 
 if TYPE_CHECKING:
@@ -33,8 +34,10 @@ from ._common import ENGINES, _active_sidb_layout, _apply_physical, _engine_argu
 
 def _temp_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
-    parser.add_argument("-c", "--confidence", type=float, default=0.99, help="confidence level")
-    parser.add_argument("-t", "--max-temperature", type=float, default=400.0, help="highest temperature in K to try")
+    parser.add_argument("-c", "--confidence", type=probability, default=0.99, help="confidence level")
+    parser.add_argument(
+        "-t", "--max-temperature", type=positive_float, default=400.0, help="highest temperature in K to try"
+    )
     parser.add_argument(
         "-g", "--gate-based", action="store_true", help="judge stability against the active truth table"
     )
@@ -57,12 +60,6 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
     the erroneous states are those with a wrong output.
     """
     layout = _active_sidb_layout(session)
-    if not 0 < args.confidence <= 1:
-        msg = "the confidence level must be in (0, 1]"
-        raise CommandError(msg)
-    if args.max_temperature <= 0:
-        msg = "the maximum temperature must be positive"
-        raise CommandError(msg)
     params = critical_temperature_params()
     params.confidence_level = args.confidence
     params.max_temperature = args.max_temperature

@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import math
 import textwrap
+from functools import partial
 from typing import TYPE_CHECKING, NoReturn
 
 from .errors import CommandError, HelpRequested
@@ -85,49 +86,6 @@ class Parser(argparse.ArgumentParser):
             Arguments in declaration order.
         """
         return self._actions
-
-    def validate(self, parsed: argparse.Namespace) -> None:
-        """Validate numeric arguments before entering native code.
-
-        Args:
-            parsed: The parsed command arguments.
-        """
-        positive = {
-            "inputs",
-            "bitwidth",
-            "threads",
-            "upper_x",
-            "upper_y",
-            "upper_area",
-            "fixed_size",
-            "iterations",
-            "expansions",
-            "epsilon_r",
-            "lambda_tf",
-            "timeout",
-            "max_temperature",
-            "random_sampling",
-            "flood_fill",
-            "contour_tracing",
-        }
-        for name, value in vars(parsed).items():
-            if isinstance(value, bool) or value is None:
-                continue
-            maximum = 2**64 - 1 if name == "seed" else 2**32 - 1
-            if isinstance(value, int) and not 0 <= value <= maximum:
-                self.error(f"{name.replace('_', '-')}: expected an integer from 0 to {maximum}")
-            if isinstance(value, float) and not math.isfinite(value):
-                self.error(f"{name.replace('_', '-')}: expected a finite number")
-            if name in positive and value <= 0:
-                self.error(
-                    f"{name.replace('_', '-')}: must be at least 1"
-                    if isinstance(value, int)
-                    else f"{name.replace('_', '-')}: must be positive"
-                )
-            if name in {"width", "height", "hspace", "vspace", "alpha"} and value < 0:
-                self.error(f"{name.replace('_', '-')}: cannot be negative")
-            if name == "confidence" and not 0 < value <= 1:
-                self.error("confidence must be in (0, 1]")
 
     def error(self, message: str) -> NoReturn:
         """Turn a usage error into a :class:`CommandError` that carries the usage line.
@@ -231,3 +189,110 @@ def tokenize(line: str, *, incomplete: bool = False) -> list[list[str]]:  # ruff
     if words:
         commands.append(words)
     return commands
+
+
+def integer(value: str, *, minimum: int = 0, maximum: int = 2**32 - 1) -> int:
+    """Parse an integer within the native parameter's bounds.
+
+    Args:
+        value: The user's argument.
+        minimum: The smallest accepted integer.
+        maximum: The largest accepted integer.
+
+    Returns:
+        The validated integer.
+
+    Raises:
+        argparse.ArgumentTypeError: The value falls outside the bounds.
+    """
+    result = int(value)
+    if result < minimum:
+        msg = f"must be at least {minimum}"
+        raise argparse.ArgumentTypeError(msg)
+    if result > maximum:
+        msg = f"must be at most {maximum}"
+        raise argparse.ArgumentTypeError(msg)
+    return result
+
+
+positive_int = partial(integer, minimum=1)
+"""A positive native 32-bit integer."""
+
+seed = partial(integer, maximum=2**64 - 1)
+"""An unsigned native 64-bit random seed."""
+
+
+def finite_float(value: str) -> float:
+    """Parse a finite floating-point argument.
+
+    Args:
+        value: The user's argument.
+
+    Returns:
+        The finite number.
+
+    Raises:
+        argparse.ArgumentTypeError: The value is NaN or infinite.
+    """
+    result = float(value)
+    if not math.isfinite(result):
+        msg = "expected a finite number"
+        raise argparse.ArgumentTypeError(msg)
+    return result
+
+
+def positive_float(value: str) -> float:
+    """Parse a positive finite floating-point argument.
+
+    Args:
+        value: The user's argument.
+
+    Returns:
+        The positive number.
+
+    Raises:
+        argparse.ArgumentTypeError: The value is not positive and finite.
+    """
+    result = finite_float(value)
+    if result <= 0:
+        msg = "must be positive"
+        raise argparse.ArgumentTypeError(msg)
+    return result
+
+
+def nonnegative_float(value: str) -> float:
+    """Parse a nonnegative finite floating-point argument.
+
+    Args:
+        value: The user's argument.
+
+    Returns:
+        The nonnegative number.
+
+    Raises:
+        argparse.ArgumentTypeError: The value is negative or not finite.
+    """
+    result = finite_float(value)
+    if result < 0:
+        msg = "cannot be negative"
+        raise argparse.ArgumentTypeError(msg)
+    return result
+
+
+def probability(value: str) -> float:
+    """Parse a finite probability in (0, 1].
+
+    Args:
+        value: The user's argument.
+
+    Returns:
+        The probability.
+
+    Raises:
+        argparse.ArgumentTypeError: The value is outside (0, 1] or not finite.
+    """
+    result = finite_float(value)
+    if not 0 < result <= 1:
+        msg = "must be in (0, 1]"
+        raise argparse.ArgumentTypeError(msg)
+    return result

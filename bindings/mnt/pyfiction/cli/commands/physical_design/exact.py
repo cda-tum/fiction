@@ -21,6 +21,7 @@ from mnt.pyfiction import (
 )
 from mnt.pyfiction.cli.commands.io._common import FGL_READERS
 from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.parsing import positive_float, positive_int
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.statistics import stats_to_dict
 
@@ -84,12 +85,14 @@ def _exact_arguments(parser: Parser) -> None:
         default="cartesian",
         help="layout topology; choices: %(choices)s. hexagonal is even-row, shifted_cartesian is odd-column",
     )
-    parser.add_argument("--upper-x", type=int, metavar="N", help="maximum layout width in tiles")
-    parser.add_argument("--upper-y", type=int, metavar="N", help="maximum layout height in tiles")
-    parser.add_argument("--upper-area", type=int, metavar="N", help="maximum layout area in tiles")
-    parser.add_argument("-f", "--fixed-size", type=int, metavar="N", help="only try layouts of exactly N tiles")
-    parser.add_argument("-t", "--timeout", type=float, metavar="SECONDS", help="give up after this long")
-    parser.add_argument("-a", "--threads", type=int, metavar="N", help="solve N aspect ratios in parallel")
+    parser.add_argument("--upper-x", type=positive_int, metavar="N", help="maximum layout width in tiles")
+    parser.add_argument("--upper-y", type=positive_int, metavar="N", help="maximum layout height in tiles")
+    parser.add_argument("--upper-area", type=positive_int, metavar="N", help="maximum layout area in tiles")
+    parser.add_argument(
+        "-f", "--fixed-size", type=positive_int, metavar="N", help="only try layouts of exactly N tiles"
+    )
+    parser.add_argument("-t", "--timeout", type=positive_float, metavar="SECONDS", help="give up after this long")
+    parser.add_argument("-a", "--threads", type=positive_int, metavar="N", help="solve N aspect ratios in parallel")
     parser.add_argument("--async-max", action="store_true", help="use every processor core for -a")
     parser.add_argument(
         "--synchronization-elements", action="store_true", help="allow Cartesian synchronization elements"

@@ -17,6 +17,7 @@ from mnt.pyfiction import (
     fanout_substitution_params,
     substitution_strategy,
 )
+from mnt.pyfiction.cli.parsing import integer, seed
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.stores import describe
 
@@ -30,7 +31,7 @@ if TYPE_CHECKING:
 
 def _fanouts_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
-    parser.add_argument("-d", "--degree", type=int, choices=[2, 3], default=2, help="fan-out nodes' output degree")
+    parser.add_argument("-d", "--degree", type=integer, choices=[2, 3], default=2, help="fan-out nodes' output degree")
     parser.add_argument(
         "-s",
         "--strategy",
@@ -38,8 +39,8 @@ def _fanouts_arguments(parser: Parser) -> None:
         default="breadth",
         help="how cascaded fan-outs are arranged",
     )
-    parser.add_argument("-t", "--threshold", type=int, default=1, help="maximum output degree left unsubstituted")
-    parser.add_argument("--seed", type=int, help="seed for the random strategy")
+    parser.add_argument("-t", "--threshold", type=integer, default=1, help="maximum output degree left unsubstituted")
+    parser.add_argument("--seed", type=seed, help="seed for the random strategy")
 
 
 @command(

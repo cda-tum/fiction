@@ -19,6 +19,7 @@ from mnt.pyfiction import (
     orthogonal_params,
     orthogonal_stats,
 )
+from mnt.pyfiction.cli.parsing import integer
 from mnt.pyfiction.cli.registry import Category, command
 
 if TYPE_CHECKING:
@@ -45,7 +46,7 @@ def _ortho_arguments(parser: Parser) -> None:
     parser.add_argument(
         "-n",
         "--clock-phases",
-        type=int,
+        type=integer,
         choices=[3, 4],
         default=4,
         help="the number of clock phases of the result",

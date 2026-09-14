@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 from mnt.pyfiction import (
     area,
 )
+from mnt.pyfiction.cli.parsing import nonnegative_float
 from mnt.pyfiction.cli.registry import Category, command
 
 if TYPE_CHECKING:
@@ -31,10 +32,10 @@ AREA_OVERRIDES = {"width": "-x", "height": "-y", "hspace": "--hspace", "vspace":
 
 def _area_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
-    parser.add_argument("-x", "--width", type=float, metavar="NM", help="cell width")
-    parser.add_argument("-y", "--height", type=float, metavar="NM", help="cell height")
-    parser.add_argument("--hspace", type=float, metavar="NM", help="horizontal spacing between cells")
-    parser.add_argument("--vspace", type=float, metavar="NM", help="vertical spacing between cells")
+    parser.add_argument("-x", "--width", type=nonnegative_float, metavar="NM", help="cell width")
+    parser.add_argument("-y", "--height", type=nonnegative_float, metavar="NM", help="cell height")
+    parser.add_argument("--hspace", type=nonnegative_float, metavar="NM", help="horizontal spacing between cells")
+    parser.add_argument("--vspace", type=nonnegative_float, metavar="NM", help="vertical spacing between cells")
 
 
 @command(

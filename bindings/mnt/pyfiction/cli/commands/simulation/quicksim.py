@@ -16,7 +16,7 @@ from mnt.pyfiction import (
     quicksim,
     quicksim_params,
 )
-from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.parsing import positive_int, probability
 from mnt.pyfiction.cli.registry import Category, command
 
 if TYPE_CHECKING:
@@ -31,8 +31,8 @@ from ._common import _active_sidb_layout, _apply_physical, _physical_arguments, 
 def _quicksim_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
     _physical_arguments(parser, base=False)
-    parser.add_argument("-i", "--iterations", type=int, default=80, help="iteration steps")
-    parser.add_argument("-a", "--alpha", type=float, default=0.7, help="alpha parameter")
+    parser.add_argument("-i", "--iterations", type=positive_int, default=80, help="iteration steps")
+    parser.add_argument("-a", "--alpha", type=probability, default=0.7, help="alpha parameter")
 
 
 @command(
@@ -45,12 +45,6 @@ def _quicksim_arguments(parser: Parser) -> None:
 def quicksim_command(session: Session, args: argparse.Namespace) -> Result:
     """Simulate the active SiDB layout heuristically with QuickSim, approximating the ground state."""
     layout = _active_sidb_layout(session, unsimulated=True)
-    if args.iterations < 1:
-        msg = "the number of iterations must be at least 1"
-        raise CommandError(msg)
-    if not 0 < args.alpha <= 1:
-        msg = "alpha must be in (0, 1]"
-        raise CommandError(msg)
     params = quicksim_params()
     parameters = _apply_physical(params.simulation_parameters, args)
     params.iteration_steps = args.iterations

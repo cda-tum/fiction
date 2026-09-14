@@ -21,6 +21,7 @@ from aigverse.generators import (
 )
 
 from mnt.pyfiction.cli.aigverse_bridge import from_aigverse
+from mnt.pyfiction.cli.parsing import positive_int
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.stores import describe
 
@@ -48,7 +49,9 @@ GENERATORS: dict[str, Callable[[int], Aig]] = {
 def _generate_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
     parser.add_argument("kind", choices=list(GENERATORS), help="rca and cla are adders, multiplier, mux, decoder")
-    parser.add_argument("-b", "--bitwidth", type=int, required=True, help="operand width, or select bits for decoder")
+    parser.add_argument(
+        "-b", "--bitwidth", type=positive_int, required=True, help="operand width, or select bits for decoder"
+    )
 
 
 @command("generate", Category.LOGIC, _generate_arguments, example="generate rca -b 2")

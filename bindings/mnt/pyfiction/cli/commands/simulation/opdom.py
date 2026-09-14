@@ -29,6 +29,7 @@ from mnt.pyfiction import (
     write_operational_domain_params,
 )
 from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.parsing import finite_float, positive_int
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.statistics import stats_to_dict
 
@@ -63,9 +64,11 @@ def _opdom_arguments(parser: Parser) -> None:
     algorithm.add_argument(
         "-g", "--grid-search", action="store_true", help="reconstruct the domain by grid search; the default"
     )
-    algorithm.add_argument("-r", "--random-sampling", type=int, metavar="N", help="sample N random points")
-    algorithm.add_argument("-f", "--flood-fill", type=int, metavar="N", help="flood fill from N random points")
-    algorithm.add_argument("-c", "--contour-tracing", type=int, metavar="N", help="trace contours from N random points")
+    algorithm.add_argument("-r", "--random-sampling", type=positive_int, metavar="N", help="sample N random points")
+    algorithm.add_argument("-f", "--flood-fill", type=positive_int, metavar="N", help="flood fill from N random points")
+    algorithm.add_argument(
+        "-c", "--contour-tracing", type=positive_int, metavar="N", help="trace contours from N random points"
+    )
     parser.add_argument(
         "-s",
         "--sketch",
@@ -83,9 +86,9 @@ def _opdom_arguments(parser: Parser) -> None:
             default=default[0] if axis != "z" else None,
             help="the parameter",
         )
-        sweep.add_argument(f"--{axis}-min", type=float, default=default[1], help="lower bound of the sweep")
-        sweep.add_argument(f"--{axis}-max", type=float, default=default[2], help="upper bound of the sweep")
-        sweep.add_argument(f"--{axis}-step", type=float, default=default[3], help="step between samples")
+        sweep.add_argument(f"--{axis}-min", type=finite_float, default=default[1], help="lower bound of the sweep")
+        sweep.add_argument(f"--{axis}-max", type=finite_float, default=default[2], help="upper bound of the sweep")
+        sweep.add_argument(f"--{axis}-step", type=finite_float, default=default[3], help="step between samples")
     _physical_arguments(parser, base=True)
     _engine_argument(parser)
 
@@ -107,9 +110,6 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
     layout = _active_sidb_layout(session)
     spec = [session.truth_tables.current()]
     samples = next((n for n in (args.random_sampling, args.flood_fill, args.contour_tracing) if n is not None), None)
-    if samples is not None and samples < 1:
-        msg = "the number of samples must be at least 1"
-        raise CommandError(msg)
 
     params = operational_domain_params()
     params.operational_params.sim_engine = ENGINES[args.engine]

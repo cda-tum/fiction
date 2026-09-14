@@ -15,8 +15,11 @@ from typing import TYPE_CHECKING
 from mnt.pyfiction import (
     sidb_layout,
     sidb_simulation_engine,
+    sidb_simulation_parameters,
+    sidb_simulation_result,
 )
 from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.parsing import finite_float, integer, positive_float
 from mnt.pyfiction.cli.stores import TECHNOLOGIES, CellEntry, describe
 
 if TYPE_CHECKING:
@@ -32,41 +35,48 @@ ENGINES = {name.lower(): member for name, member in sidb_simulation_engine.__mem
 
 
 def _physical_arguments(parser: Parser, *, base: bool, base_default: int = 2, potential: bool = False) -> None:
-    """Add the shared physical parameters and optional base and potential arguments."""
+    """Add shared physical simulation arguments.
+
+    Args:
+        parser: The command parser.
+        base: Include the charge-state option.
+        base_default: The default number of charge states.
+        potential: Include the global-potential option.
+    """
     physics = parser.add_argument_group("physical parameters")
-    physics.add_argument("-e", "--epsilon-r", type=float, default=5.6, help="relative permittivity")
-    physics.add_argument("-l", "--lambda-tf", type=float, default=5.0, help="Thomas-Fermi screening length in nm")
-    physics.add_argument("-m", "--mu-minus", type=float, default=-0.32, help="energy transition level (0/-) in eV")
+    physics.add_argument("-e", "--epsilon-r", type=positive_float, default=5.6, help="relative permittivity")
+    physics.add_argument(
+        "-l", "--lambda-tf", type=positive_float, default=5.0, help="Thomas-Fermi screening length in nm"
+    )
+    physics.add_argument(
+        "-m", "--mu-minus", type=finite_float, default=-0.32, help="energy transition level (0/-) in eV"
+    )
     if potential:
-        physics.add_argument("-g", "--global-potential", type=float, default=0.0, help="global external potential in V")
+        physics.add_argument(
+            "-g", "--global-potential", type=finite_float, default=0.0, help="global external potential in V"
+        )
     if base:
         physics.add_argument(
             "--base",
-            type=int,
+            type=integer,
             choices=[2, 3],
             default=base_default,
             help="charge states per SiDB",
         )
 
 
-def _apply_physical(params: object, args: argparse.Namespace) -> dict[str, object]:
+def _apply_physical(params: sidb_simulation_parameters, args: argparse.Namespace) -> dict[str, object]:
     """Copy the physical parameters of ``args`` into a ``sidb_simulation_parameters`` and describe them."""
-    if args.epsilon_r <= 0:
-        msg = "epsilon_r must be positive"
-        raise CommandError(msg)
-    if args.lambda_tf <= 0:
-        msg = "lambda_tf must be positive"
-        raise CommandError(msg)
-    params.epsilon_r = args.epsilon_r  # type: ignore[attr-defined]
-    params.lambda_tf = args.lambda_tf  # type: ignore[attr-defined]
-    params.mu_minus = args.mu_minus  # type: ignore[attr-defined]
+    params.epsilon_r = args.epsilon_r
+    params.lambda_tf = args.lambda_tf
+    params.mu_minus = args.mu_minus
     description: dict[str, object] = {
         "epsilon_r": args.epsilon_r,
         "lambda_tf": args.lambda_tf,
         "mu_minus": args.mu_minus,
     }
     if hasattr(args, "base"):
-        params.base = args.base  # type: ignore[attr-defined]
+        params.base = args.base
         description["base"] = args.base
     return description
 
@@ -106,12 +116,14 @@ def _active_sidb_layout(session: Session, *, unsimulated: bool = False) -> sidb_
     return entry.layout
 
 
-def _store_result(session: Session, layout: sidb_layout, result: object, parameters: dict[str, object]) -> Result:
+def _store_result(
+    session: Session, layout: sidb_layout, result: sidb_simulation_result | None, parameters: dict[str, object]
+) -> Result:
     """Store the simulation result and describe its physical parameters."""
     if result is None:
         msg = "the simulation found no physically valid charge distribution"
         raise CommandError(msg)
-    entry = CellEntry(layout, result, result.algorithm_name)  # type: ignore[attr-defined]
+    entry = CellEntry(layout, result, result.algorithm_name)
     session.cell_layouts.add(entry)
     description = describe(entry)
     simulation = description["simulation"]

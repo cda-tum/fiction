@@ -20,6 +20,7 @@ from mnt.pyfiction import (
     wiring_reduction_params,
     wiring_reduction_stats,
 )
+from mnt.pyfiction.cli.parsing import integer, positive_float
 from mnt.pyfiction.cli.registry import Category, command
 
 if TYPE_CHECKING:
@@ -34,9 +35,9 @@ from ._common import _added, _cartesian_2ddwave, _seconds_to_ms
 def _optimize_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
     parser.add_argument("-w", "--wiring-only", action="store_true", help="only reduce wiring, do not move gates")
-    parser.add_argument("-m", "--max-relocations", type=int, metavar="N", help="move at most N gates")
+    parser.add_argument("-m", "--max-relocations", type=integer, metavar="N", help="move at most N gates")
     parser.add_argument("-p", "--planar", action="store_true", help="only move gates when no crossing results")
-    parser.add_argument("-t", "--timeout", type=float, metavar="SECONDS", help="stop after this long")
+    parser.add_argument("-t", "--timeout", type=positive_float, metavar="SECONDS", help="stop after this long")
     parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
 
 

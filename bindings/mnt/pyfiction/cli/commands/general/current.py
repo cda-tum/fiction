@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from mnt.pyfiction.cli.parsing import integer
 from mnt.pyfiction.cli.registry import (
     Category,
     command,
@@ -32,7 +33,7 @@ from ._common import stores_of
 def _current_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
     store_flags(parser)
-    parser.add_argument("position", type=int, help="the element's position, counting from 1 as 'store' lists it")
+    parser.add_argument("position", type=integer, help="the element's position, counting from 1 as 'store' lists it")
 
 
 @command(

@@ -17,6 +17,7 @@ from mnt import pyfiction
 from mnt.pyfiction import (
     network_target,
 )
+from mnt.pyfiction.cli.parsing import integer, positive_int, seed
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.stores import describe
 
@@ -39,8 +40,8 @@ NETWORK_TARGETS = {
 
 def _random_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
-    parser.add_argument("-n", "--inputs", type=int, required=True, help="number of primary inputs")
-    parser.add_argument("-g", "--gates", type=int, required=True, help="number of gates")
+    parser.add_argument("-n", "--inputs", type=positive_int, required=True, help="number of primary inputs")
+    parser.add_argument("-g", "--gates", type=integer, required=True, help="number of gates")
     parser.add_argument(
         "--type",
         type=str.lower,
@@ -48,7 +49,7 @@ def _random_arguments(parser: Parser) -> None:
         default="aig",
         help="the network type to produce",
     )
-    parser.add_argument("--seed", type=int, help="random seed; a fresh one is drawn when omitted")
+    parser.add_argument("--seed", type=seed, help="random seed; a fresh one is drawn when omitted")
 
 
 @command("random", Category.LOGIC, _random_arguments, example="random -n 3 -g 10 --type xag --seed 42")

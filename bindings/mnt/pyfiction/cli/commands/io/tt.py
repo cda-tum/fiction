@@ -17,6 +17,7 @@ from mnt.pyfiction import (
     dynamic_truth_table,
 )
 from mnt.pyfiction.cli.errors import CommandError
+from mnt.pyfiction.cli.parsing import integer
 from mnt.pyfiction.cli.registry import Category, command
 from mnt.pyfiction.cli.stores import describe
 
@@ -38,7 +39,7 @@ def _tt_arguments(parser: Parser) -> None:
         metavar="EXPR",
         help="a Boolean expression over a..p: !E, (E..E) for AND, {E..E} for OR, [E..E] for XOR, <EEE> for MAJ",
     )
-    source.add_argument("-r", "--random", type=int, metavar="VARS", help="a random function of VARS variables")
+    source.add_argument("-r", "--random", type=integer, metavar="VARS", help="a random function of VARS variables")
 
 
 @command("tt", Category.IO, _tt_arguments, example='tt -e "<abc>"')

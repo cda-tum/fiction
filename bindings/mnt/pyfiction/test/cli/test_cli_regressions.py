@@ -134,18 +134,27 @@ def test_log_failure_still_cleans_temporary_files(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
-    "command",
+    ("command", "message"),
     [
-        "tt -r 64",
-        "random -n -1 -g 2",
-        "exact --timeout nan",
-        "area --width -1",
-        "quickexact --epsilon-r nan",
-        "quickexact --epsilon-r inf",
+        ("tt -r 64", "fewer than 38"),
+        ("random -n -1 -g 2", "at least 1"),
+        ("random -n 0 -g 2", "at least 1"),
+        ("random -n 2 -g 4294967296", "at most 4294967295"),
+        ("random -n 2 -g 1 --seed 18446744073709551616", "at most 18446744073709551615"),
+        ("exact --timeout nan", "finite number"),
+        ("area --width -1", "cannot be negative"),
+        ("quickexact --epsilon-r nan", "finite number"),
+        ("quickexact --epsilon-r inf", "finite number"),
+        ("quickexact --epsilon-r 0", "must be positive"),
+        ("quicksim --alpha 2", "in (0, 1]"),
     ],
 )
-def test_invalid_numeric_input_is_a_command_failure(shell: Shell, command: str) -> None:
-    shell.fails(command)
+def test_invalid_numeric_input_is_a_command_failure(
+    shell: Shell, resource: Callable[[str], str], command: str, message: str
+) -> None:
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"; generate mux -b 1')
+    assert message in shell.fails(command)
+    assert len(shell.session.networks) == len(shell.session.cell_layouts) == 1
 
 
 @pytest.mark.parametrize(

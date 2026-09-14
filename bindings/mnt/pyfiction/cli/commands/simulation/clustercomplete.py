@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt import pyfiction
+from mnt.pyfiction.cli.parsing import integer
 from mnt.pyfiction.cli.registry import Category, command
 
 if TYPE_CHECKING:
@@ -28,8 +29,8 @@ def _clustercomplete_arguments(parser: Parser) -> None:
     # base 3 is what ClusterComplete is for, and what the C++ shell defaulted to
     """Add the command's arguments to the parser."""
     _physical_arguments(parser, base=True, base_default=3, potential=True)
-    parser.add_argument("-w", "--witness-limit", type=int, default=6, help="witness partitioning limit")
-    parser.add_argument("-o", "--overlap-limit", type=int, default=6, help="overlapping witnesses limit")
+    parser.add_argument("-w", "--witness-limit", type=integer, default=6, help="witness partitioning limit")
+    parser.add_argument("-o", "--overlap-limit", type=integer, default=6, help="overlapping witnesses limit")
     parser.add_argument("-r", "--report-stats", action="store_true", help="report ground state space statistics")
 
 
