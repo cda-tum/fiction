@@ -205,14 +205,15 @@ def cpp_lint(session: nox.Session) -> None:
         "z3-solver==4.14.1",
     )
     session.run("clang-tools", "install", "clang-tidy", "--version", "21")
-    installed_z3_root = Path(
-        session.run(
-            "python",
-            "-c",
-            "import pathlib, z3; print(pathlib.Path(z3.__file__).parent)",
-            silent=True,
-        ).strip()
+    installed_z3_output = session.run(
+        "python",
+        "-c",
+        "import pathlib, z3; print(pathlib.Path(z3.__file__).parent)",
+        silent=True,
     )
+    if not installed_z3_output:
+        session.error("Could not locate the installed Z3 package")
+    installed_z3_root = Path(installed_z3_output.strip())
 
     with tempfile.TemporaryDirectory(prefix="fiction-z3-") as temp_dir_name:
         z3_root = Path(temp_dir_name, "z3")
