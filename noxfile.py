@@ -20,6 +20,7 @@ import argparse
 import contextlib
 import os
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -204,31 +205,47 @@ def cpp_lint(session: nox.Session) -> None:
         "z3-solver==4.14.1",
     )
     session.run("clang-tools", "install", "clang-tidy", "--version", "21")
-    session.run(
-        "cmake",
-        "-S",
-        ".",
-        "--preset",
-        "ci-tidy",
-        "-DSKBUILD_SABI_COMPONENT=Development.SABIModule",
-        external=True,
+    installed_z3_root = Path(
+        session.run(
+            "python",
+            "-c",
+            "import pathlib, z3; print(pathlib.Path(z3.__file__).parent)",
+            silent=True,
+        ).strip()
     )
 
-    linter_args = [
-        "--style=",
-        "--tidy-checks=",
-        "--database=build-ci-tidy",
-        "--version=21",
-        "--lines-changed-only=false",
-        f"--files-changed-only={'false' if args.all_files else 'true'}",
-        f"--ignore={'|'.join(CPP_LINT_IGNORED_PATHS)}",
-        "--file-annotations=false",
-        "--jobs=0",
-    ]
-    if args.diff_base:
-        linter_args.append(f"--diff-base={args.diff_base}")
+    with tempfile.TemporaryDirectory(prefix="fiction-z3-") as temp_dir_name:
+        z3_root = Path(temp_dir_name, "z3")
+        shutil.copytree(installed_z3_root, z3_root)
+        z3_library_name = "libz3.dll" if os.name == "nt" else "libz3.dylib" if sys.platform == "darwin" else "libz3.so"
 
-    session.run("cpp-linter", *linter_args)
+        cmake_args = [
+            "-S",
+            ".",
+            "--preset",
+            "ci-tidy",
+            "-DSKBUILD_SABI_COMPONENT=Development.SABIModule",
+            f"-DZ3_ROOT={z3_root}",
+            f"-DZ3_CXX_INCLUDE_DIRS={z3_root / 'include'}",
+            f"-DZ3_LIBRARIES={z3_root / 'lib' / z3_library_name}",
+        ]
+        session.run("cmake", *cmake_args, external=True)
+
+        linter_args = [
+            "--style=",
+            "--tidy-checks=",
+            "--database=build-ci-tidy",
+            "--version=21",
+            "--lines-changed-only=false",
+            f"--files-changed-only={'false' if args.all_files else 'true'}",
+            f"--ignore={'|'.join(CPP_LINT_IGNORED_PATHS)}",
+            "--file-annotations=false",
+            "--jobs=0",
+        ]
+        if args.diff_base:
+            linter_args.append(f"--diff-base={args.diff_base}")
+
+        session.run("cpp-linter", *linter_args)
 
 
 @nox.session(python="3.12", reuse_venv=True)
