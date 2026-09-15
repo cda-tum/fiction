@@ -42,6 +42,7 @@ nox.options.sessions = ["lint", "tests"]
 PYTHON_ALL_VERSIONS = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 CPP_LINT_IGNORED_PATHS = (
     "build-*",
+    "build/*",
     "libs/*",
     "vendors/*",
     "docs/*",
