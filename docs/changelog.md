@@ -139,6 +139,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
 - Continuous integration:
+  - Windows wheel builds no longer install the zero-hit job-local `sccache`; split mode
+    compiles the extension only once per job.
   - Reusable workflows now use GitHub's self-repository reference syntax.
   - Clang-Tidy skips Python-only changes in the bindings tree.
   - PyPI releases now use trusted publishing instead of an API token.
