@@ -17,6 +17,7 @@
  * @author Benjamin Hien (hibenj)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -33,9 +34,11 @@
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <chrono>
 #include <cstddef>
 #include <stdexcept>
 #include <thread>
@@ -76,6 +79,36 @@ TEST_CASE("Gate design propagates worker failures", "[design-sidb-gates]")
 TEST_CASE("Reject an empty gate specification", "[design-sidb-gates]")
 {
     CHECK_THROWS_AS(design_gates(layout{}, std::vector<tt>{}), std::invalid_argument);
+}
+
+TEST_CASE("Gate-design timeouts cover every search mode", "[design-sidb-gates]")
+{
+    const auto lyt = blueprints::two_input_one_output_skeleton_west_west();
+
+    design_gates_params params{};
+
+    SECTION("Zero expires immediately")
+    {
+        params.timeout = 0;
+    }
+    SECTION("A positive budget covers canvas enumeration")
+    {
+        params.timeout                = 1;
+        params.canvas                 = {site_at_row(0, 0), site_at_row(1'000, 1'000)};
+        params.number_of_canvas_sidbs = 0;
+    }
+
+    for (const auto mode :
+         {design_gates_params::design_gates_mode::QUICKCELL,
+          design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+          design_gates_params::design_gates_mode::RANDOM, design_gates_params::design_gates_mode::PRUNING_ONLY})
+    {
+        CAPTURE(mode);
+        params.design_mode = mode;
+        const auto start   = std::chrono::steady_clock::now();
+        CHECK_THROWS_AS(design_gates(lyt, std::vector{create_and_tt()}, params), utils::timeout_error);
+        CHECK(std::chrono::steady_clock::now() - start < std::chrono::seconds{10});
+    }
 }
 
 TEST_CASE("Design AND gate with skeleton, where one input wire and the output wire are orientated to the east.",

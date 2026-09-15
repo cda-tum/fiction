@@ -11,8 +11,13 @@ Convert Cartesian layouts with {ref}`hexagonalization` before designing the SiDB
 The default search uses exhaustive gate design with one canvas SiDB and stops at the first
 solution. Crossings and double wires use predefined implementations when possible.
 The required number of canvas SiDBs depends on the gates; the example uses three with QuickCell.
-The search has no timeout or cancellation parameter; applications that require cancellation
-must run the call in a separate process. The returned layout can be exported as SVG or SiQAD SQD.
+The returned layout can be exported as SVG or SiQAD SQD.
+
+Set the circuit parameters' `timeout` to a millisecond budget for the entire circuit search,
+including all gate designs. A gate's own `design_gate_params.timeout` can impose a shorter
+per-gate limit. Both default to `2**64 - 1` (unlimited); `0` expires immediately.
+Deadline checks are cooperative; use a separate process when an exact cutoff is required.
+Finite timeouts support QuickExact, ExGS, and QuickSim; ClusterComplete rejects them.
 
 ::::{tab-set}
 :sync-group: language
@@ -21,6 +26,8 @@ must run the call in a separate process. The returned layout can be exported as 
 :sync: cpp
 
 **Header:** `fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp`
+
+An expired deadline throws `fiction::utils::timeout_error` without returning a partial circuit.
 
 ```{doxygenstruct} fiction::sidb::generators::on_the_fly_circuit_design_params
 :members:
@@ -38,7 +45,8 @@ must run the call in a separate process. The returned layout can be exported as 
 The Python call accepts `hexagonal_gate_layout` and returns `sidb_layout`.
 The call leaves its input unchanged and releases the GIL during circuit design.
 An unsupported gate type or orientation raises `ValueError`; an unsuccessful gate search
-raises `RuntimeError`. This interface does not accept defective surfaces or logic networks.
+raises `RuntimeError`. An expired circuit or gate deadline raises the built-in `TimeoutError`.
+This interface does not accept defective surfaces or logic networks.
 
 Choose the gate-search algorithm through `design_gate_params.design_mode`, as shown below.
 The `PRUNING_ONLY` mode skips operational simulation, so it does not verify the designed gates' functionality.
@@ -59,6 +67,7 @@ gate = layout.create_and(a, b, (1, 1, 0))
 layout.create_po(gate, "f", (0, 2, 0))
 
 params = on_the_fly_sidb_circuit_design_params()
+params.timeout = 60_000  # one minute for the whole circuit
 gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params
 gates.design_mode = design_sidb_gates_mode.QUICKCELL
 gates.number_of_canvas_sidbs = 3

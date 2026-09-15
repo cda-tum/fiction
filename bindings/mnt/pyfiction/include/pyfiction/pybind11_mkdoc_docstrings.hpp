@@ -13917,6 +13917,10 @@ finish.
 Random placement samples at most `maximal_random_design_attempts`
 candidates without enumerating canvas layouts.
 
+The timeout covers setup and all search phases. Expiration discards
+partial results and stops all workers before throwing. Allocation and
+non-interruptible setup may exceed the cooperative deadline.
+
 *QuickCell* is described in "Towards Fast Automatic Design of Silicon
 Dangling Bond Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus,
 and R. Wille in DATE 2025
@@ -13941,6 +13945,7 @@ Returns:
 Raises:
     std::invalid_argument: if `spec` is empty or the input wire count
                            differs from the specification.
+    utils::timeout_error: if the gate-design deadline is reached.
 
 )doc";
 
@@ -13983,6 +13988,13 @@ static const char *mkd_doc_fiction_sidb_generators_design_gates_params_terminati
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_AFTER_FIRST_SOLUTION = R"doc(Stop after the first operational gate.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED = R"doc(Enumerate every combination of canvas SiDBs.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_timeout =
+R"doc(Timeout in milliseconds, including candidate generation and
+simulation. The maximum value means unlimited; zero expires
+immediately. Checks are cooperative, so allocation and non-
+interruptible setup can exceed the budget. Finite budgets support
+QUICKEXACT, EXGS, and QUICKSIM, but not CLUSTERCOMPLETE.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_stats = R"doc(Statistics of the gate designers.)doc";
 
@@ -14256,6 +14268,11 @@ Returns:
 
 Raises:
     unsuccessful_gate_design_error: if a gate cannot be designed.
+    utils::timeout_error: if the shared circuit budget or an
+                          individual gate budget expires. No partial
+                          circuit is returned. Deadline checks are
+                          cooperative and do not interrupt allocation
+                          or layout conversion.
 
 )doc";
 
@@ -14323,6 +14340,13 @@ static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_params = R"doc(This struct stores the parameters to design an SiDB circuit.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_params_sidb_on_the_fly_gate_library_parameters = R"doc(Parameters for the SiDB on-the-fly gate library.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_params_timeout =
+R"doc(Total timeout in milliseconds for all gates and layout conversion. The
+maximum value means unlimited; zero expires immediately. Every gate
+shares the same deadline, including crossings and double wires.
+Timeout checks are cooperative; allocation and non-interruptible setup
+can exceed the budget.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_unsuccessful_gate_design_error =
 R"doc(Exception thrown if the gate design was unsuccessful. Depending on the
@@ -15963,6 +15987,8 @@ Raises:
                                                  unsupported.
     fcn::unsupported_gate_type_exception: if the gate type is
                                           unsupported.
+    utils::timeout_error: if the shared circuit-design deadline is
+                          reached.
 
 )doc";
 
@@ -20504,12 +20530,16 @@ landscape.
 Args:
     lyt: Layout to simulate.
     params: Physical parameters.
+    deadline: Shared caller deadline. `time_point::max()` leaves the
+              simulation unlimited.
 
 Returns:
     The physically valid charge distributions.
 
 Raises:
     std::out_of_range: if a site has an invalid lattice basis index.
+    utils::timeout_error: if the shared caller deadline expires. No
+                          partial result is returned.
 
 )doc";
 
@@ -20675,6 +20705,8 @@ Returns:
 
 Raises:
     std::out_of_range: if a site has an invalid lattice basis index.
+    utils::timeout_error: if the shared caller deadline expires. No
+                          partial result is returned.
 
 )doc";
 
@@ -20695,6 +20727,10 @@ static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_bas
 R"doc(If `ON`, *QuickExact* checks which base number is required for the
 simulation, i.e., whether positively charged SiDBs can occur. If
 `OFF`, the base number from the physical parameters is used.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_deadline =
+R"doc(Shared caller deadline. `time_point::max()` leaves the simulation
+unlimited.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_global_potential =
 R"doc(Global external electrostatic potential (unit: V). Value is applied on
@@ -20730,12 +20766,19 @@ Returns:
 
 Raises:
     std::out_of_range: if a site has an invalid lattice basis index.
+    utils::timeout_error: if the shared caller deadline expires. No
+                          partial result is returned.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params = R"doc(This struct stores the parameters for the *QuickSim* algorithm.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_alpha = R"doc(`alpha` parameter for the *QuickSim* algorithm.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_deadline =
+R"doc(Shared caller deadline. Expiration throws instead of returning an
+incomplete simulation. `time_point::max()` leaves the caller budget
+unlimited; `timeout` still applies.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_iteration_steps = R"doc(Number of iterations to run the simulation for.)doc";
 
@@ -21856,6 +21899,22 @@ R"doc(Sanity checks shared by every entry point.
 Args:
     lyt: The layout.
     spec: The specification.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_checked_parameters =
+R"doc(Validates the shared deadline before setting up an operational check.
+
+Args:
+    params: Operational parameters.
+
+Returns:
+    The validated parameters.
+
+Raises:
+    utils::timeout_error: if the deadline expires.
+    std::invalid_argument: if ClusterComplete is selected with a
+                           finite deadline.
 
 )doc";
 
@@ -23047,6 +23106,11 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_deadline =
+R"doc(Shared caller deadline for pruning and simulation. `time_point::max()`
+leaves the check unlimited. Finite deadlines support QuickExact, ExGS,
+and QuickSim; ClusterComplete is unsupported.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_input_bdl_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_op_condition =
@@ -24101,6 +24165,7 @@ corners may be given in any order.
 Args:
     first_corner: One corner of the rectangle.
     second_corner: The opposite corner.
+    deadline: Shared execution deadline; unlimited by default.
 
 Returns:
     The sites in the rectangle in raster order.
@@ -24108,6 +24173,8 @@ Returns:
 Raises:
     std::length_error: if the rectangle exceeds the maximum vector
                        size.
+    utils::timeout_error: if the deadline is reached during
+                          enumeration.
 
 )doc";
 
@@ -25038,6 +25105,17 @@ static const char *mkd_doc_fiction_synthesis_technology_mapping_stats_mapper_sta
 
 static const char *mkd_doc_fiction_synthesis_technology_mapping_stats_report = R"doc(Report statistics.)doc";
 
+static const char *mkd_doc_fiction_utils_check_deadline =
+R"doc(Checks a shared monotonic deadline.
+
+Args:
+    deadline: Expiration time; the maximum time point means unlimited.
+
+Raises:
+    timeout_error: if the deadline has been reached.
+
+)doc";
+
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_convert_node_index =
@@ -25664,6 +25742,18 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_utils_make_deadline =
+R"doc(Starts a millisecond budget without extending an enclosing deadline.
+
+Args:
+    timeout: Milliseconds from now; the maximum value means unlimited.
+    enclosing: Deadline shared with an enclosing algorithm.
+
+Returns:
+    The earlier deadline, saturated at the clock's maximum time point.
+
+)doc";
+
 static const char *mkd_doc_fiction_utils_math_binomial_coefficient =
 R"doc(Calculates the binomial coefficient :math:`\binom{n}{k}`.
 
@@ -25726,6 +25816,7 @@ of indices, where each index indicates the position of an entity.
 Args:
     k: The number of entities to distribute.
     n: The number of positions available for distribution.
+    deadline: Shared execution deadline; unlimited by default.
 
 Returns:
     A vector of vectors representing all possible combinations of
@@ -25734,6 +25825,7 @@ Returns:
 Raises:
     std::length_error: if the number of combinations exceeds the
                        vector's capacity.
+    timeout_error: if the deadline is reached during enumeration.
 
 )doc";
 
@@ -26385,6 +26477,12 @@ Returns:
     `val` is not contained.
 
 )doc";
+
+static const char *mkd_doc_fiction_utils_timeout_error =
+R"doc(An algorithm reached its execution deadline without producing a
+complete result.)doc";
+
+static const char *mkd_doc_fiction_utils_timeout_error_timeout_error = R"doc(Constructs an execution-timeout error.)doc";
 
 static const char *mkd_doc_fiction_verification_count_gate_types =
 R"doc(Gives a detailed listing of all gate types present in the provided
