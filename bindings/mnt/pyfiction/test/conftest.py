@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 import pytest
@@ -48,18 +49,165 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
                     item.add_marker(getattr(pytest.mark, directory))
 
 
-@pytest.fixture
-def resources_dir() -> Path:
-    """Directory holding the Verilog and SQD input files the tests read.
+SYNTHETIC_INPUTS = {
+    "FA.v": """\
+module top(x, y, cin, s, cout);
+input x, y, cin;
+output s, cout;
+
+wire w1, w2, w3;
+
+assign w1 = x & y;
+assign w2 = x ^ y;
+assign w3 = cin & w2;
+assign cout = w1 | w3;
+assign s = cin ^ w2;
+
+endmodule
+
+""",
+    "mux21.v": """\
+module top(in0, in1, in2, out);
+input in0, in1, in2;
+output out;
+
+wire w1, w2, w3;
+
+assign w1 = ~in2;
+assign w2 = in0 & w1;
+assign w3 = in1 & in2;
+assign out = w2 | w3;
+
+endmodule
+
+""",
+    "xor2.v": """\
+module top(in0, in1, out);
+input a, b;
+output out;
+
+wire w1, w2, w3;
+
+assign w1 = a & b;
+assign w2 = a | b;
+assign w3 = ~w1;
+assign out = w2 & w3;
+
+endmodule
+
+""",
+    "xnor2.v": """\
+module top(a, b, out);
+input a, b;
+output out;
+wire w1, w2, w3, w4, w5;
+
+assign w1 = ~b;
+assign w2 = a & w1;
+assign w3 = ~a;
+assign w4 = w3 & b;
+assign w5 = w2 | w4;
+assign out = ~w5;
+
+endmodule
+
+""",
+    "network_interfaces.blif": """\
+.model interfaces
+.inputs apple banana cherry unused
+.outputs zero one inverted xor majority lut copy
+.names zero
+.names one
+1
+.names apple inverted
+0 1
+.names apple banana xor
+01 1
+10 1
+.names apple banana cherry majority
+11- 1
+1-1 1
+-11 1
+.names apple banana cherry lut
+001 1
+010 1
+111 1
+.names apple copy
+1 1
+.end
+
+""",
+    "stacked_crossing.fqca": """\
+[ Wire crossing ]
+
+= = = = =
+    a
+
+b 0 0 0 c
+
+    d
+= = = = =
+    0
+
+
+
+    0
+= = = = =
+    0
+    0
+    0
+    0
+    0
+= = = = =
+
+
+$
+
+a:
+- input
+- label = "a"
+- clock = 0
+
+b:
+- input
+- label = "b"
+- clock = 0
+
+c:
+- output
+- label = "b'"
+- clock = 0
+
+d:
+- output
+- label = "a'"
+- clock = 0
+
+""",
+}
+"""Small network and layout files used by reader and writer tests."""
+
+
+@pytest.fixture(scope="session")
+def resources_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Materialize synthetic inputs beside copies of the SiDB reference layouts.
+
+    Args:
+        tmp_path_factory: The worker's temporary-directory factory.
 
     Returns:
-        Absolute path to the shared ``resources`` directory.
+        The directory holding this worker's input files.
     """
-    return RESOURCES_DIR
+    directory = tmp_path_factory.mktemp("inputs")
+    for name, content in SYNTHETIC_INPUTS.items():
+        (directory / name).write_text(content, encoding="utf-8")
+    for source in RESOURCES_DIR.glob("*.sqd"):
+        shutil.copyfile(source, directory / source.name)
+    return directory
 
 
 @pytest.fixture
-def mux21() -> technology_network:
+def mux21(resources_dir: Path) -> technology_network:
     """A 2:1 multiplexer, the network most physical design tests place and route.
 
     Read once per test rather than once per session, because callers pass it to algorithms
@@ -68,17 +216,17 @@ def mux21() -> technology_network:
     Returns:
         The ``mux21.v`` network as a ``technology_network``.
     """
-    return read_technology_network(str(RESOURCES_DIR / "mux21.v"))
+    return read_technology_network(str(resources_dir / "mux21.v"))
 
 
 @pytest.fixture
-def interface_network() -> technology_network:
+def interface_network(resources_dir: Path) -> technology_network:
     """A network with constants, inverted edges, LUTs, labels, and an unused input.
 
     Returns:
         The network used to check conversion and file round trips.
     """
-    return read_technology_network(str(RESOURCES_DIR / "network_interfaces.blif"))
+    return read_technology_network(str(resources_dir / "network_interfaces.blif"))
 
 
 @pytest.fixture

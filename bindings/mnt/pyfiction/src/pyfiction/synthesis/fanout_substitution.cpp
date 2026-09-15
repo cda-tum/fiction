@@ -37,7 +37,7 @@ void fanout_substitution_impl(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("fanout_substitution", &fiction::synthesis::fanout_substitution<py_logic_network, Ntk>, py::arg("network"),
+    m.def("fanout_substitution", &fiction::synthesis::fanout_substitution<py_tec_network, Ntk>, py::arg("network"),
           py::arg("params") = fiction::synthesis::fanout_substitution_params{},
           DOC(fiction_synthesis_fanout_substitution));
 
@@ -77,7 +77,7 @@ void fanout_substitution(nanobind::module_& m)
 
         ;
 
-    detail::fanout_substitution_impl<py_logic_network>(m);
+    detail::fanout_substitution_impl<py_tec_network>(m);
 }
 
 }  // namespace pyfiction

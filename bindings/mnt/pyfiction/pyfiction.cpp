@@ -57,10 +57,11 @@ NB_MODULE(pyfiction, m)
     m.doc() = "Python bindings for fiction, a framework for Design Automation for Field-coupled Nanotechnologies";
 
     // The order is load-bearing: a type has to be registered before anything that names it in a
-    // signature or a default argument. Types first, then the readers and writers, then the
-    // utilities, then the algorithms that build on all of them.
+    // signature or a default argument. Synthesis registers truth tables before the SiDB types
+    // and algorithms that use them.
     pyfiction::register_layouts(m);
     pyfiction::register_networks(m);
+    pyfiction::register_synthesis(m);
     pyfiction::register_sidb_model(m);
     pyfiction::register_sidb(m);
     pyfiction::register_sidb_simulation(m);
@@ -73,7 +74,6 @@ NB_MODULE(pyfiction, m)
     pyfiction::register_sidb_io(m);
     pyfiction::register_sidb_simulation_io(m);
     pyfiction::register_utils(m);
-    pyfiction::register_synthesis(m);
     pyfiction::register_verification(m);
     pyfiction::register_path_finding(m);
     pyfiction::register_physical_design(m);

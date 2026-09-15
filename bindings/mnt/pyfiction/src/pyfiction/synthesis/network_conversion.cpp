@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Python bindings for converting logic networks into technology networks.
+ * @brief Python bindings for converting logic networks between AIG, XAG, MIG, and technology networks.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -34,12 +34,29 @@ namespace detail
  */
 enum class network_target : std::uint8_t
 {
+    /**
+     * @brief Technology network.
+     */
     TEC,
+    /**
+     * @brief AND-inverter graph.
+     */
     AIG,
+    /**
+     * @brief XOR-AND-inverter graph.
+     */
     XAG,
+    /**
+     * @brief Majority-inverter graph.
+     */
     MIG
 };
 
+/**
+ * @brief Register conversions from one source network type.
+ * @tparam NtkSrc Source network type.
+ * @param m Python module.
+ */
 template <typename NtkSrc>
 void convert_network(nanobind::module_& m)
 {
@@ -52,12 +69,21 @@ void convert_network(nanobind::module_& m)
             switch (target)
             {
                 case network_target::AIG:
+                {
                     return py::cast(fiction::synthesis::convert_network<py_aig_network, NtkSrc>(ntk));
+                }
                 case network_target::XAG:
+                {
                     return py::cast(fiction::synthesis::convert_network<py_xag_network, NtkSrc>(ntk));
+                }
                 case network_target::MIG:
+                {
                     return py::cast(fiction::synthesis::convert_network<py_mig_network, NtkSrc>(ntk));
-                default: return py::cast(fiction::synthesis::convert_network<py_logic_network, NtkSrc>(ntk));
+                }
+                default:
+                {
+                    return py::cast(fiction::synthesis::convert_network<py_tec_network, NtkSrc>(ntk));
+                }
             }
         },
         py::arg("network"), py::arg("target") = network_target::TEC, DOC(fiction_synthesis_convert_network));
@@ -65,6 +91,10 @@ void convert_network(nanobind::module_& m)
 
 }  // namespace detail
 
+/**
+ * @brief Register conversion targets and network overloads.
+ * @param m Python module.
+ */
 void network_conversion(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
@@ -75,7 +105,7 @@ void network_conversion(nanobind::module_& m)
         .value("XAG", detail::network_target::XAG, "An XOR-AND-inverter graph.")
         .value("MIG", detail::network_target::MIG, "A majority-inverter graph.");
 
-    detail::convert_network<py_logic_network>(m);
+    detail::convert_network<py_tec_network>(m);
     detail::convert_network<py_aig_network>(m);
     detail::convert_network<py_xag_network>(m);
     detail::convert_network<py_mig_network>(m);

@@ -15,8 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - CLI:
 
   - `pip install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
-    completion, script files, piped input, and JSON statistics.
-  - `write` selects formats by suffix or `--format`; readers support AAG, PLA, and all FGL topologies.
+    completion, script files, piped input, and JSON statistics. The shell also runs as `python -m mnt.fiction.cli`.
+  - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
   - `aig`, `abc`, and `generate` provide AIG optimization, external ABC scripts, and network generators.
   - `show` supports optional Graphviz SVG rendering, explicit viewers, and temporary-file cleanup.
 

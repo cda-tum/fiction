@@ -15,19 +15,27 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt import pyfiction as fiction
+from mnt import pyfiction
+from mnt.fiction.cli.stores import CellEntry, describe
+from mnt.fiction.cli.topologies import FGL_READERS
 from mnt.pyfiction import (
     aig_network,
     inml_layout,
     inml_technology,
     mig_network,
+    read_fqca_layout,
+    read_sqd_layout,
+    read_stacked_fqca_layout,
     set_name,
     shifted_cartesian_gate_layout,
+    simulate_outputs,
+    stacked_qca_layout,
     technology_network,
+    write_fgl_layout,
+    write_qca_layout_svg,
+    write_qca_layout_svg_params,
     xag_network,
 )
-from mnt.pyfiction.cli.stores import CellEntry, describe
-from mnt.pyfiction.cli.topologies import FGL_READERS
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -74,7 +82,7 @@ def test_read_aiger_and_pla(
 
 def test_read_blif_rejects_other_types(shell: Shell, tmp_path: Path, mux21_shell: Shell) -> None:
     blif = tmp_path / "mux21.blif"
-    mux21_shell.ok(f'write "{blif}"')
+    mux21_shell.ok(f'write_blif "{blif}"')
     shell.ok(f'read "{blif}"')
     assert "technology networks only" in shell.fails(f'read "{blif}" --type aig')
 
@@ -110,7 +118,7 @@ def test_read_aiger_accepts_both_aiger_suffixes(shell: Shell, tmp_path: Path, re
     """read_aiger reads binary .aig and ASCII .aag, dispatching on the file's own suffix."""
     shell.ok(f'read_verilog "{resource("mux21.v")}" --type aig')
     binary = tmp_path / "mux21.aig"
-    shell.ok(f'write "{binary}"')
+    shell.ok(f'write_aiger "{binary}"')
     shell.ok("clear -n")
     shell.ok(f'read_aiger "{binary}"')
     assert len(shell.session.networks) == 1
@@ -139,13 +147,13 @@ def test_sqd_shell_round_trip(shell: Shell, resource: Callable[[str], str], tmp_
     shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
     before = shell.session.cell_layouts.current().layout
     path = tmp_path / "gate.sqd"
-    shell.ok(f'write "{path}"; clear -c; read "{path}"')
+    shell.ok(f'write_sqd "{path}"; clear -c; read "{path}"')
     after = shell.session.cell_layouts.current().layout
     assert after.num_dots() == before.num_dots()
     assert after.num_pis() == before.num_pis()
     assert after.num_pos() == before.num_pos()
     fqca = tmp_path / "gate.fqca"
-    shell.ok(f'read "{resource("mux21.v")}"; ortho; cell; write "{fqca}"; clear -c; read "{fqca}"')
+    shell.ok(f'read "{resource("mux21.v")}"; ortho; cell; write_fqca "{fqca}"; clear -c; read "{fqca}"')
     assert shell.session.cell_layouts.current().layout.num_cells() > 0
 
 
@@ -161,20 +169,22 @@ def test_fgl_round_trip(shell: Shell, resource: Callable[[str], str], tmp_path: 
         layout.create_po(source, "f", (1, 0))
         shell.session.gate_layouts.add(layout)
     gates = shell.session.gate_layouts.current().num_gates()
-    shell.ok(f'write "{fgl}"; clear -g; read "{fgl}" --topology {topology}')
+    shell.ok(f'write_fgl "{fgl}"; clear -g; read "{fgl}" --topology {topology}')
     assert shell.session.gate_layouts.current().num_gates() == gates
 
 
-@pytest.mark.parametrize("suffix", [".v", ".blif", ".dot"])
-def test_write_networks(mux21_shell: Shell, tmp_path: Path, suffix: str) -> None:
+@pytest.mark.parametrize(
+    ("writer", "suffix"), [("write_verilog", ".v"), ("write_blif", ".blif"), ("write_dot -n", ".dot")]
+)
+def test_write_networks(mux21_shell: Shell, tmp_path: Path, writer: str, suffix: str) -> None:
     path = tmp_path / f"mux21{suffix}"
-    mux21_shell.ok(f'write {"-n " if suffix == ".dot" else ""}"{path}"')
+    mux21_shell.ok(f'{writer} "{path}"')
     assert path.stat().st_size > 0
 
 
 def test_write_aiger_needs_an_aig(mux21_shell: Shell, tmp_path: Path, resource: Callable[[str], str]) -> None:
-    assert "--type aig" in mux21_shell.fails(f'write "{tmp_path / "x.aig"}"')
-    mux21_shell.ok(f'read "{resource("mux21.v")}" --type aig; write "{tmp_path / "x.aig"}"')
+    assert "--type aig" in mux21_shell.fails(f'write_aiger "{tmp_path / "x.aig"}"')
+    mux21_shell.ok(f'read "{resource("mux21.v")}" --type aig; write_aiger "{tmp_path / "x.aig"}"')
     assert (tmp_path / "x.aig").stat().st_size > 0
 
 
@@ -182,20 +192,19 @@ def test_write_aiger_needs_an_aig(mux21_shell: Shell, tmp_path: Path, resource: 
 def test_write_layouts(mux21_shell: Shell, tmp_path: Path, suffix: str) -> None:
     mux21_shell.ok("ortho; cell")
     path = tmp_path / f"mux21{suffix}"
-    mux21_shell.ok(f'write "{path}"')
+    mux21_shell.ok(f'write_{suffix[1:]} "{path}"')
     assert path.stat().st_size > 0
 
 
 def test_write_via_layer_flags(mux21_shell: Shell, tmp_path: Path) -> None:
     mux21_shell.ok("ortho; cell")
-    mux21_shell.ok(f'write --no-via-layers "{tmp_path / "a.qca"}"; write --via-layers "{tmp_path / "b.fqca"}"')
+    mux21_shell.ok(f'write_qca --no-via-layers "{tmp_path / "a.qca"}"; write_fqca --via-layers "{tmp_path / "b.fqca"}"')
 
 
 def test_write_technology_mismatch(mux21_shell: Shell, tmp_path: Path) -> None:
     mux21_shell.ok("ortho; cell")
-    assert "not a qca_layout" in mux21_shell.fails(f'write "{tmp_path / "x.sqd"}"')
-    assert "not a qca_layout" in mux21_shell.fails(f'write "{tmp_path / "x.qcc"}"')
-    assert "cannot write" in mux21_shell.fails(f'write "{tmp_path / "x.txt"}"')
+    assert "not a qca_layout" in mux21_shell.fails(f'write_sqd "{tmp_path / "x.sqd"}"')
+    assert "not a qca_layout" in mux21_shell.fails(f'write_qcc "{tmp_path / "x.qcc"}"')
 
 
 @pytest.mark.parametrize(
@@ -228,21 +237,25 @@ def test_tt_random_and_errors(shell: Shell) -> None:
 def test_write_defaults_to_the_element_name(
     mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Without a file, the active element's name and --format make one in the current directory."""
+    """Without a file, the active element's name and the format suffix make one in the current directory."""
     monkeypatch.chdir(tmp_path)
-    mux21_shell.ok("write -F v")
+    mux21_shell.ok("write_verilog")
     assert (tmp_path / "mux21.v").is_file()
-    mux21_shell.ok("ortho; cell; write -F qca")
+    mux21_shell.ok("ortho; cell; write_qca")
     assert (tmp_path / "mux21.qca").is_file()
 
 
 def test_write_refuses_a_directory(mux21_shell: Shell, tmp_path: Path) -> None:
-    assert "is a directory" in mux21_shell.fails(f'write "{tmp_path}" -F v')
+    assert "is a directory" in mux21_shell.fails(f'write_verilog "{tmp_path}"')
 
 
-def test_write_needs_a_known_format(mux21_shell: Shell, tmp_path: Path) -> None:
-    assert "cannot write" in mux21_shell.fails(f'write "{tmp_path / "mux21.xyz"}"')
-    assert "give a file with a known suffix" in mux21_shell.fails("write")
+def test_writer_selects_format_independently_of_filename(mux21_shell: Shell, tmp_path: Path) -> None:
+    """The writer command determines serialization, including for extensionless output."""
+    for name in ("output", "output.xyz", "output.blif"):
+        path = tmp_path / name
+        mux21_shell.ok(f'write_verilog "{path}"')
+        assert "module top" in path.read_text(encoding="utf-8")
+    assert "unknown command" in mux21_shell.fails("write output.v")
 
 
 def test_write_dot_selects_the_store(mux21_shell: Shell, tmp_path: Path) -> None:
@@ -250,7 +263,7 @@ def test_write_dot_selects_the_store(mux21_shell: Shell, tmp_path: Path) -> None
     mux21_shell.ok("ortho")
     for flag, expected in (("-n", "digraph"), ("-g", "digraph"), ("", "digraph")):
         path = tmp_path / f"out{flag or 'default'}.dot"
-        mux21_shell.ok(f'write "{path}" {flag}')
+        mux21_shell.ok(f'write_dot "{path}" {flag}')
         assert expected in path.read_text(encoding="utf-8")
 
 
@@ -259,8 +272,8 @@ def test_write_dot_indexes_and_clock_colors(mux21_shell: Shell, tmp_path: Path) 
     mux21_shell.ok("ortho")
     plain = tmp_path / "plain.dot"
     colored = tmp_path / "colored.dot"
-    mux21_shell.ok(f'write "{plain}" -g')
-    mux21_shell.ok(f'write "{colored}" -g --clock-colors --indexes')
+    mux21_shell.ok(f'write_dot "{plain}" -g')
+    mux21_shell.ok(f'write_dot "{colored}" -g --clock-colors --indexes')
     assert plain.read_text(encoding="utf-8") != colored.read_text(encoding="utf-8")
 
 
@@ -272,7 +285,7 @@ def test_write_more_cell_formats(shell: Shell, resource: Callable[[str], str], t
     else:
         shell.ok(f'read "{resource("mux21.v")}"; ortho; cell')
     path = tmp_path / f"out{suffix}"
-    shell.ok(f'write "{path}"')
+    shell.ok(f'write_{suffix[1:]} "{path}"')
     assert path.stat().st_size > 0
 
 
@@ -289,28 +302,28 @@ def test_write_qcc_component_name(shell: Shell, tmp_path: Path) -> None:
 
     named_after_the_layout = tmp_path / "wire.qcc"
     named_after_the_file = tmp_path / "component.qcc"
-    shell.ok(f'write "{named_after_the_layout}"')
-    shell.ok(f'write "{named_after_the_file}" --component-name')
+    shell.ok(f'write_qcc "{named_after_the_layout}"')
+    shell.ok(f'write_qcc "{named_after_the_file}" --component-name')
     assert 'name="mygate"' in named_after_the_layout.read_text(encoding="utf-8")
     assert 'name="component"' in named_after_the_file.read_text(encoding="utf-8")
 
 
 @pytest.mark.parametrize(
-    ("options", "message"),
+    ("writer", "options", "message"),
     [
-        ("--via-layers -F v", "--via-layers applies only"),
-        ("--simple -F v", "--simple requires QCA SVG"),
-        ("--indexes -F v", "--indexes requires a DOT drawing"),
-        ("--clock-colors -n -F dot", "--clock-colors requires a gate-level DOT drawing"),
+        ("write_verilog", "--via-layers", "unrecognized arguments"),
+        ("write_verilog", "--simple", "unrecognized arguments"),
+        ("write_verilog", "--indexes", "unrecognized arguments"),
+        ("write_dot", "--clock-colors -n", "--clock-colors requires a gate-level DOT drawing"),
     ],
 )
 def test_rejected_writer_options_preserve_destination(
-    mux21_shell: Shell, tmp_path: Path, options: str, message: str
+    mux21_shell: Shell, tmp_path: Path, writer: str, options: str, message: str
 ) -> None:
-    """Irrelevant drawing options must fail before replacing an existing file."""
+    """Unsupported options fail before replacing an existing file."""
     path = tmp_path / "output"
     path.write_text("keep this file", encoding="utf-8")
-    assert message in mux21_shell.fails(f'write "{path}" {options}')
+    assert message in mux21_shell.fails(f'{writer} "{path}" {options}')
     assert path.read_text(encoding="utf-8") == "keep this file"
 
 
@@ -324,23 +337,23 @@ def test_implicit_output_requires_a_simple_name(
     set_name(network, name)
     shell.session.networks.add(network)
     message = "explicit output path" if name else "no name"
-    assert message in shell.fails("write -F v")
+    assert message in shell.fails("write_verilog")
     assert not list(tmp_path.glob("*.v"))
 
 
 def test_implicit_gate_layout_filename(mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """FGL uses the active gate layout name when no filename is supplied."""
     monkeypatch.chdir(tmp_path)
-    mux21_shell.ok("ortho; write -F fgl")
+    mux21_shell.ok("ortho; write_fgl")
     assert (tmp_path / "mux21.fgl").is_file()
 
 
 def test_read_fgl_round_trips_a_gate_layout(shell: Shell, tmp_path: Path, resource: Callable[[str], str]) -> None:
-    """read_fgl loads a layout written by `write`, under the topology the flag names."""
+    """read_fgl loads a layout written by `write_fgl`, under the topology the flag names."""
     shell.ok(f'read_verilog "{resource("mux21.v")}"')
     shell.ok("ortho")
     path = tmp_path / "mux21.fgl"
-    shell.ok(f'write "{path}"')
+    shell.ok(f'write_fgl "{path}"')
     shell.ok("clear -g")
     shell.ok(f'read_fgl "{path}" --topology cartesian')
     assert len(shell.session.gate_layouts) == 1
@@ -352,13 +365,19 @@ def test_split_readers_report_a_missing_file(shell: Shell, tmp_path: Path) -> No
 
 
 @pytest.mark.parametrize(
-    ("flags", "filename"),
-    [("-n -g", "a.dot"), ("-n", "a.fgl"), ("-g", "a.v"), ("-c", "a.v"), ("--component-name", "a.fgl")],
+    ("writer", "flags"),
+    [
+        ("write_dot", "-n -g"),
+        ("write_fgl", "-n"),
+        ("write_verilog", "-g"),
+        ("write_verilog", "-c"),
+        ("write_fgl", "--component-name"),
+    ],
 )
-def test_conflicting_writer_options_do_not_touch_files(shell: Shell, tmp_path: Path, flags: str, filename: str) -> None:
-    path = tmp_path / filename
+def test_conflicting_writer_options_do_not_touch_files(shell: Shell, tmp_path: Path, writer: str, flags: str) -> None:
+    path = tmp_path / "output"
     path.write_text("original", encoding="utf-8")
-    shell.fails(f'write {flags} "{path}"')
+    shell.fails(f'{writer} {flags} "{path}"')
     assert path.read_text(encoding="utf-8") == "original"
 
 
@@ -372,16 +391,16 @@ def test_all_topologies_round_trip_small_fixture(shell: Shell, tmp_path: Path, t
         "odd_column_cartesian": "shifted_cartesian",
         "even_row_hex": "hexagonal",
     }.get(topology, topology)
-    layout = getattr(fiction, f"{native}_gate_layout")((2, 1), f"2DDWave{phases}", topology)
+    layout = getattr(pyfiction, f"{native}_gate_layout")((2, 1), f"2DDWave{phases}", topology)
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (1, 0))
     path = tmp_path / f"{topology}.fgl"
-    fiction.write_fgl_layout(layout, str(path))
+    write_fgl_layout(layout, str(path))
     shell.ok(f'read_fgl "{path}" --topology {topology}')
     restored = shell.session.gate_layouts.current()
     assert restored.num_clocks() == phases
     assert restored.num_pis() == restored.num_pos() == 1
-    assert fiction.simulate_outputs(restored) == fiction.simulate_outputs(layout)
+    assert simulate_outputs(restored) == simulate_outputs(layout)
 
 
 def test_stacked_fqca_preserves_all_cells(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:
@@ -392,7 +411,7 @@ def test_stacked_fqca_preserves_all_cells(shell: Shell, resource: Callable[[str]
     assert layout.z() == 2
     assert layout.num_pis() == layout.num_pos() == 2
 
-    def metadata(lyt: fiction.stacked_qca_layout) -> list[tuple[object, ...]]:
+    def metadata(lyt: stacked_qca_layout) -> list[tuple[object, ...]]:
         return sorted(
             (
                 c.x,
@@ -407,11 +426,11 @@ def test_stacked_fqca_preserves_all_cells(shell: Shell, resource: Callable[[str]
         )
 
     destination = tmp_path / "crossing.fqca"
-    shell.ok(f'write -c "{destination}"')
-    restored = fiction.read_stacked_fqca_layout(str(destination))
+    shell.ok(f'write_fqca "{destination}"')
+    restored = read_stacked_fqca_layout(str(destination))
     assert metadata(restored) == metadata(layout)
     with pytest.raises((ValueError, IndexError, RuntimeError)):
-        fiction.read_fqca_layout(filename)
+        read_fqca_layout(filename)
 
 
 @pytest.mark.parametrize("simple", [False, True])
@@ -422,11 +441,11 @@ def test_fqca_import_preserves_svg_drawing(mux21_shell: Shell, tmp_path: Path, *
     after = tmp_path / "after.svg"
     fqca = tmp_path / "layout.fqca"
     option = " --simple" if simple else ""
-    mux21_shell.ok(f'write -c "{fqca}"; read "{fqca}"')
-    params = fiction.write_qca_layout_svg_params()
+    mux21_shell.ok(f'write_fqca "{fqca}"; read "{fqca}"')
+    params = write_qca_layout_svg_params()
     params.simple = simple
-    fiction.write_qca_layout_svg(fiction.read_fqca_layout(str(fqca)), str(before), params)
-    mux21_shell.ok(f'write -c "{after}"{option}')
+    write_qca_layout_svg(read_fqca_layout(str(fqca)), str(before), params)
+    mux21_shell.ok(f'write_svg "{after}"{option}')
     assert after.read_text(encoding="utf-8") == before.read_text(encoding="utf-8")
     mux21_shell.ok(f'show -c --silent -o "{after}"{option}')
     assert after.read_text(encoding="utf-8") == before.read_text(encoding="utf-8")
@@ -445,12 +464,12 @@ def test_named_extensionless_bridges(shell: Shell, tmp_path: Path, format_name: 
     shell.ok(f'read --format {format_name} "{source}"')
     network = shell.session.networks.current()
     assert [network.get_name(pi) for pi in network.pis()] == ["apple", "banana"]
-    assert fiction.simulate_outputs(network) == [("fruit", [True, False, True, False])]
+    assert simulate_outputs(network) == [("fruit", [True, False, True, False])]
 
 
 @pytest.mark.parametrize("library", ["qca-one", "sim7-mol", "bestagon", "topolinano"])
 def test_complete_design_and_export_workflows(shell: Shell, tmp_path: Path, library: str) -> None:
-    if library == "topolinano" and not hasattr(fiction, "exact_cartesian"):
+    if library == "topolinano" and not hasattr(pyfiction, "exact_cartesian"):
         pytest.skip("pyfiction was built without Z3")
     source = tmp_path / "inverter.v"
     source.write_text("module top(a, f);\ninput a;\noutput f;\nassign f = ~a;\nendmodule\n", encoding="utf-8")
@@ -472,15 +491,15 @@ def test_complete_design_and_export_workflows(shell: Shell, tmp_path: Path, libr
     for suffix in formats:
         destination = tmp_path / f"exported.{suffix}"
         options = " --component-name" if suffix == "qcc" else ""
-        shell.ok(f'write -c "{destination}"{options}')
+        shell.ok(f'write_{suffix} "{destination}"{options}')
         text = destination.read_text(encoding="utf-8")
         if suffix == "fqca":
-            restored = fiction.read_stacked_fqca_layout(str(destination))
+            restored = read_stacked_fqca_layout(str(destination))
             assert restored.num_cells() == entry.layout.num_cells()
             assert restored.num_pis() == entry.layout.num_pis()
             assert restored.num_pos() == entry.layout.num_pos()
         elif suffix == "sqd":
-            restored = fiction.read_sqd_layout(str(destination))
+            restored = read_sqd_layout(str(destination))
             assert restored.num_dots() == entry.layout.num_dots()
             assert restored.num_pis() == entry.layout.num_pis()
             assert restored.num_pos() == entry.layout.num_pos()

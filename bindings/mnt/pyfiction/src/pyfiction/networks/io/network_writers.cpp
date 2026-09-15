@@ -55,7 +55,7 @@ void network_writers(nanobind::module_& m)
             mockturtle::write_verilog_params params{};
             params.module_name = "top";
 
-            if constexpr (std::is_same_v<Ntk, py_logic_network>)
+            if constexpr (std::is_same_v<Ntk, py_tec_network>)
             {
                 // gate-level Verilog has no buffers or fan-out nodes, so a technology network is written as
                 // an equivalent XAG
@@ -94,13 +94,12 @@ void network_writers(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    detail::network_writers<py_logic_network>(m);
+    detail::network_writers<py_tec_network>(m);
     detail::network_writers<py_aig_network>(m);
     detail::network_writers<py_xag_network>(m);
     detail::network_writers<py_mig_network>(m);
 
-    // the AIGER format encodes AND gates and inverted edges only, so only an AIG can be written to it. The file
-    // is binary: written through a text stream, Windows turns every newline byte of the gate deltas into two
+    // AIGER encodes AND gates and inverted edges; other network types require conversion to an AIG.
     m.def(
         "write_aiger", [](const py_aig_network& ntk, const std::string& filename)
         { fiction::detail::atomic_write(filename, [&](std::ostream& os) { mockturtle::write_aiger(ntk, os); }); },

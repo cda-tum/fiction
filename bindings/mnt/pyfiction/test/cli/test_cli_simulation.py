@@ -15,8 +15,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt import pyfiction
-from mnt.pyfiction.cli.registry import REGISTRY
-from mnt.pyfiction.cli.stores import CellEntry
+from mnt.fiction.cli.registry import REGISTRY
+from mnt.fiction.cli.stores import CellEntry
 
 if TYPE_CHECKING:
     from collections.abc import Callable

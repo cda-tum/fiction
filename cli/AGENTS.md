@@ -1,6 +1,6 @@
 # Legacy C++ CLI
 
-The shipped Python shell lives in `bindings/mnt/pyfiction/cli/`. Add Python commands through its existing
+The shipped Python shell lives in `bindings/mnt/fiction/cli/`. Add Python commands through its existing
 registry and cover them in `bindings/mnt/pyfiction/test/cli/`; update `docs/cli.md`. Native binding changes follow
 `bindings/mnt/pyfiction/AGENTS.md`. This directory retains the legacy alice CLI during the parity transition.
 The source-list rules below apply only to that legacy implementation.

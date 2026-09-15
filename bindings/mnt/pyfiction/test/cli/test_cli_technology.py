@@ -14,8 +14,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt import pyfiction as fiction
-from mnt.pyfiction import mol_qca_layout, qca_layout, sidb_layout
+from mnt.pyfiction import (
+    mol_qca_layout,
+    qca_layout,
+    shifted_cartesian_gate_layout,
+    sidb_layout,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -83,7 +87,7 @@ def test_cell_library_spellings(mux21_shell: Shell, spelling: str) -> None:
 
 
 def test_gate_library_error_preserves_store(shell: Shell) -> None:
-    layout = fiction.shifted_cartesian_gate_layout((1, 1), "2DDWave", "unsupported routing")
+    layout = shifted_cartesian_gate_layout((1, 1), "2DDWave", "unsupported routing")
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (0, 1))
     shell.session.gate_layouts.add(layout)

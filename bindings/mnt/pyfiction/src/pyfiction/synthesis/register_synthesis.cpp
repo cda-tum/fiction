@@ -19,6 +19,12 @@
 namespace pyfiction
 {
 
+/**
+ * @brief Register the dynamic truth-table type.
+ * @param m Python module.
+ */
+void dynamic_truth_table(nanobind::module_& m);
+
 void truth_tables(nanobind::module_& m);
 void fanout_substitution(nanobind::module_& m);
 void network_balancing(nanobind::module_& m);
@@ -27,6 +33,7 @@ void network_conversion(nanobind::module_& m);
 
 void register_synthesis(nanobind::module_& m)
 {
+    dynamic_truth_table(m);
     truth_tables(m);
     fanout_substitution(m);
     network_balancing(m);

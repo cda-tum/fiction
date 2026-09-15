@@ -89,7 +89,7 @@ void count_gate_types(nanobind::module_& m)
         .def_ro("num_and_xor", &stats::num_and_xor)
         .def_ro("num_other", &stats::num_other);
 
-    detail::count_gate_types<py_logic_network>(m);
+    detail::count_gate_types<py_tec_network>(m);
     detail::count_gate_types<py_aig_network>(m);
     detail::count_gate_types<py_xag_network>(m);
     detail::count_gate_types<py_mig_network>(m);

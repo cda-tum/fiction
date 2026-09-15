@@ -72,7 +72,7 @@ void name_utils(nanobind::module_& m)
     detail::get_name<py_stacked_qca_layout>(m);
     detail::get_name<py_inml_layout>(m);
     detail::get_name<fiction::sidb::layout>(m);
-    detail::get_name<py_logic_network>(m);
+    detail::get_name<py_tec_network>(m);
     detail::get_name<py_aig_network>(m);
     detail::get_name<py_xag_network>(m);
     detail::get_name<py_mig_network>(m);
@@ -93,7 +93,7 @@ void name_utils(nanobind::module_& m)
     detail::set_name<py_stacked_qca_layout>(m);
     detail::set_name<py_inml_layout>(m);
     detail::set_name<fiction::sidb::layout>(m);
-    detail::set_name<py_logic_network>(m);
+    detail::set_name<py_tec_network>(m);
     detail::set_name<py_aig_network>(m);
     detail::set_name<py_xag_network>(m);
     detail::set_name<py_mig_network>(m);

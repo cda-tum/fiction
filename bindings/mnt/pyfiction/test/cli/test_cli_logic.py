@@ -19,9 +19,13 @@ import pytest
 from aigverse import abc
 from aigverse.algorithms import equivalence_checking as aig_equivalent
 
-from mnt import pyfiction as fiction
-from mnt.pyfiction import aig_network, technology_network
-from mnt.pyfiction.cli.aigverse_bridge import from_aigverse, to_aigverse
+from mnt import pyfiction
+from mnt.fiction.cli.aigverse_bridge import from_aigverse, to_aigverse
+from mnt.pyfiction import (
+    aig_network,
+    simulate_outputs,
+    technology_network,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -147,7 +151,7 @@ def test_abc_xag_and_custom_flow(
     shell.ok("abc -c print_stats --no-write")
     assert shell.session.networks.current() is original
     path = tmp_path / "custom input.aig"
-    shell.ok(f'write -n "{path}"')
+    shell.ok(f'write_aiger "{path}"')
     monkeypatch.chdir(tmp_path)
     shell.ok(f"abc --no-read --no-strash -c 'read_aiger \"{path.name}\"; strash; balance'")
     shell.ok("simulate -n")
@@ -158,7 +162,7 @@ def test_abc_xag_and_custom_flow(
 def test_incomplete_mapping_is_bounded_and_preserves_store(resource: Callable[[str], str], options: str) -> None:
     code = """
 import sys
-from mnt.pyfiction.cli import Session
+from mnt.fiction.cli import Session
 session = Session()
 assert session.execute('read "' + sys.argv[1] + '"')
 original = session.networks.current()
@@ -178,9 +182,9 @@ session.close()
 
 
 def test_mapping_with_statistics_preserves_function(mux21_shell: Shell) -> None:
-    expected = fiction.simulate_outputs(mux21_shell.session.networks.current())
+    expected = simulate_outputs(mux21_shell.session.networks.current())
     mux21_shell.ok("map --and --inv --verbose")
-    assert fiction.simulate_outputs(mux21_shell.session.networks.current()) == expected
+    assert simulate_outputs(mux21_shell.session.networks.current()) == expected
     result = mux21_shell.session.log[-1]["result"]
     assert isinstance(result, dict)
     assert isinstance(result["stats"], dict)
@@ -193,6 +197,6 @@ def test_seeded_random_networks(shell: Shell, kind: str) -> None:
     shell.ok(f"random --type {kind} -n 4 -g 30 --seed 17")
     network = shell.session.networks.current()
     assert network.num_pis() == 4
-    assert isinstance(network, getattr(fiction, "technology_network" if kind == "tec" else f"{kind}_network"))
+    assert isinstance(network, getattr(pyfiction, "technology_network" if kind == "tec" else f"{kind}_network"))
     shell.ok(f"random --type {kind} -n 4 -g 30 --seed 17")
-    assert fiction.simulate_outputs(network) == fiction.simulate_outputs(shell.session.networks.current())
+    assert simulate_outputs(network) == simulate_outputs(shell.session.networks.current())

@@ -15,9 +15,13 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt import pyfiction
-from mnt import pyfiction as fiction
-from mnt.pyfiction import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
-from mnt.pyfiction.cli.topologies import FGL_READERS
+from mnt.fiction.cli.topologies import FGL_READERS
+from mnt.pyfiction import (
+    cartesian_gate_layout,
+    hexagonal_gate_layout,
+    shifted_cartesian_gate_layout,
+    simulate_outputs,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -101,16 +105,16 @@ def test_direct_hexagonal_ortho_variants(
     shell.ok(f'read "{resource("mux21.v")}"; ortho --topology {topology} --clock-phases {phases}')
     layout = shell.session.gate_layouts.current()
     assert layout.num_clocks() == phases
-    expected = fiction.simulate_outputs(layout)
-    assert expected == fiction.simulate_outputs(shell.session.networks.current())
+    expected = simulate_outputs(layout)
+    assert expected == simulate_outputs(shell.session.networks.current())
     path = tmp_path / "hex.fgl"
-    shell.ok(f'write "{path}"; read --topology {topology} "{path}"')
+    shell.ok(f'write_fgl "{path}"; read --topology {topology} "{path}"')
     restored = shell.session.gate_layouts.current()
     assert restored.num_clocks() == phases
-    assert fiction.simulate_outputs(restored) == expected
+    assert simulate_outputs(restored) == expected
 
 
-@pytest.mark.skipif(not hasattr(fiction, "exact_cartesian"), reason="pyfiction was built without Z3")
+@pytest.mark.skipif(not hasattr(pyfiction, "exact_cartesian"), reason="pyfiction was built without Z3")
 def test_failed_search_preserves_store_and_statistics(mux21_shell: Shell) -> None:
     before = len(mux21_shell.session.gate_layouts)
     output = mux21_shell.fails("exact --fixed-size 1 --timeout 0.0001")
@@ -121,11 +125,9 @@ def test_failed_search_preserves_store_and_statistics(mux21_shell: Shell) -> Non
 
 
 @pytest.mark.parametrize("topology", [name for name in FGL_READERS if name not in {"shifted_cartesian", "hexagonal"}])
-@pytest.mark.skipif(not hasattr(fiction, "exact_cartesian"), reason="pyfiction was built without Z3")
+@pytest.mark.skipif(not hasattr(pyfiction, "exact_cartesian"), reason="pyfiction was built without Z3")
 def test_exact_topologies_preserve_function(shell: Shell, tmp_path: Path, topology: str) -> None:
     source = tmp_path / "wire.v"
     source.write_text("module top(a,f);\ninput a;\noutput f;\nassign f = a;\nendmodule\n", encoding="utf-8")
     shell.ok(f'read "{source}"; exact --topology {topology} --timeout 5')
-    assert fiction.simulate_outputs(shell.session.gate_layouts.current()) == fiction.simulate_outputs(
-        shell.session.networks.current()
-    )
+    assert simulate_outputs(shell.session.gate_layouts.current()) == simulate_outputs(shell.session.networks.current())

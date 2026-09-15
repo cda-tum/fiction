@@ -63,7 +63,7 @@ dependencies = [
 ]
 
 [project.scripts]
-fiction = "mnt.pyfiction.cli.app:main"
+fiction = "mnt.fiction.cli.app:main"
 
 [project.urls]
 Source = 'https://github.com/cda-tum/fiction'
@@ -190,7 +190,7 @@ markers = [
 
 
 [tool.coverage.run]
-source = ["mnt.pyfiction"]
+source = ["mnt.pyfiction", "mnt.fiction"]
 parallel = true
 relative_files = true
 patch = ["subprocess"]
@@ -272,7 +272,7 @@ cache-keys = [
 [tool.mypy]
 # Every Python file the repository owns, so a new one is checked without anyone remembering to
 # add it here
-files = ["bindings/mnt/pyfiction", "docs", "experiments", "noxfile.py", "scripts"]
+files = ["bindings/mnt", "docs", "experiments", "noxfile.py", "scripts"]
 mypy_path = ["$MYPY_CONFIG_FILE_DIR/bindings"]
 warn_unused_configs = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
@@ -310,7 +310,7 @@ ignore = [
 future-annotations = true
 
 [tool.ruff.lint.isort]
-known-first-party = ["mnt.pyfiction"]
+known-first-party = ["mnt.fiction", "mnt.pyfiction"]
 # `future-annotations = true` above lets ruff assume PEP 563 semantics when it rewrites an
 # annotation, which only holds in files that carry the import. Requiring it closes the gap.
 required-imports = ["from __future__ import annotations"]
@@ -318,7 +318,7 @@ required-imports = ["from __future__ import annotations"]
 [tool.ruff.lint.per-file-ignores]
 # a command's docstring is the help text `fiction` shows for it, so it describes the command for a
 # user; every command returns the log entry and raises `CommandError`, which `registry.py` documents
-"bindings/mnt/pyfiction/cli/commands/*.py" = ["docstring-missing-returns", "docstring-missing-exception"]
+"bindings/mnt/fiction/cli/commands/*.py" = ["docstring-missing-returns", "docstring-missing-exception"]
 # E501: the expected SVG output is compared verbatim, so its lines cannot be wrapped
 "bindings/mnt/pyfiction/test/technology/sidb/io/test_write_sidb_layout_svg.py" = ["line-too-long"]
 # RUF069: a test that stores a float through a binding and reads it back asserts that it

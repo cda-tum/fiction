@@ -128,7 +128,7 @@ void graph_oriented_layout_design(nanobind::module_& m)
                 DOC(fiction_physical_design_graph_oriented_layout_design_stats_num_crossings));
 
     m.def("graph_oriented_layout_design",
-          &fiction::physical_design::graph_oriented_layout_design<py_cartesian_gate_layout, py_logic_network>,
+          &fiction::physical_design::graph_oriented_layout_design<py_cartesian_gate_layout, py_tec_network>,
           py::arg("network"), py::arg("parameters") = fiction::physical_design::graph_oriented_layout_design_params{},
           py::arg("statistics") = nullptr, py::arg("custom_cost_objective") = nullptr,
           DOC(fiction_physical_design_graph_oriented_layout_design));

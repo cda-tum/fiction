@@ -70,7 +70,7 @@ void equivalence_checking_impl(nanobind::module_& m)
 template <typename Spec>
 void equivalence_checking_for(nanobind::module_& m)
 {
-    equivalence_checking_impl<Spec, py_logic_network>(m);
+    equivalence_checking_impl<Spec, py_tec_network>(m);
     equivalence_checking_impl<Spec, py_cartesian_gate_layout>(m);
     equivalence_checking_impl<Spec, py_shifted_cartesian_gate_layout>(m);
     equivalence_checking_impl<Spec, py_hexagonal_gate_layout>(m);
@@ -123,7 +123,7 @@ void equivalence_checking(nanobind::module_& m)
 
         ;
 
-    detail::equivalence_checking_for<py_logic_network>(m);
+    detail::equivalence_checking_for<py_tec_network>(m);
     detail::equivalence_checking_for<py_cartesian_gate_layout>(m);
     detail::equivalence_checking_for<py_shifted_cartesian_gate_layout>(m);
     detail::equivalence_checking_for<py_hexagonal_gate_layout>(m);

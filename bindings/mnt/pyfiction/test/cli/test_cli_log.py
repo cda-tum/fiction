@@ -17,9 +17,11 @@ from typing import TYPE_CHECKING
 
 from rich.console import Console
 
-from mnt import pyfiction as fiction
-from mnt.pyfiction.cli.session import Session
-from mnt.pyfiction.cli.statistics import json_value
+from mnt.fiction.cli.session import Session
+from mnt.fiction.cli.statistics import json_value
+from mnt.pyfiction import (
+    area,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -130,5 +132,5 @@ def test_sidb_statistics_use_lattice_area(shell: Shell, resource: Callable[[str]
     description = shell.session.log[-1]["result"]
     assert isinstance(description, dict)
     assert isinstance(description["cell_layout"], dict)
-    assert description["cell_layout"]["area_nm2"] == fiction.area(shell.session.cell_layouts.current().layout)
+    assert description["cell_layout"]["area_nm2"] == area(shell.session.cell_layouts.current().layout)
     assert "Area (nm²)" in shell.output

@@ -12,7 +12,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt import pyfiction as fiction
+from mnt.pyfiction import (
+    cartesian_gate_layout,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -52,7 +54,7 @@ def test_check(mux21_shell: Shell) -> None:
 
 def test_drv_blocked_equivalence_is_a_report(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("mux21.v")}"')
-    layout = fiction.cartesian_gate_layout((1, 0), "2DDWave", "invalid")
+    layout = cartesian_gate_layout((1, 0), "2DDWave", "invalid")
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (0, 1))
     shell.session.gate_layouts.add(layout)

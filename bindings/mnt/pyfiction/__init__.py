@@ -17,7 +17,6 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 if sys.platform == "win32":
     if "Z3_ROOT" in os.environ:
@@ -725,70 +724,46 @@ __all__ = [
 # Solver-specific bindings are absent from builds without the corresponding solver.
 from . import pyfiction as _native
 
-for _name in (
-    "ground_state_space_reporting",
-    "exact_cartesian",
-    "exact_hexagonal",
-    "exact_shifted_cartesian",
-    "exact_params",
-    "exact_stats",
-    "technology_constraints",
-    "clustercomplete",
-    "clustercomplete_params",
-    "exact_odd_row_cartesian",
-    "exact_even_row_cartesian",
-    "exact_even_column_cartesian",
-    "exact_odd_row_hex",
-    "exact_odd_column_hex",
-    "exact_even_column_hex",
-):
-    if hasattr(_native, _name):
-        globals()[_name] = getattr(_native, _name)
-        __all__ += [_name]  # ruff: ignore[invalid-all-object] -- names come from the literal optional-export list
+if hasattr(_native, "exact_params"):
+    from .pyfiction import (
+        exact_cartesian,
+        exact_even_column_cartesian,
+        exact_even_column_hex,
+        exact_even_row_cartesian,
+        exact_hexagonal,
+        exact_odd_column_hex,
+        exact_odd_row_cartesian,
+        exact_odd_row_hex,
+        exact_params,
+        exact_shifted_cartesian,
+        exact_stats,
+        technology_constraints,
+    )
 
-if TYPE_CHECKING:
+    __all__ += [
+        "exact_cartesian",
+        "exact_even_column_cartesian",
+        "exact_even_column_hex",
+        "exact_even_row_cartesian",
+        "exact_hexagonal",
+        "exact_odd_column_hex",
+        "exact_odd_row_cartesian",
+        "exact_odd_row_hex",
+        "exact_params",
+        "exact_shifted_cartesian",
+        "exact_stats",
+        "technology_constraints",
+    ]
+
+if hasattr(_native, "clustercomplete"):
     from .pyfiction import (
-        clustercomplete as clustercomplete,
+        clustercomplete,
+        clustercomplete_params,
+        ground_state_space_reporting,
     )
-    from .pyfiction import (
-        clustercomplete_params as clustercomplete_params,
-    )
-    from .pyfiction import (
-        exact_cartesian as exact_cartesian,
-    )
-    from .pyfiction import (
-        exact_even_column_cartesian as exact_even_column_cartesian,
-    )
-    from .pyfiction import (
-        exact_even_column_hex as exact_even_column_hex,
-    )
-    from .pyfiction import (
-        exact_even_row_cartesian as exact_even_row_cartesian,
-    )
-    from .pyfiction import (
-        exact_hexagonal as exact_hexagonal,
-    )
-    from .pyfiction import (
-        exact_odd_column_hex as exact_odd_column_hex,
-    )
-    from .pyfiction import (
-        exact_odd_row_cartesian as exact_odd_row_cartesian,
-    )
-    from .pyfiction import (
-        exact_odd_row_hex as exact_odd_row_hex,
-    )
-    from .pyfiction import (
-        exact_params as exact_params,
-    )
-    from .pyfiction import (
-        exact_shifted_cartesian as exact_shifted_cartesian,
-    )
-    from .pyfiction import (
-        exact_stats as exact_stats,
-    )
-    from .pyfiction import (
-        ground_state_space_reporting as ground_state_space_reporting,
-    )
-    from .pyfiction import (
-        technology_constraints as technology_constraints,
-    )
+
+    __all__ += [
+        "clustercomplete",
+        "clustercomplete_params",
+        "ground_state_space_reporting",
+    ]

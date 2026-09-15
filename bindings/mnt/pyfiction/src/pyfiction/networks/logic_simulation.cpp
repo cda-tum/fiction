@@ -96,7 +96,7 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
 
 void logic_simulation(nanobind::module_& m)
 {
-    detail::logic_simulation_impl<py_logic_network>(m, "network");
+    detail::logic_simulation_impl<py_tec_network>(m, "network");
     detail::logic_simulation_impl<py_aig_network>(m, "network");
     detail::logic_simulation_impl<py_xag_network>(m, "network");
     detail::logic_simulation_impl<py_mig_network>(m, "network");

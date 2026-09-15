@@ -20,11 +20,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from mnt.fiction.cli.errors import CommandError
+from mnt.fiction.cli.registry import REGISTRY
+from mnt.fiction.cli.render import table_rows
+from mnt.fiction.cli.stores import CellEntry, element_name
 from mnt.pyfiction import inml_layout, mol_qca_layout, mol_qca_technology
-from mnt.pyfiction.cli.errors import CommandError
-from mnt.pyfiction.cli.registry import REGISTRY
-from mnt.pyfiction.cli.render import table_rows
-from mnt.pyfiction.cli.stores import CellEntry, element_name
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -109,28 +109,27 @@ def test_show_writes_files(mux21_shell: Shell, tmp_path: Path) -> None:
     assert "<svg" in (tmp_path / "lyt.svg").read_text(encoding="utf-8")
 
 
-@pytest.mark.parametrize("command", ["show --silent -o", "write"])
 @pytest.mark.parametrize(
     ("store", "suffix", "option"),
     [("-n", "dot", "simple"), ("-n", "dot", "clock-colors"), ("-c", "svg", "indexes"), ("-c", "svg", "clock-colors")],
 )
 def test_unsupported_drawing_options_preserve_file(
-    mux21_shell: Shell, tmp_path: Path, command: str, store: str, suffix: str, option: str
+    mux21_shell: Shell, tmp_path: Path, store: str, suffix: str, option: str
 ) -> None:
     mux21_shell.ok("ortho; cell")
     path = tmp_path / f"drawing.{suffix}"
     path.write_text("original", encoding="utf-8")
-    assert f"--{option} requires" in mux21_shell.fails(f'{command} "{path}" {store} --{option}')
+    assert f"--{option} requires" in mux21_shell.fails(f'show --silent -o "{path}" {store} --{option}')
     assert path.read_text(encoding="utf-8") == "original"
 
 
-@pytest.mark.parametrize("command", ["show --silent -o", "write"])
+@pytest.mark.parametrize("command", ["show -c --silent -o", "write_svg"])
 def test_sidb_drawing_rejects_qca_options(
     shell: Shell, resource: Callable[[str], str], tmp_path: Path, command: str
 ) -> None:
     shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
     path = tmp_path / "sidb.svg"
-    assert "--simple requires QCA SVG" in shell.fails(f'{command} "{path}" -c --simple')
+    assert "--simple requires QCA SVG" in shell.fails(f'{command} "{path}" --simple')
     assert not path.exists()
 
 
@@ -164,7 +163,7 @@ def test_show_rejects_inml_svg(shell: Shell, tmp_path: Path) -> None:
 def test_show_opens_the_written_file(mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """The viewer is the platform's file opener, which takes the path itself, not a browser URL."""
     opened: list[list[str]] = []
-    monkeypatch.setattr("mnt.pyfiction.cli.drawing.subprocess.Popen", lambda command, **_: opened.append(command))
+    monkeypatch.setattr("mnt.fiction.cli.drawing.subprocess.Popen", lambda command, **_: opened.append(command))
     path = tmp_path / "network.dot"
     mux21_shell.ok(f'show -n -o "{path}"')
     assert opened == [["open" if sys.platform == "darwin" else "xdg-open", str(path)]]
@@ -179,10 +178,10 @@ def test_show_uses_the_shell_association_on_windows(
     The branch is forced here rather than skipped off Windows, so that every run covers it.
     """
     opened: list[Path] = []
-    monkeypatch.setattr("mnt.pyfiction.cli.drawing.sys", SimpleNamespace(platform="win32"))
+    monkeypatch.setattr("mnt.fiction.cli.drawing.sys", SimpleNamespace(platform="win32"))
     monkeypatch.setattr("os.startfile", opened.append, raising=False)
     started: list[list[str]] = []
-    monkeypatch.setattr("mnt.pyfiction.cli.drawing.subprocess.Popen", lambda command, **_: started.append(command))
+    monkeypatch.setattr("mnt.fiction.cli.drawing.subprocess.Popen", lambda command, **_: started.append(command))
     path = tmp_path / "network.dot"
     mux21_shell.ok(f'show -n -o "{path}"')
     assert opened == [path]
@@ -193,7 +192,7 @@ def test_show_uses_the_shell_association_on_windows(
 def test_show_takes_an_explicit_program(mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """--program replaces the platform opener, substituting '{}' when the command carries one."""
     opened: list[list[str]] = []
-    monkeypatch.setattr("mnt.pyfiction.cli.drawing.subprocess.Popen", lambda command, **_: opened.append(command))
+    monkeypatch.setattr("mnt.fiction.cli.drawing.subprocess.Popen", lambda command, **_: opened.append(command))
     path = tmp_path / "network.dot"
     mux21_shell.ok(f"show -n -o \"{path}\" --program 'dot -Tpng'")
     mux21_shell.ok(f"show -n -o \"{path}\" --program 'viewer --file {{}} --wait'")
@@ -382,7 +381,7 @@ def test_real_graphviz_renders_svg(mux21_shell: Shell, tmp_path: Path, flags: st
 def test_graphviz_failure_preserves_destination(
     mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr("mnt.pyfiction.cli.drawing.shutil.which", lambda _: None)
+    monkeypatch.setattr("mnt.fiction.cli.drawing.shutil.which", lambda _: None)
     destination = tmp_path / "drawing.svg"
     destination.write_text("original", encoding="utf-8")
     output = mux21_shell.fails(f'show -n --silent -o "{destination}"')
@@ -397,7 +396,7 @@ def test_graphviz_rejects_special_outputs(
     mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str
 ) -> None:
     """Rendering rejects special output files before invoking Graphviz."""
-    monkeypatch.setattr("mnt.pyfiction.cli.drawing.shutil.which", lambda _: "dot")
+    monkeypatch.setattr("mnt.fiction.cli.drawing.shutil.which", lambda _: "dot")
     destination = tmp_path / "output.svg"
     if kind == "fifo":
         if not hasattr(os, "mkfifo"):

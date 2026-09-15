@@ -52,7 +52,7 @@ void network_reader(nanobind::module_& m, const char* function_name)
             {
                 auto ntk = *ntks.front();
 
-                if constexpr (std::is_same_v<Ntk, py_logic_network>)
+                if constexpr (std::is_same_v<Ntk, py_tec_network>)
                 {
                     ntk.substitute_po_signals();
                 }
@@ -72,7 +72,7 @@ void network_reader(nanobind::module_& m, const char* function_name)
 
 void network_reader(nanobind::module_& m)
 {
-    detail::network_reader<py_logic_network>(m, "read_technology_network");
+    detail::network_reader<py_tec_network>(m, "read_technology_network");
     detail::network_reader<py_aig_network>(m, "read_aig_network");
     detail::network_reader<py_xag_network>(m, "read_xag_network");
     detail::network_reader<py_mig_network>(m, "read_mig_network");

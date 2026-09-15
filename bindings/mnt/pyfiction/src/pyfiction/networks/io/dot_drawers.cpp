@@ -57,7 +57,7 @@ void write_dot_network(nanobind::module_& m)
 
 void dot_drawers(nanobind::module_& m)
 {
-    detail::write_dot_network<py_logic_network>(m);
+    detail::write_dot_network<py_tec_network>(m);
     detail::write_dot_network<py_aig_network>(m);
     detail::write_dot_network<py_xag_network>(m);
     detail::write_dot_network<py_mig_network>(m);

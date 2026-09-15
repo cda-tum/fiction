@@ -79,21 +79,21 @@ void orthogonal(nanobind::module_& m)
         .def_ro("num_crossings", &fiction::physical_design::orthogonal_physical_design_stats::num_crossings,
                 DOC(fiction_physical_design_orthogonal_physical_design_stats_num_crossings));
 
-    m.def("orthogonal", &fiction::physical_design::orthogonal<py_cartesian_gate_layout, py_logic_network>,
+    m.def("orthogonal", &fiction::physical_design::orthogonal<py_cartesian_gate_layout, py_tec_network>,
           py::arg("network"), py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
           py::arg("statistics") = nullptr, DOC(fiction_physical_design_orthogonal));
-    m.def("orthogonal_hexagonal", &fiction::physical_design::orthogonal<py_hexagonal_gate_layout, py_logic_network>,
+    m.def("orthogonal_hexagonal", &fiction::physical_design::orthogonal<py_hexagonal_gate_layout, py_tec_network>,
           py::arg("network"), py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
           py::arg("statistics") = nullptr, DOC(fiction_physical_design_orthogonal));
-    m.def("orthogonal_odd_row_hex", &fiction::physical_design::orthogonal<py_odd_row_hex_gate_layout, py_logic_network>,
+    m.def("orthogonal_odd_row_hex", &fiction::physical_design::orthogonal<py_odd_row_hex_gate_layout, py_tec_network>,
           py::arg("network"), py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
           py::arg("statistics") = nullptr, DOC(fiction_physical_design_orthogonal));
     m.def("orthogonal_odd_column_hex",
-          &fiction::physical_design::orthogonal<py_odd_column_hex_gate_layout, py_logic_network>, py::arg("network"),
+          &fiction::physical_design::orthogonal<py_odd_column_hex_gate_layout, py_tec_network>, py::arg("network"),
           py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
           py::arg("statistics") = nullptr, DOC(fiction_physical_design_orthogonal));
     m.def("orthogonal_even_column_hex",
-          &fiction::physical_design::orthogonal<py_even_column_hex_gate_layout, py_logic_network>, py::arg("network"),
+          &fiction::physical_design::orthogonal<py_even_column_hex_gate_layout, py_tec_network>, py::arg("network"),
           py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
           py::arg("statistics") = nullptr, DOC(fiction_physical_design_orthogonal));
 }

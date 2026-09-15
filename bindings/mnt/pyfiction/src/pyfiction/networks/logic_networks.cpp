@@ -195,7 +195,7 @@ void network(nanobind::module_& m, const char* network_name, const char* doc)
             "is_xnor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xnor(n); }, py::arg("n"),
             DOC(fiction_networks_technology_network_is_xnor));
     }
-    if constexpr (std::is_same_v<Ntk, py_logic_network>)
+    if constexpr (std::is_same_v<Ntk, py_tec_network>)
     {
         cls.def(
                "po_index", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.po_index(n); }, py::arg("n"))
@@ -207,7 +207,7 @@ void network(nanobind::module_& m, const char* network_name, const char* doc)
 
 void logic_networks(nanobind::module_& m)
 {
-    detail::network<py_logic_network>(m, "technology_network", DOC(fiction_networks_technology_network));
+    detail::network<py_tec_network>(m, "technology_network", DOC(fiction_networks_technology_network));
     detail::network<py_aig_network>(m, "aig_network", "An AND-inverter graph (AIG) with node and output names.");
     detail::network<py_xag_network>(m, "xag_network", "An XOR-AND-inverter graph (XAG) with node and output names.");
     detail::network<py_mig_network>(m, "mig_network", "A majority-inverter graph (MIG) with node and output names.");

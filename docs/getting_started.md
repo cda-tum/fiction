@@ -297,7 +297,7 @@ re-running `cmake` picks up new files on its own — you only need to wire the n
 The Python-facing `mnt.pyfiction` namespace must not change shape when adding new bindings. In particular, do
 not introduce new Python-level submodules for bound symbols (e.g. `mnt.pyfiction.algorithms`) — all registration
 functions attach their bindings to the single top-level module object that is threaded through the call chain,
-matching the existing flat API that user scripts depend on. The one pure-Python subpackage is `mnt.pyfiction.cli`,
+matching the existing flat API that user scripts depend on. The one pure-Python subpackage is `mnt.fiction.cli`,
 the {ref}`command-line interface <cli>`, which only calls the bindings.
 :::
 

@@ -15,13 +15,13 @@ from typing import TYPE_CHECKING
 import pytest
 from rich.cells import cell_len
 
+from mnt.fiction.cli.errors import CommandError
+from mnt.fiction.cli.parsing import tokenize
+from mnt.fiction.cli.registry import REGISTRY, STORE_FLAGS, Category
+from mnt.fiction.cli.session import Session
+from mnt.fiction.cli.statistics import stats_to_dict
+from mnt.fiction.cli.stores import Store
 from mnt.pyfiction import orthogonal, orthogonal_stats, set_name
-from mnt.pyfiction.cli.errors import CommandError
-from mnt.pyfiction.cli.parsing import tokenize
-from mnt.pyfiction.cli.registry import REGISTRY, STORE_FLAGS, Category
-from mnt.pyfiction.cli.session import Session
-from mnt.pyfiction.cli.statistics import stats_to_dict
-from mnt.pyfiction.cli.stores import Store
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
         ("read 'my file.v';;", [["read", "my file.v"]]),
         ('tt -e "[(ab)(!ac)]" # comment; version', [["tt", "-e", "[(ab)(!ac)]"]]),
         ("   ", []),
-        ("write out.v;ortho", [["write", "out.v"], ["ortho"]]),
+        ("write_verilog out.v;ortho", [["write_verilog", "out.v"], ["ortho"]]),
         ("read C:\\Users\\me\\mux21.v", [["read", "C:\\Users\\me\\mux21.v"]]),
         ('read "C:\\my dir\\a.v"', [["read", "C:\\my dir\\a.v"]]),
     ],
@@ -190,7 +190,7 @@ def test_interrupted_command_is_logged_and_session_continues(shell: Shell, monke
     def interrupt(*_: object, **__: object) -> None:
         raise KeyboardInterrupt
 
-    monkeypatch.setattr("mnt.pyfiction.cli.commands.logic.simulate.simulate_outputs", interrupt)
+    monkeypatch.setattr("mnt.fiction.cli.commands.logic.simulate.simulate_outputs", interrupt)
     shell.ok("generate rca -b 1")
     assert "interrupted" in shell.fails("simulate -n")
     assert shell.session.log[-1]["status"] == "interrupted"

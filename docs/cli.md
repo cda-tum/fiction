@@ -15,7 +15,16 @@ $ pip install mnt.pyfiction
 $ fiction
 ```
 
-`python -m mnt.pyfiction.cli` starts the same shell. The {ref}`Docker image <cli-docker>` starts it as well.
+`python -m mnt.fiction.cli` starts the same shell. The `mnt.pyfiction` distribution contains both the
+bindings and the `mnt.fiction.cli` module; the executable is named `fiction`.
+
+From a local checkout, `uv run fiction` builds and installs the project as needed, then starts the shell.
+After installation, `uv run --no-sync fiction` reuses the environment. To build and run an isolated copy,
+use `uvx --from . fiction`. To run a wheel you already built, use
+`uvx --from path/to/mnt_pyfiction-<version>-<tags>.whl fiction`.
+Source builds require the {ref}`build dependencies <python-bindings>`.
+The `--from` option selects the package that provides the `fiction` executable, as described in
+[uv's tool documentation](https://docs.astral.sh/uv/guides/tools/#commands-with-different-package-names). The {ref}`Docker image <cli-docker>` starts it as well.
 
 ## The shell
 
@@ -101,20 +110,21 @@ reads a whole folder of them. FQCA imports preserve stacked layouts, including v
 I/O labels, clocks, and cell modes. Imports with at most two layers support SVG drawing; deeper layouts support
 QCA, FQCA, and QLL export. Readers reject coordinates the requested layout type cannot represent.
 
-`write FILE` writes the active element in the format the suffix names:
+Each writer selects its format by command name, independently of the filename:
 
-| Suffix           | Writes                                                     | Element           |
-| ---------------- | ---------------------------------------------------------- | ----------------- |
-| `.v`, `.blif`    | gate-level Verilog, BLIF                                   | network           |
-| `.aig`           | binary AIGER                                               | network (AIG)     |
-| `.dot`           | Graphviz drawing                                           | layout, or network with `-n` |
-| `.fgl`           | fiction gate-level layout                                  | gate-level layout |
-| `.qca`           | [QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/)    | QCA layout        |
-| `.fqca`          | [QCA-STACK](https://github.com/wlambooy/QCA-STACK)         | QCA layout        |
-| `.qcc`           | [ToPoliNano](https://topolinano.polito.it/) component      | iNML layout       |
-| `.qll`           | ToPoliNano, MagCAD, or [SCERPA](https://ieeexplore.ieee.org/document/8935211) layout | QCA, molQCA, or iNML layout |
-| `.sqd`           | [SiQAD](https://github.com/siqad/siqad)                    | SiDB layout       |
-| `.svg`           | drawing                                                    | cell-level layout |
+| Command | Default suffix | Element |
+| --- | --- | --- |
+| `write_verilog` | `.v` | network |
+| `write_blif` | `.blif` | network |
+| `write_aiger` | `.aig` | AIG network |
+| `write_dot` | `.dot` | gate-level layout, or network with `-n` |
+| `write_fgl` | `.fgl` | gate-level layout |
+| `write_qca` | `.qca` | QCA layout for QCADesigner |
+| `write_fqca` | `.fqca` | QCA layout for QCA-STACK |
+| `write_qcc` | `.qcc` | iNML component for ToPoliNano |
+| `write_qll` | `.qll` | QCA, molQCA, or iNML layout for ToPoliNano, MagCAD, or SCERPA |
+| `write_sqd` | `.sqd` | SiDB layout for SiQAD |
+| `write_svg` | `.svg` | QCA, molQCA, or SiDB drawing |
 
 `--via-layers` and `--no-via-layers` add or omit the inter-layer via cells of `.qca` and `.fqca` files, which
 `.qca` files carry by default and `.fqca` files do not. `--component-name` names a `.qcc` component after the
@@ -128,11 +138,13 @@ Writers replace destination files after successful serialization. Symbolic links
 and their targets receive the output. Dangling links and non-regular outputs, such as named pipes or devices,
 are rejected.
 
-Without a file, `write -F FORMAT` writes `<name>.<format>` in the current directory, where `<name>` is the active
-element's name: `read c17.v; ortho; cell; write -F qca` produces `c17.qca`. On a `.dot` file, `-n` and `-g` select
-the network or the gate-level layout store; a gate-level layout is the default. `-c` selects cell layouts.
-Conflicting store flags and irrelevant format options fail before writing. `--format` changes the serializer,
-not an explicitly supplied filename. Names containing path components require an explicit output path.
+Without a filename, each writer uses the active element's name and its default suffix in the current
+directory: `read c17.v; ortho; cell; write_qca` produces `c17.qca`. An explicit filename is used unchanged,
+even without a suffix. Names containing path components require an explicit output path.
+Only `write_dot` takes store flags: `-n` selects the network, while `-g` selects the gate-level layout,
+which is the default. Conflicting store flags and unsupported options fail before writing.
+`write_aiger` requires an AIG: load one with `read_verilog circuit.v --type aig`, or explicitly convert a
+network with the Python binding `convert_network(network, network_target.AIG)` before writing it.
 
 ### Truth tables
 
@@ -146,7 +158,7 @@ that the gate-based SiDB simulations check a layout against.
 ## Logic networks
 
 The network store holds AND-inverter graphs (AIG), XOR-AND-inverter graphs (XAG), majority-inverter graphs
-(MIG), and technology networks (TEC). Technology mapping, gate counting, simulation, and the writers take any of
+(MIG), and technology networks (TEC). Technology mapping, gate counting, simulation, and the Verilog and BLIF writers take any of
 them. Physical design and verification work on technology networks; when the active network is of another type,
 the command converts it on the fly and says so in its help.
 
@@ -320,7 +332,7 @@ invalid command arguments remain command errors.
   which `hex` produces, or `exact --topology hexagonal -s row -xbd`
 
 Cell-level layouts are much larger than gate-level ones, so `show -c` is the better way to look at them than
-`print -c`. `write` exports them for the simulators listed above.
+`print -c`. The format-specific writers export them for the simulators listed above.
 
 `area [-x WIDTH] [-y HEIGHT] [--hspace H] [--vspace V]` computes the physical area of the active cell-level layout
 in nm². Every unset dimension is the technology's own, from
@@ -402,7 +414,7 @@ the operational points, and `--engine` chooses the simulator.
 
 ## Scripting
 
-`fiction -c "read c17.v; ortho; cell; write c17.qca"` runs a `;`-separated command string and exits. The exit
+`fiction -c "read c17.v; ortho; cell; write_qca c17.qca"` runs a `;`-separated command string and exits. The exit
 status is `1` when a command fails, which stops the string at that command. `fiction -f FLOW` runs the commands
 of a file, one line per line, in the same way; a missing file exits with `2`. `quit` ends either without failing,
 leaving the commands after it unrun. `-i` continues into the interactive shell once the commands are done, and
@@ -421,7 +433,7 @@ Shell loops turn this into batch runs:
 ```bash
 for filepath in benchmarks/TOY/*.v; do
     f="${filepath##*/}"
-    fiction -c "read $filepath; ortho; cell; write ${f%.*}.qca"
+    fiction -c "read $filepath; ortho; cell; write_qca ${f%.*}.qca"
 done
 ```
 
@@ -465,7 +477,7 @@ A log-write failure reports an error, returns a failing exit status, and still c
 
 ## Adding a command
 
-Each command has one Python module under `bindings/mnt/pyfiction/cli/commands/`, in its help category's
+Each command has one Python module under `bindings/mnt/fiction/cli/commands/`, in its help category's
 package. The module defines an argument function and a handler decorated with `@command`. The decorator
 sets the name, category, inputs, example, and any unavailable capability; the handler's docstring supplies
 the help description. Declare numeric constraints with the converters in `cli/parsing.py` at each argument.
@@ -484,14 +496,14 @@ and `-c/--cell-layout`; `--logic_network` becomes `--network`.
 | Original command | Python shell | Option and behavior migration |
 | --- | --- | --- |
 | `read` | `read FILE`, or `read_verilog`, `read_aiger`, `read_blif`, `read_pla`, `read_fgl`, `read_sqd`, `read_fqca` | `--aig/--xag/--mig/--tec` become `--type`; format flags become `--format`; positional topology becomes `--topology`; reading a whole directory and `--sort` are gone |
-| `verilog` | `write FILE.v` | Optional filename and implicit element naming remain |
-| `blif` | `write FILE.blif` | All network types |
-| `fgl` | `write FILE.fgl` | All nine topologies |
-| `fqca` | `write FILE.fqca` | `--via_layers` becomes `--via-layers`; stacked QCA supported |
-| `qca` | `write FILE.qca` | `--no_via_layers` becomes `--no-via-layers` |
-| `qcc` | `write FILE.qcc` | `--component_name` becomes `--component-name` |
-| `qll` | `write FILE.qll` | QCA, molQCA, iNML |
-| `sqd` | `write FILE.sqd` | SiDB lattice, dots, and defects |
+| `verilog` | `write_verilog FILE.v` | Optional filename and implicit element naming remain |
+| `blif` | `write_blif FILE.blif` | All network types |
+| `fgl` | `write_fgl FILE.fgl` | All nine topologies |
+| `fqca` | `write_fqca FILE.fqca` | `--via_layers` becomes `--via-layers`; stacked QCA supported |
+| `qca` | `write_qca FILE.qca` | `--no_via_layers` becomes `--no-via-layers` |
+| `qcc` | `write_qcc FILE.qcc` | `--component_name` becomes `--component-name` |
+| `qll` | `write_qll FILE.qll` | QCA, molQCA, iNML |
+| `sqd` | `write_sqd FILE.sqd` | SiDB lattice, dots, and defects |
 | `tt` | `tt` | `--table`, `--expression`, `--random` remain; select one source; fewer than 38 variables |
 | `abc` | `abc` | `--command` becomes `--commands`; `--dont_read/--dont_strash/--dont_write` become `--no-read/--no-strash/--no-write`; AIG and XAG input |
 | `map` | `map` | Every gate selector, `--all2/--all3/--all`, `--decay`, and verbose statistics remain; compound selectors use hyphens; unsafe or uncovered libraries fail explicitly |
@@ -521,6 +533,6 @@ and `-c/--cell-layout`; `--logic_network` becomes `--network`.
 settings, shell escapes, echo/counter switches, and its documentation launcher. Shell scripts provide loops
 and process invocation. The legacy CLI source remains available during the parity transition.
 
-A migrated QCA workflow is `read circuit.v; map --and --or --inv; ortho; check; equiv -n -g; cell; write circuit.qca`.
-For Bestagon, use `ortho; hex; cell --library bestagon; write circuit.sqd` after reading a supported network.
-For iNML, use `exact --topolinano -s columnar --border-io --timeout 30; check; equiv -n -g; cell --library topolinano; write circuit.qll`.
+A migrated QCA workflow is `read circuit.v; map --and --or --inv; ortho; check; equiv -n -g; cell; write_qca circuit.qca`.
+For Bestagon, use `ortho; hex; cell --library bestagon; write_sqd circuit.sqd` after reading a supported network.
+For iNML, use `exact --topolinano -s columnar --border-io --timeout 30; check; equiv -n -g; cell --library topolinano; write_qll circuit.qll`.

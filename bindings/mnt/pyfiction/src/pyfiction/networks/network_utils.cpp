@@ -64,7 +64,7 @@ void network_utils(nanobind::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::has_high_degree_fanin_nodes<py_logic_network>(m);
+    detail::has_high_degree_fanin_nodes<py_tec_network>(m);
     m.def(
         "random_aig_network",
         [](const uint32_t inputs, const uint32_t gates, const uint64_t seed)
@@ -131,7 +131,7 @@ void network_utils(nanobind::module_& m)
                                                                           .num_pis   = inputs,
                                                                           .num_gates = gates};
             auto generator = mockturtle::mixed_random_mig_generator(params);
-            auto network   = fiction::synthesis::convert_network<py_logic_network>(generator.generate());
+            auto network   = fiction::synthesis::convert_network<py_tec_network>(generator.generate());
             network.set_network_name(std::to_string(seed));
             return network;
         },

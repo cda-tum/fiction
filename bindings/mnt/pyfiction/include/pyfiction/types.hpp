@@ -45,14 +45,21 @@ namespace pyfiction
  */
 using py_tt = kitty::dynamic_truth_table;
 /**
- * Logic networks. `py_logic_network` is the technology network every physical design and verification
- * binding takes; the other three are read, mapped, converted, and written, and reach physical design
- * through `convert_network`.
+ * @brief Technology network used by physical design and verification bindings.
  */
-using py_logic_network = mockturtle::names_view<fiction::networks::technology_network>;
-using py_aig_network   = mockturtle::names_view<mockturtle::aig_network>;
-using py_xag_network   = mockturtle::names_view<mockturtle::xag_network>;
-using py_mig_network   = mockturtle::names_view<mockturtle::mig_network>;
+using py_tec_network = mockturtle::names_view<fiction::networks::technology_network>;
+/**
+ * @brief Named AND-inverter graph.
+ */
+using py_aig_network = mockturtle::names_view<mockturtle::aig_network>;
+/**
+ * @brief Named XOR-AND-inverter graph.
+ */
+using py_xag_network = mockturtle::names_view<mockturtle::xag_network>;
+/**
+ * @brief Named majority-inverter graph.
+ */
+using py_mig_network = mockturtle::names_view<mockturtle::mig_network>;
 /**
  * Coordinates.
  */

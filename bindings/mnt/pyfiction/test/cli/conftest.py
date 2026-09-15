@@ -11,19 +11,16 @@
 from __future__ import annotations
 
 import io
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 from rich.console import Console
 
-from mnt.pyfiction.cli import Session
+from mnt.fiction.cli import Session
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
-
-
-RESOURCES_DIR = Path(__file__).resolve().parent.parent / "resources"
+    from pathlib import Path
 
 
 class Shell:
@@ -125,7 +122,7 @@ def shell(tmp_path: Path) -> Iterator[Shell]:
 
 
 @pytest.fixture
-def resource() -> Callable[[str], str]:
+def resource(resources_dir: Path) -> Callable[[str], str]:
     """Resolve a file under the shared test resources.
 
     Returns:
@@ -133,7 +130,7 @@ def resource() -> Callable[[str], str]:
     """
 
     def path(name: str) -> str:
-        return str(RESOURCES_DIR / name)
+        return str(resources_dir / name)
 
     return path
 

@@ -142,7 +142,7 @@ void technology_mapping(nanobind::module_& m)
     m.def("all_supported_standard_functions", &fiction::synthesis::all_supported_standard_functions,
           DOC(fiction_synthesis_all_supported_standard_functions));
 
-    detail::technology_mapping_impl<py_logic_network>(m);
+    detail::technology_mapping_impl<py_tec_network>(m);
     detail::technology_mapping_impl<py_aig_network>(m);
     detail::technology_mapping_impl<py_xag_network>(m);
     detail::technology_mapping_impl<py_mig_network>(m);

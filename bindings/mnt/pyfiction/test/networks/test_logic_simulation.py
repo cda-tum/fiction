@@ -10,8 +10,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt import pyfiction as fiction
-from mnt.pyfiction import exact_cartesian, exact_params, read_technology_network, simulate
+from mnt.pyfiction import (
+    exact_cartesian,
+    exact_params,
+    read_technology_network,
+    simulate,
+    simulate_outputs,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -39,9 +44,9 @@ def test_duplicate_output_names_preserve_order(tmp_path: Path) -> None:
     path.write_text(
         "module top(a, f, g);\ninput a;\noutput f, g;\nassign f = a;\nassign g = ~a;\nendmodule\n", encoding="utf-8"
     )
-    network = fiction.read_technology_network(str(path))
+    network = read_technology_network(str(path))
     network.set_output_name(0, "same")
     network.set_output_name(1, "same")
-    outputs = fiction.simulate_outputs(network)
+    outputs = simulate_outputs(network)
     assert [name for name, bits in outputs] == ["same", "same"]
     assert outputs[0][1] != outputs[1][1]

@@ -26,10 +26,10 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.input import DummyInput
 from prompt_toolkit.output import DummyOutput
 
+from mnt.fiction.cli import Session, main
+from mnt.fiction.cli import app as cli_app
+from mnt.fiction.cli.app import CommandCompleter
 from mnt.pyfiction import __version__
-from mnt.pyfiction.cli import Session, main
-from mnt.pyfiction.cli import app as cli_app
-from mnt.pyfiction.cli.app import CommandCompleter
 
 
 def test_commands_succeed() -> None:
@@ -72,7 +72,7 @@ def test_version_flag(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_module_runs_as_a_process() -> None:
     result = subprocess.run(
-        [sys.executable, "-m", "mnt.pyfiction.cli", "-c", "version"], check=False, capture_output=True, text=True
+        [sys.executable, "-m", "mnt.fiction.cli", "-c", "version"], check=False, capture_output=True, text=True
     )
     assert result.returncode == 0, result.stderr
     assert __version__ in result.stdout
@@ -210,7 +210,7 @@ def test_prompt_dims_once_the_line_is_accepted(monkeypatch: pytest.MonkeyPatch) 
 
 def test_piped_entry_point() -> None:
     result = subprocess.run(
-        [sys.executable, "-m", "mnt.pyfiction.cli", "--quiet"],
+        [sys.executable, "-m", "mnt.fiction.cli", "--quiet"],
         input="version\nquit\n",
         capture_output=True,
         text=True,

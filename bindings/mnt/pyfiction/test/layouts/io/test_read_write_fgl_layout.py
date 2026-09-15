@@ -12,16 +12,19 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt import pyfiction as fiction
 from mnt.pyfiction import (
+    cartesian_gate_layout,
     eq_type,
     equivalence_checking,
+    fgl_parsing_error,
+    get_name,
     hexagonalization,
     orthogonal,
     read_cartesian_fgl_layout,
     read_hexagonal_fgl_layout,
     read_shifted_cartesian_fgl_layout,
     shifted_cartesian_gate_layout,
+    simulate_outputs,
     write_fgl_layout,
 )
 
@@ -48,26 +51,26 @@ def test_read_write(mux21, tmp_path):
 
 @pytest.mark.parametrize("value", ["2", "-1", "18446744073709551616", "1garbage"])
 def test_fgl_rejects_unrepresentable_layers(tmp_path: Path, value: str) -> None:
-    layout = fiction.cartesian_gate_layout((1, 0), "2DDWave", "wire")
+    layout = cartesian_gate_layout((1, 0), "2DDWave", "wire")
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (1, 0))
     path = tmp_path / "invalid.fgl"
-    fiction.write_fgl_layout(layout, str(path))
+    write_fgl_layout(layout, str(path))
     path.write_text(path.read_text(encoding="utf-8").replace("<z>0</z>", f"<z>{value}</z>", 1), encoding="utf-8")
-    with pytest.raises(fiction.fgl_parsing_error, match=r"range|integer"):
-        fiction.read_cartesian_fgl_layout(str(path))
+    with pytest.raises(fgl_parsing_error, match=r"range|integer"):
+        read_cartesian_fgl_layout(str(path))
 
 
 def test_fgl_preserves_labels_and_synchronization(tmp_path: Path) -> None:
-    layout = fiction.cartesian_gate_layout((2, 0), "2DDWave", "A & B < C")
+    layout = cartesian_gate_layout((2, 0), "2DDWave", "A & B < C")
     source = layout.create_pi("a&b", (0, 0))
     wire = layout.create_buf(source, (1, 0))
     layout.create_po(wire, "f<g", (2, 0))
     layout.assign_synchronization_element((1, 0), 2)
     path = tmp_path / "sync.fgl"
-    fiction.write_fgl_layout(layout, str(path))
-    restored = fiction.read_cartesian_fgl_layout(str(path))
-    assert fiction.get_name(restored) == "A & B < C"
+    write_fgl_layout(layout, str(path))
+    restored = read_cartesian_fgl_layout(str(path))
+    assert get_name(restored) == "A & B < C"
     assert restored.num_se() == 1
     assert restored.get_synchronization_element((1, 0)) == 2
-    assert fiction.simulate_outputs(restored) == fiction.simulate_outputs(layout)
+    assert simulate_outputs(restored) == simulate_outputs(layout)
