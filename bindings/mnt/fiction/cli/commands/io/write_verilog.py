@@ -13,29 +13,21 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import (
-    write_verilog,
-)
+from mnt.pyfiction import write_verilog
 
 from ._write import output_argument, output_path, written
 
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-
-
-def _write_verilog_arguments(parser: Parser) -> None:
-    """Add the command's arguments to the parser."""
-    output_argument(parser)
 
 
 @command(
     "write_verilog",
     Category.IO,
-    _write_verilog_arguments,
+    output_argument,
     inputs="Active network.",
     example="generate mux -b 1; write_verilog output.v",
 )

@@ -10,7 +10,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -22,10 +21,7 @@ from mnt.fiction.cli.stores import CellEntry, describe
 from mnt.fiction.cli.topologies import FGL_READERS
 from mnt.pyfiction import (
     convert_network,
-    inml_layout,
-    mol_qca_layout,
     network_target,
-    qca_layout,
     read_aig_network,
     read_fqca_layout,
     read_mig_network,
@@ -34,8 +30,6 @@ from mnt.pyfiction import (
     read_technology_network,
     read_xag_network,
     set_name,
-    sidb_layout,
-    stacked_qca_layout,
 )
 
 if TYPE_CHECKING:
@@ -54,34 +48,11 @@ NETWORK_READERS = {
 """The ``--type`` names and the readers that produce them."""
 
 
-@dataclass(frozen=True)
-class FileFormat:
-    """Reader family, writable stores, and supported cell types for one format."""
-
-    reader: str | None
-    stores: tuple[str, ...]
-    cell_types: tuple[type, ...] = ()
+READ_SUFFIXES = (".v", ".aig", ".blif", ".aag", ".pla", ".fgl", ".fqca", ".sqd")
+"""Formats accepted by the generic reader."""
 
 
-FORMATS = {
-    ".v": FileFormat("native", ("network",)),
-    ".aig": FileFormat("native", ("network",)),
-    ".blif": FileFormat("native", ("network",)),
-    ".aag": FileFormat("aigverse", ()),
-    ".pla": FileFormat("aigverse", ()),
-    ".fgl": FileFormat("gate", ("gate_layout",)),
-    ".fqca": FileFormat("cell", ("cell_layout",), (qca_layout, stacked_qca_layout)),
-    ".sqd": FileFormat("cell", ("cell_layout",), (sidb_layout,)),
-    ".qca": FileFormat(None, ("cell_layout",), (qca_layout, stacked_qca_layout)),
-    ".qcc": FileFormat(None, ("cell_layout",), (inml_layout,)),
-    ".qll": FileFormat(None, ("cell_layout",), (qca_layout, stacked_qca_layout, mol_qca_layout, inml_layout)),
-    ".svg": FileFormat(None, ("cell_layout",), (qca_layout, mol_qca_layout, sidb_layout)),
-    ".dot": FileFormat(None, ("gate_layout", "network")),
-}
-"""Shared format contract for dispatch, validation, help choices, and completion."""
-
-
-AIGVERSE_NETWORK_SUFFIXES = {suffix for suffix, spec in FORMATS.items() if spec.reader == "aigverse"}
+AIGVERSE_NETWORK_SUFFIXES = {".aag", ".pla"}
 """Formats read as AIGs through aigverse."""
 
 

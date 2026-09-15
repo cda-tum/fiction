@@ -13,11 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import (
-    inml_layout,
-    write_qcc_layout,
-    write_qcc_layout_params,
-)
+from mnt.pyfiction import inml_layout, write_qcc_layout, write_qcc_layout_params
 
 from ._write import output_argument, output_path, require_cell_type, written
 

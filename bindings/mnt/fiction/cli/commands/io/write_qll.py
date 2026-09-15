@@ -13,33 +13,21 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import (
-    inml_layout,
-    mol_qca_layout,
-    qca_layout,
-    stacked_qca_layout,
-    write_qll_layout,
-)
+from mnt.pyfiction import inml_layout, mol_qca_layout, qca_layout, stacked_qca_layout, write_qll_layout
 
 from ._write import output_argument, output_path, require_cell_type, written
 
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-
-
-def _write_qll_arguments(parser: Parser) -> None:
-    """Add the command's arguments to the parser."""
-    output_argument(parser)
 
 
 @command(
     "write_qll",
     Category.IO,
-    _write_qll_arguments,
+    output_argument,
     inputs="Active cell-level layout.",
     example="generate mux -b 1; ortho; cell; write_qll output.qll",
 )

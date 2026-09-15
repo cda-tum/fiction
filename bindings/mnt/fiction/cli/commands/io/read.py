@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
 
-from ._common import read_file
+from ._common import READ_SUFFIXES, _topology_argument, _type_argument, read_file
 
 if TYPE_CHECKING:
     import argparse
@@ -23,7 +23,6 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-from ._common import FORMATS, _topology_argument, _type_argument
 
 
 def _read_arguments(parser: Parser) -> None:
@@ -31,7 +30,7 @@ def _read_arguments(parser: Parser) -> None:
     parser.add_argument(
         "-F",
         "--format",
-        choices=sorted(suffix[1:] for suffix, spec in FORMATS.items() if spec.reader),
+        choices=sorted(suffix[1:] for suffix in READ_SUFFIXES),
         help="select the reader independently of the filename",
     )
     parser.add_argument("path", type=Path, help="the file to read")

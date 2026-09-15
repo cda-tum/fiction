@@ -14,11 +14,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.drawing import validate_drawing_options, write_svg
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import (
-    mol_qca_layout,
-    qca_layout,
-    sidb_layout,
-)
+from mnt.pyfiction import mol_qca_layout, qca_layout, sidb_layout
 
 from ._write import output_argument, output_path, require_cell_type, written
 

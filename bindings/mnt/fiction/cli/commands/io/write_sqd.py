@@ -13,30 +13,21 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import (
-    sidb_layout,
-    write_sqd_layout,
-)
+from mnt.pyfiction import sidb_layout, write_sqd_layout
 
 from ._write import output_argument, output_path, require_cell_type, written
 
 if TYPE_CHECKING:
     import argparse
 
-    from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-
-
-def _write_sqd_arguments(parser: Parser) -> None:
-    """Add the command's arguments to the parser."""
-    output_argument(parser)
 
 
 @command(
     "write_sqd",
     Category.IO,
-    _write_sqd_arguments,
+    output_argument,
     inputs="Active cell-level layout.",
     example="read_sqd layout.sqd; write_sqd output.sqd",
 )

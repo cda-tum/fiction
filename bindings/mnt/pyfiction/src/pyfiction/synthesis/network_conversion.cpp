@@ -60,7 +60,7 @@ enum class network_target : std::uint8_t
 template <typename NtkSrc>
 void convert_network(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
     m.def(
         "convert_network",
@@ -97,7 +97,7 @@ void convert_network(nanobind::module_& m)
  */
 void network_conversion(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
     py::enum_<detail::network_target>(m, "network_target", "The network types `convert_network` produces.")
         .value("TEC", detail::network_target::TEC, "A technology network.")
