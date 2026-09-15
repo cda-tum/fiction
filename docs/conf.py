@@ -59,6 +59,8 @@ ogp_image_alt = "Munich Nanotech Toolkit logo"
 breathe_projects = {"fiction": "doxyxml/xml"}
 breathe_default_project = "fiction"
 autodoc_member_order = "bysource"
+# The nanobind extension uses Sphinx's class-based documenter API.
+autodoc_use_legacy_class_based = True
 add_module_names = False
 python_use_unqualified_type_names = True
 toc_object_entries_show_parents = "hide"

@@ -69,3 +69,10 @@ def test_fetch_clocking_scheme(layout):
         layout((1, 2), "SUE")
     with pytest.raises(RuntimeError):
         layout((1, 2), "PES")
+
+
+def test_clocking_scheme_name() -> None:
+    layout = clocked_cartesian_layout((2, 2), "2DDWave")
+    assert layout.get_clocking_scheme_name() == "2DDWAVE"
+    assert layout.is_clocking_scheme("2DDWAVE")
+    assert not layout.is_clocking_scheme("USE")

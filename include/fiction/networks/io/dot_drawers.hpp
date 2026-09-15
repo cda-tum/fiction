@@ -18,7 +18,7 @@
 
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/version_info.hpp"
+#include "fiction/utils/atomic_write.hpp"
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
@@ -29,13 +29,9 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
-#include <cstdint>
-#include <fstream>
 #include <ostream>
-#include <sstream>
 #include <string>
 #include <string_view>
-#include <vector>
 
 namespace fiction::networks::io
 {
@@ -443,15 +439,7 @@ void write_dot_network(const Ntk& ntk, std::ostream& os, const Drawer& drawer = 
 template <typename Ntk, typename Drawer = technology_dot_drawer<Ntk, true>>
 void write_dot_network(const Ntk& ntk, const std::string_view& filename, const Drawer& drawer = {})
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_dot_network(ntk, os, drawer);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_dot_network(ntk, os, drawer); });
 }
 
 }  // namespace fiction::networks::io

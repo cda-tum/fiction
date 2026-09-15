@@ -29,14 +29,15 @@
 #include <string>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/function.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>   // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -84,6 +85,10 @@ void clocked_layout(nanobind::module_& m, const std::string& topology)
 
         .def("is_clocking_scheme", &ClockedLyt::is_clocking_scheme, py::arg("name"),
              DOC(fiction_layouts_clocked_layout_is_clocking_scheme))
+        .def(
+            "get_clocking_scheme_name",
+            [](const ClockedLyt& lyt) { return std::string{lyt.get_clocking_scheme().name}; },
+            "Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.")
 
         .def("is_incoming_clocked", &ClockedLyt::is_incoming_clocked, py::arg("cz1"), py::arg("cz2"),
              DOC(fiction_layouts_clocked_layout_is_incoming_clocked))
@@ -119,6 +124,14 @@ void clocked_layout(nanobind::module_& m)
     detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian");
     detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian");
     detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "hexagonal");
+    detail::clocked_layout<py_odd_row_cartesian_layout, py_odd_row_cartesian_clocked_layout>(m, "odd_row_cartesian");
+    detail::clocked_layout<py_even_row_cartesian_layout, py_even_row_cartesian_clocked_layout>(m, "even_row_cartesian");
+    detail::clocked_layout<py_even_column_cartesian_layout, py_even_column_cartesian_clocked_layout>(
+        m, "even_column_cartesian");
+    detail::clocked_layout<py_odd_row_hex_layout, py_odd_row_hex_clocked_layout>(m, "odd_row_hex");
+    detail::clocked_layout<py_odd_column_hex_layout, py_odd_column_hex_clocked_layout>(m, "odd_column_hex");
+    detail::clocked_layout<py_even_column_hex_layout, py_even_column_hex_clocked_layout>(m, "even_column_hex");
+    detail::clocked_layout<py_stacked_cartesian_layout, py_stacked_cartesian_clocked_layout>(m, "stacked_cartesian");
 }
 
 }  // namespace pyfiction

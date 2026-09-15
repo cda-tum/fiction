@@ -53,14 +53,30 @@ To help you get started with _fiction_, pick the interface that best fits your u
 
 | Goal                                   | Recommended Path          | Section                              |
 | -------------------------------------- | ------------------------- | ------------------------------------ |
-| Try the tool immediately               | 🐳 Docker CLI image       | [CLI (Docker)](#-cli-docker)         |
-| Full-featured local CLI build          | 💻 Native build           | [CLI (Source)](#-cli-source)         |
+| Try the tool immediately               | 🐍 `pip install`          | [CLI (pip)](#-cli-pip)               |
+| Run the CLI without installing Python  | 🐳 Docker CLI image       | [CLI (Docker)](#-cli-docker)         |
+| Develop the C++ library                | 💻 Native build           | [CLI (Source)](#-cli-source)         |
 | Integrate into a C++ project           | 📚 Header-only library    | [C++ Library](#-c-library)           |
 | Script / notebooks / rapid prototyping | 🐍 Python bindings (PyPI) | [Python Bindings](#-python-bindings) |
 
 For a
 full [getting started guide](https://fiction.readthedocs.io/en/latest/getting_started.html), [CLI command list](https://fiction.readthedocs.io/en/latest/cli.html),
 or API reference, see the [documentation](https://fiction.readthedocs.io/en/latest/index.html).
+
+### 🐍 CLI (pip)
+
+The `fiction` command-line interface ships with the `mnt.pyfiction` Python package:
+
+```bash
+pip install mnt.pyfiction
+fiction
+```
+
+Type `help` at the prompt for the list of commands, or run a whole flow at once:
+
+```bash
+fiction -c "read c17.v; ortho; cell; write c17.qca"
+```
 
 ### 🐳 CLI (Docker)
 

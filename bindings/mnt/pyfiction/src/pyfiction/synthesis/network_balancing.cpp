@@ -34,7 +34,7 @@ void network_balancing_impl(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("network_balancing", &fiction::synthesis::network_balancing<py_logic_network, Ntk>, py::arg("network"),
+    m.def("network_balancing", &fiction::synthesis::network_balancing<py_tec_network, Ntk>, py::arg("network"),
           py::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_network_balancing));
 
     m.def("is_balanced", &fiction::synthesis::is_balanced<Ntk>, py::arg("network"),
@@ -55,7 +55,7 @@ void network_balancing(nanobind::module_& m)
 
         ;
 
-    detail::network_balancing_impl<py_logic_network>(m);
+    detail::network_balancing_impl<py_tec_network>(m);
 }
 
 }  // namespace pyfiction

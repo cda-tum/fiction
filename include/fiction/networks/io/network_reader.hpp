@@ -33,6 +33,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <filesystem>
 #include <ostream>
 #include <string>
@@ -55,9 +56,10 @@ class network_reader
      * Standard constructor. Reads and constructs logic networks. May throw.
      *
      * @param filename Path to the file or folder of files to read.
-     * @param out Output stream to write status updates into.
+     * @param format Explicit format without a dot, or empty to infer the extension.
+     * @param o Output stream to write status updates into.
      */
-    network_reader(const std::string_view& filename, std::ostream& o) : out{o}
+    network_reader(const std::string_view& filename, std::ostream& o, const std::string_view format = {}) : out{o}
     {
         constexpr const char* verilog_ext = ".v";
         constexpr const char* aig_ext     = ".aig";
@@ -65,11 +67,19 @@ class network_reader
 
         constexpr const std::array<const char*, 3> extensions{{verilog_ext, aig_ext, blif_ext}};
 
+        const auto extension = [format](const auto& path)
+        {
+            auto suffix = format.empty() ? std::filesystem::path(path).extension().string() : "." + std::string{format};
+            std::ranges::transform(suffix, suffix.begin(),
+                                   [](const unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            return suffix;
+        };
+
         // checks for extension validity
         auto is_valid_extension = [&](const auto& p) -> bool
         {
-            return std::ranges::any_of(extensions, [&p](const auto& valid)
-                                       { return std::filesystem::path(p).extension() == valid; });
+            return std::ranges::any_of(extensions,
+                                       [&p, &extension](const auto& valid) { return extension(p) == valid; });
         };
 
         std::vector<std::string> paths{};
@@ -115,21 +125,21 @@ class network_reader
         for (const auto& p : paths)
         {
             // parse Verilog
-            if (std::filesystem::path(p).extension() == verilog_ext)
+            if (extension(p) == verilog_ext)
             {
                 read<mockturtle::verilog_reader<Ntk>,
                      lorina::return_code(const std::string&, const lorina::verilog_reader&,
                                          lorina::diagnostic_engine*)>(p, lorina::read_verilog);
             }
             // parse AIGER
-            else if (std::filesystem::path(p).extension() == aig_ext)
+            else if (extension(p) == aig_ext)
             {
                 read<mockturtle::aiger_reader<Ntk>,
                      lorina::return_code(const std::string&, const lorina::aiger_reader&, lorina::diagnostic_engine*)>(
                     p, lorina::read_aiger);
             }
             // parse BLIF
-            else if (std::filesystem::path(p).extension() == blif_ext)
+            else if (extension(p) == blif_ext)
             {
                 if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::aig_network>)
                 {
@@ -151,7 +161,7 @@ class network_reader
                 }
             }
             // parse ...
-            // else if (std::filesystem::path(p).extension() == ...)
+            // else if (extension(p) == ...)
         }
     }
     /**

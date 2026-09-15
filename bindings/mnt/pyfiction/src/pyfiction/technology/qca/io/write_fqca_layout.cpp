@@ -69,6 +69,7 @@ void write_fqca_layout(nanobind::module_& m)
         ;
 
     detail::write_fqca_layout<py_qca_layout>(m);
+    detail::write_fqca_layout<py_stacked_qca_layout>(m);
 }
 
 }  // namespace pyfiction
