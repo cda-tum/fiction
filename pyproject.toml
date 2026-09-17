@@ -1,26 +1,27 @@
 [build-system]
-requires = [
-    "scikit-build-core~=1.0.3",
-    "vcs-versioning~=2.3.0",
-    "nanobind~=3.0.0"
-]
 build-backend = "scikit_build_core.build"
+requires = [ "nanobind~=3.0.0", "scikit-build-core~=1.0.3", "vcs-versioning~=2.3.0" ]
 
 [project]
-name = "mnt.pyfiction"
-dynamic = ["version"]
+name = "mnt-pyfiction"
 description = "Design Automation for Field-coupled Nanotechnologies"
 readme = "README.md"
-authors = [
-    { name = "Marcel Walter", email = "marcel.walter@tum.de" },
-    { name = "Jan Drewniok", email = "jan.drewniok@tum.de" },
-    { name = "Simon Hofmann", email = "simon.t.hofmann@tum.de" },
-    { name = "Benjamin Hien", email = "benjamin.hien@tum.de" },
-    { name = "Willem Lambooy", email = "willem.lambooy@tum.de" }
+keywords = [
+    "clocking",
+    "design automation",
+    "FCN",
+    "fiction",
+    "MNT",
+    "nanotechnology",
+    "NML",
+    "placement",
+    "QCA",
+    "routing",
+    "SiDB",
+    "simulation",
 ]
-keywords = ["MNT", "fiction", "nanotechnology", "FCN", "QCA", "NML", "SiDB", "design automation", "placement", "routing", "clocking", "simulation"]
 license = { file = "LICENSE.txt" }
-
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
@@ -33,7 +34,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: C++",
-    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -43,55 +43,113 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
     "Topic :: Scientific/Engineering :: Physics",
 ]
-
-requires-python = ">=3.10"
+dynamic = [ "version" ]
 dependencies = [
-    # 4.10.2 is the first release publishing a wheel for every platform the project supports. The
-    # earlier bound was only ever exercised on x86-64 Linux, where 4.8.5 happens to have one; on
-    # macOS and Linux aarch64 it forced a source build of a 2019 Z3 that modern toolchains reject
-    "z3-solver>=4.10.2",
+    # AIG optimization and generators for the CLI. 0.1.5 is the first split-mode release, which
+    # shares the nanobind backend with pyfiction instead of embedding a second copy
+    "aigverse>=0.1.5",
     # the split-mode extension carries no copy of the nanobind library and resolves it at import
     # time from this wheel. Never pin or upper-bound it: two projects pinning different versions
     # could not be installed together
     "nanobind-backend>=1.0",
     # the `fiction` command-line interface
-    "prompt_toolkit>=3.0.43",
+    "prompt-toolkit>=3.0.43",
     "rich>=13.7.0",
-    # AIG optimization and generators for the CLI. 0.1.5 is the first split-mode release, which
-    # shares the nanobind backend with pyfiction instead of embedding a second copy
-    "aigverse>=0.1.5",
+    # 4.10.2 is the first release publishing a wheel for every platform the project supports. The
+    # earlier bound was only ever exercised on x86-64 Linux, where 4.8.5 happens to have one; on
+    # macOS and Linux aarch64 it forced a source build of a 2019 Z3 that modern toolchains reject
+    "z3-solver>=4.10.2",
 ]
+
+[[project.authors]]
+name = "Marcel Walter"
+email = "marcel.walter@tum.de"
+
+[[project.authors]]
+name = "Jan Drewniok"
+email = "jan.drewniok@tum.de"
+
+[[project.authors]]
+name = "Simon Hofmann"
+email = "simon.t.hofmann@tum.de"
+
+[[project.authors]]
+name = "Benjamin Hien"
+email = "benjamin.hien@tum.de"
+
+[[project.authors]]
+name = "Willem Lambooy"
+email = "willem.lambooy@tum.de"
+
+[project.urls]
+Source = "https://github.com/cda-tum/fiction"
+Tracker = "https://github.com/cda-tum/fiction/issues"
+Documentation = "https://fiction.readthedocs.io/en/latest/"
+Research = "https://www.cda.cit.tum.de/research/fcn/"
 
 [project.scripts]
 fiction = "mnt.fiction.cli.app:main"
 
-[project.urls]
-Source = 'https://github.com/cda-tum/fiction'
-Tracker = 'https://github.com/cda-tum/fiction/issues'
-Documentation = 'https://fiction.readthedocs.io/en/latest/'
-Research = 'https://www.cda.cit.tum.de/research/fcn/'
-
+[dependency-groups]
+dev = [
+    { include-group = "build" },
+    { include-group = "test" },
+    "nox>=2025.11.12",
+]
+test = [
+    "pytest>=9.0.1",
+    "pytest-cov>=7.1.0",
+    "pytest-sugar>=1.1.1",
+    "pytest-xdist>=3.8.0",
+]
+docs = [
+    "breathe>=4.36.0",
+    "furo>=2025.12.19",
+    "myst-parser>=5.1.0",
+    "sphinx>=8.2.3",
+    "sphinx-autobuild>=2025.8.25",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-design>=0.7.0",
+    "sphinx-llm>=1.0.0",
+    "sphinxcontrib-bibtex>=2.6.5",
+    "sphinxext-opengraph>=0.13.0",
+]
+build = [
+    "nanobind~=3.0.0",
+    "scikit-build-core~=1.0.3",
+    "vcs-versioning~=2.3.0",
+]
 
 [tool.scikit-build]
 # Protect the configuration against future changes in scikit-build-core
 minimum-version = "build-system.requires"
-# Set the wheel install directory
-wheel.install-dir = "mnt/pyfiction"
-# Set required Ninja version
-ninja.version = ">=1.10"
-# Set default build type to Release
-cmake.build-type = "Release"
 # Setuptools-style build caching in a local directory
 build-dir = "build/{wheel_tag}/{build_type}"
-# Explicitly set the package directory
-wheel.packages = ["bindings/mnt"]
-# One Stable ABI wheel per platform serves every supported CPython. The 3.10 floor is what
-# nanobind's split mode buys: a linked stable-ABI build cannot go below 3.12
-wheel.py-api = "cp310"
+
+[tool.scikit-build.build]
 # Only build the Python bindings target
-build.targets = ["pyfiction"]
-# Only install the Python package component
-install.components = ["fiction_Python"]
+targets = [ "pyfiction" ]
+
+[tool.scikit-build.cmake]
+# Set default build type to Release
+build-type = "Release"
+
+[tool.scikit-build.cmake.define]
+MOCKTURTLE_EXAMPLES = "OFF"
+FICTION_PROGRESS_BARS = "OFF"
+FICTION_TEST = "OFF"
+FICTION_EXPERIMENTS = "OFF"
+FICTION_ENABLE_IPO = "OFF"
+FICTION_ENABLE_PCH = "OFF"
+FICTION_Z3 = "ON"
+FICTION_ALGLIB = "ON"
+FICTION_PYTHON_BINDINGS = "ON"
+
+[tool.scikit-build.ninja]
+# Set required Ninja version
+version = ">=1.10"
+
+[tool.scikit-build.sdist]
 
 # The sdist has to build the extension, so it keeps `include/`, `bindings/`, `vendors/`, and
 # `cmake/`. Two rules keep it readable: name directories, never a source glob, and anchor every
@@ -99,7 +157,7 @@ install.components = ["fiction_Python"]
 # `**/include` also matched `bindings/mnt/pyfiction/include/` and `**.hpp` matched the library
 # itself. `[tool.check-sdist]` below now fails on a pattern that drops a tracked source, so the
 # two rules are style rather than the only defense.
-sdist.exclude = [
+exclude = [
     "/.github",
     "/benchmarks",
     "/bib",
@@ -113,16 +171,18 @@ sdist.exclude = [
     "**/__pycache__"
 ]
 
-[tool.scikit-build.cmake.define]
-MOCKTURTLE_EXAMPLES = "OFF"
-FICTION_PROGRESS_BARS = "OFF"
-FICTION_TEST = "OFF"
-FICTION_EXPERIMENTS = "OFF"
-FICTION_ENABLE_IPO = "OFF"
-FICTION_ENABLE_PCH = "OFF"
-FICTION_Z3 = "ON"
-FICTION_ALGLIB = "ON"
-FICTION_PYTHON_BINDINGS = "ON"
+[tool.scikit-build.wheel]
+# Set the wheel install directory
+install-dir = "mnt/pyfiction"
+# Explicitly set the package directory
+packages = [ "bindings/mnt" ]
+# One Stable ABI wheel per platform serves every supported CPython. The 3.10 floor is what
+# nanobind's split mode buys: a linked stable-ABI build cannot go below 3.12
+py-api = "cp310"
+
+[tool.scikit-build.install]
+# Only install the Python package component
+components = [ "fiction_Python" ]
 
 [[tool.scikit-build.overrides]]
 if.env.READTHEDOCS = "True"
@@ -132,76 +192,16 @@ cmake.args = [
     "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold"
 ]
 
-
-[[tool.dynamic-metadata]]
-provider = "vcs_versioning"
-
-
-[tool.vcs-versioning]
-
-
-[tool.check-sdist]
-# `build-backend = "none"` is what makes this check load-bearing. The default `"auto"` resolves the
-# scikit-build-core adapter, whose `git_only_excludes` subtracts `sdist.exclude` from the set of
-# files it expects to find -- so it takes that list on trust and forgives exactly the bug that
-# emptied the published sdist. `"none"` subtracts nothing, so `git-only` below becomes the list
-# that has to account for every tracked file the sdist drops, and an over-broad exclude fails here.
-# The two lists overlap by design: that duplication is the check.
-build-backend = "none"
-git-only = [
-    "/.github",
-    "/benchmarks",
-    "/bib",
-    "/docs",
-    "/experiments",
-    "/test",
-    "/bindings/mnt/pyfiction/test",
+[tool.uv]
+required-version = ">=0.5.20"
+cache-keys = [
+    { file = "pyproject.toml" },
+    { git = { commit = true, tags = true } },
+    { file = "bindings/**/*.hpp" },
 ]
 
-
-[tool.pytest]
-minversion = "9.0"
-strict = true
-filterwarnings = ["error"]
-addopts = [
-    "-ra",
-    "--durations=10",
-    "--numprocesses=auto", # Automatically use all available CPU cores for parallel testing
-]
-log_level = "INFO"
-testpaths = ["bindings/mnt/pyfiction/test"]
-markers = [
-    "layouts: layout data structures and layout I/O",
-    "networks: logic networks",
-    "physical_design: placement, routing, and optimization",
-    "synthesis: logic synthesis",
-    "verification: layout and circuit verification",
-    "fcn: technology-independent FCN operations",
-    "inml: iNML operations",
-    "sidb: SiDB operations",
-    "simulation: SiDB simulation engines and analysis",
-    "io: input and output formats across modules",
-    "generators: SiDB layout and gate generation",
-    "slow: physical integration tests; exclude with -m 'not slow' for a quick run",
-]
-
-
-[tool.coverage.run]
-source = ["mnt.pyfiction", "mnt.fiction"]
-parallel = true
-relative_files = true
-patch = ["subprocess"]
-omit = ["*/test/*"]
-# Workers that only execute native bindings may collect no Python source lines.
-disable_warnings = ["no-data-collected"]
-
-[tool.coverage.report]
-exclude_also = [
-    '^\s*if TYPE_CHECKING:',
-    '^\s*@(?:typing\.)?overload',
-    '^\s*\.\.\.\s*$',
-]
-
+[tool.uv.dependency-groups]
+docs = { requires-python = ">=3.12" }
 
 [tool.cibuildwheel]
 # cp310 builds the one abi3 wheel that serves every supported CPython; the later interpreters find
@@ -209,25 +209,25 @@ exclude_also = [
 # the shipped wheel meets an interpreter newer than the headers it compiled against -- `🐍 Test`
 # builds from source, so on 3.14 it compiles against 3.14 headers and cannot catch the same thing
 build = "cp3*"
-archs = "auto64"
 # nanobind-backend publishes no musllinux wheels.
 # The free-threaded identifiers are not gated behind `enable` from 3.14 on, so they are skipped
 # here: split mode needs the `abi3t` stable ABI of Python 3.15 (PEP 803) and stops the CMake
 # configure below it
-skip = ["*-musllinux*", "cp3*t-*"]
+skip = [ "*-musllinux*", "cp3*t-*" ]
+archs = "auto64"
 build-frontend = "build[uv]"
+test-command = "pytest"
+# The wheel does not ship its own tests, so the suite is copied in next to the installed
+# wheel. `test-sources` keeps the relative path, and copying `pyproject.toml` along with it
+# gives pytest its configuration file, so the wheel runs the same suite under the same
+# settings as `nox -s tests` without repeating any of them here.
+test-groups = [ "test" ]
+test-sources = [ "bindings/mnt/pyfiction/test", "pyproject.toml" ]
 manylinux-x86_64-image = "manylinux_2_28"
 # every `z3-solver` aarch64 wheel on PyPI is tagged `manylinux_2_34` or newer, so the default
 # `manylinux_2_28` image finds none of them, falls back to the sdist, and spends ~19 minutes
 # compiling Z3 from source. `manylinux_2_34` is the oldest image that can install one
 manylinux-aarch64-image = "manylinux_2_34"
-# The wheel does not ship its own tests, so the suite is copied in next to the installed
-# wheel. `test-sources` keeps the relative path, and copying `pyproject.toml` along with it
-# gives pytest its configuration file, so the wheel runs the same suite under the same
-# settings as `nox -s tests` without repeating any of them here.
-test-groups = ["test"]
-test-sources = ["bindings/mnt/pyfiction/test", "pyproject.toml"]
-test-command = "pytest"
 
 [tool.cibuildwheel.linux]
 environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3" }
@@ -254,30 +254,110 @@ environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
 [[tool.cibuildwheel.overrides]]
 # the cp310-* wheel carries the abi3 tag (Stable ABI); verify no non-limited-API symbols leaked in
 select = "cp310-*"
-inherit.repair-wheel-command = "append"
 repair-wheel-command = "uvx abi3audit --strict --report {wheel}"
+inherit.repair-wheel-command = "append"
 
+[tool.ruff]
+line-length = 120
+namespace-packages = [ "mnt" ]
+src = [ "bindings" ]
+# `rule-codes-in-selectors` requires preview mode to allow rule names in selectors.
+preview = true
+fix = true
+unsafe-fixes = true
+show-fixes = true
 
-[tool.uv]
-required-version = ">=0.5.20"
-cache-keys = [
-    { file = "pyproject.toml" },
-    { git = { commit = true, tags = true } },
-    { file = "bindings/**/*.hpp" },
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint.per-file-ignores]
+# a command's docstring is the help text `fiction` shows for it, so it describes the command for a
+# user; every command returns the log entry and raises `CommandError`, which `registry.py` documents
+"bindings/mnt/fiction/cli/commands/*.py" = [ "docstring-missing-exception", "docstring-missing-returns" ]
+# E501: the expected SVG output is compared verbatim, so its lines cannot be wrapped
+"bindings/mnt/pyfiction/test/technology/sidb/io/test_write_sidb_layout_svg.py" = [ "line-too-long" ]
+# RUF069: a test that stores a float through a binding and reads it back asserts that it
+# comes back unchanged, which is exact; pytest.approx there would hide a broken setter
+# PLR6201: a set literal tests membership by hash, a list literal by `__eq__`. The coordinate
+# bindings compare equal to the tuples these tests write but do not hash equal to them, so the
+# rule's rewrite turns a passing assertion into a failing one
+"bindings/mnt/pyfiction/test/**" = [
+    "ANN",
+    "assert",                    # a test suite asserts
+    "D",
+    "float-equality-comparison",
+    "literal-membership",
+    "magic-value-comparison",    # a test suite compares against the numbers it expects
+    "T20",
+]
+# `docs/conf.py` is run by path, not imported as a module, so an `__init__.py` would be wrong
+"docs/**" = [ "A", "implicit-namespace-package", "T20" ]
+"noxfile.py" = [ "banned-api", "T20" ]
+"scripts/**" = [ "T20" ]  # maintenance scripts report progress on stdout
+"*.pyi" = [ "docstring-in-stub", "overload-with-docstring" ]  # pydocstyle
+# these three run real initialization: the two binding packages register the Windows DLL search
+# path before the extension is imported, and the test package does the same before the tests are
+# collected. A re-export-only `__init__` cannot do that
+"bindings/mnt/__init__.py" = [ "non-empty-init-module" ]
+"bindings/mnt/pyfiction/__init__.py" = [ "non-empty-init-module" ]
+"bindings/mnt/pyfiction/test/__init__.py" = [ "non-empty-init-module" ]
+# standalone scripts run by path, not modules anything imports, so an `__init__.py` would be wrong
+".github/scripts/**" = [ "implicit-namespace-package" ]
+"experiments/**" = [
+    "implicit-namespace-package",
+    # an experiment samples with `random`; a cryptographic source would draw a different
+    # surface, and an experiment keeps producing the result it reproduces
+    "suspicious-non-cryptographic-random-usage",
+    "T20",                                       # an experiment reports on stdout, as the C++ experiments do
+]
+"*.ipynb" = [
+    "D",                                # pydocstyle
+    "missing-required-import",          # Allow missing `from __future__ import annotations` import
+    "module-import-not-at-top-of-file", # Allow imports to appear anywhere in Jupyter notebooks
 ]
 
-[tool.mypy]
-# Every Python file the repository owns, so a new one is checked without anyone remembering to
-# add it here
-files = ["bindings/mnt", "docs", "experiments", "noxfile.py", "scripts"]
-mypy_path = ["$MYPY_CONFIG_FILE_DIR/bindings"]
-warn_unused_configs = true
-enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
-strict = true
-disallow_untyped_defs = false
-explicit_package_bases = true
-warn_unreachable = true
+[tool.ruff.lint.isort]
+known-first-party = [ "mnt.fiction", "mnt.pyfiction" ]
+# `future-annotations = true` above lets ruff assume PEP 563 semantics when it rewrites an
+# annotation, which only holds in files that carry the import. Requiring it closes the gap.
+required-imports = [ "from __future__ import annotations" ]
 
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint]
+select = [ "ALL" ]
+ignore = [
+    # `TD002`/`TD003`/`TD004` stay on and demand that a TODO name an author, link an issue, and
+    # end in a colon. `FIX002` fires on every TODO regardless of form, so the two cannot both hold
+    "line-contains-todo",
+    # the `license-tools` prek hook writes the per-file copyright headers and rewrites any
+    # that departs from the canonical text. Ruff only reports what that hook already fixes,
+    # and it matches against a preview default regex that can diverge from the emitted header
+    "missing-copyright-notice",
+    "missing-trailing-comma",                    # conflicts with the formatter
+    "PLR09",                                     # too many <...>
+    "single-line-implicit-string-concatenation", # conflicts with the formatter
+]
+future-annotations = true
+
+[tool.check-sdist]
+# `build-backend = "none"` is what makes this check load-bearing. The default `"auto"` resolves the
+# scikit-build-core adapter, whose `git_only_excludes` subtracts `sdist.exclude` from the set of
+# files it expects to find -- so it takes that list on trust and forgives exactly the bug that
+# emptied the published sdist. `"none"` subtracts nothing, so `git-only` below becomes the list
+# that has to account for every tracked file the sdist drops, and an over-broad exclude fails here.
+# The two lists overlap by design: that duplication is the check.
+build-backend = "none"
+git-only = [
+    "/.github",
+    "/benchmarks",
+    "/bib",
+    "/docs",
+    "/experiments",
+    "/test",
+    "/bindings/mnt/pyfiction/test",
+]
 
 [tool.pyproject-fmt]
 column_width = 120
@@ -287,121 +367,61 @@ max_supported_python = "3.14"
 table_format = "long"
 sub_table_spacing = "\n"
 
+[tool.mypy]
+mypy_path = [ "$MYPY_CONFIG_FILE_DIR/bindings" ]
+# Every Python file the repository owns, so a new one is checked without anyone remembering to
+# add it here
+files = [ "bindings/mnt", "docs", "experiments", "noxfile.py", "scripts" ]
+explicit_package_bases = true
+disallow_untyped_defs = false
+warn_unreachable = true
+enable_error_code = [ "ignore-without-code", "redundant-expr", "truthy-bool" ]
+strict = true
+warn_unused_configs = true
 
-[tool.ruff]
-line-length = 120
-namespace-packages = ["mnt"]
-# `rule-codes-in-selectors` requires preview mode to allow rule names in selectors.
-preview = true
-fix = true
-unsafe-fixes = true
-show-fixes = true
-src = ["bindings"]
-
-
-[tool.ruff.lint]
-select = ["ALL"]
-ignore = [
-    "single-line-implicit-string-concatenation", # conflicts with the formatter
-    "missing-trailing-comma", # conflicts with the formatter
-    "PLR09", # too many <...>
-    # the `license-tools` prek hook writes the per-file copyright headers and rewrites any
-    # that departs from the canonical text. Ruff only reports what that hook already fixes,
-    # and it matches against a preview default regex that can diverge from the emitted header
-    "missing-copyright-notice",
-    # `TD002`/`TD003`/`TD004` stay on and demand that a TODO name an author, link an issue, and
-    # end in a colon. `FIX002` fires on every TODO regardless of form, so the two cannot both hold
-    "line-contains-todo",
+[tool.pytest]
+addopts = [
+    "-ra",
+    "--durations=10",
+    "--numprocesses=auto", # Automatically use all available CPU cores for parallel testing
 ]
-future-annotations = true
-
-[tool.ruff.lint.isort]
-known-first-party = ["mnt.fiction", "mnt.pyfiction"]
-# `future-annotations = true` above lets ruff assume PEP 563 semantics when it rewrites an
-# annotation, which only holds in files that carry the import. Requiring it closes the gap.
-required-imports = ["from __future__ import annotations"]
-
-[tool.ruff.lint.per-file-ignores]
-# a command's docstring is the help text `fiction` shows for it, so it describes the command for a
-# user; every command returns the log entry and raises `CommandError`, which `registry.py` documents
-"bindings/mnt/fiction/cli/commands/*.py" = ["docstring-missing-returns", "docstring-missing-exception"]
-# E501: the expected SVG output is compared verbatim, so its lines cannot be wrapped
-"bindings/mnt/pyfiction/test/technology/sidb/io/test_write_sidb_layout_svg.py" = ["line-too-long"]
-# RUF069: a test that stores a float through a binding and reads it back asserts that it
-# comes back unchanged, which is exact; pytest.approx there would hide a broken setter
-# PLR6201: a set literal tests membership by hash, a list literal by `__eq__`. The coordinate
-# bindings compare equal to the tuples these tests write but do not hash equal to them, so the
-# rule's rewrite turns a passing assertion into a failing one
-"bindings/mnt/pyfiction/test/**" = [
-    "T20",
-    "ANN",
-    "D",
-    "assert", # a test suite asserts
-    "magic-value-comparison", # a test suite compares against the numbers it expects
-    "float-equality-comparison",
-    "literal-membership",
+filterwarnings = [ "error" ]
+log_level = "INFO"
+markers = [
+    "layouts: layout data structures and layout I/O",
+    "networks: logic networks",
+    "physical_design: placement, routing, and optimization",
+    "synthesis: logic synthesis",
+    "verification: layout and circuit verification",
+    "fcn: technology-independent FCN operations",
+    "inml: iNML operations",
+    "sidb: SiDB operations",
+    "simulation: SiDB simulation engines and analysis",
+    "io: input and output formats across modules",
+    "generators: SiDB layout and gate generation",
+    "slow: physical integration tests; exclude with -m 'not slow' for a quick run",
 ]
-# `docs/conf.py` is run by path, not imported as a module, so an `__init__.py` would be wrong
-"docs/**" = ["T20", "A", "implicit-namespace-package"]
-"noxfile.py" = ["T20", "banned-api"]
-"scripts/**" = ["T20"]  # maintenance scripts report progress on stdout
-"*.pyi" = ["overload-with-docstring", "docstring-in-stub"]  # pydocstyle
-# these three run real initialization: the two binding packages register the Windows DLL search
-# path before the extension is imported, and the test package does the same before the tests are
-# collected. A re-export-only `__init__` cannot do that
-"bindings/mnt/__init__.py" = ["non-empty-init-module"]
-"bindings/mnt/pyfiction/__init__.py" = ["non-empty-init-module"]
-"bindings/mnt/pyfiction/test/__init__.py" = ["non-empty-init-module"]
-# standalone scripts run by path, not modules anything imports, so an `__init__.py` would be wrong
-".github/scripts/**" = ["implicit-namespace-package"]
-"experiments/**" = [
-    "T20", # an experiment reports on stdout, as the C++ experiments do
-    "implicit-namespace-package",
-    # an experiment samples with `random`; a cryptographic source would draw a different
-    # surface, and an experiment keeps producing the result it reproduces
-    "suspicious-non-cryptographic-random-usage",
-]
-"*.ipynb" = [
-    "D", # pydocstyle
-    "module-import-not-at-top-of-file", # Allow imports to appear anywhere in Jupyter notebooks
-    "missing-required-import", # Allow missing `from __future__ import annotations` import
+minversion = "9.0"
+strict = true
+testpaths = [ "bindings/mnt/pyfiction/test" ]
+
+[tool.coverage.run]
+source = [ "mnt.fiction", "mnt.pyfiction" ]
+omit = [ "*/test/*" ]
+parallel = true
+relative_files = true
+# Workers that only execute native bindings may collect no Python source lines.
+disable_warnings = [ "no-data-collected" ]
+patch = [ "subprocess" ]
+
+[tool.coverage.report]
+exclude_also = [
+    '^\s*@(?:typing\.)?overload',
+    '^\s*\.\.\.\s*$',
+    '^\s*if TYPE_CHECKING:',
 ]
 
-[tool.ruff.lint.pydocstyle]
-convention = "google"
+[[tool.dynamic-metadata]]
+provider = "vcs_versioning"
 
-[tool.ruff.format]
-docstring-code-format = true
-
-[dependency-groups]
-build = [
-    "scikit-build-core~=1.0.3",
-    "vcs-versioning~=2.3.0",
-    "nanobind~=3.0.0",
-]
-docs = [
-    "sphinx>=8.2.3",
-    "breathe>=4.36.0",
-    "myst-parser>=5.1.0",
-    "furo>=2025.12.19",
-    "sphinx-design>=0.7.0",
-    "sphinx-copybutton>=0.5.2",
-    "sphinx-autobuild>=2025.8.25",
-    "sphinx-llm>=1.0.0",
-    "sphinxcontrib-bibtex>=2.6.5",
-    "sphinxext-opengraph>=0.13.0",
-]
-test = [
-    "pytest>=9.0.1",
-    "pytest-cov>=7.1.0",
-    "pytest-sugar>=1.1.1",
-    "pytest-xdist>=3.8.0",
-]
-dev = [
-    { include-group = "build" },
-    { include-group = "test" },
-    "nox>=2025.11.12",
-]
-
-[tool.uv.dependency-groups]
-docs = { requires-python = ">=3.12" }
+[tool.vcs-versioning]
