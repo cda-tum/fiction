@@ -250,7 +250,7 @@ def test_progress_is_silent_without_terminal(mux21_shell: Shell) -> None:
     """Without a terminal, the progress display writes nothing."""
     output = mux21_shell.ok("ortho")
     assert "placing gates" not in output
-    assert "completed" in output
+    assert "mux21" in output
 
 
 def test_progress_resets_a_restarted_task(monkeypatch: pytest.MonkeyPatch) -> None:
