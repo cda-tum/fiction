@@ -39,8 +39,8 @@ params = orthogonal_params()
 params.on_progress = lambda task, done, total: print(f"{task}: {done}/{total}")
 ```
 
-The algorithms release the global interpreter lock while they run, so the callback is invoked from the algorithm's
-worker threads while the call is in flight.
+The algorithms release the global interpreter lock while they run. Callbacks acquire the lock and may run on the calling
+thread or a worker thread before the algorithm returns.
 
 :::
 
@@ -48,4 +48,5 @@ worker threads while the call is in flight.
 
 Algorithms use a `progress_reporter` to forward their progress. Each reporter serializes its callbacks and throttles
 intermediate reports to whole percents and at most ten reports per second. It always forwards the first and final count
-of a task. C++ callbacks shared by multiple reporters must synchronize access to shared state.
+of a task, including before a reset starts another pass. Callbacks must not throw exceptions. Callbacks shared by multiple
+reporters must synchronize access to shared state, including Python callbacks that release the global interpreter lock.

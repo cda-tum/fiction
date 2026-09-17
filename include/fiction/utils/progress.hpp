@@ -181,6 +181,8 @@ class progress_reporter
 
         const std::scoped_lock lock{mutex};
 
+        report_locked(count.load(std::memory_order_relaxed));
+
         count.store(0, std::memory_order_relaxed);
         total_items = total;
         step        = step_for(total);

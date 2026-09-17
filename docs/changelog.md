@@ -379,6 +379,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Progress reporters now flush each pass's final count before a reset.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
   - Defect-influence analysis now propagates worker exceptions to the caller.
@@ -414,6 +415,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
+  - Progress displays now serialize concurrent reports, clear totals for restarted tasks, and respect nested quiet commands.
   - `opdom` logs its default algorithm as grid search; JSON logs encode non-finite statistics as `null`.
   - `show` and `write` reject unsupported drawing options before writing output. Invalid mapping and
     numeric inputs preserve stored elements.

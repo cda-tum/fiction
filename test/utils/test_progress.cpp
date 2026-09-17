@@ -193,6 +193,8 @@ TEST_CASE("A reporter can be reset for a new pass", "[progress]")
         reporter.advance(3);
         reporter.reset(4);
 
+        REQUIRE(rec.records.size() >= 3);
+        CHECK(rec.records[rec.records.size() - 2] == record{3, 3});
         CHECK(rec.records.back() == record{0, 4});
 
         reporter.advance(4);

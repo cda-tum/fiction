@@ -16,6 +16,7 @@ import json
 import os
 import shutil
 import tempfile
+import threading
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -397,7 +398,12 @@ class Session:
         """
         if self.quiet or not self.console.is_terminal:
             # older rich versions print a newline when a disabled display stops, so start none at all
-            yield ignore_progress
+            previous = self.report_progress
+            self.report_progress = ignore_progress
+            try:
+                yield ignore_progress
+            finally:
+                self.report_progress = previous
             return
 
         display = Progress(
@@ -412,16 +418,19 @@ class Session:
         )
         bars: dict[str, TaskID] = {}
         counts: dict[str, int] = {}
+        report_lock = threading.Lock()
 
         def report(task: str, done: int, total: int) -> None:
-            bar = bars.get(task)
-            if bar is None:
-                bar = bars[task] = display.add_task(task, total=total or None)
-            elif done < counts[task]:
-                # the algorithm restarted the task, e.g., for another optimization pass
-                display.reset(bar, total=total or None)
-            counts[task] = done
-            display.update(bar, completed=done, total=total or None, refresh=True)
+            with report_lock:
+                bar = bars.get(task)
+                if bar is not None and (done == 0 or done < counts[task]):
+                    # Rich's reset preserves the old total when passed None, so recreate restarted tasks.
+                    display.remove_task(bar)
+                    bar = None
+                if bar is None:
+                    bar = bars[task] = display.add_task(task, total=total or None)
+                counts[task] = done
+                display.update(bar, completed=done, total=total or None, refresh=True)
 
         previous = self.report_progress
         self.report_progress = report

@@ -11,11 +11,15 @@
 from __future__ import annotations
 
 import io
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING
 
 import pytest
 from rich.cells import cell_len
 from rich.console import Console
+from rich.progress import Progress
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import tokenize
@@ -28,6 +32,8 @@ from mnt.pyfiction import orthogonal, orthogonal_stats, set_name
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
+
+    from rich.progress import TaskID
 
     from mnt.pyfiction import technology_network
 
@@ -267,6 +273,60 @@ def test_progress_resets_a_restarted_task(monkeypatch: pytest.MonkeyPatch) -> No
     session.close()
     assert "gate relocations" in buffer.getvalue()
     assert "wire paths" in buffer.getvalue()
+
+
+def test_progress_serializes_shared_task_reports(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Concurrent reporters create one bar for a shared task name."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    display = Progress(console=session.console, auto_refresh=False)
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    add_task = display.add_task
+
+    def delayed_add_task(description: str, *, total: float | None = 100, spinner: bool = False) -> TaskID:
+        """Yield while Rich creates a task.
+
+        Returns:
+            The new task's identifier.
+        """
+        time.sleep(0.05)
+        return add_task(description, total=total, spinner=spinner)
+
+    monkeypatch.setattr(display, "add_task", delayed_add_task)
+    ready = threading.Barrier(4)
+    with session.progress("simulation") as report:
+
+        def report_from_worker(_: int) -> None:
+            """Start the reports together."""
+            ready.wait(timeout=5)
+            report("compositions", 0, 0)
+
+        with ThreadPoolExecutor(max_workers=4) as workers:
+            list(workers.map(report_from_worker, range(4)))
+
+    assert sum(task.description == "compositions" for task in display.tasks) == 1
+
+
+def test_progress_restarts_with_an_unknown_total(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A new pass clears the old total even if the old pass completed no items."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    display = Progress(console=session.console, auto_refresh=False)
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    with session.progress("simulation") as report:
+        report("compositions", 0, 4)
+        report("compositions", 0, 0)
+        task = next(task for task in display.tasks if task.description == "compositions")
+        assert task.total is None
+
+
+def test_quiet_nested_progress_discards_reports() -> None:
+    """A quiet nested command suspends the outer command's progress callback."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    with session.progress("source") as outer:
+        session.quiet = True
+        with session.progress("ortho") as inner:
+            assert inner is ignore_progress
+            assert session.report_progress is ignore_progress
+        assert session.report_progress is outer
 
 
 def test_progress_reports_are_dropped_without_terminal(shell: Shell) -> None:
