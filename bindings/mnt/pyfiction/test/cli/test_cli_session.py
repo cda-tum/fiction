@@ -10,15 +10,17 @@
 
 from __future__ import annotations
 
+import io
 from typing import TYPE_CHECKING
 
 import pytest
 from rich.cells import cell_len
+from rich.console import Console
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import tokenize
 from mnt.fiction.cli.registry import REGISTRY, STORE_FLAGS, Category
-from mnt.fiction.cli.session import ignore_progress, Session
+from mnt.fiction.cli.session import Session, ignore_progress
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import Store
 from mnt.pyfiction import orthogonal, orthogonal_stats, set_name

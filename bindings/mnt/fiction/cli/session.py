@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import json
 import os
@@ -61,6 +62,7 @@ command output does not read as a wall of color."""
 
 ProgressCallback = Callable[[str, int, int], None]
 """What an algorithm's ``on_progress`` parameter accepts: the task name, the completed count, and the total."""
+
 
 def ignore_progress(task: str, done: int, total: int) -> None:
     """Discard a progress report; the callback in effect while no command runs.

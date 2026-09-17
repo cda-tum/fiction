@@ -132,7 +132,6 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
 def _exact_parameters(args: argparse.Namespace, scheme: str) -> exact_params:
     """Build exact placement parameters from validated command options."""
     params = pyfiction.exact_params()
-    params.on_progress = session.report_progress
     params.scheme = scheme
     params.synchronization_elements = args.synchronization_elements
     params.crossings = args.crossings
