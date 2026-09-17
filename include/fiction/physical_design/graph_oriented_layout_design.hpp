@@ -927,18 +927,7 @@ class graph_oriented_layout_design_impl
                             {
                                 if (auto r = f.get())
                                 {
-                                    // cancel remaining futures if return_first is enabled
-                                    if (ps.return_first)
-                                    {
-                                        for (auto& remaining_future : futures_pool)
-                                        {
-                                            if (remaining_future.valid())
-                                            {
-                                                remaining_future.wait();
-                                            }
-                                        }
-                                    }
-                                    return *r;  // return immediately when first result is ready
+                                    return *r;
                                 }
                             }
                             else
