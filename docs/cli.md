@@ -183,7 +183,7 @@ the command converts it on the fly and says so in its help.
 
 AIG optimization runs in [aigverse](https://github.com/marcelwa/aigverse). `aig PASS...` applies its passes to
 the active AIG in the given order: `rewrite` (cut rewriting), `resub` (resubstitution), `refactor` (SOP
-refactoring), `balance` (ESOP balancing), and `cleanup`. A typical flow is
+refactoring), `balance` (SOP balancing, which minimizes depth at the cost of gates), and `cleanup`. A typical flow is
 
 ```text
 fiction> read mux21.v --type aig; aig rewrite resub balance; map --and --or --inv; ortho

@@ -402,6 +402,25 @@ def describe(element: object) -> dict[str, object]:
     raise TypeError(msg)
 
 
+def size_and_depth(before: Network | None, after: Network) -> str:
+    """Render the size and the depth an optimization left behind.
+
+    Both numbers belong in the line because the passes do not optimize the same metric: cut
+    rewriting, resubstitution, and refactoring reduce the gate count, while balancing reduces the
+    depth and pays for it in gates.
+
+    Args:
+        before: The network the pass consumed, or ``None`` when the pass provided its own input.
+        after: The network the pass produced.
+
+    Returns:
+        The line, e.g. ``17 -> 18 gates, depth 6 -> 5``.
+    """
+    if before is None:
+        return f"{after.num_gates()} gates, depth {after.depth()}"
+    return f"{before.num_gates()} -> {after.num_gates()} gates, depth {before.depth()} -> {after.depth()}"
+
+
 def one_line(description: dict[str, object]) -> str:
     """Render a compact confirmation for a created or selected element.
 
@@ -409,7 +428,7 @@ def one_line(description: dict[str, object]) -> str:
         description: A dictionary from :func:`describe`.
 
     Returns:
-        The line, e.g. ``mux21 (TEC) - I/O: 3/1, gates: 3, depth: 2``.
+        The line, e.g. ``mux21 (TEC) - I/O: 3/1, gates: 3``.
     """
     parts: list[str] = []
     name = description.get("name")

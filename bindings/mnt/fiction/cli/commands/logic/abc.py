@@ -18,7 +18,7 @@ from aigverse import abc
 from mnt import pyfiction
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
-from mnt.fiction.cli.stores import describe
+from mnt.fiction.cli.stores import describe, size_and_depth
 from mnt.pyfiction import aig_network, convert_network, get_name, network_target, set_name
 
 if TYPE_CHECKING:
@@ -81,7 +81,12 @@ def abc_command(session: Session, args: argparse.Namespace) -> Result:
         if aig is not None:
             set_name(result, get_name(aig))
         session.networks.add(result)
-        return {"network": describe(result), "output": output}
+        session.info(size_and_depth(aig, result))
+        log: dict[str, object] = {"network": describe(result), "output": output}
+        if aig is not None:
+            log["gates_before"] = aig.num_gates()
+            log["depth_before"] = aig.depth()
+        return log
     finally:
         input_path.unlink(missing_ok=True)
         output_path.unlink(missing_ok=True)

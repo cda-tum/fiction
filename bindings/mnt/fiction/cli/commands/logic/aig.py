@@ -17,7 +17,7 @@ from aigverse.algorithms import aig_cut_rewriting, aig_resubstitution, balancing
 from mnt.fiction.cli.aigverse_bridge import from_aigverse, to_aigverse
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
-from mnt.fiction.cli.stores import describe
+from mnt.fiction.cli.stores import describe, size_and_depth
 from mnt.pyfiction import aig_network, get_name, technology_network
 
 if TYPE_CHECKING:
@@ -53,7 +53,8 @@ def aig_command(session: Session, args: argparse.Namespace) -> Result:
     """Run optimization passes on the active AIG, in the given order.
 
     Passes: rewrite (cut rewriting), resub (resubstitution), refactor (SOP refactoring), balance
-    (ESOP balancing), cleanup (remove dangling nodes). Only AIGs read with '--type aig' qualify.
+    (SOP balancing, which minimizes depth at the cost of gates), cleanup (remove dangling nodes).
+    Only AIGs read with '--type aig' qualify.
     """
     aig = _active_aig(session)
     optimized = to_aigverse(session, aig)
@@ -65,8 +66,13 @@ def aig_command(session: Session, args: argparse.Namespace) -> Result:
         optimized = result
     network = from_aigverse(session, optimized, get_name(aig), like=aig)
     session.networks.add(network)
-    session.info(f"{aig.num_gates()} -> {network.num_gates()} gates")
-    return {"network": describe(network), "passes": list(args.passes), "gates_before": aig.num_gates()}
+    session.info(size_and_depth(aig, network))
+    return {
+        "network": describe(network),
+        "passes": list(args.passes),
+        "gates_before": aig.num_gates(),
+        "depth_before": aig.depth(),
+    }
 
 
 def _active_aig(session: Session) -> aig_network:

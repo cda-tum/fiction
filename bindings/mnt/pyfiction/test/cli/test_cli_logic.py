@@ -21,6 +21,7 @@ from aigverse.algorithms import equivalence_checking as aig_equivalent
 
 from mnt import pyfiction
 from mnt.fiction.cli.aigverse_bridge import from_aigverse, to_aigverse
+from mnt.fiction.cli.stores import size_and_depth
 from mnt.pyfiction import (
     aig_network,
     simulate_outputs,
@@ -110,6 +111,28 @@ def test_aig_passes_preserve_the_function(shell: Shell, resource: Callable[[str]
     assert isinstance(optimized, aig_network)
     assert aig_equivalent(to_aigverse(shell.session, original), to_aigverse(shell.session, optimized))
     assert shell.session.log[-1]["result"]["passes"] == ["rewrite", "resub", "refactor", "balance", "cleanup"]  # type: ignore[index]
+
+
+def test_aig_reports_gates_and_depth(shell: Shell) -> None:
+    shell.ok("generate rca -b 4")
+    before = shell.session.networks.current()
+    shell.ok("aig balance")
+    after = shell.session.networks.current()
+    # balancing trades gates for depth, so the line has to carry both numbers to be readable
+    assert after.depth() < before.depth()
+    assert after.num_gates() > before.num_gates()
+    assert f"{before.num_gates()} -> {after.num_gates()} gates" in shell.stdout
+    assert f"depth {before.depth()} -> {after.depth()}" in shell.stdout
+    result = shell.session.log[-1]["result"]
+    assert result["gates_before"] == before.num_gates()  # type: ignore[index]
+    assert result["depth_before"] == before.depth()  # type: ignore[index]
+
+
+def test_size_and_depth_without_an_input_network(shell: Shell) -> None:
+    # 'abc --no-read' lets the flow provide its own input, so there is nothing to compare against
+    shell.ok("generate rca -b 2")
+    network = shell.session.networks.current()
+    assert size_and_depth(None, network) == f"{network.num_gates()} gates, depth {network.depth()}"
 
 
 def test_aig_needs_an_aig(mux21_shell: Shell) -> None:
