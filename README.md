@@ -78,6 +78,13 @@ Type `help` at the prompt for the list of commands, or run a whole flow at once:
 fiction -c "read c17.v; ortho; cell; write c17.qca"
 ```
 
+From a local checkout, [uv](https://docs.astral.sh/uv/) builds and installs the project as needed, then starts
+the same shell:
+
+```bash
+uv run fiction
+```
+
 ### 🐳 CLI (Docker)
 
 This is the fastest zero-install path. We release pre-built images of the latest CLI
