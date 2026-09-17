@@ -135,7 +135,7 @@ code comments, and error messages.
 - Prefer everyday English to a jargon term where it costs no precision. Where it does cost
   precision, keep the precise term.
 - Preserve the capitalization of project names: _fiction_, `pyfiction`, `nanobind`,
-  `mockturtle`, `kitty`, `alice`, `Catch2`, `CMake`, `GitHub`, `SiDB`, `QCA`, `iNML`.
+  `mockturtle`, `kitty`, `Catch2`, `CMake`, `GitHub`, `SiDB`, `QCA`, `iNML`.
 - Write for the final design, not for the history of how you got there. Never narrate
   review rounds, prompts, former names, or the order in which you did the work. Where a
   rejected alternative is worth recording because a reader would otherwise retry it, put
@@ -216,7 +216,6 @@ automatically, open the file yourself** — several do not.
 | `bindings/mnt/pyfiction/` | `bindings/mnt/pyfiction/AGENTS.md` | nanobind wiring; five steps, no compiler reminder                   |
 | `test/`                   | `test/AGENTS.md`                   | test file base names must be globally unique                        |
 | `docs/`                   | `docs/AGENTS.md`                   | a page missing from a `toctree` builds silently and is unreachable  |
-| `cli/`                    | `cli/AGENTS.md`                    | the one subtree with manual source lists, in two places             |
 | `experiments/`            | `experiments/AGENTS.md`            | published-paper reproductions; the code may change, the results not |
 
 Everything else: `include/fiction/` is the header-only C++20 library; `vendors/` holds
@@ -317,7 +316,7 @@ imitate.
   opened, because their leaf names cannot stand alone: `fiction::layouts::coords` (`offset`,
   `cube`) and `fiction::layouts::clocking` (`scheme`) -- a reference to either is
   shortened only as far as `coords::offset` and `clocking::scheme`. `detail` namespaces are
-  never opened either. `cli/` and the `pyfiction` bindings qualify in full. See
+  never opened either. The `pyfiction` bindings qualify in full. See
   `test/AGENTS.md`.
 - **Documentation**:
   - Apply to **ALL** new and edited code.

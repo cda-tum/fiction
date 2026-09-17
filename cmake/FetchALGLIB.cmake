@@ -112,4 +112,9 @@ if(NOT alglib-cmake_POPULATED)
 
   # Add alglib-cmake to the build
   add_subdirectory(${alglib-cmake_SOURCE_DIR} ${alglib-cmake_BINARY_DIR})
+
+  # The wrapper's install rule reads the version file from the top-level build
+  # directory.
+  configure_file(${alglib-cmake_BINARY_DIR}/alglib-configVersion.cmake
+                 ${CMAKE_BINARY_DIR}/alglib-configVersion.cmake COPYONLY)
 endif()
