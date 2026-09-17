@@ -21,6 +21,7 @@
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
@@ -28,7 +29,6 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
-#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -341,15 +341,7 @@ inline void write_sidb_layout_svg(const layout& lyt, std::ostream& os, const wri
 inline void write_sidb_layout_svg(const layout& lyt, const std::string_view& filename,
                                   const write_sidb_layout_svg_params& ps = {})
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("Could not open file");
-    }
-
-    write_sidb_layout_svg(lyt, os, ps);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_sidb_layout_svg(lyt, os, ps); });
 }
 
 /**
@@ -382,15 +374,7 @@ inline void write_sidb_layout_svg(const layout& lyt, const charge_distribution& 
 inline void write_sidb_layout_svg(const layout& lyt, const charge_distribution& cd, const std::string_view& filename,
                                   const write_sidb_layout_svg_params& ps = {})
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("Could not open file");
-    }
-
-    write_sidb_layout_svg(lyt, cd, os, ps);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_sidb_layout_svg(lyt, cd, os, ps); });
 }
 
 }  // namespace fiction::sidb::io

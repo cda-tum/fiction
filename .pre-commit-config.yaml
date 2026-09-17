@@ -186,7 +186,7 @@ repos:
     rev: v2.3.1
     hooks:
       - id: mypy
-        files: ^(bindings/mnt/pyfiction|docs/.*\.py|experiments|noxfile\.py|scripts)
+        files: ^(bindings/mnt/|docs/.*\.py|experiments|noxfile\.py|scripts)
         args: []
         additional_dependencies:
           - nox
@@ -195,6 +195,10 @@ repos:
           # `experiments/` plots with `matplotlib` and holds its surfaces in `numpy` arrays
           - matplotlib
           - numpy
+          # the `fiction` shell in `bindings/mnt/fiction/cli`
+          - aigverse
+          - prompt_toolkit
+          - rich
         priority: 9
 
   # Format configuration files with prettier

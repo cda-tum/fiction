@@ -8,7 +8,18 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import exact_cartesian, exact_params, read_technology_network, simulate
+from typing import TYPE_CHECKING
+
+from mnt.pyfiction import (
+    exact_cartesian,
+    exact_params,
+    read_technology_network,
+    simulate,
+    simulate_outputs,
+)
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def test_logic_simulation(resources_dir):
@@ -26,3 +37,16 @@ def test_logic_simulation(resources_dir):
     xor_lyt = exact_cartesian(xor2_net, params)
     xor_lyt_sim = simulate(xor_lyt)
     assert xor_lyt_sim["out"] == [False, True, True, False]
+
+
+def test_duplicate_output_names_preserve_order(tmp_path: Path) -> None:
+    path = tmp_path / "outputs.v"
+    path.write_text(
+        "module top(a, f, g);\ninput a;\noutput f, g;\nassign f = a;\nassign g = ~a;\nendmodule\n", encoding="utf-8"
+    )
+    network = read_technology_network(str(path))
+    network.set_output_name(0, "same")
+    network.set_output_name(1, "same")
+    outputs = simulate_outputs(network)
+    assert [name for name, bits in outputs] == ["same", "same"]
+    assert outputs[0][1] != outputs[1][1]
