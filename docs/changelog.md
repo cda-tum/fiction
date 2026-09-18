@@ -380,6 +380,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Algorithms:
+  - `network_balancing` accepts networks without primary outputs.
 
   - Progress reporters now flush each pass's final count before a reset.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.

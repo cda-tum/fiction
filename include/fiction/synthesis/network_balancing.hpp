@@ -111,7 +111,7 @@ class network_balancing_impl
 
         // gather PO levels
         const auto po_levels    = get_po_levels(ntk_depth);
-        const auto max_po_level = *std::ranges::max_element(po_levels);
+        const auto max_po_level = po_levels.empty() ? 0u : *std::ranges::max_element(po_levels);
 
         // add primary outputs to finalize the network
         ntk_topo.foreach_po(

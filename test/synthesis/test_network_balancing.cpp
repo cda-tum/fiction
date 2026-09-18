@@ -92,3 +92,18 @@ TEST_CASE("Complex network balancing", "[network-balancing]")
         check_eq(tec, balanced_tec);
     }
 }
+
+TEST_CASE("Balance a network without primary outputs", "[network-balancing]")
+{
+    technology_network ntk{};
+    for (const bool unify_outputs : {false, true})
+    {
+        const auto empty = network_balancing<technology_network>(ntk, {.unify_outputs = unify_outputs});
+        CHECK(empty.num_gates() == 0);
+        CHECK(empty.num_pos() == 0);
+    }
+    ntk.create_pi();
+    const auto balanced = network_balancing<technology_network>(ntk, {.unify_outputs = true});
+    CHECK(balanced.num_pis() == 1);
+    CHECK(balanced.num_pos() == 0);
+}
