@@ -1144,9 +1144,24 @@ class operational_domain_impl
             workers.reserve(number_of_threads);
             try
             {
-                for (std::size_t i = 0; i < number_of_threads; ++i)
+                if (number_of_threads == 1)
                 {
-                    workers.emplace_back(std::async(std::launch::async, worker));
+                    worker();
+                }
+                else
+                {
+                    for (std::size_t i = 0; i < number_of_threads; ++i)
+                    {
+                        // A small surface can finish before the full worker team starts.
+                        {
+                            const std::scoped_lock lock{queue_mutex};
+                            if (finished)
+                            {
+                                break;
+                            }
+                        }
+                        workers.emplace_back(std::async(std::launch::async, worker));
+                    }
                 }
                 for (auto& result : workers)
                 {
@@ -1775,6 +1790,12 @@ class operational_domain_impl
         // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
         // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
         const std::size_t num_threads = std::max(std::min(number_of_threads, step_points.size()), std::size_t{1});
+
+        if (num_threads == 1)
+        {
+            std::ranges::for_each(step_points, [this](const auto& sp) { is_step_point_operational(sp); });
+            return;
+        }
 
         // calculate the size of each slice
         const auto slice_size = (step_points.size() + num_threads - 1) / num_threads;
