@@ -185,7 +185,20 @@ def docs(session: nox.Session) -> None:
         "SKBUILD_BUILD_DIR": "build-pyfiction",
         "SKBUILD_CMAKE_ARGS": "--preset=pyfiction",
     }
-    session.run("uv", "sync", "--frozen", "--no-dev", "--group", "build", "--group", "docs", env=env)
+    # The native build discovers Z3 through the Python dependencies installed by uv.
+    session.run(
+        "uv",
+        "sync",
+        "--frozen",
+        "--no-dev",
+        "--group",
+        "build",
+        "--group",
+        "docs",
+        "--no-build-isolation-package",
+        "mnt-pyfiction",
+        env=env,
+    )
     with session.chdir("docs"):
         serve = args.builder == "html" and session.interactive
         command = ["sphinx-autobuild" if serve else "sphinx-build"]
