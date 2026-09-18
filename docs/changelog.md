@@ -144,6 +144,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
 - Continuous integration:
+  - Replaced Ubuntu 22.04 and GCC 11 CI coverage with Ubuntu 26.04, GCC 15, and Clang 22.
+    Ubuntu 24.04 retains older compiler coverage.
   - Windows wheel builds no longer install the zero-hit job-local `sccache`; split mode
     compiles the extension only once per job.
   - Reusable workflows now use GitHub's self-repository reference syntax.
