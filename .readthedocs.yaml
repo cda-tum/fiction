@@ -6,6 +6,8 @@ sphinx:
 build:
   os: ubuntu-26.04
   apt_packages:
+    - cmake
+    - ninja-build
     - mold
     - doxygen
   tools:
