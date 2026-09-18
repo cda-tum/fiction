@@ -2179,6 +2179,24 @@ TEST_CASE("Concurrent operational-domain sampling matches grid results", "[opera
     }
 }
 
+TEST_CASE("Parameter hashes distribute regular sweeps across partitions", "[operational-domain]")
+{
+    std::unordered_set<std::size_t> partitions{};
+    for (auto x = 0u; x < 8; ++x)
+    {
+        for (auto y = 0u; y < 8; ++y)
+        {
+            for (auto z = 0u; z < 8; ++z)
+            {
+                const parameter_point point{{5.6 + x * 0.1024, 5.0 + y * 0.1024, -0.32 + z * 0.004096}};
+                partitions.insert(std::hash<parameter_point>{}(point) % 256);
+            }
+        }
+    }
+    // Partitioned processing must not serialize this regular grid onto one lock.
+    CHECK(partitions.size() > 1);
+}
+
 TEST_CASE("Parallel contour surfaces preserve classifications and avoid duplicate simulations", "[operational-domain]")
 {
     const layout lyt{blueprints::siqad_and_gate()};

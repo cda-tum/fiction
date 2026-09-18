@@ -41,6 +41,7 @@
 #include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
+#include <phmap_utils.h>
 
 #include <algorithm>
 #include <array>
@@ -145,7 +146,7 @@ template <>
 struct hash<fiction::sidb::simulation::logic::parameter_point>
 {
     /**
-     * @brief Computes the hash of a parameter point.
+     * @brief Mixes the quantized parameter values across the hash bits for partitioned processing.
      *
      * @param pp Parameter point to hash.
      * @return Hash of the quantized parameter values.
@@ -162,7 +163,7 @@ struct hash<fiction::sidb::simulation::logic::parameter_point>
                                               fiction::sidb::simulation::logic::parameter_point::quantize(parameter));
         }
 
-        return hash_value;
+        return phmap::phmap_mix<sizeof(size_t)>{}(hash_value);
     }
 };
 

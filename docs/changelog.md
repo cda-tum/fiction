@@ -307,6 +307,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Contour tracing distributes simulation locks across regular parameter grids.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
   - Defect-influence analysis now propagates worker exceptions to the caller.
