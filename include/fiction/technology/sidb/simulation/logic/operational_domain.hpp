@@ -88,7 +88,7 @@ struct parameter_point
      *
      * @param values Parameter values for each dimension.
      */
-    explicit parameter_point(const std::vector<double>& values) : parameters(values) {}
+    explicit parameter_point(std::vector<double> values) : parameters{std::move(values)} {}
     /**
      * Equality operator. Checks if this parameter point is equal to another point within a specified tolerance.
      * The tolerance is defined by `constants::ERROR_MARGIN`.
@@ -1450,7 +1450,7 @@ class operational_domain_impl
          *
          * @param steps All dimension step values.
          */
-        explicit step_point(const std::vector<std::size_t>& steps) : step_values(steps) {}
+        explicit step_point(std::vector<std::size_t> steps) : step_values{std::move(steps)} {}
         /**
          * All dimension step values.
          */
@@ -1480,7 +1480,7 @@ class operational_domain_impl
             parameter_values.push_back(values.at(d).at(sp.step_values.at(d)));
         }
 
-        return parameter_point{parameter_values};
+        return parameter_point{std::move(parameter_values)};
     }
     /**
      * Converts a parameter point to a step point.
@@ -1513,7 +1513,7 @@ class operational_domain_impl
             step_values.push_back(static_cast<std::size_t>(dis));
         }
 
-        return step_point{step_values};
+        return step_point{std::move(step_values)};
     }
     /**
      * Helper function that sets the value of a sweep dimension in the simulation parameters.
@@ -1967,13 +1967,13 @@ class operational_domain_impl
             {
                 auto decremented  = sp.step_values;
                 decremented.at(d) = step - 1;
-                neighbors.emplace_back(decremented);
+                neighbors.emplace_back(std::move(decremented));
             }
             if (step + 1 < indices.at(d).size())
             {
                 auto incremented  = sp.step_values;
                 incremented.at(d) = step + 1;
-                neighbors.emplace_back(incremented);
+                neighbors.emplace_back(std::move(incremented));
             }
         }
 
@@ -2033,7 +2033,7 @@ class operational_domain_impl
 
             if (!is_center && is_in_range)
             {
-                neighbors.emplace_back(neighbor);
+                neighbors.emplace_back(std::move(neighbor));
             }
         }
 
