@@ -164,6 +164,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Dependencies:
 
+  - Native CI and Docker now use Z3 5.1.0. Wheel builds retain Z3 4.14.1 for their deployment floors.
+
   - `fmt` is fetched as the 12.1.0 release, the version alice carried; mockturtle's bundled
     11.0.2 does not compile with clang 20.
 
