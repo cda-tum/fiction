@@ -402,7 +402,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
 
 - Build system:
-
+  - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
   - Installed CMake packages include the `fmt` headers and their header-only compile definition.
   - CMake installation includes ALGLIB's generated version metadata.
