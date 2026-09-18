@@ -20,12 +20,9 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 
-#include <mockturtle/networks/detail/foreach.hpp>
-
 #include <algorithm>
 #include <cstdint>
 #include <functional>
-#include <iterator>
 #include <memory>
 #include <string_view>
 #include <utility>
@@ -126,6 +123,8 @@ class clocked_layout : public CoordinateLayout
     {
         auto copy = clocked_layout(CoordinateLayout::clone());
         copy.strg = std::make_shared<clocked_layout_storage>(*strg);
+        // The storage copy shares the clocking scheme pointer; detach it so clock-number overrides stay independent.
+        copy.replace_clocking_scheme(*strg->clocking);
 
         return copy;
     }

@@ -23,6 +23,23 @@
 #endif
 
 
+static const char *mkd_doc_fiction_detail_atomic_write =
+R"doc(Serialize into a sibling temporary file and replace the destination
+after a successful close.
+
+Args:
+    filename: Destination file.
+    writer: Serialization callback.
+
+Template Args:
+    Writer: Callable accepting an output stream.
+
+Raises:
+    std::ios_base::failure: If creating, writing, closing, or
+                            replacing the file fails.
+
+)doc";
+
 static const char *mkd_doc_fiction_fcn_area =
 R"doc(Computes real-world area requirements in nm² of a given cell-level
 layout. For this purpose, each cell position in the layout is assigned
@@ -5395,6 +5412,17 @@ R"doc(
 +-------+
 ```)doc";
 
+static const char *mkd_doc_fiction_layouts_io_detail_fgl_xml_text =
+R"doc(Escape user-provided text for an XML element.
+
+Args:
+    value: Layout or port name.
+
+Returns:
+    XML text preserving the original label when parsed.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage =
@@ -5432,6 +5460,38 @@ static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_lyt = 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_fgl_layout_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_fgl_layout_impl_2 = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_number =
+R"doc(Read a nonnegative integer without truncation or trailing characters.
+
+Args:
+    parent: XML element containing the number.
+    name: Child element name.
+
+Returns:
+    Parsed integer.
+
+Raises:
+    fgl_parsing_error: If the element is missing or the number is
+                       invalid.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_position =
+R"doc(Read a position and reject values the layout's coordinate type cannot
+represent.
+
+Args:
+    element: XML element containing x, y, and optionally z.
+    with_z: Whether the z child is required.
+
+Returns:
+    Losslessly represented coordinate.
+
+Raises:
+    fgl_parsing_error: If an axis is invalid or overflows.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_run = R"doc()doc";
 
@@ -6544,7 +6604,9 @@ R"doc(Standard constructor. Reads and constructs logic networks. May throw.
 
 Args:
     filename: Path to the file or folder of files to read.
-    out: Output stream to write status updates into.
+    format: Explicit format without a dot, or empty to infer the
+            extension.
+    o: Output stream to write status updates into.
 
 )doc";
 

@@ -63,7 +63,9 @@ void area(nanobind::module_& m)
 void area(nanobind::module_& m)
 {
     detail::area<py_qca_layout>(m);
+    detail::area<py_stacked_qca_layout>(m);
     detail::area<py_inml_layout>(m);
+    detail::area<py_mol_qca_layout>(m);
 
     namespace py    = nanobind;
     using sidb_tech = fiction::sidb::sidb_technology;

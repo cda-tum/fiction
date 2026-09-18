@@ -94,7 +94,7 @@ jobs:
           version: ${{ env.Z3_VERSION }}
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           version: "latest"
           enable-cache: true
@@ -103,6 +103,14 @@ jobs:
       - if: runner.os == 'Windows'
         name: Install sccache
         run: uv tool install sccache
+
+      - if: runner.os == 'Linux'
+        name: Install external ABC for CLI integration tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes yosys-abc graphviz
+          echo "AIGVERSE_ABC=/usr/bin/yosys-abc" >> "$GITHUB_ENV"
+          echo "FICTION_REQUIRE_ABC=1" >> "$GITHUB_ENV"
 
       # A declared floor is only a claim until something installs it. Pinned to Python 3.10, so
       # it runs first and fails fastest.

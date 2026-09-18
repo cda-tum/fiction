@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
 
+- CLI:
+
+  - `pip install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
+    completion, script files, piped input, and JSON statistics. The shell also runs as `python -m mnt.fiction.cli`.
+  - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
+  - `aig`, `abc`, and `generate` provide AIG optimization, external ABC scripts, and network generators.
+  - `show` supports optional Graphviz SVG rendering, explicit viewers, and temporary-file cleanup.
+
 - Code quality:
 
   - Added QCA SVG regression tests for colors, detail modes, tile labels, and file output.
@@ -30,6 +38,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `sidb::simulation::potential_landscape` stores static electrostatics for reuse across
     charge configurations and simulation worker threads
 
+- Dependencies:
+
+  - `mnt.pyfiction` depends on `prompt_toolkit`, `rich`, and `aigverse` for the shell.
+
 - Documentation:
 
   - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
@@ -45,6 +57,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Python bindings:
 
   - Added directory-based test markers, including `pytest -m simulation`.
+  - Marked the SiDB circuit-design integration test as `slow`; `pytest -m 'not slow'` skips it.
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
   - `lattice`, `lattice_site`, `sidb_layout` (the lattice-based layout), `read_sqd_layout`,
     `read_surface_defects`, and the `sidb_layout` overloads of `write_sqd_layout` and
@@ -59,10 +72,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `displacement_robustness_domain`, and defect-domain writers return `None`
   - `displacement_robustness_domain` replaces its `_100` and `_111` variants
   - `apply_bestagon_library` returns `sidb_layout`
+  - Added `on_the_fly_sidb_circuit_design` to design SiDB circuits from placed and routed
+    hexagonal gate-level layouts, with configurable gate-design parameters
+  - `aig_network`, `xag_network`, and `mig_network` with their readers, `write_verilog`,
+    `write_blif`, `write_aiger`, `convert_network`, `count_gate_types`, and `print_sidb_layout`
+  - `dynamic_truth_table` gains `create_from_binary_string`, `create_from_hex_string`,
+    `create_from_expression`, `create_random`, `to_binary`, and `to_hex`; networks gain `depth`,
+    gate-level layouts `clone`, clocked layouts `get_clocking_scheme_name`, and `exact_params`
+    `upper_bound_area`
+  - `technology_mapping`, `simulate`, `count_gate_types`, and `write_dot_network` accept every
+    network type; `technology_mapping_params` exposes `lt2`, `gt2`, `le2`, and `ge2`
+  - `area` accepts a `mol_qca_layout`, `orthogonal_params` exposes `number_of_clock_phases` with the
+    `num_clks` enum, `write_qcc_layout_params` exposes `use_filename_as_component_name`, and
+    `gate_level_drvs` fills a `gate_level_drv_stats` whose `report` is the full check as JSON
+  - `convert_network` takes a `target` of the new `network_target` enum, so it produces AIGs, XAGs,
+    and MIGs as well as technology networks
+  - `print_sidb_layout` exposes `lat_color` and `crop_layout`, and `write_dot_network` and
+    `write_dot_layout` expose `indexes` and `clock_colors`
 
 - Tooling:
 
   - Added EditorConfig settings that match the repository's formatters.
+  - Prek formats `pyproject.toml` with `pyproject-fmt`.
+  - Added `nox -s cpp_lint` for local Clang-Tidy checks. Nox uses `cmake` as the sole CMake executable.
 
 ### Changed
 
@@ -73,6 +105,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Reuse completed three-dimensional contour surfaces across initial samples.
   - Contour tracing explores boundary surfaces in three or more dimensions in parallel. It uses
     `operational_domain_params::number_of_threads`; large contour interiors also use parallel inference.
+  - `convert_network` maps a technology network's inverters to `create_not` on a target without
+    `create_node`, so AIG, XAG, and MIG conversions keep the inverters they used to lose
   - **Breaking:** _QuickExact_, _QuickSim_, _ExGS_, _ClusterComplete_, and _Ground State Space_
     simulate `sidb::layout` and return the non-template `sidb::simulation::result`
   - _QuickSim_ returns `std::nullopt` for layouts with charged surface defects
@@ -94,13 +128,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
     SiDB header dependency
 
+- Build system:
+
+  - The Docker image uses `uv` to install the `mnt.pyfiction` wheel and starts the Python `fiction` shell.
+
 - CLI:
-  - **Breaking:** SiDB commands use `sidb::layout` and simulation results. `read --sqd` reads the lattice
-    from the file; `--lattice_orientation` is removed
-  - `print`, `show`, and statistics use stored ground states; `sqd` exports geometry and defects
-  - SiDB shell descriptions and JSON statistics report dot counts as `dots`.
+
+  - Commands now live in separate modules grouped by help category, with local options and metadata.
+  - **Breaking:** SiDB commands use `sidb::layout` and simulation results. SQD files supply the lattice;
+    `--lattice_orientation` is removed. Descriptions count SiDBs as `dots`.
+  - SiDB simulation commands accept simulated entries and append results; earlier entries remain selectable.
+    `print`, `show`, and statistics use stored ground states; SQD output exports geometry and defects.
+  - **Breaking:** store positions count from 1. `ps --all` describes every entry; `store --pop` removes
+    the active entry from explicitly selected stores.
+  - **Breaking:** format-specific readers complement `read`. Directory imports, `--sort`, `source`, and
+    the `exit` alias are removed; `-f` runs scripts and `quit` ends them.
+  - Help includes command inputs, defaults, restrictions, and examples. Store tables and status text fit
+    terminal widths; `ps` groups related statistics.
+  - Errors use standard error. `--quiet` retains requested results, and `-i` continues scripted runs
+    interactively. `gold --progress` controls search progress separately from verbose statistics.
+  - Long options use hyphens. See the CLI migration table for renamed options, topology choices, clock
+    phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
 - Continuous integration:
+  - Windows wheel builds no longer install the zero-hit job-local `sccache`; split mode
+    compiles the extension only once per job.
   - Reusable workflows now use GitHub's self-repository reference syntax.
   - Clang-Tidy skips Python-only changes in the bindings tree.
   - PyPI releases now use trusted publishing instead of an API token.
@@ -114,6 +166,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     take `int32_t` coordinates and an `int8_t` basis index.
   - Simulation results store charge states and energy beside one shared layout and potential
     landscape instead of copying a `charge_distribution_surface` for every configuration
+
+- Dependencies:
+
+  - `fmt` is fetched as the 12.1.0 release, the version alice carried; mockturtle's bundled
+    11.0.2 does not compile with clang 20.
 
 - Documentation:
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
@@ -269,6 +326,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 
+- Build system:
+
+  - **Breaking:** `FICTION_CLI`, `FICTION_ABC`, `ABC_ROOT`, the `deploy` preset, and the `alice`
+    dependency are gone with the C++ command-line interface.
+- CLI:
+
+  - **Breaking:** The C++ command-line interface and `shortcuts.fs`. Use the Python `fiction` shell.
+  - `akers`, together with `miginvopt` and `miginvprop`. The truth table store now feeds the
+    gate-based SiDB simulations, `temp -g` and `opdom`, alone.
+  - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
+    `help --docs`.
 - **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
   `charge_distribution_surface`, and the lattice orientation tags; `model/nm_position.hpp` and
   `model/nm_distance.hpp` (use `lattice::nm_position` and `lattice::nm_distance`); the SiQAD coordinate
@@ -333,9 +401,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Population-stability analysis now distinguishes complete charge distributions beyond the charge-index range.
   - Gate design enumerates, counts, and randomly samples only empty, defect-free canvas sites.
   - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
+  - `convert_network` keeps the inverters of a technology network when the target network
+    type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
+
+- Build system:
+
+  - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
+  - Installed CMake packages include the `fmt` headers and their header-only compile definition.
+  - CMake installation includes ALGLIB's generated version metadata.
 
 - CLI:
-  - SiDB store descriptions and statistics handle the full column range without integer overflow
+
+  - `opdom` logs its default algorithm as grid search; JSON logs encode non-finite statistics as `null`.
+  - `show` and `write` reject unsupported drawing options before writing output. Invalid mapping and
+    numeric inputs preserve stored elements.
+  - Hex truth tables retain every bit. Area statistics use each technology's cell dimensions and the
+    SiDB lattice's physical extent.
+  - Unreadable scripts report the cause and exit with status 2. Interrupted commands retain a log entry
+    and leave the shell usable. Status text accounts for Unicode display widths.
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
@@ -344,6 +427,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
   - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.
+  - Clocked-layout clones preserve clock overrides without sharing later clock-number edits.
   - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
     Potential landscapes validate basis indices even for isolated SiDBs and defects.
   - SiDB cell conversion now rejects coordinates outside the target coordinate range.
@@ -359,6 +443,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation:
 
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
+  - Nanobind API documentation now keeps its custom class renderer with Sphinx's deferred registration.
+    Removed duplicate bounding-box entries and corrected the critical-temperature overload reference.
   - Restored Python API entries and method signatures, and formatted generated docstrings.
   - SiDB reader documentation now lists every overload without ambiguous signatures.
 
@@ -374,6 +460,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.
+  - FGL round trips now preserve three-phase clocking across all supported topologies.
+  - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
+  - Transactional writers now report filesystem setup and replacement errors as stream failures. They preserve output permissions and symbolic links to existing files, and reject dangling links and non-regular output files.
+  - Network DOT export uses transactional replacement, including intermediate drawings produced by `show`.
+  - FQCA imports with at most two layers retain SVG export and viewing.
+  - Stacked FQCA imports preserve all layers and cell metadata. Layout readers reject coordinate overflow; writers replace files only after successful serialization.
   - QCA SVG output now uses valid text colors in simple tile mode.
   - SQD readers now reject fractional coordinates and trailing text in numeric attributes.
   - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites
@@ -385,12 +478,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Added ordered `simulate_outputs`, exposed mapper statistics, and validated truth-table sizes and expressions before native operations. Gate-library errors identify unsupported gates and their coordinates.
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
   - Exposed the defect-matrix reader exceptions at the package root.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector
   - The Python bindings compile when Z3 support is disabled
   - `write_sqd_layout` owns its Python filename during export on Windows
+  - `is_clocking_scheme`, `set_name`, and `get_name` accept Python strings, and the `time_total`
+    and `runtime` members of the statistics classes are readable; the casters were missing
+  - `write_dot_layout` draws shifted-Cartesian layouts instead of writing nothing
+  - The readers raise `RuntimeError` with the parser's diagnostics instead of printing them
+  - `energy_state` and `sidb_lattice_mode` are importable from `mnt.pyfiction`
+  - `create_from_binary_string` and `create_from_hex_string` raise `ValueError` for a character outside
+    their alphabet; `kitty` read such a character as a bit pattern and built a wrong truth table
+  - `write_verilog`, `write_blif`, and `write_aiger` raise `RuntimeError` when the file cannot be opened
+    or written; they returned as if they had written it
 
 - Tooling:
 

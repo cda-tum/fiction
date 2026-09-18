@@ -31,7 +31,8 @@ exclude: "^vendors/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind
 #         `mixed-line-ending`, `trailing-whitespace`, `fix-ligatures`, and `fix-smartquotes`
 #         all take `types: [text]`, so any two of them sharing a tier would read-modify-write
 #         the same file at the same time and lose one of the two edits
-#   6     the language formatters. These share a tier because their file types are disjoint
+#   6     the language and configuration formatters. These share a tier because their file
+#         types are disjoint
 #   7-9   the hooks that must observe the formatters' result
 #
 # Do not collapse tiers 1-5 to win back the wall clock; those hooks are cheap, and the
@@ -90,7 +91,7 @@ repos:
 
   # Format and lint documentation with MyST support.
   - repo: https://github.com/rvben/rumdl-pre-commit
-    rev: v0.2.66
+    rev: v0.2.71
     hooks:
       - id: rumdl
         files: ^docs/.*\.md$
@@ -139,16 +140,23 @@ repos:
         args: ["-style=file"]
         priority: 6
 
+  # Format pyproject.toml
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: v2.29.4
+    hooks:
+      - id: pyproject-fmt
+        priority: 6
+
   # Ensure uv lock file is up-to-date
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.10
+    rev: 0.12.13
     hooks:
       - id: uv-lock
         priority: 0
 
   # Python linting using ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.6
+    rev: v0.16.7
     hooks:
       - id: ruff-format
         priority: 6
@@ -186,7 +194,7 @@ repos:
     rev: v2.3.1
     hooks:
       - id: mypy
-        files: ^(bindings/mnt/pyfiction|docs/.*\.py|experiments|noxfile\.py|scripts)
+        files: ^(bindings/mnt/|docs/.*\.py|experiments|noxfile\.py|scripts)
         args: []
         additional_dependencies:
           - nox
@@ -195,6 +203,10 @@ repos:
           # `experiments/` plots with `matplotlib` and holds its surfaces in `numpy` arrays
           - matplotlib
           - numpy
+          # the `fiction` shell in `bindings/mnt/fiction/cli`
+          - aigverse
+          - prompt_toolkit
+          - rich
         priority: 9
 
   # Format configuration files with prettier
@@ -222,7 +234,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.09.04
+    rev: 2026.09.08
     hooks:
       - id: validate-pyproject
         priority: 0

@@ -86,9 +86,7 @@ jobs:
           filter: |
             include/fiction/**
             test/**
-            cli/**
             experiments/**
-            libs/**
             cmake/**
             CMakeLists.txt
             CMakePresets.json
@@ -118,12 +116,10 @@ jobs:
           filter: |
             include/fiction/**
             test/**
-            cli/**
             bindings/**/*.cpp
             bindings/**/*.hpp
             bindings/**/CMakeLists.txt
             experiments/**
-            libs/**
             cmake/**
             CMakeLists.txt
             CMakePresets.json
@@ -148,10 +144,8 @@ jobs:
           filter: |
             include/fiction/**
             test/**
-            cli/**
             bindings/**
             experiments/**
-            libs/**
             cmake/**
             CMakeLists.txt
             CMakePresets.json
@@ -201,7 +195,6 @@ jobs:
           filter: |
             include/fiction/**
             bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
-            libs/**
             cmake/**
             CMakeLists.txt
             CMakePresets.json
@@ -226,7 +219,6 @@ jobs:
           filter: |
             bindings/**
             include/fiction/**
-            libs/**
             cmake/**
             CMakeLists.txt
             CMakePresets.json
@@ -256,7 +248,6 @@ jobs:
           filter: |
             bindings/**
             include/fiction/**
-            libs/**
             cmake/**
             CMakeLists.txt
             CMakePresets.json
@@ -286,8 +277,8 @@ jobs:
             Dockerfile
             .dockerignore
             include/fiction/**
-            cli/**
-            libs/**
+            bindings/**
+            pyproject.toml
             cmake/**
             CMakeLists.txt
             CMakePresets.json

@@ -24,8 +24,9 @@ Never:
 
 - Add bindings through a monolithic header included into `pyfiction.cpp`. That is the old
   pattern and it is gone.
-- Introduce new Python-level submodules. The `mnt.pyfiction` namespace shape must stay
-  unchanged.
+- Introduce new Python-level submodules for bound symbols. Every binding registers into the
+  flat `mnt.pyfiction` namespace, and that shape must stay unchanged. The pure-Python CLI lives in
+  the sibling `mnt.fiction.cli` package and only calls the bindings.
 - Add source files to a manual list in `CMakeLists.txt`. `file(GLOB_RECURSE ...)` picks
   them up; just wire the new function into its `register_<name>.cpp`.
 - Edit `include/pyfiction/pybind11_mkdoc_docstrings.hpp` by hand. It is generated from the
