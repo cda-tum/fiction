@@ -37,6 +37,7 @@ def _write_qcc_arguments(parser: Parser) -> None:
     _write_qcc_arguments,
     inputs="Active cell-level layout.",
     example="read_fgl layout.fgl; cell --library topolinano; write_qcc output.qcc",
+    progress=True,
 )
 def write_qcc_command(session: Session, args: argparse.Namespace) -> Result:
     """Write the active iNML layout as a ToPoliNano QCC file.
@@ -48,6 +49,7 @@ def write_qcc_command(session: Session, args: argparse.Namespace) -> Result:
     require_cell_type(element, (inml_layout,), ".qcc")
     path = output_path(element, args.file, ".qcc")
     params = write_qcc_layout_params()
+    params.on_progress = session.report_progress
     params.use_filename_as_component_name = args.component_name
     write_qcc_layout(element, str(path), params)
     return written(session, path)

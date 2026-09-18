@@ -26,13 +26,16 @@
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/traits.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <functional>
 #include <optional>
 #include <type_traits>
+#include <utility>
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
@@ -52,9 +55,15 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
 class apply_gate_library_impl
 {
   public:
-    explicit apply_gate_library_impl(const GateLyt& lyt) :
+    /**
+     * @brief Prepares cell mapping with optional gate counts.
+     * @param lyt Gate-level source layout.
+     * @param callback Receives completed gate mappings.
+     */
+    explicit apply_gate_library_impl(const GateLyt& lyt, utils::progress_callback callback = {}) :
             gate_lyt{lyt},
-            cell_lyt{determine_aspect_ratio_for_cell_level_layout(gate_lyt)}
+            cell_lyt{determine_aspect_ratio_for_cell_level_layout(gate_lyt)},
+            on_progress{std::move(callback)}
     {
         cell_lyt.set_tile_size_x(GateLibrary::gate_x_size());
         cell_lyt.set_tile_size_y(GateLibrary::gate_y_size());
@@ -87,6 +96,7 @@ class apply_gate_library_impl
      */
     [[nodiscard]] CellLyt run_static_gate_library()
     {
+        utils::progress_reporter progress{on_progress, "mapping gates", mapping_count()};
         gate_lyt.foreach_node(
             [&, this](const auto& n)
             {
@@ -101,6 +111,7 @@ class apply_gate_library_impl
                             gate_lyt, t, cell<CellLyt>{0, 0});
 
                     assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t), n);
+                    progress.advance();
                 }
             });
 
@@ -140,6 +151,7 @@ class apply_gate_library_impl
             GateLibrary::post_layout_optimization(gate_lyt);
         }
 
+        utils::progress_reporter progress{on_progress, "mapping gates", mapping_count()};
         gate_lyt.foreach_node(
             [&, this](const auto& n)
             {
@@ -154,6 +166,7 @@ class apply_gate_library_impl
                             gate_lyt, t, cell<CellLyt>{0, 0});
 
                     assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t, params, defect_surface), n);
+                    progress.advance();
                 }
             });
 
@@ -172,6 +185,20 @@ class apply_gate_library_impl
      * Cell-level layout.
      */
     CellLyt cell_lyt;
+    /** @brief Receives completed gate mappings. */
+    utils::progress_callback on_progress;
+    /** @brief Counts nonconstant nodes using the mapping traversal, or skips the scan without a callback.
+     * @return Number of nodes mapped to cell implementations.
+     */
+    [[nodiscard]] std::size_t mapping_count() const
+    {
+        std::size_t count{};
+        if (on_progress)
+        {
+            gate_lyt.foreach_node([&](const auto& n) { count += !gate_lyt.is_constant(n); });
+        }
+        return count;
+    }
     /**
      * This function assigns a given FCN gate implementation to the total cell layout.
      *
@@ -247,10 +274,11 @@ class apply_gate_library_impl
  * @tparam GateLibrary Type of the gate library to apply.
  * @tparam GateLyt Type of the gate-level layout to apply the library to.
  * @param lyt The gate-level layout.
+ * @param on_progress Optional callback reporting completed nonconstant gate mappings.
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt>
-[[nodiscard]] CellLyt apply_gate_library(const GateLyt& lyt)
+[[nodiscard]] CellLyt apply_gate_library(const GateLyt& lyt, utils::progress_callback on_progress = {})
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
@@ -260,7 +288,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
     static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
                   "CellLyt and GateLibrary must implement the same technology");
 
-    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
+    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt, std::move(on_progress)};
 
     return p.run_static_gate_library();
 }

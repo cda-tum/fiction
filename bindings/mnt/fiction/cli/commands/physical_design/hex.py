@@ -43,6 +43,7 @@ def _hex_arguments(parser: Parser) -> None:
     _hex_arguments,
     inputs="Active gate-level layout.",
     example="generate mux -b 1; ortho; hex",
+    progress=True,
 )
 def hex_command(session: Session, args: argparse.Namespace) -> Result:
     """Turn the active 2DDWave-clocked Cartesian layout into a hexagonal, row-clocked one.

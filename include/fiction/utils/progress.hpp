@@ -25,6 +25,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 namespace fiction::utils
 {
@@ -41,6 +42,163 @@ namespace fiction::utils
  * callbacks shared by multiple reporters must synchronize access to shared state. The callback must not throw.
  */
 using progress_callback = std::function<void(std::string_view task, std::size_t done, std::size_t total)>;
+
+/**
+ * @brief Reports a logical worker's activity without changing its identity when its description changes.
+ *
+ * Arguments are the zero-based worker ID, worker count, description, completed work, total work (0 if unknown),
+ * and whether the worker is active. Worker counts stay fixed for one invocation. Callbacks must not throw.
+ */
+using worker_progress_callback =
+    std::function<void(std::size_t, std::size_t, std::string_view, std::size_t, std::size_t, bool)>;
+
+/**
+ * @brief Serializes worker reports and throttles updates to ten per second per worker.
+ *
+ * Activity transitions and final counts are reported immediately. Destruction clears remaining active workers.
+ */
+class worker_progress_reporter
+{
+  public:
+    /**
+     * @brief Creates reporting state only when a callback is present.
+     * @param callback Receives worker snapshots.
+     * @param count Number of logical workers, including workers that may remain idle.
+     */
+    worker_progress_reporter(worker_progress_callback callback, const std::size_t count) :
+            on_worker{std::move(callback)},
+            workers(on_worker ? count : 0)
+    {}
+    /** @brief Clears every active worker before releasing callback state. */
+    ~worker_progress_reporter()
+    {
+        for (std::size_t i = 0; i < workers.size(); ++i)
+        {
+            try
+            {
+                finish(i);
+            }
+            catch (...)  // NOLINT(bugprone-empty-catch): cleanup cannot propagate callback exceptions
+            {}
+        }
+    }
+    /** @brief Reporters own synchronization state and cannot be copied. */
+    worker_progress_reporter(const worker_progress_reporter&) = delete;
+    /** @brief Workers may reference reporters, so reporters cannot be moved. */
+    worker_progress_reporter(worker_progress_reporter&&) = delete;
+    /** @brief Reporters do not support copy assignment. */
+    worker_progress_reporter& operator=(const worker_progress_reporter&) = delete;
+    /** @brief Reporters do not support move assignment. */
+    worker_progress_reporter& operator=(worker_progress_reporter&&) = delete;
+    /**
+     * @brief Updates a worker's snapshot and publishes activity changes immediately.
+     * @param id Stable logical worker index.
+     * @param description Human-readable work and candidate description.
+     * @param done Completed work items.
+     * @param total Work budget, or 0 if unknown.
+     * @param force Publish a significant status change immediately.
+     */
+    void update(const std::size_t id, const std::string_view description, const std::size_t done = 0,
+                const std::size_t total = 0, const bool force = false)
+    {
+        if (!on_worker)
+        {
+            return;
+        }
+        const std::scoped_lock lock{mutex};
+        auto&                  state   = workers.at(id);
+        const auto             now     = std::chrono::steady_clock::now();
+        const bool             publish = force || !state.active || (total != 0 && done == total) ||
+                                         now - state.last_report >= std::chrono::milliseconds{100};
+        state.description              = description;
+        state.done                     = done;
+        state.total                    = total;
+        state.active                   = true;
+        if (publish)
+        {
+            state.last_report = now;
+            on_worker(id, workers.size(), state.description, done, total, true);
+        }
+    }
+    /**
+     * @brief Publishes the final snapshot and marks the worker inactive.
+     * @param id Stable logical worker index.
+     */
+    void finish(const std::size_t id)
+    {
+        if (!on_worker)
+        {
+            return;
+        }
+        const std::scoped_lock lock{mutex};
+        auto&                  state = workers.at(id);
+        if (state.active)
+        {
+            state.active = false;
+            on_worker(id, workers.size(), state.description, state.done, state.total, false);
+        }
+    }
+
+  private:
+    /** @brief The most recent snapshot of a logical worker, guarded by mutex. */
+    struct worker_state
+    {
+        /** @brief Current work description. */
+        std::string description{};
+        /** @brief Completed work items. */
+        std::size_t done{};
+        /** @brief Work budget, or zero if unknown. */
+        std::size_t total{};
+        /** @brief Whether the worker has unfinished work. */
+        bool active{};
+        /** @brief Time of the last published snapshot. */
+        std::chrono::steady_clock::time_point last_report{};
+    };
+    /** @brief Receives serialized snapshots. */
+    worker_progress_callback on_worker;
+    /** @brief State indexed by logical worker ID. */
+    std::vector<worker_state> workers;
+    /** @brief Serializes callbacks and state changes. */
+    std::mutex mutex{};
+};
+
+/** @brief Clears a worker's activity on every exit from a computation. */
+class worker_progress_scope
+{
+  public:
+    /**
+     * @brief Tracks the lifetime of an active worker.
+     * @param reporter Shared reporter, which outlives this scope.
+     * @param worker Logical worker ID.
+     */
+    worker_progress_scope(worker_progress_reporter& reporter, const std::size_t worker) : progress{reporter}, id{worker}
+    {}
+    /** @brief Marks the worker inactive, including during exception unwinding. */
+    ~worker_progress_scope()
+    {
+        try
+        {
+            progress.finish(id);
+        }
+        catch (...)  // NOLINT(bugprone-empty-catch): cleanup cannot propagate callback exceptions
+        {}
+    }
+
+    /** @brief One scope owns the worker's activity lifetime. */
+    worker_progress_scope(const worker_progress_scope&) = delete;
+    /** @brief A worker scope stays at its construction site. */
+    worker_progress_scope(worker_progress_scope&&) = delete;
+    /** @brief Worker scopes do not support copy assignment. */
+    worker_progress_scope& operator=(const worker_progress_scope&) = delete;
+    /** @brief Worker scopes do not support move assignment. */
+    worker_progress_scope& operator=(worker_progress_scope&&) = delete;
+
+  private:
+    /** @brief Shared serialized reporter. */
+    worker_progress_reporter& progress;
+    /** @brief Logical worker ID. */
+    std::size_t id;
+};
 
 /**
  * @brief Forwards the progress of a single task to a `progress_callback`, throttling the reports.

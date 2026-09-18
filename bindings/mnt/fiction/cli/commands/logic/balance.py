@@ -29,13 +29,21 @@ def _balance_arguments(parser: Parser) -> None:
     parser.add_argument("-u", "--unify-outputs", action="store_true", help="balance the outputs against each other")
 
 
-@command("balance", Category.LOGIC, _balance_arguments, inputs="Active network.", example="generate mux -b 1; balance")
+@command(
+    "balance",
+    Category.LOGIC,
+    _balance_arguments,
+    inputs="Active network.",
+    example="generate mux -b 1; balance",
+    progress=True,
+)
 def balance(session: Session, args: argparse.Namespace) -> Result:
     """Balance the paths of the active network with buffers, so every path to a gate has the same length.
 
     Physical design does not need this and balanced networks produce much larger layouts.
     """
     params = network_balancing_params()
+    params.on_progress = session.report_progress
     params.unify_outputs = args.unify_outputs
     network = network_balancing(session.as_technology_network(session.networks.current()), params)
     session.networks.add(network)

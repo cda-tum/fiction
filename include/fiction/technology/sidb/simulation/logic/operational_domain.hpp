@@ -412,6 +412,8 @@ struct operational_domain_params
      * sampling only.
      */
     utils::progress_callback on_progress{};
+    /** @brief Reports logical worker activity with a fixed worker count for each invocation. */
+    utils::worker_progress_callback on_worker_progress{};
 };
 /**
  * Statistics for the operational domain computation. The statistics are used across the different operational domain
@@ -761,8 +763,10 @@ class operational_domain_impl
                 queue_cv.notify_all();
             };
 
-            const auto worker = [&]()
+            const auto worker = [&](const std::size_t id)
             {
+                const utils::worker_progress_scope worker_scope{worker_progress, id};
+                std::size_t                        completed{};
                 try
                 {
                     while (true)
@@ -784,6 +788,7 @@ class operational_domain_impl
                         ++active_workers;
 
                         lock.unlock();
+                        worker_progress.update(id, "exploring parameter points", completed);
 
                         // determine the operational status and, if the point is operational, its yet unknown neighbors.
                         // No lock is held here, which is what enables the parallelism in the first place
@@ -791,6 +796,7 @@ class operational_domain_impl
                                                     unknown_neighborhood(sp) :
                                                     std::vector<step_point>{};
 
+                        worker_progress.update(id, "exploring parameter points", ++completed);
                         lock.lock();
 
                         if (finished)
@@ -826,7 +832,7 @@ class operational_domain_impl
             {
                 for (std::size_t i = 0; i < number_of_threads; ++i)
                 {
-                    workers.emplace_back(std::async(std::launch::async, worker));
+                    workers.emplace_back(std::async(std::launch::async, worker, i));
                 }
 
                 for (auto& worker_result : workers)
@@ -1118,12 +1124,16 @@ class operational_domain_impl
 
             threads.emplace_back(
                 std::async(std::launch::async,
-                           [this, &cd, start, end, &all_index_combinations]
+                           [this, &cd, i, start, end, &all_index_combinations]
                            {
+                               const utils::worker_progress_scope worker_scope{worker_progress, i};
+                               std::size_t                        completed{};
+                               worker_progress.update(i, "parameter points", 0, end - start);
                                for (auto it = all_index_combinations.cbegin() + static_cast<int64_t>(start);
                                     it != all_index_combinations.cbegin() + static_cast<int64_t>(end); ++it)
                                {
                                    is_step_point_suitable(cd, step_point{*it});  // construct a step_point
+                                   worker_progress.update(i, "parameter points", ++completed, end - start);
                                }
                            }));
         }
@@ -1332,6 +1342,8 @@ class operational_domain_impl
      * Number of worker threads to distribute the parameter points over, taken from the parameters and floored at `1`.
      */
     const std::size_t number_of_threads{std::max(params.number_of_threads, std::size_t{1})};
+    /** @brief Reports each top-level parameter worker without exposing nested simulations. */
+    utils::worker_progress_reporter worker_progress{params.on_worker_progress, number_of_threads};
     /**
      * Input BDL wires.
      */
@@ -1696,11 +1708,18 @@ class operational_domain_impl
 
             threads.emplace_back(std::async(
                 std::launch::async,
-                [this, start, end, &step_points]
+                [this, i, start, end, &step_points]
                 {
+                    const utils::worker_progress_scope worker_scope{worker_progress, i};
+                    std::size_t                        completed{};
+                    worker_progress.update(i, "parameter points", 0, end - start);
                     std::ranges::for_each(std::ranges::subrange{step_points.cbegin() + static_cast<int64_t>(start),
                                                                 step_points.cbegin() + static_cast<int64_t>(end)},
-                                          [this](const auto& sp) { is_step_point_operational(sp); });
+                                          [this, i, start, end, &completed](const auto& sp)
+                                          {
+                                              is_step_point_operational(sp);
+                                              worker_progress.update(i, "parameter points", ++completed, end - start);
+                                          });
                 }));
         }
 

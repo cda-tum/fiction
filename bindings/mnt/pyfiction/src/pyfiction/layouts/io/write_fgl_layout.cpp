@@ -25,6 +25,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): enables callback conversion
 #include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/shared_ptr.h>   // NOLINT(misc-include-cleaner)
@@ -43,9 +44,11 @@ void write_fgl_layout(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
-        "write_fgl_layout", [](const Lyt& lyt, const std::string_view& filename)
-        { fiction::layouts::io::write_fgl_layout<Lyt>(lyt, filename); }, py::arg("layout"), py::arg("filename"),
-        DOC(fiction_layouts_io_write_fgl_layout_2));
+        "write_fgl_layout",
+        [](const Lyt& lyt, const std::string_view& filename, const fiction::utils::progress_callback& on_progress)
+        { fiction::layouts::io::write_fgl_layout<Lyt>(lyt, filename, on_progress); }, py::arg("layout"),
+        py::arg("filename"), py::arg("on_progress").none() = py::none(), DOC(fiction_layouts_io_write_fgl_layout_2),
+        py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail

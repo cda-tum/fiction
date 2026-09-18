@@ -57,6 +57,9 @@ class Command:
     unavailable: str | None = None
     """The missing capability, or None when the command can run."""
 
+    progress: bool = False
+    """Whether execution displays algorithm progress."""
+
     @property
     def options(self) -> tuple[str, ...]:
         """The command's option strings, for tab completion.
@@ -79,6 +82,7 @@ def command(
     inputs: str = "No store input.",
     example: str | None = None,
     unavailable: str | None = None,
+    progress: bool = False,
 ) -> Callable[[Runner], Runner]:
     """Register a function as a shell command.
 
@@ -91,6 +95,7 @@ def command(
         inputs: The input requirements shown in help.
         example: A shell invocation, or the command name when omitted.
         unavailable: A missing capability reported by help and execution.
+        progress: Display progress while the command runs.
 
     Returns:
         The decorator, which returns the function unchanged.
@@ -116,6 +121,7 @@ def command(
             run=run,
             parser=parser,
             unavailable=unavailable,
+            progress=progress,
         )
         REGISTRY[name] = cmd
         return run

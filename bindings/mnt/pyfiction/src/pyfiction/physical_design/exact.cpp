@@ -86,7 +86,9 @@ void exact(nanobind::module_& m)
         .def_rw("technology_specifics", &fiction::physical_design::exact_physical_design_params::technology_specifics,
                 DOC(fiction_physical_design_exact_physical_design_params_technology_specifics))
         .def_rw("on_progress", &fiction::physical_design::exact_physical_design_params::on_progress,
-                DOC(fiction_physical_design_exact_physical_design_params_on_progress));
+                DOC(fiction_physical_design_exact_physical_design_params_on_progress))
+        .def_rw("on_worker_progress", &fiction::physical_design::exact_physical_design_params::on_worker_progress,
+                DOC(fiction_physical_design_exact_physical_design_params_on_worker_progress));
 
     py::class_<fiction::physical_design::exact_physical_design_stats>(
         m, "exact_stats", DOC(fiction_physical_design_exact_physical_design_stats))

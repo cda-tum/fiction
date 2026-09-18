@@ -77,7 +77,8 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
     m.def("simulate_outputs", outputs, py::arg(type_name.c_str()),
           "Return (name, bits) pairs in output declaration order, preserving duplicate labels. "
           "Truth-table storage grows exponentially with the input count; fewer than 38 inputs "
-          "is a representation bound, not a memory guarantee.");
+          "is a representation bound, not a memory guarantee.",
+          py::call_guard<py::gil_scoped_release>());
     m.def(
         "simulate",
         [outputs](const NtkOrLyt& ntk)
@@ -89,7 +90,7 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
             }
             return result;
         },
-        py::arg(type_name.c_str()));
+        py::arg(type_name.c_str()), py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail

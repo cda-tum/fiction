@@ -50,7 +50,12 @@ def _ortho_arguments(parser: Parser) -> None:
 
 
 @command(
-    "ortho", Category.PHYSICAL_DESIGN, _ortho_arguments, inputs="Active network.", example="generate mux -b 1; ortho"
+    "ortho",
+    Category.PHYSICAL_DESIGN,
+    _ortho_arguments,
+    inputs="Active network.",
+    example="generate mux -b 1; ortho",
+    progress=True,
 )
 def ortho(session: Session, args: argparse.Namespace) -> Result:
     """Place and route the active network with the scalable orthogonal graph drawing heuristic.

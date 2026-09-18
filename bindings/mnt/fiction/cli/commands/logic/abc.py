@@ -43,7 +43,14 @@ def _abc_arguments(parser: Parser) -> None:
     source.add_argument("-s", "--script", choices=ABC_SCRIPTS, help="a named ABC script")
 
 
-@command("abc", Category.LOGIC, _abc_arguments, inputs="Active network.", example="generate mux -b 1; abc -c strash")
+@command(
+    "abc",
+    Category.LOGIC,
+    _abc_arguments,
+    inputs="Active network.",
+    example="generate mux -b 1; abc -c strash",
+    progress=True,
+)
 def abc_command(session: Session, args: argparse.Namespace) -> Result:
     """Optimize the active AIG or XAG with an external ABC installation.
 

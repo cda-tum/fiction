@@ -88,6 +88,8 @@ struct critical_temperature_params
      * simulation (non-gate-based).
      */
     utils::progress_callback on_progress{};
+    /** @brief Reports logical worker activity with a fixed worker count for each invocation. */
+    utils::worker_progress_callback on_worker_progress{};
 };
 
 /**
@@ -339,9 +341,10 @@ class critical_temperature_impl
 #if (FICTION_ALGLIB_ENABLED)
         else if (params.operational_params.sim_engine == engine::CLUSTERCOMPLETE)
         {
-            const sidb::simulation::engines::clustercomplete_params cc_params{.sim_params =
-                                                                                  params.operational_params.sim_params,
-                                                                              .on_progress = params.on_progress};
+            const sidb::simulation::engines::clustercomplete_params cc_params{
+                .sim_params         = params.operational_params.sim_params,
+                .on_progress        = params.on_progress,
+                .on_worker_progress = params.on_worker_progress};
 
             // All physically valid charge configurations are determined for the given layout (`ClusterComplete`
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
@@ -352,9 +355,10 @@ class critical_temperature_impl
         {
             const sidb::simulation::engines::quicksim_params qs_params{.sim_params =
                                                                            params.operational_params.sim_params,
-                                                                       .iteration_steps = params.iteration_steps,
-                                                                       .alpha           = params.alpha,
-                                                                       .on_progress     = params.on_progress};
+                                                                       .iteration_steps    = params.iteration_steps,
+                                                                       .alpha              = params.alpha,
+                                                                       .on_progress        = params.on_progress,
+                                                                       .on_worker_progress = params.on_worker_progress};
 
             // All physically valid charge configurations are determined for the given layout (probabilistic ground
             // state simulation is used).
@@ -599,8 +603,9 @@ class critical_temperature_impl
         if (params.operational_params.sim_engine == engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
-            const sidb::simulation::engines::clustercomplete_params cc_params{.sim_params =
-                                                                                  params.operational_params.sim_params};
+            const sidb::simulation::engines::clustercomplete_params cc_params{
+                .sim_params         = params.operational_params.sim_params,
+                .on_worker_progress = params.on_worker_progress};
             return sidb::simulation::engines::clustercomplete(lyt_with_input_pattern, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED
@@ -610,8 +615,9 @@ class critical_temperature_impl
 
             const sidb::simulation::engines::quicksim_params qs_params{.sim_params =
                                                                            params.operational_params.sim_params,
-                                                                       .iteration_steps = params.iteration_steps,
-                                                                       .alpha           = params.alpha};
+                                                                       .iteration_steps    = params.iteration_steps,
+                                                                       .alpha              = params.alpha,
+                                                                       .on_worker_progress = params.on_worker_progress};
 
             if (const auto result = sidb::simulation::engines::quicksim(lyt_with_input_pattern, qs_params))
             {

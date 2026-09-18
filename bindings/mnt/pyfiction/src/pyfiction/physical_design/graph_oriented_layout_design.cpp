@@ -103,7 +103,10 @@ void graph_oriented_layout_design(nanobind::module_& m)
                 &fiction::physical_design::graph_oriented_layout_design_params::randomize_tiles_to_skip_between_pis,
                 DOC(fiction_physical_design_graph_oriented_layout_design_params_randomize_tiles_to_skip_between_pis))
         .def_rw("on_progress", &fiction::physical_design::graph_oriented_layout_design_params::on_progress,
-                DOC(fiction_physical_design_graph_oriented_layout_design_params_on_progress));
+                DOC(fiction_physical_design_graph_oriented_layout_design_params_on_progress))
+        .def_rw("on_worker_progress",
+                &fiction::physical_design::graph_oriented_layout_design_params::on_worker_progress,
+                DOC(fiction_physical_design_graph_oriented_layout_design_params_on_worker_progress));
 
     py::class_<fiction::physical_design::graph_oriented_layout_design_stats>(
         m, "graph_oriented_layout_design_stats", DOC(fiction_physical_design_graph_oriented_layout_design_stats))

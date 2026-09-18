@@ -25,6 +25,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner): enables callback conversion
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
@@ -49,8 +50,8 @@ void write_qca_layout_svg_impl(nanobind::module_& m)
         &fiction::qca::io::write_qca_layout_svg<py_qca_layout>;
 
     m.def("write_qca_layout_svg", write_qca_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
-          py::arg("params") = fiction::qca::io::write_qca_layout_svg_params{},
-          DOC(fiction_qca_io_write_qca_layout_svg));
+          py::arg("params") = fiction::qca::io::write_qca_layout_svg_params{}, DOC(fiction_qca_io_write_qca_layout_svg),
+          py::call_guard<py::gil_scoped_release>());
 }
 
 void write_mol_qca_layout_svg_impl(nanobind::module_& m)
@@ -65,7 +66,7 @@ void write_mol_qca_layout_svg_impl(nanobind::module_& m)
 
     m.def("write_mol_qca_layout_svg", write_mol_qca_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
           py::arg("params") = fiction::qca::io::write_qca_layout_svg_params{},
-          DOC(fiction_qca_io_write_mol_qca_layout_svg));
+          DOC(fiction_qca_io_write_mol_qca_layout_svg), py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail
@@ -77,6 +78,8 @@ void write_qca_layout_svg(nanobind::module_& m)
     py::class_<fiction::qca::io::write_qca_layout_svg_params>(m, "write_qca_layout_svg_params",
                                                               DOC(fiction_qca_io_write_qca_layout_svg_params))
         .def(py::init<>(), "Default constructor.")
+        .def_rw("on_progress", &fiction::qca::io::write_qca_layout_svg_params::on_progress,
+                "Receives serialization progress.")
         .def_rw("simple", &fiction::qca::io::write_qca_layout_svg_params::simple,
                 DOC(fiction_qca_io_write_qca_layout_svg_params_simple));
 

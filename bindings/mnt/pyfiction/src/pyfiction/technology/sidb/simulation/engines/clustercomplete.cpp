@@ -72,7 +72,9 @@ void clustercomplete(nanobind::module_& m)
         .def_rw("report_gss_stats", &clustercomplete_params::report_gss_stats,
                 DOC(fiction_sidb_simulation_engines_clustercomplete_params_report_gss_stats))
         .def_rw("on_progress", &clustercomplete_params::on_progress,
-                DOC(fiction_sidb_simulation_engines_clustercomplete_params_on_progress));
+                DOC(fiction_sidb_simulation_engines_clustercomplete_params_on_progress))
+        .def_rw("on_worker_progress", &clustercomplete_params::on_worker_progress,
+                DOC(fiction_sidb_simulation_engines_clustercomplete_params_on_worker_progress));
 
     // NOLINTNEXTLINE(misc-const-correctness)
     fiction::sidb::simulation::result (*const clustercomplete_pointer)(const fiction::sidb::layout&,

@@ -42,6 +42,7 @@
 #include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner): converts callback task names
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
@@ -58,15 +59,16 @@ namespace detail
  * @tparam GateLibrary Gate library.
  * @tparam GateLyt Source gate-level layout.
  * @param layout Source layout.
+ * @param on_progress Receives completed gate mappings.
  * @return Mapped cell-level layout.
  * @throws std::invalid_argument If the library cannot implement a gate or its orientation.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt>
-CellLyt checked_apply_gate_library(const GateLyt& layout)
+CellLyt checked_apply_gate_library(const GateLyt& layout, const fiction::utils::progress_callback& on_progress = {})
 {
     try
     {
-        return fiction::physical_design::apply_gate_library<CellLyt, GateLibrary>(layout);
+        return fiction::physical_design::apply_gate_library<CellLyt, GateLibrary>(layout, on_progress);
     }
     catch (const fiction::fcn::unsupported_gate_type_exception<fiction::tile<GateLyt>>& error)
     {
@@ -101,6 +103,7 @@ void apply_gate_library(nanobind::module_& m, const std::string& lib_name)
 
     m.def(fmt::format("apply_{}_library", lib_name).c_str(),
           &checked_apply_gate_library<py_cartesian_technology_cell_layout, GateLibrary, GateLyt>, py::arg("layout"),
+          py::arg("on_progress").none() = py::none(), py::call_guard<py::gil_scoped_release>(),
           DOC(fiction_physical_design_apply_gate_library));
 }
 
@@ -120,13 +123,15 @@ void apply_gate_library(nanobind::module_& m)
     // the SiDB gate library yields an SiDB layout over the H-Si(100) 2x1 lattice
     m.def(
         "apply_bestagon_library",
-        [](const py_hexagonal_gate_layout& lyt)
+        [](const py_hexagonal_gate_layout& lyt, const fiction::utils::progress_callback& on_progress)
         {
             return fiction::sidb::to_sidb_layout(
                 detail::checked_apply_gate_library<py_cartesian_cell_layout<fiction::sidb::sidb_technology>,
-                                                   fiction::sidb::bestagon_library, py_hexagonal_gate_layout>(lyt));
+                                                   fiction::sidb::bestagon_library, py_hexagonal_gate_layout>(
+                    lyt, on_progress));
         },
-        py::arg("layout"), DOC(fiction_physical_design_apply_gate_library));
+        py::arg("layout"), py::arg("on_progress").none() = py::none(), py::call_guard<py::gil_scoped_release>(),
+        DOC(fiction_physical_design_apply_gate_library));
 }
 
 }  // namespace pyfiction

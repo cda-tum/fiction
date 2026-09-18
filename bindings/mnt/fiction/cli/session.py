@@ -60,9 +60,15 @@ STYLES = {
 """The colors the shell sets command output apart from the prompt with; muted, so a long run of
 command output does not read as a wall of color."""
 
-
 ProgressCallback = Callable[[str, int, int], None]
 """What an algorithm's ``on_progress`` parameter accepts: the task name, the completed count, and the total."""
+
+WorkerProgressCallback = Callable[[int, int, str, int, int, bool], None]
+"""A worker ID, worker count, description, completed work, total, and active state."""
+
+
+def ignore_worker_progress(worker: int, workers: int, description: str, done: int, total: int, active: bool) -> None:  # ruff: ignore[boolean-type-hint-positional-argument] -- native callbacks pass positional arguments
+    """Discard worker activity when the session has no progress display."""
 
 
 def ignore_progress(task: str, done: int, total: int) -> None:
@@ -129,6 +135,71 @@ class RemainingColumn(TimeRemainingColumn):
         return super().render(task)
 
 
+MAX_WORKER_ROWS = 4
+"""Largest worker group displayed individually."""
+SUMMARY_WORKERS = 2
+"""Maximum candidate descriptions in compact mode."""
+
+
+class WorkerDisplay:
+    """Render a fixed-size worker group with bounded terminal detail."""
+
+    def __init__(self, display: Progress, label: str, spinner: TaskID) -> None:
+        """Share the command display and its spinner row."""
+        self.display = display
+        self.label = label
+        self.spinner = spinner
+        self.bars: dict[int, TaskID] = {}
+        self.descriptions: dict[int, str] = {}
+        self.best_solution = ""
+        self.best_cost = float("inf")
+        self.detailed: bool | None = None
+        self.lock = threading.Lock()
+
+    def __call__(self, worker: int, workers: int, description: str, done: int, total: int, active: bool) -> None:  # ruff: ignore[boolean-type-hint-positional-argument] -- native callbacks pass positional arguments
+        """Update one stable worker row, removing it when its work ends."""
+        with self.lock:
+            if self.detailed is None:
+                self.detailed = workers <= MAX_WORKER_ROWS and workers + MAX_WORKER_ROWS <= self.display.console.height
+            if self.label == "gold":
+                description, _, best = description.partition("; best ")
+                if best:
+                    cost = int(best.rsplit(", cost ", 1)[1])
+                    if cost < self.best_cost:
+                        self.best_cost = cost
+                        self.best_solution = "; best " + best
+            if not description.startswith(("worker ", "graph ", "examining ")):
+                description = f"worker {worker + 1}: {description}"
+            if active:
+                self.descriptions[worker] = description
+            else:
+                self.descriptions.pop(worker, None)
+            if self.detailed:
+                self.update_row(worker, description, done, total, active=active)
+                self.display.update(self.spinner, description=escape(self.label + self.best_solution))
+            else:
+                descriptions = [self.descriptions[key] for key in sorted(self.descriptions)[:SUMMARY_WORKERS]]
+                summary = f"{self.label}: {len(self.descriptions)} active"
+                if descriptions:
+                    summary += "; " + "; ".join(descriptions)
+                if len(self.descriptions) > SUMMARY_WORKERS:
+                    summary += "; …"
+                self.display.update(self.spinner, description=escape(summary + self.best_solution))
+            self.display.refresh()
+
+    def update_row(self, worker: int, description: str, done: int, total: int, *, active: bool) -> None:
+        """Maintain one worker's bar independently of its changing description."""
+        bar = self.bars.get(worker)
+        if not active:
+            if bar is not None:
+                self.display.remove_task(bar)
+                del self.bars[worker]
+            return
+        if bar is None:
+            bar = self.bars[worker] = self.display.add_task(escape(description), total=total or None)
+        self.display.update(bar, description=escape(description), completed=done, total=total or None)
+
+
 class Session:
     """The state of one shell session.
 
@@ -141,6 +212,7 @@ class Session:
         gate_layouts: The gate-level layout store.
         cell_layouts: The cell-level layout store.
         report_progress: The callback that displays algorithm progress while a command runs.
+        report_worker_progress: The callback that displays bounded worker detail.
         running: Cleared by ``quit``; the interactive loop stops when it is ``False``.
     """
 
@@ -167,6 +239,7 @@ class Session:
         self.cell_layouts: Store[CellEntry] = Store("cell-level layout")
         self.running = True
         self.report_progress: ProgressCallback = ignore_progress
+        self.report_worker_progress: WorkerProgressCallback = ignore_worker_progress
         self.log_path = log_path
         self.log: list[dict[str, object]] = []
         self._source: tuple[str, int] | None = None
@@ -281,8 +354,10 @@ class Session:
         entry["args"] = {key: json_value(value) for key, value in vars(args).items()}
         if cmd.unavailable is not None:
             raise CommandError(cmd.unavailable)
-        with self.progress(name):
-            return cmd.run(self, args)
+        if cmd.progress:
+            with self.progress(name):
+                return cmd.run(self, args)
+        return cmd.run(self, args)
 
     def run_script(self, path: Path) -> bool:
         """Run the commands in a file, one line at a time, stopping at the first failure or at ``quit``.
@@ -305,7 +380,6 @@ class Session:
                 raise CommandError(msg_0) from error
             msg_0 = f"cannot read script '{path}': {error}"
             raise CommandError(msg_0) from error
-
         previous_source = self._source
         try:
             for number, line in enumerate(lines, 1):
@@ -399,13 +473,15 @@ class Session:
         if self.quiet or not self.console.is_terminal:
             # older rich versions print a newline when a disabled display stops, so start none at all
             previous = self.report_progress
+            previous_worker = self.report_worker_progress
             self.report_progress = ignore_progress
+            self.report_worker_progress = ignore_worker_progress
             try:
                 yield ignore_progress
             finally:
                 self.report_progress = previous
+                self.report_worker_progress = previous_worker
             return
-
         display = Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
@@ -427,19 +503,25 @@ class Session:
                     # Rich's reset preserves the old total when passed None, so recreate restarted tasks.
                     display.remove_task(bar)
                     bar = None
+                if done == 0 and total == 0:
+                    bars.pop(task, None)
+                    return
                 if bar is None:
                     bar = bars[task] = display.add_task(task, total=total or None)
                 counts[task] = done
                 display.update(bar, completed=done, total=total or None, refresh=True)
 
         previous = self.report_progress
+        previous_worker = self.report_worker_progress
         self.report_progress = report
         try:
             with display:
-                display.add_task(label, total=None, spinner=True)
+                spinner = display.add_task(label, total=None, spinner=True)
+                self.report_worker_progress = WorkerDisplay(display, label, spinner)
                 yield report
         finally:
             self.report_progress = previous
+            self.report_worker_progress = previous_worker
 
     def error(self, message: str) -> None:
         """Print an error message.

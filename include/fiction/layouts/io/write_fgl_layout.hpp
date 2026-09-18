@@ -20,6 +20,7 @@
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -29,11 +30,13 @@
 #include <mockturtle/views/topo_view.hpp>
 #include <tinyxml2.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <ctime>
 #include <ostream>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace fiction::layouts::io
 {
@@ -111,7 +114,17 @@ template <typename Lyt>
 class write_fgl_layout_impl
 {
   public:
-    write_fgl_layout_impl(const Lyt& src, std::ostream& s) : lyt{src}, os{s} {}
+    /**
+     * @brief Creates a writer with optional serialization progress.
+     * @param src Layout to write.
+     * @param s Output stream.
+     * @param callback Receives completed serialization work.
+     */
+    write_fgl_layout_impl(const Lyt& src, std::ostream& s, utils::progress_callback callback = {}) :
+            lyt{src},
+            os{s},
+            on_progress{std::move(callback)}
+    {}
 
     void run()
     {
@@ -180,6 +193,8 @@ class write_fgl_layout_impl
         if (!clocking_scheme.is_regular())
         {
             os << fgl::OPEN_CLOCK_ZONES;
+            utils::progress_reporter clocks{on_progress, "writing clock columns",
+                                            static_cast<std::size_t>(lyt.x()) + 1};
             for (uint64_t x = 0; x <= lyt.x(); ++x)
             {
                 for (uint64_t y = 0; y <= lyt.y(); ++y)
@@ -187,6 +202,7 @@ class write_fgl_layout_impl
                     const int clock{clocking_scheme({x, y})};
                     os << fmt::format(fgl::CLOCK_ZONE, x, y, clock);
                 }
+                clocks.advance();
             }
             os << fgl::CLOSE_CLOCK_ZONES;
         }
@@ -195,8 +211,12 @@ class write_fgl_layout_impl
             if (lyt.num_se() != 0)
             {
                 os << "      <synchronization_elements>\n";
+                utils::progress_reporter synchronization{on_progress, "scanning synchronization elements",
+                                                         (static_cast<std::size_t>(lyt.x()) + 1) *
+                                                             (static_cast<std::size_t>(lyt.y()) + 1) *
+                                                             (static_cast<std::size_t>(lyt.z()) + 1)};
                 lyt.foreach_coordinate(
-                    [this](const auto& coordinate)
+                    [this, &synchronization](const auto& coordinate)
                     {
                         if (const auto delay = lyt.get_synchronization_element(coordinate); delay != 0)
                         {
@@ -204,6 +224,7 @@ class write_fgl_layout_impl
                                 "        <element><x>{}</x><y>{}</y><z>{}</z><delay>{}</delay></element>\n",
                                 coordinate.x, coordinate.y, coordinate.z, delay);
                         }
+                        synchronization.advance();
                     });
                 os << "      </synchronization_elements>\n";
             }
@@ -217,9 +238,11 @@ class write_fgl_layout_impl
         mockturtle::topo_view layout_topo{lyt};
         uint32_t              gate_id = 0;
 
+        utils::progress_reporter progress{on_progress, "writing gates",
+                                          layout_topo.num_pis() + layout_topo.num_gates()};
         // inputs
         layout_topo.foreach_pi(
-            [&gate_id, this](const auto& gate)
+            [&gate_id, this, &progress](const auto& gate)
             {
                 const auto coord = lyt.get_tile(gate);
                 os << fgl::OPEN_GATE;
@@ -227,11 +250,12 @@ class write_fgl_layout_impl
                                   coord.z);
                 os << fgl::CLOSE_GATE;
                 gate_id++;
+                progress.advance();
             });
 
         // gates
         layout_topo.foreach_gate(
-            [&gate_id, this](const auto& gate)
+            [&gate_id, this, &progress](const auto& gate)
             {
                 os << fgl::OPEN_GATE;
                 const auto coord = lyt.get_tile(gate);
@@ -356,6 +380,7 @@ class write_fgl_layout_impl
                 }
                 os << fgl::CLOSE_GATE;
                 gate_id++;
+                progress.advance();
             });
 
         os << fgl::CLOSE_GATES;
@@ -371,6 +396,8 @@ class write_fgl_layout_impl
      * The output stream to which the gate-level layout is written.
      */
     std::ostream& os;
+    /** @brief Receives serialization progress. */
+    utils::progress_callback on_progress;
 };
 
 }  // namespace detail
@@ -382,14 +409,15 @@ class write_fgl_layout_impl
  *
  * @tparam Lyt Layout.
  * @param lyt The layout to be written.
+ * @param on_progress Receives completed serialization work.
  * @param os The output stream to write into.
  */
 template <typename Lyt>
-void write_fgl_layout(const Lyt& lyt, std::ostream& os)
+void write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
-    detail::write_fgl_layout_impl p{lyt, os};
+    detail::write_fgl_layout_impl p{lyt, os, std::move(on_progress)};
 
     p.run();
 }
@@ -400,12 +428,13 @@ void write_fgl_layout(const Lyt& lyt, std::ostream& os)
  *
  * @tparam Lyt Layout.
  * @param lyt The layout to be written.
+ * @param on_progress Receives completed serialization work.
  * @param filename The file name to create and write into. Should preferably use the .fgl extension.
  */
 template <typename Lyt>
-void write_fgl_layout(const Lyt& lyt, const std::string_view& filename)
+void write_fgl_layout(const Lyt& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
 {
-    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_fgl_layout(lyt, os); });
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_fgl_layout(lyt, os, on_progress); });
 }
 
 }  // namespace fiction::layouts::io

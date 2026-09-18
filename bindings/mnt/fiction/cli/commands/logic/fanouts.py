@@ -45,6 +45,7 @@ def _fanouts_arguments(parser: Parser) -> None:
     _fanouts_arguments,
     inputs="Active network.",
     example="generate mux -b 1; fanouts --degree 2",
+    progress=True,
 )
 def fanouts(session: Session, args: argparse.Namespace) -> Result:
     """Replace high-degree outputs of the active network by fan-out nodes.
@@ -52,6 +53,7 @@ def fanouts(session: Session, args: argparse.Namespace) -> Result:
     Physical design does this with default settings; run it beforehand to choose the settings.
     """
     params = fanout_substitution_params()
+    params.on_progress = session.report_progress
     params.degree = args.degree
     params.threshold = args.threshold
     params.strategy = getattr(substitution_strategy, args.strategy.upper())

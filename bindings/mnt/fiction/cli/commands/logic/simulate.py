@@ -37,6 +37,7 @@ def _simulate_arguments(parser: Parser) -> None:
     _simulate_arguments,
     inputs="Store elements selected by the flags below.",
     example="generate mux -b 1; simulate -n --store",
+    progress=True,
 )
 def simulate_command(session: Session, args: argparse.Namespace) -> Result:
     """Compute the truth table of every output of the active network or gate-level layout.

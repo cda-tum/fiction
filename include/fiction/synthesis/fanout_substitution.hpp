@@ -19,6 +19,7 @@
 
 #include "fiction/synthesis/network_conversion.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -77,6 +78,8 @@ struct fanout_substitution_params
      * Seed used for random substitution, generated randomly if not specified.
      */
     std::optional<uint32_t> seed = std::nullopt;
+    /** @brief Reports completed work in each bounded phase. */
+    utils::progress_callback on_progress{};
 };
 
 namespace detail
@@ -132,6 +135,7 @@ class fanout_substitution_impl
         ntk_topo.foreach_pi([this, &substituted, &old2new](const auto& pi)
                             { generate_fanout_tree(substituted, pi, old2new); });
 
+        utils::progress_reporter progress{ps.on_progress, "substituting fanouts", ntk_topo.num_gates()};
         ntk_topo.foreach_gate(
             [&, this](const auto& n)
             {
@@ -159,6 +163,7 @@ class fanout_substitution_impl
 
                 // generate the fanout tree for n
                 generate_fanout_tree(substituted, n, old2new);
+                progress.advance();
             });
 
         // add primary outputs to finalize the network

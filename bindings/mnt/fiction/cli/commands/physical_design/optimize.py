@@ -47,6 +47,7 @@ def _optimize_arguments(parser: Parser) -> None:
     _optimize_arguments,
     inputs="Active gate-level layout.",
     example="generate mux -b 1; ortho; optimize",
+    progress=True,
 )
 def optimize(session: Session, args: argparse.Namespace) -> Result:
     """Shrink the active 2DDWave-clocked Cartesian layout by moving gates and shortening wires.

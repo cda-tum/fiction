@@ -400,7 +400,9 @@ void operational_domain(nanobind::module_& m)
         .def_rw("number_of_threads", &fiction::sidb::simulation::logic::operational_domain_params::number_of_threads,
                 DOC(fiction_sidb_simulation_logic_operational_domain_params_number_of_threads))
         .def_rw("on_progress", &fiction::sidb::simulation::logic::operational_domain_params::on_progress,
-                DOC(fiction_sidb_simulation_logic_operational_domain_params_on_progress));
+                DOC(fiction_sidb_simulation_logic_operational_domain_params_on_progress))
+        .def_rw("on_worker_progress", &fiction::sidb::simulation::logic::operational_domain_params::on_worker_progress,
+                DOC(fiction_sidb_simulation_logic_operational_domain_params_on_worker_progress));
 
     py::class_<fiction::sidb::simulation::logic::operational_domain_stats>(
         m, "operational_domain_stats", DOC(fiction_sidb_simulation_logic_operational_domain_stats))

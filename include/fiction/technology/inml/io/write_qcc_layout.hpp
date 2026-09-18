@@ -22,12 +22,14 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/atomic_write.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <functional>
@@ -58,6 +60,8 @@ struct write_qcc_layout_params
      * Filename of the QCC file.
      */
     std::string_view filename{};
+    /** @brief Receives completed serialization work and the phase total. */
+    utils::progress_callback on_progress{};
 };
 
 namespace detail
@@ -285,6 +289,7 @@ class write_qcc_layout_impl
 
     void write_layout()
     {
+        utils::progress_reporter      progress{ps.on_progress, "writing rows", (static_cast<std::size_t>(lyt.y()) + 1)};
         std::unordered_set<cell<Lyt>> skip{};
 
         os << qcc::OPEN_LAYOUT;
@@ -353,6 +358,7 @@ class write_qcc_layout_impl
 
                 os << qcc::CLOSE_LAYOUT_ITEM;
             }
+            progress.advance();
         }
         os << qcc::CLOSE_LAYOUT;
     }

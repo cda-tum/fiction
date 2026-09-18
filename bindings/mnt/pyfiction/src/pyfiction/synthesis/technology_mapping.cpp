@@ -42,7 +42,7 @@ void technology_mapping_impl(nanobind::module_& m)
 
     m.def("technology_mapping", &fiction::synthesis::technology_mapping<Ntk>, py::arg("network"),
           py::arg("params") = fiction::synthesis::technology_mapping_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_synthesis_technology_mapping));
+          DOC(fiction_synthesis_technology_mapping), py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail
@@ -129,18 +129,20 @@ void technology_mapping(nanobind::module_& m)
         .def_ro("mapper_stats", &fiction::synthesis::technology_mapping_stats::mapper_stats,
                 DOC(fiction_synthesis_technology_mapping_stats_mapper_stats));
 
-    m.def("and_or_not", &fiction::synthesis::and_or_not, DOC(fiction_synthesis_and_or_not));
+    m.def("and_or_not", &fiction::synthesis::and_or_not, DOC(fiction_synthesis_and_or_not),
+          py::call_guard<py::gil_scoped_release>());
 
-    m.def("and_or_not_maj", &fiction::synthesis::and_or_not_maj, DOC(fiction_synthesis_and_or_not_maj));
+    m.def("and_or_not_maj", &fiction::synthesis::and_or_not_maj, DOC(fiction_synthesis_and_or_not_maj),
+          py::call_guard<py::gil_scoped_release>());
 
     m.def("all_standard_2_input_functions", &fiction::synthesis::all_standard_2_input_functions,
-          DOC(fiction_synthesis_all_standard_2_input_functions));
+          DOC(fiction_synthesis_all_standard_2_input_functions), py::call_guard<py::gil_scoped_release>());
 
     m.def("all_standard_3_input_functions", &fiction::synthesis::all_standard_3_input_functions,
-          DOC(fiction_synthesis_all_standard_3_input_functions));
+          DOC(fiction_synthesis_all_standard_3_input_functions), py::call_guard<py::gil_scoped_release>());
 
     m.def("all_supported_standard_functions", &fiction::synthesis::all_supported_standard_functions,
-          DOC(fiction_synthesis_all_supported_standard_functions));
+          DOC(fiction_synthesis_all_supported_standard_functions), py::call_guard<py::gil_scoped_release>());
 
     detail::technology_mapping_impl<py_tec_network>(m);
     detail::technology_mapping_impl<py_aig_network>(m);

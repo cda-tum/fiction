@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
   - `utils::progress_callback` and `utils::progress_reporter` let long-running algorithms report
     progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
+  - Parallel algorithms accept `on_worker_progress` for stable worker activity and completed counts.
+    Gate mapping, network passes, design-rule checks, and layout writers report counted phases.
 
 - CLI:
 
@@ -21,7 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
   - `aig`, `abc`, and `generate` provide AIG optimization, external ABC scripts, and network generators.
   - `show` supports optional Graphviz SVG rendering, explicit viewers, and temporary-file cleanup.
-  - Commands show progress on terminals; quiet mode and redirected output suppress progress displays.
+  - Long-running CLI commands show responsive progress. Counted phases use real bars; searches show
+    candidate dimensions and bounded worker detail. Quiet mode and redirected output suppress displays.
 
 - Code quality:
 
@@ -148,7 +151,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Help includes command inputs, defaults, restrictions, and examples. Store tables and status text fit
     terminal widths; `ps` groups related statistics.
   - Errors use standard error. `--quiet` retains requested results, and `-i` continues scripted runs
-    interactively. `gold --progress` controls search progress separately from verbose statistics.
+    interactively. `gold --progress` remains accepted for compatibility; Rich controls search progress.
   - Long options use hyphens. See the CLI migration table for renamed options, topology choices, clock
     phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
@@ -381,7 +384,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
   - `network_balancing` accepts networks without primary outputs.
-
+  - `gold` counts expansions only when a search-space graph expands.
   - Progress reporters now flush each pass's final count before a reset.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.

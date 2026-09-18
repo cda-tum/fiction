@@ -20,6 +20,7 @@
 #include "fiction/networks/io/dot_drawers.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
@@ -28,6 +29,7 @@
 
 #include <array>
 #include <cctype>
+#include <cstddef>
 #include <cstdint>
 #include <ostream>
 #include <sstream>
@@ -705,10 +707,12 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
  * - foreach_fanin
  *
  * \param lyt Layout
+ * @param on_progress Receives completed drawing work.
  * \param os Output stream
  */
 template <class Lyt, class Drawer>
-void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})
+void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {},
+                      utils::progress_callback on_progress = {})
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::has_is_pi_v<Lyt>, "Lyt does not implement the is_pi function");
@@ -722,12 +726,16 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
 
     nodes << fmt::format("node [{}];\n", fmt::join(node_attributes, ", "));
 
+    utils::progress_reporter tiles_progress{on_progress, "drawing tiles",
+                                            (static_cast<std::size_t>(lyt.x()) + 1) *
+                                                (static_cast<std::size_t>(lyt.y()) + 1)};
     // draw tiles
     lyt.foreach_ground_tile(
-        [&lyt, &drawer, &nodes](const auto& t)
+        [&lyt, &drawer, &nodes, &tiles_progress](const auto& t)
         {
             nodes << fmt::format("{} [label=\"{}\", fillcolor={}];\n", drawer.tile_id(t), drawer.tile_label(lyt, t),
                                  drawer.tile_fillcolor(lyt, t));
+            tiles_progress.advance();
         });
 
     edges << "edge [constraint=false];\n";
@@ -763,11 +771,13 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
  * - foreach_fanin
  *
  * \param lyt Layout
+ * @param on_progress Receives completed drawing work.
  * \param filename Filename
  */
 template <class Lyt, class Drawer>
-void write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {})
+void write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {},
+                      utils::progress_callback on_progress = {})
 {
-    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_dot_layout(lyt, os, drawer); });
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_dot_layout(lyt, os, drawer, on_progress); });
 }
 }  // namespace fiction::layouts::io

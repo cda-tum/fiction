@@ -36,7 +36,14 @@ def _arguments_read_aiger(parser: Parser) -> None:
     _type_argument(parser)
 
 
-@command("read_aiger", Category.IO, _arguments_read_aiger, inputs="One file.", example='read_aiger "circuit.aig"')
+@command(
+    "read_aiger",
+    Category.IO,
+    _arguments_read_aiger,
+    inputs="One file.",
+    example='read_aiger "circuit.aig"',
+    progress=True,
+)
 def read_aiger(session: Session, args: argparse.Namespace) -> Result:
     """Read a logic network from a binary (.aig) or ASCII (.aag) AIGER file.
 

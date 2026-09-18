@@ -65,7 +65,8 @@ void network_reader(nanobind::module_& m, const char* function_name)
         py::arg("filename"), py::arg("format") = "",
         "Reads a logic network from a Verilog (`.v`), AIGER (`.aig`), or BLIF (`.blif`) file, or the first "
         "network from a directory of such files. Raises `RuntimeError` with the parser's diagnostics when no "
-        "network can be read.");
+        "network can be read.",
+        py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail

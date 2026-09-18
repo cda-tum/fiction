@@ -47,25 +47,28 @@ namespace detail
  * @tparam DrawIndexes Label the tiles with their node indices.
  * @param lyt The layout to draw.
  * @param filename Path of the file to write.
+ * @param on_progress Receives completed tile rendering.
  */
 template <typename Lyt, bool ClockColors, bool DrawIndexes>
-void draw(const Lyt& lyt, const std::string_view& filename)
+void draw(const Lyt& lyt, const std::string_view& filename, const fiction::utils::progress_callback& on_progress)
 {
     if constexpr (fiction::is_cartesian_layout_v<Lyt>)
     {
         fiction::layouts::io::write_dot_layout<
-            Lyt, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename);
+            Lyt, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
+                                                                                                    on_progress);
     }
     else if constexpr (fiction::is_shifted_cartesian_layout_v<Lyt>)
     {
         fiction::layouts::io::write_dot_layout<
-            Lyt, fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt,
-                                                                                                            filename);
+            Lyt, fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(
+            lyt, filename, {}, on_progress);
     }
     else if constexpr (fiction::is_hexagonal_layout_v<Lyt>)
     {
         fiction::layouts::io::write_dot_layout<
-            Lyt, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename);
+            Lyt, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
+                                                                                                    on_progress);
     }
 }
 
@@ -76,27 +79,29 @@ void write_dot_layout(nanobind::module_& m)
 
     m.def(
         "write_dot_layout",
-        [](const Lyt& lyt, const std::string_view& filename, const bool clock_colors, const bool indexes)
+        [](const Lyt& lyt, const std::string_view& filename, const bool clock_colors, const bool indexes,
+           const fiction::utils::progress_callback& on_progress)
         {
             if (clock_colors && indexes)
             {
-                draw<Lyt, true, true>(lyt, filename);
+                draw<Lyt, true, true>(lyt, filename, on_progress);
             }
             else if (clock_colors)
             {
-                draw<Lyt, true, false>(lyt, filename);
+                draw<Lyt, true, false>(lyt, filename, on_progress);
             }
             else if (indexes)
             {
-                draw<Lyt, false, true>(lyt, filename);
+                draw<Lyt, false, true>(lyt, filename, on_progress);
             }
             else
             {
-                draw<Lyt, false, false>(lyt, filename);
+                draw<Lyt, false, false>(lyt, filename, on_progress);
             }
         },
         py::arg("layout"), py::arg("filename"), py::arg("clock_colors") = false, py::arg("indexes") = false,
-        DOC(fiction_layouts_io_write_dot_layout));
+        py::arg("on_progress").none() = py::none(), DOC(fiction_layouts_io_write_dot_layout),
+        py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail

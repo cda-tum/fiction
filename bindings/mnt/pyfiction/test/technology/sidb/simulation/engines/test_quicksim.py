@@ -134,6 +134,8 @@ def test_quicksim_reports_progress_from_worker_threads(resources_dir: Path) -> N
         reports.append((task, done, total))
 
     params.on_progress = on_progress
+    workers = []
+    params.on_worker_progress = lambda *report: workers.append(report)
 
     result = quicksim(layout, params)
 
@@ -144,3 +146,9 @@ def test_quicksim_reports_progress_from_worker_threads(resources_dir: Path) -> N
     assert iterations[-1] == (50000, 50000)
     # a worker thread reported in between, so the calling thread cannot have held the GIL
     assert len(threads) > 1
+
+    final = {worker: (done, total) for worker, count, description, done, total, active in workers if not active}
+    assert set(final) == {0, 1}
+    assert sum(done for done, total in final.values()) == params.iteration_steps
+    assert all(done == total for done, total in final.values())
+    assert all(count == 2 for worker, count, *rest in workers)

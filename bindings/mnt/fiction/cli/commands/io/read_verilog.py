@@ -42,6 +42,7 @@ def _arguments_read_verilog(parser: Parser) -> None:
     _arguments_read_verilog,
     inputs="One file.",
     example='read_verilog "circuit.v" --type tec',
+    progress=True,
 )
 def read_verilog(session: Session, args: argparse.Namespace) -> Result:
     """Read a logic network from a Verilog file.

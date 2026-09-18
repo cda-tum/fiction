@@ -22,6 +22,7 @@
 #include <chrono>
 #include <cstddef>
 #include <mutex>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -273,4 +274,64 @@ TEST_CASE("Concurrent advances are counted exactly once", "[progress]")
 
     CHECK(rec.records.back() == record{num_threads * items_per_thread, num_threads * items_per_thread});
     CHECK(is_monotone(rec.records));
+}
+
+TEST_CASE("Worker progress preserves identities and clears activity", "[progress]")
+{
+    std::vector<std::size_t> finished{};
+    std::vector<std::size_t> counts(4);
+    std::vector<bool>        active(4);
+    bool                     valid = true;
+    {
+        utils::worker_progress_reporter reporter{
+            [&](const std::size_t id, const std::size_t workers, const std::string_view description,
+                const std::size_t done, const std::size_t total, const bool running)
+            {
+                valid         = valid && workers == 4 && !description.empty() && done <= total;
+                active.at(id) = running;
+                counts.at(id) = done;
+                if (!running)
+                {
+                    finished.push_back(id);
+                }
+            },
+            4};
+        std::vector<std::thread> workers{};
+        for (std::size_t i = 0; i < 4; ++i)
+        {
+            workers.emplace_back(
+                [&, i]
+                {
+                    const utils::worker_progress_scope scope{reporter, i};
+                    reporter.update(i, "first candidate", 0, 3);
+                    reporter.update(i, "next candidate", 1, 3);
+                    reporter.update(i, "last candidate", 3, 3);
+                });
+        }
+        for (auto& worker : workers)
+        {
+            worker.join();
+        }
+    }
+    CHECK(valid);
+    CHECK(finished.size() == 4);
+    CHECK(std::ranges::none_of(active, [](const bool running) { return running; }));
+    CHECK(std::ranges::all_of(counts, [](const auto count) { return count == 3; }));
+}
+
+TEST_CASE("Worker progress clears unfinished work during unwinding", "[progress]")
+{
+    bool active = false;
+    try
+    {
+        utils::worker_progress_reporter    reporter{[&](auto, auto, auto, auto, auto, const bool running)
+                                                    { active = running; }, 1};
+        const utils::worker_progress_scope scope{reporter, 0};
+        reporter.update(0, "candidate");
+        REQUIRE(active);
+        throw std::runtime_error{"stop"};
+    }
+    catch (const std::runtime_error&)
+    {}
+    CHECK_FALSE(active);
 }

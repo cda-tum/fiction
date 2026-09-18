@@ -35,6 +35,7 @@ def _quickexact_arguments(parser: Parser) -> None:
     _quickexact_arguments,
     inputs="Active cell-level layout.",
     example="read layout.sqd; quickexact",
+    progress=True,
 )
 def quickexact_command(session: Session, args: argparse.Namespace) -> Result:
     """Simulate the active SiDB layout exactly with QuickExact, finding every physically valid charge distribution.

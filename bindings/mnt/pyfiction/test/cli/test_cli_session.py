@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import io
+import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -19,21 +20,22 @@ from typing import TYPE_CHECKING
 import pytest
 from rich.cells import cell_len
 from rich.console import Console
-from rich.progress import Progress
+from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import tokenize
 from mnt.fiction.cli.registry import REGISTRY, STORE_FLAGS, Category
-from mnt.fiction.cli.session import Session, ignore_progress
+from mnt.fiction.cli.session import Session, WorkerDisplay, ignore_progress, ignore_worker_progress
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import Store
-from mnt.pyfiction import orthogonal, orthogonal_stats, set_name
+from mnt.pyfiction import orthogonal, orthogonal_stats, read_technology_network, set_name
 
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
 
-    from rich.progress import TaskID
+    from rich.console import RenderableType
+    from rich.progress import Task, TaskID
 
     from mnt.pyfiction import technology_network
 
@@ -298,7 +300,7 @@ def test_progress_serializes_shared_task_reports(monkeypatch: pytest.MonkeyPatch
         def report_from_worker(_: int) -> None:
             """Start the reports together."""
             ready.wait(timeout=5)
-            report("compositions", 0, 0)
+            report("compositions", 1, 0)
 
         with ThreadPoolExecutor(max_workers=4) as workers:
             list(workers.map(report_from_worker, range(4)))
@@ -314,6 +316,8 @@ def test_progress_restarts_with_an_unknown_total(monkeypatch: pytest.MonkeyPatch
     with session.progress("simulation") as report:
         report("compositions", 0, 4)
         report("compositions", 0, 0)
+        assert all(task.description != "compositions" for task in display.tasks)
+        report("compositions", 1, 0)
         task = next(task for task in display.tasks if task.description == "compositions")
         assert task.total is None
 
@@ -322,11 +326,14 @@ def test_quiet_nested_progress_discards_reports() -> None:
     """A quiet nested command suspends the outer command's progress callback."""
     session = Session(console=Console(file=io.StringIO(), force_terminal=True))
     with session.progress("source") as outer:
+        outer_worker = session.report_worker_progress
         session.quiet = True
         with session.progress("ortho") as inner:
             assert inner is ignore_progress
             assert session.report_progress is ignore_progress
+            assert session.report_worker_progress is ignore_worker_progress
         assert session.report_progress is outer
+        assert session.report_worker_progress is outer_worker
 
 
 def test_progress_reports_are_dropped_without_terminal(shell: Shell) -> None:
@@ -335,3 +342,142 @@ def test_progress_reports_are_dropped_without_terminal(shell: Shell) -> None:
         report("gate relocations", 0, 4)
         report("gate relocations", 4, 4)
     assert not shell.output
+
+
+@pytest.mark.parametrize("workers", [1, 4, 5, 120])
+@pytest.mark.parametrize("height", [6, 24])
+def test_worker_display_bounds_detail(workers: int, height: int) -> None:
+    """Small groups show worker rows; large groups and short terminals show a summary."""
+    output = io.StringIO()
+    console = Console(file=output, width=240, height=height, color_system=None)
+    display = Progress(console=console, auto_refresh=False)
+    spinner = display.add_task("exact", total=None, spinner=True)
+    report = WorkerDisplay(display, "exact", spinner)
+    for worker in range(workers):
+        report(worker, workers, f"worker {worker + 1}: 4 \N{MULTIPLICATION SIGN} 6", worker, 10, active=True)
+    console.print(display)
+    text = output.getvalue()
+    if workers <= 4 and workers + 4 <= height:
+        assert f"worker {workers}: 4 \N{MULTIPLICATION SIGN} 6" in text
+        assert "active" not in text
+    else:
+        assert f"{workers} active" in text
+        assert "worker 3:" not in text
+    # Changing descriptions updates a worker rather than accumulating candidate rows.
+    for worker in range(workers):
+        report(worker, workers, f"worker {worker + 1}: 5 \N{MULTIPLICATION SIGN} 6", worker, 10, active=True)
+        report(worker, workers, "finished", worker, 10, active=False)
+    output.seek(0)
+    output.truncate()
+    console.print(display)
+    assert "4 \N{MULTIPLICATION SIGN} 6" not in output.getvalue()
+    assert "5 \N{MULTIPLICATION SIGN} 6" not in output.getvalue()
+
+
+def test_command_progress_is_explicit() -> None:
+    """Only the agreed algorithm and I/O commands enable progress."""
+    disabled = {"gates", "random", "tt", "area"}
+    for name, cmd in REGISTRY.items():
+        assert cmd.progress == (cmd.category is not Category.GENERAL and name not in disabled)
+
+
+def test_worker_callback_restored_after_failure() -> None:
+    """Progress state cannot leak from a failed command into the next command."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+
+    def fail() -> None:
+        """Fail while a worker has an active row."""
+        active = True
+        with session.progress("exact"):
+            session.report_worker_progress(0, 1, "candidate", 0, 0, active)
+            int("failed")
+
+    with pytest.raises(ValueError, match="failed"):
+        fail()
+    assert session.report_worker_progress is ignore_worker_progress
+    assert session.report_progress is ignore_progress
+
+
+@pytest.mark.parametrize("workers", [4, 5])
+def test_gold_retains_best_accepted_solution(workers: int) -> None:
+    """A completed graph and an older report cannot erase the best accepted solution."""
+    output = io.StringIO()
+    console = Console(file=output, width=240, height=24, color_system=None)
+    display = Progress(console=console, auto_refresh=False)
+    spinner = display.add_task("gold", total=None, spinner=True)
+    report = WorkerDisplay(display, "gold", spinner)
+    report(0, workers, "graph 1: 4 by 6; best 4 by 6, cost 24", 8, 0, active=True)
+    report(1, workers, "graph 2: 3 by 6; best 3 by 6, cost 18", 9, 0, active=True)
+    report(1, workers, "finished", 9, 0, active=False)
+    report(0, workers, "graph 1: 5 by 6; best 4 by 6, cost 24", 10, 0, active=True)
+    console.print(display)
+    assert "best 3 by 6, cost 18" in output.getvalue()
+    assert "best 4 by 6, cost 24" not in output.getvalue()
+
+
+def test_worker_callback_restored_after_interruption() -> None:
+    """An interrupt removes the live display and restores both callbacks."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+
+    def interrupt() -> None:
+        """Interrupt an active progress context.
+
+        Raises:
+            KeyboardInterrupt: Simulated user interruption.
+        """
+        with session.progress("exact"):
+            raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        interrupt()
+    assert session.report_progress is ignore_progress
+    assert session.report_worker_progress is ignore_worker_progress
+
+
+def test_spinner_refreshes_during_native_read(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Rich advances both spinner frames and elapsed time during one native reader call."""
+    path = tmp_path / "large.v"
+    count = 200_000
+    path.write_text(
+        "module top(a,b,o);\ninput a,b;\noutput o;\nwire "
+        + ",".join(f"w{index}" for index in range(count))
+        + ";\n"
+        + "".join(f"assign w{index} = a & b;\n" for index in range(count))
+        + "assign o = w0;\nendmodule\n",
+        encoding="utf-8",
+    )
+    reading = False
+    frames: list[str] = []
+    elapsed: list[float] = []
+
+    class RecordingSpinner(SpinnerColumn):
+        """Record frames while the native reader owns the calling thread."""
+
+        def render(self, task: Task) -> RenderableType:
+            """Render the current frame and record its elapsed time.
+
+            Returns:
+                The spinner frame.
+            """
+            frame = super().render(task)
+            if reading:
+                frames.append(str(frame))
+                elapsed.append(task.elapsed or 0)
+            return frame
+
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    display = Progress(RecordingSpinner(), TimeElapsedColumn(), console=session.console, transient=True)
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    interval = sys.getswitchinterval()
+    try:
+        # Only the native call can release the GIL while the reading flag is set.
+        sys.setswitchinterval(10)
+        with session.progress("read"):
+            reading = True
+            read_technology_network(str(path))
+            reading = False
+    finally:
+        sys.setswitchinterval(interval)
+        session.close()
+    assert len(set(frames)) > 1
+    assert max(elapsed) > min(elapsed)

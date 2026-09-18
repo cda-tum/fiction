@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
@@ -162,6 +163,8 @@ struct exact_physical_design_params
      * Callback that receives the number of examined aspect ratios.
      */
     utils::progress_callback on_progress{};
+    /** @brief Reports logical worker activity with a fixed worker count for each invocation. */
+    utils::worker_progress_callback on_worker_progress{};
 };
 /**
  * Statistics.
@@ -212,6 +215,7 @@ class exact_impl
             ps{std::move(p)},
             pst{st},
             progress{ps.on_progress, "aspect ratios"},
+            worker_progress{ps.on_worker_progress, std::max(std::size_t{1}, static_cast<std::size_t>(ps.num_threads))},
             scheme{std::move(clocking_scheme)},
             black_list{sbl}
     {
@@ -262,6 +266,8 @@ class exact_impl
      * Reports the examined aspect ratios. Their number is not bounded in advance, so the total stays unknown.
      */
     utils::progress_reporter progress;
+    /** @brief Serializes the active candidate dimensions of each solver worker. */
+    utils::worker_progress_reporter worker_progress;
     /**
      * The utilized clocking scheme.
      */
@@ -2943,7 +2949,8 @@ class exact_impl
                                                             const std::shared_ptr<std::vector<thread_info>>& ti_list,
                                                             const std::chrono::steady_clock::time_point      started)
     {
-        const auto ctx = std::make_shared<z3::context>();
+        const utils::worker_progress_scope worker_scope{worker_progress, t_num};
+        const auto                         ctx = std::make_shared<z3::context>();
 
         Lyt layout{{}, scheme};
 
@@ -3004,6 +3011,7 @@ class exact_impl
                 const std::scoped_lock guard{rar_mutex};
                 (*ti_list)[t_num].worker_aspect_ratio = ar;
             }
+            worker_progress.update(t_num, fmt::format("worker {}: {} × {}", t_num + 1, ar.x + 1, ar.y + 1), 0, 0, true);
             handler.update(ar);
             {
                 const std::scoped_lock guard{rar_mutex};
@@ -3143,7 +3151,8 @@ class exact_impl
      */
     [[nodiscard]] std::optional<Lyt> run_synchronously()
     {
-        Lyt layout{{}, scheme};
+        const utils::worker_progress_scope worker_scope{worker_progress, 0};
+        Lyt                                layout{{}, scheme};
 
         smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps, black_list};
 
@@ -3163,6 +3172,7 @@ class exact_impl
                 continue;
             }
 
+            worker_progress.update(0, fmt::format("examining layout: {} × {}", ar.x + 1, ar.y + 1), 0, 0, true);
             handler.update(ar);
 
             try

@@ -17,6 +17,7 @@
 #pragma once
 
 #include "fiction/synthesis/network_conversion.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -40,6 +41,8 @@ struct network_balancing_params
      * Flag to indicate that all output nodes should be in the same rank.
      */
     bool unify_outputs = false;
+    /** @brief Reports completed work in each bounded phase. */
+    utils::progress_callback on_progress{};
 };
 
 namespace detail
@@ -82,8 +85,9 @@ class network_balancing_impl
         auto& balanced = init.first;
         auto& old2new  = init.second;
 
+        utils::progress_reporter progress{ps.on_progress, "balancing gates", ntk_topo.num_gates()};
         ntk_topo.foreach_gate(
-            [this, &balanced, &old2new, &insert_buf_chain](const auto& n)
+            [this, &balanced, &old2new, &insert_buf_chain, &progress](const auto& n)
             {
                 // gather children, but substitute fanins by buf where applicable
                 std::vector<typename mockturtle::topo_view<NtkDest>::signal> children{};
@@ -107,6 +111,7 @@ class network_balancing_impl
 
                 // clone the node with new children according to its depth
                 old2new[n] = balanced.clone_node(ntk_topo, n, children);
+                progress.advance();
             });
 
         // gather PO levels

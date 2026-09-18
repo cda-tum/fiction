@@ -222,6 +222,8 @@ struct graph_oriented_layout_design_params
      * Callback that receives the number of search space graph expansions performed so far.
      */
     utils::progress_callback on_progress{};
+    /** @brief Reports logical worker activity with a fixed worker count for each invocation. */
+    utils::worker_progress_callback on_worker_progress{};
 };
 
 /**
@@ -491,6 +493,12 @@ struct search_space_graph
      * The current vertex in the search space graph.
      */
     coord_vec_type<Lyt> current_vertex{};
+    /** @brief Completed expansions of this logical graph. */
+    std::size_t completed_expansions{};
+    /** @brief The most recent accepted solution found by this graph. */
+    std::string best_description{};
+    /** @brief Most recent candidate description for the worker progress row. */
+    std::string progress_description{};
     /**
      * The network associated with this search space graph.
      */
@@ -834,6 +842,7 @@ class graph_oriented_layout_design_impl
 
         // resize ssg_vec based on the new number of search space graphs
         ssg_vec.resize(num_search_space_graphs);
+        utils::worker_progress_reporter worker_progress{ps.on_worker_progress, ssg_vec.size()};
 
         // initialize layout to keep track of current best solution
         Lyt best_lyt{{}, layouts::clocking::twoddwave<Lyt>()};
@@ -892,26 +901,27 @@ class graph_oriented_layout_design_impl
                 for (auto& ssg : ssg_vec)
                 {
                     auto* ssg_ptr = &ssg;
-                    futures_pool.emplace_back(std::async(
-                        std::launch::async,
-                        [this, ssg_ptr, &update_best_layout_mutex, &best_lyt, &progress]() -> std::optional<Lyt>
-                        {
-                            auto result = process_ssg(*ssg_ptr, progress);
+                    futures_pool.emplace_back(std::async(std::launch::async,
+                                                         [this, ssg_ptr, &update_best_layout_mutex, &best_lyt,
+                                                          &progress, &worker_progress]() -> std::optional<Lyt>
+                                                         {
+                                                             auto result =
+                                                                 process_ssg(*ssg_ptr, progress, worker_progress);
 
-                            if (result)
-                            {
-                                const std::scoped_lock lock(update_best_layout_mutex);
-                                best_lyt = std::move(*result);
-                                networks::restore_names(ssg_ptr->network, best_lyt);
-                                update_stats(best_lyt);
+                                                             if (result)
+                                                             {
+                                                                 const std::scoped_lock lock(update_best_layout_mutex);
+                                                                 best_lyt = std::move(*result);
+                                                                 networks::restore_names(ssg_ptr->network, best_lyt);
+                                                                 update_stats(best_lyt);
 
-                                if (ps.return_first)
-                                {
-                                    return best_lyt;
-                                }
-                            }
-                            return std::nullopt;
-                        }));
+                                                                 if (ps.return_first)
+                                                                 {
+                                                                     return best_lyt;
+                                                                 }
+                                                             }
+                                                             return std::nullopt;
+                                                         }));
                 }
 
                 // check the futures for the result - poll for readiness to support return_first
@@ -952,7 +962,7 @@ class graph_oriented_layout_design_impl
                 // single-threaded version
                 for (auto& ssg : ssg_vec)
                 {
-                    auto result = process_ssg(ssg, progress);
+                    auto result = process_ssg(ssg, progress, worker_progress);
 
                     if (result)
                     {
@@ -980,6 +990,7 @@ class graph_oriented_layout_design_impl
                     else
                     {
                         ssg.frontier_flag = false;
+                        worker_progress.finish(static_cast<std::size_t>(&ssg - ssg_vec.data()));
                     }
                 }
             }
@@ -1979,7 +1990,7 @@ class graph_oriented_layout_design_impl
      * If the layout is invalid or no improvement is possible, std::nullopt is returned.
      */
     [[nodiscard]] std::pair<std::vector<std::pair<coord_vec_type<ObstrLyt>, double>>, std::optional<ObstrLyt>>
-    expand(search_space_graph<ObstrLyt>& ssg) noexcept
+    expand(search_space_graph<ObstrLyt>& ssg, utils::worker_progress_reporter& worker_progress)
     {
         const auto min_layout_width = ssg.network.num_pis();
 
@@ -1987,6 +1998,7 @@ class graph_oriented_layout_design_impl
         next_positions.reserve(2 * ps.num_vertex_expansions);
 
         auto layout = initialize_layout(min_layout_width);
+        report_graph(ssg, layout, 0, worker_progress);
 
         auto                             pi2node = reserve_input_nodes(layout, ssg.network);
         node_dict_type<ObstrLyt, tec_nt> node2pos{ssg.network};
@@ -2005,6 +2017,7 @@ class graph_oriented_layout_design_impl
             const auto position = ssg.current_vertex[idx];
 
             bool found_solution = place_and_route(position, layout, ssg, place_info);
+            report_graph(ssg, layout, place_info.current_node, worker_progress);
 
             uint64_t cost         = 0ul;
             uint64_t desired_cost = 0ul;
@@ -2118,6 +2131,9 @@ class graph_oriented_layout_design_impl
                 if (desired_cost < best_optimized_solution)
                 {
                     best_optimized_solution = desired_cost;
+                    ssg.best_description =
+                        fmt::format("; best {} × {}, cost {}", layout.x() + 1, layout.y() + 1, desired_cost);
+                    report_graph(ssg, layout, place_info.current_node, worker_progress, true);
 
                     if (ps.verbose)
                     {
@@ -2185,18 +2201,43 @@ class graph_oriented_layout_design_impl
         return generate_next_positions(possible_positions, layout, ssg);
     }
     /**
+     * @brief Reports a graph's current candidate without interpreting search depth as completion.
+     * @param ssg Search graph with a stable vector index.
+     * @param layout Current partial layout.
+     * @param placed Number of nodes placed in this candidate.
+     * @param reporter Serializes worker descriptions.
+     * @param force Publish an accepted solution immediately.
+     */
+    void report_graph(search_space_graph<ObstrLyt>& ssg, const ObstrLyt& layout, const std::size_t placed,
+                      utils::worker_progress_reporter& reporter, const bool force = false) const
+    {
+        if (ps.on_worker_progress)
+        {
+            const auto id = static_cast<std::size_t>(&ssg - ssg_vec.data());
+            ssg.progress_description =
+                fmt::format("graph {}: {} × {}, placed {}/{}{}", id + 1, layout.x() + 1, layout.y() + 1, placed,
+                            ssg.nodes_to_place.size(), ssg.best_description);
+            reporter.update(id, ssg.progress_description, ssg.completed_expansions, 0, force);
+        }
+    }
+    /**
      * This function performs an expansion step on the given SSG and updates the frontier and cost information.
      *
      * @param ssg The search space graph to process.
      * @param progress Reports completed expansions of active graphs.
+     * @param worker_progress Reports each graph under its stable index.
      * @return An optional layout. Returns a layout if one is found during expansion; otherwise, std::nullopt.
      */
-    std::optional<Lyt> process_ssg(search_space_graph<ObstrLyt>& ssg, utils::progress_reporter& progress)
+    std::optional<Lyt> process_ssg(search_space_graph<ObstrLyt>& ssg, utils::progress_reporter& progress,
+                                   utils::worker_progress_reporter& worker_progress)
     {
         if (ssg.frontier_flag)
         {
-            const auto expansion = expand(ssg);
+            const auto expansion = expand(ssg, worker_progress);
             progress.advance();
+            ++ssg.completed_expansions;
+            worker_progress.update(static_cast<std::size_t>(&ssg - ssg_vec.data()), ssg.progress_description,
+                                   ssg.completed_expansions);
             if (expansion.second)
             {
                 return expansion.second;

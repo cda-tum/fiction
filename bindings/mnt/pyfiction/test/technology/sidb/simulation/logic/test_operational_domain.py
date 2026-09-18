@@ -478,7 +478,8 @@ def test_operational_domain_two_bdl_pair_wire():
     assert stats_grid.num_non_operational_parameter_combinations == 8281
 
 
-def test_grid_search_reports_progress(resources_dir):
+@pytest.mark.parametrize("strategy", ["grid", "flood"])
+def test_domain_reports_progress(resources_dir: Path, strategy: str) -> None:
     """The parameter points are reported as they are evaluated, ending at the grid size."""
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
@@ -496,11 +497,25 @@ def test_grid_search_reports_progress(resources_dir):
 
     reports = []
     params.on_progress = lambda task, done, total: reports.append((task, done, total))
+    workers = []
+    params.on_worker_progress = lambda *report: workers.append(report)
 
     stats = operational_domain_stats()
-    operational_domain_grid_search(lyt, [create_or_tt()], params, stats)
+    if strategy == "grid":
+        operational_domain_grid_search(lyt, [create_or_tt()], params, stats)
+    else:
+        operational_domain_flood_fill(lyt, [create_or_tt()], 1, params, stats)
 
     points = [(done, total) for task, done, total in reports if task == "parameter points"]
     assert points[0] == (0, 0)  # the total is unknown until the grid is set up
     assert points == sorted(points)
-    assert points[-1] == (stats.num_evaluated_parameter_combinations, 121)
+    assert points[-1][0] == stats.num_evaluated_parameter_combinations == 121
+    assert points[-1][1] == (121 if strategy == "grid" else 0)
+
+    finished = [(done, total) for worker, count, description, done, total, active in workers if not active]
+    if strategy == "grid":
+        assert len(finished) == params.number_of_threads
+    assert sum(done for done, total in finished) == stats.num_evaluated_parameter_combinations
+    assert all(total in (done, 0) for done, total in finished)
+    if strategy == "flood":
+        assert any("exploring" in description and total == 0 for _, _, description, _, total, _ in workers)

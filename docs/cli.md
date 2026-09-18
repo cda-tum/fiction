@@ -49,9 +49,22 @@ words: `tt -e "[(ab)(!ac)]"`. When a command fails, the shell prints the reason 
 the shell itself keeps running. Quoted `;` and `#` are literal characters; Windows backslashes stay intact.
 `--quiet` suppresses notices while retaining requested command results. `NO_COLOR` disables drawing colors.
 
-While a command runs, the shell shows a spinner with the elapsed time, and the algorithms that report their
-progress add a bar per task below it. The display disappears when the command finishes. Quiet mode and
-nonterminal output disable the display.
+Long-running commands show a spinner and elapsed time immediately. Counted phases show bars with actual
+completed work: gate placement and mapping, network passes, design-rule checks, and layout export. General
+commands, `gates`, `random`, `tt`, and `area` have no progress display. Readers and opaque library calls
+retain a spinner because their work has no known total. Quiet mode and nonterminal output disable progress;
+the transient display disappears on completion, interruption, or failure.
+
+`exact` shows the tile dimensions of each solver candidate. `gold` shows search-graph expansions and
+candidate dimensions, with placed nodes as candidate status; neither search claims a completion percentage.
+`gold` also shows the dimensions and selected-objective cost of the best accepted solution. Its `--progress`
+flag remains accepted for compatibility; the shell controls progress through Rich.
+
+Up to four workers or search graphs get individual rows when they fit the terminal. Larger groups use an
+aggregate indicator and a short summary. The display mode stays fixed throughout the command. `quicksim`
+reports worker iteration budgets, `opdom` reports fixed slices or dynamic point counts, and `clustercomplete`
+reports composition counts. `temp` forwards the active simulation's workers beneath its outer phase;
+nested simulations inside `opdom` remain part of their owning worker.
 
 ## Stores
 
@@ -518,7 +531,7 @@ and `-c/--cell-layout`; `--logic_network` becomes `--network`.
 | `simulate` | `simulate` | `--store`, `--silent`, network/layout selection remain; all outputs retain declaration order even with duplicate names |
 | `exact` | `exact` | `--clk_scheme` becomes `--scheme`; `--async` becomes `--threads`; `--sync_elems` becomes `--synchronization-elements`; `--hex` becomes explicit `--topology`; bounds, crossings, border I/O, desynchronization, minimization, and ToPoliNano constraints remain |
 | `ortho` | `ortho` | `--clock_numbers` becomes `--clock-phases`; `--hex or/er/oc/ec` becomes the corresponding explicit hexagonal topology |
-| `gold` | `gold` | `--num_vertex_expansions/--effort_mode/--cost_objective` become `--expansions/--effort/--cost`; `--tiles_to_skip_between_pis` becomes `--skip-tiles`; random spacing becomes `--randomize-skip-tiles`; `--progress` requests progress, `--verbose` statistics |
+| `gold` | `gold` | `--num_vertex_expansions/--effort_mode/--cost_objective` become `--expansions/--effort/--cost`; `--tiles_to_skip_between_pis` becomes `--skip-tiles`; random spacing becomes `--randomize-skip-tiles`; `--progress` is accepted for compatibility, `--verbose` requests statistics |
 | `hex` | `hex` | `--input_pin_extension/--output_pin_extension` become `--extend-inputs/--extend-outputs`; `--planar` remains |
 | `optimize` | `optimize` | `--wiring_reduction_only/--max_gate_relocations/--planar_optimization` become `--wiring-only/--max-relocations/--planar`; timeout remains |
 | `cell` | `cell` | All four libraries and their established spelling aliases remain |

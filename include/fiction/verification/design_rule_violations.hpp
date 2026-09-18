@@ -17,6 +17,7 @@
 #pragma once
 
 #include "fiction/traits.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>
@@ -94,6 +95,8 @@ struct gate_level_drv_params
      * Stream to write the report into.
      */
     std::ostream* out = &std::cout;
+    /** @brief Reports completed work in each bounded phase. */
+    utils::progress_callback on_progress{};
 };
 
 struct gate_level_drv_stats
@@ -148,26 +151,39 @@ class gate_level_drvs_impl
      */
     void run()
     {
+        utils::progress_reporter progress{
+            ps.on_progress, "design rule checks",
+            static_cast<std::size_t>(ps.unplaced_nodes) + static_cast<std::size_t>(ps.placed_dead_nodes) +
+                static_cast<std::size_t>(ps.non_adjacent_connections) +
+                static_cast<std::size_t>(ps.missing_connections) + static_cast<std::size_t>(ps.crossing_gates) +
+                static_cast<std::size_t>(ps.clocked_data_flow) + static_cast<std::size_t>(ps.has_io) +
+                static_cast<std::size_t>(ps.empty_io) + static_cast<std::size_t>(ps.io_pins) +
+                static_cast<std::size_t>(ps.border_io)};
         *ps.out << "[i] Topology:\n";
         if (ps.unplaced_nodes)
         {
             *ps.out << "[i]" << unplaced_nodes_check() << '\n';
+            progress.advance();
         }
         if (ps.placed_dead_nodes)
         {
             *ps.out << "[i]" << placed_dead_nodes_check() << '\n';
+            progress.advance();
         }
         if (ps.non_adjacent_connections)
         {
             *ps.out << "[i]" << non_adjacent_connections_check() << '\n';
+            progress.advance();
         }
         if (ps.missing_connections)
         {
             *ps.out << "[i]" << missing_connections_check() << '\n';
+            progress.advance();
         }
         if (ps.crossing_gates)
         {
             *ps.out << "[i]" << crossing_gates_check() << '\n';
+            progress.advance();
         }
         *ps.out << '\n';
 
@@ -175,6 +191,7 @@ class gate_level_drvs_impl
         if (ps.clocked_data_flow)
         {
             *ps.out << "[i]" << clocked_data_flow_check() << '\n';
+            progress.advance();
         }
         *ps.out << '\n';
 
@@ -182,18 +199,22 @@ class gate_level_drvs_impl
         if (ps.has_io)
         {
             *ps.out << "[i]" << has_io_check() << '\n';
+            progress.advance();
         }
         if (ps.empty_io)
         {
             *ps.out << "[i]" << empty_io_check() << '\n';
+            progress.advance();
         }
         if (ps.io_pins)
         {
             *ps.out << "[i]" << io_pin_check() << '\n';
+            progress.advance();
         }
         if (ps.border_io)
         {
             *ps.out << "[i]" << border_io_check() << '\n';
+            progress.advance();
         }
 
         *ps.out << fmt::format(
@@ -331,8 +352,14 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
+            std::size_t traversal_count{};
+            if (ps.on_progress)
+            {
+                lyt.foreach_node([&](const auto&) { ++traversal_count; });
+            }
+            utils::progress_reporter traversal{ps.on_progress, "unplaced nodes", traversal_count};
             lyt.foreach_node(
-                [&unplaced_report, &all_placed, this](const auto& n)
+                [&unplaced_report, &all_placed, this, &traversal](const auto& n)
                 {
                     // skip constants
                     if (!lyt.is_constant(n))
@@ -345,6 +372,7 @@ class gate_level_drvs_impl
                             ++pst.warnings;
                         }
                     }
+                    traversal.advance();
                 });
         }
 
@@ -365,8 +393,12 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
+            utils::progress_reporter traversal{ps.on_progress, "placed dead nodes",
+                                               (static_cast<std::size_t>(lyt.x()) + 1) *
+                                                   (static_cast<std::size_t>(lyt.y()) + 1) *
+                                                   (static_cast<std::size_t>(lyt.z()) + 1)};
             lyt.foreach_tile(
-                [&placed_dead_report, &all_alive, this](const auto& t)
+                [&placed_dead_report, &all_alive, this, &traversal](const auto& t)
                 {
                     // skip empty tiles
                     if (!lyt.is_empty_tile(t))
@@ -381,6 +413,7 @@ class gate_level_drvs_impl
                             ++pst.warnings;
                         }
                     }
+                    traversal.advance();
                 });
         }
 
@@ -401,12 +434,17 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
+            utils::progress_reporter traversal{ps.on_progress, "non adjacent connections",
+                                               (static_cast<std::size_t>(lyt.x()) + 1) *
+                                                   (static_cast<std::size_t>(lyt.y()) + 1) *
+                                                   (static_cast<std::size_t>(lyt.z()) + 1)};
             lyt.foreach_tile(
-                [this, &non_adjacency_report, &adjacencies_respected](const auto& t)
+                [this, &non_adjacency_report, &adjacencies_respected, &traversal](const auto& t)
                 {
                     // skip empty tiles
                     if (lyt.is_empty_tile(t))
                     {
+                        traversal.advance();
                         return;
                     }
 
@@ -423,6 +461,7 @@ class gate_level_drvs_impl
                             ++pst.drvs;
                         }
                     }
+                    traversal.advance();
                 });
         }
 
@@ -443,11 +482,16 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
+            utils::progress_reporter traversal{ps.on_progress, "missing connections",
+                                               (static_cast<std::size_t>(lyt.x()) + 1) *
+                                                   (static_cast<std::size_t>(lyt.y()) + 1) *
+                                                   (static_cast<std::size_t>(lyt.z()) + 1)};
             lyt.foreach_tile(
-                [this, &connections_report, &all_connected](const auto& t)
+                [this, &connections_report, &all_connected, &traversal](const auto& t)
                 {
                     if (lyt.is_empty_tile(t))
                     {
+                        traversal.advance();
                         return;
                     }
 
@@ -462,6 +506,7 @@ class gate_level_drvs_impl
                         log_tile(t, connections_report);
                         ++pst.drvs;
                     }
+                    traversal.advance();
                 });
         }
 
@@ -482,8 +527,14 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
+            std::size_t traversal_count{};
+            if (ps.on_progress)
+            {
+                lyt.foreach_wire([&](const auto&) { ++traversal_count; });
+            }
+            utils::progress_reporter traversal{ps.on_progress, "crossing gates", traversal_count};
             lyt.foreach_wire(
-                [this, &crossing_report, &all_wire_crossings](const auto& w)
+                [this, &crossing_report, &all_wire_crossings, &traversal](const auto& w)
                 {
                     if (const auto t = lyt.get_tile(w); lyt.is_crossing_layer(t))
                     {
@@ -494,6 +545,7 @@ class gate_level_drvs_impl
                             ++pst.drvs;
                         }
                     }
+                    traversal.advance();
                 });
         }
 
@@ -514,11 +566,16 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
+            utils::progress_reporter traversal{ps.on_progress, "clocked data flow",
+                                               (static_cast<std::size_t>(lyt.x()) + 1) *
+                                                   (static_cast<std::size_t>(lyt.y()) + 1) *
+                                                   (static_cast<std::size_t>(lyt.z()) + 1)};
             lyt.foreach_tile(
-                [this, &data_flow_report, &data_flow_respected](const auto& t)
+                [this, &data_flow_report, &data_flow_respected, &traversal](const auto& t)
                 {
                     if (lyt.is_empty_tile(t))
                     {
+                        traversal.advance();
                         return;
                     }
 
@@ -535,6 +592,7 @@ class gate_level_drvs_impl
                             ++pst.drvs;
                         }
                     }
+                    traversal.advance();
                 });
         }
 

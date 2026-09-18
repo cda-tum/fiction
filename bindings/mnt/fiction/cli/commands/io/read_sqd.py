@@ -24,7 +24,9 @@ if TYPE_CHECKING:
 from ._common import _read_path_argument
 
 
-@command("read_sqd", Category.IO, _read_path_argument, inputs="One file.", example='read_sqd "layout.sqd"')
+@command(
+    "read_sqd", Category.IO, _read_path_argument, inputs="One file.", example='read_sqd "layout.sqd"', progress=True
+)
 def read_sqd(session: Session, args: argparse.Namespace) -> Result:
     """Read an SiDB cell-level layout from a SiQAD file."""
     return read_file(session, args.path, suffixes=(".sqd",))

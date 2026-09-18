@@ -37,6 +37,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <deque>
 #include <functional>
@@ -117,6 +118,8 @@ struct clustercomplete_params
      * Callback that receives the number of unfolded charge space compositions.
      */
     utils::progress_callback on_progress{};
+    /** @brief Reports logical worker activity with a fixed worker count for each invocation. */
+    utils::worker_progress_callback on_worker_progress{};
 };
 
 namespace detail
@@ -137,6 +140,7 @@ class clustercomplete_impl
     clustercomplete_impl(const layout& lyt, const clustercomplete_params& params) :
             available_threads{std::max(uint64_t{1}, params.available_threads)},
             progress{params.on_progress, "compositions"},
+            worker_progress{params.on_worker_progress, available_threads},
             landscape{lyt, params.sim_params, params.local_external_potential, params.global_potential},
             mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
                                  -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
@@ -192,6 +196,8 @@ class clustercomplete_impl
                 {
                     // single-threaded execution
 
+                    const utils::worker_progress_scope worker_scope{worker_progress, 0};
+                    worker_progress.update(0, "compositions");
                     collect_physically_valid_charge_distributions_single_threaded(gss_stats.top_cluster);
                 }
                 else
@@ -202,7 +208,7 @@ class clustercomplete_impl
                     initialize_worker_queues(extract_work_from_top_cluster(gss_stats.top_cluster));
 
                     // set up threads
-                    std::vector<std::thread> supporting_threads{};
+                    std::vector<std::jthread> supporting_threads{};
                     supporting_threads.reserve(available_threads);
 
                     for (uint64_t i = 1; i < available_threads; ++i)
@@ -210,7 +216,8 @@ class clustercomplete_impl
                         supporting_threads.emplace_back(
                             [&, ix = i]
                             {
-                                worker& w = *workers.at(ix);
+                                worker&                            w = *workers.at(ix);
+                                const utils::worker_progress_scope worker_scope{worker_progress, ix};
 
                                 // keep unfolding on this thread until no more work exists
                                 while (const std::optional<work_t>& work = w.obtain_work())
@@ -220,6 +227,7 @@ class clustercomplete_impl
                             });
                     }
 
+                    const utils::worker_progress_scope main_worker_scope{worker_progress, 0};
                     // keep unfolding on the main thread until no more work exists
                     while (const std::optional<work_t>& work = workers.front()->obtain_work())
                     {
@@ -261,6 +269,10 @@ class clustercomplete_impl
      * @brief Reports unfolded compositions; the total is unknown.
      */
     utils::progress_reporter progress;
+    /** @brief Worker activity during dynamic composition exploration. */
+    utils::worker_progress_reporter worker_progress;
+    /** @brief Completed compositions in the serial traversal. */
+    std::size_t completed_compositions{};
     /**
      * @brief Vector containing all workers.
      */
@@ -581,8 +593,6 @@ class clustercomplete_impl
         // specialise for all compositions of max_pst
         for (const charge_space_composition& max_pst_composition : get_projector_state_compositions(*max_pst))
         {
-            progress.advance();
-
             // specialise parent to a specific composition of its children
             add_composition(cl_state, max_pst_composition);
 
@@ -591,6 +601,8 @@ class clustercomplete_impl
 
             // undo specialization such that the specialization may consider a different children composition
             remove_composition(cl_state, max_pst_composition);
+            progress.advance();
+            worker_progress.update(0, "compositions", ++completed_compositions);
         }
 
         // apply max_pst back
@@ -611,14 +623,14 @@ class clustercomplete_impl
         {
             for (const charge_space_composition& composition : ccs.compositions)
             {
-                progress.advance();
-
                 // convert charge space composition to clustering state
                 clustering_state cl_state{landscape.num_sidbs()};
                 add_composition(cl_state, composition);
 
                 // unfold
                 add_physically_valid_charge_configurations(cl_state);
+                progress.advance();
+                worker_progress.update(0, "compositions", ++completed_compositions);
             }
         }
     }
@@ -858,6 +870,8 @@ class clustercomplete_impl
          * @brief Worker index in the vector of all workers.
          */
         const uint64_t index;
+        /** @brief Compositions examined by this worker. */
+        std::size_t completed_compositions{};
         /**
          * @brief This worker's queue where work can be obtained from either by this worker or by others (work
          * stealing).
@@ -1132,21 +1146,20 @@ class clustercomplete_impl
      */
     bool unfold_composition(worker& w, const charge_space_composition& composition)
     {
-        progress.advance();
-
         // specialize parent to a specific composition of its children
         add_composition(w.cl_state, composition);
 
         // recurse with specialized composition
-        if (add_physically_valid_charge_configurations(w, composition))
+        const auto backtrack = add_physically_valid_charge_configurations(w, composition);
+        if (backtrack)
         {
             // undo specialization such that the specialization may consider a different children composition
             remove_composition(w.cl_state, composition);
-
-            return true;
         }
 
-        return false;
+        progress.advance();
+        worker_progress.update(w.index, "compositions", ++w.completed_compositions);
+        return backtrack;
     }
 };
 

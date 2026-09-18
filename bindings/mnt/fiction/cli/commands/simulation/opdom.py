@@ -99,6 +99,7 @@ def _opdom_arguments(parser: Parser) -> None:
     _opdom_arguments,
     inputs="Active SiDB layout; gate checks also use the active truth table.",
     example='read and.sqd; tt -e "(ab)"; opdom domain.csv',
+    progress=True,
 )
 def opdom(session: Session, args: argparse.Namespace) -> Result:
     """Compute the operational domain of the active SiDB gate and write it as CSV.
@@ -113,6 +114,7 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
 
     params = operational_domain_params()
     params.on_progress = session.report_progress
+    params.on_worker_progress = session.report_worker_progress
     params.operational_params.sim_engine = ENGINES[args.engine]
     parameters = _apply_physical(params.operational_params.simulation_parameters, args)
     if args.sketch:

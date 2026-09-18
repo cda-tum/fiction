@@ -50,3 +50,35 @@ Algorithms use a `progress_reporter` to forward their progress. Each reporter se
 intermediate reports to whole percents and at most ten reports per second. It always forwards the first and final count
 of a task, including before a reset starts another pass. Callbacks must not throw exceptions. Callbacks shared by multiple
 reporters must synchronize access to shared state, including Python callbacks that release the global interpreter lock.
+
+Parallel algorithms accept an optional `on_worker_progress` callback. Its arguments are the stable logical
+worker ID, fixed worker count, description, completed count, total (`0` for unknown), and active state.
+Descriptions can change without changing the worker ID. `gold` uses search-space graph IDs across rounds;
+`exact` describes dimensions in tiles. A candidate's placed-node count describes that candidate, not the
+fraction of the search completed.
+
+```python
+from mnt.pyfiction import exact_params
+
+params = exact_params()
+params.on_worker_progress = lambda worker, count, description, done, total, active: print(
+    worker, description, done, total, active
+)
+```
+
+```{doxygentypedef} fiction::utils::worker_progress_callback
+```
+
+```{doxygenclass} fiction::utils::worker_progress_reporter
+:members:
+```
+
+Worker reporters serialize callbacks and throttle ordinary updates to ten per second per worker. Activity
+transitions publish immediately. Inactive reports retain the final completed count, including on early exits.
+Algorithms join their workers before destroying callback state. Callbacks run outside solver, queue, and
+result locks. A callback must not throw or re-enter its reporter.
+
+Gate-library application and layout writers also accept aggregate callbacks, either as `on_progress`
+arguments or in their parameter structs. Counted phases use their actual units: gates, rows, tiles, cell
+positions, dots, defects, or rendering passes. The shell hides empty phases and keeps the last completed
+count on failure. Readers do not scan input solely to determine progress totals.

@@ -50,7 +50,9 @@ void quicksim(nanobind::module_& m)
                 DOC(fiction_sidb_simulation_engines_quicksim_params_number_threads))
         .def_rw("timeout", &quicksim_params::timeout, DOC(fiction_sidb_simulation_engines_quicksim_params_timeout))
         .def_rw("on_progress", &quicksim_params::on_progress,
-                DOC(fiction_sidb_simulation_engines_quicksim_params_on_progress));
+                DOC(fiction_sidb_simulation_engines_quicksim_params_on_progress))
+        .def_rw("on_worker_progress", &quicksim_params::on_worker_progress,
+                DOC(fiction_sidb_simulation_engines_quicksim_params_on_worker_progress));
 
     // NOLINTNEXTLINE(misc-const-correctness)
     std::optional<fiction::sidb::simulation::result> (*const quicksim_pointer)(

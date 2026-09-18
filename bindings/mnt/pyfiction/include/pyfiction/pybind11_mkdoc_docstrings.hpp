@@ -344,6 +344,8 @@ static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_has_borde
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_lyt = R"doc()doc";
 
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_on_progress = R"doc(Receives serialization progress.)doc";
+
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_os = R"doc()doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_run = R"doc()doc";
@@ -364,7 +366,15 @@ static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_lay
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_pins = R"doc()doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_qll_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_qll_layout_impl =
+R"doc(Creates a writer with optional serialization progress.
+
+Args:
+    src: Layout to write.
+    s: Output stream.
+    callback: Receives completed serialization work.
+
+)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_technology_settings = R"doc()doc";
 
@@ -379,6 +389,7 @@ This overload uses an output stream to write into.
 
 Args:
     lyt: The layout to be written.
+    on_progress: Receives completed serialization work.
     os: The output stream to write into.
 
 Template Args:
@@ -397,6 +408,7 @@ This overload uses a file name to create and write into.
 
 Args:
     lyt: The layout to be written.
+    on_progress: Receives completed serialization work.
     filename: The file name to create and write into. Should
               preferably use the `.qll` extension.
 
@@ -950,6 +962,8 @@ Template Args:
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params = R"doc(Parameters for writing QCC layouts.)doc";
 
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params_filename = R"doc(Filename of the QCC file.)doc";
+
+static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params_on_progress = R"doc(Receives completed serialization work and the phase total.)doc";
 
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params_use_filename_as_component_name = R"doc(Use the given filename as the component name inside the QCC file.)doc";
 
@@ -5499,11 +5513,21 @@ static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl = R"d
 
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_lyt = R"doc(The layout to be written.)doc";
 
+static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_on_progress = R"doc(Receives serialization progress.)doc";
+
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_os = R"doc(The output stream to which the gate-level layout is written.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_run = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_write_fgl_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_write_fgl_layout_impl =
+R"doc(Creates a writer with optional serialization progress.
+
+Args:
+    src: Layout to write.
+    s: Output stream.
+    callback: Receives completed serialization work.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_io_fgl_parsing_error =
 R"doc(Exception thrown when an error occurs during parsing of a .fgl file
@@ -5761,6 +5785,7 @@ An overloaded variant exists that writes the layout into a file.
 
 Args:
     lyt: Layout
+    on_progress: Receives completed drawing work.
     os: Output stream
 
 )doc";
@@ -5773,6 +5798,7 @@ R"doc(Writes layout in DOT format into a file
 
 Args:
     lyt: Layout
+    on_progress: Receives completed drawing work.
     filename: Filename
 
 )doc";
@@ -5784,6 +5810,7 @@ This overload uses an output stream to write into.
 
 Args:
     lyt: The layout to be written.
+    on_progress: Receives completed serialization work.
     os: The output stream to write into.
 
 Template Args:
@@ -5798,6 +5825,7 @@ This overload uses a file name to create and write into.
 
 Args:
     lyt: The layout to be written.
+    on_progress: Receives completed serialization work.
     filename: The file name to create and write into. Should
               preferably use the .fgl extension.
 
@@ -7463,6 +7491,8 @@ May pass through, and thereby throw, an
 
 Args:
     lyt: The gate-level layout.
+    on_progress: Optional callback reporting completed nonconstant
+                 gate mappings.
 
 Template Args:
     CellLyt: Type of the returned cell-level layout.
@@ -7862,7 +7892,14 @@ Template Args:
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_apply_gate_library_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_apply_gate_library_impl =
+R"doc(Prepares cell mapping with optional gate counts.
+
+Args:
+    lyt: Gate-level source layout.
+    callback: Receives completed gate mappings.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_assign_gate =
 R"doc(This function assigns a given FCN gate implementation to the total
@@ -7893,6 +7930,17 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_gate_lyt = R"doc(Gate-level layout.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_mapping_count =
+R"doc(Counts nonconstant nodes using the mapping traversal, or skips the
+scan without a callback.
+
+Returns:
+    Number of nodes mapped to cell implementations.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_on_progress = R"doc(Receives completed gate mappings.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_run_parameterized_gate_library =
 R"doc(Run the cell layout generation process.
@@ -9052,6 +9100,8 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_worker_progress = R"doc(Serializes the active candidate dimensions of each solver worker.)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data =
 R"doc(This struct stores information about the fan-in and fan-out
 connections of a gate in a layout. These fan-in and fan-outs are the
@@ -9612,6 +9662,8 @@ the frontier and cost information.
 
 Args:
     ssg: The search space graph to process.
+    progress: Reports completed expansions of active graphs.
+    worker_progress: Reports each graph under its stable index.
 
 Returns:
     An optional layout. Returns a layout if one is found during
@@ -9622,6 +9674,19 @@ Returns:
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_ps = R"doc(Parameters.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_pst = R"doc(Statistics.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_report_graph =
+R"doc(Reports a graph's current candidate without interpreting search depth
+as completion.
+
+Args:
+    ssg: Search graph with a stable vector index.
+    layout: Current partial layout.
+    placed: Number of nodes placed in this candidate.
+    reporter: Serializes worker descriptions.
+    force: Publish an accepted solution immediately.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_route_double_input_node =
 R"doc(Places a node with two inputs in the layout and routes it.
@@ -10173,6 +10238,10 @@ information.
 Template Args:
     Lyt: The layout type.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_best_description = R"doc(The most recent accepted solution found by this graph.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_completed_expansions = R"doc(Completed expansions of this logical graph.)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_cost = R"doc(The cost objective used to expand a vertex in the search space graph.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_cost_so_far = R"doc(The cost so far for reaching each vertex in the layout.)doc";
@@ -10194,6 +10263,8 @@ left.)doc";
 static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_pi_placement_rng =
 R"doc(Random engine for this search space graph's PI spacing. It is seeded
 from the parameters before use.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_progress_description = R"doc(Most recent candidate description for the worker progress row.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_to_hex =
 R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
@@ -10606,6 +10677,10 @@ Note:
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_on_progress = R"doc(Callback that receives the number of examined aspect ratios.)doc";
 
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_on_worker_progress =
+R"doc(Reports logical worker activity with a fixed worker count for each
+invocation.)doc";
+
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_scheme = R"doc(Clocking scheme to be used.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_straight_inverters =
@@ -10913,6 +10988,10 @@ vertex.)doc";
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_on_progress =
 R"doc(Callback that receives the number of search space graph expansions
 performed so far.)doc";
+
+static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_on_worker_progress =
+R"doc(Reports logical worker activity with a fixed worker count for each
+invocation.)doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_planar =
 R"doc(Disable the creation of crossings during layout generation. If set to
@@ -12942,6 +13021,8 @@ static const char *mkd_doc_fiction_qca_io_write_fqca_layout_params = R"doc(Param
 
 static const char *mkd_doc_fiction_qca_io_write_fqca_layout_params_create_inter_layer_via_cells = R"doc(Create via cells in between each layer.)doc";
 
+static const char *mkd_doc_fiction_qca_io_write_fqca_layout_params_on_progress = R"doc(Receives completed serialization work and the phase total.)doc";
+
 static const char *mkd_doc_fiction_qca_io_write_mol_qca_layout_svg =
 R"doc(Writes an SVG representation of a cell-level MolQCA layout to an
 output stream. Only cell-based layouts are supported, since the
@@ -13021,6 +13102,8 @@ static const char *mkd_doc_fiction_qca_io_write_qca_layout_params = R"doc(Parame
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_params_create_inter_layer_via_cells = R"doc(Create via cells in between each layer.)doc";
 
+static const char *mkd_doc_fiction_qca_io_write_qca_layout_params_on_progress = R"doc(Receives completed serialization work and the phase total.)doc";
+
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg =
 R"doc(Writes an SVG representation of a cell-level QCA layout into an output
 stream. Both tile- and cell-based layouts are supported. For tile-
@@ -13068,6 +13151,8 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_params = R"doc(Parameters for writing SVG QCA layouts.)doc";
+
+static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_params_on_progress = R"doc(Receives completed serialization work and the phase total.)doc";
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_params_simple = R"doc(Limit details to create smaller file sizes.)doc";
 
@@ -14677,6 +14762,8 @@ coordinate, and every surface defect as a `<defect>`.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_lyt = R"doc(Layout to write.)doc";
 
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_on_progress = R"doc(Receives serialization progress.)doc";
+
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_os = R"doc(Output stream.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run = R"doc(Writes the layout with XML-escaped lattice text.)doc";
@@ -14687,6 +14774,7 @@ R"doc(Creates an SQD writer for a lattice layout.
 Args:
     src: Layout to write.
     s: Output stream.
+    callback: Receives completed dot and defect records.
 
 )doc";
 
@@ -15005,6 +15093,8 @@ static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_lattice_
 
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_lattice_point_size = R"doc(Size of the H-Si lattice points in SVG units.)doc";
 
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_on_progress = R"doc(Receives completed serialization work and the phase total.)doc";
+
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_sidb_border_width = R"doc(Border width of the SiDB.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode =
@@ -15026,6 +15116,7 @@ defect layer.
 Args:
     lyt: Layout to write.
     os: Output stream to write into.
+    on_progress: Receives completed dot and defect records.
 
 )doc";
 
@@ -15036,6 +15127,7 @@ the file's content.
 Args:
     lyt: Layout to write.
     filename: File to write into.
+    on_progress: Receives completed dot and defect records.
 
 Raises:
     std::ofstream::failure: if the file cannot be opened.
@@ -16441,6 +16533,10 @@ conducted (~ 126 °C by default) (unit: K).)doc";
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_on_progress =
 R"doc(Callback that receives the number of simulated input patterns (gate-
 based) or the progress of the physical simulation (non-gate-based).)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_on_worker_progress =
+R"doc(Reports logical worker activity with a fixed worker count for each
+invocation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_operational_params =
 R"doc(The parameters used to determine if a layout is `operational` or `non-
@@ -18461,6 +18557,10 @@ static const char *mkd_doc_fiction_sidb_simulation_engines_clustercomplete_param
 R"doc(Callback that receives the number of unfolded charge space
 compositions.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_engines_clustercomplete_params_on_worker_progress =
+R"doc(Reports logical worker activity with a fixed worker count for each
+invocation.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_engines_clustercomplete_params_report_gss_stats =
 R"doc(Option to decide if the *Ground State Space* statistics are reported
 to the standard output. By default, this option is disabled.)doc";
@@ -19019,6 +19119,8 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_completed_compositions = R"doc(Completed compositions in the serial traversal.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_extract_work_from_top_cluster =
 R"doc(Work in the form of compositions of charge space elements of the top
 cluster are extracted into a vector and shuffled at random before
@@ -19257,6 +19359,8 @@ cluster has an assigned multiset charge configuration, and a store
 containing lower and upper bounds on the local potential for each SiDB
 under this multiset charge configuration assignment.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_worker_completed_compositions = R"doc(Compositions examined by this worker.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_worker_index = R"doc(Worker index in the vector of all workers.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_worker_obtain_work =
@@ -19268,6 +19372,8 @@ Returns:
     terminate), or the work that was obtained.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_worker_progress = R"doc(Worker activity during dynamic composition exploration.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_worker_queue =
 R"doc(A worker queue contains a double-layer queue of work items, a
@@ -20885,6 +20991,10 @@ the number of available hardware threads.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_on_progress =
 R"doc(Callback that receives the number of completed iterations across all
 threads.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_on_worker_progress =
+R"doc(Reports logical worker activity with a fixed worker count for each
+invocation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_sim_params = R"doc(Simulation parameters for the simulation of the physical SiDB system.)doc";
 
@@ -22969,6 +23079,10 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_worker_progress =
+R"doc(Reports each top-level parameter worker without exposing nested
+simulations.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_patterns_of =
 R"doc(The input patterns that are not operational for the given reasons.
 
@@ -23526,6 +23640,10 @@ free for other work.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_on_progress =
 R"doc(Callback that receives the number of evaluated parameter points. The
 total is known for grid search and random sampling only.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_on_worker_progress =
+R"doc(Reports logical worker activity with a fixed worker count for each
+invocation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_operational_params =
 R"doc(The parameters used to determine if a layout is operational or non-
@@ -24957,6 +25075,8 @@ static const char *mkd_doc_fiction_synthesis_fanout_substitution_params = R"doc(
 
 static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_degree = R"doc(Maximum output degree of each fan-out node.)doc";
 
+static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_on_progress = R"doc(Reports completed work in each bounded phase.)doc";
+
 static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_seed =
 R"doc(Seed used for random substitution, generated randomly if not
 specified.)doc";
@@ -25102,6 +25222,8 @@ Note:
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_network_balancing_params = R"doc(Parameters for the network balancing algorithm.)doc";
+
+static const char *mkd_doc_fiction_synthesis_network_balancing_params_on_progress = R"doc(Reports completed work in each bounded phase.)doc";
 
 static const char *mkd_doc_fiction_synthesis_network_balancing_params_unify_outputs = R"doc(Flag to indicate that all output nodes should be in the same rank.)doc";
 
@@ -26650,6 +26772,93 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_utils_worker_progress_reporter =
+R"doc(Serializes worker reports and throttles updates to ten per second per
+worker.
+
+Activity transitions and final counts are reported immediately.
+Destruction clears remaining active workers.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_finish =
+R"doc(Publishes the final snapshot and marks the worker inactive.
+
+Args:
+    id: Stable logical worker index.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_mutex = R"doc(Serializes callbacks and state changes.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_on_worker = R"doc(Receives serialized snapshots.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_operator_assign = R"doc(Reporters do not support copy assignment.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_operator_assign_2 = R"doc(Reporters do not support move assignment.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_update =
+R"doc(Updates a worker's snapshot and publishes activity changes
+immediately.
+
+Args:
+    id: Stable logical worker index.
+    description: Human-readable work and candidate description.
+    done: Completed work items.
+    total: Work budget, or 0 if unknown.
+    force: Publish a significant status change immediately.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_progress_reporter =
+R"doc(Creates reporting state only when a callback is present.
+
+Args:
+    callback: Receives worker snapshots.
+    count: Number of logical workers, including workers that may
+           remain idle.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_progress_reporter_2 = R"doc(Reporters own synchronization state and cannot be copied.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_progress_reporter_3 = R"doc(Workers may reference reporters, so reporters cannot be moved.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_state = R"doc(The most recent snapshot of a logical worker, guarded by mutex.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_state_active = R"doc(Whether the worker has unfinished work.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_state_description = R"doc(Current work description.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_state_done = R"doc(Completed work items.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_state_last_report = R"doc(Time of the last published snapshot.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_state_total = R"doc(Work budget, or zero if unknown.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_workers = R"doc(State indexed by logical worker ID.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope = R"doc(Clears a worker's activity on every exit from a computation.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_id = R"doc(Logical worker ID.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_operator_assign = R"doc(Worker scopes do not support copy assignment.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_operator_assign_2 = R"doc(Worker scopes do not support move assignment.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_progress = R"doc(Shared serialized reporter.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_worker_progress_scope =
+R"doc(Tracks the lifetime of an active worker.
+
+Args:
+    reporter: Shared reporter, which outlives this scope.
+    worker: Logical worker ID.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_worker_progress_scope_2 = R"doc(One scope owns the worker's activity lifetime.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_worker_progress_scope_3 = R"doc(A worker scope stays at its construction site.)doc";
+
 static const char *mkd_doc_fiction_verification_count_gate_types =
 R"doc(Gives a detailed listing of all gate types present in the provided
 network (or layout). This function can distinguish most gate types
@@ -27095,6 +27304,8 @@ static const char *mkd_doc_fiction_verification_gate_level_drv_params_io_pins = 
 static const char *mkd_doc_fiction_verification_gate_level_drv_params_missing_connections = R"doc(Check for nodes without connections.)doc";
 
 static const char *mkd_doc_fiction_verification_gate_level_drv_params_non_adjacent_connections = R"doc()doc";
+
+static const char *mkd_doc_fiction_verification_gate_level_drv_params_on_progress = R"doc(Reports completed work in each bounded phase.)doc";
 
 static const char *mkd_doc_fiction_verification_gate_level_drv_params_out = R"doc(Stream to write the report into.)doc";
 
