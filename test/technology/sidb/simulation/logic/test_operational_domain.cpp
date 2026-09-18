@@ -2241,6 +2241,61 @@ TEST_CASE("Parallel contour surfaces preserve classifications and avoid duplicat
     }
 }
 
+TEST_CASE("Contour surfaces infer unsimulated interiors without crossing non-operational points",
+          "[operational-domain]")
+{
+    const layout lyt{blueprints::siqad_and_gate()};
+
+    operational_domain_params params{};
+    params.number_of_threads = 1;
+    params.sweep_dimensions  = {{.dimension = sweep_parameter::EPSILON_R, .min = 4.6, .max = 6.6, .step = 0.2},
+                                {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.6, .max = 6.6, .step = 0.2},
+                                {.dimension = sweep_parameter::MU_MINUS, .min = -0.38, .max = -0.26, .step = 0.01}};
+    operational_domain_stats reference_stats{};
+    const auto reference = operational_domain_grid_search(lyt, std::vector{create_and_tt()}, params, &reference_stats);
+    REQUIRE(reference.size() == 1573);
+    REQUIRE(reference_stats.num_non_operational_parameter_combinations > 0);
+
+    const parameter_point               interior_seed{{5.6, 5.6, -0.32}};
+    const parameter_point               surface_seed{{5.8, 4.6, -0.34}};
+    std::optional<operational_domain>   serial_domain{};
+    std::unordered_set<parameter_point> serial_inferred{};
+    for (const auto threads : {1u, 2u, 8u})
+    {
+        params.number_of_threads = threads;
+        operational_domain_stats                                                     stats{};
+        sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
+            lyt, std::vector{create_and_tt()}, params, stats};
+        const auto domain   = impl.trace_boundary_surface(0, {interior_seed, surface_seed, interior_seed});
+        const auto inferred = impl.inferred_operational_parameter_points();
+        const std::unordered_set<parameter_point> inferred_set{inferred.cbegin(), inferred.cend()};
+
+        CHECK(stats.num_evaluated_parameter_combinations == domain.size());
+        CHECK(inferred_set.contains(interior_seed));
+        CHECK(inferred_set.contains(surface_seed));
+        CHECK(std::ranges::any_of(inferred, [&domain](const auto& pp) { return !domain.contains(pp).has_value(); }));
+        for (const auto& pp : inferred)
+        {
+            CHECK(reference.contains(pp) == std::optional{std::tuple{operational_status::OPERATIONAL}});
+        }
+        domain.for_each([&reference](const auto& pp, const auto& status)
+                        { CHECK(reference.contains(pp) == std::optional{status}); });
+
+        if (serial_domain.has_value())
+        {
+            CHECK(inferred_set == serial_inferred);
+            CHECK(domain.size() == serial_domain->size());
+            domain.for_each([&serial_domain](const auto& pp, const auto& status)
+                            { CHECK(serial_domain->contains(pp) == std::optional{status}); });
+        }
+        else
+        {
+            serial_domain   = domain;
+            serial_inferred = inferred_set;
+        }
+    }
+}
+
 TEST_CASE("Contour surface tracing propagates a worker's storage failure", "[operational-domain]")
 {
     /**

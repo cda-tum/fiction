@@ -970,15 +970,29 @@ class operational_domain_impl
      * resulting set is closed under the Moore neighborhood, which is what the interior inference requires.
      *
      * @param samples Maximum number of random samples to be taken before tracing.
+     * @param initial_points Additional seeds, rounded up to sweep grid points and deduplicated with the random samples.
+     * @throws std::invalid_argument if an additional seed has the wrong dimensions or lies outside the sweep grid.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] OpDomain trace_boundary_surface(const std::size_t samples)
+    [[nodiscard]] OpDomain trace_boundary_surface(const std::size_t                   samples,
+                                                  const std::vector<parameter_point>& initial_points = {})
     {
         assert(num_dimensions >= 3 && "Boundary surface tracing is intended for three or more dimensions");
 
         const mockturtle::stopwatch stop{stats.time_total};
 
-        const auto step_point_samples = generate_random_step_points(samples);
+        auto step_point_samples = generate_random_step_points(samples);
+
+        for (const auto& pp : initial_points)
+        {
+            step_point_samples.push_back(to_step_point(pp));
+        }
+        if (!initial_points.empty())
+        {
+            std::ranges::sort(step_point_samples);
+            step_point_samples.erase(std::unique(step_point_samples.begin(), step_point_samples.end()),
+                                     step_point_samples.end());
+        }
 
         simulate_operational_status_in_parallel(step_point_samples);
 
