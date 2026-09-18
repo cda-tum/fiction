@@ -896,8 +896,7 @@ class graph_oriented_layout_design_impl
                         std::launch::async,
                         [this, ssg_ptr, &update_best_layout_mutex, &best_lyt, &progress]() -> std::optional<Lyt>
                         {
-                            auto result = process_ssg(*ssg_ptr);
-                            progress.advance();
+                            auto result = process_ssg(*ssg_ptr, progress);
 
                             if (result)
                             {
@@ -953,8 +952,7 @@ class graph_oriented_layout_design_impl
                 // single-threaded version
                 for (auto& ssg : ssg_vec)
                 {
-                    auto result = process_ssg(ssg);
-                    progress.advance();
+                    auto result = process_ssg(ssg, progress);
 
                     if (result)
                     {
@@ -2190,13 +2188,15 @@ class graph_oriented_layout_design_impl
      * This function performs an expansion step on the given SSG and updates the frontier and cost information.
      *
      * @param ssg The search space graph to process.
+     * @param progress Reports completed expansions of active graphs.
      * @return An optional layout. Returns a layout if one is found during expansion; otherwise, std::nullopt.
      */
-    std::optional<Lyt> process_ssg(search_space_graph<ObstrLyt>& ssg)
+    std::optional<Lyt> process_ssg(search_space_graph<ObstrLyt>& ssg, utils::progress_reporter& progress)
     {
         if (ssg.frontier_flag)
         {
             const auto expansion = expand(ssg);
+            progress.advance();
             if (expansion.second)
             {
                 return expansion.second;
