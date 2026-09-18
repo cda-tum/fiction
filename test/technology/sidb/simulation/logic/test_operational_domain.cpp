@@ -2296,6 +2296,100 @@ TEST_CASE("Contour surfaces infer unsimulated interiors without crossing non-ope
     }
 }
 
+TEST_CASE("Parallel contour interiors preserve coverage and propagate worker failures", "[operational-domain]")
+{
+    const layout              lyt{blueprints::siqad_and_gate()};
+    operational_domain_params params{};
+    params.number_of_threads = 1;
+    params.sweep_dimensions  = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6016, .step = 0.0001},
+                                {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0016, .step = 0.0001},
+                                {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.3184, .step = 0.0001}};
+    const parameter_point seed{{5.6008, 5.0008, -0.3192}};
+
+    SECTION("recovers the full region with unsimulated interior points")
+    {
+        const auto reference = operational_domain_grid_search(lyt, std::vector{create_and_tt()}, params);
+        REQUIRE(reference.size() == 4913);
+        reference.for_each([](const auto&, const auto& value)
+                           { REQUIRE(std::get<0>(value) == operational_status::OPERATIONAL); });
+        std::optional<operational_domain>   serial_domain{};
+        std::unordered_set<parameter_point> serial_inferred{};
+        for (const auto threads : {1u, 8u})
+        {
+            params.number_of_threads = threads;
+            operational_domain_stats                                                     stats{};
+            sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
+                lyt, std::vector{create_and_tt()}, params, stats};
+            const auto                                domain   = impl.trace_boundary_surface(0, {seed});
+            const auto                                inferred = impl.inferred_operational_parameter_points();
+            const std::unordered_set<parameter_point> inferred_set{inferred.cbegin(), inferred.cend()};
+            CHECK(domain.size() < reference.size());
+            CHECK(stats.num_evaluated_parameter_combinations == domain.size());
+            reference.for_each(
+                [&](const auto& pp, const auto& status)
+                {
+                    if (const auto known = domain.contains(pp); known.has_value())
+                    {
+                        CHECK(*known == status);
+                    }
+                    else
+                    {
+                        CHECK(inferred_set.contains(pp));
+                    }
+                });
+            for (const auto& pp : inferred)
+            {
+                CHECK(reference.contains(pp) == std::optional{std::tuple{operational_status::OPERATIONAL}});
+            }
+            if (serial_domain.has_value())
+            {
+                CHECK(inferred_set == serial_inferred);
+                CHECK(domain.size() == serial_domain->size());
+                domain.for_each([&](const auto& pp, const auto& status)
+                                { CHECK(serial_domain->contains(pp) == std::optional{status}); });
+            }
+            else
+            {
+                serial_domain   = domain;
+                serial_inferred = inferred_set;
+            }
+        }
+    }
+
+    SECTION("joins inference workers before propagating a lookup failure")
+    {
+        /**
+         * @brief Rejects a deep interior lookup during inference.
+         */
+        class failing_interior_domain : public operational_domain
+        {
+          public:
+            /**
+             * @brief Reads cached classifications, with an injected failure away from the surface and seed line.
+             * @param pp Parameter point to look up.
+             * @return The cached classification, if present.
+             * @throws std::bad_alloc when inference reaches the selected interior point.
+             */
+            [[nodiscard]] std::optional<std::tuple<operational_status>> contains(const parameter_point& pp) const
+            {
+                if (pp == parameter_point{{5.6004, 5.0004, -0.3196}})
+                {
+                    throw std::bad_alloc{};
+                }
+                return operational_domain::contains(pp);
+            }
+        };
+        for (const auto threads : {2u, 8u})
+        {
+            params.number_of_threads = threads;
+            operational_domain_stats                                                          stats{};
+            sidb::simulation::logic::detail::operational_domain_impl<failing_interior_domain> impl{
+                lyt, std::vector{create_and_tt()}, params, stats};
+            CHECK_THROWS_AS(impl.trace_boundary_surface(0, {seed}), std::bad_alloc);
+        }
+    }
+}
+
 TEST_CASE("Contour surface tracing propagates a worker's storage failure", "[operational-domain]")
 {
     /**

@@ -71,7 +71,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Reduce coordinate-vector allocations during operational-domain traversal.
   - Reuse completed three-dimensional contour surfaces across initial samples.
   - Contour tracing explores boundary surfaces in three or more dimensions in parallel. It uses
-    `operational_domain_params::number_of_threads`; interior inference remains sequential.
+    `operational_domain_params::number_of_threads`; large contour interiors also use parallel inference.
   - **Breaking:** _QuickExact_, _QuickSim_, _ExGS_, _ClusterComplete_, and _Ground State Space_
     simulate `sidb::layout` and return the non-template `sidb::simulation::result`
   - _QuickSim_ returns `std::nullopt` for layouts with charged surface defects
