@@ -41,7 +41,8 @@
 #include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
-#include <phmap.h>
+#include <phmap.h>  // IWYU pragma: keep, defines the container behind the parallel_flat_hash_set_m alias
+#include <phmap_fwd_decl.h>
 #include <phmap_utils.h>
 
 #include <algorithm>

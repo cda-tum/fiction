@@ -2188,7 +2188,7 @@ TEST_CASE("Parameter hashes distribute regular sweeps across partitions", "[oper
         {
             for (auto z = 0u; z < 8; ++z)
             {
-                const parameter_point point{{5.6 + x * 0.1024, 5.0 + y * 0.1024, -0.32 + z * 0.004096}};
+                const parameter_point point{{5.6 + (x * 0.1024), 5.0 + (y * 0.1024), -0.32 + (z * 0.004096)}};
                 partitions.insert(std::hash<parameter_point>{}(point) % 256);
             }
         }
@@ -2301,10 +2301,11 @@ TEST_CASE("Parallel contour interiors preserve coverage and propagate worker fai
     const layout              lyt{blueprints::siqad_and_gate()};
     operational_domain_params params{};
     params.number_of_threads = 1;
-    params.sweep_dimensions  = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6016, .step = 0.0001},
-                                {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0016, .step = 0.0001},
-                                {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.3184, .step = 0.0001}};
-    const parameter_point seed{{5.6008, 5.0008, -0.3192}};
+    params.sweep_dimensions  = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6016, .step = 0.0001},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0016, .step = 0.0001},
+        {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.32 + (16 * 0.0001), .step = 0.0001}};
+    const parameter_point seed{{5.6008, 5.0008, -0.32 + (8 * 0.0001)}};
 
     SECTION("recovers the full region with unsimulated interior points")
     {
