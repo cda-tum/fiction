@@ -12,7 +12,6 @@
  * @file
  * @brief Registers the `technology/qca/io` bindings with the `mnt.pyfiction` module.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #include <nanobind/nanobind.h>
