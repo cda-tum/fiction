@@ -24,6 +24,7 @@
 #include "fiction/technology/sidb/simulation/detail/simulation_state.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -67,6 +68,11 @@ struct quicksim_params
      * Timeout limit (in ms).
      */
     uint64_t timeout = std::numeric_limits<uint64_t>::max();
+    /**
+     * Shared caller deadline. Expiration throws instead of returning an incomplete simulation.
+     * `time_point::max()` leaves the caller budget unlimited; `timeout` still applies.
+     */
+    std::chrono::steady_clock::time_point deadline{std::chrono::steady_clock::time_point::max()};
 };
 
 /**
@@ -82,9 +88,11 @@ struct quicksim_params
  * @return The physically valid charge distributions found, or `std::nullopt` if the layout is empty, holds charged
  * defects, the iteration count is zero, the timeout was hit, or no valid distribution was found.
  * @throws std::out_of_range if a site has an invalid lattice basis index.
+ * @throws utils::timeout_error if the shared caller deadline expires. No partial result is returned.
  */
 [[nodiscard]] inline std::optional<result> quicksim(const layout& lyt, const quicksim_params& ps = quicksim_params{})
 {
+    utils::check_deadline(ps.deadline);
     if (ps.iteration_steps == 0 || lyt.num_dots() == 0 || lyt.num_charged_defects() > 0)
     {
         return std::nullopt;
@@ -117,6 +125,8 @@ struct quicksim_params
         simulation::detail::simulation_state state{land, model::charge_state::NEGATIVE,
                                                    simulation::detail::simulation_state::energy_model::INTERNAL_ONLY};
 
+        utils::check_deadline(ps.deadline);
+
         const auto predefined_negative_sidb_indices = state.negative_sidb_detection();
 
         // Check that the layout with all SiDBs negatively charged is physically valid.
@@ -141,6 +151,7 @@ struct quicksim_params
 
         for (std::size_t i = 0; i < state.num_sidbs(); ++i)
         {
+            utils::check_deadline(ps.deadline);
             // no execution policy: predefined_negative_sidb_indices holds a handful of entries, where the dispatch
             // costs an order of magnitude more than the search itself
             if (std::ranges::find(predefined_negative_sidb_indices, i) == predefined_negative_sidb_indices.cend())
@@ -155,6 +166,7 @@ struct quicksim_params
         }
 
         state.update_after_charge_change();
+        utils::check_deadline(ps.deadline);
         if (state.is_physically_valid())
         {
             st.charge_distributions.push_back(state.snapshot());
@@ -189,9 +201,19 @@ struct quicksim_params
 
                     for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
+                        if (ps.deadline != std::chrono::steady_clock::time_point::max() &&
+                            std::chrono::steady_clock::now() >= ps.deadline)
+                        {
+                            return;
+                        }
                         for (const auto sidb_index_with_unknown_charge_state :
                              all_sidb_indices_with_unknown_charge_state)
                         {
+                            if (ps.deadline != std::chrono::steady_clock::time_point::max() &&
+                                std::chrono::steady_clock::now() >= ps.deadline)
+                            {
+                                return;
+                            }
                             // Check if the timeout has been reached before starting the iterations
                             const auto current_time = std::chrono::high_resolution_clock::now();
                             const auto elapsed_time =
@@ -230,6 +252,11 @@ struct quicksim_params
 
                             for (uint64_t num = 0ul; num < upper_limit; num++)
                             {
+                                if (ps.deadline != std::chrono::steady_clock::time_point::max() &&
+                                    std::chrono::steady_clock::now() >= ps.deadline)
+                                {
+                                    return;
+                                }
                                 worker_state.adjacent_search(ps.alpha, negative_sidbs_indices);
                                 worker_state.validity_check();
 
@@ -251,6 +278,9 @@ struct quicksim_params
     }
 
     st.simulation_runtime = time_counter;
+
+    // Throw only after every worker has joined; exceptions cannot escape a worker thread.
+    utils::check_deadline(ps.deadline);
 
     if (timeout_limit_reached.load(std::memory_order_relaxed) || st.charge_distributions.empty())
     {

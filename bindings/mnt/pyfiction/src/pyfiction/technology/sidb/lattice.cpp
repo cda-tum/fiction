@@ -79,8 +79,11 @@ void lattice(nanobind::module_& m)
 
     m.def("row_of", &fiction::sidb::row_of, py::arg("site"), DOC(fiction_sidb_row_of));
     m.def("site_at_row", &fiction::sidb::site_at_row, py::arg("x"), py::arg("row"), DOC(fiction_sidb_site_at_row));
-    m.def("sites_in_area", &fiction::sidb::sites_in_area, py::arg("first_corner"), py::arg("second_corner"),
-          DOC(fiction_sidb_sites_in_area));
+    m.def(
+        "sites_in_area",
+        [](const fiction::sidb::lattice_site& first_corner, const fiction::sidb::lattice_site& second_corner)
+        { return fiction::sidb::sites_in_area(first_corner, second_corner); }, py::arg("first_corner"),
+        py::arg("second_corner"), DOC(fiction_sidb_sites_in_area));
 
     py::class_<fiction::sidb::lattice>(m, "lattice", DOC(fiction_sidb_lattice))
         .def(py::init<>(), "Default constructor.")

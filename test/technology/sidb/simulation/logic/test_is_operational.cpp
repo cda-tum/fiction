@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -34,7 +35,9 @@
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 
+#include <chrono>
 #include <cstdint>
 #include <optional>
 #include <set>
@@ -47,6 +50,36 @@ using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
+
+TEST_CASE("Operational checks honor a shared caller deadline", "[is-operational]")
+{
+    const auto lyt = blueprints::siqad_or_gate();
+
+    for (const auto sim_engine : {engine::QUICKEXACT, engine::EXGS, engine::QUICKSIM})
+    {
+        const is_operational_params params{.sim_params = simulation_parameters{2, -0.32},
+                                           .sim_engine = sim_engine,
+                                           .deadline   = std::chrono::steady_clock::now()};
+        CHECK_THROWS_AS(is_operational(lyt, {create_or_tt()}, params), utils::timeout_error);
+    }
+
+#if (FICTION_ALGLIB_ENABLED)
+    const is_operational_params params{.sim_engine = engine::CLUSTERCOMPLETE,
+                                       .deadline   = std::chrono::steady_clock::now() + std::chrono::hours{1}};
+    CHECK_THROWS_AS(is_operational(lyt, {create_or_tt()}, params), std::invalid_argument);
+#endif  // FICTION_ALGLIB_ENABLED
+}
+
+TEST_CASE("Operational checks retain their validated parameters", "[is-operational]")
+{
+    const auto                                           lyt = blueprints::siqad_or_gate();
+    const std::vector<tt>                                spec{create_or_tt()};
+    is_operational_params                                params{.sim_params = simulation_parameters{2, -0.32}};
+    sidb::simulation::logic::detail::is_operational_impl implementation{lyt, spec, params};
+
+    params.deadline = std::chrono::steady_clock::now();
+    CHECK_NOTHROW(implementation.run());
+}
 
 TEST_CASE("SiQAD OR gate", "[is-operational]")
 {
@@ -150,13 +183,14 @@ TEST_CASE("Incomplete BDL wire set is non-operational", "[is-operational]")
 TEST_CASE("Canvas filtering rejects SiDBs outside the simulation state", "[is-operational]")
 {
     const auto                  lyt = blueprints::siqad_or_gate();
+    const std::vector<tt>       spec{create_or_tt()};
     const is_operational_params params{};
     layout                      canvas{};
     canvas.assign_sidb({1000, 0, 0}, dot_tag::LOGIC);
 
     const potential_landscape                            landscape{lyt, params.sim_params};
     sidb::simulation::detail::simulation_state           state{landscape, charge_state::NEGATIVE};
-    sidb::simulation::logic::detail::is_operational_impl implementation{lyt, {create_or_tt()}, params, canvas};
+    sidb::simulation::logic::detail::is_operational_impl implementation{lyt, spec, params, canvas};
 
     CHECK_THROWS_AS(implementation.is_physical_validity_feasible(state), std::invalid_argument);
 }

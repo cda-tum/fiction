@@ -31,6 +31,7 @@
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <phmap.h>
@@ -182,12 +183,15 @@ class on_the_fly_gate_library
      * @throws gate_design_exception if no gate can be designed.
      * @throws fcn::unsupported_gate_orientation_exception if the gate orientation is unsupported.
      * @throws fcn::unsupported_gate_type_exception if the gate type is unsupported.
+     * @throws utils::timeout_error if the shared circuit-design deadline is reached.
      */
     template <typename GateLyt, typename Params>
     static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const Params& params,
                             const std::optional<layout>& defect_surface = std::nullopt)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
+
+        utils::check_deadline(params.design_gate_params.operational_params.deadline);
 
         const auto n = lyt.get_node(t);
         const auto f = lyt.node_function(n);

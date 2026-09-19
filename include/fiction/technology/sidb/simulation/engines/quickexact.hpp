@@ -28,11 +28,13 @@
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/gray_code_iterator.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <unordered_map>
@@ -79,6 +81,10 @@ struct quickexact_params
      * Global external electrostatic potential (unit: V). Value is applied on each SiDB.
      */
     double global_potential = 0;
+    /**
+     * Shared caller deadline. `time_point::max()` leaves the simulation unlimited.
+     */
+    std::chrono::steady_clock::time_point deadline{std::chrono::steady_clock::time_point::max()};
 };
 
 namespace detail
@@ -108,6 +114,7 @@ class quickexact_impl
      */
     [[nodiscard]] result run()
     {
+        utils::check_deadline(params.deadline);
         sim_result.algorithm_name = "QuickExact";
         sim_result.sim_params     = params.sim_params;
         sim_result.lyt            = landscape.get_layout();
@@ -153,6 +160,7 @@ class quickexact_impl
                 // charge index is increased and the corresponding charge distribution is checked for physical validity.
                 while (state.charge_index() < state.max_charge_index())
                 {
+                    utils::check_deadline(params.deadline);
                     if (state.is_physically_valid())
                     {
                         sim_result.charge_distributions.push_back(state.snapshot());
@@ -171,6 +179,8 @@ class quickexact_impl
         }
 
         sim_result.simulation_runtime = time_counter;
+
+        utils::check_deadline(params.deadline);
 
         return sim_result;
     }
@@ -230,6 +240,7 @@ class quickexact_impl
 
         for (const auto i : preassigned_negative_sidbs)
         {
+            utils::check_deadline(params.deadline);
             reduced.assign_sidb(sites[i], dot_tag::EMPTY);
             // IMPORTANT: The pre-assigned negatively charged SiDBs (they have to be negatively charged to
             // fulfill the population stability) are considered as negatively charged defects in the layout.
@@ -240,6 +251,7 @@ class quickexact_impl
 
         for (std::size_t i = 0; i < landscape.num_sidbs(); ++i)
         {
+            utils::check_deadline(params.deadline);
             if (!std::ranges::binary_search(preassigned_negative_sidbs, i))
             {
                 free_sidbs.push_back(i);
@@ -309,6 +321,7 @@ class quickexact_impl
 
         for (gci = 0; gci <= reduced_state.max_charge_index(); ++gci)
         {
+            utils::check_deadline(params.deadline);
             reduced_state.assign_charge_index_by_gray_code(
                 *gci, previous_charge_index, simulation::detail::dependent_dot_mode::VARIABLE,
                 simulation::detail::energy_calculation::KEEP_OLD_ENERGY_VALUE,
@@ -339,8 +352,10 @@ class quickexact_impl
 
         while (reduced_state.charge_index() < reduced_state.max_charge_index())
         {
+            utils::check_deadline(params.deadline);
             while (reduced_state.charge_index_of_sub_layout() < reduced_state.max_charge_index_sub_layout())
             {
+                utils::check_deadline(params.deadline);
                 if (reduced_state.is_physically_valid())
                 {
                     record(reduced_state);
@@ -369,6 +384,7 @@ class quickexact_impl
         // charge configurations of the sublayout are iterated
         while (reduced_state.charge_index_of_sub_layout() < reduced_state.max_charge_index_sub_layout())
         {
+            utils::check_deadline(params.deadline);
             if (reduced_state.is_physically_valid())
             {
                 record(reduced_state);
@@ -405,9 +421,11 @@ class quickexact_impl
  * @param params Parameter required for the simulation.
  * @return Simulation result: every physically valid charge distribution of `lyt`.
  * @throws std::out_of_range if a site has an invalid lattice basis index.
+ * @throws utils::timeout_error if the shared caller deadline expires. No partial result is returned.
  */
 [[nodiscard]] inline result quickexact(const layout& lyt, const quickexact_params& params = {})
 {
+    utils::check_deadline(params.deadline);
     detail::quickexact_impl p{lyt, params};
 
     return p.run();

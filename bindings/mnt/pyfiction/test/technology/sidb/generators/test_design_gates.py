@@ -16,6 +16,7 @@ from mnt.pyfiction import (
     design_sidb_gates,
     design_sidb_gates_mode,
     design_sidb_gates_params,
+    design_sidb_gates_stats,
     lattice,
     lattice_site,
     operational_condition,
@@ -95,12 +96,15 @@ def test_siqad_and_gate_skeleton_100():
     assert params.operational_params.simulation_parameters.mu_minus == -0.28
     assert params.number_of_canvas_sidbs == 1
     assert params.maximal_random_design_attempts == 1_000_000
+    assert params.timeout == 2**64 - 1
     assert params.canvas[0] == lattice_site(4, 4, 0)
     assert params.canvas[1] == lattice_site(14, 5, 1)
 
-    designed_gates = design_sidb_gates(layout, [create_and_tt()], params)
+    stats = design_sidb_gates_stats()
+    designed_gates = design_sidb_gates(layout, [create_and_tt()], params, stats)
 
     assert len(designed_gates) == 23
+    assert "total time" in repr(stats)
 
 
 def test_nor_gate_111(nor_gate_skeleton):
@@ -153,3 +157,34 @@ def test_nor_gate_111_quickcell(nor_gate_skeleton):
 
     designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
     assert len(designed_gates) == 14
+
+
+@pytest.mark.parametrize(
+    "mode",
+    [
+        design_sidb_gates_mode.QUICKCELL,
+        design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        design_sidb_gates_mode.RANDOM,
+        design_sidb_gates_mode.PRUNING_ONLY,
+    ],
+)
+@pytest.mark.parametrize("timeout", [0, 1])
+def test_gate_design_timeout(nor_gate_skeleton: sidb_layout, mode: design_sidb_gates_mode, timeout: int) -> None:
+    """Every search mode raises TimeoutError without changing its inputs or publishing partial statistics."""
+    params = design_sidb_gates_params()
+    params.timeout = timeout
+    params.design_mode = mode
+    params.canvas = (lattice_site(0, 0, 0), lattice_site(1_000, 1_000, 0))
+    params.number_of_canvas_sidbs = 3
+    params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
+    stats = design_sidb_gates_stats()
+    initial_stats = repr(stats)
+    initial_dots = nor_gate_skeleton.sidbs()
+
+    with pytest.raises(TimeoutError):
+        design_sidb_gates(nor_gate_skeleton, [create_nor_tt()], params, stats)
+
+    assert nor_gate_skeleton.sidbs() == initial_dots
+    assert params.timeout == timeout
+    assert params.number_of_canvas_sidbs == 3
+    assert repr(stats) == initial_stats
