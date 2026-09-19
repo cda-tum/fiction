@@ -439,6 +439,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+  - Clocked degree counts each eligible neighbor once, including neighbors enabled by synchronization.
+  - Clocking-scheme queries compare bounded string views.
   - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.
   - Clocked-layout clones preserve clock overrides without sharing later clock-number edits.
   - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
@@ -470,6 +472,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - The Bestagon critical-temperature domain experiment removes a redundant calculation while preserving its
     kink-rejection policy and reported temperatures.
   - The library walkthrough writes QCA layouts only in QCADesigner and SVG formats.
+
+- Gate libraries:
+
+  - Gate-library application preserves synchronization delays on nonempty emitted cells.
 
 - I/O:
 

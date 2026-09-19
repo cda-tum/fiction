@@ -81,6 +81,32 @@ void check_equivalence(const sidb::layout& layout_designed, const std::string& p
 
 using cell_lyt = sidb_cell_clk_lyt_cube;
 
+TEST_CASE("Gate-library application preserves synchronization on emitted cells", "[apply-gate-library]")
+{
+    cart_gate_clk_lyt layout{{2, 0}, clocking::twoddwave<cart_gate_clk_lyt>()};
+    const auto        input = layout.create_pi("x", {0, 0});
+    const auto        wire  = layout.create_buf(input, {1, 0});
+    layout.create_po(wire, "f", {2, 0});
+    layout.assign_synchronization_element({1, 0}, 2);
+
+    const auto cells = apply_gate_library<qca_cell_clk_lyt, qca_one_library>(layout);
+    uint32_t   synchronized_cells{0};
+    cells.foreach_coordinate(
+        [&](const auto& c)
+        {
+            const auto delayed = c.x >= qca_one_library::gate_x_size() && c.x < 2 * qca_one_library::gate_x_size() &&
+                                 !cells.is_empty_cell(c);
+            CHECK(cells.get_synchronization_element(c) == (delayed ? 2 : 0));
+            if (delayed)
+            {
+                ++synchronized_cells;
+            }
+        });
+    CHECK(synchronized_cells > 0);
+    CHECK(cells.num_se() == synchronized_cells);
+    CHECK(layout.num_se() == 1);
+}
+
 TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 {
     hex_even_row_gate_clk_lyt layout{{2, 2}, clocking::row<hex_even_row_gate_clk_lyt>()};

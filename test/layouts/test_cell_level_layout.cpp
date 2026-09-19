@@ -31,12 +31,36 @@
 #include <fiction/types.hpp>
 
 #include <string>
+#include <string_view>
 
 using namespace fiction;
 using namespace fiction::inml;
 using namespace fiction::layouts;
 using namespace fiction::qca;
 using namespace fiction::sidb;
+
+TEMPLATE_TEST_CASE("Clocking capabilities across coordinate geometries", "[cell-level-layout]", cart_gate_clk_lyt,
+                   cart_odd_row_gate_clk_lyt, hex_even_row_gate_clk_lyt, qca_cell_clk_lyt, inml_cell_clk_lyt,
+                   sidb_cell_clk_lyt_cube)
+{
+    TestType                   layout{{4, 4}};
+    const coordinate<TestType> center{2, 2};
+    CHECK(layout.degree(center) == 0);
+    const auto neighbors = layout.adjacent_coordinates(center);
+    REQUIRE(neighbors.size() >= 2);
+    layout.assign_synchronization_element(neighbors[0], 1);
+    layout.assign_synchronization_element(neighbors[1], 2);
+    CHECK(layout.in_degree(center) == 2);
+    CHECK(layout.out_degree(center) == 2);
+    CHECK(layout.degree(center) == 2);
+    layout.assign_synchronization_element(center, 1);
+    CHECK(layout.degree(center) == neighbors.size());
+    CHECK(layout.num_se() == 3);
+
+    const std::string bounded_name{"OPEN suffix"};
+    CHECK(layout.is_clocking_scheme(std::string_view{bounded_name.data(), 4}));
+    CHECK_FALSE(layout.is_clocking_scheme(bounded_name));
+}
 
 TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", qca_cell_clk_lyt, stacked_qca_cell_clk_lyt,
                    inml_cell_clk_lyt, sidb_cell_clk_lyt, sidb_cell_clk_lyt_cube)

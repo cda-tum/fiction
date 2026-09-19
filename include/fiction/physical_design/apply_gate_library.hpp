@@ -196,7 +196,7 @@ class apply_gate_library_impl
      */
     CellLyt cell_lyt;
     /**
-     * This function assigns a given FCN gate implementation to the total cell layout.
+     * Assigns a gate implementation and its synchronization delay to each nonempty cell.
      *
      * @param c Top-left cell of the tile where the gate is placed.
      * @param g Gate implementation.
@@ -207,6 +207,7 @@ class apply_gate_library_impl
         const auto start_x = c.x;
         const auto start_y = c.y;
         const auto layer   = c.z;
+        const auto delay   = gate_lyt.get_synchronization_element(gate_lyt.get_tile(n));
 
         for (auto y = 0ul; y < g.size(); ++y)
         {
@@ -218,6 +219,7 @@ class apply_gate_library_impl
                 if (!technology<CellLyt>::is_empty_cell(type))
                 {
                     cell_lyt.assign_cell_type(pos, type);
+                    cell_lyt.assign_synchronization_element(pos, delay);
                 }
 
                 // set IO names
@@ -265,6 +267,8 @@ class apply_gate_library_impl
  *
  * May pass through, and thereby throw, an `unsupported_gate_type_exception` or an
  * `unsupported_gate_orientation_exception`.
+ *
+ * Each nonempty emitted cell receives the synchronization delay of its gate tile.
  *
  * @tparam CellLyt Type of the returned cell-level layout.
  * @tparam GateLibrary Type of the gate library to apply.
@@ -323,6 +327,8 @@ template <typename GateLibrary, typename GateLyt>
  *
  * May pass through, and thereby throw, an `unsupported_gate_type_exception`, an
  * `unsupported_gate_orientation_exception` and any further custom exceptions of the gate libraries.
+ *
+ * Each nonempty emitted cell receives the synchronization delay of its gate tile.
  *
  * @tparam CellLyt Type of the returned cell-level layout.
  * @tparam GateLibrary Type of the gate library to apply.
