@@ -30,6 +30,7 @@
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/utils/math/math_utils.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -112,6 +113,10 @@ struct clustercomplete_params
      * this option is disabled.
      */
     ground_state_space_reporting report_gss_stats = ground_state_space_reporting::OFF;
+    /**
+     * Callback that receives the number of unfolded charge space compositions.
+     */
+    utils::progress_callback on_progress{};
 };
 
 namespace detail
@@ -131,6 +136,7 @@ class clustercomplete_impl
      */
     clustercomplete_impl(const layout& lyt, const clustercomplete_params& params) :
             available_threads{std::max(uint64_t{1}, params.available_threads)},
+            progress{params.on_progress, "compositions"},
             landscape{lyt, params.sim_params, params.local_external_potential, params.global_potential},
             mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
                                  -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
@@ -251,6 +257,10 @@ class clustercomplete_impl
      * @brief Number of available threads.
      */
     const uint64_t available_threads;
+    /**
+     * @brief Reports unfolded compositions; the total is unknown.
+     */
+    utils::progress_reporter progress;
     /**
      * @brief Vector containing all workers.
      */
@@ -571,6 +581,8 @@ class clustercomplete_impl
         // specialise for all compositions of max_pst
         for (const charge_space_composition& max_pst_composition : get_projector_state_compositions(*max_pst))
         {
+            progress.advance();
+
             // specialise parent to a specific composition of its children
             add_composition(cl_state, max_pst_composition);
 
@@ -599,6 +611,8 @@ class clustercomplete_impl
         {
             for (const charge_space_composition& composition : ccs.compositions)
             {
+                progress.advance();
+
                 // convert charge space composition to clustering state
                 clustering_state cl_state{landscape.num_sidbs()};
                 add_composition(cl_state, composition);
@@ -1118,6 +1132,8 @@ class clustercomplete_impl
      */
     bool unfold_composition(worker& w, const charge_space_composition& composition)
     {
+        progress.advance();
+
         // specialize parent to a specific composition of its children
         add_composition(w.cl_state, composition);
 

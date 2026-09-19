@@ -8198,19 +8198,35 @@ Returns:
 
 static const char *mkd_doc_fiction_physical_design_detail_east_south_edge_coloring = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl =
+R"doc(Places and routes a network with SMT constraints.
+
+Template Args:
+    Lyt: Target gate-level layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ari = R"doc(Iterator for the factorization of possible aspect ratios.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ari_mutex =
-R"doc(Restricts access to the aspect_ratio_iterator and the
-result_aspect_ratio.)doc";
+R"doc(Restricts access to the aspect-ratio iterator, result, and worker
+context records.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_black_list =
 R"doc(Maps tiles to blacklisted gate types via their truth tables and port
 information.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_exact_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_exact_impl =
+R"doc(Initializes exact placement and routing with a validated clocking
+scheme.
+
+Args:
+    src: Network to place and route; output signals are replaced by
+         output nodes.
+    p: Placement and routing parameters.
+    st: Statistics to update.
+    clocking_scheme: Validated clocking scheme for the target layout.
+    sbl: Gate orientations forbidden at each tile.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_explore_asynchronously =
 R"doc(Thread function for the asynchronous solving strategy. It registers
@@ -8225,15 +8241,20 @@ Args:
     t_num: Thread's identifier.
     ti_list: Pointer to a list of shared thread info that the threads
              use for communication.
+    started: Start of the shared timeout budget.
 
 Returns:
-    A found layout or nullptr if being interrupted.
+    A found layout or `std::nullopt` when interrupted or timed out.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_lower_bound = R"doc(Lower bound for the number of layout tiles.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ntk = R"doc(Specification network.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_progress =
+R"doc(Reports the examined aspect ratios. Their number is not bounded in
+advance, so the total stays unknown.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ps = R"doc(Parameters.)doc";
 
@@ -8374,6 +8395,15 @@ gates.
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_check_point = R"doc(Current solver checkpoint extracted from the solver tree.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_ctx = R"doc(The context used for all solvers.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_current_solver =
+R"doc(Returns the solver for interruption without cancelling model
+evaluation.
+
+Returns:
+    The solver for the current aspect ratio.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_define_gate_fanin_tiles =
 R"doc(Adds constraints to the solver to enforce that a tile which was
@@ -9001,13 +9031,14 @@ free. Symmetry breaking constraints.
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info =
-R"doc(Contains a context pointer and a currently worked on aspect ratio and
-can be shared between multiple worker threads so that they can notify
-each other via context interrupts based on their individual results,
-i.e., a thread that found a result at aspect ratio x * y can interrupt
-all other threads that are working on larger layout sizes.)doc";
+R"doc(Shares worker solvers and aspect ratios under `rar_mutex`.
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_ctx = R"doc(Pointer to a context.)doc";
+A worker with a result interrupts solvers exploring layouts of equal
+or greater area.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_ctx = R"doc(Context that owns the worker solver.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_solver = R"doc(Current solver, kept alive while other workers may interrupt it.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_worker_aspect_ratio = R"doc(Currently examined layout aspect ratio.)doc";
 
@@ -10160,7 +10191,9 @@ static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_pi_
 R"doc(Enum indicating if primary inputs (PIs) can be placed at the top or
 left.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_pi_placement_rng = R"doc(Random engine for this search space graph's PI spacing.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_pi_placement_rng =
+R"doc(Random engine for this search space graph's PI spacing. It is seeded
+from the parameters before use.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_to_hex =
 R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
@@ -10563,15 +10596,15 @@ static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_
 R"doc(Flag to indicate that the number of used crossing tiles should be
 minimized.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_minimize_wires =
-R"doc(Flag to indicate that the number of used crossing tiles should be
-minimized.)doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_minimize_wires = R"doc(Minimize the number of wire tiles.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_num_threads =
 R"doc(Number of threads to use for exploring the possible aspect ratios.
 
 Note:
     This is an unstable beta feature.)doc";
+
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_on_progress = R"doc(Callback that receives the number of examined aspect ratios.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_scheme = R"doc(Clocking scheme to be used.)doc";
 
@@ -10587,9 +10620,7 @@ static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_
 R"doc(Technology-specific constraints that are only to be added for a
 certain target technology.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_timeout =
-R"doc(Sets a timeout in ms for the solving process. Standard is 4294967
-seconds as defined by Z3.)doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_timeout = R"doc(Timeout budget for the solving process, in milliseconds.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_upper_bound_area =
 R"doc(Number of total tiles to use as an upper bound.
@@ -10879,6 +10910,10 @@ solution being found. A higher value might lead to better solutions,
 but also requires more runtime. Defaults to 4 expansions for each
 vertex.)doc";
 
+static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_on_progress =
+R"doc(Callback that receives the number of search space graph expansions
+performed so far.)doc";
+
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_planar =
 R"doc(Disable the creation of crossings during layout generation. If set to
 true, gates will only be placed if a crossing-free wiring is found.
@@ -10999,6 +11034,10 @@ R"doc(Extend primary inputs/outputs to the top/bottom row with planar
 rerouting (i.e., without crossings).)doc";
 
 static const char *mkd_doc_fiction_physical_design_hexagonalization_params_io_pin_extension_mode_NONE = R"doc(Do not extend primary inputs/outputs to the top/bottom row (default).)doc";
+
+static const char *mkd_doc_fiction_physical_design_hexagonalization_params_on_progress =
+R"doc(Callback that receives the progress of the gate mapping and the pin
+extension.)doc";
 
 static const char *mkd_doc_fiction_physical_design_hexagonalization_params_output_pin_extension = R"doc(Output extension mode. Defaults to none)doc";
 
@@ -11145,6 +11184,8 @@ Returns:
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_params = R"doc(Parameters for the orthogonal physical design algorithm.)doc";
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_params_number_of_clock_phases = R"doc(Number of clock phases to use. 3 and 4 are supported.)doc";
+
+static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_params_on_progress = R"doc(Callback that receives the progress of the gate placement.)doc";
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats = R"doc()doc";
 
@@ -12344,6 +12385,10 @@ static const char *mkd_doc_fiction_physical_design_post_layout_optimization_para
 R"doc(Maximum number of relocations to try for each gate. Defaults to the
 number of tiles in the given layout if not specified.)doc";
 
+static const char *mkd_doc_fiction_physical_design_post_layout_optimization_params_on_progress =
+R"doc(Callback that receives the progress of the gate relocations and of the
+nested wiring reduction.)doc";
+
 static const char *mkd_doc_fiction_physical_design_post_layout_optimization_params_optimize_pos_only = R"doc(Only optimize PO positions.)doc";
 
 static const char *mkd_doc_fiction_physical_design_post_layout_optimization_params_planar_optimization =
@@ -12545,6 +12590,8 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_wiring_reduction_params = R"doc(Parameters for the wiring reduction algorithm.)doc";
+
+static const char *mkd_doc_fiction_physical_design_wiring_reduction_params_on_progress = R"doc(Callback that receives the number of wire paths processed so far.)doc";
 
 static const char *mkd_doc_fiction_physical_design_wiring_reduction_params_timeout =
 R"doc(Timeout limit (in ms). Specifies the maximum allowed time in
@@ -14036,6 +14083,8 @@ threads.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs = R"doc(Number of canvas SiDBs.)doc";
 
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_on_progress = R"doc(Callback that receives the progress of the design mode's main loop.)doc";
+
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_operational_params = R"doc(Parameters of the operational check.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_cond = R"doc(When to stop.)doc";
@@ -14122,6 +14171,7 @@ Args:
     items: The items.
     fn: The function.
     done: The stop flag.
+    progress: The reporter to advance after each processed item.
 
 Template Args:
     Items: Container type.
@@ -14250,6 +14300,10 @@ static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_unique_generated_layouts =
 R"doc(Number of unique layouts to generate with
 `generate_multiple_random_layouts`.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_on_progress =
+R"doc(Callback that receives the number of placed SiDBs and, for multiple
+layouts, the number of generated layouts.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges = R"doc(Whether positively charged SiDBs may occur in the generated layout.)doc";
 
@@ -16384,6 +16438,10 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature
 R"doc(Maximum simulation temperature beyond which no simulation will be
 conducted (~ 126 °C by default) (unit: K).)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_on_progress =
+R"doc(Callback that receives the number of simulated input patterns (gate-
+based) or the progress of the physical simulation (non-gate-based).)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_operational_params =
 R"doc(The parameters used to determine if a layout is `operational` or `non-
 operational`.)doc";
@@ -16925,6 +16983,8 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_par
 R"doc(Exhaustive simulation algorithm used to simulate the ground state as
 reference.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_on_progress = R"doc(Callback that receives the number of completed heuristic repetitions.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_repetitions =
 R"doc(Number of iterations of the heuristic algorithm used to determine the
 simulation accuracy (`repetitions = 100` means that accuracy is
@@ -17104,6 +17164,10 @@ R"doc(The defect changes the operational status of the layout (a
 specification is required).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_number_of_threads = R"doc(Number of threads to use.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_on_progress =
+R"doc(Callback that receives the number of evaluated defect positions or,
+for *QuickTrace*, contour points.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_operational_params = R"doc(Parameters of the operational check and the simulation.)doc";
 
@@ -17438,6 +17502,7 @@ Worker exceptions propagate to the caller after the workers finish.
 
 Args:
     n: Number of indices.
+    progress: The reporter to advance after each processed index.
     fn: The function to run.
 
 Template Args:
@@ -17630,6 +17695,8 @@ remain representable.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_fixed_sidbs = R"doc(SiDBs that are not displaced.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_number_of_threads = R"doc(Number of threads to use.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_on_progress = R"doc(Callback that receives the number of analyzed displaced layouts.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_operational_params = R"doc(Parameters of the operational check.)doc";
 
@@ -18390,6 +18457,10 @@ reduction to overlapping witnesses for larger cluster sizes that could
 be runtime-impairing, then limiting specifically the length of the
 input to the factorial call.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_engines_clustercomplete_params_on_progress =
+R"doc(Callback that receives the number of unfolded charge space
+compositions.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_engines_clustercomplete_params_report_gss_stats =
 R"doc(Option to decide if the *Ground State Space* statistics are reported
 to the standard output. By default, this option is disabled.)doc";
@@ -19072,6 +19143,8 @@ R"doc(Globally available array of bounds that section the band gap, used for
 pruning.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_mutex_to_protect_the_simulation_results = R"doc(Mutex to protect the simulation results.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_progress = R"doc(Reports unfolded compositions; the total is unknown.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_remove_composition =
 R"doc(A composition is removed from the given clustering state, i.e., the
@@ -20566,6 +20639,8 @@ landscape.
 Args:
     lyt: Layout to simulate.
     params: Physical parameters.
+    on_progress: Callback that receives the number of enumerated
+                 charge configurations.
 
 Returns:
     The physically valid charge distributions.
@@ -20766,6 +20841,8 @@ static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_loc
 R"doc(Local external electrostatic potentials (e.g., locally applied
 electrodes), per site (unit: V).)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_on_progress = R"doc(Callback that receives the number of enumerated charge configurations.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_sim_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim =
@@ -20804,6 +20881,10 @@ static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_itera
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_number_threads =
 R"doc(Number of threads to spawn. By default the number of threads is set to
 the number of available hardware threads.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_on_progress =
+R"doc(Callback that receives the number of completed iterations across all
+threads.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_sim_params = R"doc(Simulation parameters for the simulation of the physical SiDB system.)doc";
 
@@ -22728,6 +22809,8 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_doma
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_params = R"doc(The parameters for the operational domain computation.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_progress = R"doc(Reports the evaluated parameter points.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_random_sampling =
 R"doc(Performs a random sampling of the specified number of samples within
 the specified parameter range. The operational status is computed for
@@ -23439,6 +23522,10 @@ unavailable. Values below `1` are treated as `1`.
 Pinning it makes wall-clock comparisons reproducible across runs and
 machines, and allows an operational domain computation to leave cores
 free for other work.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_on_progress =
+R"doc(Callback that receives the number of evaluated parameter points. The
+total is known for grid search and random sampling only.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_operational_params =
 R"doc(The parameters used to determine if a layout is operational or non-
@@ -26248,6 +26335,121 @@ Returns:
     A pair of the optimized state and its cost value.
 
 )doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter =
+R"doc(Forwards the progress of a single task to a `progress_callback`,
+throttling the reports.
+
+A reporter is created at the start of a task with the callback of the
+algorithm's parameters, a task name, and, where known, the total
+number of work items. Each completed item is announced with
+`advance()`, which is safe to call concurrently from any number of
+threads. The reporter forwards the first report, the final report in
+its destructor, and intermediate reports whenever another percent of
+the total (or another 64 items when the total is unknown) was
+completed and at least 100 ms have passed since the last report. An
+empty callback turns every member into a no-op.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_advance =
+R"doc(Records `n` completed work items and forwards a report if one is due.
+
+This function may be called concurrently from any thread.
+
+Args:
+    n: The number of work items completed since the last call.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_count = R"doc(The number of completed work items.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_last_report = R"doc(The count and total of the last report. Guarded by `mutex`.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_last_report_time = R"doc(The time of the last report. Guarded by `mutex`.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_mutex = R"doc(Serializes the reports.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_next_report = R"doc(The count at which the next intermediate report is due.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_on_progress = R"doc(The callback to forward reports to.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_operator_assign = R"doc(Reporters do not support copy assignment.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_operator_assign_2 = R"doc(Reporters do not support move assignment.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_progress_reporter =
+R"doc(Starts a task and reports `done == 0` to the callback.
+
+Args:
+    callback: The callback to forward reports to. May be empty.
+    task: The name of the task, e.g., `"placing gates"`.
+    total: The number of work items the task consists of, or `0` if it
+           is unknown.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_progress_reporter_2 =
+R"doc(Reporters cannot be copied because each reporter owns its
+synchronization state.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_progress_reporter_3 = R"doc(Reporters cannot be moved while worker threads may access them.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_report_locked =
+R"doc(Forwards a report for `done` completed items unless the same report
+was forwarded already.
+
+Must be called with `mutex` held.
+
+Args:
+    done: The number of completed work items to report.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_reported = R"doc(Whether a report was forwarded yet. Guarded by `mutex`.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_reset =
+R"doc(Restarts the task with a new total and reports `done == 0`.
+
+Use this for algorithms that iterate over the same set of items
+repeatedly, e.g., until a fixpoint is reached.
+
+Args:
+    total: The number of work items the task consists of, or `0` if it
+           is unknown.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_set_total =
+R"doc(Sets the total number of work items once it becomes known and forwards
+a report.
+
+Args:
+    total: The number of work items the task consists of, or `0` if it
+           is unknown.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_step =
+R"doc(The number of items between two intermediate reports. Guarded by
+`mutex`.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_step_for =
+R"doc(Computes the number of items between two intermediate reports for a
+given total.
+
+Args:
+    total: The total number of work items, or `0` if unknown.
+
+Returns:
+    One percent of `total`, at least `1`, or `UNKNOWN_TOTAL_STEP` if
+    the total is unknown.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_task_name = R"doc(The name of the task.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_total_items = R"doc(The total number of work items, or `0` if unknown. Guarded by `mutex`.)doc";
 
 static const char *mkd_doc_fiction_utils_stl_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and

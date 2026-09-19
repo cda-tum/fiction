@@ -27,17 +27,11 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
-#include <optional>
-
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-
-#include <cstdint>
-#endif
 #include <mockturtle/traits.hpp>
 
 #include <algorithm>
 #include <functional>
+#include <optional>
 #include <type_traits>
 
 // data types cannot properly be converted to bit field types
@@ -93,13 +87,8 @@ class apply_gate_library_impl
      */
     [[nodiscard]] CellLyt run_static_gate_library()
     {
-#if (PROGRESS_BARS)
-        // initialize a progress bar
-        mockturtle::progress_bar bar{static_cast<uint32_t>(gate_lyt.size()), "[i] applying gate library: |{0}|"};
-#endif
-
         gate_lyt.foreach_node(
-            [&, this](const auto& n, [[maybe_unused]] auto i)
+            [&, this](const auto& n)
             {
                 if (!gate_lyt.is_constant(n))
                 {
@@ -113,10 +102,6 @@ class apply_gate_library_impl
 
                     assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t), n);
                 }
-#if (PROGRESS_BARS)
-                // update progress
-                bar(i);
-#endif
             });
 
         // perform post-layout optimization if necessary
@@ -149,10 +134,6 @@ class apply_gate_library_impl
     [[nodiscard]] auto run_parameterized_gate_library(const Params&                      params,
                                                       const std::optional<sidb::layout>& defect_surface = std::nullopt)
     {
-#if (PROGRESS_BARS)
-        // initialize a progress bar
-        mockturtle::progress_bar bar{static_cast<uint32_t>(gate_lyt.size()), "[i] applying gate library: |{0}|"};
-#endif
         // perform post-layout optimization if necessary
         if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
         {
@@ -160,7 +141,7 @@ class apply_gate_library_impl
         }
 
         gate_lyt.foreach_node(
-            [&, this](const auto& n, [[maybe_unused]] auto i)
+            [&, this](const auto& n)
             {
                 if (!gate_lyt.is_constant(n))
                 {
@@ -174,10 +155,6 @@ class apply_gate_library_impl
 
                     assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t, params, defect_surface), n);
                 }
-#if (PROGRESS_BARS)
-                // update progress
-                bar(i);
-#endif
             });
 
         // if available, recover layout name

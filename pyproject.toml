@@ -136,7 +136,6 @@ build-type = "Release"
 
 [tool.scikit-build.cmake.define]
 MOCKTURTLE_EXAMPLES = "OFF"
-FICTION_PROGRESS_BARS = "OFF"
 FICTION_TEST = "OFF"
 FICTION_EXPERIMENTS = "OFF"
 FICTION_ENABLE_IPO = "OFF"

@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
+  - `utils::progress_callback` and `utils::progress_reporter` let long-running algorithms report
+    progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
 
 - CLI:
 
@@ -19,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
   - `aig`, `abc`, and `generate` provide AIG optimization, external ABC scripts, and network generators.
   - `show` supports optional Graphviz SVG rendering, explicit viewers, and temporary-file cleanup.
+  - Commands show progress on terminals; quiet mode and redirected output suppress progress displays.
 
 - Code quality:
 
@@ -89,6 +92,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and MIGs as well as technology networks
   - `print_sidb_layout` exposes `lat_color` and `crop_layout`, and `write_dot_network` and
     `write_dot_layout` expose `indexes` and `clock_colors`
+  - The parameters of the algorithms that report progress accept a Python callable as
+    `on_progress`, and `exhaustive_ground_state_simulation` takes it as an argument. These
+    algorithms release the GIL while they run.
 
 - Tooling:
 
@@ -121,6 +127,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `surface_analysis` and `surface_black_list` live in `physical_design/surface_analysis.hpp` and namespace
     `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
     SiDB header dependency
+  - `graph_oriented_layout_design`, `post_layout_optimization`, and `wiring_reduction` are no longer
+    `noexcept`, so an exception of a progress callback propagates to the caller
 
 - Build system:
 
@@ -324,6 +332,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - **Breaking:** `FICTION_CLI`, `FICTION_ABC`, `ABC_ROOT`, the `deploy` preset, and the `alice`
     dependency are gone with the C++ command-line interface.
+  - **Breaking:** `FICTION_PROGRESS_BARS` and mockturtle's progress bars on `std::cout`; the
+    `on_progress` callbacks replace them.
 - CLI:
 
   - **Breaking:** The C++ command-line interface and `shortcuts.fs`. Use the Python `fiction` shell.
@@ -371,11 +381,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Progress reporters now flush each pass's final count before a reset.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
   - Defect-influence analysis now propagates worker exceptions to the caller.
   - Canvas filtering now rejects SiDBs missing from the simulation state's layout.
   - Ground State Space reports multiset limits using the potential landscape's charge base.
+  - Multi-threaded `exact` synchronizes worker contexts and measures one shared timeout budget.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
   - GOLD now applies each invocation's seed and PI-spacing limit independently
   - Operational checks and gate pruning now reject mismatched input counts; band-bending resilience rejects unusable inputs.
@@ -405,6 +417,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
+  - Progress displays now serialize concurrent reports, clear totals for restarted tasks, and respect nested quiet commands.
   - `opdom` logs its default algorithm as grid search; JSON logs encode non-finite statistics as `null`.
   - `show` and `write` reject unsupported drawing options before writing output. Invalid mapping and
     numeric inputs preserve stored elements.
@@ -471,6 +484,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - `physically_valid_parameters` and `operational_domain_ratio` now release the GIL so
+    worker progress callbacks can execute without deadlocking.
   - Added ordered `simulate_outputs`, exposed mapper statistics, and validated truth-table sizes and expressions before native operations. Gate-library errors identify unsupported gates and their coordinates.
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
   - Exposed the defect-matrix reader exceptions at the package root.

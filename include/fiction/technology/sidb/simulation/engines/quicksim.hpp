@@ -24,6 +24,7 @@
 #include "fiction/technology/sidb/simulation/detail/simulation_state.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -67,6 +68,10 @@ struct quicksim_params
      * Timeout limit (in ms).
      */
     uint64_t timeout = std::numeric_limits<uint64_t>::max();
+    /**
+     * Callback that receives the number of completed iterations across all threads.
+     */
+    utils::progress_callback on_progress{};
 };
 
 /**
@@ -173,6 +178,8 @@ struct quicksim_params
         threads.reserve(num_threads);
         std::mutex mutex{};  // used to control access to shared resources
 
+        utils::progress_reporter progress{ps.on_progress, "iterations", num_threads * iter_per_thread};
+
         for (uint64_t z = 0ul; z < num_threads; z++)
         {
             threads.emplace_back(
@@ -240,6 +247,8 @@ struct quicksim_params
                                 }
                             }
                         }
+
+                        progress.advance();
                     }
                 });
         }

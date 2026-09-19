@@ -110,6 +110,7 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
     """
     topology = "shifted_cartesian" if args.topolinano else args.topology
     params = _exact_parameters(args, _clocking_scheme(args.scheme, topology))
+    params.on_progress = session.report_progress
     native_topology = {"odd_column_cartesian": "shifted_cartesian", "even_row_hex": "hexagonal"}.get(topology, topology)
     design = getattr(pyfiction, f"exact_{native_topology}")
     if args.synchronization_elements and topology != "cartesian":

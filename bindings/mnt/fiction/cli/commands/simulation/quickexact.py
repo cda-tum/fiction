@@ -43,6 +43,7 @@ def quickexact_command(session: Session, args: argparse.Namespace) -> Result:
     """
     layout = _active_sidb_layout(session)
     params = quickexact_params()
+    params.on_progress = session.report_progress
     parameters = _apply_physical(params.simulation_parameters, args)
     params.global_potential = args.global_potential
     parameters["global_potential"] = args.global_potential

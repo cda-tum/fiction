@@ -43,6 +43,7 @@ def quicksim_command(session: Session, args: argparse.Namespace) -> Result:
     """Simulate the active SiDB layout heuristically with QuickSim, approximating the ground state."""
     layout = _active_sidb_layout(session)
     params = quicksim_params()
+    params.on_progress = session.report_progress
     parameters = _apply_physical(params.simulation_parameters, args)
     params.iteration_steps = args.iterations
     params.alpha = args.alpha

@@ -18,7 +18,6 @@
 #pragma once
 
 #include "fiction/technology/sidb/charge_distribution.hpp"
-#include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/critical_temperature.hpp"
@@ -36,6 +35,7 @@
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/utils/math/math_utils.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/stl/hash.hpp"
 
 #include <btree.h>
@@ -407,6 +407,11 @@ struct operational_domain_params
      * computation to leave cores free for other work.
      */
     std::size_t number_of_threads{std::max(std::size_t{std::thread::hardware_concurrency()}, std::size_t{1})};
+    /**
+     * Callback that receives the number of evaluated parameter points. The total is known for grid search and random
+     * sampling only.
+     */
+    utils::progress_callback on_progress{};
 };
 /**
  * Statistics for the operational domain computation. The statistics are used across the different operational domain
@@ -616,6 +621,8 @@ class operational_domain_impl
         // expensive operational points
         std::ranges::shuffle(all_step_points, std::mt19937_64{std::random_device{}()});
 
+        progress.set_total(all_step_points.size());
+
         simulate_operational_status_in_parallel(all_step_points);
 
         log_stats();
@@ -634,6 +641,8 @@ class operational_domain_impl
         const mockturtle::stopwatch stop{stats.time_total};
 
         const auto step_point_samples = generate_random_step_points(samples);
+
+        progress.set_total(step_point_samples.size());
 
         simulate_operational_status_in_parallel(step_point_samples);
 
@@ -1084,6 +1093,7 @@ class operational_domain_impl
 
         // Cartesian product of all step point indices
         const auto all_index_combinations = fiction::utils::math::cartesian_combinations(indices);
+        progress.set_total(all_index_combinations.size());
 
         // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
         // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
@@ -1315,6 +1325,10 @@ class operational_domain_impl
      */
     std::atomic<std::size_t> num_evaluated_parameter_combinations{0};
     /**
+     * Reports the evaluated parameter points.
+     */
+    utils::progress_reporter progress{params.on_progress, "parameter points"};
+    /**
      * Number of worker threads to distribute the parameter points over, taken from the parameters and floored at `1`.
      */
     const std::size_t number_of_threads{std::max(params.number_of_threads, std::size_t{1})};
@@ -1500,6 +1514,7 @@ class operational_domain_impl
         };
 
         ++num_evaluated_parameter_combinations;
+        progress.advance();
 
         sidb::model::simulation_parameters sim_params = params.operational_params.sim_params;
 
@@ -1574,6 +1589,7 @@ class operational_domain_impl
 
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
+        progress.advance();
 
         sidb::model::simulation_parameters sim_params = params.operational_params.sim_params;
 

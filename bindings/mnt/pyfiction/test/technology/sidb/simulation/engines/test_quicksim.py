@@ -10,11 +10,15 @@
 
 from __future__ import annotations
 
+import threading
+from typing import TYPE_CHECKING
+
 from mnt.pyfiction import (
     lattice,
     lattice_site,
     quicksim,
     quicksim_params,
+    read_sqd_layout,
     sidb_charge_state,
     sidb_defect,
     sidb_defect_type,
@@ -22,6 +26,9 @@ from mnt.pyfiction import (
     sidb_layout,
     sidb_simulation_parameters,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def test_perturber_and_sidb_pair() -> None:
@@ -109,3 +116,31 @@ def test_charged_defects_are_not_supported() -> None:
     layout.assign_defect(lattice_site(2, 2, 0), sidb_defect(sidb_defect_type.SI_VACANCY, -1))
 
     assert quicksim(layout) is None
+
+
+def test_quicksim_reports_progress_from_worker_threads(resources_dir: Path) -> None:
+    """The iterations are reported by the worker threads, which needs the GIL released during the call."""
+    layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
+
+    params = quicksim_params()
+    params.iteration_steps = 50000  # long enough for the throttled reporter to forward worker reports
+    params.number_threads = 2
+
+    reports: list[tuple[str, int, int]] = []
+    threads: set[int] = set()
+
+    def on_progress(task: str, done: int, total: int) -> None:
+        threads.add(threading.get_ident())
+        reports.append((task, done, total))
+
+    params.on_progress = on_progress
+
+    result = quicksim(layout, params)
+
+    assert result is not None
+    iterations = [(done, total) for task, done, total in reports if task == "iterations"]
+    assert iterations[0] == (0, 50000)
+    assert iterations == sorted(iterations)
+    assert iterations[-1] == (50000, 50000)
+    # a worker thread reported in between, so the calling thread cannot have held the GIL
+    assert len(threads) > 1

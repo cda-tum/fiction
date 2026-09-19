@@ -61,6 +61,7 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
     """
     layout = _active_sidb_layout(session)
     params = critical_temperature_params()
+    params.on_progress = session.report_progress
     params.confidence_level = args.confidence
     params.max_temperature = args.max_temperature
     params.operational_params.sim_engine = ENGINES[args.engine]

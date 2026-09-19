@@ -32,6 +32,7 @@
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <kitty/operations.hpp>
@@ -42,10 +43,6 @@
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/names_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
-
 #include <z3++.h>
 #include <z3_api.h>
 
@@ -146,7 +143,7 @@ struct exact_physical_design_params
      */
     bool desynchronize = false;
     /**
-     * Flag to indicate that the number of used crossing tiles should be minimized.
+     * @brief Minimize the number of wire tiles.
      */
     bool minimize_wires = false;
     /**
@@ -154,13 +151,17 @@ struct exact_physical_design_params
      */
     bool minimize_crossings = false;
     /**
-     * Sets a timeout in ms for the solving process. Standard is 4294967 seconds as defined by Z3.
+     * @brief Timeout budget for the solving process, in milliseconds.
      */
     unsigned timeout = 4294967u;
     /**
      * Technology-specific constraints that are only to be added for a certain target technology.
      */
     technology_constraints technology_specifics = technology_constraints::NONE;
+    /**
+     * Callback that receives the number of examined aspect ratios.
+     */
+    utils::progress_callback on_progress{};
 };
 /**
  * Statistics.
@@ -187,15 +188,31 @@ struct exact_physical_design_stats
 namespace detail
 {
 
+/**
+ * @brief Places and routes a network with SMT constraints.
+ *
+ * @tparam Lyt Target gate-level layout type.
+ */
 template <typename Lyt>
 class exact_impl
 {
   public:
+    /**
+     * @brief Initializes exact placement and routing with a validated clocking scheme.
+     *
+     * @param src Network to place and route; output signals are replaced by output nodes.
+     * @param p Placement and routing parameters.
+     * @param st Statistics to update.
+     * @param clocking_scheme Validated clocking scheme for the target layout.
+     * @param sbl Gate orientations forbidden at each tile.
+     */
     exact_impl(mockturtle::names_view<networks::technology_network>& src, exact_physical_design_params p,
-               exact_physical_design_stats& st, const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
+               exact_physical_design_stats& st, layouts::clocking::scheme<tile<Lyt>> clocking_scheme,
+               const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
-            scheme{*layouts::clocking::get_scheme<Lyt>(ps.scheme)},
+            progress{ps.on_progress, "aspect ratios"},
+            scheme{std::move(clocking_scheme)},
             black_list{sbl}
     {
         // create PO nodes in the network
@@ -242,6 +259,10 @@ class exact_impl
      */
     exact_physical_design_stats& pst;
     /**
+     * Reports the examined aspect ratios. Their number is not bounded in advance, so the total stays unknown.
+     */
+    utils::progress_reporter progress;
+    /**
      * The utilized clocking scheme.
      */
     layouts::clocking::scheme<tile<Lyt>> scheme;
@@ -262,7 +283,7 @@ class exact_impl
      */
     std::optional<typename Lyt::aspect_ratio> result_aspect_ratio;
     /**
-     * Restricts access to the aspect_ratio_iterator and the result_aspect_ratio.
+     * Restricts access to the aspect-ratio iterator, result, and worker context records.
      */
     std::mutex ari_mutex{}, rar_mutex{};
 
@@ -426,6 +447,16 @@ class exact_impl
         [[nodiscard]] z3::stats get_solver_statistics() const
         {
             return solver->statistics();
+        }
+
+        /**
+         * @brief Returns the solver for interruption without cancelling model evaluation.
+         *
+         * @return The solver for the current aspect ratio.
+         */
+        [[nodiscard]] solver_ptr current_solver() const noexcept
+        {
+            return solver;
         }
 
       private:
@@ -656,6 +687,8 @@ class exact_impl
             solver_state new_state{std::make_shared<z3::solver>(*ctx), {get_lit_e(), get_lit_s()}};
 
             return {std::make_shared<solver_state>(new_state), added_tiles, {}, create_assumptions(new_state)};
+            // MSVC shared_ptr ownership transfers to the returned checkpoint.
+            // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
         }
         /**
          * Checks whether a given tile belongs to the added tiles of the current solver check point.
@@ -2876,19 +2909,22 @@ class exact_impl
         handler.set_timeout(time_left);
     }
     /**
-     * Contains a context pointer and a currently worked on aspect ratio and can be shared between multiple worker
-     * threads so that they can notify each other via context interrupts based on their individual results, i.e., a
-     * thread that found a result at aspect ratio x * y can interrupt all other threads that are working on larger
-     * layout sizes.
+     * @brief Shares worker solvers and aspect ratios under `rar_mutex`.
+     *
+     * A worker with a result interrupts solvers exploring layouts of equal or greater area.
      */
     struct thread_info
     {
         /**
-         * Pointer to a context.
+         * @brief Context that owns the worker solver.
          */
         ctx_ptr ctx;
         /**
-         * Currently examined layout aspect ratio.
+         * @brief Current solver, kept alive while other workers may interrupt it.
+         */
+        solver_ptr solver;
+        /**
+         * @brief Currently examined layout aspect ratio.
          */
         typename Lyt::aspect_ratio worker_aspect_ratio;
     };
@@ -2900,17 +2936,26 @@ class exact_impl
      *
      * @param t_num Thread's identifier.
      * @param ti_list Pointer to a list of shared thread info that the threads use for communication.
-     * @return A found layout or nullptr if being interrupted.
+     * @param started Start of the shared timeout budget.
+     * @return A found layout or `std::nullopt` when interrupted or timed out.
      */
     [[nodiscard]] std::optional<Lyt> explore_asynchronously(const unsigned                                   t_num,
-                                                            const std::shared_ptr<std::vector<thread_info>>& ti_list)
+                                                            const std::shared_ptr<std::vector<thread_info>>& ti_list,
+                                                            const std::chrono::steady_clock::time_point      started)
     {
         const auto ctx = std::make_shared<z3::context>();
 
         Lyt layout{{}, scheme};
 
-        smt_handler handler{ctx, layout, *ntk, ps, black_list};
-        (*ti_list)[t_num].ctx = ctx;
+        // Network views mutate traversal marks and event subscriptions, so each worker needs its own storage.
+        mockturtle::names_view<networks::technology_network> worker_ntk{*ntk};
+        static_cast<networks::technology_network&>(worker_ntk) = ntk->clone();
+        const topology_ntk_t worker_topology{mockturtle::fanout_view{worker_ntk}};
+        smt_handler          handler{ctx, layout, worker_topology, ps, black_list};
+        {
+            const std::scoped_lock guard{rar_mutex};
+            (*ti_list)[t_num].ctx = ctx;
+        }
 
         while (true)
         {
@@ -2926,6 +2971,8 @@ class exact_impl
                 // log the examination of a new aspect ratio
                 pst.num_aspect_ratios++;
             }
+
+            progress.advance();
 
             if ((ar.x + 1) * (ar.y + 1) > ps.upper_bound_area || (ar.x >= ps.upper_bound_x && ar.y >= ps.upper_bound_y))
             {
@@ -2953,12 +3000,19 @@ class exact_impl
             }
 
             // update aspect ratio in the thread_info list and the handler
-            (*ti_list)[t_num].worker_aspect_ratio = ar;
+            {
+                const std::scoped_lock guard{rar_mutex};
+                (*ti_list)[t_num].worker_aspect_ratio = ar;
+            }
             handler.update(ar);
+            {
+                const std::scoped_lock guard{rar_mutex};
+                (*ti_list)[t_num].solver = handler.current_solver();
+            }
 
             try
             {
-                mockturtle::stopwatch stop{pst.time_total};
+                update_timeout(handler, std::chrono::steady_clock::now() - started);
 
                 if (handler.is_satisfiable())  // found a layout
                 {
@@ -2985,11 +3039,16 @@ class exact_impl
                     }
 
                     // interrupt other threads that are working on higher aspect ratios
-                    for (const auto& ti : *ti_list)
                     {
-                        if (layouts::coords::area_of(ar) <= layouts::coords::area_of(ti.worker_aspect_ratio))
+                        const std::scoped_lock guard{rar_mutex};
+                        for (const auto& ti : *ti_list)
                         {
-                            ti.ctx->interrupt();
+                            if (ti.solver && ti.ctx != ctx &&
+                                layouts::coords::area_of(ar) <= layouts::coords::area_of(ti.worker_aspect_ratio))
+                            {
+                                // Context-wide interruption also cancels model evaluation inside noexcept traversals.
+                                Z3_solver_interrupt(*ti.ctx, *ti.solver);
+                            }
                         }
                     }
 
@@ -3007,8 +3066,6 @@ class exact_impl
             {
                 return std::nullopt;
             }
-
-            update_timeout(handler, pst.time_total);
         }
 
         // unreachable code, but compiler complains if it's not there
@@ -3021,8 +3078,6 @@ class exact_impl
      */
     [[nodiscard]] std::optional<Lyt> run_asynchronously()
     {
-        std::cout << "You have called an unstable beta feature that might crash.\n";
-
         Lyt layout{{}, scheme};
 
         {
@@ -3032,20 +3087,11 @@ class exact_impl
             std::vector<fut_layout> fut(ps.num_threads);
 
             const auto ti_list = std::make_shared<std::vector<thread_info>>(ps.num_threads);
-
-#if (PROGRESS_BARS)
-            mockturtle::progress_bar thread_bar("[i] examining layout aspect ratios using {} threads");
-            thread_bar(ps.num_threads);
-
-            auto post_toggle = false;
-
-            mockturtle::progress_bar post_bar(
-                "[i] some layout has been found; waiting for threads examining smaller aspect ratios to terminate");
-#endif
+            const auto started = std::chrono::steady_clock::now() - pst.time_total;
 
             for (auto i = 0u; i < ps.num_threads; ++i)
             {
-                fut[i] = std::async(std::launch::async, &exact_impl::explore_asynchronously, this, i, ti_list);
+                fut[i] = std::async(std::launch::async, &exact_impl::explore_asynchronously, this, i, ti_list, started);
             }
 
             // wait for every task to finish running. This is the join that makes the unguarded `result_aspect_ratio`
@@ -3053,15 +3099,6 @@ class exact_impl
             for (auto& f : fut)
             {
                 f.wait();
-
-#if (PROGRESS_BARS)
-                if (!post_toggle)
-                {
-                    thread_bar.done();
-                    post_bar(true);
-                    post_toggle = true;
-                }
-#endif
             }
 
             // extract the layout from the futures. Every future is consumed, even when no result was found:
@@ -3104,7 +3141,7 @@ class exact_impl
      *
      * @return A placed and routed gate-level layout or std::nullopt in case a timeout or an upper bound was reached.
      */
-    [[nodiscard]] std::optional<Lyt> run_synchronously() noexcept
+    [[nodiscard]] std::optional<Lyt> run_synchronously()
     {
         Lyt layout{{}, scheme};
 
@@ -3115,27 +3152,16 @@ class exact_impl
 
         for (; ari <= upper_bound; ++ari)  // <= to prevent overflow
         {
-
-#if (PROGRESS_BARS)
-            // `progress_bar::operator()` is non-const, so `bar` cannot be declared `const`; clang-tidy does not
-            // recognize the variadic call below as a mutating use
-            // NOLINTNEXTLINE(misc-const-correctness)
-            mockturtle::progress_bar bar("[i] examining layout aspect ratios: {:>2} × {:<2}");
-#endif
-
             auto ar = *ari;
 
             // log the examination of a new aspect ratio
             pst.num_aspect_ratios++;
+            progress.advance();
 
             if (handler.skippable(ar))
             {
                 continue;
             }
-
-#if (PROGRESS_BARS)
-            bar(ar.x + 1, ar.y + 1);
-#endif
 
             handler.update(ar);
 
@@ -3265,7 +3291,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st};
+    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, *clocking_scheme};
 
     auto result = p.run();
 
@@ -3337,7 +3363,7 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, black_list};
+    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, *clocking_scheme, black_list};
 
     auto result = p.run();
 

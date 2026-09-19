@@ -59,12 +59,14 @@ def optimize(session: Session, args: argparse.Namespace) -> Result:
     stats: post_layout_optimization_stats | wiring_reduction_stats
     if args.wiring_only:
         wiring_params = wiring_reduction_params()
+        wiring_params.on_progress = session.report_progress
         if timeout is not None:
             wiring_params.timeout = timeout
         stats = wiring_reduction_stats()
         wiring_reduction(layout, wiring_params, stats)
     else:
         params = post_layout_optimization_params()
+        params.on_progress = session.report_progress
         params.planar_optimization = args.planar
         if args.max_relocations is not None:
             params.max_gate_relocations = args.max_relocations
