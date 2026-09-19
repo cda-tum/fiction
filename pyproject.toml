@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "scikit_build_core.build"
-requires = [ "nanobind~=3.0.0", "scikit-build-core~=1.0.3", "vcs-versioning~=2.3.0" ]
+requires = [ "nanobind~=3.0.0", "scikit-build-core~=1.0.3", "vcs-versioning~=2.4.0" ]
 
 [project]
 name = "mnt-pyfiction"
@@ -117,7 +117,7 @@ docs = [
 build = [
     "nanobind~=3.0.0",
     "scikit-build-core~=1.0.3",
-    "vcs-versioning~=2.3.0",
+    "vcs-versioning~=2.4.0",
 ]
 
 [tool.scikit-build]
