@@ -37,7 +37,7 @@ jobs:
   publish-to-pypi:
     name: 🚀 Publish to PyPI
     needs: [build-sdist, build-wheels]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: github.event_name == 'release' && github.event.action == 'published'
     # the one place in the repository that can reach PyPI. Naming a deployment environment
     # gives that step somewhere to hang required reviewers or a wait timer; until such a rule
