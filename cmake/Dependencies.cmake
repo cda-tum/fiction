@@ -123,7 +123,7 @@ FetchContent_MakeAvailable(tinyxml2)
 # release and defines the target first; mockturtle and lorina then link this
 # one.
 set(FMT_VERSION
-    12.1.0
+    12.2.0
     CACHE STRING "fmt version")
 if(NOT DEFINED FMT_URL)
   set(FMT_URL
