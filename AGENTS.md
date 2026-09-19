@@ -241,6 +241,7 @@ Use these commands to validate your work.
 - **Test (Floors)**: `nox -s minimums` (Runs pytest on Python 3.10 against the lowest declared
   dependency versions)
 - **Lint**: `nox -s lint` (Runs prek hooks including ruff and mypy)
+- **C++ Lint**: `nox -s cpp_lint -- --all` (Runs the CI Clang-Tidy configuration on all eligible C++ files)
 
 ### General
 

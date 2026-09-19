@@ -94,10 +94,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Added EditorConfig settings that match the repository's formatters.
   - Prek formats `pyproject.toml` with `pyproject-fmt`.
+  - Added `nox -s cpp_lint` for local Clang-Tidy checks. Nox uses `cmake` as the sole CMake executable.
 
 ### Changed
 
 - Algorithms:
+
+  - Avoid helper threads for single-worker sampling and contour exploration.
+  - Reduce coordinate-vector allocations during operational-domain traversal.
+  - Reuse completed three-dimensional contour surfaces across initial samples.
+  - Contour tracing explores boundary surfaces in three or more dimensions in parallel. It uses
+    `operational_domain_params::number_of_threads`; large contour interiors also use parallel inference.
   - `convert_network` maps a technology network's inverters to `create_not` on a target without
     `create_node`, so AIG, XAG, and MIG conversions keep the inverters they used to lose
   - **Breaking:** _QuickExact_, _QuickSim_, _ExGS_, _ClusterComplete_, and _Ground State Space_
@@ -375,6 +382,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Contour tracing distributes simulation locks across regular parameter grids.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
   - Defect-influence analysis now propagates worker exceptions to the caller.
