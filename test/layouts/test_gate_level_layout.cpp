@@ -82,6 +82,19 @@ TEST_CASE("Owned gate capabilities share copies and isolate clones", "[gate-leve
     CHECK_FALSE(original.is_outgoing_clocked({1, 1}, {1, 1}));
 }
 
+TEST_CASE("Gate layout constructed from coordinates supports logic functions", "[gate-level-layout]")
+{
+    const cartesian_layout<coords::offset> coordinates{{2, 2}};
+    gate_level_layout                      layout{coordinates};
+    const auto                             x    = layout.create_pi("x", {0, 0});
+    const auto                             y    = layout.create_pi("y", {1, 0});
+    const auto                             gate = layout.create_and(x, y, {1, 1});
+    kitty::dynamic_truth_table             expected{2};
+    kitty::create_from_hex_string(expected, "8");
+    CHECK(layout.node_function(layout.get_node(gate)) == expected);
+    CHECK(layout.size() == 5);
+}
+
 TEST_CASE("Deep copy gate-level layout", "[gate-level-layout]")
 {
     using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;

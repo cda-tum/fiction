@@ -439,6 +439,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+  - Gate layouts constructed from coordinate layouts initialize their logic functions.
   - Clocked degree counts each eligible neighbor once, including neighbors enabled by synchronization.
   - Clocking-scheme queries compare bounded string views.
   - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.

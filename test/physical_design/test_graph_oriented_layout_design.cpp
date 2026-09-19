@@ -66,6 +66,12 @@ const T& required_value(const std::optional<T>& optional)
     return optional.value();  // NOLINT(bugprone-unchecked-optional-access) Catch2 REQUIRE guards each call.
 }
 
+/**
+ * @brief Checks logic equivalence and removal of placement-search obstructions.
+ * @tparam Lyt Gate layout type.
+ * @tparam Ntk Network type.
+ * @param ntk Network to place and route.
+ */
 template <typename Lyt, typename Ntk>
 void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
 {
@@ -78,6 +84,9 @@ void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
     REQUIRE(layout.has_value());
 
     check_eq(ntk, required_value(layout));
+    const auto& result = required_value(layout);
+    result.foreach_coordinate([&result](const auto& c)
+                              { CHECK(result.is_obstructed_coordinate(c) == !result.is_empty_tile(c)); });
 }
 
 template <typename Lyt>

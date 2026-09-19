@@ -93,11 +93,7 @@ class obstructions
      */
     [[nodiscard]] bool is_obstructed_coordinate(const Coordinate& c) const noexcept
     {
-        if (obstructed_coordinates.count(c) > 0)
-        {
-            return true;
-        }
-        return false;
+        return obstructed_coordinates.contains(c);
     }
     /**
      * Checks if the given coordinate-coordinate connection is obstructed of some sort.
@@ -108,11 +104,7 @@ class obstructions
      */
     [[nodiscard]] bool is_obstructed_connection(const Coordinate& src, const Coordinate& tgt) const noexcept
     {
-        if (obstructed_connections.count({src, tgt}) > 0)
-        {
-            return true;
-        }
-        return false;
+        return obstructed_connections.contains({src, tgt});
     }
 
   private:

@@ -163,7 +163,7 @@ class cell_level_layout : public CoordinateLayout
      */
     explicit cell_level_layout(const CoordinateLayout& lyt) :
             CoordinateLayout(lyt),
-            strg{std::make_shared<cell_level_layout_storage<cell>>("", 1, 1)}
+            strg{std::make_shared<cell_level_layout_storage<cell>>("")}
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
     }
@@ -174,8 +174,9 @@ class cell_level_layout : public CoordinateLayout
      */
     [[nodiscard]] cell_level_layout clone() const noexcept
     {
-        cell_level_layout copy{CoordinateLayout::clone()};
-        copy.strg = std::make_shared<cell_level_layout_storage<cell>>(*strg);
+        cell_level_layout copy{*this};
+        static_cast<CoordinateLayout&>(copy) = CoordinateLayout::clone();
+        copy.strg                            = std::make_shared<cell_level_layout_storage<cell>>(*strg);
 
         return copy;
     }

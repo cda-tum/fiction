@@ -377,7 +377,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
     /**
      * Marks the given coordinate as obstructed.
      *
-     * @param c OffsetCoordinateType to obstruct.
+     * @param c Coordinate to obstruct.
      */
     void obstruct_coordinate(const OffsetCoordinateType& c) noexcept
     {
@@ -386,7 +386,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
     /**
      * Marks the connection from coordinate `src` to coordinate `tgt` as obstructed.
      *
-     * @note OffsetCoordinateTypes marked this way will not be crossed with wires by path finding algorithms.
+     * @note Coordinates marked this way will not be crossed with wires by path finding algorithms.
      *
      * @param src Source coordinate.
      * @param tgt Target coordinate.
@@ -396,44 +396,9 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
         search_obstructions.obstruct_connection(src, tgt);
     }
     /**
-     * Clears the obstruction status of the given coordinate `c` if the obstruction was manually marked via
-     * `obstruct_coordinate`.
-     *
-     * @param c OffsetCoordinateType to clear.
-     */
-    void clear_obstructed_coordinate(const OffsetCoordinateType& c) noexcept
-    {
-        search_obstructions.clear_obstructed_coordinate(c);
-    }
-    /**
-     * Clears the obstruction status of the connection from coordinate `src` to coordinate `tgt` if the obstruction was
-     * manually marked via `obstruct_connection`.
-     *
-     * @param src Source coordinate.
-     * @param tgt Target coordinate.
-     */
-    void clear_obstructed_connection(const OffsetCoordinateType& src, const OffsetCoordinateType& tgt) noexcept
-    {
-        search_obstructions.clear_obstructed_connection(src, tgt);
-    }
-    /**
-     * Clears all obstructed coordinates that were manually marked via `obstruct_coordinate`.
-     */
-    void clear_obstructed_coordinates() noexcept
-    {
-        search_obstructions.clear_obstructed_coordinates();
-    }
-    /**
-     * Clears all obstructed connections that were manually marked via `obstruct_connection`.
-     */
-    void clear_obstructed_connections() noexcept
-    {
-        search_obstructions.clear_obstructed_connections();
-    }
-    /**
      * Checks if the given coordinate is obstructed of some sort.
      *
-     * @param c OffsetCoordinateType to check.
+     * @param c Coordinate to check.
      * @return `true` iff `c` is obstructed.
      */
     [[nodiscard]] bool is_obstructed_coordinate(const OffsetCoordinateType& c) const noexcept
@@ -445,7 +410,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
      *
      * @param src Source coordinate.
      * @param tgt Target coordinate.
-     * @return `true` iff the connection from `c1` to `c2` is obstructed.
+     * @return `true` iff the connection from `src` to `tgt` is obstructed.
      */
     [[nodiscard]] bool is_obstructed_connection(const OffsetCoordinateType& src,
                                                 const OffsetCoordinateType& tgt) const noexcept
@@ -464,12 +429,6 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
 };
 
 /**
- * Type alias for an obstruction layout specialized for finding excess wiring.
- */
-template <typename OffsetCoordinateType>
-using wiring_reduction_layout_type = wiring_reduction_layout<OffsetCoordinateType>;
-
-/**
  * Create a wiring_reduction_layout suitable for finding excess wiring based on a Cartesian layout.
  *
  * This function generates a new layout suitable for finding excess wiring by shifting the input layout based on
@@ -480,11 +439,11 @@ using wiring_reduction_layout_type = wiring_reduction_layout<OffsetCoordinateTyp
  * @param lyt The input Cartesian gate-level layout to be shifted.
  * @param x_offset The offset for shifting in the x-direction. Defaults to 0 if not specified.
  * @param y_offset The offset for shifting in the y-direction. Defaults to 0 if not specified.
- * @param search_direction If set to horizontally, paths are searched from left to right, otherwise from top to bottom.
+ * @param direction If set to horizontally, paths are searched from left to right, otherwise from top to bottom.
  * @return wiring_reduction_layout suitable for finding excess wiring via A*.
  */
 template <typename Lyt>
-wiring_reduction_layout_type<coordinate<Lyt>>
+wiring_reduction_layout<coordinate<Lyt>>
 create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_t y_offset = 0,
                                search_direction direction = search_direction::HORIZONTAL) noexcept
 {
@@ -492,11 +451,9 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
     // create a wiring_reduction_layout with specified offsets
-    wiring_reduction_layout<coordinate<Lyt>> obs_wiring_reduction_layout{
+    wiring_reduction_layout<coordinate<Lyt>> wiring_reduction_lyt{
         {lyt.x() + x_offset + 1, lyt.y() + y_offset + 1, lyt.z()},
         direction};
-
-    auto wiring_reduction_lyt = wiring_reduction_layout_type<coordinate<Lyt>>(obs_wiring_reduction_layout);
 
     // iterate through nodes in the layout
     lyt.foreach_node(
@@ -1183,11 +1140,11 @@ class wiring_reduction_impl
         pst.x_size_before    = plyt.x() + 1;
         pst.y_size_before    = plyt.y() + 1;
 
-        // create an obstruction layout based on the original layout
+        // share the layout storage while updating placement
         auto layout = plyt;
 
         // initialize the list of wires to delete
-        layout_coordinate_path<wiring_reduction_layout_type<coordinate<Lyt>>> to_delete = {};
+        layout_coordinate_path<wiring_reduction_layout<coordinate<Lyt>>> to_delete = {};
 
         bool found_wires = true;
 
@@ -1239,8 +1196,8 @@ class wiring_reduction_impl
                 while (!possible_path.empty() && !timeout_limit_reached)
                 {
                     // update the list of wires to delete based on the current path
-                    update_to_delete_list<Lyt, wiring_reduction_layout_type<coordinate<Lyt>>>(wiring_reduction_lyt,
-                                                                                              possible_path, to_delete);
+                    update_to_delete_list<Lyt, wiring_reduction_layout<coordinate<Lyt>>>(wiring_reduction_lyt,
+                                                                                         possible_path, to_delete);
 
                     // update the remaining timeout after processing the path
                     update_timeout();

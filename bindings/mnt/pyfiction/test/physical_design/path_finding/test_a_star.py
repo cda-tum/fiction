@@ -50,13 +50,10 @@ def test_search_constraints_are_local() -> None:
 
 
 CLOCKED_LAYOUTS = [
-    pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave"), id="cartesian_gate_layout"),
     pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
-    pytest.param(lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave"), id="shifted_cartesian_gate_layout"),
     pytest.param(
         lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
     ),
-    pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave"), id="hexagonal_gate_layout"),
     pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
 ]
 
@@ -91,15 +88,15 @@ def test_clocked_path_finding(make_lyt):
     [
         pytest.param(
             lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
-            id="cartesian_obstruction_layout",
+            id="cartesian_gate_layout",
         ),
         pytest.param(
             lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
-            id="shifted_cartesian_obstruction_layout",
+            id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
             lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"),
-            id="hexagonal_obstruction_layout",
+            id="hexagonal_gate_layout",
         ),
     ],
 )
@@ -131,15 +128,15 @@ def test_path_finding_with_obstructions(make_lyt):
     [
         pytest.param(
             lambda: cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout"),
-            id="cartesian_obstruction_layout",
+            id="cartesian_gate_layout",
         ),
         pytest.param(
             lambda: shifted_cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout"),
-            id="shifted_cartesian_obstruction_layout",
+            id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
             lambda: hexagonal_gate_layout((2, 1, 1), "2DDWave", "Layout"),
-            id="hexagonal_obstruction_layout",
+            id="hexagonal_gate_layout",
         ),
     ],
 )

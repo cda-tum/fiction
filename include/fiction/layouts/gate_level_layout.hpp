@@ -254,6 +254,7 @@ class gate_level_layout : public CoordinateLayout
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+        initialize_truth_table_cache();
     }
     /**
      * Clones the layout returning a deep copy.
@@ -262,9 +263,10 @@ class gate_level_layout : public CoordinateLayout
      */
     [[nodiscard]] gate_level_layout clone() const noexcept
     {
-        gate_level_layout copy{CoordinateLayout::clone()};
-        copy.strg  = std::make_shared<gate_level_layout_storage>(*strg);
-        copy.evnts = std::make_shared<mockturtle::network_events<base_type>>(*evnts);
+        gate_level_layout copy{*this};
+        static_cast<CoordinateLayout&>(copy) = CoordinateLayout::clone();
+        copy.strg                            = std::make_shared<gate_level_layout_storage>(*strg);
+        copy.evnts                           = std::make_shared<mockturtle::network_events<base_type>>(*evnts);
 
         return copy;
     }

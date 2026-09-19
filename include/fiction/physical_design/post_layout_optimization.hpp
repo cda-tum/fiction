@@ -461,7 +461,7 @@ class post_layout_optimization_impl
         // determine the maximum number of gate relocations
         max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
 
-        // create an obstruction layout based on the original layout
+        // share the layout storage while updating placement
         auto layout = plyt;
 
         // initialize flags to control the optimization loop

@@ -38,13 +38,10 @@ def test_non_clocked_paths(make_lyt):
 @pytest.mark.parametrize(
     "make_lyt",
     [
-        pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave"), id="cartesian_gate_layout"),
         pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
-        pytest.param(lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave"), id="shifted_cartesian_gate_layout"),
         pytest.param(
             lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
         ),
-        pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave"), id="hexagonal_gate_layout"),
         pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
     ],
 )
