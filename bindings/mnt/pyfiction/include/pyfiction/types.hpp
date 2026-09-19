@@ -13,6 +13,7 @@
  * @brief The concrete network and layout types the Python bindings instantiate.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
+ * @author OpenAI Codex
  */
 
 #pragma once
@@ -116,11 +117,6 @@ using py_stacked_cartesian_layout = fiction::layouts::cartesian_layout<py_cube_c
  */
 using py_stacked_cartesian_clocked_layout =
     fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<py_stacked_cartesian_layout>>;
-/**
- * QCA layout preserving all imported layers.
- */
-using py_stacked_qca_layout =
-    fiction::layouts::cell_level_layout<fiction::qca::qca_technology, py_stacked_cartesian_clocked_layout>;
 /**
  * Clocked odd row cartesian layout.
  */

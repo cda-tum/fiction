@@ -37,7 +37,7 @@ def _area_arguments(parser: Parser) -> None:
 
 
 @command(
-    "area", Category.TECHNOLOGY, _area_arguments, inputs="Active cell-level layout.", example="read layout.fqca; area"
+    "area", Category.TECHNOLOGY, _area_arguments, inputs="Active cell-level layout.", example="read layout.sqd; area"
 )
 def area_command(session: Session, args: argparse.Namespace) -> Result:
     """Compute the physical area of the active cell-level layout in nm².

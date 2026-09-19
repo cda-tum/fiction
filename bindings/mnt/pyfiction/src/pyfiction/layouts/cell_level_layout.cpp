@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)
+ * @author OpenAI Codex
  */
 
 #include "pyfiction/documentation.hpp"
@@ -272,7 +273,6 @@ void cell_level_layout(nanobind::module_& m)
     detail::cell_layout<py_qca_layout, py_cartesian_clocked_layout>(m, "qca");
     detail::cell_layout<py_mol_qca_layout, py_cartesian_clocked_layout>(m, "mol_qca");
     detail::cell_layout<py_inml_layout, py_cartesian_clocked_layout>(m, "inml");
-    detail::cell_layout<py_stacked_qca_layout, py_stacked_cartesian_clocked_layout>(m, "stacked_qca");
 }
 
 }  // namespace pyfiction
