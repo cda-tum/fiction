@@ -412,6 +412,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Build system:
   - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
+  - CMake now verifies the `fmt` 12.2.0 archive with its matching SHA-256 checksum.
   - Installed CMake packages include the `fmt` headers and their header-only compile definition.
   - CMake installation includes ALGLIB's generated version metadata.
 
