@@ -75,7 +75,7 @@ jobs:
 
       - name: Run pybind11_mkdoc
         env:
-          LIBCLANG_PATH: /usr/lib/llvm-${{env.LLVM_VERSION}}/lib/libclang.so.1
+          LIBCLANG_PATH: /usr/lib/llvm-${{env.LLVM_VERSION}}/lib/libclang.so
         # Resolve the flags and the header list into variables first. Inline command
         # substitution would swallow a failure of either: the generator would still run, just
         # without include paths or without inputs, and write a truncated header.
