@@ -34,7 +34,7 @@ env:
 jobs:
   docstrings:
     name: 🐍 pybind11_mkdoc
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     permissions:
       contents: read # required to check out the repository
