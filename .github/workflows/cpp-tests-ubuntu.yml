@@ -25,10 +25,7 @@ defaults:
     shell: bash
 
 env:
-  # 4.14.1 is the newest Z3 whose Linux x64 build still runs on `ubuntu-22.04`: from
-  # 4.15.0 on, the release binaries require GLIBC_2.38/GLIBCXX_3.4.32, and 22.04 ships
-  # glibc 2.35. Raise this once `ubuntu-22.04` leaves the matrix in `ci.yml`
-  Z3_VERSION: 4.14.1
+  Z3_VERSION: 5.1.0
   CMAKE_BUILD_PARALLEL_LEVEL: 4
   CTEST_PARALLEL_LEVEL: 4
 
@@ -74,7 +71,7 @@ jobs:
         uses: rui314/setup-mold@7e4f20ad28a2e8ca6fd0892ccf72e2abb706b9c3 # v1
 
       # `platform` and `architecture` are left at their `host` default so that the
-      # `ubuntu-24.04-arm` runners pick up the `arm64-glibc` archive
+      # Ubuntu ARM64 runners pick up the `arm64-glibc` archive
       - name: Setup Z3 Solver
         id: z3
         uses: cda-tum/setup-z3@0401375ea1e34d77ef35bbeb634f6203f3bcde60 # v1.7.3

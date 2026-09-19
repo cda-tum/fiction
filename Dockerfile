@@ -36,7 +36,7 @@ ENV PATH="/app/venv/bin:$PATH"
 
 # The Z3 wheel provides the solver the build links against
 RUN uv venv --python /usr/bin/python3 "$VIRTUAL_ENV" && \
-    uv pip install --no-cache z3-solver==4.14.1
+    uv pip install --no-cache z3-solver==5.1.0.0
 
 # Copy the local fiction repository to the container (preferred for development and CI); `.git` comes along
 # because the wheel takes its version from the tags
