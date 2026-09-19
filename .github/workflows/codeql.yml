@@ -82,7 +82,7 @@ jobs:
         if: matrix.language == 'cpp'
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
-          key: "codeql-ubuntu-24.04-clang++-17"
+          key: "codeql-ubuntu-26.04-clang++-17"
           variant: ccache
           # Only `main` writes; pull requests restore its cache. Caches are
           # branch-scoped and the repository shares a 10 GB budget.

@@ -24,7 +24,7 @@ env:
 
 jobs:
   coverage:
-    name: ☂️ ubuntu-24.04 g++-13
+    name: ☂️ ubuntu-26.04 g++-13
     runs-on: ubuntu-26.04
     permissions:
       contents: read # required to check out the repository
@@ -47,7 +47,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
-          key: "ubuntu-24.04-g++-13-coverage"
+          key: "ubuntu-26.04-g++-13-coverage"
           variant: ccache
           # Only `main` writes; pull requests restore its cache. Caches are
           # branch-scoped and the repository shares a 10 GB budget.

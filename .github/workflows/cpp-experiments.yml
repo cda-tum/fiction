@@ -46,7 +46,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
-          key: "ubuntu-24.04-experiments"
+          key: "ubuntu-26.04-experiments"
           variant: ccache
           # Only `main` writes; pull requests restore its cache. Caches are
           # branch-scoped and the repository shares a 10 GB budget.
