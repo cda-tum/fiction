@@ -211,7 +211,7 @@ repos:
 
   # Format configuration files with prettier
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.9.6
+    rev: v3.9.7
     hooks:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
