@@ -18,11 +18,10 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/layouts/bounding_box.hpp>                              // bounding box
-#include <fiction/layouts/cartesian_layout.hpp>                          // Cartesian layout
-#include <fiction/layouts/clocked_layout.hpp>                            // clocked layout
+#include <fiction/layouts/bounding_box.hpp>      // bounding box
+#include <fiction/layouts/cartesian_layout.hpp>  // Cartesian layout
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>                         // gate-level layout
-#include <fiction/layouts/tile_based_layout.hpp>                         // tile-based layout
 #include <fiction/networks/io/network_reader.hpp>                        // read networks from files
 #include <fiction/physical_design/orthogonal.hpp>                        // scalable heuristic for physical design
 #include <fiction/physical_design/wiring_reduction.hpp>                  // wiring reduction algorithm
@@ -60,7 +59,7 @@ static Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout<>>;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                             uint64_t, uint64_t, size_t, size_t, float, uint64_t, uint64_t, float, uint64_t, uint64_t,

@@ -16,14 +16,13 @@
 
 #if (FICTION_Z3_SOLVER)
 
-#include <fiction/layouts/cartesian_layout.hpp>                // Cartesian grid layouts
-#include <fiction/layouts/cell_level_layout.hpp>               // cell-level abstraction of layouts
-#include <fiction/layouts/clocked_layout.hpp>                  // clocked layouts
-#include <fiction/layouts/clocking_scheme.hpp>                 // clocking schemes
-#include <fiction/layouts/coordinates.hpp>                     // coordinate systems
+#include <fiction/layouts/cartesian_layout.hpp>   // Cartesian grid layouts
+#include <fiction/layouts/cell_level_layout.hpp>  // cell-level abstraction of layouts
+#include <fiction/layouts/clocking_scheme.hpp>    // clocking schemes
+#include <fiction/layouts/coordinates.hpp>        // coordinate systems
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>               // gate-level abstraction of layouts
 #include <fiction/layouts/io/layout_drawers.hpp>               // DOT drawers and writer for layouts
-#include <fiction/layouts/tile_based_layout.hpp>               // tile-based abstraction of layouts
 #include <fiction/networks/io/dot_drawers.hpp>                 // DOT drawers and writer for logic networks
 #include <fiction/physical_design/apply_gate_library.hpp>      // layout conversion to cell-level
 #include <fiction/physical_design/exact.hpp>                   // SMT-based physical design of FCN layouts
@@ -221,11 +220,10 @@ int main(int argc, char* argv[])  // NOLINT
     /**************************************************************/
 
     // defining the type of gate-level layout to use (also already pre-defined in fiction/types.hpp as cart_gate_clk_lyt
-    using fcn_gate_level_layout =
-        gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using fcn_gate_level_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     // defining the type of cell-level layout to use (also already pre-defined in fiction/types.hpp as qca_cell_clk_lyt
-    using qca_cell_level_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using qca_cell_level_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     std::cout << "[i] orthogonal physical design\n";
 

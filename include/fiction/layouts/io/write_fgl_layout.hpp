@@ -190,24 +190,22 @@ class write_fgl_layout_impl
             }
             os << fgl::CLOSE_CLOCK_ZONES;
         }
-        if constexpr (has_synchronization_elements_v<Lyt>)
+
+        if (lyt.num_se() != 0)
         {
-            if (lyt.num_se() != 0)
-            {
-                os << "      <synchronization_elements>\n";
-                lyt.foreach_coordinate(
-                    [this](const auto& coordinate)
+            os << "      <synchronization_elements>\n";
+            lyt.foreach_coordinate(
+                [this](const auto& coordinate)
+                {
+                    if (const auto delay = lyt.get_synchronization_element(coordinate); delay != 0)
                     {
-                        if (const auto delay = lyt.get_synchronization_element(coordinate); delay != 0)
-                        {
-                            os << fmt::format(
-                                "        <element><x>{}</x><y>{}</y><z>{}</z><delay>{}</delay></element>\n",
-                                coordinate.x, coordinate.y, coordinate.z, delay);
-                        }
-                    });
-                os << "      </synchronization_elements>\n";
-            }
+                        os << fmt::format("        <element><x>{}</x><y>{}</y><z>{}</z><delay>{}</delay></element>\n",
+                                          coordinate.x, coordinate.y, coordinate.z, delay);
+                    }
+                });
+            os << "      </synchronization_elements>\n";
         }
+
         os << fgl::CLOSE_CLOCKING;
         os << fgl::CLOSE_LAYOUT_METADATA;
 

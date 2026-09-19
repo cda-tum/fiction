@@ -19,9 +19,7 @@
 
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>  // read networks from files
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>                // scalable heuristic for physical design
@@ -60,7 +58,7 @@ Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout<>>;
 
     experiments::experiment<std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, uint64_t,
                             double, float, std::string>

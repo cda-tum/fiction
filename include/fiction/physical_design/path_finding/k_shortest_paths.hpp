@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/obstruction_layout.hpp"
+#include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
@@ -53,16 +53,19 @@ class yen_k_shortest_paths_impl
 {
   public:
     yen_k_shortest_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const uint32_t k,
-                              const yen_k_shortest_paths_params& p) :
+                              const yen_k_shortest_paths_params&            p,
+                              const layouts::obstructions<coordinate<Lyt>>& extra) :
             layout{lyt},
             objective{obj.source, obj.target},  // create a new objective due to potentially differing types
             num_shortest_paths{k},
-            params{p}
+            params{p},
+            initial_obstructions{extra},
+            search_obstructions{extra}
     {
         // start by determining the shortest path between source and target
-        k_shortest_paths.push_back(
-            a_star<Path>(layout, objective, manhattan_distance_functor<layouts::obstruction_layout<Lyt>, uint64_t>(),
-                         unit_cost_functor<layouts::obstruction_layout<Lyt>, uint8_t>(), params.astar_params));
+        k_shortest_paths.push_back(a_star<Path>(layout, objective, manhattan_distance_functor<Lyt, uint64_t>(),
+                                                unit_cost_functor<Lyt, uint8_t>(), params.astar_params,
+                                                search_obstructions));
     }
 
     /**
@@ -107,9 +110,7 @@ class yen_k_shortest_paths_impl
                         std::ranges::equal(root_path.cbegin(), root_path.cend(), p.cbegin(), p.cbegin() + i))
                     {
                         // block the connection that was already used in the previous shortest path
-                        layout.obstruct_connection(p[i], p[i + 1]);
-                        // store connection for later clearing
-                        temporarily_obstructed_connections.push_back({p[i], p[i + 1]});
+                        search_obstructions.obstruct_connection(p[i], p[i + 1]);
                     }
                 }
 
@@ -120,17 +121,14 @@ class yen_k_shortest_paths_impl
                     if (root != spur)
                     {
                         // block them from further exploration
-                        layout.obstruct_coordinate(root);
-                        // store coordinate for later clearing
-                        temporarily_obstructed_coordinates.push_back(root);
+                        search_obstructions.obstruct_coordinate(root);
                     }
                 }
 
                 // find an alternative path from the spur coordinate to the target and check that it is not empty
-                if (const auto spur_path = a_star<Path>(
-                        layout, {spur, objective.target},
-                        manhattan_distance_functor<layouts::obstruction_layout<Lyt>, uint64_t>(),
-                        unit_cost_functor<layouts::obstruction_layout<Lyt>, uint8_t>(), params.astar_params);
+                if (const auto spur_path =
+                        a_star<Path>(layout, {spur, objective.target}, manhattan_distance_functor<Lyt, uint64_t>(),
+                                     unit_cost_functor<Lyt, uint8_t>(), params.astar_params, search_obstructions);
                     !spur_path.empty())
                 {
                     // the final path will be a concatenation of the root path and the spur path
@@ -176,11 +174,15 @@ class yen_k_shortest_paths_impl
     /**
      * The layout in which k shortest paths are to be found extended by an obstruction functionality layer.
      */
-    layouts::obstruction_layout<Lyt> layout;
+    const Lyt& layout;
+    /** @brief Caller constraints retained across spur searches. */
+    const layouts::obstructions<coordinate<Lyt>>& initial_obstructions;
+    /** @brief Independent constraints for the current spur search. */
+    layouts::obstructions<coordinate<Lyt>> search_obstructions;
     /**
      * Source and target coordinates.
      */
-    const routing_objective<layouts::obstruction_layout<Lyt>> objective;
+    const routing_objective<Lyt> objective;
     /**
      * The number of paths to determine, i.e., k.
      */
@@ -198,14 +200,6 @@ class yen_k_shortest_paths_impl
      */
     path_set<Path> shortest_path_candidates{};
     /**
-     * A temporary storage for coordinates that are obstructed during the algorithm.
-     */
-    std::vector<coordinate<Lyt>> temporarily_obstructed_coordinates{};
-    /**
-     * A temporary storage for coordinates that are obstructed during the algorithm.
-     */
-    std::vector<std::pair<coordinate<Lyt>, coordinate<Lyt>>> temporarily_obstructed_connections{};
-    /**
      * Computes the cost of a path. This function can be adjusted to fetch paths of differing costs.
      *
      * Currently, the cost is equal to its length.
@@ -222,17 +216,7 @@ class yen_k_shortest_paths_impl
      */
     void reset_temporary_obstructions() noexcept
     {
-        for (const auto& c : temporarily_obstructed_coordinates)
-        {
-            layout.clear_obstructed_coordinate(c);
-        }
-        for (const auto& c : temporarily_obstructed_connections)
-        {
-            layout.clear_obstructed_connection(c.first, c.second);
-        }
-
-        temporarily_obstructed_coordinates.clear();
-        temporarily_obstructed_connections.clear();
+        search_obstructions = initial_obstructions;
     }
 };
 
@@ -245,15 +229,15 @@ class yen_k_shortest_paths_impl
  *
  * This implementation uses the A* algorithm with the Manhattan distance function internally.
  *
- * This function automatically detects whether the given layout implements a clocking interface (see `clocked_layout`)
- * and respects the underlying information flow imposed by `layout`'s clocking scheme. This algorithm does neither
- * generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each path, each coordinate can
- * occur at maximum once.
+ * This function automatically detects whether the given layout implements a clocking interface (see
+ * `gate_level_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
+ * algorithm does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each
+ * path, each coordinate can occur at maximum once.
  *
- * If the given layout implements the obstruction interface (see `obstruction_layout`), paths will not be routed via
+ * If the given layout implements the obstruction interface (see `obstructions`), paths will not be routed via
  * obstructed coordinates or connections.
  *
- * If the given layout is a gate-level layout and implements the obstruction interface (see obstruction_layout), paths
+ * If the given layout is a gate-level layout and implements the obstruction interface (see `obstructions`), paths
  * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
  * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
  * cross only in a single point (orthogonal crossings + knock-knees/double wires).
@@ -261,7 +245,7 @@ class yen_k_shortest_paths_impl
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = clocked_layout<cartesian_layout<>>;
+ * using clk_lyt = gate_level_layout<cartesian_layout<>>;
  * using path = layout_coordinate_path<cartesian_layout<>>;
  * clk_lyt layout = ...;
  * auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target}, k);
@@ -276,17 +260,19 @@ class yen_k_shortest_paths_impl
  * @param objective Source-target coordinate pair.
  * @param k Maximum number of shortest paths to find.
  * @param params Parameters.
+ * @param obstructions Additional constraints; caller and layout obstructions remain unchanged.
  * @return A collection of up to \f$k\f$ shortest loop-less paths in `layout` from `objective.source` to
  * `objective.target`.
  */
 template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path> yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
-                                                         const uint32_t                     k,
-                                                         const yen_k_shortest_paths_params& params = {}) noexcept
+[[nodiscard]] path_collection<Path>
+yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective, const uint32_t k,
+                     const yen_k_shortest_paths_params&            params       = {},
+                     const layouts::obstructions<coordinate<Lyt>>& obstructions = {}) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
-    return detail::yen_k_shortest_paths_impl<Path, Lyt>{layout, objective, k, params}.run();
+    return detail::yen_k_shortest_paths_impl<Path, Lyt>{layout, objective, k, params, obstructions}.run();
 }
 
 }  // namespace fiction::physical_design::path_finding

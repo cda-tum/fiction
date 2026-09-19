@@ -23,10 +23,8 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
@@ -106,7 +104,7 @@ TEST_CASE("Layout equivalence after graph-oriented layout design", "[graph-orien
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+        using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
         check_graph_oriented_layout_design_equiv_all<gate_layout>();
     }
@@ -114,8 +112,8 @@ TEST_CASE("Layout equivalence after graph-oriented layout design", "[graph-orien
 
 TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     const auto check = [](const auto& ntk)
     {
@@ -135,7 +133,7 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
 
 TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats  stats{};
@@ -305,7 +303,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
 TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats  stats{};
@@ -345,7 +343,7 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 
 TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats stats{};
@@ -373,7 +371,7 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
 
 TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     const auto ntk = blueprints::clpl<technology_network>();
 
@@ -432,7 +430,7 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
 
 TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats stats{};
@@ -476,7 +474,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
 
 TEST_CASE("Name conservation after graph-oriented layout design", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto maj = blueprints::maj1_network<mockturtle::aig_network>();
     maj.set_network_name("maj");
@@ -505,7 +503,7 @@ TEST_CASE("Name conservation after graph-oriented layout design", "[graph-orient
 
 TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
     const auto ntk    = blueprints::maj1_network<technology_network>();
 
     graph_oriented_layout_design_stats stats{};
@@ -517,7 +515,7 @@ TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
 
 TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats stats{};
@@ -535,7 +533,7 @@ TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-ori
     /**
      * Cartesian gate layout used to compare seeded PI placement.
      */
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     const auto layouts =

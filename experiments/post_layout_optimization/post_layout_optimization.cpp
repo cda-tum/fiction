@@ -55,7 +55,7 @@ Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout<>>;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                             uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, double, float, std::string>

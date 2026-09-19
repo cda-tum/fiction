@@ -20,8 +20,8 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/technology/qca/io/read_fqca_layout.hpp>
 #include <fiction/technology/qca/io/write_fqca_layout.hpp>
 #include <fiction/technology/qca/technology.hpp>
@@ -70,13 +70,13 @@ TEST_CASE("Read empty layout", "[fqca]")
 
     SECTION("Cartesian layout")
     {
-        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+        using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
         check(read_fqca_layout<qca_layout>(layout_stream));
     }
     SECTION("Stacked layout")
     {
-        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::cube>>>;
+        using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::cube>>;
 
         check(read_fqca_layout<qca_layout>(layout_stream));
     }
@@ -149,13 +149,13 @@ TEST_CASE("Read single-layer AND gate", "[fqca]")
 
     SECTION("Cartesian layout")
     {
-        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+        using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
         check(read_fqca_layout<qca_layout>(layout_stream, "AND"));
     }
     SECTION("Stacked layout")
     {
-        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::cube>>>;
+        using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::cube>>;
 
         check(read_fqca_layout<qca_layout>(layout_stream, "AND"));
     }
@@ -211,11 +211,11 @@ TEST_CASE("Read multi-layer wire crossing", "[fqca]")
 
     std::istringstream layout_stream{fqca_layout};
 
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::cube>>>;
+    using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::cube>>;
 
     const auto layout = read_fqca_layout<qca_layout>(layout_stream, "Crossover");
 
-    using limited_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using limited_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
     std::istringstream limited_stream{fqca_layout};
     CHECK_THROWS_AS(read_fqca_layout<limited_layout>(limited_stream), std::out_of_range);
 
@@ -344,14 +344,14 @@ TEST_CASE("Parsing of unsupported features", "[fqca]")
 
     SECTION("Cartesian layout")
     {
-        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+        using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
         // despite unsupported features, the parsing should proceed normally
         check(read_fqca_layout<qca_layout>(layout_stream, "AND"));
     }
     SECTION("Stacked layout")
     {
-        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::cube>>>;
+        using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::cube>>;
 
         // despite unsupported features, the parsing should proceed normally
         check(read_fqca_layout<qca_layout>(layout_stream, "AND"));
@@ -396,12 +396,12 @@ TEST_CASE("Exceptions", "[fqca]")
 
         SECTION("Cartesian layout")
         {
-            using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+            using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
             CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), unsupported_character_exception);
         }
         SECTION("Stacked layout")
         {
-            using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::cube>>>;
+            using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::cube>>;
             CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), unsupported_character_exception);
         }
     }
@@ -443,12 +443,12 @@ TEST_CASE("Exceptions", "[fqca]")
 
         SECTION("Cartesian layout")
         {
-            using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+            using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
             CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), undefined_cell_label_exception);
         }
         SECTION("Stacked layout")
         {
-            using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::cube>>>;
+            using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::cube>>;
             CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), undefined_cell_label_exception);
         }
     }
@@ -489,12 +489,12 @@ TEST_CASE("Exceptions", "[fqca]")
 
         SECTION("Cartesian layout")
         {
-            using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+            using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
             CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), unrecognized_cell_definition_exception);
         }
         SECTION("Stacked layout")
         {
-            using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::cube>>>;
+            using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::cube>>;
             CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), unrecognized_cell_definition_exception);
         }
     }
@@ -521,13 +521,13 @@ TEST_CASE("Read written layouts", "[fqca]")
 
     SECTION("Cartesian layout")
     {
-        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+        using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
         read_write_layout(blueprints::single_layer_qca_and_gate<qca_layout>());
     }
     SECTION("Stacked layout")
     {
-        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::cube>>>;
+        using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::cube>>;
 
         read_write_layout(blueprints::single_layer_qca_and_gate<qca_layout>());
     }

@@ -18,9 +18,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
 #include <fiction/physical_design/path_finding/distance_map.hpp>
@@ -47,7 +47,7 @@ Dist sum_distances(const Lyt& layout, const distance_functor<Lyt, Dist>& dist_fu
 
 TEST_CASE("Benchmark distance maps", "[benchmark]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     using dist    = uint64_t;
 
     const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, clocking::use<clk_lyt>()};
@@ -76,20 +76,22 @@ TEST_CASE("Benchmark distance maps", "[benchmark]")
 
 TEST_CASE("Benchmark smart distance cache", "[benchmark]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     using dist    = uint64_t;
 
     const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, clocking::use<clk_lyt>()};
 
     BENCHMARK("smart_distance_cache (cold start)")
     {
-        const auto dist_map_func = smart_distance_cache_functor<clk_lyt, dist>{layout, &a_star_distance<clk_lyt, dist>};
+        const auto dist_map_func =
+            smart_distance_cache_functor<clk_lyt, dist>{layout, a_star_distance_functor<clk_lyt, dist>{}};
 
         return sum_distances(layout, dist_map_func);
     };
 
     // warm up the cache
-    const auto dist_map_func = smart_distance_cache_functor<clk_lyt, dist>{layout, &a_star_distance<clk_lyt, dist>};
+    const auto dist_map_func =
+        smart_distance_cache_functor<clk_lyt, dist>{layout, a_star_distance_functor<clk_lyt, dist>{}};
     sum_distances(layout, dist_map_func);
 
     BENCHMARK("smart_distance_cache (warm start)")

@@ -17,7 +17,6 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
@@ -31,7 +30,7 @@ using namespace fiction::physical_design;
 
 TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<coords::offset>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
@@ -133,7 +132,7 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<coords::offset>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
@@ -178,7 +177,7 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<coords::offset>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
@@ -221,7 +220,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<coords::offset>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")

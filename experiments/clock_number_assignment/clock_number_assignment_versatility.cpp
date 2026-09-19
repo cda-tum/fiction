@@ -52,7 +52,7 @@ int main()  // NOLINT
     const std::string layout_folder =
         fmt::format("{}/clock_number_assignment/versatility_benchmarks/", EXPERIMENTS_PATH);
 
-    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout<>>;
 
     experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, bool>
         clock_number_assignment_exp{"clock number assignment",

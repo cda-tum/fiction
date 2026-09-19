@@ -56,12 +56,14 @@ class a_star_impl
 {
   public:
     a_star_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const distance_functor<Lyt, Dist>& dist_fn,
-                const cost_functor<Lyt, Cost>& cost_fn, const a_star_params& p) :
+                const cost_functor<Lyt, Cost>& cost_fn, const a_star_params& p,
+                const layouts::obstructions<coordinate<Lyt>>& extra) :
             layout{lyt},
             objective{obj},
             distance{dist_fn},
             cost{cost_fn},
-            params{p}
+            params{p},
+            search_obstructions{extra}
     {
         open_list.push(coordinate_f{objective.source, 0});
     }
@@ -104,6 +106,8 @@ class a_star_impl
      * The layout in which the shortest path between `source` and `target` is to be found.
      */
     const Lyt& layout;
+    /** @brief Additional constraints owned by the caller. */
+    const layouts::obstructions<coordinate<Lyt>>& search_obstructions;
     /**
      * The source-target coordinate pair.
      */
@@ -211,41 +215,37 @@ class a_star_impl
             successor = layout.below(successor);
 
             // check if successor is obstructed
-            if constexpr (has_is_obstructed_coordinate_v<Lyt>)
+            if (physical_design::detail::routing_coordinate_obstructed(layout, successor, search_obstructions) &&
+                successor != objective.target)
             {
-                if (layout.is_obstructed_coordinate(successor) && successor != objective.target)
+                // if crossings are enabled, check if it is possible to switch to the crossing layer
+                if (params.crossings &&
+                    (is_crossable_wire(layout, current, successor) || layout.above(successor) == objective.target))
                 {
-                    // if crossings are enabled, check if it is possible to switch to the crossing layer
-                    if (params.crossings &&
-                        (is_crossable_wire(layout, current, successor) || layout.above(successor) == objective.target))
+                    // if the crossing layer is not obstructed
+                    if (const auto above_successor = layout.above(successor);
+                        above_successor != successor && (!physical_design::detail::routing_coordinate_obstructed(
+                                                             layout, above_successor, search_obstructions) ||
+                                                         above_successor == objective.target))
                     {
-                        // if the crossing layer is not obstructed
-                        if (const auto above_successor = layout.above(successor);
-                            above_successor != successor &&
-                            (!layout.is_obstructed_coordinate(above_successor) || above_successor == objective.target))
-                        {
-                            // allow exploring the crossing layer
-                            successor = above_successor;
-                        }
-                        else
-                        {
-                            return;  // skip the obstructed coordinate and keep looping
-                        }
+                        // allow exploring the crossing layer
+                        successor = above_successor;
                     }
                     else
                     {
                         return;  // skip the obstructed coordinate and keep looping
                     }
                 }
+                else
+                {
+                    return;  // skip the obstructed coordinate and keep looping
+                }
             }
 
             // check if the connection to the successor is obstructed
-            if constexpr (has_is_obstructed_connection_v<Lyt>)
+            if (physical_design::detail::routing_connection_obstructed(layout, current, successor, search_obstructions))
             {
-                if (layout.is_obstructed_connection(current, successor))
-                {
-                    return;  // skip the obstructed connection and keep looping
-                }
+                return;  // skip the obstructed connection and keep looping
             }
 
             if (is_visited(successor))
@@ -283,7 +283,7 @@ class a_star_impl
             }
         };
 
-        if constexpr (is_clocked_layout_v<Lyt>)
+        if constexpr (has_foreach_outgoing_clocked_zone_v<Lyt>)
         {
             // recurse for all outgoing clock zones
             layout.foreach_outgoing_clocked_zone(current, explore_successor);
@@ -367,18 +367,18 @@ class a_star_impl
 
 /**
  * The A* path finding algorithm for shortest loop-less paths between a given source and target coordinate in a layout.
- * This function automatically detects whether the given layout implements a clocking interface (see `clocked_layout`)
- * and respects the underlying information flow imposed by `layout`'s clocking scheme.
+ * This function automatically detects whether the given layout implements a clocking interface (see
+ * `gate_level_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme.
  *
  * A* is an extension of Dijkstra's algorithm for shortest paths but offers better average complexity. It uses a
  * heuristic distance function that estimates the remaining costs towards the target in every step. Thus, this heuristic
  * function should neither be complex to calculate nor overestimating the remaining costs. Common heuristics to be used
  * are the Manhattan and the Euclidean distance functions. See `distance_functor` for implementations.
  *
- * If the given layout implements the obstruction interface (see `obstruction_layout`), paths will not be routed via
+ * If the given layout implements the obstruction interface (see `obstructions`), paths will not be routed via
  * obstructed coordinates and connections.
  *
- * If the given layout is a gate-level layout and implements the obstruction interface (see `obstruction_layout`), paths
+ * If the given layout is a gate-level layout and implements the obstruction interface (see `obstructions`), paths
  * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
  * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
  * cross only in a single point (orthogonal crossings + knock-knees/double wires).
@@ -386,7 +386,7 @@ class a_star_impl
  * In certain cases it might be desirable to determine regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = clocked_layout<cartesian_layout<>>;
+ * using clk_lyt = gate_level_layout<cartesian_layout<>>;
  * using path = layout_coordinate_path<cartesian_layout<>>;
  * clk_lyt layout = ...;
  * auto shortest_path = a_star<path>(static_cast<cartesian_layout<>>(layout), {source, target});
@@ -406,6 +406,7 @@ class a_star_impl
  * @param dist_fn A distance functor that implements the desired heuristic estimation function.
  * @param cost_fn A cost functor that implements the desired cost function.
  * @param params Parameters.
+ * @param obstructions Additional coordinate and connection constraints; the search does not modify them.
  * @return The shortest loop-less path in `layout` from `objective.source` to `objective.target`.
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
@@ -413,9 +414,10 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
 [[nodiscard]] Path a_star(const Lyt& layout, const routing_objective<Lyt>& objective,
                           const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, uint64_t>(),
                           const cost_functor<Lyt, Cost>&     cost_fn = unit_cost_functor<Lyt, uint8_t>(),
-                          const a_star_params&               params  = {}) noexcept
+                          const a_star_params&               params  = {},
+                          const layouts::obstructions<coordinate<Lyt>>& obstructions = {}) noexcept
 {
-    return detail::a_star_impl<Path, Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, params}.run();
+    return detail::a_star_impl<Path, Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, params, obstructions}.run();
 }
 /**
  * A distance function that does not approximate but compute the actual minimum path length on the given layout via A*
@@ -431,14 +433,18 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
  * @param layout The layout in which the distance between `source` and `target` is to be determined.
  * @param source Source coordinate.
  * @param target Target coordinate.
+ * @param obstructions Additional constraints; caller and layout obstructions remain unchanged.
  * @return Minimum path length between `source` and `target` in `layout`.
  */
 template <typename Lyt, typename Dist = uint64_t>
     requires is_coordinate_layout_v<Lyt> && (std::integral<Dist> || std::floating_point<Dist>)
-[[nodiscard]] Dist a_star_distance(const Lyt& layout, const coordinate<Lyt>& source,
-                                   const coordinate<Lyt>& target) noexcept
+[[nodiscard]] Dist a_star_distance(const Lyt& layout, const coordinate<Lyt>& source, const coordinate<Lyt>& target,
+                                   const layouts::obstructions<coordinate<Lyt>>& obstructions = {}) noexcept
 {
-    const auto path_length = a_star<layout_coordinate_path<Lyt>>(layout, {source, target}).size();
+    const auto path_length =
+        a_star<layout_coordinate_path<Lyt>>(layout, {source, target}, manhattan_distance_functor<Lyt>(),
+                                            unit_cost_functor<Lyt>(), {}, obstructions)
+            .size();
 
     if (path_length == 0ul)
     {
@@ -464,7 +470,10 @@ template <typename Lyt, typename Dist = uint64_t>
 class a_star_distance_functor : public distance_functor<Lyt, Dist>
 {
   public:
-    a_star_distance_functor() : distance_functor<Lyt, Dist>(&a_star_distance<Lyt, Dist>) {}
+    a_star_distance_functor() :
+            distance_functor<Lyt, Dist>([](const Lyt& lyt, const coordinate<Lyt>& source, const coordinate<Lyt>& target)
+                                        { return a_star_distance<Lyt, Dist>(lyt, source, target); })
+    {}
 };
 
 }  // namespace fiction::physical_design::path_finding

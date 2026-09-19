@@ -57,7 +57,7 @@ using namespace fiction::verification;
 
 int main()  // NOLINT
 {
-    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     using hex_lyt  = hex_even_row_gate_clk_lyt;
     using cell_lyt = sidb_cell_clk_lyt;
 

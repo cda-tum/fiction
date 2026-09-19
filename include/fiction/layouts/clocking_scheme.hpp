@@ -38,7 +38,7 @@ namespace fiction::layouts::clocking
 
 /**
  * Clocking scheme type that assigns a clock number to each element of the provided type `ClockZone`. Clocking scheme
- * objects are utilized, e.g., in clocked_layout.
+ * objects are owned by gate and cell layouts.
  *
  * Usually, a clocking scheme is defined by the means of a cutout that can be seamlessly extended in all directions to
  * provide repeating clock numbers.
@@ -168,7 +168,7 @@ class scheme
 };
 
 // The canonical name of each pre-defined clocking scheme. A scheme is identified by its name, so these are
-// what `get_scheme` and `clocked_layout::is_clocking_scheme` match against. `get_scheme` additionally accepts
+// what `get_scheme` and `clocking::state::is_clocking_scheme` match against. `get_scheme` additionally accepts
 // the phase-count spellings that carry no constant of their own -- `OPEN3`, `ROW4`, `2DDWAVEHEX3`, and the
 // like -- and matches case-insensitively, which is why the names stay strings rather than becoming an enum:
 // they cross into FGL files, the CLI, and `pyfiction` as free text. Deliberately not a Doxygen block: it

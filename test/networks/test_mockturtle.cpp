@@ -22,10 +22,7 @@
 #include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/synchronization_element_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>
 
@@ -48,7 +45,7 @@ TEST_CASE("Simulation", "[mockturtle]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
@@ -95,8 +92,7 @@ TEST_CASE("Simulation", "[mockturtle]")
 
     SECTION("Synchronization elements")
     {
-        using se_layout = gate_level_layout<
-            synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>>;
+        using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
         REQUIRE(mockturtle::has_compute_v<se_layout, kitty::dynamic_truth_table>);
 

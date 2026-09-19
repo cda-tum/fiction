@@ -11,6 +11,29 @@ from __future__ import annotations
 from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_dot_tag
 
 
+def test_owned_cell_capabilities_and_clone() -> None:
+    """Cell clock lookup scales coordinates; synchronization addresses raw coordinates."""
+    layout = qca_layout((4, 4), "2DDWave")
+    layout.set_tile_size_x(2)
+    layout.set_tile_size_y(2)
+    layout.assign_clock_number((1, 1), 3)
+    layout.assign_synchronization_element((2, 2), 2)
+    layout.obstruct_coordinate((3, 3))
+    layout.obstruct_connection((1, 0), (2, 0))
+    assert layout.get_clock_number((2, 2)) == 3
+    assert layout.get_synchronization_element((2, 2)) == 2
+    assert layout.get_synchronization_element((1, 1)) == 0
+    copy = layout.clone()
+    copy.assign_clock_number((1, 1), 0)
+    copy.assign_synchronization_element((2, 2), 0)
+    copy.clear_obstructed_coordinates()
+    copy.clear_obstructed_connections()
+    assert layout.get_clock_number((2, 2)) == 3
+    assert layout.num_se() == 1
+    assert layout.is_obstructed_coordinate((3, 3))
+    assert layout.is_obstructed_connection((1, 0), (2, 0))
+
+
 def test_qca_technology():
     qca = qca_technology
 

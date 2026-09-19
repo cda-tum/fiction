@@ -21,8 +21,8 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/technology/qca/technology.hpp>
 
@@ -38,7 +38,7 @@ using namespace fiction::qca::io;
 
 TEST_CASE("Write empty QCAD layout", "[qcad]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     const qca_layout layout{{2, 2, 1}, "empty layout"};
 
@@ -160,7 +160,7 @@ TEST_CASE("Write empty QCAD layout", "[qcad]")
 
 TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     qca_layout layout{{4, 4}, "AND"};
 
@@ -776,7 +776,7 @@ TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
 
 TEST_CASE("Write wire crossing", "[qcad]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     qca_layout layout{{4, 4, 1}, "Crossover"};
 

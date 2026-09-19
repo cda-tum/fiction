@@ -42,7 +42,7 @@ using namespace fiction::physical_design;
 using namespace fiction::utils::graph;
 using namespace fiction::verification;
 
-using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
 
 using color_routing_experiment =
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, std::string_view, uint64_t, uint64_t, uint64_t,
@@ -268,7 +268,6 @@ int main()  // NOLINT
 
 #else  // FICTION_Z3_SOLVER
 
-#include <cstdlib>
 #include <iostream>
 
 int main()  // NOLINT

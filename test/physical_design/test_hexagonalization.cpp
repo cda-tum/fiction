@@ -22,10 +22,8 @@
 #include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/hexagonalization.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
@@ -223,7 +221,7 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+        using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
         check_mapping_equiv_all<gate_layout>();
     }
@@ -231,7 +229,7 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
 
 TEST_CASE("Cartesian to hexagonal")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
     using hex_lyt     = hex_even_row_gate_clk_lyt;
 
     constexpr const auto layout_height = 3;

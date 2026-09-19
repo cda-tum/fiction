@@ -24,11 +24,8 @@
 .. autofunction:: mnt.pyfiction.hexagonal_gate_layout.bounding_box_2d
    :no-index:
 
-.. autofunction:: mnt.pyfiction.cartesian_obstruction_layout.bounding_box_2d
 
-.. autofunction:: mnt.pyfiction.shifted_cartesian_obstruction_layout.bounding_box_2d
 
-.. autofunction:: mnt.pyfiction.hexagonal_obstruction_layout.bounding_box_2d
 
 .. autofunction:: mnt.pyfiction.qca_layout.bounding_box_2d
    :no-index:

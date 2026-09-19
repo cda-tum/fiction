@@ -12,29 +12,26 @@ import pytest
 
 from mnt.pyfiction import (
     cartesian_gate_layout,
-    cartesian_obstruction_layout,
     critical_path_length_and_throughput,
     gate_level_drv_params,
     gate_level_drvs,
     hexagonal_gate_layout,
-    hexagonal_obstruction_layout,
     offset_coordinate,
     shifted_cartesian_gate_layout,
-    shifted_cartesian_obstruction_layout,
 )
 
 OBSTRUCTION_LAYOUTS = [
     pytest.param(
-        lambda: cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-        id="cartesian_obstruction_layout",
+        lambda: cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"),
+        id="cartesian_gate_layout",
     ),
     pytest.param(
-        lambda: shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-        id="shifted_cartesian_obstruction_layout",
+        lambda: shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"),
+        id="shifted_cartesian_gate_layout",
     ),
     pytest.param(
-        lambda: hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-        id="hexagonal_obstruction_layout",
+        lambda: hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"),
+        id="hexagonal_gate_layout",
     ),
 ]
 
@@ -43,20 +40,20 @@ OBSTRUCTION_LAYOUTS = [
     "make_layout",
     [
         pytest.param(
-            lambda: cartesian_obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-            id="cartesian_obstruction_layout",
+            lambda: cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
+            id="cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-            id="shifted_cartesian_obstruction_layout",
+            lambda: shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
+            id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-            id="hexagonal_obstruction_layout",
+            lambda: hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"),
+            id="hexagonal_gate_layout",
         ),
     ],
 )
-def test_obstruction_layout_clocking_inheritance(make_layout):
+def test_gate_layout_clocking_inheritance(make_layout):
     layout = make_layout()
     assert layout.incoming_clocked_zones((0, 0)) == []
     assert layout.outgoing_clocked_zones((2, 2)) == []
@@ -121,8 +118,8 @@ def test_obstruction_via_gates(make_layout):
     assert layout.is_obstructed_connection((3, 2), (3, 3))
 
 
-def test_cartesian_obstruction_layout_gate_level_inheritance():
-    layout = cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"))
+def test_cartesian_gate_layout_gate_level_inheritance():
+    layout = cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")
 
     assert layout.is_empty()
 
@@ -250,8 +247,8 @@ def test_cartesian_obstruction_layout_gate_level_inheritance():
     assert gate_level_drvs(layout, drv_params) == (0, 0)
 
 
-def test_hexagonal_obstruction_layout_gate_level_inheritance():
-    layout = hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"))
+def test_hexagonal_gate_layout_gate_level_inheritance():
+    layout = hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")
 
     assert layout.is_empty()
 

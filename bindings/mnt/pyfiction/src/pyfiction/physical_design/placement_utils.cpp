@@ -85,18 +85,12 @@ void placement_utils(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::reserve_input_nodes<py_cartesian_obstruction_layout, py_tec_network>(m);
     detail::reserve_input_nodes<py_cartesian_gate_layout, py_tec_network>(m);
-    detail::reserve_input_nodes<py_shifted_cartesian_obstruction_layout, py_tec_network>(m);
     detail::reserve_input_nodes<py_shifted_cartesian_gate_layout, py_tec_network>(m);
-    detail::reserve_input_nodes<py_hexagonal_obstruction_layout, py_tec_network>(m);
     detail::reserve_input_nodes<py_hexagonal_gate_layout, py_tec_network>(m);
 
-    detail::place<py_cartesian_obstruction_layout, py_tec_network>(m);
     detail::place<py_cartesian_gate_layout, py_tec_network>(m);
-    detail::place<py_shifted_cartesian_obstruction_layout, py_tec_network>(m);
     detail::place<py_shifted_cartesian_gate_layout, py_tec_network>(m);
-    detail::place<py_hexagonal_obstruction_layout, py_tec_network>(m);
     detail::place<py_hexagonal_gate_layout, py_tec_network>(m);
 }
 

@@ -100,6 +100,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Path searches accept separate `obstructions` data for temporary constraints and preserve caller-owned constraints.
   - Avoid helper threads for single-worker sampling and contour exploration.
   - Reduce coordinate-vector allocations during operational-domain traversal.
   - Reuse completed three-dimensional contour surfaces across initial samples.
@@ -163,6 +164,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** Gate and cell layouts own clocking, synchronization, and obstructions. Instantiate them directly on coordinate layouts; remove `clocked_layout`, `synchronization_element_layout`, `obstruction_layout`, and `tile_based_layout` wrappers.
   - Population-stability results expose the critical dot as `critical_dot` in C++ and Python.
   - SiDB layouts use dot operations and `dot_tag` for dot roles. `assign_sidb` defaults to the
     `NORMAL` tag. Lattice-site constructors
@@ -323,6 +325,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     it that carries the toctree
 
 - Python bindings:
+
+  - **Breaking:** Use clocking and obstruction methods directly on gate and cell layouts. `RoutingObstructions` and `CubeRoutingObstructions` hold additional path-search constraints. Cell layouts expose `clone`.
 
   - **Breaking:** The Python class `sidb_layout` names the lattice-based `sidb::layout`
 

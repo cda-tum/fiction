@@ -21,9 +21,9 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/technology/inml/technology.hpp>
 #include <fiction/technology/qca/technology.hpp>
 #include <fiction/technology/sidb/technology.hpp>
@@ -51,7 +51,7 @@ TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", qca_cell_c
 
 TEST_CASE("Deep copy cell-level layout", "[cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     cell_layout original{{5, 5, 0}, clocking::twoddwave<cell_layout>(), "Original", 2, 2};
     original.assign_cell_type({0, 2}, qca_technology::cell_type::NORMAL);
@@ -174,7 +174,7 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
 
 TEST_CASE("Cell type assignment", "[cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     REQUIRE(has_get_layout_name_v<cell_layout>);
     REQUIRE(has_set_layout_name_v<cell_layout>);
@@ -272,7 +272,7 @@ TEST_CASE("Cell type assignment", "[cell-level-layout]")
 
 TEST_CASE("Cell mode assignment", "[cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 
@@ -335,7 +335,7 @@ TEST_CASE("Cell mode assignment", "[cell-level-layout]")
 
 TEST_CASE("Clock zone assignment to cells", "[cell-level-layout]")
 {
-    using clk_cell_lyt = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using clk_cell_lyt = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     const clk_cell_lyt layout{clk_cell_lyt::aspect_ratio{4, 4, 0}, clocking::twoddwave<clk_cell_lyt>(), "Lyt", 2, 2};
 
@@ -364,4 +364,32 @@ TEST_CASE("Clock zone assignment to cells", "[cell-level-layout]")
     CHECK(layout.get_clock_number({2, 4}) == 3);
     CHECK(layout.get_clock_number({3, 4}) == 3);
     CHECK(layout.get_clock_number({4, 4}) == 0);
+}
+TEST_CASE("Cell capabilities retain coordinate conventions and independent clones", "[cell-level-layout]")
+{
+    using layout =
+        fiction::layouts::cell_level_layout<fiction::qca::qca_technology,
+                                            fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>;
+    layout original{{5, 5}, fiction::layouts::clocking::twoddwave<layout>(), "cells", 2, 2};
+    original.assign_clock_number({1, 1}, 3);
+    CHECK(original.get_clock_number({2, 2}) == 3);
+    CHECK(original.get_clock_number({3, 3}) == 3);
+    original.assign_synchronization_element({2, 2}, 2);
+    CHECK(original.get_synchronization_element({2, 2}) == 2);
+    CHECK(original.get_synchronization_element({3, 3}) == 0);
+    original.obstruct_coordinate({4, 4});
+    original.obstruct_connection({0, 0}, {0, 1});
+    auto copy = original.clone();
+    CHECK(copy.get_clock_number({3, 3}) == 3);
+    CHECK(copy.get_synchronization_element({2, 2}) == 2);
+    CHECK(copy.is_obstructed_coordinate({4, 4}));
+    CHECK(copy.is_obstructed_connection({0, 0}, {0, 1}));
+    copy.assign_clock_number({1, 1}, 0);
+    copy.assign_synchronization_element({2, 2}, 0);
+    copy.clear_obstructed_coordinates();
+    copy.clear_obstructed_connections();
+    CHECK(original.get_clock_number({3, 3}) == 3);
+    CHECK(original.get_synchronization_element({2, 2}) == 2);
+    CHECK(original.is_obstructed_coordinate({4, 4}));
+    CHECK(original.is_obstructed_connection({0, 0}, {0, 1}));
 }

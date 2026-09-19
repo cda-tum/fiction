@@ -971,7 +971,7 @@ class exact_impl
                 [this, &e, &ve, &one, &zero, &num_phases](const auto& t)
                 {
                     // an artificial latch variable counts as an extra 1 clock cycle (n clock phases)
-                    if (has_synchronization_elements_v<Lyt> && params.synchronization_elements && !params.desynchronize)
+                    if (params.synchronization_elements && !params.desynchronize)
                     {
                         ve.push_back(z3::ite(get_te(t, e), (get_tse(t) * num_phases) + one, zero));
                     }
@@ -2239,32 +2239,30 @@ class exact_impl
          */
         void restrict_synchronization_elements()
         {
-            if constexpr (has_synchronization_elements_v<Lyt>)
-            {
-                const auto zero = ctx->int_val(0u);
 
-                apply_to_added_tiles(
-                    [this, &zero](const auto& t)
-                    {
-                        // synchronization elements must be positive
-                        const auto l = get_tse(t);
-                        solver->add(l >= zero);
+            const auto zero = ctx->int_val(0u);
 
-                        // tiles without wires cannot be synchronization elements
-                        z3::expr_vector te{*ctx};
+            apply_to_added_tiles(
+                [this, &zero](const auto& t)
+                {
+                    // synchronization elements must be positive
+                    const auto l = get_tse(t);
+                    solver->add(l >= zero);
 
-                        networks::foreach_edge(network,
-                                               [this, &t, &te](const auto& e)
+                    // tiles without wires cannot be synchronization elements
+                    z3::expr_vector te{*ctx};
+
+                    networks::foreach_edge(network,
+                                           [this, &t, &te](const auto& e)
+                                           {
+                                               if (!skip_const_or_io_edge(e))
                                                {
-                                                   if (!skip_const_or_io_edge(e))
-                                                   {
-                                                       te.push_back(get_te(t, e));
-                                                   }
-                                               });
+                                                   te.push_back(get_te(t, e));
+                                               }
+                                           });
 
-                        solver->add(z3::implies(z3::atmost(te, 0u), l == zero));
-                    });
-            }
+                    solver->add(z3::implies(z3::atmost(te, 0u), l == zero));
+                });
         }
         /**
          * Adds constraints to the solver to enforce technology-specific restrictions.
@@ -2546,13 +2544,11 @@ class exact_impl
          */
         void minimize_synchronization_elements(const optimize_ptr& optimize)
         {
-            if constexpr (has_synchronization_elements_v<Lyt>)
-            {
-                z3::expr_vector se_counter{*ctx};
-                layout.foreach_ground_tile([this, &se_counter](const auto& t) { se_counter.push_back(get_tse(t)); });
 
-                optimize->minimize(z3::sum(se_counter));
-            }
+            z3::expr_vector se_counter{*ctx};
+            layout.foreach_ground_tile([this, &se_counter](const auto& t) { se_counter.push_back(get_tse(t)); });
+
+            optimize->minimize(z3::sum(se_counter));
         }
         /**
          * Generates the SMT instance by calling the constraint generating functions.
@@ -2837,18 +2833,15 @@ class exact_impl
                 });
 
             // assign synchronization elements if there were any in use
-            if constexpr (has_synchronization_elements_v<Lyt>)
+
+            if (params.synchronization_elements)
             {
-                if (params.synchronization_elements)
-                {
-                    layout.foreach_ground_tile(
-                        [this, &model](const auto& t)
-                        {
-                            layout.assign_synchronization_element(
-                                t,
-                                static_cast<typename Lyt::sync_elem_t>(model.eval(get_tse(t), true).get_numeral_int()));
-                        });
-                }
+                layout.foreach_ground_tile(
+                    [this, &model](const auto& t)
+                    {
+                        layout.assign_synchronization_element(
+                            t, static_cast<typename Lyt::sync_elem_t>(model.eval(get_tse(t), true).get_numeral_int()));
+                    });
             }
 
             // restore possibly set signal names
@@ -3224,7 +3217,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
                          exact_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
+    static_assert(has_foreach_tile_v<Lyt>, "Lyt is not a tile-based layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
@@ -3248,13 +3241,6 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
             std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
                          "cannot be guaranteed"
                       << '\n';
-        }
-    }
-    if constexpr (!fiction::has_synchronization_elements_v<Lyt>)
-    {
-        if (ps.synchronization_elements)
-        {
-            std::cout << "[w] Lyt does not support synchronization elements; not using them\n";
         }
     }
 
@@ -3297,7 +3283,7 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
                                         exact_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
+    static_assert(has_foreach_tile_v<Lyt>, "Lyt is not a tile-based layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
@@ -3320,13 +3306,6 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
         {
             std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
                          "cannot be guaranteed\n";
-        }
-    }
-    if constexpr (!fiction::has_synchronization_elements_v<Lyt>)
-    {
-        if (ps.synchronization_elements)
-        {
-            std::cout << "[w] Lyt does not support synchronization elements; not using them\n";
         }
     }
 

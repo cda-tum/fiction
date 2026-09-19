@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Tests for `fiction/layouts/obstruction_layout.hpp`.
+ * @brief Tests for `fiction/layouts/obstructions.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -20,94 +20,14 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/obstruction_layout.hpp>
+#include <fiction/layouts/obstructions.hpp>
 #include <fiction/traits.hpp>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::qca;
-
-TEST_CASE("Traits and construction", "[obstruction-layout]")
-{
-    SECTION("Cartesian layout")
-    {
-        using layout = cartesian_layout<coords::offset>;
-
-        REQUIRE(is_coordinate_layout_v<layout>);
-        CHECK(!has_is_obstructed_coordinate_v<layout>);
-        CHECK(!has_is_obstructed_connection_v<layout>);
-
-        layout lyt{};
-
-        using obstr_layout = obstruction_layout<layout>;
-        CHECK(is_coordinate_layout_v<obstr_layout>);
-        CHECK(has_is_obstructed_coordinate_v<obstr_layout>);
-        CHECK(has_is_obstructed_connection_v<obstr_layout>);
-
-        obstr_layout obstr_lyt{};
-        obstr_layout obstr_lyt_from_lyt{lyt};
-
-        using obstr_obstr_layout = obstruction_layout<obstr_layout>;
-        CHECK(is_coordinate_layout_v<obstr_obstr_layout>);
-        CHECK(has_is_obstructed_coordinate_v<obstr_obstr_layout>);
-        CHECK(has_is_obstructed_connection_v<obstr_obstr_layout>);
-
-        obstr_obstr_layout obstr_obstr_lyt_from_lyt{obstr_lyt};
-    }
-    SECTION("Gate-level layout")
-    {
-        using layout = gate_level_layout<clocked_layout<cartesian_layout<coords::offset>>>;
-
-        REQUIRE(is_gate_level_layout_v<layout>);
-        CHECK(!has_is_obstructed_coordinate_v<layout>);
-        CHECK(!has_is_obstructed_connection_v<layout>);
-
-        layout lyt{};
-
-        using obstr_layout = obstruction_layout<layout>;
-        CHECK(is_coordinate_layout_v<obstr_layout>);
-        CHECK(has_is_obstructed_coordinate_v<obstr_layout>);
-        CHECK(has_is_obstructed_connection_v<obstr_layout>);
-
-        obstr_layout obstr_lyt{};
-        obstr_layout obstr_lyt_from_lyt{lyt};
-
-        using obstr_obstr_layout = obstruction_layout<obstr_layout>;
-        CHECK(is_coordinate_layout_v<obstr_obstr_layout>);
-        CHECK(has_is_obstructed_coordinate_v<obstr_obstr_layout>);
-        CHECK(has_is_obstructed_connection_v<obstr_obstr_layout>);
-
-        obstr_obstr_layout obstr_obstr_lyt_from_lyt{obstr_lyt};
-    }
-    SECTION("Cell-level layout")
-    {
-        using layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
-
-        REQUIRE(is_cell_level_layout_v<layout>);
-        CHECK(!has_is_obstructed_coordinate_v<layout>);
-        CHECK(!has_is_obstructed_connection_v<layout>);
-
-        layout lyt{};
-
-        using obstr_layout = obstruction_layout<layout>;
-        CHECK(is_coordinate_layout_v<obstr_layout>);
-        CHECK(has_is_obstructed_coordinate_v<obstr_layout>);
-        CHECK(has_is_obstructed_connection_v<obstr_layout>);
-
-        obstr_layout obstr_lyt{};
-        obstr_layout obstr_lyt_from_lyt{lyt};
-
-        using obstr_obstr_layout = obstruction_layout<obstr_layout>;
-        CHECK(is_coordinate_layout_v<obstr_obstr_layout>);
-        CHECK(has_is_obstructed_coordinate_v<obstr_obstr_layout>);
-        CHECK(has_is_obstructed_connection_v<obstr_obstr_layout>);
-
-        obstr_obstr_layout obstr_obstr_lyt_from_lyt{obstr_lyt};
-    }
-}
 
 TEST_CASE("Coordinate obstruction", "[obstruction-layout]")
 {
@@ -117,9 +37,9 @@ TEST_CASE("Coordinate obstruction", "[obstruction-layout]")
 
         const layout lyt{{4, 4}};
 
-        obstruction_layout obstr_lyt{lyt};
+        obstructions<coords::offset> obstr_lyt{};
 
-        obstr_lyt.foreach_coordinate([&obstr_lyt](const auto& c) { CHECK(!obstr_lyt.is_obstructed_coordinate(c)); });
+        lyt.foreach_coordinate([&obstr_lyt, &lyt](const auto& c) { CHECK(!obstr_lyt.is_obstructed_coordinate(c)); });
 
         // add artificial obstruction
         obstr_lyt.obstruct_coordinate({0, 0});
@@ -156,11 +76,11 @@ TEST_CASE("Coordinate obstruction", "[obstruction-layout]")
     }
     SECTION("Gate-level layout")
     {
-        using layout = gate_level_layout<clocked_layout<cartesian_layout<coords::offset>>>;
+        using layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
         const auto lyt = blueprints::xor_maj_gate_layout<layout>();
 
-        obstruction_layout obstr_lyt{lyt};
+        auto obstr_lyt = lyt.clone();
 
         CHECK(obstr_lyt.is_obstructed_coordinate({1, 1}));
         CHECK(obstr_lyt.is_obstructed_coordinate({2, 0}));
@@ -215,11 +135,11 @@ TEST_CASE("Coordinate obstruction", "[obstruction-layout]")
     }
     SECTION("Cell-level layout")
     {
-        using layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+        using layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
         const auto lyt = blueprints::single_layer_qca_and_gate<layout>();
 
-        obstruction_layout obstr_lyt{lyt};
+        auto obstr_lyt = lyt.clone();
 
         CHECK(obstr_lyt.is_obstructed_coordinate({0, 2}));
         CHECK(obstr_lyt.is_obstructed_coordinate({2, 4}));
@@ -333,13 +253,13 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
 
         const layout lyt{{4, 4}};
 
-        obstruction_layout obstr_lyt{lyt};
+        obstructions<coords::offset> obstr_lyt{};
 
-        obstr_lyt.foreach_coordinate(
-            [&obstr_lyt](const auto& c)
+        lyt.foreach_coordinate(
+            [&obstr_lyt, &lyt](const auto& c)
             {
-                obstr_lyt.foreach_adjacent_coordinate(c, [&obstr_lyt, &c](const auto& ac)
-                                                      { CHECK(!obstr_lyt.is_obstructed_connection(c, ac)); });
+                lyt.foreach_adjacent_coordinate(c, [&obstr_lyt, &c](const auto& ac)
+                                                { CHECK(!obstr_lyt.is_obstructed_connection(c, ac)); });
             });
 
         // add artificial obstruction
@@ -383,11 +303,11 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
     }
     SECTION("Gate-level layout")
     {
-        using layout = gate_level_layout<clocked_layout<cartesian_layout<coords::offset>>>;
+        using layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
         const auto lyt = blueprints::xor_maj_gate_layout<layout>();
 
-        obstruction_layout obstr_lyt{lyt};
+        auto obstr_lyt = lyt.clone();
 
         CHECK(obstr_lyt.is_obstructed_connection({1, 1}, {2, 1}));
         CHECK(obstr_lyt.is_obstructed_connection({2, 0}, {2, 1}));
@@ -447,11 +367,11 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
     }
     SECTION("Cell-level layout")
     {
-        using layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+        using layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
         const auto lyt = blueprints::single_layer_qca_and_gate<layout>();
 
-        obstruction_layout obstr_lyt{lyt};
+        auto obstr_lyt = lyt.clone();
 
         obstr_lyt.foreach_coordinate(
             [&obstr_lyt](const auto& c)

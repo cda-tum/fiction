@@ -25,13 +25,11 @@
 
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
@@ -158,7 +156,7 @@ void check_parsing_equiv_layout_all()
 
 TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
     const gate_layout layout{{}, "empty"};
 
     std::stringstream layout_stream{};
@@ -170,7 +168,7 @@ TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
 
 TEST_CASE("Write and read layouts", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     check_parsing_equiv_all<gate_layout>();
     check_parsing_equiv_layout_all();

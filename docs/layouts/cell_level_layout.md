@@ -1,10 +1,9 @@
 # Cell-level Layout
 
-The cell-level layout can be layered on top of any clocked layout type at compile time to extend its functionality by
-a notion of FCN cells that can be assigned to its clock zones. In contrast to `gate_level_layout`, this layout type
-does not abstract from a technology implementation but embraces it. The cell-level layout requires a
-{ref}`cell technology <fcn-cell-technologies>` as a template parameter that specifies the types and properties of cells
-available to it. These could for instance be QCA, iNML, or SiDB.
+`cell_level_layout<Technology, CoordinateLayout>` stores FCN cells on a coordinate layout.
+The {ref}`cell technology <fcn-cell-technologies>` supplies cell types and modes.
+The layout owns clocking, synchronization, and persistent obstruction data. Dedicated
+`sidb::layout` represents SiDB designs independently of this hierarchy.
 
 Cell-level layouts merely represent structural information of the FCN circuit but do not inherently possess any
 knowledge of their implemented functionality.
@@ -43,3 +42,15 @@ A cell-level layout can be obtained from a `gate_level_layout` by the {ref}`appl
 :::
 
 ::::
+
+## Clock and synchronization coordinates
+
+`get_clock_number(c)` takes a cell position and queries the clock zone at
+`(c.x / tile_size_x, c.y / tile_size_y, c.z)`. `assign_clock_number(cz, number)` takes
+the unscaled clock-zone coordinate. For a tile size of 2 by 2, assigning zone `(1, 1)`
+changes the clock returned for cells `(2, 2)` through `(3, 3)`.
+
+Synchronization assignment and lookup use the supplied coordinate directly, without
+tile-size conversion. `num_se()` counts stored nonzero synchronization entries.
+Manual obstructions use cell positions. An occupied cell remains obstructed after clearing
+manual obstructions. Ordinary C++ copies share storage; `clone()` produces independent state.

@@ -211,7 +211,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             {
                 color = color | detail::CLOCK_COLOR[layout.get_clock_number(t)];
             }
-            if constexpr (has_synchronization_elements_v<Lyt>)
+            if constexpr (requires(const Lyt& lyt) { lyt.num_se(); })
             {
                 if (io_color && layout.is_synchronization_element(t))
                 {
@@ -294,7 +294,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             {
                 const auto ct = layout.get_cell_type(c);
 
-                if constexpr (has_synchronization_elements_v<Lyt>)
+                if constexpr (requires(const Lyt& lyt) { lyt.num_se(); })
                 {
                     if (io_color && layout.is_synchronization_element(c))
                     {

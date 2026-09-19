@@ -56,11 +56,8 @@ void name_utils(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::get_name<py_cartesian_obstruction_layout>(m);
     detail::get_name<py_cartesian_gate_layout>(m);
-    detail::get_name<py_shifted_cartesian_obstruction_layout>(m);
     detail::get_name<py_shifted_cartesian_gate_layout>(m);
-    detail::get_name<py_hexagonal_obstruction_layout>(m);
     detail::get_name<py_hexagonal_gate_layout>(m);
     detail::get_name<py_odd_row_cartesian_gate_layout>(m);
     detail::get_name<py_even_row_cartesian_gate_layout>(m);
@@ -77,11 +74,8 @@ void name_utils(nanobind::module_& m)
     detail::get_name<py_xag_network>(m);
     detail::get_name<py_mig_network>(m);
 
-    detail::set_name<py_cartesian_obstruction_layout>(m);
     detail::set_name<py_cartesian_gate_layout>(m);
-    detail::set_name<py_shifted_cartesian_obstruction_layout>(m);
     detail::set_name<py_shifted_cartesian_gate_layout>(m);
-    detail::set_name<py_hexagonal_obstruction_layout>(m);
     detail::set_name<py_hexagonal_gate_layout>(m);
     detail::set_name<py_odd_row_cartesian_gate_layout>(m);
     detail::set_name<py_even_row_cartesian_gate_layout>(m);

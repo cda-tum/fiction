@@ -18,7 +18,7 @@
 #pragma once
 
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/obstruction_layout.hpp"
+#include "fiction/layouts/obstructions.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
@@ -789,7 +789,8 @@ class hexagonalization_impl
                 }
 
                 // perform routing using A*
-                auto layout_obstruct = layouts::obstruction_layout<HexLyt>(hex_layout);
+                auto                                      layout_obstruct = hex_layout;
+                layouts::obstructions<coordinate<HexLyt>> search_obstructions{};
                 using path           = layout_coordinate_path<decltype(layout_obstruct)>;
                 const auto crossings = ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
                 const physical_design::path_finding::a_star_params params_astar{crossings};
@@ -811,7 +812,7 @@ class hexagonalization_impl
                     }
 
                     if (auto new_path = physical_design::path_finding::a_star<path>(
-                            layout_obstruct, {obj.source, target}, dist(), cost(), params_astar);
+                            layout_obstruct, {obj.source, target}, dist(), cost(), params_astar, search_obstructions);
                         !new_path.empty())
                     {
                         // for planar extension, if target is in the crossing layer, update path
@@ -826,7 +827,7 @@ class hexagonalization_impl
                         {
                             x_max = std::max(static_cast<uint64_t>(t.x), x_max);
                             y_max = std::max(static_cast<uint64_t>(t.y), y_max);
-                            layout_obstruct.obstruct_coordinate(t);
+                            search_obstructions.obstruct_coordinate(t);
                         }
                         // if the flag is set, re-collect and update fanins
                         if (obj.update_first_fanin)
@@ -902,8 +903,9 @@ class hexagonalization_impl
                 }
 
                 // perform routing using A*
-                auto layout_obstruct = layouts::obstruction_layout<HexLyt>(hex_layout);
-                using path           = layout_coordinate_path<decltype(layout_obstruct)>;
+                auto                                      layout_obstruct = hex_layout;
+                layouts::obstructions<coordinate<HexLyt>> search_obstructions{};
+                using path = layout_coordinate_path<decltype(layout_obstruct)>;
                 const auto crossings =
                     ps.output_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
                 const physical_design::path_finding::a_star_params params_astar{crossings};
@@ -959,7 +961,7 @@ class hexagonalization_impl
                     }
 
                     if (auto new_path = physical_design::path_finding::a_star<path>(
-                            layout_obstruct, {source, obj.target}, dist(), cost(), params_astar);
+                            layout_obstruct, {source, obj.target}, dist(), cost(), params_astar, search_obstructions);
                         !new_path.empty())
                     {
                         // for planar extension, if source or target are in the crossing layer, update path
@@ -974,7 +976,7 @@ class hexagonalization_impl
                         {
                             x_max = std::max(static_cast<uint64_t>(t.x), x_max);
                             y_max = std::max(static_cast<uint64_t>(t.y), y_max);
-                            layout_obstruct.obstruct_coordinate(t);
+                            search_obstructions.obstruct_coordinate(t);
                         }
                     }
                     else

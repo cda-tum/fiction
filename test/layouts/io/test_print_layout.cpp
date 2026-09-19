@@ -26,10 +26,8 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 
 #include <sstream>
 
@@ -40,7 +38,7 @@ using namespace fiction::qca;
 
 TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     const gate_layout layout{gate_layout::aspect_ratio{2, 2}, clocking::open<gate_layout>(clocking::num_clks::FOUR)};
 
@@ -61,7 +59,7 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, clocking::open<gate_layout>(clocking::num_clks::FOUR)};
 
@@ -112,7 +110,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -133,7 +131,7 @@ TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     const cell_layout layout{cell_layout::aspect_ratio{2, 2}, "Empty"};
 
@@ -154,7 +152,7 @@ TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 
 TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4}, "AND"};
 
@@ -188,7 +186,7 @@ TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 
 TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 

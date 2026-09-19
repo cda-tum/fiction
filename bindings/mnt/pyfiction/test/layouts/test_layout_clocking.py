@@ -10,17 +10,17 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import clocked_cartesian_layout, clocked_hexagonal_layout, clocked_shifted_cartesian_layout
+from mnt.pyfiction import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
 
 CLOCKED_LAYOUTS = [
-    pytest.param(lambda: clocked_cartesian_layout((2, 2, 0), "2DDWave"), id="clocked_cartesian_layout"),
-    pytest.param(lambda: clocked_shifted_cartesian_layout((2, 2, 0), "2DDWave"), id="clocked_shifted_cartesian_layout"),
-    pytest.param(lambda: clocked_hexagonal_layout((2, 2, 0), "2DDWave"), id="clocked_hexagonal_layout"),
+    pytest.param(lambda: cartesian_gate_layout((2, 2, 0), "2DDWave"), id="cartesian_gate_layout"),
+    pytest.param(lambda: shifted_cartesian_gate_layout((2, 2, 0), "2DDWave"), id="shifted_cartesian_gate_layout"),
+    pytest.param(lambda: hexagonal_gate_layout((2, 2, 0), "2DDWave"), id="hexagonal_gate_layout"),
 ]
 
 
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
-def test_clocked_layout_inheritance(make_layout):
+def test_layout_coordinate_access(make_layout):
     layout = make_layout()
     for t in layout.coordinates():
         assert t <= (9, 9, 1)
@@ -51,9 +51,9 @@ def test_clock_zone_iteration(make_layout):
 @pytest.mark.parametrize(
     "layout",
     [
-        pytest.param(clocked_cartesian_layout, id="clocked_cartesian_layout"),
-        pytest.param(clocked_shifted_cartesian_layout, id="clocked_shifted_cartesian_layout"),
-        pytest.param(clocked_hexagonal_layout, id="clocked_hexagonal_layout"),
+        pytest.param(cartesian_gate_layout, id="cartesian_gate_layout"),
+        pytest.param(shifted_cartesian_gate_layout, id="shifted_cartesian_gate_layout"),
+        pytest.param(hexagonal_gate_layout, id="hexagonal_gate_layout"),
     ],
 )
 def test_fetch_clocking_scheme(layout):
@@ -72,7 +72,7 @@ def test_fetch_clocking_scheme(layout):
 
 
 def test_clocking_scheme_name() -> None:
-    layout = clocked_cartesian_layout((2, 2), "2DDWave")
+    layout = cartesian_gate_layout((2, 2), "2DDWave")
     assert layout.get_clocking_scheme_name() == "2DDWAVE"
     assert layout.is_clocking_scheme("2DDWAVE")
     assert not layout.is_clocking_scheme("USE")

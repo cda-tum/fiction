@@ -400,22 +400,6 @@ inline constexpr const bool has_even_column_hex_arrangement_v =
 template <typename Lyt>
 using tile = typename Lyt::tile;
 
-#pragma region is_tile_based_layout
-template <class Lyt, class = void>
-struct is_tile_based_layout : std::false_type
-{};
-
-template <class Lyt>
-struct is_tile_based_layout<Lyt,
-                            std::enable_if_t<is_coordinate_layout_v<Lyt>,
-                                             std::void_t<typename Lyt::base_type, tile<Lyt>, typename Lyt::storage>>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool is_tile_based_layout_v = is_tile_based_layout<Lyt>::value;
-#pragma endregion
-
 #pragma region has_foreach_tile
 template <class Lyt, class = void>
 struct has_foreach_tile : std::false_type
@@ -468,27 +452,6 @@ inline constexpr bool has_foreach_adjacent_opposite_tiles_v = has_foreach_adjace
 
 template <typename Lyt>
 using clock_zone = typename Lyt::clock_zone;
-
-#pragma region is_clocked_layout
-template <class Lyt, class = void>
-struct is_clocked_layout : std::false_type
-{};
-
-template <class Lyt>
-struct is_clocked_layout<
-    Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt>,
-                          std::void_t<typename Lyt::base_type, clock_zone<Lyt>, typename Lyt::clocking_scheme_t,
-                                      typename Lyt::clock_number_t, typename Lyt::degree_t, typename Lyt::storage,
-                                      decltype(std::declval<Lyt>().get_clock_number(clock_zone<Lyt>())),
-                                      decltype(std::declval<Lyt>().num_clocks()),
-                                      decltype(std::declval<Lyt>().is_regularly_clocked()),
-                                      decltype(std::declval<Lyt>().is_clocking_scheme(std::string()))>>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool is_clocked_layout_v = is_clocked_layout<Lyt>::value;
-#pragma endregion
 
 #pragma region has_is_incoming_clocked
 template <class Lyt, class = void>
@@ -550,27 +513,6 @@ template <class Lyt>
 inline constexpr bool has_foreach_outgoing_clocked_zone_v = has_foreach_outgoing_clocked_zone<Lyt>::value;
 #pragma endregion
 
-#pragma region has_synchronization_elements
-template <class Lyt, class = void>
-struct has_synchronization_elements : std::false_type
-{};
-
-template <class Lyt>
-struct has_synchronization_elements<
-    Lyt, std::enable_if_t<
-             is_clocked_layout_v<Lyt>,
-             std::void_t<typename Lyt::sync_elem_t, typename Lyt::base_type, typename Lyt::storage,
-                         decltype(std::declval<Lyt>().assign_synchronization_element(
-                             std::declval<clock_zone<Lyt>>(), std::declval<typename Lyt::sync_elem_t>())),
-                         decltype(std::declval<Lyt>().is_synchronization_element(std::declval<clock_zone<Lyt>>())),
-                         decltype(std::declval<Lyt>().get_synchronization_element(std::declval<clock_zone<Lyt>>())),
-                         decltype(std::declval<Lyt>().num_se())>>> : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_synchronization_elements_v = has_synchronization_elements<Lyt>::value;
-#pragma endregion
-
 /**
  * Cell-level layouts
  */
@@ -606,7 +548,7 @@ struct is_cell_level_layout : std::false_type
 
 template <class Lyt>
 struct is_cell_level_layout<
-    Lyt, std::enable_if_t<is_clocked_layout_v<Lyt>,
+    Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt>,
                           std::void_t<typename Lyt::base_type, cell<Lyt>, typename Lyt::cell_type,
                                       typename Lyt::cell_mode, technology<Lyt>, typename Lyt::storage,
                                       decltype(std::declval<Lyt>().get_cell_type(cell<Lyt>())),
@@ -704,7 +646,7 @@ struct is_gate_level_layout : std::false_type
 
 template <class Lyt>
 struct is_gate_level_layout<
-    Lyt, std::enable_if_t<std::conjunction_v<is_clocked_layout<Lyt>, mockturtle::is_network_type<Lyt>>,
+    Lyt, std::enable_if_t<std::conjunction_v<is_coordinate_layout<Lyt>, mockturtle::is_network_type<Lyt>>,
                           std::void_t<typename Lyt::base_type, tile<Lyt>, typename Lyt::storage>>> : std::true_type
 {};
 

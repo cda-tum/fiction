@@ -21,7 +21,7 @@
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/layouts/obstruction_layout.hpp"
+#include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
@@ -374,7 +374,89 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
         apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(c));
     }
 
+    /**
+     * Marks the given coordinate as obstructed.
+     *
+     * @param c OffsetCoordinateType to obstruct.
+     */
+    void obstruct_coordinate(const OffsetCoordinateType& c) noexcept
+    {
+        search_obstructions.obstruct_coordinate(c);
+    }
+    /**
+     * Marks the connection from coordinate `src` to coordinate `tgt` as obstructed.
+     *
+     * @note OffsetCoordinateTypes marked this way will not be crossed with wires by path finding algorithms.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     */
+    void obstruct_connection(const OffsetCoordinateType& src, const OffsetCoordinateType& tgt) noexcept
+    {
+        search_obstructions.obstruct_connection(src, tgt);
+    }
+    /**
+     * Clears the obstruction status of the given coordinate `c` if the obstruction was manually marked via
+     * `obstruct_coordinate`.
+     *
+     * @param c OffsetCoordinateType to clear.
+     */
+    void clear_obstructed_coordinate(const OffsetCoordinateType& c) noexcept
+    {
+        search_obstructions.clear_obstructed_coordinate(c);
+    }
+    /**
+     * Clears the obstruction status of the connection from coordinate `src` to coordinate `tgt` if the obstruction was
+     * manually marked via `obstruct_connection`.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     */
+    void clear_obstructed_connection(const OffsetCoordinateType& src, const OffsetCoordinateType& tgt) noexcept
+    {
+        search_obstructions.clear_obstructed_connection(src, tgt);
+    }
+    /**
+     * Clears all obstructed coordinates that were manually marked via `obstruct_coordinate`.
+     */
+    void clear_obstructed_coordinates() noexcept
+    {
+        search_obstructions.clear_obstructed_coordinates();
+    }
+    /**
+     * Clears all obstructed connections that were manually marked via `obstruct_connection`.
+     */
+    void clear_obstructed_connections() noexcept
+    {
+        search_obstructions.clear_obstructed_connections();
+    }
+    /**
+     * Checks if the given coordinate is obstructed of some sort.
+     *
+     * @param c OffsetCoordinateType to check.
+     * @return `true` iff `c` is obstructed.
+     */
+    [[nodiscard]] bool is_obstructed_coordinate(const OffsetCoordinateType& c) const noexcept
+    {
+        return search_obstructions.is_obstructed_coordinate(c);
+    }
+    /**
+     * Checks if the given coordinate-coordinate connection is obstructed of some sort.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     * @return `true` iff the connection from `c1` to `c2` is obstructed.
+     */
+    [[nodiscard]] bool is_obstructed_connection(const OffsetCoordinateType& src,
+                                                const OffsetCoordinateType& tgt) const noexcept
+    {
+        return search_obstructions.is_obstructed_connection(src, tgt);
+    }
+
   private:
+    /** @brief Constraints of this wiring-cut search. */
+    layouts::obstructions<OffsetCoordinateType> search_obstructions{};
+
     /**
      * The current search direction: horizontal (from left to right) and vertical (from top to bottom).
      */
@@ -385,13 +467,13 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
  * Type alias for an obstruction layout specialized for finding excess wiring.
  */
 template <typename OffsetCoordinateType>
-using wiring_reduction_layout_type = layouts::obstruction_layout<wiring_reduction_layout<OffsetCoordinateType>>;
+using wiring_reduction_layout_type = wiring_reduction_layout<OffsetCoordinateType>;
 
 /**
  * Create a wiring_reduction_layout suitable for finding excess wiring based on a Cartesian layout.
  *
  * This function generates a new layout suitable for finding excess wiring by shifting the input layout based on
- * specified offsets. The generated layout is wrapped in an obstruction_layout. The shifted layout is constructed by
+ * specified offsets. The generated search layout owns its obstruction data. The shifted layout is constructed by
  * iterating through the input Cartesian layout diagonally and obstructing connections and coordinates accordingly.
  *
  * @tparam Lyt Type of the input Cartesian gate-level layout.
@@ -1102,7 +1184,7 @@ class wiring_reduction_impl
         pst.y_size_before    = plyt.y() + 1;
 
         // create an obstruction layout based on the original layout
-        auto layout = layouts::obstruction_layout<Lyt>(plyt);
+        auto layout = plyt;
 
         // initialize the list of wires to delete
         layout_coordinate_path<wiring_reduction_layout_type<coordinate<Lyt>>> to_delete = {};

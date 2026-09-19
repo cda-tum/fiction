@@ -20,15 +20,16 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/traits.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <set>
 #include <type_traits>
 
 using namespace fiction;
@@ -36,19 +37,54 @@ using namespace fiction::layouts;
 
 TEST_CASE("Gate-level layout traits", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     CHECK(is_coordinate_layout_v<gate_layout>);
-    CHECK(is_tile_based_layout_v<gate_layout>);
-    CHECK(is_clocked_layout_v<gate_layout>);
+    CHECK(has_foreach_tile_v<gate_layout>);
+    CHECK(has_foreach_outgoing_clocked_zone_v<gate_layout>);
     CHECK(is_gate_level_layout_v<gate_layout>);
     CHECK(has_is_empty_tile_v<gate_layout>);
     CHECK(has_is_empty_v<gate_layout>);
 }
 
+TEST_CASE("Owned gate capabilities share copies and isolate clones", "[gate-level-layout]")
+{
+    using layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    layout original{{3, 3}, clocking::twoddwave<layout>()};
+    original.assign_clock_number({1, 1}, 3);
+    original.assign_synchronization_element({1, 1}, 2);
+    original.obstruct_coordinate({2, 2});
+    original.obstruct_connection({0, 0}, {1, 0});
+
+    auto shared = original;
+    shared.assign_synchronization_element({1, 1}, 4);
+    CHECK(original.get_synchronization_element({1, 1}) == 4);
+    shared.obstruct_coordinate({3, 3});
+    CHECK(original.is_obstructed_coordinate({3, 3}));
+
+    auto cloned = original.clone();
+    CHECK(cloned.get_clock_number({1, 1}) == 3);
+    CHECK(cloned.get_synchronization_element({1, 1}) == 4);
+    CHECK(cloned.is_obstructed_coordinate({2, 2}));
+    CHECK(cloned.is_obstructed_connection({0, 0}, {1, 0}));
+    cloned.assign_clock_number({1, 1}, 0);
+    cloned.assign_synchronization_element({1, 1}, 0);
+    cloned.clear_obstructed_coordinates();
+    cloned.clear_obstructed_connections();
+    CHECK(original.get_clock_number({1, 1}) == 3);
+    CHECK(original.num_se() == 1);
+    CHECK(original.is_obstructed_coordinate({2, 2}));
+    CHECK(original.is_obstructed_connection({0, 0}, {1, 0}));
+
+    original.replace_clocking_scheme(clocking::use<layout>());
+    CHECK(original.get_synchronization_element({1, 1}) == 4);
+    CHECK_FALSE(original.is_incoming_clocked({1, 1}, {1, 1}));
+    CHECK_FALSE(original.is_outgoing_clocked({1, 1}, {1, 1}));
+}
+
 TEST_CASE("Deep copy gate-level layout", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     gate_layout original{gate_layout::aspect_ratio{5, 5, 0}, clocking::twoddwave<gate_layout>(), "Original"};
     original.create_pi("x1", {0, 2});
@@ -83,7 +119,7 @@ TEST_CASE("Creation and usage of constants", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
     REQUIRE(mockturtle::has_size_v<gate_layout>);
@@ -116,7 +152,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
     REQUIRE(mockturtle::has_size_v<gate_layout>);
@@ -207,7 +243,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
     REQUIRE(mockturtle::has_size_v<gate_layout>);
@@ -282,7 +318,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
 
 TEST_CASE("Node names", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto layout = blueprints::or_not_gate_layout<gate_layout>();
 
@@ -326,7 +362,7 @@ TEST_CASE("Creation of unary operations", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
     REQUIRE(mockturtle::has_size_v<gate_layout>);
@@ -380,7 +416,7 @@ TEST_CASE("Creation of binary operations", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
     REQUIRE(mockturtle::has_create_pi_v<gate_layout>);
@@ -490,7 +526,7 @@ TEST_CASE("Creation of ternary operations", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
     REQUIRE(mockturtle::has_create_pi_v<gate_layout>);
@@ -526,7 +562,7 @@ TEST_CASE("compute functions from AND and NOT gates", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
@@ -564,7 +600,7 @@ TEST_CASE("create nodes and compute their functions", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
@@ -598,7 +634,7 @@ TEST_CASE("node and signal iteration", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::has_foreach_node_v<gate_layout>);
     REQUIRE(mockturtle::has_foreach_pi_v<gate_layout>);
@@ -861,7 +897,7 @@ TEST_CASE("node and signal iteration", "[gate-level-layout]")
 
 TEST_CASE("Iteration disrespecting clocking", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto layout = blueprints::and_not_gate_layout<gate_layout>();
 
@@ -903,7 +939,7 @@ TEST_CASE("Gate-level layout properties", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::has_size_v<gate_layout>);
     REQUIRE(mockturtle::has_num_pis_v<gate_layout>);
@@ -942,7 +978,7 @@ TEST_CASE("Gate-level layout properties", "[gate-level-layout]")
 
 TEST_CASE("Functional properties", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::has_is_and_v<gate_layout>);
     REQUIRE(mockturtle::has_is_or_v<gate_layout>);
@@ -1011,7 +1047,7 @@ TEST_CASE("Custom node values", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::has_clear_values_v<gate_layout>);
     REQUIRE(mockturtle::has_value_v<gate_layout>);
@@ -1043,7 +1079,7 @@ TEST_CASE("Visited values", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::has_clear_visited_v<gate_layout>);
     REQUIRE(mockturtle::has_visited_v<gate_layout>);
@@ -1067,7 +1103,7 @@ TEST_CASE("Visited values", "[gate-level-layout]")
 
 TEST_CASE("Crossings", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -1101,7 +1137,7 @@ TEST_CASE("Crossings", "[gate-level-layout]")
 
 TEST_CASE("Move nodes", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto layout = blueprints::and_or_gate_layout<gate_layout>();
 
@@ -1210,7 +1246,7 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
 
 TEST_CASE("Move crossing", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -1263,7 +1299,7 @@ TEST_CASE("Move crossing", "[gate-level-layout]")
 
 TEST_CASE("Clear tiles", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto layout = blueprints::and_or_gate_layout<gate_layout>();
 
@@ -1314,7 +1350,7 @@ TEST_CASE("Clear tiles", "[gate-level-layout]")
 
 TEST_CASE("Clear crossing", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -1337,7 +1373,7 @@ TEST_CASE("Clear crossing", "[gate-level-layout]")
 
 TEST_CASE("Gate-level cardinal operations", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -1372,4 +1408,372 @@ TEST_CASE("Gate-level cardinal operations", "[gate-level-layout]")
 
     CHECK(layout.has_western_incoming_signal({3, 1}));
     CHECK(layout.has_western_incoming_signal({3, 2}));
+}
+
+TEST_CASE("Clocked layout traits", "[clocked-layout]")
+{
+    using layout = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    CHECK(has_is_incoming_clocked_v<layout>);
+    CHECK(has_is_outgoing_clocked_v<layout>);
+    CHECK(has_foreach_incoming_clocked_zone_v<layout>);
+    CHECK(has_foreach_outgoing_clocked_zone_v<layout>);
+}
+
+TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
+{
+    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    clk_lyt original{{5, 5, 0}, clocking::twoddwave<clk_lyt>()};
+    original.assign_clock_number({0, 0}, 3);
+
+    auto copy = original.clone();
+
+    CHECK(copy.get_clock_number({0, 0}) == 3);
+    original.assign_clock_number({0, 0}, 1);
+    CHECK(copy.get_clock_number({0, 0}) == 3);
+    copy.assign_clock_number({0, 0}, 2);
+    CHECK(original.get_clock_number({0, 0}) == 1);
+
+    copy.resize({10, 10, 1});
+    copy.replace_clocking_scheme(clocking::use<clk_lyt>());
+
+    CHECK(original.x() == 5);
+    CHECK(original.y() == 5);
+    CHECK(original.z() == 0);
+    CHECK(original.is_clocking_scheme(clocking::TWODDWAVE_NAME));
+
+    CHECK(copy.x() == 10);
+    CHECK(copy.y() == 10);
+    CHECK(copy.z() == 1);
+    CHECK(copy.is_clocking_scheme(clocking::USE_NAME));
+}
+
+TEST_CASE("Clock zone assignment", "[clocked-layout]")
+{
+    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    clk_lyt layout{clk_lyt::aspect_ratio{1, 1, 0}, clocking::twoddwave<clk_lyt>()};
+
+    SECTION("2DDWave Clocking")
+    {
+        CHECK(layout.is_clocking_scheme(clocking::TWODDWAVE_NAME));
+        CHECK(!layout.is_clocking_scheme(clocking::RES_NAME));
+        CHECK(layout.is_regularly_clocked());
+        CHECK(layout.num_clocks() == 4);
+
+        CHECK(layout.get_clock_number({0, 0}) == 0);
+        CHECK(layout.get_clock_number({1, 0}) == 1);
+        CHECK(layout.get_clock_number({0, 1}) == 1);
+        CHECK(layout.get_clock_number({1, 1}) == 2);
+
+        CHECK(layout.is_incoming_clocked({1, 0}, {0, 0}));
+        CHECK(layout.is_incoming_clocked({0, 1}, {0, 0}));
+        CHECK(layout.is_incoming_clocked({1, 1}, {0, 1}));
+        CHECK(layout.is_incoming_clocked({1, 1}, {1, 0}));
+        CHECK(!layout.is_incoming_clocked({1, 1}, {0, 0}));
+        CHECK(!layout.is_incoming_clocked({1, 1}, {1, 1}));
+
+        CHECK(layout.is_outgoing_clocked({0, 0}, {1, 0}));
+        CHECK(layout.is_outgoing_clocked({0, 0}, {0, 1}));
+        CHECK(layout.is_outgoing_clocked({0, 1}, {1, 1}));
+        CHECK(layout.is_outgoing_clocked({1, 0}, {1, 1}));
+        CHECK(!layout.is_outgoing_clocked({0, 0}, {1, 1}));
+        CHECK(!layout.is_outgoing_clocked({1, 1}, {1, 1}));
+
+        layout.assign_clock_number({1, 0}, 2);
+        layout.assign_clock_number({0, 1}, 2);
+        layout.assign_clock_number({1, 1}, 3);
+
+        CHECK(!layout.is_regularly_clocked());
+
+        CHECK(layout.get_clock_number({0, 0}) == 0);
+        CHECK(layout.get_clock_number({1, 0}) == 2);
+        CHECK(layout.get_clock_number({0, 1}) == 2);
+        CHECK(layout.get_clock_number({1, 1}) == 3);
+
+        CHECK(layout.is_incoming_clocked({1, 1}, {1, 0}));
+        CHECK(layout.is_incoming_clocked({1, 1}, {0, 1}));
+        CHECK(!layout.is_incoming_clocked({1, 0}, {0, 0}));
+        CHECK(!layout.is_incoming_clocked({1, 1}, {0, 0}));
+
+        CHECK(layout.is_outgoing_clocked({1, 0}, {1, 1}));
+        CHECK(layout.is_outgoing_clocked({0, 1}, {1, 1}));
+        CHECK(!layout.is_outgoing_clocked({0, 0}, {1, 0}));
+        CHECK(!layout.is_outgoing_clocked({0, 0}, {0, 1}));
+    }
+
+    SECTION("Replace with USE")
+    {
+        layout.replace_clocking_scheme(clocking::use<clk_lyt>());
+
+        CHECK(!layout.is_clocking_scheme(clocking::TWODDWAVE_NAME));
+        CHECK(layout.is_clocking_scheme(clocking::USE_NAME));
+        CHECK(layout.is_regularly_clocked());
+
+        CHECK(layout.get_clock_number({0, 0}) == 0);
+        CHECK(layout.get_clock_number({1, 0}) == 1);
+        CHECK(layout.get_clock_number({0, 1}) == 3);
+        CHECK(layout.get_clock_number({1, 1}) == 2);
+
+        CHECK(layout.is_incoming_clocked({0, 1}, {1, 1}));
+        CHECK(layout.is_incoming_clocked({1, 1}, {1, 0}));
+        CHECK(layout.is_incoming_clocked({1, 0}, {0, 0}));
+        CHECK(!layout.is_incoming_clocked({1, 1}, {0, 0}));
+        CHECK(!layout.is_incoming_clocked({1, 1}, {1, 1}));
+
+        CHECK(layout.is_outgoing_clocked({0, 0}, {1, 0}));
+        CHECK(layout.is_outgoing_clocked({0, 1}, {0, 0}));
+        CHECK(layout.is_outgoing_clocked({1, 0}, {1, 1}));
+        CHECK(!layout.is_outgoing_clocked({0, 0}, {0, 1}));
+        CHECK(!layout.is_outgoing_clocked({0, 0}, {1, 1}));
+        CHECK(!layout.is_outgoing_clocked({1, 1}, {1, 1}));
+
+        layout.assign_clock_number({1, 0}, 2);
+        layout.assign_clock_number({0, 1}, 2);
+        layout.assign_clock_number({1, 1}, 3);
+
+        CHECK(!layout.is_regularly_clocked());
+
+        CHECK(layout.get_clock_number({0, 0}) == 0);
+        CHECK(layout.get_clock_number({1, 0}) == 2);
+        CHECK(layout.get_clock_number({0, 1}) == 2);
+        CHECK(layout.get_clock_number({1, 1}) == 3);
+    }
+}
+
+TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
+{
+    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, clocking::twoddwave<clk_lyt>()};
+
+    CHECK(layout.incoming_clocked_zones({0, 0}).empty());
+    CHECK(layout.outgoing_clocked_zones({2, 2}).empty());
+
+    auto v1 = layout.incoming_clocked_zones({1, 1});
+    auto s1 = std::set<clk_lyt::coordinate>{v1.cbegin(), v1.cend()};
+    auto s2 = std::set<clk_lyt::coordinate>{{{1, 0}, {0, 1}}};
+
+    CHECK(s1 == s2);
+
+    layout.foreach_incoming_clocked_zone({1, 1}, [&s2](const auto& cz) { CHECK(s2.count(cz) > 0); });
+
+    auto v3 = layout.outgoing_clocked_zones({1, 1});
+    auto s3 = std::set<clk_lyt::coordinate>{v3.cbegin(), v3.cend()};
+    auto s4 = std::set<clk_lyt::coordinate>{{{1, 2}, {2, 1}}};
+
+    layout.foreach_outgoing_clocked_zone({1, 1}, [&s4](const auto& cz) { CHECK(s4.count(cz) > 0); });
+
+    CHECK(s3 == s4);
+
+    layout.foreach_outgoing_clocked_zone({1, 1}, [&s4](const auto& cz) { CHECK(s4.count(cz) > 0); });
+}
+
+TEST_CASE("Clocked layout properties", "[clocked-layout]")
+{
+    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    SECTION("2DDWave Clocking")
+    {
+        const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, clocking::twoddwave<clk_lyt>()};
+
+        CHECK(layout.in_degree({0, 0}) == static_cast<clk_lyt::degree_t>(0));
+        CHECK(layout.in_degree({1, 0}) == static_cast<clk_lyt::degree_t>(1));
+        CHECK(layout.in_degree({2, 0}) == static_cast<clk_lyt::degree_t>(1));
+        CHECK(layout.in_degree({1, 1}) == static_cast<clk_lyt::degree_t>(2));
+
+        CHECK(layout.out_degree({1, 1}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.out_degree({0, 2}) == static_cast<clk_lyt::degree_t>(1));
+        CHECK(layout.out_degree({1, 2}) == static_cast<clk_lyt::degree_t>(1));
+        CHECK(layout.out_degree({2, 2}) == static_cast<clk_lyt::degree_t>(0));
+
+        CHECK(layout.degree({0, 0}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.degree({1, 0}) == static_cast<clk_lyt::degree_t>(3));
+        CHECK(layout.degree({2, 0}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.degree({1, 1}) == static_cast<clk_lyt::degree_t>(4));
+        CHECK(layout.degree({0, 2}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.degree({1, 2}) == static_cast<clk_lyt::degree_t>(3));
+        CHECK(layout.degree({2, 2}) == static_cast<clk_lyt::degree_t>(2));
+    }
+    SECTION("USE Clocking")
+    {
+        const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, clocking::use<clk_lyt>()};
+
+        CHECK(layout.in_degree({0, 0}) == static_cast<clk_lyt::degree_t>(1));
+        CHECK(layout.in_degree({1, 0}) == static_cast<clk_lyt::degree_t>(1));
+        CHECK(layout.in_degree({2, 0}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.in_degree({1, 1}) == static_cast<clk_lyt::degree_t>(2));
+
+        CHECK(layout.out_degree({1, 1}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.out_degree({0, 2}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.out_degree({1, 2}) == static_cast<clk_lyt::degree_t>(1));
+        CHECK(layout.out_degree({2, 2}) == static_cast<clk_lyt::degree_t>(1));
+
+        CHECK(layout.degree({0, 0}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.degree({1, 0}) == static_cast<clk_lyt::degree_t>(3));
+        CHECK(layout.degree({2, 0}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.degree({1, 1}) == static_cast<clk_lyt::degree_t>(4));
+        CHECK(layout.degree({0, 2}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.degree({1, 2}) == static_cast<clk_lyt::degree_t>(3));
+        CHECK(layout.degree({2, 2}) == static_cast<clk_lyt::degree_t>(2));
+    }
+}
+
+TEST_CASE("Synchronization element layout traits", "[synchronization-element-layout]")
+{
+    using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    CHECK(requires(const se_layout& lyt) { lyt.num_se(); });
+}
+
+TEST_CASE("Deep copy synchronization element layout", "[synchronization-element-layout]")
+{
+    using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    se_layout original{{5, 5, 0}, clocking::twoddwave<se_layout>()};
+    original.assign_synchronization_element({0, 0}, 1);
+    original.assign_synchronization_element({1, 0}, 2);
+
+    auto copy = original.clone();
+
+    copy.resize({10, 10, 1});
+    copy.replace_clocking_scheme(clocking::use<se_layout>());
+    copy.assign_synchronization_element({0, 0}, 2);
+    copy.assign_synchronization_element({1, 0}, 3);
+
+    CHECK(original.x() == 5);
+    CHECK(original.y() == 5);
+    CHECK(original.z() == 0);
+    CHECK(original.is_clocking_scheme(clocking::TWODDWAVE_NAME));
+    CHECK(original.get_synchronization_element({0, 0}) == 1);
+    CHECK(original.get_synchronization_element({1, 0}) == 2);
+
+    CHECK(copy.x() == 10);
+    CHECK(copy.y() == 10);
+    CHECK(copy.z() == 1);
+    CHECK(copy.is_clocking_scheme(clocking::USE_NAME));
+    CHECK(copy.get_synchronization_element({0, 0}) == 2);
+    CHECK(copy.get_synchronization_element({1, 0}) == 3);
+}
+
+TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-element-layout]")
+{
+    using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave<se_layout>()};
+
+    layout.assign_synchronization_element({1, 1}, 1);
+
+    CHECK(layout.is_clocking_scheme(clocking::TWODDWAVE_NAME));
+    CHECK(layout.is_regularly_clocked());
+    CHECK(layout.num_clocks() == 4);
+
+    CHECK(layout.get_clock_number({0, 0}) == 0);
+    CHECK(layout.get_clock_number({1, 0}) == 1);
+    CHECK(layout.get_clock_number({0, 1}) == 1);
+    CHECK(layout.get_clock_number({1, 1}) == 2);
+    CHECK(layout.get_clock_number({2, 1}) == 3);
+    CHECK(layout.get_clock_number({1, 2}) == 3);
+    CHECK(layout.get_clock_number({2, 2}) == 0);
+
+    CHECK(layout.is_incoming_clocked({1, 0}, {0, 0}));
+    CHECK(layout.is_incoming_clocked({0, 1}, {0, 0}));
+    CHECK(layout.is_incoming_clocked({1, 1}, {0, 1}));
+    CHECK(layout.is_incoming_clocked({1, 1}, {1, 0}));
+    CHECK(layout.is_incoming_clocked({1, 1}, {2, 1}));
+    CHECK(layout.is_incoming_clocked({1, 1}, {1, 2}));
+
+    CHECK(layout.is_outgoing_clocked({0, 0}, {1, 0}));
+    CHECK(layout.is_outgoing_clocked({0, 0}, {0, 1}));
+    CHECK(layout.is_outgoing_clocked({0, 1}, {1, 1}));
+    CHECK(layout.is_outgoing_clocked({1, 0}, {1, 1}));
+    CHECK(layout.is_outgoing_clocked({2, 1}, {1, 1}));
+    CHECK(layout.is_outgoing_clocked({1, 2}, {1, 1}));
+}
+
+TEST_CASE("Iteration over synchronization elements", "[synchronization-element-layout]")
+{
+    using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave<se_layout>()};
+
+    layout.assign_synchronization_element({0, 1}, 1);
+    layout.assign_synchronization_element({1, 0}, 1);
+    layout.assign_synchronization_element({1, 2}, 1);
+    layout.assign_synchronization_element({2, 1}, 1);
+
+    CHECK(layout.incoming_clocked_zones({0, 0}).size() == 2);
+    CHECK(layout.outgoing_clocked_zones({2, 2}).size() == 2);
+
+    const auto v1 = layout.incoming_clocked_zones({1, 1});
+    const auto s1 = std::set<se_layout::coordinate>{v1.cbegin(), v1.cend()};
+    const auto s2 = std::set<se_layout::coordinate>{{{1, 0}, {0, 1}, {1, 2}, {2, 1}}};
+
+    CHECK(s1 == s2);
+
+    const auto v3 = layout.outgoing_clocked_zones({1, 1});
+    const auto s3 = std::set<se_layout::coordinate>{v3.cbegin(), v3.cend()};
+    const auto s4 = std::set<se_layout::coordinate>{{{1, 0}, {0, 1}, {1, 2}, {2, 1}}};
+
+    CHECK(s3 == s4);
+}
+
+TEST_CASE("Synchronization element layout properties", "[synchronization-element-layout]")
+{
+    using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave<se_layout>()};
+
+    CHECK(layout.num_se() == 0);
+    layout.assign_synchronization_element({0, 0}, 0);
+    CHECK(layout.num_se() == 0);
+    layout.assign_synchronization_element({0, 1}, 1);
+    CHECK(layout.num_se() == 1);
+    layout.assign_synchronization_element({1, 0}, 1);
+    CHECK(layout.num_se() == 2);
+    layout.assign_synchronization_element({1, 2}, 2);
+    CHECK(layout.num_se() == 3);
+    layout.assign_synchronization_element({2, 1}, 2);
+    CHECK(layout.num_se() == 4);
+
+    CHECK(layout.is_synchronization_element({0, 1}));
+    CHECK(layout.is_synchronization_element({1, 0}));
+    CHECK(layout.is_synchronization_element({1, 2}));
+    CHECK(layout.is_synchronization_element({2, 1}));
+
+    CHECK(!layout.is_synchronization_element({0, 0}));
+    CHECK(!layout.is_synchronization_element({1, 1}));
+    CHECK(!layout.is_synchronization_element({2, 0}));
+    CHECK(!layout.is_synchronization_element({0, 2}));
+    CHECK(!layout.is_synchronization_element({2, 2}));
+
+    CHECK(layout.get_synchronization_element({0, 1}) == 1);
+    CHECK(layout.get_synchronization_element({1, 0}) == 1);
+    CHECK(layout.get_synchronization_element({1, 2}) == 2);
+    CHECK(layout.get_synchronization_element({2, 1}) == 2);
+
+    CHECK(layout.get_synchronization_element({0, 0}) == 0);
+    CHECK(layout.get_synchronization_element({1, 1}) == 0);
+    CHECK(layout.get_synchronization_element({2, 0}) == 0);
+    CHECK(layout.get_synchronization_element({0, 2}) == 0);
+    CHECK(layout.get_synchronization_element({2, 2}) == 0);
+
+    CHECK(layout.in_degree({0, 0}) == static_cast<se_layout::degree_t>(2));
+    CHECK(layout.in_degree({1, 0}) == static_cast<se_layout::degree_t>(3));
+    CHECK(layout.in_degree({2, 0}) == static_cast<se_layout::degree_t>(2));
+    CHECK(layout.in_degree({1, 1}) == static_cast<se_layout::degree_t>(4));
+
+    CHECK(layout.out_degree({1, 1}) == static_cast<se_layout::degree_t>(4));
+    CHECK(layout.out_degree({0, 2}) == static_cast<se_layout::degree_t>(2));
+    CHECK(layout.out_degree({1, 2}) == static_cast<se_layout::degree_t>(3));
+    CHECK(layout.out_degree({2, 2}) == static_cast<se_layout::degree_t>(2));
+
+    CHECK(layout.degree({0, 0}) == static_cast<se_layout::degree_t>(2));
+    CHECK(layout.degree({1, 0}) == static_cast<se_layout::degree_t>(3));
+    CHECK(layout.degree({2, 0}) == static_cast<se_layout::degree_t>(2));
+    CHECK(layout.degree({1, 1}) == static_cast<se_layout::degree_t>(4));
+    CHECK(layout.degree({0, 2}) == static_cast<se_layout::degree_t>(2));
+    CHECK(layout.degree({1, 2}) == static_cast<se_layout::degree_t>(3));
+    CHECK(layout.degree({2, 2}) == static_cast<se_layout::degree_t>(2));
 }

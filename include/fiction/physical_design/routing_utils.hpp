@@ -15,7 +15,7 @@
  */
 
 #pragma once
-
+#include "fiction/layouts/obstructions.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -28,6 +28,43 @@
 
 namespace fiction::physical_design
 {
+namespace detail
+{
+/** @brief Combines layout occupancy with explicit search constraints.
+ * @tparam Lyt Layout type. @param lyt Layout. @param c Position. @param extra Search constraints.
+ * @return Whether the position is obstructed.
+ */
+template <typename Lyt>
+[[nodiscard]] bool routing_coordinate_obstructed(const Lyt& lyt, const coordinate<Lyt>& c,
+                                                 const layouts::obstructions<coordinate<Lyt>>& extra) noexcept
+{
+    if constexpr (requires { lyt.is_obstructed_coordinate(c); })
+    {
+        return extra.is_obstructed_coordinate(c) || lyt.is_obstructed_coordinate(c);
+    }
+    else
+    {
+        return extra.is_obstructed_coordinate(c);
+    }
+}
+/** @brief Combines layout connections with explicit search constraints.
+ * @tparam Lyt Layout type. @param lyt Layout. @param src Source. @param tgt Target. @param extra Search constraints.
+ * @return Whether the directed connection is obstructed.
+ */
+template <typename Lyt>
+[[nodiscard]] bool routing_connection_obstructed(const Lyt& lyt, const coordinate<Lyt>& src, const coordinate<Lyt>& tgt,
+                                                 const layouts::obstructions<coordinate<Lyt>>& extra) noexcept
+{
+    if constexpr (requires { lyt.is_obstructed_connection(src, tgt); })
+    {
+        return extra.is_obstructed_connection(src, tgt) || lyt.is_obstructed_connection(src, tgt);
+    }
+    else
+    {
+        return extra.is_obstructed_connection(src, tgt);
+    }
+}
+}  // namespace detail
 
 /**
  * Routing objectives are source-target pairs.

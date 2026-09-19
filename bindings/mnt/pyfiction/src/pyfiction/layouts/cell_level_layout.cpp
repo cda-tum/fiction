@@ -145,11 +145,11 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
 /**
  * Register a concrete cell layout without duplicating its technology enums.
  * @tparam CellLyt Cell layout.
- * @tparam ClockedLyt Registered base layout.
+ * @tparam CoordinateLyt Registered base layout.
  * @param m Python module.
  * @param tech_name Class name prefix.
  */
-template <typename CellLyt, typename ClockedLyt>
+template <typename CellLyt, typename CoordinateLyt>
 void cell_layout(nanobind::module_& m, const std::string& tech_name)
 {
     namespace py = nanobind;
@@ -159,7 +159,7 @@ void cell_layout(nanobind::module_& m, const std::string& tech_name)
      */
     const auto class_name = fmt::format("{}_layout", tech_name);
 
-    py::class_<CellLyt, ClockedLyt>(m, class_name.c_str(), DOC(fiction_layouts_cell_level_layout))
+    py::class_<CellLyt, CoordinateLyt>(m, class_name.c_str(), DOC(fiction_layouts_cell_level_layout))
         .def(py::init<>(), DOC(fiction_layouts_cell_level_layout_cell_level_layout))
         .def(py::init<const fiction::aspect_ratio<CellLyt>&>(), py::arg("dimension"),
              DOC(fiction_layouts_cell_level_layout_cell_level_layout))
@@ -180,6 +180,67 @@ void cell_layout(nanobind::module_& m, const std::string& tech_name)
             py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
             DOC(fiction_layouts_cell_level_layout_cell_level_layout_2))
 
+        .def("assign_clock_number", &CellLyt::assign_clock_number, py::arg("cz"), py::arg("cn"),
+             DOC(fiction_layouts_cell_level_layout_assign_clock_number))
+        .def("get_clock_number", &CellLyt::get_clock_number, py::arg("cz"),
+             DOC(fiction_layouts_cell_level_layout_get_clock_number))
+        .def("num_clocks", &CellLyt::num_clocks, DOC(fiction_layouts_cell_level_layout_num_clocks))
+        .def("is_regularly_clocked", &CellLyt::is_regularly_clocked,
+             DOC(fiction_layouts_cell_level_layout_is_regularly_clocked))
+
+        .def("is_clocking_scheme", &CellLyt::is_clocking_scheme, py::arg("name"),
+             DOC(fiction_layouts_cell_level_layout_is_clocking_scheme))
+        .def(
+            "get_clocking_scheme_name", [](const CellLyt& lyt) { return std::string{lyt.get_clocking_scheme().name}; },
+            "Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.")
+
+        .def("incoming_clocked_zones", &CellLyt::incoming_clocked_zones, py::arg("cz"),
+             DOC(fiction_layouts_cell_level_layout_incoming_clocked_zones))
+        .def("outgoing_clocked_zones", &CellLyt::outgoing_clocked_zones, py::arg("cz"),
+             DOC(fiction_layouts_cell_level_layout_outgoing_clocked_zones))
+
+        .def("in_degree", &CellLyt::in_degree, py::arg("cz"), DOC(fiction_layouts_cell_level_layout_in_degree))
+        .def("out_degree", &CellLyt::out_degree, py::arg("cz"), DOC(fiction_layouts_cell_level_layout_out_degree))
+        .def("degree", &CellLyt::degree, py::arg("cz"), DOC(fiction_layouts_cell_level_layout_degree))
+
+        .def(
+            "replace_clocking_scheme",
+            [](CellLyt& lyt, const std::string& name)
+            {
+                if (const auto scheme = fiction::layouts::clocking::get_scheme<CellLyt>(name); scheme)
+                {
+                    lyt.replace_clocking_scheme(*scheme);
+                }
+                else
+                {
+                    throw std::invalid_argument("Unknown clocking scheme");
+                }
+            },
+            py::arg("name"), "Replaces the scheme while preserving synchronization delays.")
+        .def("obstruct_coordinate", &CellLyt::obstruct_coordinate, py::arg("c"),
+             DOC(fiction_layouts_cell_level_layout_obstruct_coordinate))
+        .def("obstruct_connection", &CellLyt::obstruct_connection, py::arg("src"), py::arg("tgt"),
+             DOC(fiction_layouts_cell_level_layout_obstruct_connection))
+        .def("clear_obstructed_coordinate", &CellLyt::clear_obstructed_coordinate, py::arg("c"),
+             DOC(fiction_layouts_cell_level_layout_clear_obstructed_coordinate))
+        .def("clear_obstructed_connection", &CellLyt::clear_obstructed_connection, py::arg("src"), py::arg("tgt"),
+             DOC(fiction_layouts_cell_level_layout_clear_obstructed_connection))
+        .def("clear_obstructed_coordinates", &CellLyt::clear_obstructed_coordinates,
+             DOC(fiction_layouts_cell_level_layout_clear_obstructed_coordinates))
+        .def("clear_obstructed_connections", &CellLyt::clear_obstructed_connections,
+             DOC(fiction_layouts_cell_level_layout_clear_obstructed_connections))
+        .def("is_obstructed_coordinate", &CellLyt::is_obstructed_coordinate, py::arg("c"),
+             DOC(fiction_layouts_cell_level_layout_is_obstructed_coordinate))
+        .def("is_obstructed_connection", &CellLyt::is_obstructed_connection, py::arg("src"), py::arg("tgt"),
+             DOC(fiction_layouts_cell_level_layout_is_obstructed_connection))
+        .def("assign_synchronization_element", &CellLyt::assign_synchronization_element, py::arg("coordinate"),
+             py::arg("delay"), DOC(fiction_layouts_cell_level_layout_assign_synchronization_element))
+        .def("is_synchronization_element", &CellLyt::is_synchronization_element, py::arg("coordinate"),
+             DOC(fiction_layouts_cell_level_layout_is_synchronization_element))
+        .def("get_synchronization_element", &CellLyt::get_synchronization_element, py::arg("coordinate"),
+             DOC(fiction_layouts_cell_level_layout_get_synchronization_element))
+        .def("num_se", &CellLyt::num_se, DOC(fiction_layouts_cell_level_layout_num_se))
+
         .def("assign_cell_mode", &CellLyt::assign_cell_mode, py::arg("c"), py::arg("mode"))
         .def("get_cell_mode", &CellLyt::get_cell_mode, py::arg("c"))
         .def("assign_cell_type", &CellLyt::assign_cell_type, py::arg("c"), py::arg("ct"),
@@ -195,6 +256,7 @@ void cell_layout(nanobind::module_& m, const std::string& tech_name)
         .def("set_layout_name", &CellLyt::set_layout_name, py::arg("name"),
              DOC(fiction_layouts_cell_level_layout_set_layout_name))
         .def("get_layout_name", &CellLyt::get_layout_name, DOC(fiction_layouts_cell_level_layout_get_layout_name))
+        .def("clone", &CellLyt::clone, DOC(fiction_layouts_cell_level_layout_clone))
         .def("num_cells", &CellLyt::num_cells, DOC(fiction_layouts_cell_level_layout_num_cells))
         .def("is_empty", &CellLyt::is_empty, DOC(fiction_layouts_cell_level_layout_is_empty))
         .def("num_pis", &CellLyt::num_pis, DOC(fiction_layouts_cell_level_layout_num_pis))
@@ -269,10 +331,10 @@ void cell_level_layout(nanobind::module_& m)
     detail::fcn_technology_cell_level_layout<fiction::qca::qca_technology>(m);
     detail::fcn_technology_cell_level_layout<fiction::qca::mol_qca_technology>(m);
     detail::fcn_technology_cell_level_layout<fiction::inml::inml_technology>(m);
-    detail::cell_layout<py_qca_layout, py_cartesian_clocked_layout>(m, "qca");
-    detail::cell_layout<py_mol_qca_layout, py_cartesian_clocked_layout>(m, "mol_qca");
-    detail::cell_layout<py_inml_layout, py_cartesian_clocked_layout>(m, "inml");
-    detail::cell_layout<py_stacked_qca_layout, py_stacked_cartesian_clocked_layout>(m, "stacked_qca");
+    detail::cell_layout<py_qca_layout, py_cartesian_layout>(m, "qca");
+    detail::cell_layout<py_mol_qca_layout, py_cartesian_layout>(m, "mol_qca");
+    detail::cell_layout<py_inml_layout, py_cartesian_layout>(m, "inml");
+    detail::cell_layout<py_stacked_qca_layout, py_stacked_cartesian_layout>(m, "stacked_qca");
 }
 
 }  // namespace pyfiction

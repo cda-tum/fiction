@@ -18,13 +18,11 @@
 #pragma once
 
 // clang-format off
-// NOLINTBEGIN(misc-include-cleaner): no symbol from these headers is named directly, but clocked_layout.hpp's
+// NOLINTBEGIN(misc-include-cleaner): no symbol from these headers is named directly, but the
 // clocking::get_scheme free function is looked up via two-phase name lookup at template instantiation time, so
 // removing any of these breaks the build despite the tool's "not used directly" heuristic
 #include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/clocked_layout.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
-#include "fiction/layouts/tile_based_layout.hpp"
 // NOLINTEND(misc-include-cleaner)
 // clang-format on
 #include "fiction/networks/name_utils.hpp"
@@ -238,25 +236,18 @@ class read_fgl_layout_impl
         {
             if (const auto* elements = clocking->FirstChildElement("synchronization_elements"); elements != nullptr)
             {
-                if constexpr (has_synchronization_elements_v<Lyt>)
+
+                for (const auto* element = elements->FirstChildElement("element"); element != nullptr;
+                     element             = element->NextSiblingElement("element"))
                 {
-                    for (const auto* element = elements->FirstChildElement("element"); element != nullptr;
-                         element             = element->NextSiblingElement("element"))
+                    const auto delay = read_number(element, "delay");
+                    if (delay > std::numeric_limits<typename Lyt::sync_elem_t>::max())
                     {
-                        const auto delay = read_number(element, "delay");
-                        if (delay > std::numeric_limits<typename Lyt::sync_elem_t>::max())
-                        {
-                            throw fgl_parsing_error(
-                                "Error parsing FGL file: synchronization delay exceeds the target range");
-                        }
-                        lyt.assign_synchronization_element(read_position(element),
-                                                           static_cast<typename Lyt::sync_elem_t>(delay));
+                        throw fgl_parsing_error(
+                            "Error parsing FGL file: synchronization delay exceeds the target range");
                     }
-                }
-                else
-                {
-                    throw fgl_parsing_error(
-                        "Error parsing FGL file: target layout does not support synchronization elements");
+                    lyt.assign_synchronization_element(read_position(element),
+                                                       static_cast<typename Lyt::sync_elem_t>(delay));
                 }
             }
             if (auto* const clocking_scheme_name = clocking->FirstChildElement("name");
