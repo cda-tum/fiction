@@ -131,7 +131,7 @@ if(NOT DEFINED FMT_URL)
 endif()
 if(NOT DEFINED FMT_SHA256)
   set(FMT_SHA256
-      ea7de4299689e12b6dddd392f9896f08fb0777ac7168897a244a6d6085043fea)
+      8b852bb5aa6e7d8564f9e81394055395dd1d1936d38dfd3a17792a02bebd7af0)
 endif()
 # `SOURCE_SUBDIR` names a directory without a CMakeLists.txt, so the archive is
 # only populated; fmt's own CMake would build a library and install rules
