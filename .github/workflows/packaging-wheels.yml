@@ -16,6 +16,7 @@ concurrency:
 permissions: {}
 
 env:
+  # Match the Linux wheel-build pin in pyproject.toml and preserve the macOS deployment target.
   Z3_VERSION: 4.14.1
 
 jobs:

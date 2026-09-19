@@ -46,24 +46,24 @@ jobs:
       matrix:
         # Each entry costs a full Debug *and* Release build of a header-only, template-heavy
         # library, so the matrix carries the ends of each compiler family and one point in
-        # between, not every version. g++-11 on 22.04 is the oldest combination we support.
+        # between, not every version. Ubuntu 24.04 covers older compilers; 26.04 covers newer ones.
         include:
-          - runs-on: ubuntu-22.04
-            compiler: g++-11
           - runs-on: ubuntu-24.04
             compiler: g++-13
           - runs-on: ubuntu-24.04
             compiler: g++-14
+          - runs-on: ubuntu-26.04
+            compiler: g++-15
           - runs-on: ubuntu-24.04
             compiler: clang++-18
-          - runs-on: ubuntu-24.04
-            compiler: clang++-19
-          - runs-on: ubuntu-24.04
+          - runs-on: ubuntu-26.04
             compiler: clang++-20
-          - runs-on: ubuntu-24.04-arm
-            compiler: clang++-19
+          - runs-on: ubuntu-26.04
+            compiler: clang++-22
           - runs-on: ubuntu-24.04-arm
             compiler: clang++-20
+          - runs-on: ubuntu-26.04-arm
+            compiler: clang++-22
     uses: $/.github/workflows/cpp-tests-ubuntu.yml
     with:
       runs-on: ${{ matrix.runs-on }}

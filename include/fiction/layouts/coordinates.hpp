@@ -205,14 +205,7 @@ struct offset
      * @param other Right-hand side coordinate.
      * @return `true` iff both coordinates are identical.
      */
-    // this is written out rather than defaulted. g++-11, the project's C++20 floor compiler and part of the Ubuntu CI
-    // matrix, miscompiles a defaulted comparison over this struct's bit-field members and produces wrong
-    // layout-printing output, consistent with a known class of GCC bugs in early C++20 support. Revisit once g++-11
-    // is dropped from the matrix
-    constexpr bool operator==(const offset& other) const noexcept
-    {
-        return d == other.d && z == other.z && y == other.y && x == other.x;
-    }
+    constexpr bool operator==(const offset& other) const noexcept = default;
     /**
      * Compares against another coordinate's `uint64_t` representation for equality. Respects the dead indicator.
      *
