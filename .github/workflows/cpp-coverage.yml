@@ -79,12 +79,12 @@ jobs:
         run: ctest --preset coverage --output-on-failure --repeat until-pass:3
 
       - name: Generate Coverage Report
-        # GCC 13 reports conflicting end lines for Catch2 template tests. lcov 2.4
-        # classifies these diagnostics as inconsistent rather than mismatch.
+        # GCC 13 reports conflicting function ranges and function/line hit counts.
+        # lcov 2.4 checks these inconsistencies during capture, extraction, and listing.
         run: |
           lcov --gcov-tool gcov-13 -t "fiction-coverage" -o lcov.info -c -d build-coverage/ --ignore-errors mismatch,inconsistent --ignore-errors gcov
-          lcov --gcov-tool gcov-13 -e lcov.info "$GITHUB_WORKSPACE/include*" -o lcov_filtered.info
-          lcov -l lcov_filtered.info
+          lcov --gcov-tool gcov-13 -e lcov.info "$GITHUB_WORKSPACE/include*" -o lcov_filtered.info --ignore-errors inconsistent
+          lcov -l lcov_filtered.info --ignore-errors inconsistent
 
       - name: Upload report to Codecov
         uses: codecov/codecov-action@0b35c9ecc4f0529d0eb674914510c22f85b196b4 # v7.1.0

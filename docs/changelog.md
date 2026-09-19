@@ -417,7 +417,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Canceled CI runs now stop optional summary jobs.
   - Docstring generation now loads the libclang development symlink on Ubuntu 26.04.
   - Ubuntu 26.04 jobs now use matching compiler-cache keys and coverage labels.
-  - Coverage collection now tolerates GCC 13 function-range inconsistencies reported by lcov 2.4.
+  - Coverage collection, extraction, and listing now tolerate GCC 13 function-range and hit-count inconsistencies reported by lcov 2.4.
   - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
   - Change detection now allows five minutes for runner setup and file comparisons.
 
