@@ -151,6 +151,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
 - Continuous integration:
+  - Read the Docs now builds on Ubuntu 26.04.
+  - Replaced Ubuntu 22.04 and GCC 11 CI coverage with Ubuntu 26.04, GCC 15, and Clang 22.
+    Ubuntu 24.04 retains older compiler coverage.
   - Windows wheel builds no longer install the zero-hit job-local `sccache`; split mode
     compiles the extension only once per job.
   - Reusable workflows now use GitHub's self-repository reference syntax.
@@ -168,6 +171,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     landscape instead of copying a `charge_distribution_surface` for every configuration
 
 - Dependencies:
+
+  - Native CI and Docker now use Z3 5.1.0. Wheel builds retain Z3 4.14.1 for their deployment floors.
 
   - `fmt` is fetched as the 12.1.0 release, the version alice carried; mockturtle's bundled
     11.0.2 does not compile with clang 20.
@@ -405,7 +410,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
 
 - Build system:
-
+  - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
   - Installed CMake packages include the `fmt` headers and their header-only compile definition.
   - CMake installation includes ALGLIB's generated version metadata.
@@ -441,7 +446,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB-to-cell-level conversion preserves bounds from converted cells.
 
 - Documentation:
-
+  - The documentation session builds Python bindings with the installed Z3 dependency.
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
   - Nanobind API documentation now keeps its custom class renderer with Sphinx's deferred registration.
     Removed duplicate bounding-box entries and corrected the critical-temperature overload reference.

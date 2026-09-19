@@ -233,7 +233,8 @@ manylinux-aarch64-image = "manylinux_2_34"
 environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3" }
 # pinned rather than floored: pip ranks by version before it ranks wheel over sdist, so a bare
 # `>=` floor picks the newest `z3-solver`'s sdist over an installable older wheel and builds Z3
-# from source anyway. Keep this in step with `Z3_VERSION` in the workflows and the `Dockerfile`
+# from source anyway. Z3 5.1 ARM64 wheels require glibc 2.38; retain 4.14.1 for
+# manylinux_2_34 compatibility. Native CI and Docker use a newer Z3 release.
 before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver==4.14.1"
 repair-wheel-command = [
     "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python/cp311-cp311/lib/python3.11/site-packages/z3/lib",
