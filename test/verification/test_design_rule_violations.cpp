@@ -21,6 +21,7 @@
 #include <fiction/types.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
+#include <cstddef>
 #include <sstream>
 
 using namespace fiction;
