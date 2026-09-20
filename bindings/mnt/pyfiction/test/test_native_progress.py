@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import re
 import sys
 import threading
 from typing import TYPE_CHECKING
@@ -169,7 +170,9 @@ def test_writer_counts_and_output(mux21: fiction.technology_network, tmp_path: P
     if kind == "sqd":
         assert fiction.read_sqd_layout(str(paths[0])) == fiction.read_sqd_layout(str(paths[1]))
     else:
-        assert paths[0].read_bytes() == paths[1].read_bytes()
+        # FGL metadata records the wall-clock time of each write.
+        contents = [re.sub(rb"<date>[^<]*</date>", b"<date/>", path.read_bytes(), count=1) for path in paths]
+        assert contents[0] == contents[1]
     final = {task: (done, total) for task, done, total in reports}
     assert final
     assert all(done == total for done, total in final.values())
