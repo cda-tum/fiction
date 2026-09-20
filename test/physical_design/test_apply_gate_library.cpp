@@ -43,6 +43,7 @@
 #include <fiction/types.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <string>
 #include <vector>
 

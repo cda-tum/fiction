@@ -17,6 +17,9 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
 #include <fiction/physical_design/hexagonalization.hpp>      // layout conversion to hexagonal gird
 #include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
@@ -24,21 +27,21 @@
 #include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
 #include <fiction/technology/sidb/bestagon_library.hpp>      // a pre-defined SiDB gate library
 #include <fiction/technology/sidb/technology.hpp>            // cell implementations
-#include <fiction/traits.hpp>                                // traits for type-checking
 #include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
-#include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
 #include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
 #include <mockturtle/algorithms/mapper.hpp>                    // Technology mapping on the logic level
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
 #include <mockturtle/io/genlib_reader.hpp>                     // call-backs to read Genlib files into gate libraries
 #include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
 #include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
-#include <mockturtle/utils/tech_library.hpp>                   // technology library utils
+#include <mockturtle/utils/stopwatch.hpp>
+#include <mockturtle/utils/tech_library.hpp>  // technology library utils
+#include <mockturtle/views/depth_view.hpp>
 
 #include <cassert>
 #include <cstdint>
@@ -160,16 +163,22 @@ int main()  // NOLINT
         equivalence_checking_stats eq_stats{};
         equivalence_checking(gate_level_layout, hex_layout, &eq_stats);
 
-        const std::string eq_result = eq_stats.eq == eq_type::STRONG ? "STRONG" :
-                                      eq_stats.eq == eq_type::WEAK   ? "WEAK" :
-                                                                       "NO";
+        std::string eq_result{"NO"};
+        if (eq_stats.eq == eq_type::STRONG)
+        {
+            eq_result = "STRONG";
+        }
+        else if (eq_stats.eq == eq_type::WEAK)
+        {
+            eq_result = "WEAK";
+        }
 
         // apply gate library
         const auto cell_level_layout = apply_gate_library<cell_lyt, bestagon_library>(hex_layout);
 
         // compute area
-        area_stats                   area_stats{};
-        area_params<sidb_technology> area_ps{};
+        area_stats                         area_stats{};
+        area_params<sidb_technology> const area_ps{};
         area(cell_level_layout, area_ps, &area_stats);
 
         // log results

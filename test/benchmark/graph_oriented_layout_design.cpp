@@ -24,7 +24,6 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
-#include <fiction/traits.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 

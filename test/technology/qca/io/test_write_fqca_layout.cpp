@@ -16,15 +16,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/utils/version_info.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/technology/qca/io/write_fqca_layout.hpp>
 #include <fiction/technology/qca/technology.hpp>
+#include <fiction/utils/version_info.hpp>
 
 #include <fmt/format.h>
 

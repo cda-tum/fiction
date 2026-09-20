@@ -21,7 +21,6 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/traits.hpp>
 
-#include <iostream>
 #include <set>
 
 using namespace fiction;
@@ -361,288 +360,288 @@ TEST_CASE("Hexagonal coordinate iteration", "[hexagonal-layout]")
     check_visited_coordinates<even_column_layout>();
 }
 
-TEST_CASE("Cardinal and ordinal operations", "[hexagonal-layout]")
+TEST_CASE("Cardinal and ordinal operations: odd row", "[hexagonal-layout]")
 {
-    SECTION("odd row")
-    {
-        using layout = hexagonal_layout<coords::offset, odd_row_hex>;
+    using layout = hexagonal_layout<coords::offset, odd_row_hex>;
 
-        layout lyt{{3, 3, 1}};
+    layout const lyt{{3, 3, 1}};
 
-        const coordinate<layout> c{2, 2};
-        const coordinate<layout> ac{2, 2, 1};
+    const coordinate<layout> c{2, 2};
+    const coordinate<layout> ac{2, 2, 1};
 
-        const coordinate<layout> nc{2, 1};
-        const coordinate<layout> nec{2, 1};
-        const coordinate<layout> ec{3, 2};
-        const coordinate<layout> sec{2, 3};
-        const coordinate<layout> sc{2, 3};
-        const coordinate<layout> swc{1, 3};
-        const coordinate<layout> wc{1, 2};
-        const coordinate<layout> nwc{1, 1};
+    const coordinate<layout> nc{2, 1};
+    const coordinate<layout> nec{2, 1};
+    const coordinate<layout> ec{3, 2};
+    const coordinate<layout> sec{2, 3};
+    const coordinate<layout> sc{2, 3};
+    const coordinate<layout> swc{1, 3};
+    const coordinate<layout> wc{1, 2};
+    const coordinate<layout> nwc{1, 1};
 
-        const coordinate<layout> bnc{2, 0};
-        const coordinate<layout> bnec{3, 0};
-        const coordinate<layout> bec{3, 2};
-        const coordinate<layout> bsec{3, 3};
-        const coordinate<layout> bsc{2, 3};
-        const coordinate<layout> bswc{0, 3};
-        const coordinate<layout> bwc{0, 2};
-        const coordinate<layout> bnwc{0, 0};
+    const coordinate<layout> bnc{2, 0};
+    const coordinate<layout> bnec{3, 0};
+    const coordinate<layout> bec{3, 2};
+    const coordinate<layout> bsec{3, 3};
+    const coordinate<layout> bsc{2, 3};
+    const coordinate<layout> bswc{0, 3};
+    const coordinate<layout> bwc{0, 2};
+    const coordinate<layout> bnwc{0, 0};
 
-        CHECK(lyt.is_above(c, ac));
-        CHECK(lyt.is_below(ac, c));
+    CHECK(lyt.is_above(c, ac));
+    CHECK(lyt.is_below(ac, c));
 
-        CHECK(lyt.north(c) == nc);
-        CHECK(lyt.is_north_of(c, nc));
-        CHECK(lyt.is_northwards_of(c, bnc));
-        CHECK(lyt.northern_border_of(c) == bnc);
-        CHECK(lyt.north_east(c) == nec);
-        CHECK(lyt.east(c) == ec);
-        CHECK(lyt.is_east_of(c, ec));
-        CHECK(lyt.is_eastwards_of(c, bec));
-        CHECK(lyt.eastern_border_of(c) == bec);
-        CHECK(lyt.south_east(c) == sec);
-        CHECK(lyt.south(c) == sc);
-        CHECK(lyt.is_south_of(c, sc));
-        CHECK(lyt.is_southwards_of(c, bsc));
-        CHECK(lyt.southern_border_of(c) == bsc);
-        CHECK(lyt.south_west(c) == swc);
-        CHECK(lyt.west(c) == wc);
-        CHECK(lyt.is_west_of(c, wc));
-        CHECK(lyt.is_westwards_of(c, bwc));
-        CHECK(lyt.western_border_of(c) == bwc);
-        CHECK(lyt.north_west(c) == nwc);
+    CHECK(lyt.north(c) == nc);
+    CHECK(lyt.is_north_of(c, nc));
+    CHECK(lyt.is_northwards_of(c, bnc));
+    CHECK(lyt.northern_border_of(c) == bnc);
+    CHECK(lyt.north_east(c) == nec);
+    CHECK(lyt.east(c) == ec);
+    CHECK(lyt.is_east_of(c, ec));
+    CHECK(lyt.is_eastwards_of(c, bec));
+    CHECK(lyt.eastern_border_of(c) == bec);
+    CHECK(lyt.south_east(c) == sec);
+    CHECK(lyt.south(c) == sc);
+    CHECK(lyt.is_south_of(c, sc));
+    CHECK(lyt.is_southwards_of(c, bsc));
+    CHECK(lyt.southern_border_of(c) == bsc);
+    CHECK(lyt.south_west(c) == swc);
+    CHECK(lyt.west(c) == wc);
+    CHECK(lyt.is_west_of(c, wc));
+    CHECK(lyt.is_westwards_of(c, bwc));
+    CHECK(lyt.western_border_of(c) == bwc);
+    CHECK(lyt.north_west(c) == nwc);
 
-        CHECK(lyt.is_adjacent_of(c, nc));
-        CHECK(lyt.is_adjacent_of(c, nec));
-        CHECK(lyt.is_adjacent_of(c, ec));
-        CHECK(lyt.is_adjacent_of(c, sec));
-        CHECK(lyt.is_adjacent_of(c, sc));
-        CHECK(lyt.is_adjacent_of(c, swc));
-        CHECK(lyt.is_adjacent_of(c, wc));
-        CHECK(lyt.is_adjacent_of(c, nwc));
+    CHECK(lyt.is_adjacent_of(c, nc));
+    CHECK(lyt.is_adjacent_of(c, nec));
+    CHECK(lyt.is_adjacent_of(c, ec));
+    CHECK(lyt.is_adjacent_of(c, sec));
+    CHECK(lyt.is_adjacent_of(c, sc));
+    CHECK(lyt.is_adjacent_of(c, swc));
+    CHECK(lyt.is_adjacent_of(c, wc));
+    CHECK(lyt.is_adjacent_of(c, nwc));
 
-        // edge cases
-        CHECK(lyt.north(bnc) == bnc);
-        CHECK(lyt.north_east(bnec) == bnec);
-        CHECK(lyt.east(bec) == bec);
-        CHECK(lyt.south_east(bsec) == bsec);
-        CHECK(lyt.south(bsc) == bsc);
-        CHECK(lyt.south_west(bswc) == bswc);
-        CHECK(lyt.west(bwc) == bwc);
-        CHECK(lyt.north_west(bnwc) == bnwc);
-    }
-    SECTION("even row")
-    {
-        using layout = hexagonal_layout<coords::offset, even_row_hex>;
+    // edge cases
+    CHECK(lyt.north(bnc) == bnc);
+    CHECK(lyt.north_east(bnec) == bnec);
+    CHECK(lyt.east(bec) == bec);
+    CHECK(lyt.south_east(bsec) == bsec);
+    CHECK(lyt.south(bsc) == bsc);
+    CHECK(lyt.south_west(bswc) == bswc);
+    CHECK(lyt.west(bwc) == bwc);
+    CHECK(lyt.north_west(bnwc) == bnwc);
+}
 
-        layout lyt{{3, 3, 1}};
+TEST_CASE("Cardinal and ordinal operations: even row", "[hexagonal-layout]")
+{
+    using layout = hexagonal_layout<coords::offset, even_row_hex>;
 
-        const coordinate<layout> c{2, 2};
-        const coordinate<layout> ac{2, 2, 1};
+    layout const lyt{{3, 3, 1}};
 
-        const coordinate<layout> nc{2, 1};
-        const coordinate<layout> nec{3, 1};
-        const coordinate<layout> ec{3, 2};
-        const coordinate<layout> sec{3, 3};
-        const coordinate<layout> sc{2, 3};
-        const coordinate<layout> swc{2, 3};
-        const coordinate<layout> wc{1, 2};
-        const coordinate<layout> nwc{2, 1};
+    const coordinate<layout> c{2, 2};
+    const coordinate<layout> ac{2, 2, 1};
 
-        const coordinate<layout> bnc{2, 0};
-        const coordinate<layout> bnec{3, 0};
-        const coordinate<layout> bec{3, 2};
-        const coordinate<layout> bsec{3, 3};
-        const coordinate<layout> bsc{2, 3};
-        const coordinate<layout> bswc{0, 3};
-        const coordinate<layout> bwc{0, 2};
-        const coordinate<layout> bnwc{0, 0};
+    const coordinate<layout> nc{2, 1};
+    const coordinate<layout> nec{3, 1};
+    const coordinate<layout> ec{3, 2};
+    const coordinate<layout> sec{3, 3};
+    const coordinate<layout> sc{2, 3};
+    const coordinate<layout> swc{2, 3};
+    const coordinate<layout> wc{1, 2};
+    const coordinate<layout> nwc{2, 1};
 
-        CHECK(lyt.is_above(c, ac));
-        CHECK(lyt.is_below(ac, c));
+    const coordinate<layout> bnc{2, 0};
+    const coordinate<layout> bnec{3, 0};
+    const coordinate<layout> bec{3, 2};
+    const coordinate<layout> bsec{3, 3};
+    const coordinate<layout> bsc{2, 3};
+    const coordinate<layout> bswc{0, 3};
+    const coordinate<layout> bwc{0, 2};
+    const coordinate<layout> bnwc{0, 0};
 
-        CHECK(lyt.north(c) == nc);
-        CHECK(lyt.is_north_of(c, nc));
-        CHECK(lyt.is_northwards_of(c, bnc));
-        CHECK(lyt.northern_border_of(c) == bnc);
-        CHECK(lyt.north_east(c) == nec);
-        CHECK(lyt.east(c) == ec);
-        CHECK(lyt.is_east_of(c, ec));
-        CHECK(lyt.is_eastwards_of(c, bec));
-        CHECK(lyt.eastern_border_of(c) == bec);
-        CHECK(lyt.south_east(c) == sec);
-        CHECK(lyt.south(c) == sc);
-        CHECK(lyt.is_south_of(c, sc));
-        CHECK(lyt.is_southwards_of(c, bsc));
-        CHECK(lyt.southern_border_of(c) == bsc);
-        CHECK(lyt.south_west(c) == swc);
-        CHECK(lyt.west(c) == wc);
-        CHECK(lyt.is_west_of(c, wc));
-        CHECK(lyt.is_westwards_of(c, bwc));
-        CHECK(lyt.western_border_of(c) == bwc);
-        CHECK(lyt.north_west(c) == nwc);
+    CHECK(lyt.is_above(c, ac));
+    CHECK(lyt.is_below(ac, c));
 
-        CHECK(lyt.is_adjacent_of(c, nc));
-        CHECK(lyt.is_adjacent_of(c, nec));
-        CHECK(lyt.is_adjacent_of(c, ec));
-        CHECK(lyt.is_adjacent_of(c, sec));
-        CHECK(lyt.is_adjacent_of(c, sc));
-        CHECK(lyt.is_adjacent_of(c, swc));
-        CHECK(lyt.is_adjacent_of(c, wc));
-        CHECK(lyt.is_adjacent_of(c, nwc));
+    CHECK(lyt.north(c) == nc);
+    CHECK(lyt.is_north_of(c, nc));
+    CHECK(lyt.is_northwards_of(c, bnc));
+    CHECK(lyt.northern_border_of(c) == bnc);
+    CHECK(lyt.north_east(c) == nec);
+    CHECK(lyt.east(c) == ec);
+    CHECK(lyt.is_east_of(c, ec));
+    CHECK(lyt.is_eastwards_of(c, bec));
+    CHECK(lyt.eastern_border_of(c) == bec);
+    CHECK(lyt.south_east(c) == sec);
+    CHECK(lyt.south(c) == sc);
+    CHECK(lyt.is_south_of(c, sc));
+    CHECK(lyt.is_southwards_of(c, bsc));
+    CHECK(lyt.southern_border_of(c) == bsc);
+    CHECK(lyt.south_west(c) == swc);
+    CHECK(lyt.west(c) == wc);
+    CHECK(lyt.is_west_of(c, wc));
+    CHECK(lyt.is_westwards_of(c, bwc));
+    CHECK(lyt.western_border_of(c) == bwc);
+    CHECK(lyt.north_west(c) == nwc);
 
-        // edge cases
-        CHECK(lyt.north(bnc) == bnc);
-        CHECK(lyt.north_east(bnec) == bnec);
-        CHECK(lyt.east(bec) == bec);
-        CHECK(lyt.south_east(bsec) == bsec);
-        CHECK(lyt.south(bsc) == bsc);
-        CHECK(lyt.south_west(bswc) == bswc);
-        CHECK(lyt.west(bwc) == bwc);
-        CHECK(lyt.north_west(bnwc) == bnwc);
-    }
-    SECTION("odd column")
-    {
-        using layout = hexagonal_layout<coords::offset, odd_column_hex>;
+    CHECK(lyt.is_adjacent_of(c, nc));
+    CHECK(lyt.is_adjacent_of(c, nec));
+    CHECK(lyt.is_adjacent_of(c, ec));
+    CHECK(lyt.is_adjacent_of(c, sec));
+    CHECK(lyt.is_adjacent_of(c, sc));
+    CHECK(lyt.is_adjacent_of(c, swc));
+    CHECK(lyt.is_adjacent_of(c, wc));
+    CHECK(lyt.is_adjacent_of(c, nwc));
 
-        layout lyt{{3, 3, 1}};
+    // edge cases
+    CHECK(lyt.north(bnc) == bnc);
+    CHECK(lyt.north_east(bnec) == bnec);
+    CHECK(lyt.east(bec) == bec);
+    CHECK(lyt.south_east(bsec) == bsec);
+    CHECK(lyt.south(bsc) == bsc);
+    CHECK(lyt.south_west(bswc) == bswc);
+    CHECK(lyt.west(bwc) == bwc);
+    CHECK(lyt.north_west(bnwc) == bnwc);
+}
 
-        const coordinate<layout> c{2, 2};
-        const coordinate<layout> ac{2, 2, 1};
+TEST_CASE("Cardinal and ordinal operations: odd column", "[hexagonal-layout]")
+{
+    using layout = hexagonal_layout<coords::offset, odd_column_hex>;
 
-        const coordinate<layout> nc{2, 1};
-        const coordinate<layout> nec{3, 1};
-        const coordinate<layout> ec{3, 2};
-        const coordinate<layout> sec{3, 2};
-        const coordinate<layout> sc{2, 3};
-        const coordinate<layout> swc{1, 2};
-        const coordinate<layout> wc{1, 2};
-        const coordinate<layout> nwc{1, 1};
+    layout const lyt{{3, 3, 1}};
 
-        const coordinate<layout> bnc{2, 0};
-        const coordinate<layout> bnec{3, 0};
-        const coordinate<layout> bec{3, 2};
-        const coordinate<layout> bsec{3, 3};
-        const coordinate<layout> bsc{2, 3};
-        const coordinate<layout> bswc{0, 3};
-        const coordinate<layout> bwc{0, 2};
-        const coordinate<layout> bnwc{0, 0};
+    const coordinate<layout> c{2, 2};
+    const coordinate<layout> ac{2, 2, 1};
 
-        CHECK(lyt.is_above(c, ac));
-        CHECK(lyt.is_below(ac, c));
+    const coordinate<layout> nc{2, 1};
+    const coordinate<layout> nec{3, 1};
+    const coordinate<layout> ec{3, 2};
+    const coordinate<layout> sec{3, 2};
+    const coordinate<layout> sc{2, 3};
+    const coordinate<layout> swc{1, 2};
+    const coordinate<layout> wc{1, 2};
+    const coordinate<layout> nwc{1, 1};
 
-        CHECK(lyt.north(c) == nc);
-        CHECK(lyt.is_north_of(c, nc));
-        CHECK(lyt.is_northwards_of(c, bnc));
-        CHECK(lyt.northern_border_of(c) == bnc);
-        CHECK(lyt.north_east(c) == nec);
-        CHECK(lyt.east(c) == ec);
-        CHECK(lyt.is_east_of(c, ec));
-        CHECK(lyt.is_eastwards_of(c, bec));
-        CHECK(lyt.eastern_border_of(c) == bec);
-        CHECK(lyt.south_east(c) == sec);
-        CHECK(lyt.south(c) == sc);
-        CHECK(lyt.is_south_of(c, sc));
-        CHECK(lyt.is_southwards_of(c, bsc));
-        CHECK(lyt.southern_border_of(c) == bsc);
-        CHECK(lyt.south_west(c) == swc);
-        CHECK(lyt.west(c) == wc);
-        CHECK(lyt.is_west_of(c, wc));
-        CHECK(lyt.is_westwards_of(c, bwc));
-        CHECK(lyt.western_border_of(c) == bwc);
-        CHECK(lyt.north_west(c) == nwc);
+    const coordinate<layout> bnc{2, 0};
+    const coordinate<layout> bnec{3, 0};
+    const coordinate<layout> bec{3, 2};
+    const coordinate<layout> bsec{3, 3};
+    const coordinate<layout> bsc{2, 3};
+    const coordinate<layout> bswc{0, 3};
+    const coordinate<layout> bwc{0, 2};
+    const coordinate<layout> bnwc{0, 0};
 
-        CHECK(lyt.is_adjacent_of(c, nc));
-        CHECK(lyt.is_adjacent_of(c, nec));
-        CHECK(lyt.is_adjacent_of(c, ec));
-        CHECK(lyt.is_adjacent_of(c, sec));
-        CHECK(lyt.is_adjacent_of(c, sc));
-        CHECK(lyt.is_adjacent_of(c, swc));
-        CHECK(lyt.is_adjacent_of(c, wc));
-        CHECK(lyt.is_adjacent_of(c, nwc));
+    CHECK(lyt.is_above(c, ac));
+    CHECK(lyt.is_below(ac, c));
 
-        // edge cases
-        CHECK(lyt.north(bnc) == bnc);
-        CHECK(lyt.north_east(bnec) == bnec);
-        CHECK(lyt.east(bec) == bec);
-        CHECK(lyt.south_east(bsec) == bsec);
-        CHECK(lyt.south(bsc) == bsc);
-        CHECK(lyt.south_west(bswc) == bswc);
-        CHECK(lyt.west(bwc) == bwc);
-        CHECK(lyt.north_west(bnwc) == bnwc);
-    }
-    SECTION("even column")
-    {
-        using layout = hexagonal_layout<coords::offset, even_column_hex>;
+    CHECK(lyt.north(c) == nc);
+    CHECK(lyt.is_north_of(c, nc));
+    CHECK(lyt.is_northwards_of(c, bnc));
+    CHECK(lyt.northern_border_of(c) == bnc);
+    CHECK(lyt.north_east(c) == nec);
+    CHECK(lyt.east(c) == ec);
+    CHECK(lyt.is_east_of(c, ec));
+    CHECK(lyt.is_eastwards_of(c, bec));
+    CHECK(lyt.eastern_border_of(c) == bec);
+    CHECK(lyt.south_east(c) == sec);
+    CHECK(lyt.south(c) == sc);
+    CHECK(lyt.is_south_of(c, sc));
+    CHECK(lyt.is_southwards_of(c, bsc));
+    CHECK(lyt.southern_border_of(c) == bsc);
+    CHECK(lyt.south_west(c) == swc);
+    CHECK(lyt.west(c) == wc);
+    CHECK(lyt.is_west_of(c, wc));
+    CHECK(lyt.is_westwards_of(c, bwc));
+    CHECK(lyt.western_border_of(c) == bwc);
+    CHECK(lyt.north_west(c) == nwc);
 
-        layout lyt{{3, 3, 1}};
+    CHECK(lyt.is_adjacent_of(c, nc));
+    CHECK(lyt.is_adjacent_of(c, nec));
+    CHECK(lyt.is_adjacent_of(c, ec));
+    CHECK(lyt.is_adjacent_of(c, sec));
+    CHECK(lyt.is_adjacent_of(c, sc));
+    CHECK(lyt.is_adjacent_of(c, swc));
+    CHECK(lyt.is_adjacent_of(c, wc));
+    CHECK(lyt.is_adjacent_of(c, nwc));
 
-        const coordinate<layout> c{2, 2};
-        const coordinate<layout> ac{2, 2, 1};
+    // edge cases
+    CHECK(lyt.north(bnc) == bnc);
+    CHECK(lyt.north_east(bnec) == bnec);
+    CHECK(lyt.east(bec) == bec);
+    CHECK(lyt.south_east(bsec) == bsec);
+    CHECK(lyt.south(bsc) == bsc);
+    CHECK(lyt.south_west(bswc) == bswc);
+    CHECK(lyt.west(bwc) == bwc);
+    CHECK(lyt.north_west(bnwc) == bnwc);
+}
 
-        const coordinate<layout> nc{2, 1};
-        const coordinate<layout> nec{3, 2};
-        const coordinate<layout> ec{3, 2};
-        const coordinate<layout> sec{3, 3};
-        const coordinate<layout> sc{2, 3};
-        const coordinate<layout> swc{1, 3};
-        const coordinate<layout> wc{1, 2};
-        const coordinate<layout> nwc{1, 2};
+TEST_CASE("Cardinal and ordinal operations: even column", "[hexagonal-layout]")
+{
+    using layout = hexagonal_layout<coords::offset, even_column_hex>;
 
-        const coordinate<layout> bnc{2, 0};
-        const coordinate<layout> bnec{3, 0};
-        const coordinate<layout> bec{3, 2};
-        const coordinate<layout> bsec{3, 3};
-        const coordinate<layout> bsc{2, 3};
-        const coordinate<layout> bswc{0, 3};
-        const coordinate<layout> bwc{0, 2};
-        const coordinate<layout> bnwc{0, 0};
+    layout const lyt{{3, 3, 1}};
 
-        CHECK(lyt.is_above(c, ac));
-        CHECK(lyt.is_below(ac, c));
+    const coordinate<layout> c{2, 2};
+    const coordinate<layout> ac{2, 2, 1};
 
-        CHECK(lyt.north(c) == nc);
-        CHECK(lyt.is_north_of(c, nc));
-        CHECK(lyt.is_northwards_of(c, bnc));
-        CHECK(lyt.northern_border_of(c) == bnc);
-        CHECK(lyt.north_east(c) == nec);
-        CHECK(lyt.east(c) == ec);
-        CHECK(lyt.is_east_of(c, ec));
-        CHECK(lyt.is_eastwards_of(c, bec));
-        CHECK(lyt.eastern_border_of(c) == bec);
-        CHECK(lyt.south_east(c) == sec);
-        CHECK(lyt.south(c) == sc);
-        CHECK(lyt.is_south_of(c, sc));
-        CHECK(lyt.is_southwards_of(c, bsc));
-        CHECK(lyt.southern_border_of(c) == bsc);
-        CHECK(lyt.south_west(c) == swc);
-        CHECK(lyt.west(c) == wc);
-        CHECK(lyt.is_west_of(c, wc));
-        CHECK(lyt.is_westwards_of(c, bwc));
-        CHECK(lyt.western_border_of(c) == bwc);
-        CHECK(lyt.north_west(c) == nwc);
+    const coordinate<layout> nc{2, 1};
+    const coordinate<layout> nec{3, 2};
+    const coordinate<layout> ec{3, 2};
+    const coordinate<layout> sec{3, 3};
+    const coordinate<layout> sc{2, 3};
+    const coordinate<layout> swc{1, 3};
+    const coordinate<layout> wc{1, 2};
+    const coordinate<layout> nwc{1, 2};
 
-        CHECK(lyt.is_adjacent_of(c, nc));
-        CHECK(lyt.is_adjacent_of(c, nec));
-        CHECK(lyt.is_adjacent_of(c, ec));
-        CHECK(lyt.is_adjacent_of(c, sec));
-        CHECK(lyt.is_adjacent_of(c, sc));
-        CHECK(lyt.is_adjacent_of(c, swc));
-        CHECK(lyt.is_adjacent_of(c, wc));
-        CHECK(lyt.is_adjacent_of(c, nwc));
+    const coordinate<layout> bnc{2, 0};
+    const coordinate<layout> bnec{3, 0};
+    const coordinate<layout> bec{3, 2};
+    const coordinate<layout> bsec{3, 3};
+    const coordinate<layout> bsc{2, 3};
+    const coordinate<layout> bswc{0, 3};
+    const coordinate<layout> bwc{0, 2};
+    const coordinate<layout> bnwc{0, 0};
 
-        // edge cases
-        CHECK(lyt.north(bnc) == bnc);
-        CHECK(lyt.north_east(bnec) == bnec);
-        CHECK(lyt.east(bec) == bec);
-        CHECK(lyt.south_east(bsec) == bsec);
-        CHECK(lyt.south(bsc) == bsc);
-        CHECK(lyt.south_west(bswc) == bswc);
-        CHECK(lyt.west(bwc) == bwc);
-        CHECK(lyt.north_west(bnwc) == bnwc);
-    }
+    CHECK(lyt.is_above(c, ac));
+    CHECK(lyt.is_below(ac, c));
+
+    CHECK(lyt.north(c) == nc);
+    CHECK(lyt.is_north_of(c, nc));
+    CHECK(lyt.is_northwards_of(c, bnc));
+    CHECK(lyt.northern_border_of(c) == bnc);
+    CHECK(lyt.north_east(c) == nec);
+    CHECK(lyt.east(c) == ec);
+    CHECK(lyt.is_east_of(c, ec));
+    CHECK(lyt.is_eastwards_of(c, bec));
+    CHECK(lyt.eastern_border_of(c) == bec);
+    CHECK(lyt.south_east(c) == sec);
+    CHECK(lyt.south(c) == sc);
+    CHECK(lyt.is_south_of(c, sc));
+    CHECK(lyt.is_southwards_of(c, bsc));
+    CHECK(lyt.southern_border_of(c) == bsc);
+    CHECK(lyt.south_west(c) == swc);
+    CHECK(lyt.west(c) == wc);
+    CHECK(lyt.is_west_of(c, wc));
+    CHECK(lyt.is_westwards_of(c, bwc));
+    CHECK(lyt.western_border_of(c) == bwc);
+    CHECK(lyt.north_west(c) == nwc);
+
+    CHECK(lyt.is_adjacent_of(c, nc));
+    CHECK(lyt.is_adjacent_of(c, nec));
+    CHECK(lyt.is_adjacent_of(c, ec));
+    CHECK(lyt.is_adjacent_of(c, sec));
+    CHECK(lyt.is_adjacent_of(c, sc));
+    CHECK(lyt.is_adjacent_of(c, swc));
+    CHECK(lyt.is_adjacent_of(c, wc));
+    CHECK(lyt.is_adjacent_of(c, nwc));
+
+    // edge cases
+    CHECK(lyt.north(bnc) == bnc);
+    CHECK(lyt.north_east(bnec) == bnec);
+    CHECK(lyt.east(bec) == bec);
+    CHECK(lyt.south_east(bsec) == bsec);
+    CHECK(lyt.south(bsc) == bsc);
+    CHECK(lyt.south_west(bswc) == bswc);
+    CHECK(lyt.west(bwc) == bwc);
+    CHECK(lyt.north_west(bnwc) == bnwc);
 }
 
 TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
@@ -651,7 +650,7 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     {
         using layout = hexagonal_layout<coords::offset, odd_row_hex>;
 
-        layout lyt{{2, 2}};
+        layout const lyt{{2, 2}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
         const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
@@ -672,7 +671,7 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     {
         using layout = hexagonal_layout<coords::offset, even_row_hex>;
 
-        layout lyt{{2, 2}};
+        layout const lyt{{2, 2}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
         const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
@@ -693,7 +692,7 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     {
         using layout = hexagonal_layout<coords::offset, odd_column_hex>;
 
-        layout lyt{{2, 2}};
+        layout const lyt{{2, 2}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
         const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
@@ -714,7 +713,7 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     {
         using layout = hexagonal_layout<coords::offset, even_column_hex>;
 
-        layout lyt{{2, 2}};
+        layout const lyt{{2, 2}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
         const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};

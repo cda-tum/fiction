@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/traits.hpp"
 

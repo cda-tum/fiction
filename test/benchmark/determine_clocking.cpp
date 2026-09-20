@@ -71,7 +71,7 @@ TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
         return determine_clocking(lyt, params);
     };
 
-#if !defined(BILL_WINDOWS_PLATFORM)
+#ifndef BILL_WINDOWS_PLATFORM
     BENCHMARK("determine_clocking: maple")
     {
         params.sat_engine = bill::solvers::maple;

@@ -19,18 +19,23 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/physical_design/color_routing.hpp>      // routing based on graph coloring
-#include <fiction/physical_design/exact.hpp>              // SMT-based physical design of FCN layouts
-#include <fiction/physical_design/orthogonal.hpp>         // OGD-based physical design of FCN layouts
-#include <fiction/physical_design/routing_utils.hpp>      // routing utility functions
-#include <fiction/types.hpp>                              // pre-defined types suitable for the FCN domain
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/physical_design/color_routing.hpp>  // routing based on graph coloring
+#include <fiction/physical_design/exact.hpp>          // SMT-based physical design of FCN layouts
+#include <fiction/physical_design/orthogonal.hpp>     // OGD-based physical design of FCN layouts
+#include <fiction/physical_design/routing_utils.hpp>  // routing utility functions
+#include <fiction/types.hpp>                          // pre-defined types suitable for the FCN domain
+#include <fiction/utils/graph/graph_coloring.hpp>
 #include <fiction/verification/equivalence_checking.hpp>  // equivalence checking of FCN layouts
 
 #include <fmt/format.h>                      // output formatting
-#include <lorina/lorina.hpp>                 // Verilog/BLIF/AIGER/... file parsing
 #include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
-#include <mockturtle/networks/aig.hpp>       // AND-inverter graphs
+#include <mockturtle/utils/stopwatch.hpp>
 
+#include <array>
+#include <cassert>
 #include <cstdint>
 #include <cstdlib>
 #include <string>
@@ -63,7 +68,7 @@ Ntk read_ntk(const std::string& name)
 
     Ntk network{};
 
-    const auto read_verilog_result =
+    [[maybe_unused]] const auto read_verilog_result =
         lorina::read_verilog(fiction_experiments::benchmark_path(name), mockturtle::verilog_reader(network));
     assert(read_verilog_result == lorina::return_code::success);
 

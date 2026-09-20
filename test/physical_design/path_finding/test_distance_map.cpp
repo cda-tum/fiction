@@ -21,8 +21,9 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
-#include <fiction/physical_design/path_finding/distance.hpp>
 #include <fiction/physical_design/path_finding/distance_map.hpp>
+
+#include <cstdint>
 
 using namespace fiction;
 using namespace fiction::layouts;

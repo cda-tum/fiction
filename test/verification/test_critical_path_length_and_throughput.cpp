@@ -21,12 +21,11 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/io/print_layout.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
 
 #include <mockturtle/views/depth_view.hpp>
 
-#include <type_traits>
+#include <cstdint>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -35,7 +34,7 @@ using namespace fiction::verification;
 template <typename Lyt>
 void check_critical_path_length(const Lyt& lyt, const cp_and_tp& cp_tp) noexcept
 {
-    mockturtle::depth_view depth_lyt{lyt};
+    mockturtle::depth_view const depth_lyt{lyt};
 
     CHECK(cp_tp.critical_path_length == depth_lyt.depth() + 1);  // + 1 because depth_view does not count POs
 }

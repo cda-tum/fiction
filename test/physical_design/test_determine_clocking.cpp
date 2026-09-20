@@ -58,7 +58,7 @@ void remove_assign_and_check_clocking(Lyt lyt)
              bill::solvers::ghack,
              bill::solvers::glucose_41,
              bill::solvers::bsat2,
-#if !defined(BILL_WINDOWS_PLATFORM)
+#ifndef BILL_WINDOWS_PLATFORM
              bill::solvers::maple,
              bill::solvers::bmcg,
 #endif

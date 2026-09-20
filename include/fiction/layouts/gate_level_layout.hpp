@@ -171,8 +171,9 @@ class gate_level_layout : public CoordinateLayout
         }
     };
 
-    static constexpr auto min_fanin_size =
-        std::max(CoordinateLayout::min_fanin_size, 1u);                       // NOLINT(*-identifier-naming)
+    /** @brief Minimum fan-in storage required by the mockturtle network interface. */
+    // NOLINTNEXTLINE(readability-identifier-naming) -- mockturtle requires this member name.
+    static constexpr auto min_fanin_size = std::max(CoordinateLayout::min_fanin_size, 1u);
     static constexpr auto max_fanin_size = CoordinateLayout::max_fanin_size;  // NOLINT(*-identifier-naming)
 
     using base_type = gate_level_layout;

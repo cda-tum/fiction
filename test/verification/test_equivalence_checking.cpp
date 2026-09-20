@@ -19,7 +19,9 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 
-#include <fiction/layouts/obstructions.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/types.hpp>
 #include <fiction/verification/equivalence_checking.hpp>
@@ -124,19 +126,6 @@ TEST_CASE("Network-layout equivalence", "[equiv]")
                                blueprints::and_or_gate_layout<hex_even_row_gate_clk_lyt>());
         check_for_strong_equiv(blueprints::and_or_network<technology_network>(),
                                blueprints::and_or_gate_layout<hex_odd_row_gate_clk_lyt>());
-    }
-    SECTION("Obstruction layout")
-    {
-        check_for_strong_equiv(mockturtle::aig_network{}, cart_gate_clk_lyt{});
-        check_for_strong_equiv(mockturtle::mig_network{}, cart_gate_clk_lyt{});
-
-        const auto lyt       = blueprints::and_or_gate_layout<cart_gate_clk_lyt>();
-        const auto obstr_lyt = lyt;
-
-        check_for_strong_equiv(blueprints::and_or_network<mockturtle::aig_network>(), obstr_lyt);
-        check_for_strong_equiv(blueprints::and_or_network<mockturtle::mig_network>(), obstr_lyt);
-        check_for_strong_equiv(blueprints::and_or_network<mockturtle::xag_network>(), obstr_lyt);
-        check_for_strong_equiv(blueprints::and_or_network<technology_network>(), obstr_lyt);
     }
 }
 

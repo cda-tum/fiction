@@ -27,10 +27,13 @@
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <kitty/operations.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <cstdint>
 #include <set>
 #include <type_traits>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;

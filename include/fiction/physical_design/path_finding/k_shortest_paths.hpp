@@ -28,8 +28,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <utility>
-#include <vector>
 
 namespace fiction::physical_design::path_finding
 {

@@ -21,7 +21,6 @@
 #include <fiction/layouts/bounding_box.hpp>      // bounding box
 #include <fiction/layouts/cartesian_layout.hpp>  // Cartesian layout
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>                         // gate-level layout
 #include <fiction/networks/io/network_reader.hpp>                        // read networks from files
 #include <fiction/physical_design/orthogonal.hpp>                        // scalable heuristic for physical design
 #include <fiction/physical_design/wiring_reduction.hpp>                  // wiring reduction algorithm

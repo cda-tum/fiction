@@ -38,7 +38,6 @@
 #include <cctype>
 #include <charconv>
 #include <cstdint>
-#include <cstdlib>
 #include <fstream>
 #include <istream>
 #include <limits>

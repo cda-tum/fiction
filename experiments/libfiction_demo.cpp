@@ -21,7 +21,6 @@
 #include <fiction/layouts/clocking_scheme.hpp>    // clocking schemes
 #include <fiction/layouts/coordinates.hpp>        // coordinate systems
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>               // gate-level abstraction of layouts
 #include <fiction/layouts/io/layout_drawers.hpp>               // DOT drawers and writer for layouts
 #include <fiction/networks/io/dot_drawers.hpp>                 // DOT drawers and writer for logic networks
 #include <fiction/physical_design/apply_gate_library.hpp>      // layout conversion to cell-level

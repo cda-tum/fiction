@@ -17,10 +17,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/traits.hpp>
-
-#include <iostream>
 
 using namespace fiction;
 using namespace fiction::layouts;

@@ -16,11 +16,10 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>          // custom reader for layouts
-#include <fiction/networks/name_utils.hpp>                 // name utilities
 #include <fiction/physical_design/determine_clocking.hpp>  // SAT-based clock number assignment
-#include <fiction/synthesis/network_conversion.hpp>        // conversion of networks
-#include <fiction/types.hpp>                               // pre-defined types
 #include <fiction/verification/equivalence_checking.hpp>   // SAT-based equivalence checking
 
 #include <fmt/format.h>                    // output formatting
@@ -105,7 +104,7 @@ int main()  // NOLINT
                 const auto eq_result = equivalence_checking(original_layout, newly_clocked_layout) != eq_type::NO;
 
                 // log results
-                clock_number_assignment_exp(original_layout.get_clocking_scheme().name.data(), benchmark,
+                clock_number_assignment_exp(std::string{original_layout.get_clocking_scheme().name}, benchmark,
                                             original_layout.num_pis(), original_layout.num_pos(), width, height, area,
                                             mockturtle::to_seconds(stats.time_total), eq_result);
 
