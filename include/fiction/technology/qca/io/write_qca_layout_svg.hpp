@@ -730,7 +730,7 @@ class write_qca_layout_svg_impl
             tile_descriptions << t_descr;
         }
 
-        const coordinate<Lyt> length = {lyt.x() / lyt.get_tile_size_x() + 1, lyt.y() / lyt.get_tile_size_y() + 1};
+        const coordinate<Lyt> length = {(lyt.x() / lyt.get_tile_size_x()) + 1, (lyt.y() / lyt.get_tile_size_y()) + 1};
 
         const double viewbox_x = (2 * svg::VIEWBOX_DISTANCE) + (length.x * svg::TILE_DISTANCE);
         const double viewbox_y = (2 * svg::VIEWBOX_DISTANCE) + (length.y * svg::TILE_DISTANCE);
