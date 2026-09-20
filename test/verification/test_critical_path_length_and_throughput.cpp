@@ -23,23 +23,28 @@
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/io/print_layout.hpp>
 #include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
 
 #include <mockturtle/views/depth_view.hpp>
 
-#include <type_traits>
+#include <cstdint>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::verification;
 
+/**
+ * @brief Checks the critical path against the network depth.
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout to check.
+ * @param cp_tp Computed critical path and throughput.
+ */
 template <typename Lyt>
 void check_critical_path_length(const Lyt& lyt, const cp_and_tp& cp_tp) noexcept
 {
-    mockturtle::depth_view depth_lyt{lyt};
+    const mockturtle::depth_view depth_lyt{lyt};
 
     CHECK(cp_tp.critical_path_length == depth_lyt.depth() + 1);  // + 1 because depth_view does not count POs
 }

@@ -30,6 +30,7 @@
 #include <ostream>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace fiction::qca::io
@@ -180,7 +181,17 @@ template <typename Lyt>
 class write_qca_layout_impl
 {
   public:
-    write_qca_layout_impl(const Lyt& src, std::ostream& s, const write_qca_layout_params p) : lyt{src}, os{s}, ps{p} {}
+    /**
+     * @brief Stores the layout and serialization parameters.
+     * @param src Layout to serialize.
+     * @param s Output stream.
+     * @param p Serialization parameters.
+     */
+    write_qca_layout_impl(const Lyt& src, std::ostream& s, write_qca_layout_params p) :
+            lyt{src},
+            os{s},
+            ps{std::move(p)}
+    {}
 
     void run()
     {

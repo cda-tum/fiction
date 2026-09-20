@@ -28,6 +28,7 @@
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/utils/progress.hpp>
 
 #include <fmt/format.h>
 

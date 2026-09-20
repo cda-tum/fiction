@@ -20,6 +20,7 @@
 
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/networks/name_utils.hpp>  // NOLINT(misc-include-cleaner): Required by write_fgl_layout.hpp.
+#include <fiction/utils/progress.hpp>
 
 #include <string_view>
 

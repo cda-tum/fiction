@@ -18,6 +18,7 @@
 
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/utils/progress.hpp>
 
 #include <string>
 

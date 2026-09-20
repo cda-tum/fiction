@@ -491,12 +491,15 @@ class write_qca_layout_svg_impl
 {
   public:
     /**
-     * Default constructor.
+     * @brief Stores the layout and drawing parameters.
+     * @param layout Layout to draw.
+     * @param stream Output stream.
+     * @param p Drawing parameters.
      */
-    write_qca_layout_svg_impl(const Lyt& layout, std::ostream& stream, const write_qca_layout_svg_params& p = {}) :
+    write_qca_layout_svg_impl(const Lyt& layout, std::ostream& stream, write_qca_layout_svg_params p = {}) :
             lyt{layout},
             os{stream},
-            ps{p}
+            ps{std::move(p)}
     {}
 
     void run()
@@ -813,7 +816,8 @@ class write_qca_layout_svg_impl
         if constexpr (has_synchronization_elements_v<Lyt>)
         {
             // Add the descriptions of latch-tiles to the whole image
-            utils::progress_reporter assembly{ps.on_progress, "assembling latch_tile", coord_to_latch_tile.size()};
+            utils::progress_reporter latch_assembly{ps.on_progress, "assembling latch_tile",
+                                                    coord_to_latch_tile.size()};
             for (const auto& [coord, ldscr] : coord_to_latch_tile)
             {
                 const auto [descr, czone_up, latch_delay] = ldscr;
@@ -830,7 +834,7 @@ class write_qca_layout_svg_impl
                                 text_colors[czone_lo], ps.simple ? "" : std::to_string(czone_lo + 1));
 
                 tile_descriptions << t_descr;
-                assembly.advance();
+                latch_assembly.advance();
             }
         }
 
@@ -848,12 +852,15 @@ class write_mol_qca_layout_svg_impl
 {
   public:
     /**
-     * Default constructor.
+     * @brief Stores the layout and drawing parameters.
+     * @param layout Layout to draw.
+     * @param stream Output stream.
+     * @param p Drawing parameters.
      */
-    write_mol_qca_layout_svg_impl(const Lyt& layout, std::ostream& stream, const write_qca_layout_svg_params& p = {}) :
+    write_mol_qca_layout_svg_impl(const Lyt& layout, std::ostream& stream, write_qca_layout_svg_params p = {}) :
             lyt{layout},
             os{stream},
-            ps{p}
+            ps{std::move(p)}
     {}
 
     void run()

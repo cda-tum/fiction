@@ -117,6 +117,12 @@ template <typename Lyt>
 class write_qcc_layout_impl
 {
   public:
+    /**
+     * @brief Stores the layout and serialization parameters.
+     * @param src Layout to serialize.
+     * @param s Output stream.
+     * @param p Serialization parameters.
+     */
     write_qcc_layout_impl(const Lyt& src, std::ostream& s, write_qcc_layout_params p) :
             lyt{src},
             bb{lyt},
@@ -124,7 +130,7 @@ class write_qcc_layout_impl
             sorted_po_list{sorted_pos()},
             num_magnets{magcad_magnet_count(lyt)},
             os{s},
-            ps{p}
+            ps{std::move(p)}
     {}
 
     void run()

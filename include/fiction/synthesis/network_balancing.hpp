@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <functional>
+#include <utility>
 #include <vector>
 
 namespace fiction::synthesis
@@ -61,11 +62,16 @@ template <typename NtkDest, typename NtkSrc>
 class network_balancing_impl
 {
   public:
-    network_balancing_impl(const NtkSrc& src, const network_balancing_params p) :
+    /**
+     * @brief Stores the network and algorithm parameters.
+     * @param src Source network.
+     * @param p Algorithm parameters.
+     */
+    network_balancing_impl(const NtkSrc& src, network_balancing_params p) :
             ntk{convert_network<NtkDest>(src)},
             ntk_topo{ntk},
             ntk_depth{ntk},
-            ps{p}
+            ps{std::move(p)}
     {}
 
     NtkDest run()
@@ -153,7 +159,12 @@ template <typename Ntk>
 class is_balanced_impl
 {
   public:
-    is_balanced_impl(const Ntk& src, network_balancing_params p) : ntk{src}, ntk_depth{src}, ps{p} {}
+    /**
+     * @brief Stores the network and algorithm parameters.
+     * @param src Source network.
+     * @param p Algorithm parameters.
+     */
+    is_balanced_impl(const Ntk& src, network_balancing_params p) : ntk{src}, ntk_depth{src}, ps{std::move(p)} {}
 
     bool run()
     {

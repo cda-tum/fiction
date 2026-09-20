@@ -215,7 +215,7 @@ class exact_impl
             ps{std::move(p)},
             pst{st},
             progress{ps.on_progress, "aspect ratios"},
-            worker_progress{ps.on_worker_progress, std::max(std::size_t{1}, static_cast<std::size_t>(ps.num_threads))},
+            worker_progress{ps.on_worker_progress, std::max(std::size_t{1}, ps.num_threads)},
             scheme{std::move(clocking_scheme)},
             black_list{sbl}
     {

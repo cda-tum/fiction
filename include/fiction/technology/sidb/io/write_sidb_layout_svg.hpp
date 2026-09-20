@@ -28,7 +28,6 @@
 #include <fmt/format.h>
 
 #include <array>
-#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <sstream>
@@ -172,11 +171,11 @@ class sidb_layout_svg_writer
      * @param charges Charge distribution to draw, or `nullptr` to use the default SiDB color.
      * @throws std::invalid_argument if the charge distribution sites differ from the layout.
      */
-    sidb_layout_svg_writer(const layout& layout, std::ostream& stream, const write_sidb_layout_svg_params& p,
+    sidb_layout_svg_writer(const layout& layout, std::ostream& stream, write_sidb_layout_svg_params p,
                            const charge_distribution* charges = nullptr) :
             lyt{layout},
             os{stream},
-            ps{p},
+            ps{std::move(p)},
             cd{charges}
     {
         if (cd != nullptr && cd->sites() != lyt.sidbs())

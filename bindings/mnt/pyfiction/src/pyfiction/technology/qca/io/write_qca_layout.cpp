@@ -56,7 +56,7 @@ void write_qca_layout(nanobind::module_& m)
     m.def(
         "write_qca_layout",
         [](const py_stacked_qca_layout& lyt, const std::string_view& filename,
-           const fiction::qca::io::write_qca_layout_params params)
+           const fiction::qca::io::write_qca_layout_params& params)
         { fiction::qca::io::write_qca_layout(lyt, filename, params); },
         py::arg("layout"), py::arg("filename"), py::arg("params") = fiction::qca::io::write_qca_layout_params{},
         py::call_guard<py::gil_scoped_release>());

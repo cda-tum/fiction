@@ -19,6 +19,7 @@
 
 #include <fiction/layouts/io/layout_drawers.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/utils/progress.hpp>
 
 #include <string_view>
 

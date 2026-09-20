@@ -19,6 +19,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/fcn/io/write_qll_layout.hpp>
+#include <fiction/utils/progress.hpp>
 
 #include <string_view>
 

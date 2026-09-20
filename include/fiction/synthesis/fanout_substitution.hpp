@@ -113,10 +113,15 @@ template <typename NtkDest, typename NtkSrc>
 class fanout_substitution_impl
 {
   public:
-    fanout_substitution_impl(const NtkSrc& src, const fanout_substitution_params p) :
+    /**
+     * @brief Stores the network and algorithm parameters.
+     * @param src Source network.
+     * @param p Algorithm parameters.
+     */
+    fanout_substitution_impl(const NtkSrc& src, fanout_substitution_params p) :
             ntk_topo{convert_network<NtkDest>(src)},
             available_fanouts{ntk_topo},
-            ps{p}
+            ps{std::move(p)}
     {
         if (ps.strategy == fanout_substitution_params::substitution_strategy::RANDOM)
         {
@@ -381,7 +386,12 @@ template <typename Ntk>
 class is_fanout_substituted_impl
 {
   public:
-    is_fanout_substituted_impl(const Ntk& src, fanout_substitution_params p) : ntk{src}, ps{p} {}
+    /**
+     * @brief Stores the network and algorithm parameters.
+     * @param src Source network.
+     * @param p Algorithm parameters.
+     */
+    is_fanout_substituted_impl(const Ntk& src, fanout_substitution_params p) : ntk{src}, ps{std::move(p)} {}
 
     bool run()
     {

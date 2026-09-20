@@ -19,8 +19,6 @@
 
 #include <fiction/technology/qca/io/write_qca_layout_svg.hpp>
 
-#include <sstream>
-#include <string>
 #include <string_view>
 
 #include <nanobind/nanobind.h>

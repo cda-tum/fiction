@@ -123,15 +123,15 @@ class gate_level_drvs_impl
 {
   public:
     /**
-     * Standard constructor.
+     * @brief Stores the layout, parameters, and statistics.
      *
-     * @param lyt Gate layout to check for design rule flaws.
+     * @param src Gate layout to check for design rule flaws.
      * @param p Parameters.
      * @param st Statistics.
      */
-    explicit gate_level_drvs_impl(const Lyt& src, const gate_level_drv_params& p, gate_level_drv_stats& st) :
+    explicit gate_level_drvs_impl(const Lyt& src, gate_level_drv_params p, gate_level_drv_stats& st) :
             lyt{src},
-            ps{p},
+            ps{std::move(p)},
             pst{st}
     {}
     /**

@@ -28,13 +28,13 @@
 #include <mockturtle/traits.hpp>
 
 #include <array>
-#include <cctype>
 #include <cstddef>
 #include <cstdint>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace fiction::layouts::io
@@ -726,7 +726,7 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
 
     nodes << fmt::format("node [{}];\n", fmt::join(node_attributes, ", "));
 
-    utils::progress_reporter tiles_progress{on_progress, "drawing tiles",
+    utils::progress_reporter tiles_progress{std::move(on_progress), "drawing tiles",
                                             (static_cast<std::size_t>(lyt.x()) + 1) *
                                                 (static_cast<std::size_t>(lyt.y()) + 1)};
     // draw tiles
