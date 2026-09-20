@@ -733,15 +733,12 @@ class write_qca_layout_svg_impl
                 // Only add a cell description if the cell is not empty
                 if (!lyt.is_empty_cell(c))
                 {
-
-                    const auto latch_delay = lyt.get_synchronization_element(c);
                     if (latch_delay > 0)
                     {
                         coord_to_latch_cells[tile_coords] = current_cells.append(
                             fmt::format(fmt::runtime(desc_col.first), desc_col.second,
                                         svg::STARTING_OFFSET_LATCH_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
                                         svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
-                        is_sync_elem = true;
                     }
 
                     if (!is_sync_elem)
