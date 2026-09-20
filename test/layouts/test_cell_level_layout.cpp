@@ -30,6 +30,7 @@
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -38,6 +39,21 @@ using namespace fiction::inml;
 using namespace fiction::layouts;
 using namespace fiction::qca;
 using namespace fiction::sidb;
+
+TEST_CASE("Cell clock zones have positive dimensions", "[cell-level-layout]")
+{
+    using layout = qca_cell_clk_lyt;
+    CHECK_THROWS_AS((layout{{2, 2}, "", 0, 1}), std::invalid_argument);
+    CHECK_THROWS_AS((layout{{2, 2}, "", 1, 0}), std::invalid_argument);
+    CHECK_THROWS_AS((layout{{2, 2}, clocking::twoddwave<layout>(), "", 0, 1}), std::invalid_argument);
+    CHECK_THROWS_AS((layout{{2, 2}, clocking::twoddwave<layout>(), "", 1, 0}), std::invalid_argument);
+    layout cells{{4, 4}, "", 2, 3};
+    CHECK_THROWS_AS(cells.set_tile_size_x(0), std::invalid_argument);
+    CHECK_THROWS_AS(cells.set_tile_size_y(0), std::invalid_argument);
+    CHECK(cells.get_tile_size_x() == 2);
+    CHECK(cells.get_tile_size_y() == 3);
+    CHECK(cells.get_clock_number({4, 4}) == 0);
+}
 
 TEMPLATE_TEST_CASE("Clocking capabilities across coordinate geometries", "[cell-level-layout]", cart_gate_clk_lyt,
                    cart_odd_row_gate_clk_lyt, hex_even_row_gate_clk_lyt, qca_cell_clk_lyt, inml_cell_clk_lyt,

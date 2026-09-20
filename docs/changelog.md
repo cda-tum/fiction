@@ -326,7 +326,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
-  - **Breaking:** Use clocking and obstruction methods directly on gate and cell layouts. `RoutingObstructions` and `CubeRoutingObstructions` hold additional path-search constraints. Cell layouts expose `clone`.
+  - **Breaking:** Use clocking and obstruction methods directly on gate and cell layouts. `RoutingObstructions` and `CubeRoutingObstructions` hold additional path-search constraints. Cell layouts expose `clone` and tile-size accessors.
 
   - **Breaking:** The Python class `sidb_layout` names the lattice-based `sidb::layout`
 
@@ -439,6 +439,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+  - Cell layouts reject zero clock-zone dimensions in constructors and setters.
   - Gate layouts constructed from coordinate layouts initialize their logic functions.
   - Clocked degree counts each eligible neighbor once, including neighbors enabled by synchronization.
   - Clocking-scheme queries compare bounded string views.

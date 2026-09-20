@@ -49,6 +49,9 @@ A cell-level layout can be obtained from a `gate_level_layout` by the {ref}`appl
 `(c.x / tile_size_x, c.y / tile_size_y, c.z)`. `assign_clock_number(cz, number)` takes
 the unscaled clock-zone coordinate. For a tile size of 2 by 2, assigning zone `(1, 1)`
 changes the clock returned for cells `(2, 2)` through `(3, 3)`.
+Clock-zone dimensions must be positive. The constructor and tile-size setters reject zero;
+a rejected setter call preserves the stored dimensions. Python exposes these dimensions
+through `get_tile_size_x`, `get_tile_size_y`, `set_tile_size_x`, and `set_tile_size_y`.
 
 Synchronization assignment and lookup use the supplied coordinate directly, without
 tile-size conversion. `num_se()` counts stored nonzero synchronization entries.

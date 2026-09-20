@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -91,11 +92,23 @@ class cell_level_layout : public CoordinateLayout
         clocking::state<clock_zone> clocking{clocking::open<cell_level_layout>()};
         /** @brief Persistent manually assigned obstructions. */
         layouts::obstructions<clock_zone> obstructions{};
+        /**
+         * @brief Creates cell storage with nonzero clock-zone dimensions.
+         * @param name Layout name.
+         * @param tile_x Clock-zone width in cells.
+         * @param tile_y Clock-zone height in cells.
+         * @throws std::invalid_argument if either dimension is zero.
+         */
         explicit cell_level_layout_storage(const std::string_view& name, uint16_t tile_x = 1u, uint16_t tile_y = 1u) :
                 layout_name{name},
                 tile_size_x{tile_x},
                 tile_size_y{tile_y}
-        {}
+        {
+            if (tile_x == 0 || tile_y == 0)
+            {
+                throw std::invalid_argument("Clock-zone dimensions must be positive");
+            }
+        }
 
         std::string layout_name;
 
@@ -124,6 +137,7 @@ class cell_level_layout : public CoordinateLayout
      * @param name Layout name.
      * @param tile_size_x Clock zone size in x-dimension in cells.
      * @param tile_size_y Clock zone size in y-dimension in cells.
+     * @throws std::invalid_argument if either clock-zone dimension is zero.
      */
     explicit cell_level_layout(const typename CoordinateLayout::aspect_ratio& ar = {}, const std::string& name = "",
                                const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
@@ -141,6 +155,7 @@ class cell_level_layout : public CoordinateLayout
      * @param name Layout name.
      * @param tile_size_x Clock zone size in x-dimension in cells.
      * @param tile_size_y Clock zone size in y-dimension in cells.
+     * @throws std::invalid_argument if either clock-zone dimension is zero.
      */
     cell_level_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking::scheme<cell>& scheme,
                       const std::string& name = "", const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
@@ -439,9 +454,14 @@ class cell_level_layout : public CoordinateLayout
      * Sets the underlying clock zone x-dimension size.
      *
      * @param tile_size_x Tile size in the x-dimension in number of cells.
+     * @throws std::invalid_argument if `tile_size_x` is zero.
      */
-    void set_tile_size_x(const uint16_t tile_size_x) noexcept
+    void set_tile_size_x(const uint16_t tile_size_x)
     {
+        if (tile_size_x == 0)
+        {
+            throw std::invalid_argument("Clock-zone width must be positive");
+        }
         strg->tile_size_x = tile_size_x;
     }
     /**
@@ -458,9 +478,14 @@ class cell_level_layout : public CoordinateLayout
      * Sets the underlying clock zone y-dimension size.
      *
      * @param tile_size_y Tile size in the y-dimension in number of cells.
+     * @throws std::invalid_argument if `tile_size_y` is zero.
      */
-    void set_tile_size_y(const uint16_t tile_size_y) noexcept
+    void set_tile_size_y(const uint16_t tile_size_y)
     {
+        if (tile_size_y == 0)
+        {
+            throw std::invalid_argument("Clock-zone height must be positive");
+        }
         strg->tile_size_y = tile_size_y;
     }
 

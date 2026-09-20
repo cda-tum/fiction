@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_dot_tag
 
 
@@ -19,6 +21,12 @@ def test_owned_cell_capabilities_and_clone() -> None:
     assert layout.get_tile_size_x() == 2
     assert layout.get_tile_size_y() == 2
     assert layout.is_clocking_scheme("2DDWAVE")
+    with pytest.raises(ValueError, match="positive"):
+        layout.set_tile_size_x(0)
+    with pytest.raises(ValueError, match="positive"):
+        layout.set_tile_size_y(0)
+    assert layout.get_tile_size_x() == 2
+    assert layout.get_tile_size_y() == 2
     layout.assign_clock_number((1, 1), 3)
     layout.assign_synchronization_element((2, 2), 2)
     layout.obstruct_coordinate((3, 3))
