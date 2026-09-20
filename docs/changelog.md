@@ -400,6 +400,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `network_balancing` accepts networks without primary outputs.
   - `gold` counts expansions only when a search-space graph expands.
   - Progress reporters now flush each pass's final count before a reset.
+  - Operational-domain sampling now reports worker activity when it runs on the calling thread.
   - Contour tracing distributes simulation locks across regular parameter grids.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.

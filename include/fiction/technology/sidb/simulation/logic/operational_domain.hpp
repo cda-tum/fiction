@@ -1821,9 +1821,24 @@ class operational_domain_impl
         // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
         const std::size_t num_threads = std::max(std::min(number_of_threads, step_points.size()), std::size_t{1});
 
+        /** @brief Simulates one slice and reports its worker's activity on the calling thread. */
+        const auto worker = [this, &step_points](const std::size_t id, const std::size_t start, const std::size_t end)
+        {
+            const utils::worker_progress_scope worker_scope{worker_progress, id};
+            std::size_t                        completed{};
+            worker_progress.update(id, "parameter points", 0, end - start);
+            std::ranges::for_each(std::ranges::subrange{step_points.cbegin() + static_cast<int64_t>(start),
+                                                        step_points.cbegin() + static_cast<int64_t>(end)},
+                                  [this, id, start, end, &completed](const auto& sp)
+                                  {
+                                      is_step_point_operational(sp);
+                                      worker_progress.update(id, "parameter points", ++completed, end - start);
+                                  });
+        };
+
         if (num_threads == 1)
         {
-            std::ranges::for_each(step_points, [this](const auto& sp) { is_step_point_operational(sp); });
+            worker(0, 0, step_points.size());
             return;
         }
 
@@ -1844,21 +1859,7 @@ class operational_domain_impl
                 break;  // no more work to distribute
             }
 
-            threads.emplace_back(std::async(
-                std::launch::async,
-                [this, i, start, end, &step_points]
-                {
-                    const utils::worker_progress_scope worker_scope{worker_progress, i};
-                    std::size_t                        completed{};
-                    worker_progress.update(i, "parameter points", 0, end - start);
-                    std::ranges::for_each(std::ranges::subrange{step_points.cbegin() + static_cast<int64_t>(start),
-                                                                step_points.cbegin() + static_cast<int64_t>(end)},
-                                          [this, i, start, end, &completed](const auto& sp)
-                                          {
-                                              is_step_point_operational(sp);
-                                              worker_progress.update(i, "parameter points", ++completed, end - start);
-                                          });
-                }));
+            threads.emplace_back(std::async(std::launch::async, worker, i, start, end));
         }
 
         // wait for all threads to complete

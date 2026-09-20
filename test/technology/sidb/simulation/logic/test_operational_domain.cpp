@@ -47,6 +47,7 @@
 #include <new>
 #include <optional>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 #include <unordered_set>
 #include <utility>
@@ -2196,6 +2197,40 @@ TEST_CASE("Operational domain reports progress", "[operational-domain]")
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
     params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
     params.on_progress                     = rec.callback();
+
+    SECTION("single worker reports activity")
+    {
+        params.number_of_threads = 1;
+        bool        active_seen{};
+        bool        valid_worker{true};
+        std::size_t completed{};
+        std::size_t total{};
+        bool        active{};
+        params.on_worker_progress = [&](const std::size_t id, const std::size_t workers, std::string_view,
+                                        const std::size_t done, const std::size_t budget, const bool running)
+        {
+            valid_worker = valid_worker && id == 0 && workers == 1;
+            active_seen  = active_seen || running;
+            completed    = done;
+            total        = budget;
+            active       = running;
+        };
+
+        SECTION("grid search")
+        {
+            static_cast<void>(operational_domain_grid_search(lyt, std::vector{create_or_tt()}, params, &stats));
+        }
+        SECTION("random sampling")
+        {
+            static_cast<void>(operational_domain_random_sampling(lyt, std::vector{create_or_tt()}, 5, params, &stats));
+        }
+
+        CHECK(valid_worker);
+        CHECK(active_seen);
+        CHECK_FALSE(active);
+        CHECK(completed == stats.num_evaluated_parameter_combinations);
+        CHECK(total == completed);
+    }
 
     SECTION("grid search")
     {
