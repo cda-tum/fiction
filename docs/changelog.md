@@ -108,6 +108,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Algorithms:
+  - Critical-path analysis collapses wire chains to reduce traversal overhead on large layouts.
   - `convert_network` maps a technology network's inverters to `create_not` on a target without
     `create_node`, so AIG, XAG, and MIG conversions keep the inverters they used to lose
   - **Breaking:** _QuickExact_, _QuickSim_, _ExGS_, _ClusterComplete_, and _Ground State Space_

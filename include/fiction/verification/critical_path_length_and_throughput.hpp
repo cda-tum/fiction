@@ -114,6 +114,8 @@ class critical_path_length_and_throughput_impl
             std::vector<tile<Lyt>> incoming;
             /** @brief Completed predecessor paths in the same order. */
             std::vector<path_info> infos{};
+            /** @brief Wire tiles between this frame's caller and its current position. */
+            uint64_t wire_length{};
         };
 
         std::vector<frame> pending{{t, lyt.incoming_data_flow(t)}};
@@ -121,6 +123,13 @@ class critical_path_length_and_throughput_impl
         while (!pending.empty())
         {
             auto& current = pending.back();
+            while (current.infos.empty() && current.incoming.size() == 1 && lyt.is_wire_tile(current.position) &&
+                   !lyt.is_pi_tile(current.position))
+            {
+                current.position = current.incoming.front();
+                current.incoming = lyt.incoming_data_flow(current.position);
+                ++current.wire_length;
+            }
             if (lyt.is_empty_tile(current.position))
             {
                 dominant_path = {};
@@ -170,6 +179,8 @@ class critical_path_length_and_throughput_impl
                     delay_cache[current.position] = dominant_path;
                 }
             }
+            dominant_path.length += current.wire_length;
+            dominant_path.delay += current.wire_length;
             pending.pop_back();
             if (!pending.empty())
             {

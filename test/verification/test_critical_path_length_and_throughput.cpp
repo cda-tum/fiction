@@ -84,13 +84,19 @@ TEST_CASE("Critical path analysis handles long routes", "[throughput]")
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
     constexpr uint64_t length{100'000};
-    gate_layout        layout{{length, 0}, clocking::twoddwave<gate_layout>()};
+    gate_layout        layout{{length, 1}, clocking::twoddwave<gate_layout>()};
     auto               signal = layout.create_pi("in", {0, 0});
+    auto               branch = signal;
     for (uint64_t x = 1; x < length; ++x)
     {
-        signal = layout.create_buf(signal, {x, 0});
+        signal = x == length / 2 ? layout.create_not(signal, {x, 0}) : layout.create_buf(signal, {x, 0});
+        if (x == length / 2)
+        {
+            branch = signal;
+        }
     }
     layout.create_po(signal, "out", {length, 0});
+    layout.create_po(branch, "branch", {length / 2, 1});
 
     const auto result = critical_path_length_and_throughput(layout);
     CHECK(result.critical_path_length == length + 1);
