@@ -41,6 +41,7 @@
 #include <cstdint>
 #include <deque>
 #include <functional>
+#include <future>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -207,24 +208,25 @@ class clustercomplete_impl
                     // initialization
                     initialize_worker_queues(extract_work_from_top_cluster(gss_stats.top_cluster));
 
-                    // set up threads
-                    std::vector<std::jthread> supporting_threads{};
+                    // Async futures join during unwinding; Apple libc++ does not expose std::jthread.
+                    std::vector<std::future<void>> supporting_threads{};
                     supporting_threads.reserve(available_threads);
 
                     for (uint64_t i = 1; i < available_threads; ++i)
                     {
                         supporting_threads.emplace_back(
-                            [&, ix = i]
-                            {
-                                worker&                            w = *workers.at(ix);
-                                const utils::worker_progress_scope worker_scope{worker_progress, ix};
+                            std::async(std::launch::async,
+                                       [&, ix = i]
+                                       {
+                                           worker&                            w = *workers.at(ix);
+                                           const utils::worker_progress_scope worker_scope{worker_progress, ix};
 
-                                // keep unfolding on this thread until no more work exists
-                                while (const std::optional<work_t>& work = w.obtain_work())
-                                {
-                                    unfold_composition(w, work->get());
-                                }
-                            });
+                                           // keep unfolding on this thread until no more work exists
+                                           while (const std::optional<work_t>& work = w.obtain_work())
+                                           {
+                                               unfold_composition(w, work->get());
+                                           }
+                                       }));
                     }
 
                     const utils::worker_progress_scope main_worker_scope{worker_progress, 0};
@@ -237,10 +239,7 @@ class clustercomplete_impl
                     // wait for all threads to complete
                     for (auto& thread : supporting_threads)
                     {
-                        if (thread.joinable())
-                        {
-                            thread.join();
-                        }
+                        thread.get();
                     }
                 }
             }

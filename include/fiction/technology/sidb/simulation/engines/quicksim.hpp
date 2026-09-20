@@ -34,6 +34,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <future>
 #include <limits>
 #include <mutex>
 #include <optional>
@@ -182,11 +183,13 @@ struct quicksim_params
         utils::progress_reporter progress{ps.on_progress, "iterations", num_threads * iter_per_thread};
 
         utils::worker_progress_reporter worker_progress{ps.on_worker_progress, num_threads};
-        std::vector<std::jthread>       threads{};
+        // Async futures join during unwinding; Apple libc++ does not expose std::jthread.
+        std::vector<std::future<void>> threads{};
         threads.reserve(num_threads);
         for (uint64_t z = 0ul; z < num_threads; z++)
         {
-            threads.emplace_back(
+            threads.emplace_back(std::async(
+                std::launch::async,
                 [&, z]
                 {
                     const utils::worker_progress_scope worker_scope{worker_progress, z};
@@ -258,12 +261,12 @@ struct quicksim_params
                         progress.advance();
                         worker_progress.update(z, description, l + 1, iter_per_thread);
                     }
-                });
+                }));
         }
 
         for (auto& thread : threads)
         {
-            thread.join();
+            thread.get();
         }
     }
 
