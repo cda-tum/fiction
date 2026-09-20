@@ -919,10 +919,10 @@ TEST_CASE("4-phase 2DDWaveHex: odd row", "[clocking-scheme]")
         for (uint32_t y = 0; y < 8; ++y)
         {
             CAPTURE(x, y);
-            CHECK(twoddwave_hex_4({x, y}) == expected[x][y]);
-            CHECK(twoddwave_hex_4({x + 4, y}) == expected[x][y]);
-            CHECK(twoddwave_hex_4({x, y + 8}) == expected[x][y]);
-            CHECK(twoddwave_hex_4({x + 4, y + 8}) == expected[x][y]);
+            CHECK(twoddwave_hex_4({x, y}) == expected.at(x).at(y));
+            CHECK(twoddwave_hex_4({x + 4, y}) == expected.at(x).at(y));
+            CHECK(twoddwave_hex_4({x, y + 8}) == expected.at(x).at(y));
+            CHECK(twoddwave_hex_4({x + 4, y + 8}) == expected.at(x).at(y));
         }
     }
 }
@@ -948,10 +948,10 @@ TEST_CASE("4-phase 2DDWaveHex: even row", "[clocking-scheme]")
         for (uint32_t y = 0; y < 8; ++y)
         {
             CAPTURE(x, y);
-            CHECK(twoddwave_hex_4({x, y}) == expected[x][y]);
-            CHECK(twoddwave_hex_4({x + 4, y}) == expected[x][y]);
-            CHECK(twoddwave_hex_4({x, y + 8}) == expected[x][y]);
-            CHECK(twoddwave_hex_4({x + 4, y + 8}) == expected[x][y]);
+            CHECK(twoddwave_hex_4({x, y}) == expected.at(x).at(y));
+            CHECK(twoddwave_hex_4({x + 4, y}) == expected.at(x).at(y));
+            CHECK(twoddwave_hex_4({x, y + 8}) == expected.at(x).at(y));
+            CHECK(twoddwave_hex_4({x + 4, y + 8}) == expected.at(x).at(y));
         }
     }
 }
@@ -981,10 +981,10 @@ TEST_CASE("4-phase 2DDWaveHex: odd column", "[clocking-scheme]")
         for (uint32_t y = 0; y < 4; ++y)
         {
             CAPTURE(x, y);
-            CHECK(twoddwave_hex_4({x, y}) == expected[x][y]);
-            CHECK(twoddwave_hex_4({x + 8, y}) == expected[x][y]);
-            CHECK(twoddwave_hex_4({x, y + 4}) == expected[x][y]);
-            CHECK(twoddwave_hex_4({x + 8, y + 4}) == expected[x][y]);
+            CHECK(twoddwave_hex_4({x, y}) == expected.at(x).at(y));
+            CHECK(twoddwave_hex_4({x + 8, y}) == expected.at(x).at(y));
+            CHECK(twoddwave_hex_4({x, y + 4}) == expected.at(x).at(y));
+            CHECK(twoddwave_hex_4({x + 8, y + 4}) == expected.at(x).at(y));
         }
     }
 }
@@ -1014,10 +1014,10 @@ TEST_CASE("4-phase 2DDWaveHex: even column", "[clocking-scheme]")
         for (uint32_t y = 0; y < 4; ++y)
         {
             CAPTURE(x, y);
-            CHECK(twoddwave_hex_4({x, y}) == expected[x][y]);
-            CHECK(twoddwave_hex_4({x + 8, y}) == expected[x][y]);
-            CHECK(twoddwave_hex_4({x, y + 4}) == expected[x][y]);
-            CHECK(twoddwave_hex_4({x + 8, y + 4}) == expected[x][y]);
+            CHECK(twoddwave_hex_4({x, y}) == expected.at(x).at(y));
+            CHECK(twoddwave_hex_4({x + 8, y}) == expected.at(x).at(y));
+            CHECK(twoddwave_hex_4({x, y + 4}) == expected.at(x).at(y));
+            CHECK(twoddwave_hex_4({x + 8, y + 4}) == expected.at(x).at(y));
         }
     }
 }
