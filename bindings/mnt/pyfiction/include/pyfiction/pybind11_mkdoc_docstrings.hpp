@@ -922,7 +922,15 @@ static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_he
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_layout = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_qcc_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_qcc_layout_impl =
+R"doc(Stores the layout and serialization parameters.
+
+Args:
+    src: Layout to serialize.
+    s: Output stream.
+    p: Serialization parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout =
 R"doc(Writes a cell-level iNML layout to a qcc file that is used by
@@ -12788,7 +12796,15 @@ static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_ce
 
 static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_cell_definition = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_fqca_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_fqca_layout_impl =
+R"doc(Stores the layout and serialization parameters.
+
+Args:
+    src: Layout to serialize.
+    s: Output stream.
+    p: Serialization parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_header = R"doc()doc";
 
@@ -12829,7 +12845,15 @@ static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_p
 
 static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_run = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_write_mol_qca_layout_svg_impl = R"doc(Default constructor.)doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_write_mol_qca_layout_svg_impl =
+R"doc(Stores the layout and drawing parameters.
+
+Args:
+    layout: Layout to draw.
+    stream: Output stream.
+    p: Drawing parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl = R"doc()doc";
 
@@ -12859,7 +12883,15 @@ static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cel
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_header = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_qca_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_qca_layout_impl =
+R"doc(Stores the layout and serialization parameters.
+
+Args:
+    src: Layout to serialize.
+    s: Output stream.
+    p: Serialization parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_quantum_dots = R"doc()doc";
 
@@ -12900,7 +12932,15 @@ static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_ps = 
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_run = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl = R"doc(Default constructor.)doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl =
+R"doc(Stores the layout and drawing parameters.
+
+Args:
+    layout: Layout to draw.
+    stream: Output stream.
+    p: Drawing parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_out_of_cell_names_exception = R"doc()doc";
 
@@ -24868,7 +24908,14 @@ static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl = R
 
 static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_available_fanouts = R"doc(Queue map of available fanouts.)doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_fanout_substitution_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_fanout_substitution_impl =
+R"doc(Stores the network and algorithm parameters.
+
+Args:
+    src: Source network.
+    p: Algorithm parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_generate_breadth_tree =
 R"doc(BREADTH-FIRST strategy: expand buffers level by level to create
@@ -24929,7 +24976,14 @@ static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl = R"doc()do
 
 static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_balanced = R"doc()doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_is_balanced_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_is_balanced_impl =
+R"doc(Stores the network and algorithm parameters.
+
+Args:
+    src: Source network.
+    p: Algorithm parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_ntk = R"doc()doc";
 
@@ -24941,7 +24995,14 @@ static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_run = R"doc
 
 static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_is_fanout_substituted_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_is_fanout_substituted_impl =
+R"doc(Stores the network and algorithm parameters.
+
+Args:
+    src: Source network.
+    p: Algorithm parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_ntk = R"doc()doc";
 
@@ -24953,7 +25014,14 @@ static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_s
 
 static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_network_balancing_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_network_balancing_impl =
+R"doc(Stores the network and algorithm parameters.
+
+Args:
+    src: Source network.
+    p: Algorithm parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_ntk = R"doc()doc";
 
@@ -27110,10 +27178,10 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_gate_level_drvs_impl =
-R"doc(Standard constructor.
+R"doc(Stores the layout, parameters, and statistics.
 
 Args:
-    lyt: Gate layout to check for design rule flaws.
+    src: Gate layout to check for design rule flaws.
     p: Parameters.
     st: Statistics.
 
