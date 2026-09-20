@@ -47,9 +47,9 @@ class enumerate_all_paths_impl
     enumerate_all_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const enumerate_all_paths_params& p,
                              const layouts::obstructions<coordinate<Lyt>>& extra) :
             layout{lyt},
+            search_obstructions{extra},
             objective{obj},
-            params{p},
-            search_obstructions{extra}
+            params{p}
     {}
 
     /**

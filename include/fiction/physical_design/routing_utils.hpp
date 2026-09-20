@@ -38,7 +38,7 @@ template <typename Lyt>
 [[nodiscard]] bool routing_coordinate_obstructed(const Lyt& lyt, const coordinate<Lyt>& c,
                                                  const layouts::obstructions<coordinate<Lyt>>& extra) noexcept
 {
-    if constexpr (requires { lyt.is_obstructed_coordinate(c); })
+    if constexpr (has_is_obstructed_coordinate_v<Lyt>)
     {
         return extra.is_obstructed_coordinate(c) || lyt.is_obstructed_coordinate(c);
     }
@@ -55,7 +55,7 @@ template <typename Lyt>
 [[nodiscard]] bool routing_connection_obstructed(const Lyt& lyt, const coordinate<Lyt>& src, const coordinate<Lyt>& tgt,
                                                  const layouts::obstructions<coordinate<Lyt>>& extra) noexcept
 {
-    if constexpr (requires { lyt.is_obstructed_connection(src, tgt); })
+    if constexpr (has_is_obstructed_connection_v<Lyt>)
     {
         return extra.is_obstructed_connection(src, tgt) || lyt.is_obstructed_connection(src, tgt);
     }

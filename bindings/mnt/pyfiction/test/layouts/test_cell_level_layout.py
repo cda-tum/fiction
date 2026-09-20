@@ -16,6 +16,9 @@ def test_owned_cell_capabilities_and_clone() -> None:
     layout = qca_layout((4, 4), "2DDWave")
     layout.set_tile_size_x(2)
     layout.set_tile_size_y(2)
+    assert layout.get_tile_size_x() == 2
+    assert layout.get_tile_size_y() == 2
+    assert layout.is_clocking_scheme("2DDWAVE")
     layout.assign_clock_number((1, 1), 3)
     layout.assign_synchronization_element((2, 2), 2)
     layout.obstruct_coordinate((3, 3))

@@ -46,6 +46,7 @@
 #include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner): Converts Python scheme names to string views.
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
@@ -257,6 +258,12 @@ void cell_layout(nanobind::module_& m, const std::string& tech_name)
              DOC(fiction_layouts_cell_level_layout_set_layout_name))
         .def("get_layout_name", &CellLyt::get_layout_name, DOC(fiction_layouts_cell_level_layout_get_layout_name))
         .def("clone", &CellLyt::clone, DOC(fiction_layouts_cell_level_layout_clone))
+        .def("get_tile_size_x", &CellLyt::get_tile_size_x, DOC(fiction_layouts_cell_level_layout_get_tile_size_x))
+        .def("set_tile_size_x", &CellLyt::set_tile_size_x, py::arg("size"),
+             DOC(fiction_layouts_cell_level_layout_set_tile_size_x))
+        .def("get_tile_size_y", &CellLyt::get_tile_size_y, DOC(fiction_layouts_cell_level_layout_get_tile_size_y))
+        .def("set_tile_size_y", &CellLyt::set_tile_size_y, py::arg("size"),
+             DOC(fiction_layouts_cell_level_layout_set_tile_size_y))
         .def("num_cells", &CellLyt::num_cells, DOC(fiction_layouts_cell_level_layout_num_cells))
         .def("is_empty", &CellLyt::is_empty, DOC(fiction_layouts_cell_level_layout_is_empty))
         .def("num_pis", &CellLyt::num_pis, DOC(fiction_layouts_cell_level_layout_num_pis))

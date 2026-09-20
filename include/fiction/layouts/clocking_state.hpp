@@ -19,7 +19,6 @@
 #include <memory>
 #include <string_view>
 #include <unordered_map>
-#include <utility>
 
 namespace fiction::layouts::clocking
 {
@@ -60,6 +59,8 @@ class state
     }
     /** @brief Moves clocking state. @param other Source state. @return This state. */
     state& operator=(state&& other) noexcept = default;
+    /** @brief Releases the owned scheme and synchronization map. */
+    ~state() = default;
     /**
      * Replaces the stored clocking scheme with the provided one.
      *
@@ -193,12 +194,7 @@ class state
      */
     [[nodiscard]] bool is_synchronization_element(const clock_zone& cz) const noexcept
     {
-        if (auto it = synchronization.find(cz); it != synchronization.end())
-        {
-            return it->second != sync_elem_t{0};
-        }
-
-        return false;
+        return synchronization.contains(cz);
     }
     /**
      * Returns the Hold phase extension in clock cycles of clock zone `cz`.
@@ -208,7 +204,7 @@ class state
      */
     [[nodiscard]] sync_elem_t get_synchronization_element(const clock_zone& cz) const noexcept
     {
-        if (auto it = synchronization.find(cz); it != synchronization.end())
+        if (const auto it = synchronization.find(cz); it != synchronization.end())
         {
             return it->second;
         }

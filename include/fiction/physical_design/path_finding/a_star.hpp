@@ -59,11 +59,11 @@ class a_star_impl
                 const cost_functor<Lyt, Cost>& cost_fn, const a_star_params& p,
                 const layouts::obstructions<coordinate<Lyt>>& extra) :
             layout{lyt},
+            search_obstructions{extra},
             objective{obj},
             distance{dist_fn},
             cost{cost_fn},
-            params{p},
-            search_obstructions{extra}
+            params{p}
     {
         open_list.push(coordinate_f{objective.source, 0});
     }

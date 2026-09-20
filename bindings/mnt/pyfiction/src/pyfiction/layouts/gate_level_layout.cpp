@@ -19,6 +19,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
 #include <fiction/traits.hpp>
 
@@ -38,6 +39,7 @@
 #include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h> // NOLINT(misc-include-cleaner): Converts Python scheme names to string views.
 #include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
@@ -46,12 +48,19 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Registers gate layouts with their owned clocking and obstruction capabilities.
+ * @tparam LytBase Coordinate geometry.
+ * @tparam GateLyt Gate layout type.
+ * @param m Python module.
+ * @param topology Name identifying the coordinate geometry.
+ */
 template <typename LytBase, typename GateLyt>
 void gate_level_layout(nanobind::module_& m, const std::string& topology)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    auto cls = py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout", topology).c_str(),
+    py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout", topology).c_str(),
                                  DOC(fiction_layouts_gate_level_layout))
         .def(py::init<>(), DOC(fiction_layouts_gate_level_layout_gate_level_layout))
         .def(py::init<const fiction::aspect_ratio<GateLyt>&>(), py::arg("dimension"),
@@ -103,20 +112,36 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         .def("degree", &GateLyt::degree, py::arg("cz"), DOC(fiction_layouts_gate_level_layout_degree))
 
 
-        .def("replace_clocking_scheme", [](GateLyt& lyt, const std::string& name)
-        {
-            if (const auto scheme = fiction::layouts::clocking::get_scheme<GateLyt>(name); scheme)
-            { lyt.replace_clocking_scheme(*scheme); }
-            else { throw std::invalid_argument("Unknown clocking scheme"); }
-        }, py::arg("name"), "Replaces the scheme while preserving synchronization delays.")
-        .def("obstruct_coordinate", &GateLyt::obstruct_coordinate, py::arg("c"), DOC(fiction_layouts_gate_level_layout_obstruct_coordinate))
-        .def("obstruct_connection", &GateLyt::obstruct_connection, py::arg("src"), py::arg("tgt"), DOC(fiction_layouts_gate_level_layout_obstruct_connection))
-        .def("clear_obstructed_coordinate", &GateLyt::clear_obstructed_coordinate, py::arg("c"), DOC(fiction_layouts_gate_level_layout_clear_obstructed_coordinate))
-        .def("clear_obstructed_connection", &GateLyt::clear_obstructed_connection, py::arg("src"), py::arg("tgt"), DOC(fiction_layouts_gate_level_layout_clear_obstructed_connection))
-        .def("clear_obstructed_coordinates", &GateLyt::clear_obstructed_coordinates, DOC(fiction_layouts_gate_level_layout_clear_obstructed_coordinates))
-        .def("clear_obstructed_connections", &GateLyt::clear_obstructed_connections, DOC(fiction_layouts_gate_level_layout_clear_obstructed_connections))
-        .def("is_obstructed_coordinate", &GateLyt::is_obstructed_coordinate, py::arg("c"), DOC(fiction_layouts_gate_level_layout_is_obstructed_coordinate))
-        .def("is_obstructed_connection", &GateLyt::is_obstructed_connection, py::arg("src"), py::arg("tgt"), DOC(fiction_layouts_gate_level_layout_is_obstructed_connection))
+        .def(
+            "replace_clocking_scheme",
+            [](GateLyt& lyt, const std::string& name)
+            {
+                if (const auto scheme = fiction::layouts::clocking::get_scheme<GateLyt>(name); scheme)
+                {
+                    lyt.replace_clocking_scheme(*scheme);
+                }
+                else
+                {
+                    throw std::invalid_argument("Unknown clocking scheme");
+                }
+            },
+            py::arg("name"), "Replaces a named scheme and preserves synchronization delays; raises ValueError for an unknown name.")
+        .def("obstruct_coordinate", &GateLyt::obstruct_coordinate, py::arg("c"),
+             DOC(fiction_layouts_gate_level_layout_obstruct_coordinate))
+        .def("obstruct_connection", &GateLyt::obstruct_connection, py::arg("src"), py::arg("tgt"),
+             DOC(fiction_layouts_gate_level_layout_obstruct_connection))
+        .def("clear_obstructed_coordinate", &GateLyt::clear_obstructed_coordinate, py::arg("c"),
+             DOC(fiction_layouts_gate_level_layout_clear_obstructed_coordinate))
+        .def("clear_obstructed_connection", &GateLyt::clear_obstructed_connection, py::arg("src"), py::arg("tgt"),
+             DOC(fiction_layouts_gate_level_layout_clear_obstructed_connection))
+        .def("clear_obstructed_coordinates", &GateLyt::clear_obstructed_coordinates,
+             DOC(fiction_layouts_gate_level_layout_clear_obstructed_coordinates))
+        .def("clear_obstructed_connections", &GateLyt::clear_obstructed_connections,
+             DOC(fiction_layouts_gate_level_layout_clear_obstructed_connections))
+        .def("is_obstructed_coordinate", &GateLyt::is_obstructed_coordinate, py::arg("c"),
+             DOC(fiction_layouts_gate_level_layout_is_obstructed_coordinate))
+        .def("is_obstructed_connection", &GateLyt::is_obstructed_connection, py::arg("src"), py::arg("tgt"),
+             DOC(fiction_layouts_gate_level_layout_is_obstructed_connection))
 
         .def("create_pi", &GateLyt::create_pi, py::arg("name") = std::string{}, py::arg("t") = fiction::tile<GateLyt>{},
              DOC(fiction_layouts_gate_level_layout_create_pi))
@@ -381,8 +406,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             },
             "Returns a string representation of the layout.")
 
-        ;
-    cls.def("assign_synchronization_element", &GateLyt::assign_synchronization_element, py::arg("coordinate"),
+        .def("assign_synchronization_element", &GateLyt::assign_synchronization_element, py::arg("coordinate"),
             py::arg("delay"), DOC(fiction_layouts_gate_level_layout_assign_synchronization_element))
         .def("is_synchronization_element", &GateLyt::is_synchronization_element, py::arg("coordinate"),
              DOC(fiction_layouts_gate_level_layout_is_synchronization_element))

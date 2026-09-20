@@ -56,11 +56,11 @@ class yen_k_shortest_paths_impl
                               const yen_k_shortest_paths_params&            p,
                               const layouts::obstructions<coordinate<Lyt>>& extra) :
             layout{lyt},
+            initial_obstructions{extra},
+            search_obstructions{extra},
             objective{obj.source, obj.target},  // create a new objective due to potentially differing types
             num_shortest_paths{k},
-            params{p},
-            initial_obstructions{extra},
-            search_obstructions{extra}
+            params{p}
     {
         // start by determining the shortest path between source and target
         k_shortest_paths.push_back(a_star<Path>(layout, objective, manhattan_distance_functor<Lyt, uint64_t>(),
@@ -172,7 +172,7 @@ class yen_k_shortest_paths_impl
 
   private:
     /**
-     * The layout in which k shortest paths are to be found extended by an obstruction functionality layer.
+     * The caller's layout, queried without modification.
      */
     const Lyt& layout;
     /** @brief Caller constraints retained across spur searches. */
