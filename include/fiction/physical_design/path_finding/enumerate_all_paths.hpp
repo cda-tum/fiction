@@ -160,13 +160,14 @@ class enumerate_all_paths_impl
                     successor != tgt)
                 {
                     // if crossings are enabled, check if it is possible to switch to the crossing layer
-                    if (params.crossings && is_crossable_wire(layout, src, successor))
+                    if (params.crossings &&
+                        (is_crossable_wire(layout, src, successor) || layout.above(successor) == tgt))
                     {
                         // if the crossing layer is not obstructed
                         if (const auto above_successor = layout.above(successor);
-                            above_successor != successor && above_successor != tgt &&
-                            !physical_design::detail::routing_coordinate_obstructed(layout, above_successor,
-                                                                                    search_obstructions))
+                            above_successor != successor && (!physical_design::detail::routing_coordinate_obstructed(
+                                                                 layout, above_successor, search_obstructions) ||
+                                                             above_successor == tgt))
                         {
                             // allow exploring the crossing layer
                             successor = above_successor;

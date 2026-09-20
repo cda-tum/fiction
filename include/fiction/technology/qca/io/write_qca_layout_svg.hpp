@@ -690,7 +690,7 @@ class write_qca_layout_svg_impl
 
         // Capture only references that are actually used
         lyt.foreach_cell_position(
-            [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_cells](const auto& c)
+            [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_tile, &coord_to_latch_cells](const auto& c)
             {
                 const auto clock_zone = lyt.get_clock_number(c);
                 const auto tile_coords =
@@ -707,6 +707,10 @@ class write_qca_layout_svg_impl
                     if (auto latch_it = coord_to_latch_cells.find(tile_coords); latch_it != coord_to_latch_cells.end())
                     {
                         current_cells = latch_it->second;
+                    }
+                    else
+                    {
+                        coord_to_latch_tile[tile_coords] = {svg::LATCH, clock_zone, latch_delay};
                     }
                     is_sync_elem = true;
                 }
@@ -785,7 +789,7 @@ class write_qca_layout_svg_impl
         for (const auto& [coord, ldscr] : coord_to_latch_tile)
         {
             const auto [descr, czone_up, latch_delay] = ldscr;
-            const auto czone_lo                       = czone_up + (latch_delay % lyt.num_clocks());
+            const auto czone_lo                       = (czone_up + latch_delay) % lyt.num_clocks();
 
             const auto cell_descriptions = coord_to_latch_cells[coord];
 

@@ -105,7 +105,8 @@ class yen_k_shortest_paths_impl
                     // if the root path is equal to a previous partial path
                     // p[i] and p[i + 1] are accessed below, so p must hold at least i + 2 coordinates
                     if (p.size() > static_cast<std::size_t>(i) + 1 &&
-                        std::ranges::equal(root_path.cbegin(), root_path.cend(), p.cbegin(), p.cbegin() + i))
+                        std::ranges::equal(latest_path.cbegin(), latest_path.cbegin() + i + 1, p.cbegin(),
+                                           p.cbegin() + i + 1))
                     {
                         // block the connection that was already used in the previous shortest path
                         search_obstructions.obstruct_connection(p[i], p[i + 1]);
@@ -269,6 +270,11 @@ yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
                      const layouts::obstructions<coordinate<Lyt>>& obstructions = {}) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+
+    if (k == 0)
+    {
+        return {};
+    }
 
     return detail::yen_k_shortest_paths_impl<Path, Lyt>{layout, objective, k, params, obstructions}.run();
 }

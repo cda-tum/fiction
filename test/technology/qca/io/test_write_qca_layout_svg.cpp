@@ -487,3 +487,23 @@ TEST_CASE("Write QCA SVG files with the selected detail level", "[write-qca-layo
     CHECK_THROWS_AS(write_qca_layout_svg(layout, std::filesystem::temp_directory_path().string(), params),
                     std::ofstream::failure);
 }
+
+TEST_CASE("Render synchronized QCA cells in tiled SVG", "[write-qca-layout-svg]")
+{
+    const auto       simple = GENERATE(false, true);
+    const auto       clock  = GENERATE(uint8_t{0}, uint8_t{3});
+    qca_cell_clk_lyt layout{{4, 4}, "Synchronized QCA tile", 5, 5};
+    layout.assign_cell_type({2, 2}, qca_technology::cell_type::NORMAL);
+    layout.assign_clock_number({0, 0}, clock);
+    layout.assign_synchronization_element({2, 2}, 1);
+
+    std::ostringstream stream{};
+    write_qca_layout_svg(layout, stream, {.simple = simple});
+    const auto            svg = stream.str();
+    tinyxml2::XMLDocument document{};
+    REQUIRE(document.Parse(svg.c_str()) == tinyxml2::XML_SUCCESS);
+    CHECK(contains(svg, "fill:#ffe33a;"));
+    CHECK(contains(svg, "<circle") == !simple);
+    CHECK(contains(svg, fmt::format(">{}</tspan>", clock + 1)) == !simple);
+    CHECK_FALSE(contains(svg, ">5</tspan>"));
+}

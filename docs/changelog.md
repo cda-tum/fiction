@@ -387,6 +387,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Yen's algorithm now returns no paths for a zero limit and preserves valid alternatives at each spur node.
+  - Path enumeration now reaches occupied crossing-layer targets under the same constraints as A*.
   - Contour tracing distributes simulation locks across regular parameter grids.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
@@ -483,6 +485,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - I/O:
 
   - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.
+  - QCA SVG output now includes synchronized cells in tiled layouts and wraps latch clock labels within the clock cycle.
   - FGL round trips now preserve three-phase clocking across all supported topologies.
   - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
   - Transactional writers now report filesystem setup and replacement errors as stream failures. They preserve output permissions and symbolic links to existing files, and reject dangling links and non-regular output files.

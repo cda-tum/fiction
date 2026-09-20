@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -33,6 +34,56 @@ using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 using namespace fiction::physical_design::path_finding;
+
+TEST_CASE("Yen's algorithm respects a zero path limit", "[k-shortest-paths]")
+{
+    using lyt  = cartesian_layout<>;
+    using path = layout_coordinate_path<lyt>;
+    const lyt layout{{1, 1}};
+    CHECK(yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {1, 1}}, 0).empty());
+    CHECK(yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 0}}, 0).empty());
+}
+
+TEST_CASE("Yen's algorithm enumerates every simple path on a small grid", "[k-shortest-paths]")
+{
+    using lyt  = cartesian_layout<>;
+    using path = layout_coordinate_path<lyt>;
+    const lyt layout{{2, 2}};
+    layout.foreach_coordinate(
+        [&](const auto& source)
+        {
+            layout.foreach_coordinate(
+                [&](const auto& target)
+                {
+                    const routing_objective<lyt> objective{.source = source, .target = target};
+                    const auto                   expected = enumerate_all_paths<path>(layout, objective);
+                    const auto                   actual   = yen_k_shortest_paths<path>(layout, objective, 100);
+                    CAPTURE(source, target);
+                    CHECK(actual.size() == expected.size());
+                    for (const auto& candidate : expected)
+                    {
+                        CHECK(actual.contains(candidate));
+                    }
+                });
+        });
+}
+
+TEST_CASE("Path enumeration reaches targets in the crossing layer", "[k-shortest-paths]")
+{
+    using lyt  = gate_level_layout<cartesian_layout<>>;
+    using path = layout_coordinate_path<lyt>;
+    lyt layout{{1, 1, 1}, clocking::twoddwave<lyt>()};
+    layout.create_pi("a", {0, 0});
+    layout.obstruct_coordinate({1, 0});
+    layout.create_pi("b", {1, 0, 1});
+    const routing_objective<lyt> objective{.source = {0, 0}, .target = {1, 0, 1}};
+    const auto shortest = a_star<path>(layout, objective, manhattan_distance_functor<lyt>{}, unit_cost_functor<lyt>{},
+                                       {.crossings = true});
+    REQUIRE_FALSE(shortest.empty());
+    const auto all = enumerate_all_paths<path>(layout, objective, {.crossings = true});
+    CHECK(all.contains(shortest));
+    CHECK(yen_k_shortest_paths<path>(layout, objective, 10, {{true}}).size() == all.size());
+}
 
 TEST_CASE("Path searches preserve persistent and caller-supplied obstructions", "[k-shortest-paths]")
 {
