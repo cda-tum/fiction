@@ -1963,6 +1963,9 @@ Args:
     tile_size_x: Clock zone size in x-dimension in cells.
     tile_size_y: Clock zone size in y-dimension in cells.
 
+Raises:
+    std::invalid_argument: if either clock-zone dimension is zero.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_2 =
@@ -1976,6 +1979,9 @@ Args:
     name: Layout name.
     tile_size_x: Clock zone size in x-dimension in cells.
     tile_size_y: Clock zone size in y-dimension in cells.
+
+Raises:
+    std::invalid_argument: if either clock-zone dimension is zero.
 
 )doc";
 
@@ -1997,7 +2003,18 @@ Args:
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_cell_level_layout_storage = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_cell_level_layout_storage =
+R"doc(Creates cell storage with nonzero clock-zone dimensions.
+
+Args:
+    name: Layout name.
+    tile_x: Clock-zone width in cells.
+    tile_y: Clock-zone height in cells.
+
+Raises:
+    std::invalid_argument: if either dimension is zero.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_cell_mode_map = R"doc()doc";
 
@@ -2503,6 +2520,9 @@ R"doc(Sets the underlying clock zone x-dimension size.
 Args:
     tile_size_x: Tile size in the x-dimension in number of cells.
 
+Raises:
+    std::invalid_argument: if `tile_size_x` is zero.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_set_tile_size_y =
@@ -2510,6 +2530,9 @@ R"doc(Sets the underlying clock zone y-dimension size.
 
 Args:
     tile_size_y: Tile size in the y-dimension in number of cells.
+
+Raises:
+    std::invalid_argument: if `tile_size_y` is zero.
 
 )doc";
 
@@ -7810,6 +7833,9 @@ May pass through, and thereby throw, an
 `unsupported_gate_type_exception` or an
 `unsupported_gate_orientation_exception`.
 
+Each nonempty emitted cell receives the synchronization delay of its
+gate tile.
+
 Args:
     lyt: The gate-level layout.
 
@@ -7851,6 +7877,9 @@ May pass through, and thereby throw, an
 `unsupported_gate_type_exception`, an
 `unsupported_gate_orientation_exception` and any further custom
 exceptions of the gate libraries.
+
+Each nonempty emitted cell receives the synchronization delay of its
+gate tile.
 
 Args:
     lyt: The gate-level layout.
@@ -8214,8 +8243,8 @@ static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_imp
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_apply_gate_library_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_assign_gate =
-R"doc(This function assigns a given FCN gate implementation to the total
-cell layout.
+R"doc(Assigns a gate implementation and its synchronization delay to each
+nonempty cell.
 
 Args:
     c: Top-left cell of the tile where the gate is placed.
@@ -8480,8 +8509,8 @@ Args:
               0 if not specified.
     y_offset: The offset for shifting in the y-direction. Defaults to
               0 if not specified.
-    search_direction: If set to horizontally, paths are searched from
-                      left to right, otherwise from top to bottom.
+    direction: If set to horizontally, paths are searched from left to
+               right, otherwise from top to bottom.
 
 Template Args:
     Lyt: Type of the input Cartesian gate-level layout.
@@ -10639,38 +10668,6 @@ Template Args:
                           Defaults to `coords::offset` if not
                           explicitly provided.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_clear_obstructed_connection =
-R"doc(Clears the obstruction status of the connection from coordinate `src`
-to coordinate `tgt` if the obstruction was manually marked via
-`obstruct_connection`.
-
-Args:
-    src: Source coordinate.
-    tgt: Target coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_clear_obstructed_connections =
-R"doc(Clears all obstructed connections that were manually marked via
-`obstruct_connection`.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_clear_obstructed_coordinate =
-R"doc(Clears the obstruction status of the given coordinate `c` if the
-obstruction was manually marked via `obstruct_coordinate`.
-
-Args:
-    c: OffsetCoordinateType to clear.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_clear_obstructed_coordinates =
-R"doc(Clears all obstructed coordinates that were manually marked via
-`obstruct_coordinate`.
-
-)doc";
-
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_foreach_adjacent_coordinate =
 R"doc(Iterates over adjacent coordinates of a given coordinate and applies a
 given functor.
@@ -10815,7 +10812,7 @@ Args:
     tgt: Target coordinate.
 
 Returns:
-    `true` iff the connection from `c1` to `c2` is obstructed.
+    `true` iff the connection from `src` to `tgt` is obstructed.
 
 )doc";
 
@@ -10823,7 +10820,7 @@ static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layou
 R"doc(Checks if the given coordinate is obstructed of some sort.
 
 Args:
-    c: OffsetCoordinateType to check.
+    c: Coordinate to check.
 
 Returns:
     `true` iff `c` is obstructed.
@@ -10839,8 +10836,8 @@ Args:
     tgt: Target coordinate.
 
 Note:
-    OffsetCoordinateTypes marked this way will not be crossed with
-    wires by path finding algorithms.
+    Coordinates marked this way will not be crossed with wires by path
+    finding algorithms.
 
 )doc";
 
@@ -10848,7 +10845,7 @@ static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layou
 R"doc(Marks the given coordinate as obstructed.
 
 Args:
-    c: OffsetCoordinateType to obstruct.
+    c: Coordinate to obstruct.
 
 )doc";
 
@@ -12045,9 +12042,7 @@ static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_sho
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_k_shortest_paths = R"doc(The list of k shortest paths that is created during the algorithm.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_layout =
-R"doc(The layout in which k shortest paths are to be found extended by an
-obstruction functionality layer.)doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_layout = R"doc(The caller's layout, queried without modification.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_num_shortest_paths = R"doc(The number of paths to determine, i.e., k.)doc";
 
