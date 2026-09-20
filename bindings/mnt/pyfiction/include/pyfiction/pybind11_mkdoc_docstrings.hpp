@@ -22730,7 +22730,10 @@ contour encloses. In two dimensions this is the familiar pairing of a
 4-connected path against an 8-connected closed curve. Points on the
 contour itself are marked, but not expanded from.
 
-Note that no physical simulation is conducted by this function!
+Small regions run inline. Larger regions distribute batches across
+`number_of_threads` workers, with internally locked insertion into the
+inferred-point set. All workers finish before the next contour seed is
+processed. No physical simulation is conducted by this function.
 
 Args:
     starting_point: Step point at which to start the inference. If
@@ -22742,15 +22745,15 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_inferred_op_domain =
-R"doc(All the points inferred (assumed) to be operational but not actually
-simulated.)doc";
+R"doc(Points marked operational by contour interior inference, including
+sampled operational points.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_inferred_operational_parameter_points =
-R"doc(Returns the parameter points that were inferred (assumed) to be
-operational because they are enclosed by a contour traced by
-`contour_tracing`. These points have not been simulated and are,
-therefore, not part of the returned operational domain. They are
-exposed to enable inspection of the enclosure inference.
+R"doc(Returns the parameter points marked operational by contour interior
+inference, including sampled operational points and reached contour
+points. Unsimulated points are absent from the returned operational
+domain; sampled points can occur in both sets. These points enable
+inspection of the enclosure inference.
 
 Returns:
     The parameter points that have been inferred to be operational.
@@ -22830,10 +22833,10 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_log_stats =
-R"doc(Helper function that writes the the statistics of the operational
-domain computation to the statistics object. Due to data races that
-can occur during the computation, each value is temporarily held in an
-atomic variable and written to the statistics object only after the
+R"doc(Helper function that writes the statistics of the operational domain
+computation to the statistics object. Due to data races that can occur
+during the computation, each value is temporarily held in an atomic
+variable and written to the statistics object only after the
 computation has finished.
 
 )doc";
@@ -23032,17 +23035,25 @@ This serves the same purpose as the two-dimensional Moore contour
 trace — sample only the boundary of an operational region and infer
 its interior — but collects the boundary instead of walking it. A
 closed curve can be walked because its neighbors admit a cyclic order;
-a closed surface cannot, so the boundary is gathered by a breadth-
-first search over the operational points that have at least one non-
-operational Moore neighbor. The resulting set is closed under the
-Moore neighborhood, which is what the interior inference requires.
+a closed surface cannot, so the boundary is gathered by a parallel
+breadth-first search over operational points with a non-operational
+Moore neighbor or a range edge. Workers share the classification cache
+and schedule each point once; interior inference runs after they join.
+The resulting set is closed under the Moore neighborhood, which is
+what the interior inference requires.
 
 Args:
     samples: Maximum number of random samples to be taken before
              tracing.
+    initial_points: Additional seeds, rounded up to sweep grid points
+                    and deduplicated with the random samples.
 
 Returns:
     The (partial) operational domain of the layout.
+
+Raises:
+    std::invalid_argument: if an additional seed has the wrong
+                           dimensions or lies outside the sweep grid.
 
 )doc";
 
@@ -27541,7 +27552,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_std_hash_operator_call_9 =
-R"doc(Computes the hash of a parameter point.
+R"doc(Mixes the quantized parameter values across the hash bits for
+partitioned processing.
 
 Args:
     pp: Parameter point to hash.

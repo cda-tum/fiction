@@ -108,7 +108,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Algorithms:
+
   - Critical-path analysis collapses wire chains to reduce traversal overhead on large layouts.
+  - Avoid helper threads for single-worker sampling and contour exploration.
+  - Reduce coordinate-vector allocations during operational-domain traversal.
+  - Reuse completed three-dimensional contour surfaces across initial samples.
+  - Contour tracing explores boundary surfaces in three or more dimensions in parallel. It uses
+    `operational_domain_params::number_of_threads`; large contour interiors also use parallel inference.
   - `convert_network` maps a technology network's inverters to `create_not` on a target without
     `create_node`, so AIG, XAG, and MIG conversions keep the inverters they used to lose
   - **Breaking:** _QuickExact_, _QuickSim_, _ExGS_, _ClusterComplete_, and _Ground State Space_
@@ -157,6 +163,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
 - Continuous integration:
+  - Read the Docs now builds on Ubuntu 26.04.
+  - Replaced Ubuntu 22.04 and GCC 11 CI coverage with Ubuntu 26.04, GCC 15, and Clang 22.
+    Ubuntu 24.04 retains older compiler coverage.
   - Windows wheel builds no longer install the zero-hit job-local `sccache`; split mode
     compiles the extension only once per job.
   - Reusable workflows now use GitHub's self-repository reference syntax.
@@ -174,6 +183,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     landscape instead of copying a `charge_distribution_surface` for every configuration
 
 - Dependencies:
+
+  - Native CI and Docker now use Z3 5.1.0. Wheel builds retain Z3 4.14.1 for their deployment floors.
 
   - `fmt` is fetched as the 12.1.0 release, the version alice carried; mockturtle's bundled
     11.0.2 does not compile with clang 20.
@@ -384,10 +395,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Algorithms:
+
   - Critical-path analysis now handles long routed paths without overflowing the native stack.
   - `network_balancing` accepts networks without primary outputs.
   - `gold` counts expansions only when a search-space graph expands.
   - Progress reporters now flush each pass's final count before a reset.
+  - Contour tracing distributes simulation locks across regular parameter grids.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
   - Defect-influence analysis now propagates worker exceptions to the caller.
@@ -416,8 +429,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
 
 - Build system:
-
+  - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
+  - CMake now verifies the `fmt` 12.2.0 archive with its matching SHA-256 checksum.
   - Installed CMake packages include the `fmt` headers and their header-only compile definition.
   - CMake installation includes ALGLIB's generated version metadata.
 
@@ -435,6 +449,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
+  - Docstring generation now loads the libclang development symlink on Ubuntu 26.04.
+  - Ubuntu 26.04 jobs now use matching compiler-cache keys and coverage labels.
+  - Coverage collection, extraction, and listing now tolerate GCC 13 function-range and hit-count inconsistencies reported by lcov 2.4.
   - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
   - Change detection now allows five minutes for runner setup and file comparisons.
 
@@ -454,7 +471,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB-to-cell-level conversion preserves bounds from converted cells.
 
 - Documentation:
-
+  - The documentation session builds Python bindings with the installed Z3 dependency.
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
   - Nanobind API documentation now keeps its custom class renderer with Sphinx's deferred registration.
     Removed duplicate bounding-box entries and corrected the critical-temperature overload reference.

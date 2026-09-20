@@ -25,7 +25,7 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.14.1
+  Z3_VERSION: 5.1.0
   CMAKE_BUILD_PARALLEL_LEVEL: 3
   CTEST_PARALLEL_LEVEL: 3
 

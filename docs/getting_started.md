@@ -12,9 +12,10 @@ the ones we verify.
 
 | Platform                     | Compilers                                    |
 | ---------------------------- | -------------------------------------------- |
-| Ubuntu 22.04 (x86-64)        | GCC 11                                       |
-| Ubuntu 24.04 (x86-64)        | GCC 13, GCC 14, Clang 18, Clang 19, Clang 20 |
-| Ubuntu 24.04 (ARM64)         | Clang 19, Clang 20                           |
+| Ubuntu 24.04 (x86-64)        | GCC 13, GCC 14, Clang 18                     |
+| Ubuntu 24.04 (ARM64)         | Clang 20                                    |
+| Ubuntu 26.04 (x86-64)        | GCC 15, Clang 20, Clang 22                   |
+| Ubuntu 26.04 (ARM64)         | Clang 22                                    |
 | macOS 15 (ARM64)             | Apple Clang                                  |
 | Windows Server 2025 (x86-64) | MSVC `v143`, `ClangCL`                       |
 

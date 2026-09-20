@@ -18,13 +18,13 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.14.1
+  Z3_VERSION: 5.1.0
   CMAKE_BUILD_PARALLEL_LEVEL: 4
 
 jobs:
   build_experiments:
     name: 🧪 Experiments
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read # required to check out the repository
 
@@ -46,7 +46,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
-          key: "ubuntu-24.04-experiments"
+          key: "ubuntu-26.04-experiments"
           variant: ccache
           # Only `main` writes; pull requests restore its cache. Caches are
           # branch-scoped and the repository shares a 10 GB budget.
