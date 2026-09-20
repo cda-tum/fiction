@@ -66,6 +66,7 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
             "-c",
             textwrap.dedent("""
                 import sys
+                import threading
                 import time
                 from mnt import pyfiction as pf
 
@@ -75,14 +76,16 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
                 params.operational_params.sim_engine = pf.sidb_simulation_engine.QUICKEXACT
                 params.operational_params.simulation_parameters.base = 2
                 params.sweep_dimensions = [
-                    pf.operational_domain_value_range(pf.sweep_parameter.EPSILON_R, 5.5, 5.7, 0.01),
-                    pf.operational_domain_value_range(pf.sweep_parameter.LAMBDA_TF, 5, 5.2, 0.01),
+                    pf.operational_domain_value_range(pf.sweep_parameter.EPSILON_R, 5.5, 5.7, 0.02),
+                    pf.operational_domain_value_range(pf.sweep_parameter.LAMBDA_TF, 5, 5.2, 0.02),
                 ]
                 reports = []
+                threads = set()
 
                 def report(task: str, done: int, total: int) -> None:
                     'Record progress and exercise a slow callback.'
                     reports.append((task, done, total))
+                    threads.add(threading.get_ident())
                     if done == 0:
                         time.sleep(0.2)
 
@@ -94,6 +97,7 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
                 )
                 assert 0 <= ratio <= 1, ratio
                 assert reports[-1][1] > 0, reports
+                assert threads - {threading.get_ident()}, threads
             """),
             str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"),
         ],
