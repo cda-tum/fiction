@@ -55,6 +55,9 @@ commands, `gates`, `random`, `tt`, and `area` have no progress display. Readers 
 retain a spinner because their work has no known total. Quiet mode and nonterminal output disable progress;
 the transient display disappears on completion, interruption, or failure.
 
+A completed phase bar does not mean the command has returned. For large `ortho` layouts, the command's
+spinner remains active while it computes the critical-path and throughput statistics for the result.
+
 `exact` shows the tile dimensions of each solver candidate. `gold` shows search-graph expansions and
 candidate dimensions, with placed nodes as candidate status; neither search claims a completion percentage.
 `gold` also shows the dimensions and selected-objective cost of the best accepted solution. Its `--progress`

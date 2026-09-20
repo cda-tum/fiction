@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import io
+import re
 import sys
 import threading
 import time
@@ -379,6 +380,30 @@ def test_command_progress_is_explicit() -> None:
     disabled = {"gates", "random", "tt", "area"}
     for name, cmd in REGISTRY.items():
         assert cmd.progress == (cmd.category is not Category.GENERAL and name not in disabled)
+
+
+def test_store_does_not_start_a_terminal_progress_display(mux21_shell: Shell, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Listing a populated store prints its table without entering a live display."""
+    output = io.StringIO()
+    monkeypatch.setenv("TERM", "xterm-256color")
+    mux21_shell.session.console = Console(file=output, width=200, force_terminal=True, color_system=None)
+    assert mux21_shell.session.execute("store -n")
+    assert "logic networks" in output.getvalue()
+    assert "\x1b[?25l" not in output.getvalue()
+
+
+@pytest.mark.parametrize("workers", [1, 4, 5])
+def test_exact_command_displays_current_dimensions(
+    mux21_shell: Shell, workers: int, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The command connects solver candidate reports to both detailed and compact displays."""
+    if REGISTRY["exact"].unavailable:
+        pytest.skip("exact requires Z3")
+    output = io.StringIO()
+    monkeypatch.setenv("TERM", "xterm-256color")
+    mux21_shell.session.console = Console(file=output, width=240, height=24, force_terminal=True, color_system=None)
+    assert mux21_shell.session.execute(f"exact --threads {workers} --timeout 10")
+    assert re.search(r"\d+ \N{MULTIPLICATION SIGN} \d+", output.getvalue())
 
 
 def test_worker_callback_restored_after_failure() -> None:

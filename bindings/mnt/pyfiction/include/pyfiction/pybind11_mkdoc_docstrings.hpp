@@ -27009,7 +27009,17 @@ static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_
 
 static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_run = R"doc()doc";
 
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_signal_delay = R"doc()doc";
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_signal_delay =
+R"doc(Evaluates an output's incoming paths without consuming the native call
+stack.
+
+Args:
+    t: Output tile whose path information is needed.
+
+Returns:
+    Length, delay, and delay difference of the dominant path.
+
+)doc";
 
 static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl = R"doc()doc";
 

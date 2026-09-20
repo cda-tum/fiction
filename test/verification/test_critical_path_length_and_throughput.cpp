@@ -20,6 +20,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
@@ -76,4 +77,22 @@ TEST_CASE("Unbalanced layout", "[throughput]")
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
     check(blueprints::unbalanced_and_layout<gate_layout>(), 2);
+}
+
+TEST_CASE("Critical path analysis handles long routes", "[throughput]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+
+    constexpr uint64_t length{100'000};
+    gate_layout        layout{{length, 0}, clocking::twoddwave<gate_layout>()};
+    auto               signal = layout.create_pi("in", {0, 0});
+    for (uint64_t x = 1; x < length; ++x)
+    {
+        signal = layout.create_buf(signal, {x, 0});
+    }
+    layout.create_po(signal, "out", {length, 0});
+
+    const auto result = critical_path_length_and_throughput(layout);
+    CHECK(result.critical_path_length == length + 1);
+    CHECK(result.throughput == 1);
 }
