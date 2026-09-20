@@ -13,8 +13,6 @@
  * @brief Explicit coordinate and directed-connection obstructions.
  */
 #pragma once
-#include "fiction/utils/stl/hash.hpp"
-
 #include <phmap.h>
 
 #include <utility>
