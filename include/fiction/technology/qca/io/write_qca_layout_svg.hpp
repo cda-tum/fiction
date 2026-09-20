@@ -27,7 +27,6 @@
 #include <fmt/format.h>
 
 #include <array>
-#include <cmath>
 #include <cstdint>
 #include <exception>
 #include <iostream>
@@ -85,10 +84,8 @@ inline constexpr const double STARTING_OFFSET_CELL_X = 3.5;
 inline constexpr const double STARTING_OFFSET_CELL_Y = -40.25;
 
 // Latch tiles
-inline constexpr const double STARTING_OFFSET_LATCH_X      = -483.5;
-inline constexpr const int    STARTING_OFFSET_LATCH_Y      = -57;
-inline constexpr const int    STARTING_OFFSET_LATCH_CELL_X = 312;
-inline constexpr const int    STARTING_OFFSET_LATCH_CELL_Y = -41;
+inline constexpr const double STARTING_OFFSET_LATCH_X = -483.5;
+inline constexpr const int    STARTING_OFFSET_LATCH_Y = -57;
 
 // Colors
 inline constexpr const char* CLOCK_ZONE_1_CELL     = "86e291";
@@ -550,8 +547,6 @@ class write_qca_layout_svg_impl
         static constexpr const std::array<const char*, 4> cell_colors{
             {svg::CLOCK_ZONE_1_CELL, svg::CLOCK_ZONE_2_CELL, svg::CLOCK_ZONE_3_CELL, svg::CLOCK_ZONE_4_CELL}};
 
-        bool is_sync_elem = false;
-
         if (lyt.is_empty_cell(c))
         {
             // skip empty cells
@@ -559,17 +554,8 @@ class write_qca_layout_svg_impl
         else if (const auto ct = lyt.get_cell_type(c); Lyt::technology::is_normal_cell(ct))
         {
 
-            if (lyt.is_synchronization_element(c))
-            {
-                cell_color = svg::CLOCK_ZONE_LATCH_CELL;
-
-                is_sync_elem = true;
-            }
-
-            if (!is_sync_elem)
-            {
-                cell_color = cell_colors[lyt.get_clock_number(c)];
-            }
+            cell_color =
+                lyt.is_synchronization_element(c) ? svg::CLOCK_ZONE_LATCH_CELL : cell_colors[lyt.get_clock_number(c)];
 
             if (ps.simple)
             {
@@ -636,28 +622,10 @@ class write_qca_layout_svg_impl
                     // Determines cell type and color
                     const auto desc_col = generate_description_color(c);
 
-                    bool is_sync_elem = false;
-                    // The current cell-description can now be appended to the description of all cells
-
-                    if (lyt.is_synchronization_element(c))
-                    {
-                        cell_descriptions
-                            << fmt::format(fmt::runtime(desc_col.first), desc_col.second,
-                                           svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_LATCH_CELL_X +
-                                               (c.x * svg::CELL_DISTANCE),
-                                           svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_LATCH_CELL_Y +
-                                               (c.y * svg::CELL_DISTANCE));
-
-                        is_sync_elem = true;
-                    }
-
-                    if (!is_sync_elem)
-                    {
-                        cell_descriptions << fmt::format(
-                            fmt::runtime(desc_col.first), desc_col.second,
-                            svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_CELL_X + (c.x * svg::CELL_DISTANCE),
-                            svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_CELL_Y + (c.y * svg::CELL_DISTANCE));
-                    }
+                    cell_descriptions << fmt::format(
+                        fmt::runtime(desc_col.first), desc_col.second,
+                        svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_CELL_X + (c.x * svg::CELL_DISTANCE),
+                        svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_CELL_Y + (c.y * svg::CELL_DISTANCE));
                 }
             });
 
@@ -680,7 +648,6 @@ class write_qca_layout_svg_impl
         coord_to_tile_mapping      coord_to_tile{};
         coord_to_cell_list_mapping coord_to_cells{};
         coord_to_latch_mapping     coord_to_latch_tile{};
-        coord_to_cell_list_mapping coord_to_latch_cells{};
 
         // Used to determine the color of cells, tiles and text based on its clock zone
         static constexpr const std::array<const char*, 4> tile_colors{
@@ -688,70 +655,26 @@ class write_qca_layout_svg_impl
         static constexpr const std::array<const char*, 4> text_colors{
             {svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_34_TEXT, svg::CLOCK_ZONE_34_TEXT}};
 
-        // Capture only references that are actually used
         lyt.foreach_cell_position(
-            [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_tile, &coord_to_latch_cells](const auto& c)
+            [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_tile](const auto& c)
             {
-                const auto clock_zone = lyt.get_clock_number(c);
-                const auto tile_coords =
-                    coordinate<Lyt>{std::ceil(c.x / lyt.get_tile_size_x()), std::ceil(c.y / lyt.get_tile_size_y())};
+                const auto            clock_zone = lyt.get_clock_number(c);
+                const coordinate<Lyt> tile_coords{c.x / lyt.get_tile_size_x(), c.y / lyt.get_tile_size_y()};
+                coord_to_tile[tile_coords] = {svg::TILE, clock_zone};
 
-                std::string current_cells{};
-                bool        is_sync_elem = false;
-
-                // Handle synchronization elements
-
-                const auto latch_delay = lyt.get_synchronization_element(c);
-                if (latch_delay > 0)
-                {
-                    if (auto latch_it = coord_to_latch_cells.find(tile_coords); latch_it != coord_to_latch_cells.end())
-                    {
-                        current_cells = latch_it->second;
-                    }
-                    else
-                    {
-                        coord_to_latch_tile[tile_coords] = {svg::LATCH, clock_zone, latch_delay};
-                    }
-                    is_sync_elem = true;
-                }
-
-                // Handle normal cells
-                if (!is_sync_elem)
-                {
-                    if (auto cell_it = coord_to_cells.find(tile_coords); cell_it != coord_to_cells.end())
-                    {
-                        current_cells = cell_it->second;
-                    }
-                    else
-                    {
-                        // If this is called, then there is no tile for the current cell yet
-                        // It also makes sure that all required tiles are created
-                        coord_to_tile[tile_coords] = {svg::TILE, clock_zone};
-                    }
-                }
-
-                // Represent the x- and y-coordinates inside the c's tile
-                const coordinate<Lyt> in_tile{c.x % lyt.get_tile_size_x(), c.y % lyt.get_tile_size_y()};
-                const auto            desc_col = generate_description_color(c);
-
-                // Only add a cell description if the cell is not empty
                 if (!lyt.is_empty_cell(c))
                 {
-                    if (latch_delay > 0)
+                    if (const auto delay = lyt.get_synchronization_element(c); delay > 0)
                     {
-                        coord_to_latch_cells[tile_coords] = current_cells.append(
-                            fmt::format(fmt::runtime(desc_col.first), desc_col.second,
-                                        svg::STARTING_OFFSET_LATCH_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
-                                        svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
+                        coord_to_latch_tile.try_emplace(tile_coords, svg::LATCH, clock_zone, delay);
                     }
 
-                    if (!is_sync_elem)
-                    {
-                        coord_to_cells[tile_coords] = current_cells.append(
-                            fmt::format(fmt::runtime(desc_col.first), desc_col.second,
-                                        svg::STARTING_OFFSET_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
-                                        svg::STARTING_OFFSET_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
-                    }
+                    const coordinate<Lyt> in_tile{c.x % lyt.get_tile_size_x(), c.y % lyt.get_tile_size_y()};
+                    const auto            desc_col = generate_description_color(c);
+                    coord_to_cells[tile_coords].append(
+                        fmt::format(fmt::runtime(desc_col.first), desc_col.second,
+                                    svg::STARTING_OFFSET_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
+                                    svg::STARTING_OFFSET_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
                 }
             });
 
@@ -763,15 +686,15 @@ class write_qca_layout_svg_impl
             // Delete tiles with missing cell-descriptions for their coordinates
             std::erase_if(coord_to_tile,
                           [&coord_to_cells](const auto& item) { return coord_to_cells.count(item.first) == 0; });
-
-            // Delete latches with missing cell-descriptions for their coordinates
-            std::erase_if(coord_to_latch_tile, [&coord_to_latch_cells](const auto& item)
-                          { return coord_to_latch_cells.count(item.first) == 0; });
         }
 
         // Associate tiles with cell-descriptions now; coordinates of tiles are used for tile- and cell-descriptions
         for (const auto& [coord, tdscr] : coord_to_tile)
         {
+            if (coord_to_latch_tile.contains(coord))
+            {
+                continue;
+            }
             const auto [descr, czone] = tdscr;
 
             const auto cell_descriptions = coord_to_cells[coord];
@@ -791,7 +714,10 @@ class write_qca_layout_svg_impl
             const auto [descr, czone_up, latch_delay] = ldscr;
             const auto czone_lo                       = (czone_up + latch_delay) % lyt.num_clocks();
 
-            const auto cell_descriptions = coord_to_latch_cells[coord];
+            // Tile templates have different origins; all cells use the ordinary tile's coordinate system.
+            const auto cell_descriptions = fmt::format(
+                "<g transform=\"translate({},{})\">{}</g>", svg::STARTING_OFFSET_TILE_X - svg::STARTING_OFFSET_LATCH_X,
+                svg::STARTING_OFFSET_TILE_Y - svg::STARTING_OFFSET_LATCH_Y, coord_to_cells[coord]);
 
             const double x_pos = svg::STARTING_OFFSET_LATCH_X + (coord.x * svg::TILE_DISTANCE);
             const double y_pos = svg::STARTING_OFFSET_LATCH_Y + (coord.y * svg::TILE_DISTANCE);
@@ -804,7 +730,7 @@ class write_qca_layout_svg_impl
             tile_descriptions << t_descr;
         }
 
-        const coordinate<Lyt> length = {(lyt.x() + 1) / lyt.get_tile_size_x(), (lyt.y() + 1) / lyt.get_tile_size_y()};
+        const coordinate<Lyt> length = {lyt.x() / lyt.get_tile_size_x() + 1, lyt.y() / lyt.get_tile_size_y() + 1};
 
         const double viewbox_x = (2 * svg::VIEWBOX_DISTANCE) + (length.x * svg::TILE_DISTANCE);
         const double viewbox_y = (2 * svg::VIEWBOX_DISTANCE) + (length.y * svg::TILE_DISTANCE);

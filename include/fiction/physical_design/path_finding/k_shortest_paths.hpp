@@ -56,7 +56,7 @@ class yen_k_shortest_paths_impl
             layout{lyt},
             initial_obstructions{extra},
             search_obstructions{extra},
-            objective{obj.source, obj.target},  // create a new objective due to potentially differing types
+            objective{obj},
             num_shortest_paths{k},
             params{p}
     {
@@ -113,15 +113,10 @@ class yen_k_shortest_paths_impl
                     }
                 }
 
-                // for all coordinates in the root path...
+                // the root path excludes the spur coordinate
                 for (const auto& root : root_path)
                 {
-                    // ... that are not the spur
-                    if (root != spur)
-                    {
-                        // block them from further exploration
-                        search_obstructions.obstruct_coordinate(root);
-                    }
+                    search_obstructions.obstruct_coordinate(root);
                 }
 
                 // find an alternative path from the spur coordinate to the target and check that it is not empty
@@ -138,11 +133,7 @@ class yen_k_shortest_paths_impl
                     final_path.insert(final_path.end(), std::make_move_iterator(spur_path.begin()),
                                       std::make_move_iterator(spur_path.end()));
 
-                    // if the candidates do not already contain the path, it is a potential k-shortest path
-                    if (!final_path.empty())  // NOTE a contains check needs to be added back in if no set is used here
-                    {
-                        shortest_path_candidates.add(final_path);
-                    }
+                    shortest_path_candidates.add(final_path);
                 }
 
                 // clear obstructions again (prepare for the next potential path)

@@ -262,9 +262,7 @@ class gate_level_drvs_impl
 
         auto clk = lyt.get_clock_number(t);
 
-        uint32_t se{0};
-
-        se = lyt.get_synchronization_element(t);
+        const auto se = lyt.get_synchronization_element(t);
 
         const std::array<const char*, 4> inp{
             {lyt.has_northern_incoming_signal(t) ? "N" : "", lyt.has_eastern_incoming_signal(t) ? "E" : "",
