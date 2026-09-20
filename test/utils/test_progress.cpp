@@ -323,16 +323,16 @@ TEST_CASE("Worker progress preserves identities and clears activity", "[progress
 TEST_CASE("Worker progress clears unfinished work during unwinding", "[progress]")
 {
     bool active = false;
-    CHECK_THROWS_AS((
-                        [&]
-                        {
-                            utils::worker_progress_reporter reporter{
-                                [&](auto, auto, auto, auto, auto, const bool running) { active = running; }, 1};
-                            const utils::worker_progress_scope scope{reporter, 0};
-                            reporter.update(0, "candidate");
-                            REQUIRE(active);
-                            throw std::runtime_error{"stop"};
-                        }()),
-                    std::runtime_error);
+    /** @brief Throws while a worker scope is active to exercise its unwinding cleanup. */
+    const auto unwind = [&]
+    {
+        utils::worker_progress_reporter    reporter{[&](auto, auto, auto, auto, auto, const bool running)
+                                                    { active = running; }, 1};
+        const utils::worker_progress_scope scope{reporter, 0};
+        reporter.update(0, "candidate");
+        REQUIRE(active);
+        throw std::runtime_error{"stop"};
+    };
+    CHECK_THROWS_AS(unwind(), std::runtime_error);
     CHECK_FALSE(active);
 }
