@@ -218,19 +218,11 @@ struct quicksim_params
 
                     for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
-                        if (ps.deadline != std::chrono::steady_clock::time_point::max() &&
-                            std::chrono::steady_clock::now() >= ps.deadline)
-                        {
-                            return;
-                        }
+                        utils::check_deadline(ps.deadline);
                         for (const auto sidb_index_with_unknown_charge_state :
                              all_sidb_indices_with_unknown_charge_state)
                         {
-                            if (ps.deadline != std::chrono::steady_clock::time_point::max() &&
-                                std::chrono::steady_clock::now() >= ps.deadline)
-                            {
-                                return;
-                            }
+                            utils::check_deadline(ps.deadline);
                             // Check if the timeout has been reached before starting the iterations
                             const auto current_time = std::chrono::high_resolution_clock::now();
                             const auto elapsed_time =
@@ -269,11 +261,7 @@ struct quicksim_params
 
                             for (uint64_t num = 0ul; num < upper_limit; num++)
                             {
-                                if (ps.deadline != std::chrono::steady_clock::time_point::max() &&
-                                    std::chrono::steady_clock::now() >= ps.deadline)
-                                {
-                                    return;
-                                }
+                                utils::check_deadline(ps.deadline);
                                 worker_state.adjacent_search(ps.alpha, negative_sidbs_indices);
                                 worker_state.validity_check();
 
@@ -299,7 +287,6 @@ struct quicksim_params
 
     st.simulation_runtime = time_counter;
 
-    // Throw only after every worker has joined; exceptions cannot escape a worker thread.
     utils::check_deadline(ps.deadline);
 
     if (timeout_limit_reached.load(std::memory_order_relaxed) || st.charge_distributions.empty())
