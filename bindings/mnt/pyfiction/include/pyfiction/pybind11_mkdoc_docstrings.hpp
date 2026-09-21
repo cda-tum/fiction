@@ -9797,6 +9797,7 @@ priorities.
 
 Args:
     ssg: The search space graph.
+    worker_progress: Reports each graph under its stable index.
 
 Returns:
     A pair containing a vector of next positions with their priorities
