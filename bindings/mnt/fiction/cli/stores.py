@@ -41,7 +41,6 @@ from mnt.pyfiction import (
     shifted_cartesian_gate_layout,
     sidb_layout,
     sidb_simulation_result,
-    stacked_qca_layout,
     technology_network,
     xag_network,
 )
@@ -65,7 +64,7 @@ GateLayout: TypeAlias = (
     | even_column_hex_gate_layout
 )
 """The nine supported gate-level layout topologies."""
-CellLayout: TypeAlias = qca_layout | stacked_qca_layout | inml_layout | mol_qca_layout | sidb_layout
+CellLayout: TypeAlias = qca_layout | inml_layout | mol_qca_layout | sidb_layout
 """Cell-level layout types held by the shell."""
 
 NETWORK_TYPES: dict[type, str] = {
@@ -79,7 +78,6 @@ NETWORK_TYPES: dict[type, str] = {
 
 TECHNOLOGIES: dict[type, str] = {
     qca_layout: "QCA",
-    stacked_qca_layout: "QCA",
     inml_layout: "iNML",
     mol_qca_layout: "molQCA",
     sidb_layout: "SiDB",

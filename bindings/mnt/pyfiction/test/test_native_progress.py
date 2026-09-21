@@ -133,7 +133,7 @@ def test_counted_native_phases(mux21: fiction.technology_network, command: str) 
     assert all(done == total for done, total in final.values())
 
 
-@pytest.mark.parametrize("kind", ["fgl", "dot", "qll", "fqca", "qca", "svg", "sqd", "sidb_svg"])
+@pytest.mark.parametrize("kind", ["fgl", "dot", "qll", "qca", "svg", "sqd", "sidb_svg"])
 def test_writer_counts_and_output(mux21: fiction.technology_network, tmp_path: Path, kind: str) -> None:
     """Callbacks leave writer output unchanged and count every completed phase."""
     gate_layout = fiction.orthogonal(mux21)

@@ -113,7 +113,6 @@ format alone and never guesses:
 | `.pla`                 | `read_pla`                 | logic network (AIG) | `-n`  |
 | `.fgl`                 | `read_fgl`                 | gate-level layout   | `-g`  |
 | `.sqd`                 | `read_sqd`                 | SiDB layout         | `-c`  |
-| `.fqca`                | `read_fqca`                | QCA layout          | `-c`  |
 
 The format-specific readers take the same `--type` and `--topology` options as `read` where they apply, and
 reject a file of another format rather than falling back to the suffix.
@@ -123,9 +122,7 @@ technology networks; `.aag` and `.pla` files are read as AIGs by _aigverse_ and 
 layouts accept all nine explicit topology names listed below; `cartesian` is the default.
 The selected topology must match the FGL metadata. Every reader takes one file; the
 `benchmarks` folder of the repository holds many networks to start from, and a shell loop or a `-f` script
-reads a whole folder of them. FQCA imports preserve stacked layouts, including via cells,
-I/O labels, clocks, and cell modes. Imports with at most two layers support SVG drawing; deeper layouts support
-QCA, FQCA, and QLL export. Readers reject coordinates the requested layout type cannot represent.
+reads a whole folder of them. Readers reject coordinates the requested layout type cannot represent.
 
 Each writer selects its format by command name, independently of the filename:
 
@@ -137,14 +134,12 @@ Each writer selects its format by command name, independently of the filename:
 | `write_dot` | `.dot` | gate-level layout, or network with `-n` |
 | `write_fgl` | `.fgl` | gate-level layout |
 | `write_qca` | `.qca` | QCA layout for QCADesigner |
-| `write_fqca` | `.fqca` | QCA layout for QCA-STACK |
 | `write_qcc` | `.qcc` | iNML component for ToPoliNano |
 | `write_qll` | `.qll` | QCA, molQCA, or iNML layout for ToPoliNano, MagCAD, or SCERPA |
 | `write_sqd` | `.sqd` | SiDB layout for SiQAD |
 | `write_svg` | `.svg` | QCA, molQCA, or SiDB drawing |
 
-`--via-layers` and `--no-via-layers` add or omit the inter-layer via cells of `.qca` and `.fqca` files, which
-`.qca` files carry by default and `.fqca` files do not. `--component-name` names a `.qcc` component after the
+`--via-layers` and `--no-via-layers` add or omit the inter-layer via cells of `.qca` files. `--component-name` names a `.qcc` component after the
 file instead of after the layout. `--indexes` labels DOT nodes; `--clock-colors` colors gate-level DOT
 layouts. Both options also apply to SVGs rendered from DOT by `show`. `--simple` applies only to QCA and
 molQCA SVG drawings. Unsupported drawing options fail before creating output. Verilog files name
@@ -515,11 +510,10 @@ and `-c/--cell-layout`; `--logic_network` becomes `--network`.
 
 | Original command | Python shell | Option and behavior migration |
 | --- | --- | --- |
-| `read` | `read FILE`, or `read_verilog`, `read_aiger`, `read_blif`, `read_pla`, `read_fgl`, `read_sqd`, `read_fqca` | `--aig/--xag/--mig/--tec` become `--type`; format flags become `--format`; positional topology becomes `--topology`; reading a whole directory and `--sort` are gone |
+| `read` | `read FILE`, or `read_verilog`, `read_aiger`, `read_blif`, `read_pla`, `read_fgl`, `read_sqd` | `--aig/--xag/--mig/--tec` become `--type`; format flags become `--format`; positional topology becomes `--topology`; reading a whole directory and `--sort` are gone |
 | `verilog` | `write_verilog FILE.v` | Optional filename and implicit element naming remain |
 | `blif` | `write_blif FILE.blif` | All network types |
 | `fgl` | `write_fgl FILE.fgl` | All nine topologies |
-| `fqca` | `write_fqca FILE.fqca` | `--via_layers` becomes `--via-layers`; stacked QCA supported |
 | `qca` | `write_qca FILE.qca` | `--no_via_layers` becomes `--no-via-layers` |
 | `qcc` | `write_qcc FILE.qcc` | `--component_name` becomes `--component-name` |
 | `qll` | `write_qll FILE.qll` | QCA, molQCA, iNML |

@@ -671,7 +671,7 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
     {
         const auto gate_lyt = blueprints::optimization_layout_corner_case_outputs_2<GateLyt>();
 
-        const auto layout = apply_gate_library<stacked_qca_cell_clk_lyt, qca_one_library, GateLyt>(gate_lyt);
+        const auto layout = apply_gate_library<qca_cell_clk_lyt, qca_one_library, GateLyt>(gate_lyt);
 
         CHECK(layout.x() == 21);
         CHECK(layout.y() == 14);

@@ -357,6 +357,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     gate-based SiDB simulations, `temp -g` and `opdom`, alone.
   - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
     `help --docs`.
+- I/O:
+
+  - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
 - **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
   `charge_distribution_surface`, and the lattice orientation tags; `model/nm_position.hpp` and
   `model/nm_distance.hpp` (use `lattice::nm_position` and `lattice::nm_distance`); the SiQAD coordinate
@@ -502,8 +505,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
   - Transactional writers now report filesystem setup and replacement errors as stream failures. They preserve output permissions and symbolic links to existing files, and reject dangling links and non-regular output files.
   - Network DOT export uses transactional replacement, including intermediate drawings produced by `show`.
-  - FQCA imports with at most two layers retain SVG export and viewing.
-  - Stacked FQCA imports preserve all layers and cell metadata. Layout readers reject coordinate overflow; writers replace files only after successful serialization.
+  - Layout readers reject coordinate overflow; writers replace files only after successful serialization.
   - QCA SVG output now uses valid text colors in simple tile mode.
   - SQD readers now reject fractional coordinates and trailing text in numeric attributes.
   - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites

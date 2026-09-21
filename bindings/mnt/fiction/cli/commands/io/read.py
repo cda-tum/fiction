@@ -43,7 +43,7 @@ def read(session: Session, args: argparse.Namespace) -> Result:
     """Read a logic network or a layout from a file, chosen by its suffix.
 
     Networks: .v (Verilog), .aig and .aag (AIGER), .blif, and .pla; the type defaults to a
-    technology network. Gate-level layouts: .fgl. Cell-level layouts: .sqd (SiDB) and .fqca (QCA).
+    technology network. Gate-level layouts: .fgl. Cell-level layouts: .sqd (SiDB).
     The format-specific commands, such as 'read_verilog', take the same file without guessing.
     """
     return read_file(session, args.path, file_format=args.format, network_type=args.type, topology=args.topology)
