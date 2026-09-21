@@ -20,6 +20,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
@@ -776,4 +777,63 @@ TEST_CASE("Random gate design bounds work without enumerating canvas layouts", "
     params.maximal_random_design_attempts = 1;
     CHECK(design_gates(lyt, std::vector<tt>{create_and_tt()}, params, &stats).empty());
     CHECK(stats.number_of_layouts == 0);
+}
+
+TEST_CASE("Gate design reports progress", "[design-sidb-gates]")
+{
+    const auto lyt = blueprints::two_input_one_output_skeleton_west_west();
+
+    progress_recorder rec{};
+
+    design_gates_params params{
+        .operational_params =
+            is_operational_params{.sim_params                = simulation_parameters{2, -0.31},
+                                  .sim_engine                = engine::QUICKEXACT,
+                                  .input_bdl_iterator_params = bdl_input_iterator_params{},
+                                  .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
+        .canvas                 = {{27, 6, 0}, {30, 8, 0}},
+        .number_of_canvas_sidbs = 3,
+        .termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
+    params.on_progress = rec.callback();
+
+    SECTION("QuickCell")
+    {
+        params.design_mode = design_gates_params::design_gates_mode::QUICKCELL;
+
+        const auto found_gate_layouts = design_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+
+        CHECK(found_gate_layouts.size() == 10);
+
+        // every canvas layout is pruned, and every survivor is simulated
+        CHECK(rec.is_consistent("pruning"));
+        CHECK(rec.final_count("pruning") == 1140);
+        CHECK(rec.is_consistent("candidates"));
+        CHECK(rec.final_count("candidates") == 11);
+    }
+
+    SECTION("Automatic Exhaustive Gate Designer")
+    {
+        params.design_mode = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+
+        const auto found_gate_layouts = design_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+
+        CHECK(found_gate_layouts.size() == 10);
+
+        CHECK(rec.is_consistent("canvas layouts"));
+        CHECK(rec.final_count("canvas layouts") == 1140);
+    }
+
+    SECTION("Random")
+    {
+        params.design_mode      = design_gates_params::design_gates_mode::RANDOM;
+        params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
+
+        const auto found_gate_layouts = design_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+
+        CHECK(!found_gate_layouts.empty());
+
+        // the number of attempts is unknown in advance
+        CHECK(rec.is_consistent("attempts"));
+        CHECK(rec.final_count("attempts") > 0);
+    }
 }

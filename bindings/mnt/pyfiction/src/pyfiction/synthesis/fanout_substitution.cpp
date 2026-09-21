@@ -22,6 +22,7 @@
 #include <fiction/synthesis/fanout_substitution.hpp>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/function.h>  // NOLINT(misc-include-cleaner): enables callback conversion
 #include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/pair.h>      // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>    // NOLINT(misc-include-cleaner)
@@ -39,11 +40,11 @@ void fanout_substitution_impl(nanobind::module_& m)
 
     m.def("fanout_substitution", &fiction::synthesis::fanout_substitution<py_tec_network, Ntk>, py::arg("network"),
           py::arg("params") = fiction::synthesis::fanout_substitution_params{},
-          DOC(fiction_synthesis_fanout_substitution));
+          DOC(fiction_synthesis_fanout_substitution), py::call_guard<py::gil_scoped_release>());
 
     m.def("is_fanout_substituted", &fiction::synthesis::is_fanout_substituted<Ntk>, py::arg("network"),
           py::arg("params") = fiction::synthesis::fanout_substitution_params{},
-          DOC(fiction_synthesis_is_fanout_substituted));
+          DOC(fiction_synthesis_is_fanout_substituted), py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail
@@ -66,6 +67,8 @@ void fanout_substitution(nanobind::module_& m)
     py::class_<fiction::synthesis::fanout_substitution_params>(m, "fanout_substitution_params",
                                                                DOC(fiction_synthesis_fanout_substitution_params))
         .def(py::init<>(), "Default constructor.")
+        .def_rw("on_progress", &fiction::synthesis::fanout_substitution_params::on_progress,
+                "Receives completed work and the phase total.")
         .def_rw("strategy", &fiction::synthesis::fanout_substitution_params::strategy,
                 DOC(fiction_synthesis_fanout_substitution_params_strategy))
         .def_rw("degree", &fiction::synthesis::fanout_substitution_params::degree,

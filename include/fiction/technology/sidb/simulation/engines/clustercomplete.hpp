@@ -30,15 +30,18 @@
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/utils/math/math_utils.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <deque>
 #include <functional>
+#include <future>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -112,6 +115,12 @@ struct clustercomplete_params
      * this option is disabled.
      */
     ground_state_space_reporting report_gss_stats = ground_state_space_reporting::OFF;
+    /**
+     * Callback that receives the number of unfolded charge space compositions.
+     */
+    utils::progress_callback on_progress{};
+    /** @brief Reports logical worker activity with a fixed worker count for each invocation. */
+    utils::worker_progress_callback on_worker_progress{};
 };
 
 namespace detail
@@ -131,6 +140,8 @@ class clustercomplete_impl
      */
     clustercomplete_impl(const layout& lyt, const clustercomplete_params& params) :
             available_threads{std::max(uint64_t{1}, params.available_threads)},
+            progress{params.on_progress, "compositions"},
+            worker_progress{params.on_worker_progress, available_threads},
             landscape{lyt, params.sim_params, params.local_external_potential, params.global_potential},
             mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
                                  -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
@@ -186,6 +197,8 @@ class clustercomplete_impl
                 {
                     // single-threaded execution
 
+                    const utils::worker_progress_scope worker_scope{worker_progress, 0};
+                    worker_progress.update(0, "compositions");
                     collect_physically_valid_charge_distributions_single_threaded(gss_stats.top_cluster);
                 }
                 else
@@ -195,25 +208,28 @@ class clustercomplete_impl
                     // initialization
                     initialize_worker_queues(extract_work_from_top_cluster(gss_stats.top_cluster));
 
-                    // set up threads
-                    std::vector<std::thread> supporting_threads{};
+                    // Async futures join during unwinding; Apple libc++ does not expose std::jthread.
+                    std::vector<std::future<void>> supporting_threads{};
                     supporting_threads.reserve(available_threads);
 
                     for (uint64_t i = 1; i < available_threads; ++i)
                     {
                         supporting_threads.emplace_back(
-                            [&, ix = i]
-                            {
-                                worker& w = *workers.at(ix);
+                            std::async(std::launch::async,
+                                       [&, ix = i]
+                                       {
+                                           worker&                            w = *workers.at(ix);
+                                           const utils::worker_progress_scope worker_scope{worker_progress, ix};
 
-                                // keep unfolding on this thread until no more work exists
-                                while (const std::optional<work_t>& work = w.obtain_work())
-                                {
-                                    unfold_composition(w, work->get());
-                                }
-                            });
+                                           // keep unfolding on this thread until no more work exists
+                                           while (const std::optional<work_t>& work = w.obtain_work())
+                                           {
+                                               unfold_composition(w, work->get());
+                                           }
+                                       }));
                     }
 
+                    const utils::worker_progress_scope main_worker_scope{worker_progress, 0};
                     // keep unfolding on the main thread until no more work exists
                     while (const std::optional<work_t>& work = workers.front()->obtain_work())
                     {
@@ -223,10 +239,7 @@ class clustercomplete_impl
                     // wait for all threads to complete
                     for (auto& thread : supporting_threads)
                     {
-                        if (thread.joinable())
-                        {
-                            thread.join();
-                        }
+                        thread.get();
                     }
                 }
             }
@@ -251,6 +264,14 @@ class clustercomplete_impl
      * @brief Number of available threads.
      */
     const uint64_t available_threads;
+    /**
+     * @brief Reports unfolded compositions; the total is unknown.
+     */
+    utils::progress_reporter progress;
+    /** @brief Worker activity during dynamic composition exploration. */
+    utils::worker_progress_reporter worker_progress;
+    /** @brief Completed compositions in the serial traversal. */
+    std::size_t completed_compositions{};
     /**
      * @brief Vector containing all workers.
      */
@@ -579,6 +600,8 @@ class clustercomplete_impl
 
             // undo specialization such that the specialization may consider a different children composition
             remove_composition(cl_state, max_pst_composition);
+            progress.advance();
+            worker_progress.update(0, "compositions", ++completed_compositions);
         }
 
         // apply max_pst back
@@ -605,6 +628,8 @@ class clustercomplete_impl
 
                 // unfold
                 add_physically_valid_charge_configurations(cl_state);
+                progress.advance();
+                worker_progress.update(0, "compositions", ++completed_compositions);
             }
         }
     }
@@ -844,6 +869,8 @@ class clustercomplete_impl
          * @brief Worker index in the vector of all workers.
          */
         const uint64_t index;
+        /** @brief Compositions examined by this worker. */
+        std::size_t completed_compositions{};
         /**
          * @brief This worker's queue where work can be obtained from either by this worker or by others (work
          * stealing).
@@ -1122,15 +1149,16 @@ class clustercomplete_impl
         add_composition(w.cl_state, composition);
 
         // recurse with specialized composition
-        if (add_physically_valid_charge_configurations(w, composition))
+        const auto backtrack = add_physically_valid_charge_configurations(w, composition);
+        if (backtrack)
         {
             // undo specialization such that the specialization may consider a different children composition
             remove_composition(w.cl_state, composition);
-
-            return true;
         }
 
-        return false;
+        progress.advance();
+        worker_progress.update(w.index, "compositions", ++w.completed_compositions);
+        return backtrack;
     }
 };
 

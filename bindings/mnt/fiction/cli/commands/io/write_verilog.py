@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     output_argument,
     inputs="Active network.",
     example="generate mux -b 1; write_verilog output.v",
+    progress=True,
 )
 def write_verilog_command(session: Session, args: argparse.Namespace) -> Result:
     """Write the active network as Verilog.

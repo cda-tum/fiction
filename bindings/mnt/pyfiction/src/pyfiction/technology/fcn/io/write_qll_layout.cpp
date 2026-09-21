@@ -19,11 +19,13 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/fcn/io/write_qll_layout.hpp>
+#include <fiction/utils/progress.hpp>
 
 #include <string_view>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner): enables callback conversion
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
@@ -42,11 +44,13 @@ void write_qll_layout(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_qll_layout_function_pointer)(const Lyt&, const std::string_view&) =
+    void (*const write_qll_layout_function_pointer)(const Lyt&, const std::string_view&,
+                                                    fiction::utils::progress_callback) =
         &fiction::fcn::io::write_qll_layout<Lyt>;
 
     m.def("write_qll_layout", write_qll_layout_function_pointer, py::arg("layout"), py::arg("filename"),
-          DOC(fiction_fcn_io_write_qll_layout));
+          py::arg("on_progress").none() = py::none(), DOC(fiction_fcn_io_write_qll_layout),
+          py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail

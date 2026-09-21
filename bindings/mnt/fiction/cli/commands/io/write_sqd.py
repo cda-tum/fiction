@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     output_argument,
     inputs="Active cell-level layout.",
     example="read_sqd layout.sqd; write_sqd output.sqd",
+    progress=True,
 )
 def write_sqd_command(session: Session, args: argparse.Namespace) -> Result:
     """Write the active SiDB layout as a SiQAD SQD file.
@@ -40,5 +41,5 @@ def write_sqd_command(session: Session, args: argparse.Namespace) -> Result:
     element = entry.layout
     require_cell_type(element, (sidb_layout,), ".sqd")
     path = output_path(element, args.file, ".sqd")
-    write_sqd_layout(element, str(path))
+    write_sqd_layout(element, str(path), on_progress=session.report_progress)
     return written(session, path)

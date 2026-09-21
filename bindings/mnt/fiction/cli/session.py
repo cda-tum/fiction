@@ -10,18 +10,32 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import json
 import os
 import shutil
 import tempfile
+import threading
 import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from rich.cells import cell_len
-from rich.console import Console
+from rich.console import Console, RenderableType
 from rich.markup import escape
+from rich.progress import (
+    BarColumn,
+    Progress,
+    ProgressColumn,
+    SpinnerColumn,
+    Task,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
+from rich.table import Column
 from rich.text import Text
 
 from mnt.pyfiction import convert_network, technology_network
@@ -33,6 +47,8 @@ from .statistics import json_value
 from .stores import CellEntry, GateLayout, Network, Store, describe, element_name, one_line
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from mnt.pyfiction import dynamic_truth_table
 
     from .registry import Result
@@ -43,6 +59,150 @@ STYLES = {
 }
 """The colors the shell sets command output apart from the prompt with; muted, so a long run of
 command output does not read as a wall of color."""
+
+ProgressCallback = Callable[[str, int, int], None]
+"""What an algorithm's ``on_progress`` parameter accepts: the task name, the completed count, and the total."""
+
+WorkerProgressCallback = Callable[[int, int, str, int, int, bool], None]
+"""A worker ID, worker count, description, completed work, total, and active state."""
+
+
+def ignore_worker_progress(worker: int, workers: int, description: str, done: int, total: int, active: bool) -> None:  # ruff: ignore[boolean-type-hint-positional-argument] -- native callbacks pass positional arguments
+    """Discard worker activity when the session has no progress display."""
+
+
+def ignore_progress(task: str, done: int, total: int) -> None:
+    """Discard a progress report; the callback in effect while no command runs.
+
+    Args:
+        task: The name of the task the algorithm works on.
+        done: The number of completed work items.
+        total: The number of work items, or ``0`` if unknown.
+    """
+
+
+class TaskBarColumn(BarColumn):
+    """Render the bar of a task, and nothing for a spinner."""
+
+    def __call__(self, task: Task) -> RenderableType:
+        """Render the bar of a task.
+
+        Args:
+            task: The task to render.
+
+        Returns:
+            The bar, or an empty text for the spinner.
+        """
+        if task.fields.get("spinner"):
+            return Text("")
+        return super().__call__(task)
+
+
+class CountColumn(ProgressColumn):
+    """Render ``done/total`` of a task, only ``done`` while the total is unknown, and nothing for a spinner."""
+
+    def render(self, task: Task) -> Text:  # ruff: ignore[no-self-use] -- rich calls the column's render method
+        """Render the count of a task.
+
+        Args:
+            task: The task to render.
+
+        Returns:
+            The count, right-aligned.
+        """
+        if task.fields.get("spinner"):
+            return Text("")
+        completed = int(task.completed)
+        if task.total is None:
+            return Text(f"{completed}", style="progress.download")
+        return Text(f"{completed}/{int(task.total)}", style="progress.download")
+
+
+class RemainingColumn(TimeRemainingColumn):
+    """Render the time remaining of a task, and nothing while its total is unknown."""
+
+    def render(self, task: Task) -> Text:
+        """Render the time remaining of a task.
+
+        Args:
+            task: The task to render.
+
+        Returns:
+            The estimate, or an empty text without a total.
+        """
+        if task.total is None:
+            return Text("")
+        return super().render(task)
+
+
+class CommandProgress:
+    """Render aggregate counts and candidate status on one command row."""
+
+    def __init__(self, display: Progress, label: str) -> None:
+        """Start the command with an indeterminate spinner."""
+        self.display = display
+        self.label = label
+        self.bar = display.add_task(label, total=None, spinner=True)
+        self.phase = ""
+        self.completed = 0
+        self.total = 0
+        self.candidates: dict[int, str] = {}
+        self.best_solution = ""
+        self.best_cost = float("inf")
+        self.lock = threading.Lock()
+
+    def description(self) -> str:
+        """Return the current phase and the latest active candidate or best accepted solution."""
+        if self.label == "exact":
+            candidate = next(reversed(self.candidates.values()), "")
+            return f"exact: {candidate}" if candidate else "exact"
+        if self.label == "gold":
+            return "gold: expansions" + self.best_solution
+        return self.phase or self.label
+
+    def report(self, phase: str, done: int, total: int) -> None:
+        """Replace phase counts with aggregate algorithm reports, never worker-local counts."""
+        with self.lock:
+            if phase != self.phase or done < self.completed or (total == 0 and self.total != 0):
+                # Rich preserves the old total when reset receives None; replace the single row instead.
+                self.display.remove_task(self.bar)
+                self.bar = self.display.add_task(self.label, total=total or None)
+            self.phase = phase if done or total else ""
+            self.completed, self.total = done, total
+            self.display.update(
+                self.bar,
+                description=escape(self.description()),
+                completed=done,
+                total=total or None,
+                spinner=not (done or total),
+                refresh=True,
+            )
+
+    def report_worker(
+        self,
+        worker: int,
+        _workers: int,
+        description: str,
+        _done: int,
+        _total: int,
+        active: bool,  # ruff: ignore[boolean-type-hint-positional-argument] -- native callback arguments are positional
+    ) -> None:
+        """Use worker reports only for search status; counts come from the aggregate callback."""
+        with self.lock:
+            if self.label == "exact":
+                self.candidates.pop(worker, None)
+                if active:
+                    self.candidates[worker] = description.partition(": ")[2]
+            elif self.label == "gold":
+                _, _, best = description.partition("; best ")
+                if best:
+                    cost = int(best.rsplit(", cost ", 1)[1])
+                    if cost < self.best_cost:
+                        self.best_cost = cost
+                        self.best_solution = "; best " + best
+            else:
+                return
+            self.display.update(self.bar, description=escape(self.description()), spinner=False, refresh=True)
 
 
 class Session:
@@ -56,6 +216,8 @@ class Session:
         networks: The logic network store.
         gate_layouts: The gate-level layout store.
         cell_layouts: The cell-level layout store.
+        report_progress: The callback that displays algorithm progress while a command runs.
+        report_worker_progress: The callback that updates search candidate status.
         running: Cleared by ``quit``; the interactive loop stops when it is ``False``.
     """
 
@@ -81,6 +243,8 @@ class Session:
         self.gate_layouts: Store[GateLayout] = Store("gate-level layout")
         self.cell_layouts: Store[CellEntry] = Store("cell-level layout")
         self.running = True
+        self.report_progress: ProgressCallback = ignore_progress
+        self.report_worker_progress: WorkerProgressCallback = ignore_worker_progress
         self.log_path = log_path
         self.log: list[dict[str, object]] = []
         self._source: tuple[str, int] | None = None
@@ -195,6 +359,9 @@ class Session:
         entry["args"] = {key: json_value(value) for key, value in vars(args).items()}
         if cmd.unavailable is not None:
             raise CommandError(cmd.unavailable)
+        if cmd.progress:
+            with self.progress(name):
+                return cmd.run(self, args)
         return cmd.run(self, args)
 
     def run_script(self, path: Path) -> bool:
@@ -218,7 +385,6 @@ class Session:
                 raise CommandError(msg_0) from error
             msg_0 = f"cannot read script '{path}': {error}"
             raise CommandError(msg_0) from error
-
         previous_source = self._source
         try:
             for number, line in enumerate(lines, 1):
@@ -293,6 +459,57 @@ class Session:
         if delete:
             self._to_delete.append(path)
         return path
+
+    @contextlib.contextmanager
+    def progress(self, label: str) -> Iterator[ProgressCallback]:
+        """Show one row for the command, with aggregate counts and search candidate status.
+
+        The display is transient. Quiet mode and nonterminal output disable the display and
+        discard the reports. While the context is open,
+        :attr:`report_progress` is the callback that feeds the row, so commands hand it to the
+        algorithms they run.
+
+        Args:
+            label: The name of the command, shown next to the spinner.
+
+        Yields:
+            The callback to hand to an ``on_progress`` parameter.
+        """
+        if self.quiet or not self.console.is_terminal:
+            # older rich versions print a newline when a disabled display stops, so start none at all
+            previous = self.report_progress
+            previous_worker = self.report_worker_progress
+            self.report_progress = ignore_progress
+            self.report_worker_progress = ignore_worker_progress
+            try:
+                yield ignore_progress
+            finally:
+                self.report_progress = previous
+                self.report_worker_progress = previous_worker
+            return
+        display = Progress(
+            SpinnerColumn(),
+            TextColumn(
+                "[progress.description]{task.description}", table_column=Column(no_wrap=True, overflow="ellipsis")
+            ),
+            TaskBarColumn(),
+            CountColumn(),
+            TimeElapsedColumn(),
+            RemainingColumn(),
+            console=self.console,
+            transient=True,
+        )
+        previous = self.report_progress
+        previous_worker = self.report_worker_progress
+        try:
+            with display:
+                reporter = CommandProgress(display, label)
+                self.report_progress = reporter.report
+                self.report_worker_progress = reporter.report_worker
+                yield self.report_progress
+        finally:
+            self.report_progress = previous
+            self.report_worker_progress = previous_worker
 
     def error(self, message: str) -> None:
         """Print an error message.

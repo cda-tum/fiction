@@ -49,6 +49,21 @@ words: `tt -e "[(ab)(!ac)]"`. When a command fails, the shell prints the reason 
 the shell itself keeps running. Quoted `;` and `#` are literal characters; Windows backslashes stay intact.
 `--quiet` suppresses notices while retaining requested command results. `NO_COLOR` disables drawing colors.
 
+Long-running commands show a spinner and elapsed time immediately. Counted phases show bars with actual
+completed work: gate placement and mapping, network passes, design-rule checks, and layout export. General
+commands, `gates`, `random`, `tt`, and `area` have no progress display. Readers and opaque library calls
+retain a spinner because their work has no known total. Quiet mode and nonterminal output disable progress;
+the transient display disappears on completion, interruption, or failure.
+
+Each command uses one row, including parallel executions. Counts combine all workers: `quicksim` reports
+iterations, `opdom` reports fixed samples or dynamic point counts, and `clustercomplete` reports compositions.
+`temp` retains its outer phase progress. Nested simulations do not add rows.
+
+`exact` shows the tile dimensions of the most recently started active solver candidate on its aggregate row.
+The dimensions remain visible when the aspect-ratio count advances. `gold` shows total search-graph expansions
+and the dimensions and selected-objective cost of the best accepted solution. Neither search claims a completion
+percentage. The `gold --progress` flag remains accepted for compatibility; Rich controls the display.
+
 ## Stores
 
 Stores hold what the shell has read, created, or designed. There are four of them, each selected by a flag:
@@ -65,7 +80,9 @@ Each store has one _active_ element, the one commands work on, which is the most
   `store --pop` removes the active element instead and makes the one before it active
 - `current -t|-n|-g|-c POSITION` makes an element the active one; positions count from 1, the way `store`
   lists them and the status bar reports them
-- `ps -t|-n|-g|-c` prints the statistics of the active element, and `ps --all` those of every element
+- `ps -t|-n|-g|-c` prints the statistics of the active element, and `ps --all` those of every element.
+  `ps -g` traverses the layout to compute critical-path length and throughput; store listings and command
+  summaries omit these potentially expensive timing calculations.
 - `print -t|-g|-c` prints the active element as text; a simulated SiDB layout is drawn once, with its ground
   state charges in place of the dots, followed by the ground state energy
 - `show -n|-g|-c [-o FILE] [--silent] [-p COMMAND] [--delete]` draws the active element and opens it in the
@@ -150,6 +167,9 @@ two-input AND. An expression is a constant `0` or `1`, a variable `a` to `p`, a 
 if-then-else. The number of variables follows from the largest variable used. Truth tables specify the function
 that the gate-based SiDB simulations check a layout against.
 
+TEC readers preserve output drivers without adding output buffers. Physical-design algorithms prepare output
+buffers when needed. Shared outputs and outputs connected directly to primary inputs retain their logic functions.
+
 ## Logic networks
 
 The network store holds AND-inverter graphs (AIG), XOR-AND-inverter graphs (XAG), majority-inverter graphs
@@ -208,7 +228,7 @@ small networks; the two heuristics scale to large ones. Every result lands in th
 ```text
 fiction> ps -g
 name           c17
-topology       cartesian
+topology       Cartesian
 clocking       2DDWAVE
 size x         5
 size y         7
@@ -446,7 +466,7 @@ appears once the session closes, not while it runs. It holds a list with one obj
     "runtime_s": 0.41,
     "status": "ok",
     "result": {
-      "gate_layout": {"name": "c17", "topology": "cartesian", "clocking": "2DDWAVE", "size": {"x": 5, "y": 7, "area": 35}, "inputs": 5, "outputs": 2, "gates": 8, "wires": 28, "crossings": 0, "critical_path": 11, "throughput": 1},
+      "gate_layout": {"name": "c17", "topology": "cartesian", "clocking": "2DDWAVE", "size": {"x": 5, "y": 7, "area": 35}, "inputs": 5, "outputs": 2, "gates": 8, "wires": 28, "crossings": 0},
       "stats": {"time_total_s": 0.39, "x_size": 5, "y_size": 7, "num_gates": 8, "num_wires": 28, "num_crossings": 0}
     }
   }
@@ -454,12 +474,12 @@ appears once the session closes, not while it runs. It holds a list with one obj
 ```
 
 `args` holds the parsed options. A failing command has `"status": "error"` and an `error` message instead of a
-`result`. Every store element is described by one schema wherever it appears, the same one `ps` prints:
+`result`. Store descriptions use these keys; `ps` adds requested timing statistics:
 
 - a truth table by `vars` and, up to eight variables, `hex` and `binary`
 - a network by `name`, `type`, `inputs`, `outputs`, `gates`, and `depth`
 - a gate-level layout by `name`, `topology`, `clocking`, `size` (`x`, `y`, `area`), `inputs`, `outputs`, `gates`,
-  `wires`, `crossings`, `critical_path`, and `throughput`
+  `wires`, and `crossings`; `ps -g` also records `critical_path` and `throughput`
 - a cell-level layout by `name`, `technology`, `size`, `inputs`, `outputs`, and `cells`; an SiDB layout uses
   `dots` for its count and adds `lattice` and `defects`, and a simulated one a `simulation` object with `engine`, `stable_states`,
   `ground_state_energy_ev`, and `runtime_s`
@@ -508,7 +528,7 @@ and `-c/--cell-layout`; `--logic_network` becomes `--network`.
 | `simulate` | `simulate` | `--store`, `--silent`, network/layout selection remain; all outputs retain declaration order even with duplicate names |
 | `exact` | `exact` | `--clk_scheme` becomes `--scheme`; `--async` becomes `--threads`; `--sync_elems` becomes `--synchronization-elements`; `--hex` becomes explicit `--topology`; bounds, crossings, border I/O, desynchronization, minimization, and ToPoliNano constraints remain |
 | `ortho` | `ortho` | `--clock_numbers` becomes `--clock-phases`; `--hex or/er/oc/ec` becomes the corresponding explicit hexagonal topology |
-| `gold` | `gold` | `--num_vertex_expansions/--effort_mode/--cost_objective` become `--expansions/--effort/--cost`; `--tiles_to_skip_between_pis` becomes `--skip-tiles`; random spacing becomes `--randomize-skip-tiles`; `--progress` requests progress, `--verbose` statistics |
+| `gold` | `gold` | `--num_vertex_expansions/--effort_mode/--cost_objective` become `--expansions/--effort/--cost`; `--tiles_to_skip_between_pis` becomes `--skip-tiles`; random spacing becomes `--randomize-skip-tiles`; `--progress` is accepted for compatibility, `--verbose` requests statistics |
 | `hex` | `hex` | `--input_pin_extension/--output_pin_extension` become `--extend-inputs/--extend-outputs`; `--planar` remains |
 | `optimize` | `optimize` | `--wiring_reduction_only/--max_gate_relocations/--planar_optimization` become `--wiring-only/--max-relocations/--planar`; timeout remains |
 | `cell` | `cell` | All four libraries and their established spelling aliases remain |

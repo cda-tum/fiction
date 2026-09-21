@@ -33,10 +33,12 @@ from mnt.pyfiction import (
     write_qca_layout_svg,
     write_qca_layout_svg_params,
     write_sidb_layout_svg,
+    write_sidb_layout_svg_params,
 )
 
 from .errors import CommandError
 from .parsing import tokenize
+from .session import ProgressCallback, ignore_progress
 from .stores import ground_state
 
 if TYPE_CHECKING:
@@ -82,7 +84,15 @@ def validate_drawing_options(args: argparse.Namespace, *, dot: bool, gate_layout
             raise CommandError(msg)
 
 
-def write_dot(element: Network | GateLayout, path: Path, *, network: bool, indexes: bool, clock_colors: bool) -> None:
+def write_dot(
+    element: Network | GateLayout,
+    path: Path,
+    *,
+    network: bool,
+    indexes: bool,
+    clock_colors: bool,
+    on_progress: ProgressCallback = ignore_progress,
+) -> None:
     """Draw a network or a gate-level layout as a Graphviz DOT file.
 
     Args:
@@ -90,21 +100,23 @@ def write_dot(element: Network | GateLayout, path: Path, *, network: bool, index
         path: The output file.
         network: Whether ``element`` is a network rather than a gate-level layout.
         indexes: Label the nodes with their indices.
+        on_progress: Receives completed tile rendering.
         clock_colors: Color the tiles by clock number instead of by gate type; layouts only.
     """
     if network:
         write_dot_network(element, str(path), indexes=indexes)
     else:
-        write_dot_layout(element, str(path), clock_colors=clock_colors, indexes=indexes)
+        write_dot_layout(element, str(path), clock_colors=clock_colors, indexes=indexes, on_progress=on_progress)
 
 
-def write_svg(entry: CellEntry, path: Path, *, simple: bool) -> None:
+def write_svg(entry: CellEntry, path: Path, *, simple: bool, on_progress: ProgressCallback = ignore_progress) -> None:
     """Draw a cell-level layout as an SVG file.
 
     Args:
         entry: The store element; a simulated SiDB layout is drawn with its ground state charges.
         path: The output file.
         simple: Draw QCA cells without dots and clock numbers.
+        on_progress: Receives serialization progress.
 
     Raises:
         CommandError: For iNML layouts, which have no SVG drawer.
@@ -113,16 +125,19 @@ def write_svg(entry: CellEntry, path: Path, *, simple: bool) -> None:
     if isinstance(layout, qca_layout | mol_qca_layout):
         params = write_qca_layout_svg_params()
         params.simple = simple
+        params.on_progress = on_progress
         if isinstance(layout, qca_layout):
             write_qca_layout_svg(layout, str(path), params)
         else:
             write_mol_qca_layout_svg(layout, str(path), params)
     elif isinstance(layout, sidb_layout):
+        sidb_params = write_sidb_layout_svg_params()
+        sidb_params.on_progress = on_progress
         state = ground_state(entry)
         if state is not None:
-            write_sidb_layout_svg(layout, state, str(path))
+            write_sidb_layout_svg(layout, state, str(path), sidb_params)
         else:
-            write_sidb_layout_svg(layout, str(path))
+            write_sidb_layout_svg(layout, str(path), sidb_params)
     else:
         msg = f"no SVG drawer for {type(layout).__name__} layouts"
         raise CommandError(msg)

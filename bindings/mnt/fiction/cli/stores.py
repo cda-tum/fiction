@@ -17,7 +17,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Generic, TypeAlias, TypeVar
 
-from mnt.fiction.cli.topologies import TOPOLOGIES
+from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
 from mnt.pyfiction import (
     aig_network,
     area,
@@ -271,18 +271,18 @@ def describe_network(network: Network) -> dict[str, object]:
     }
 
 
-def describe_gate_layout(layout: GateLayout) -> dict[str, object]:
+def describe_gate_layout(layout: GateLayout, *, timing: bool = False) -> dict[str, object]:
     """Describe a gate-level layout.
 
     Args:
         layout: The layout.
+        timing: Traverse the layout to compute critical path and throughput.
 
     Returns:
-        Name, topology, clocking scheme, size, I/O and gate counts, critical path, and throughput.
+        Name, topology, clocking scheme, size, I/O and gate counts, and optional timing statistics.
         ``throughput`` is the denominator ``x`` of the throughput ``1/x``.
     """
-    critical_path, throughput = critical_path_length_and_throughput(layout)
-    return {
+    description: dict[str, object] = {
         "name": element_name(layout),
         "topology": TOPOLOGIES[type(layout)],
         "clocking": layout.get_clocking_scheme_name(),
@@ -293,9 +293,11 @@ def describe_gate_layout(layout: GateLayout) -> dict[str, object]:
         "wires": layout.num_wires(),
         "crossings": layout.num_crossings(),
         "synchronization_elements": layout.num_se() if hasattr(layout, "num_se") else 0,
-        "critical_path": critical_path,
-        "throughput": throughput,
     }
+    if timing:
+        critical_path, throughput = critical_path_length_and_throughput(layout)
+        description.update(critical_path=critical_path, throughput=throughput)
+    return description
 
 
 def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
@@ -376,11 +378,12 @@ def ground_state(entry: CellEntry) -> charge_distribution | None:
     return states[0] if states else None
 
 
-def describe(element: object) -> dict[str, object]:
+def describe(element: object, *, timing: bool = False) -> dict[str, object]:
     """Describe any store element.
 
     Args:
         element: A truth table, network, gate-level layout, or cell entry.
+        timing: Include gate-level timing statistics, which require a layout traversal.
 
     Returns:
         The element's description.
@@ -393,7 +396,7 @@ def describe(element: object) -> dict[str, object]:
     if isinstance(element, NETWORK_TYPES_TUPLE):
         return describe_network(element)
     if isinstance(element, GATE_LAYOUT_TYPES_TUPLE):
-        return describe_gate_layout(element)
+        return describe_gate_layout(element, timing=timing)
     if isinstance(element, CellEntry):
         return describe_cell_layout(element)
     msg = f"cannot describe {type(element).__name__}"
@@ -431,6 +434,7 @@ def one_line(description: dict[str, object]) -> str:
     parts: list[str] = []
     name = description.get("name")
     kind = description.get("type") or description.get("technology") or description.get("topology")
+    kind = DISPLAY_NAMES.get(str(kind), kind)
     head = f"{name} ({kind})" if name else str(kind or "")
     size = description.get("size")
     if isinstance(size, dict):

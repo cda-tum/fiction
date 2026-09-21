@@ -65,7 +65,7 @@ void physically_valid_parameters(nanobind::module_& m)
     m.def("physically_valid_parameters", &fiction::sidb::simulation::analysis::physically_valid_parameters,
           py::arg("lyt"), py::arg("cd"),
           py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{},
-          DOC(fiction_sidb_simulation_analysis_physically_valid_parameters));
+          py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_analysis_physically_valid_parameters));
 }
 
 }  // namespace pyfiction

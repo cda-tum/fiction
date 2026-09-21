@@ -36,7 +36,14 @@ def _arguments_read_blif(parser: Parser) -> None:
     _type_argument(parser)
 
 
-@command("read_blif", Category.IO, _arguments_read_blif, inputs="One file.", example='read_blif "circuit.blif"')
+@command(
+    "read_blif",
+    Category.IO,
+    _arguments_read_blif,
+    inputs="One file.",
+    example='read_blif "circuit.blif"',
+    progress=True,
+)
 def read_blif(session: Session, args: argparse.Namespace) -> Result:
     """Read a logic network from a BLIF file.
 

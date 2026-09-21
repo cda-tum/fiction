@@ -20,6 +20,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -277,4 +278,32 @@ TEST_CASE("Displaced layouts retain their name and stationary defects", "[displa
     CHECK(displaced.get_layout_name() == lyt.get_layout_name());
     CHECK(displaced.defects() == lyt.defects());
     CHECK(displaced.sidbs() == lyt.sidbs());
+}
+
+TEST_CASE("Displacement robustness domain reports progress", "[displacement-robustness-domain]")
+{
+    const auto lyt = blueprints::siqad_and_gate();
+
+    progress_recorder rec{};
+
+    displacement_robustness_domain_params params{};
+    params.displacement_variations       = {1, 1};
+    params.operational_params.sim_params = simulation_parameters{2, -0.28};
+    params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance       = 1.5;
+    params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
+    params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
+    params.fixed_sidbs                              = {{0, 0, 1},  {2, 1, 1},  {20, 0, 1}, {18, 1, 1}, {14, 3, 1},
+                                                       {16, 2, 1}, {10, 7, 0}, {10, 6, 0}, {10, 9, 1}, {4, 2, 1}};
+    params.percentage_of_analyzed_displaced_layouts = 0.1;
+    params.analysis_mode = displacement_robustness_domain_params::displacement_analysis_mode::RANDOM;
+    params.dimer_policy  = displacement_robustness_domain_params::dimer_displacement_policy::ALLOW_OTHER_DIMER;
+    params.on_progress   = rec.callback();
+
+    displacement_robustness_domain_stats stats{};
+
+    const auto robustness_domain =
+        determine_displacement_robustness_domain(lyt, std::vector<tt>{create_and_tt()}, params, &stats);
+
+    CHECK(rec.is_consistent("displaced layouts"));
+    CHECK(rec.final_count("displaced layouts") == robustness_domain.operational_values.size());
 }

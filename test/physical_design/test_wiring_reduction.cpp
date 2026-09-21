@@ -21,6 +21,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -232,4 +233,26 @@ TEST_CASE("PI and PO border validation", "[wiring_reduction]")
         auto layout = blueprints::po_not_in_border_optimization_layout<gate_layout>();
         CHECK_NOTHROW(wiring_reduction<gate_layout>(layout));
     }
+}
+
+TEST_CASE("Wiring reduction reports progress", "[wiring_reduction]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+
+    const auto ntk    = blueprints::mux21_network<technology_network>();
+    const auto layout = orthogonal<gate_layout>(ntk);
+
+    progress_recorder       rec{};
+    wiring_reduction_params params{};
+    params.on_progress = rec.callback();
+
+    wiring_reduction<gate_layout>(layout, params);
+
+    check_eq(ntk, layout);
+
+    // the number of wire paths is unknown in advance
+    CHECK(rec.is_consistent("wire paths"));
+    const auto reports = rec.reports_of("wire paths");
+    REQUIRE(!reports.empty());
+    CHECK(reports.back().total == 0);
 }

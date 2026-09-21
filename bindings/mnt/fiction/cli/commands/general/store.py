@@ -17,6 +17,7 @@ from rich.table import Table
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import STORE_FLAGS, Category, command, selected_stores, store_flags
+from mnt.fiction.cli.render import display_value
 from mnt.fiction.cli.stores import Store, describe, one_line
 
 if TYPE_CHECKING:
@@ -87,7 +88,9 @@ def store(session: Session, args: argparse.Namespace) -> Result:
         for index, description in enumerate(descriptions):
             marker = "*" if index == current.active else ""
             label = " / ".join(
-                str(description[key]) for key in ("type", "technology", "topology", "lattice") if description.get(key)
+                display_value(key, description[key])
+                for key in ("type", "technology", "topology", "lattice")
+                if description.get(key)
             )
             if description.get("simulation"):
                 label += " / simulated"

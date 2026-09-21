@@ -40,6 +40,7 @@ def _write_dot_arguments(parser: Parser) -> None:
     _write_dot_arguments,
     inputs="Active gate-level layout by default; -n selects the network.",
     example="generate mux -b 1; ortho; write_dot output.dot",
+    progress=True,
 )
 def write_dot_command(session: Session, args: argparse.Namespace) -> Result:
     """Write the active gate-level layout or network as Graphviz DOT.
@@ -52,5 +53,12 @@ def write_dot_command(session: Session, args: argparse.Namespace) -> Result:
     validate_drawing_options(args, dot=True, gate_layout=not args.network, qca_svg=False)
     element = session.networks.current() if args.network else session.gate_layouts.current()
     path = output_path(element, args.file, ".dot")
-    write_dot(element, path, network=args.network, indexes=args.indexes, clock_colors=args.clock_colors)
+    write_dot(
+        element,
+        path,
+        network=args.network,
+        indexes=args.indexes,
+        clock_colors=args.clock_colors,
+        on_progress=session.report_progress,
+    )
     return written(session, path)

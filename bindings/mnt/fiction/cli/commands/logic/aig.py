@@ -47,7 +47,12 @@ def _aig_arguments(parser: Parser) -> None:
 
 
 @command(
-    "aig", Category.LOGIC, _aig_arguments, inputs="Active network.", example="generate mux -b 1; aig rewrite cleanup"
+    "aig",
+    Category.LOGIC,
+    _aig_arguments,
+    inputs="Active network.",
+    example="generate mux -b 1; aig rewrite cleanup",
+    progress=True,
 )
 def aig_command(session: Session, args: argparse.Namespace) -> Result:
     """Run optimization passes on the active AIG, in the given order.

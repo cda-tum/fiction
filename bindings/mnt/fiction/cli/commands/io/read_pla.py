@@ -36,7 +36,14 @@ def _arguments_read_pla(parser: Parser) -> None:
     _type_argument(parser)
 
 
-@command("read_pla", Category.IO, _arguments_read_pla, inputs="One file.", example='read_pla "circuit.pla" --type aig')
+@command(
+    "read_pla",
+    Category.IO,
+    _arguments_read_pla,
+    inputs="One file.",
+    example='read_pla "circuit.pla" --type aig',
+    progress=True,
+)
 def read_pla(session: Session, args: argparse.Namespace) -> Result:
     """Read a logic network from a PLA file.
 

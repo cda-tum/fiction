@@ -51,6 +51,7 @@ def _temp_arguments(parser: Parser) -> None:
     _temp_arguments,
     inputs="Active SiDB layout; gate checks also use the active truth table.",
     example='read and.sqd; tt -e "(ab)"; temp --gate-based',
+    progress=True,
 )
 def temp(session: Session, args: argparse.Namespace) -> Result:
     """Compute the critical temperature of the active SiDB layout.
@@ -61,6 +62,8 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
     """
     layout = _active_sidb_layout(session)
     params = critical_temperature_params()
+    params.on_progress = session.report_progress
+    params.on_worker_progress = session.report_worker_progress
     params.confidence_level = args.confidence
     params.max_temperature = args.max_temperature
     params.operational_params.sim_engine = ENGINES[args.engine]

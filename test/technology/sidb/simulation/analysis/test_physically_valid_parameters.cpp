@@ -18,6 +18,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -275,6 +276,26 @@ TEST_CASE(
         REQUIRE(p4.has_value());
         CHECK(std::get<0>(p4.value_or(decltype(p4)::value_type{})) == 0);
     }
+}
+
+TEST_CASE("Physical-validity sweeps report their total", "[physically-valid-parameters]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
+
+    progress_recorder         rec{};
+    operational_domain_params params{};
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5, .max = 6, .step = 0.5}};
+    params.on_progress      = rec.callback();
+
+    const auto domain = physically_valid_parameters(lyt, charge_distribution{lyt}, params);
+
+    CHECK(domain.size() == 3);
+    CHECK(rec.is_consistent("parameter points"));
+    const auto reports = rec.reports_of("parameter points");
+    REQUIRE(!reports.empty());
+    CHECK(reports.back().done == 3);
+    CHECK(reports.back().total == 3);
 }
 
 TEST_CASE("Physical-validity sweep boundaries", "[physically-valid-parameters]")

@@ -20,6 +20,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -273,4 +274,28 @@ TEST_CASE("Cartesian to hexagonal")
           coords::offset(1, 4, 0));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 2, 1), layout_height) ==
           coords::offset(1, 4, 1));
+}
+
+TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using hex_lyt     = hex_even_row_gate_clk_lyt;
+
+    const auto ntk    = blueprints::mux21_network<technology_network>();
+    const auto layout = orthogonal<gate_layout>(ntk);
+
+    progress_recorder       rec{};
+    hexagonalization_params params{};
+    params.input_pin_extension  = hexagonalization_params::io_pin_extension_mode::EXTEND;
+    params.output_pin_extension = hexagonalization_params::io_pin_extension_mode::EXTEND;
+    params.on_progress          = rec.callback();
+
+    const auto hex_layout = hexagonalization<hex_lyt>(layout, params);
+
+    check_eq(ntk, hex_layout);
+
+    CHECK(rec.is_consistent("diagonals"));
+    CHECK(rec.final_count("diagonals") == layout.x() + layout.y() + 1);
+    CHECK(rec.is_consistent("input pins"));
+    CHECK(rec.is_consistent("output pins"));
 }

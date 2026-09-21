@@ -38,7 +38,7 @@ def _read_arguments(parser: Parser) -> None:
     _topology_argument(parser)
 
 
-@command("read", Category.IO, _read_arguments, inputs="One file.", example='read "circuit.v" --type tec')
+@command("read", Category.IO, _read_arguments, inputs="One file.", example='read "circuit.v" --type tec', progress=True)
 def read(session: Session, args: argparse.Namespace) -> Result:
     """Read a logic network or a layout from a file, chosen by its suffix.
 

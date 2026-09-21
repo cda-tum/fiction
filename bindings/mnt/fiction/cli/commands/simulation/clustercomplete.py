@@ -43,6 +43,7 @@ def _clustercomplete_arguments(parser: Parser) -> None:
     unavailable=None
     if hasattr(pyfiction, "clustercomplete")
     else "this build of pyfiction has no ALGLIB, which 'clustercomplete' needs",
+    progress=True,
 )
 def clustercomplete_command(session: Session, args: argparse.Namespace) -> Result:
     """Simulate the active SiDB layout exactly with ClusterComplete, which scales to multi-gate layouts in base 3.
@@ -51,6 +52,8 @@ def clustercomplete_command(session: Session, args: argparse.Namespace) -> Resul
     """
     layout = _active_sidb_layout(session)
     params = pyfiction.clustercomplete_params()
+    params.on_progress = session.report_progress
+    params.on_worker_progress = session.report_worker_progress
     parameters = _apply_physical(params.simulation_parameters, args)
     params.global_potential = args.global_potential
     params.validity_witness_partitioning_max_cluster_size_gss = args.witness_limit

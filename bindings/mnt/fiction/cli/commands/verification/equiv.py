@@ -36,6 +36,7 @@ def _equiv_arguments(parser: Parser) -> None:
     _equiv_arguments,
     inputs="Store elements selected by the flags below.",
     example="generate mux -b 1; ortho; equiv -n -g",
+    progress=True,
 )
 def equiv(session: Session, args: argparse.Namespace) -> Result:
     """Check the active gate-level layout against the active network, or two store elements against each other.

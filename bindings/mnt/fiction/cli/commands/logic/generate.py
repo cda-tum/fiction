@@ -54,7 +54,7 @@ def _generate_arguments(parser: Parser) -> None:
     )
 
 
-@command("generate", Category.LOGIC, _generate_arguments, example="generate rca -b 2")
+@command("generate", Category.LOGIC, _generate_arguments, example="generate rca -b 2", progress=True)
 def generate(session: Session, args: argparse.Namespace) -> Result:
     """Generate an arithmetic or control circuit as an AIG."""
     network = from_aigverse(session, GENERATORS[args.kind](args.bitwidth), f"{args.kind}{args.bitwidth}")
