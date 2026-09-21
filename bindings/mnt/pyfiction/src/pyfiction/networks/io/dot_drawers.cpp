@@ -50,7 +50,8 @@ void write_dot_network(nanobind::module_& m)
                     ntk, filename);
             }
         },
-        py::arg("network"), py::arg("filename"), py::arg("indexes") = true, DOC(fiction_networks_io_write_dot_network));
+        py::arg("network"), py::arg("filename"), py::arg("indexes") = true, DOC(fiction_networks_io_write_dot_network),
+        py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail

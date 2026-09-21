@@ -23,10 +23,8 @@ from mnt.pyfiction import (
     convert_network,
     network_target,
     read_aig_network,
-    read_fqca_layout,
     read_mig_network,
     read_sqd_layout,
-    read_stacked_fqca_layout,
     read_technology_network,
     read_xag_network,
     set_name,
@@ -48,7 +46,7 @@ NETWORK_READERS = {
 """The ``--type`` names and the readers that produce them."""
 
 
-READ_SUFFIXES = (".v", ".aig", ".blif", ".aag", ".pla", ".fgl", ".fqca", ".sqd")
+READ_SUFFIXES = (".v", ".aig", ".blif", ".aag", ".pla", ".fgl", ".sqd")
 """Formats accepted by the generic reader."""
 
 
@@ -228,10 +226,6 @@ def read_file(
         return {"gate_layout": describe(layout)}
     if suffix == ".sqd":
         entry = CellEntry(read_sqd_layout(str(path), path.stem))
-    elif suffix == ".fqca":
-        stacked = read_stacked_fqca_layout(str(path), path.stem)
-        # The SVG renderer supports unsigned coordinates, whose layer index is one bit.
-        entry = CellEntry(read_fqca_layout(str(path), path.stem) if stacked.z() <= 1 else stacked)
     else:
         msg = f"cannot read '{path.suffix}' files"
         raise CommandError(msg)

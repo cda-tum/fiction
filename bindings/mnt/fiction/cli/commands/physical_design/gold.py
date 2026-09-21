@@ -65,7 +65,7 @@ def _gold_arguments(parser: Parser) -> None:
     parser.add_argument(
         "--progress",
         action="store_true",
-        help="let the search write its own progress to the terminal, bypassing the shell",
+        help="show shell progress (enabled by default)",
     )
 
 
@@ -75,6 +75,7 @@ def _gold_arguments(parser: Parser) -> None:
     _gold_arguments,
     inputs="Active network.",
     example="generate mux -b 1; gold --timeout 10",
+    progress=True,
 )
 def gold(session: Session, args: argparse.Namespace) -> Result:
     """Place and route the active network with graph-oriented layout design, an A* search.
@@ -83,6 +84,8 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
     than two inputs.
     """
     params = graph_oriented_layout_design_params()
+    params.on_progress = session.report_progress
+    params.on_worker_progress = session.report_worker_progress
     params.num_vertex_expansions = args.expansions
     params.mode = getattr(gold_effort_mode, args.effort.upper())
     params.cost = getattr(gold_cost_objective, args.cost.upper())
@@ -92,7 +95,7 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
     params.straight_inverters = args.straight_inverters
     params.tiles_to_skip_between_pis = args.skip_tiles
     params.randomize_tiles_to_skip_between_pis = args.randomize_skip_tiles
-    params.verbose = args.progress
+    params.verbose = False
     if args.seed is not None:
         params.seed = args.seed
     timeout = _seconds_to_ms(args.timeout)

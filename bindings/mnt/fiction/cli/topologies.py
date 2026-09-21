@@ -25,6 +25,19 @@ NATIVE_NAMES = {
 }
 """Canonical topology names mapped to the prefixes of the native bindings."""
 
+DISPLAY_NAMES = {
+    "cartesian": "Cartesian",
+    "odd_column_cartesian": "Odd-Column Cartesian",
+    "even_column_cartesian": "Even-Column Cartesian",
+    "odd_row_cartesian": "Odd-Row Cartesian",
+    "even_row_cartesian": "Even-Row Cartesian",
+    "odd_row_hex": "Odd-Row Hexagonal",
+    "even_row_hex": "Even-Row Hexagonal",
+    "odd_column_hex": "Odd-Column Hexagonal",
+    "even_column_hex": "Even-Column Hexagonal",
+}
+"""Human-readable topology names; command options and JSON retain canonical names."""
+
 TOPOLOGIES = {getattr(pyfiction, f"{native}_gate_layout"): name for name, native in NATIVE_NAMES.items()}
 """Gate-level layout classes mapped to canonical names for descriptions."""
 

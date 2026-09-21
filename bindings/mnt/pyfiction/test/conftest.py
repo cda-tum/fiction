@@ -137,53 +137,6 @@ endmodule
 .end
 
 """,
-    "stacked_crossing.fqca": """\
-[ Wire crossing ]
-
-= = = = =
-    a
-
-b 0 0 0 c
-
-    d
-= = = = =
-    0
-
-
-
-    0
-= = = = =
-    0
-    0
-    0
-    0
-    0
-= = = = =
-
-
-$
-
-a:
-- input
-- label = "a"
-- clock = 0
-
-b:
-- input
-- label = "b"
-- clock = 0
-
-c:
-- output
-- label = "b'"
-- clock = 0
-
-d:
-- output
-- label = "a'"
-- clock = 0
-
-""",
 }
 """Small network and layout files used by reader and writer tests."""
 

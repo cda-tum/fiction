@@ -43,6 +43,7 @@
 #include <fiction/types.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -695,7 +696,7 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
     {
         const auto gate_lyt = blueprints::optimization_layout_corner_case_outputs_2<GateLyt>();
 
-        const auto layout = apply_gate_library<stacked_qca_cell_clk_lyt, qca_one_library, GateLyt>(gate_lyt);
+        const auto layout = apply_gate_library<qca_cell_clk_lyt, qca_one_library, GateLyt>(gate_lyt);
 
         CHECK(layout.x() == 21);
         CHECK(layout.y() == 14);
@@ -712,4 +713,26 @@ TEST_CASE("Apply molecular QCA gate library end-to-end", "[apply-gate-library]")
     const auto cell_layout = apply_gate_library<mol_qca_cell_clk_lyt, sim7_mol_library>(layout);
 
     CHECK(cell_layout.num_cells() > 0u);
+}
+
+TEST_CASE("Gate-library progress counts completed mappings", "[apply-gate-library]")
+{
+    const auto  gate_lyt = blueprints::straight_wire_gate_layout<cart_even_row_gate_clk_lyt>();
+    std::size_t expected{};
+    gate_lyt.foreach_node([&](const auto& n) { expected += !gate_lyt.is_constant(n); });
+    std::size_t completed{};
+    std::size_t reports{};
+    const auto  layout =
+        apply_gate_library<qca_cell_clk_lyt, qca_one_library>(gate_lyt,
+                                                              [&](const auto, const auto done, const auto total)
+                                                              {
+                                                                  CHECK(total == expected);
+                                                                  CHECK(done >= completed);
+                                                                  CHECK(done <= total);
+                                                                  completed = done;
+                                                                  ++reports;
+                                                              });
+    CHECK(reports >= 2);
+    CHECK(completed == expected);
+    CHECK(layout.num_cells() == apply_gate_library<qca_cell_clk_lyt, qca_one_library>(gate_lyt).num_cells());
 }

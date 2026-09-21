@@ -50,7 +50,12 @@ def _ortho_arguments(parser: Parser) -> None:
 
 
 @command(
-    "ortho", Category.PHYSICAL_DESIGN, _ortho_arguments, inputs="Active network.", example="generate mux -b 1; ortho"
+    "ortho",
+    Category.PHYSICAL_DESIGN,
+    _ortho_arguments,
+    inputs="Active network.",
+    example="generate mux -b 1; ortho",
+    progress=True,
 )
 def ortho(session: Session, args: argparse.Namespace) -> Result:
     """Place and route the active network with the scalable orthogonal graph drawing heuristic.
@@ -60,6 +65,7 @@ def ortho(session: Session, args: argparse.Namespace) -> Result:
     """
     network = session.as_technology_network(session.networks.current())
     params = orthogonal_params()
+    params.on_progress = session.report_progress
     params.number_of_clock_phases = num_clks.THREE if args.clock_phases == THREE_CLOCK_PHASES else num_clks.FOUR
     stats = orthogonal_stats()
     topology = "hexagonal" if args.topology == "even_row_hex" else args.topology

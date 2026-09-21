@@ -77,8 +77,8 @@ TEMPLATE_TEST_CASE("Clocking capabilities across coordinate geometries", "[cell-
     CHECK_FALSE(layout.is_clocking_scheme(bounded_name));
 }
 
-TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", qca_cell_clk_lyt, stacked_qca_cell_clk_lyt,
-                   inml_cell_clk_lyt, sidb_cell_clk_lyt, sidb_cell_clk_lyt_cube)
+TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", qca_cell_clk_lyt, inml_cell_clk_lyt,
+                   sidb_cell_clk_lyt, sidb_cell_clk_lyt_cube)
 {
     CHECK(is_cell_level_layout_v<TestType>);
     CHECK(has_foreach_cell_v<TestType>);
@@ -142,7 +142,6 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
         CHECK(tech_impl_name<qca_technology> == std::string{"QCA"});
 
         CHECK(has_qca_technology_v<qca_cell_clk_lyt>);
-        CHECK(has_qca_technology_v<stacked_qca_cell_clk_lyt>);
     }
     SECTION("iNML")
     {

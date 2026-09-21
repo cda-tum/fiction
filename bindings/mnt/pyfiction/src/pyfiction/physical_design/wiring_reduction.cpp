@@ -23,15 +23,16 @@
 #include <sstream>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/chrono.h>      // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/function.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/chrono.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>   // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -44,7 +45,9 @@ void wiring_reduction(nanobind::module_& m)
                                                                   DOC(fiction_physical_design_wiring_reduction_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("timeout", &fiction::physical_design::wiring_reduction_params::timeout,
-                DOC(fiction_physical_design_wiring_reduction_params_timeout));
+                DOC(fiction_physical_design_wiring_reduction_params_timeout))
+        .def_rw("on_progress", &fiction::physical_design::wiring_reduction_params::on_progress,
+                DOC(fiction_physical_design_wiring_reduction_params_on_progress));
 
     py::class_<fiction::physical_design::wiring_reduction_stats>(m, "wiring_reduction_stats",
                                                                  DOC(fiction_physical_design_wiring_reduction_stats))
@@ -83,7 +86,7 @@ void wiring_reduction(nanobind::module_& m)
 
     m.def("wiring_reduction", &fiction::physical_design::wiring_reduction<py_cartesian_gate_layout>, py::arg("layout"),
           py::arg("parameters") = fiction::physical_design::wiring_reduction_params{}, py::arg("statistics") = nullptr,
-          DOC(fiction_physical_design_wiring_reduction));
+          py::call_guard<py::gil_scoped_release>(), DOC(fiction_physical_design_wiring_reduction));
 }
 
 }  // namespace pyfiction

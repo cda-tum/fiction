@@ -25,9 +25,10 @@
 #include <utility>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>   // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/array.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>  // NOLINT(misc-include-cleaner): enables callback conversion
+#include <nanobind/stl/pair.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>    // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -50,7 +51,10 @@ void gate_level_drvs_impl(nanobind::module_& m)
 
             fiction::verification::gate_level_drv_stats stats{};
 
-            fiction::verification::gate_level_drvs(lyt, params, &stats);
+            {
+                const py::gil_scoped_release release{};
+                fiction::verification::gate_level_drvs(lyt, params, &stats);
+            }
 
             if (print_report)
             {
@@ -77,6 +81,8 @@ void design_rule_violations(nanobind::module_& m)
     py::class_<fiction::verification::gate_level_drv_params>(m, "gate_level_drv_params",
                                                              DOC(fiction_verification_gate_level_drv_params))
         .def(py::init<>(), "Default constructor.")
+        .def_rw("on_progress", &fiction::verification::gate_level_drv_params::on_progress,
+                "Receives completed work and the phase total.")
         .def_rw("unplaced_nodes", &fiction::verification::gate_level_drv_params::unplaced_nodes,
                 DOC(fiction_verification_gate_level_drv_params_unplaced_nodes))
         .def_rw("placed_dead_nodes", &fiction::verification::gate_level_drv_params::placed_dead_nodes,

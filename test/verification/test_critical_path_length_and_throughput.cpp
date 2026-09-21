@@ -19,6 +19,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
@@ -31,10 +32,16 @@ using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::verification;
 
+/**
+ * @brief Checks the critical path against the network depth.
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout to check.
+ * @param cp_tp Computed critical path and throughput.
+ */
 template <typename Lyt>
 void check_critical_path_length(const Lyt& lyt, const cp_and_tp& cp_tp) noexcept
 {
-    mockturtle::depth_view const depth_lyt{lyt};
+    const mockturtle::depth_view depth_lyt{lyt};
 
     CHECK(cp_tp.critical_path_length == depth_lyt.depth() + 1);  // + 1 because depth_view does not count POs
 }
@@ -71,4 +78,28 @@ TEST_CASE("Unbalanced layout", "[throughput]")
     using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     check(blueprints::unbalanced_and_layout<gate_layout>(), 2);
+}
+
+TEST_CASE("Critical path analysis handles long routes", "[throughput]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    constexpr uint64_t length{100'000};
+    gate_layout        layout{{length, 1}, clocking::twoddwave<gate_layout>()};
+    auto               signal = layout.create_pi("in", {0, 0});
+    auto               branch = signal;
+    for (uint64_t x = 1; x < length; ++x)
+    {
+        signal = x == length / 2 ? layout.create_not(signal, {x, 0}) : layout.create_buf(signal, {x, 0});
+        if (x == length / 2)
+        {
+            branch = signal;
+        }
+    }
+    layout.create_po(signal, "out", {length, 0});
+    layout.create_po(branch, "branch", {length / 2, 1});
+
+    const auto result = critical_path_length_and_throughput(layout);
+    CHECK(result.critical_path_length == length + 1);
+    CHECK(result.throughput == 1);
 }

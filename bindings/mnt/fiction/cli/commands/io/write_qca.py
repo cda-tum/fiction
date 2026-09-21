@@ -14,7 +14,7 @@ import argparse
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import qca_layout, stacked_qca_layout, write_qca_layout, write_qca_layout_params
+from mnt.pyfiction import qca_layout, write_qca_layout, write_qca_layout_params
 
 from ._write import output_argument, output_path, require_cell_type, written
 
@@ -38,6 +38,7 @@ def _write_qca_arguments(parser: Parser) -> None:
     _write_qca_arguments,
     inputs="Active cell-level layout.",
     example="generate mux -b 1; ortho; cell; write_qca output.qca",
+    progress=True,
 )
 def write_qca_command(session: Session, args: argparse.Namespace) -> Result:
     """Write the active QCA layout as a QCADesigner file.
@@ -46,9 +47,10 @@ def write_qca_command(session: Session, args: argparse.Namespace) -> Result:
     """
     entry = session.cell_layouts.current()
     element = entry.layout
-    require_cell_type(element, (qca_layout, stacked_qca_layout), ".qca")
+    require_cell_type(element, (qca_layout,), ".qca")
     path = output_path(element, args.file, ".qca")
     params = write_qca_layout_params()
+    params.on_progress = session.report_progress
     params.create_inter_layer_via_cells = args.via_layers
     write_qca_layout(element, str(path), params)
     return written(session, path)

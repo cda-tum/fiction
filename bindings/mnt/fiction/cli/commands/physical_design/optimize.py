@@ -47,6 +47,7 @@ def _optimize_arguments(parser: Parser) -> None:
     _optimize_arguments,
     inputs="Active gate-level layout.",
     example="generate mux -b 1; ortho; optimize",
+    progress=True,
 )
 def optimize(session: Session, args: argparse.Namespace) -> Result:
     """Shrink the active 2DDWave-clocked Cartesian layout by moving gates and shortening wires.
@@ -59,12 +60,14 @@ def optimize(session: Session, args: argparse.Namespace) -> Result:
     stats: post_layout_optimization_stats | wiring_reduction_stats
     if args.wiring_only:
         wiring_params = wiring_reduction_params()
+        wiring_params.on_progress = session.report_progress
         if timeout is not None:
             wiring_params.timeout = timeout
         stats = wiring_reduction_stats()
         wiring_reduction(layout, wiring_params, stats)
     else:
         params = post_layout_optimization_params()
+        params.on_progress = session.report_progress
         params.planar_optimization = args.planar
         if args.max_relocations is not None:
             params.max_gate_relocations = args.max_relocations

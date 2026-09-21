@@ -183,11 +183,9 @@ File formats:
 
 - `*.qca` for [QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/)
 - `*.qll` for [MagCAD](https://topolinano.polito.it/) and [SCERPA](https://ieeexplore.ieee.org/document/8935211)
-- `*.fqca` for [QCA-STACK](https://github.com/wlambooy/QCA-STACK)
 - `*.svg` for visual representation
 
-Many thanks to Frank Sill Torres for his support with the QCADesigner format, to Willem Lambooy for his support with the
-QCA-STACK format, and to Sophia Kuhn for implementing the SVG writer!
+Many thanks to Frank Sill Torres for his support with the QCADesigner format and to Sophia Kuhn for implementing the SVG writer!
 
 ### in-plane Nanomagnet Logic (iNML)
 

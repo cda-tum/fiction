@@ -22,11 +22,13 @@
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <exception>
 #include <iostream>
@@ -49,6 +51,8 @@ struct write_qca_layout_svg_params
      * Limit details to create smaller file sizes.
      */
     bool simple = false;
+    /** @brief Receives completed serialization work and the phase total. */
+    utils::progress_callback on_progress{};
 };
 
 template <typename Coordinate>
@@ -484,12 +488,15 @@ class write_qca_layout_svg_impl
 {
   public:
     /**
-     * Default constructor.
+     * @brief Stores the layout and drawing parameters.
+     * @param layout Layout to draw.
+     * @param stream Output stream.
+     * @param p Drawing parameters.
      */
-    write_qca_layout_svg_impl(const Lyt& layout, std::ostream& stream, const write_qca_layout_svg_params& p = {}) :
+    write_qca_layout_svg_impl(const Lyt& layout, std::ostream& stream, write_qca_layout_svg_params p = {}) :
             lyt{layout},
             os{stream},
-            ps{p}
+            ps{std::move(p)}
     {}
 
     void run()
@@ -614,8 +621,12 @@ class write_qca_layout_svg_impl
     {
         std::stringstream cell_descriptions{};
 
+        utils::progress_reporter progress{ps.on_progress, "rendering cell positions",
+                                          (static_cast<std::size_t>(lyt.x()) + 1) *
+                                              (static_cast<std::size_t>(lyt.y()) + 1) *
+                                              (static_cast<std::size_t>(lyt.z()) + 1)};
         lyt.foreach_cell_position(
-            [this, &cell_descriptions](const auto& c)
+            [this, &cell_descriptions, &progress](const auto& c)
             {
                 if (!lyt.is_empty_cell(c))
                 {
@@ -627,6 +638,7 @@ class write_qca_layout_svg_impl
                         svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_CELL_X + (c.x * svg::CELL_DISTANCE),
                         svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_CELL_Y + (c.y * svg::CELL_DISTANCE));
                 }
+                progress.advance();
             });
 
         const double viewbox_x = (2 * svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.x() + 1) * svg::CELL_DISTANCE);
@@ -655,8 +667,12 @@ class write_qca_layout_svg_impl
         static constexpr const std::array<const char*, 4> text_colors{
             {svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_34_TEXT, svg::CLOCK_ZONE_34_TEXT}};
 
+        utils::progress_reporter progress{ps.on_progress, "rendering cell positions",
+                                          (static_cast<std::size_t>(lyt.x()) + 1) *
+                                              (static_cast<std::size_t>(lyt.y()) + 1) *
+                                              (static_cast<std::size_t>(lyt.z()) + 1)};
         lyt.foreach_cell_position(
-            [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_tile](const auto& c)
+            [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_tile, &progress](const auto& c)
             {
                 const auto            clock_zone = lyt.get_clock_number(c);
                 const coordinate<Lyt> tile_coords{c.x / lyt.get_tile_size_x(), c.y / lyt.get_tile_size_y()};
@@ -676,6 +692,7 @@ class write_qca_layout_svg_impl
                                     svg::STARTING_OFFSET_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
                                     svg::STARTING_OFFSET_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
                 }
+                progress.advance();
             });
 
         // All cell-descriptions are done and tiles have been created
@@ -689,6 +706,7 @@ class write_qca_layout_svg_impl
         }
 
         // Associate tiles with cell-descriptions now; coordinates of tiles are used for tile- and cell-descriptions
+        utils::progress_reporter assembly{ps.on_progress, "assembling tile", coord_to_tile.size()};
         for (const auto& [coord, tdscr] : coord_to_tile)
         {
             if (coord_to_latch_tile.contains(coord))
@@ -706,9 +724,10 @@ class write_qca_layout_svg_impl
                                              text_colors[czone], ps.simple ? "" : std::to_string(czone + 1));
 
             tile_descriptions << c_descr;
+            assembly.advance();
         }
 
-        // Add the descriptions of latch-tiles to the whole image
+        utils::progress_reporter latch_assembly{ps.on_progress, "assembling latch_tile", coord_to_latch_tile.size()};
         for (const auto& [coord, ldscr] : coord_to_latch_tile)
         {
             const auto [descr, czone_up, latch_delay] = ldscr;
@@ -728,6 +747,7 @@ class write_qca_layout_svg_impl
                             text_colors[czone_lo], ps.simple ? "" : std::to_string(czone_lo + 1));
 
             tile_descriptions << t_descr;
+            latch_assembly.advance();
         }
 
         const coordinate<Lyt> length = {(lyt.x() / lyt.get_tile_size_x()) + 1, (lyt.y() / lyt.get_tile_size_y()) + 1};
@@ -744,12 +764,15 @@ class write_mol_qca_layout_svg_impl
 {
   public:
     /**
-     * Default constructor.
+     * @brief Stores the layout and drawing parameters.
+     * @param layout Layout to draw.
+     * @param stream Output stream.
+     * @param p Drawing parameters.
      */
-    write_mol_qca_layout_svg_impl(const Lyt& layout, std::ostream& stream, const write_qca_layout_svg_params& p = {}) :
+    write_mol_qca_layout_svg_impl(const Lyt& layout, std::ostream& stream, write_qca_layout_svg_params p = {}) :
             lyt{layout},
             os{stream},
-            ps{p}
+            ps{std::move(p)}
     {}
 
     void run()
@@ -843,8 +866,12 @@ class write_mol_qca_layout_svg_impl
     {
         std::stringstream cell_descriptions{};
 
+        utils::progress_reporter progress{ps.on_progress, "rendering cell positions",
+                                          (static_cast<std::size_t>(lyt.x()) + 1) *
+                                              (static_cast<std::size_t>(lyt.y()) + 1) *
+                                              (static_cast<std::size_t>(lyt.z()) + 1)};
         lyt.foreach_cell_position(
-            [this, &cell_descriptions](const auto& c)
+            [this, &cell_descriptions, &progress](const auto& c)
             {
                 if (!lyt.is_empty_cell(c))
                 {
@@ -858,6 +885,7 @@ class write_mol_qca_layout_svg_impl
                                                      svg::STARTING_OFFSET_TILE_Y + svg::MOL_QCA_STARTING_OFFSET_CELL_Y +
                                                          (c.y * svg::MOL_QCA_CELL_DISTANCE));
                 }
+                progress.advance();
             });
 
         const double viewbox_x =

@@ -17,13 +17,14 @@ from mnt.pyfiction import read_technology_network
 DIR_PATH = Path(__file__).resolve().parent
 
 
-def test_read_technology_network(resources_dir):
+def test_read_technology_network(resources_dir: Path) -> None:
+    """The parsed output remains driven by the OR gate without a synthesized buffer."""
     network = read_technology_network(str(resources_dir / "mux21.v"))
 
-    assert network.size() == 10
-    assert network.nodes() == list(range(10))
-    assert network.num_gates() == 5
-    assert network.gates() == [5, 6, 7, 8, 9]
+    assert network.size() == 9
+    assert network.nodes() == list(range(9))
+    assert network.num_gates() == 4
+    assert network.gates() == [5, 6, 7, 8]
     assert network.is_inv(5)
     assert network.is_and(6)
     assert network.is_and(7)
@@ -45,12 +46,12 @@ def test_read_technology_network(resources_dir):
     assert network.get_name(4) == "in2"
 
     assert network.num_pos() == 1
-    assert network.pos() == [9]
-    assert network.is_po(9)
-    assert network.po_index(9) == 0
-    assert network.po_at(0) == 9
-    assert network.has_output_name(network.po_index(9))
-    assert network.get_output_name(network.po_index(9)) == "out"
+    assert network.pos() == [8]
+    assert network.is_po(8)
+    assert network.po_index(8) == 0
+    assert network.po_at(0) == 8
+    assert network.has_output_name(network.po_index(8))
+    assert network.get_output_name(network.po_index(8)) == "out"
 
     assert network.fanins(0) == []
     assert network.fanins(1) == []
@@ -61,7 +62,6 @@ def test_read_technology_network(resources_dir):
     assert network.fanins(6) == [2, 5]
     assert network.fanins(7) == [3, 4]
     assert network.fanins(8) == [6, 7]
-    assert network.fanins(9) == [8]
 
     with pytest.raises(RuntimeError):
         read_technology_network(str(DIR_PATH / "mux41.v"))

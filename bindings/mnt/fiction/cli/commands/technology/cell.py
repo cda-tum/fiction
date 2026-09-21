@@ -78,6 +78,7 @@ def _cell_arguments(parser: Parser) -> None:
     _cell_arguments,
     inputs="Active gate-level layout.",
     example="generate mux -b 1; ortho; cell --library qca-one",
+    progress=True,
 )
 def cell(session: Session, args: argparse.Namespace) -> Result:
     """Compile the active gate-level layout into a cell-level layout with a gate library.
@@ -91,6 +92,6 @@ def cell(session: Session, args: argparse.Namespace) -> Result:
     if not isinstance(layout, needed):
         msg = f"{library} needs a {TOPOLOGIES[needed]} layout; the active layout is {TOPOLOGIES[type(layout)]}"
         raise CommandError(msg)
-    entry = CellEntry(apply(layout))
+    entry = CellEntry(apply(layout, on_progress=session.report_progress))
     session.cell_layouts.add(entry)
     return {"cell_layout": describe(entry)}

@@ -23,17 +23,12 @@ from mnt.pyfiction import (
     inml_layout,
     inml_technology,
     mig_network,
-    read_fqca_layout,
     read_sqd_layout,
-    read_stacked_fqca_layout,
     set_name,
     shifted_cartesian_gate_layout,
     simulate_outputs,
-    stacked_qca_layout,
     technology_network,
     write_fgl_layout,
-    write_qca_layout_svg,
-    write_qca_layout_svg_params,
     xag_network,
 )
 
@@ -99,8 +94,6 @@ def test_split_readers_take_their_own_format(shell: Shell, resource: Callable[[s
     assert len(shell.session.networks) == 1
     shell.ok(f'read_sqd "{resource("siqad_or_gate.sqd")}"')
     assert len(shell.session.cell_layouts) == 1
-    shell.ok(f'read_fqca "{resource("stacked_crossing.fqca")}"')
-    assert len(shell.session.cell_layouts) == 2
 
 
 def test_split_readers_reject_another_format(shell: Shell, resource: Callable[[str], str]) -> None:
@@ -152,9 +145,6 @@ def test_sqd_shell_round_trip(shell: Shell, resource: Callable[[str], str], tmp_
     assert after.num_dots() == before.num_dots()
     assert after.num_pis() == before.num_pis()
     assert after.num_pos() == before.num_pos()
-    fqca = tmp_path / "gate.fqca"
-    shell.ok(f'read "{resource("mux21.v")}"; ortho; cell; write_fqca "{fqca}"; clear -c; read "{fqca}"')
-    assert shell.session.cell_layouts.current().layout.num_cells() > 0
 
 
 @pytest.mark.parametrize("topology", ["cartesian", "shifted_cartesian", "hexagonal"])
@@ -188,7 +178,7 @@ def test_write_aiger_needs_an_aig(mux21_shell: Shell, tmp_path: Path, resource: 
     assert (tmp_path / "x.aig").stat().st_size > 0
 
 
-@pytest.mark.parametrize("suffix", [".qca", ".fqca", ".qll", ".svg", ".dot", ".fgl"])
+@pytest.mark.parametrize("suffix", [".qca", ".qll", ".svg", ".dot", ".fgl"])
 def test_write_layouts(mux21_shell: Shell, tmp_path: Path, suffix: str) -> None:
     mux21_shell.ok("ortho; cell")
     path = tmp_path / f"mux21{suffix}"
@@ -198,7 +188,7 @@ def test_write_layouts(mux21_shell: Shell, tmp_path: Path, suffix: str) -> None:
 
 def test_write_via_layer_flags(mux21_shell: Shell, tmp_path: Path) -> None:
     mux21_shell.ok("ortho; cell")
-    mux21_shell.ok(f'write_qca --no-via-layers "{tmp_path / "a.qca"}"; write_fqca --via-layers "{tmp_path / "b.fqca"}"')
+    mux21_shell.ok(f'write_qca --no-via-layers "{tmp_path / "a.qca"}"')
 
 
 def test_write_technology_mismatch(mux21_shell: Shell, tmp_path: Path) -> None:
@@ -403,54 +393,6 @@ def test_all_topologies_round_trip_small_fixture(shell: Shell, tmp_path: Path, t
     assert simulate_outputs(restored) == simulate_outputs(layout)
 
 
-def test_stacked_fqca_preserves_all_cells(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:
-    filename = resource("stacked_crossing.fqca")
-    shell.ok(f'read "{filename}"')
-    layout = shell.session.cell_layouts.current().layout
-    assert layout.num_cells() == 14
-    assert layout.z() == 2
-    assert layout.num_pis() == layout.num_pos() == 2
-
-    def metadata(lyt: stacked_qca_layout) -> list[tuple[object, ...]]:
-        return sorted(
-            (
-                c.x,
-                c.y,
-                c.z,
-                str(lyt.get_cell_type(c)),
-                str(lyt.get_cell_mode(c)),
-                lyt.get_cell_name(c),
-                lyt.get_clock_number(c),
-            )
-            for c in lyt.cells()
-        )
-
-    destination = tmp_path / "crossing.fqca"
-    shell.ok(f'write_fqca "{destination}"')
-    restored = read_stacked_fqca_layout(str(destination))
-    assert metadata(restored) == metadata(layout)
-    with pytest.raises((ValueError, IndexError, RuntimeError)):
-        read_fqca_layout(filename)
-
-
-@pytest.mark.parametrize("simple", [False, True])
-def test_fqca_import_preserves_svg_drawing(mux21_shell: Shell, tmp_path: Path, *, simple: bool) -> None:
-    """CLI FQCA imports render like native imports at both drawing detail levels."""
-    mux21_shell.ok("ortho; cell --library qca-one")
-    before = tmp_path / "before.svg"
-    after = tmp_path / "after.svg"
-    fqca = tmp_path / "layout.fqca"
-    option = " --simple" if simple else ""
-    mux21_shell.ok(f'write_fqca "{fqca}"; read "{fqca}"')
-    params = write_qca_layout_svg_params()
-    params.simple = simple
-    write_qca_layout_svg(read_fqca_layout(str(fqca)), str(before), params)
-    mux21_shell.ok(f'write_svg "{after}"{option}')
-    assert after.read_text(encoding="utf-8") == before.read_text(encoding="utf-8")
-    mux21_shell.ok(f'show -c --silent -o "{after}"{option}')
-    assert after.read_text(encoding="utf-8") == before.read_text(encoding="utf-8")
-
-
 @pytest.mark.parametrize(
     ("format_name", "content"),
     [
@@ -483,7 +425,7 @@ def test_complete_design_and_export_workflows(shell: Shell, tmp_path: Path, libr
     shell.ok(f"cell --library {library}; area")
     entry = shell.session.cell_layouts.current()
     formats = {
-        "qca-one": ("qca", "fqca", "qll", "svg"),
+        "qca-one": ("qca", "qll", "svg"),
         "sim7-mol": ("qll", "svg"),
         "bestagon": ("sqd", "svg"),
         "topolinano": ("qcc", "qll"),
@@ -493,12 +435,7 @@ def test_complete_design_and_export_workflows(shell: Shell, tmp_path: Path, libr
         options = " --component-name" if suffix == "qcc" else ""
         shell.ok(f'write_{suffix} "{destination}"{options}')
         text = destination.read_text(encoding="utf-8")
-        if suffix == "fqca":
-            restored = read_stacked_fqca_layout(str(destination))
-            assert restored.num_cells() == entry.layout.num_cells()
-            assert restored.num_pis() == entry.layout.num_pis()
-            assert restored.num_pos() == entry.layout.num_pos()
-        elif suffix == "sqd":
+        if suffix == "sqd":
             restored = read_sqd_layout(str(destination))
             assert restored.num_dots() == entry.layout.num_dots()
             assert restored.num_pis() == entry.layout.num_pis()

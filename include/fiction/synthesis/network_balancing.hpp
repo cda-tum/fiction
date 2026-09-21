@@ -17,6 +17,7 @@
 #pragma once
 
 #include "fiction/synthesis/network_conversion.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -26,6 +27,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <functional>
+#include <utility>
 #include <vector>
 
 namespace fiction::synthesis
@@ -40,6 +42,8 @@ struct network_balancing_params
      * Flag to indicate that all output nodes should be in the same rank.
      */
     bool unify_outputs = false;
+    /** @brief Reports completed work in each bounded phase. */
+    utils::progress_callback on_progress{};
 };
 
 namespace detail
@@ -58,11 +62,16 @@ template <typename NtkDest, typename NtkSrc>
 class network_balancing_impl
 {
   public:
-    network_balancing_impl(const NtkSrc& src, const network_balancing_params p) :
+    /**
+     * @brief Stores the network and algorithm parameters.
+     * @param src Source network.
+     * @param p Algorithm parameters.
+     */
+    network_balancing_impl(const NtkSrc& src, network_balancing_params p) :
             ntk{convert_network<NtkDest>(src)},
             ntk_topo{ntk},
             ntk_depth{ntk},
-            ps{p}
+            ps{std::move(p)}
     {}
 
     NtkDest run()
@@ -82,8 +91,9 @@ class network_balancing_impl
         auto& balanced = init.first;
         auto& old2new  = init.second;
 
+        utils::progress_reporter progress{ps.on_progress, "balancing gates", ntk_topo.num_gates()};
         ntk_topo.foreach_gate(
-            [this, &balanced, &old2new, &insert_buf_chain](const auto& n)
+            [this, &balanced, &old2new, &insert_buf_chain, &progress](const auto& n)
             {
                 // gather children, but substitute fanins by buf where applicable
                 std::vector<typename mockturtle::topo_view<NtkDest>::signal> children{};
@@ -107,11 +117,12 @@ class network_balancing_impl
 
                 // clone the node with new children according to its depth
                 old2new[n] = balanced.clone_node(ntk_topo, n, children);
+                progress.advance();
             });
 
         // gather PO levels
         const auto po_levels    = get_po_levels(ntk_depth);
-        const auto max_po_level = *std::ranges::max_element(po_levels);
+        const auto max_po_level = po_levels.empty() ? 0u : *std::ranges::max_element(po_levels);
 
         // add primary outputs to finalize the network
         ntk_topo.foreach_po(
@@ -148,7 +159,12 @@ template <typename Ntk>
 class is_balanced_impl
 {
   public:
-    is_balanced_impl(const Ntk& src, network_balancing_params p) : ntk{src}, ntk_depth{src}, ps{p} {}
+    /**
+     * @brief Stores the network and algorithm parameters.
+     * @param src Source network.
+     * @param p Algorithm parameters.
+     */
+    is_balanced_impl(const Ntk& src, network_balancing_params p) : ntk{src}, ntk_depth{src}, ps{std::move(p)} {}
 
     bool run()
     {

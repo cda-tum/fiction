@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
+  - `utils::progress_callback` and `utils::progress_reporter` let long-running algorithms report
+    progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
+  - Parallel algorithms accept `on_worker_progress` for stable worker activity and completed counts.
+    Gate mapping, network passes, design-rule checks, and layout writers report counted phases.
 
 - CLI:
 
@@ -19,6 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
   - `aig`, `abc`, and `generate` provide AIG optimization, external ABC scripts, and network generators.
   - `show` supports optional Graphviz SVG rendering, explicit viewers, and temporary-file cleanup.
+  - Long-running CLI commands show responsive progress. Counted phases use real bars; searches show
+    candidate dimensions on one aggregate row. Quiet mode and redirected output suppress displays.
 
 - Code quality:
 
@@ -89,6 +95,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and MIGs as well as technology networks
   - `print_sidb_layout` exposes `lat_color` and `crop_layout`, and `write_dot_network` and
     `write_dot_layout` expose `indexes` and `clock_colors`
+  - The parameters of the algorithms that report progress accept a Python callable as
+    `on_progress`, and `exhaustive_ground_state_simulation` takes it as an argument. These
+    algorithms release the GIL while they run.
 
 - Tooling:
 
@@ -101,6 +110,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - Path searches accept separate `obstructions` data for temporary constraints and preserve caller-owned constraints.
+  - Avoid redundant progress-callback copies in algorithms and layout writers.
+  - Critical-path analysis collapses wire chains to reduce traversal overhead on large layouts.
   - Avoid helper threads for single-worker sampling and contour exploration.
   - Reduce coordinate-vector allocations during operational-domain traversal.
   - Reuse completed three-dimensional contour surfaces across initial samples.
@@ -128,6 +139,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `surface_analysis` and `surface_black_list` live in `physical_design/surface_analysis.hpp` and namespace
     `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
     SiDB header dependency
+  - `graph_oriented_layout_design`, `post_layout_optimization`, and `wiring_reduction` are no longer
+    `noexcept`, so an exception of a progress callback propagates to the caller
 
 - Build system:
 
@@ -147,7 +160,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Help includes command inputs, defaults, restrictions, and examples. Store tables and status text fit
     terminal widths; `ps` groups related statistics.
   - Errors use standard error. `--quiet` retains requested results, and `-i` continues scripted runs
-    interactively. `gold --progress` controls search progress separately from verbose statistics.
+    interactively. `gold --progress` remains accepted for compatibility; Rich controls search progress.
   - Long options use hyphens. See the CLI migration table for renamed options, topology choices, clock
     phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
@@ -340,6 +353,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - **Breaking:** `FICTION_CLI`, `FICTION_ABC`, `ABC_ROOT`, the `deploy` preset, and the `alice`
     dependency are gone with the C++ command-line interface.
+  - **Breaking:** `FICTION_PROGRESS_BARS` and mockturtle's progress bars on `std::cout`; the
+    `on_progress` callbacks replace them.
 - CLI:
 
   - **Breaking:** The C++ command-line interface and `shortcuts.fs`. Use the Python `fiction` shell.
@@ -347,6 +362,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     gate-based SiDB simulations, `temp -g` and `opdom`, alone.
   - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
     `help --docs`.
+- I/O:
+
+  - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
 - **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
   `charge_distribution_surface`, and the lattice orientation tags; `model/nm_position.hpp` and
   `model/nm_distance.hpp` (use `lattice::nm_position` and `lattice::nm_distance`); the SiQAD coordinate
@@ -389,12 +407,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Yen's algorithm now returns no paths for a zero limit and preserves valid alternatives at each spur node.
   - Path enumeration now reaches occupied crossing-layer targets under the same constraints as A*.
+  - Critical-path analysis now handles long routed paths without overflowing the native stack.
+  - `network_balancing` accepts networks without primary outputs.
+  - `gold` counts expansions only when a search-space graph expands.
+  - Progress reporters now flush each pass's final count before a reset.
+  - Operational-domain sampling now reports worker activity when it runs on the calling thread.
   - Contour tracing distributes simulation locks across regular parameter grids.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
   - Defect-influence analysis now propagates worker exceptions to the caller.
   - Canvas filtering now rejects SiDBs missing from the simulation state's layout.
   - Ground State Space reports multiset limits using the potential landscape's charge base.
+  - Multi-threaded `exact` synchronizes worker contexts and measures one shared timeout budget.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
   - GOLD now applies each invocation's seed and PI-spacing limit independently
   - Operational checks and gate pruning now reject mismatched input counts; band-bending resilience rejects unusable inputs.
@@ -417,6 +441,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
 
 - Build system:
+  - QuickSim and ClusterComplete compile with Apple libc++ without experimental library features.
   - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
   - CMake now verifies the `fmt` 12.2.0 archive with its matching SHA-256 checksum.
@@ -425,6 +450,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
+  - Parallel commands now use one aggregate progress row; `exact` retains candidate dimensions at count checkpoints.
+  - Store listings and command summaries skip layout timing analysis; `ps -g` computes it on request.
+  - Store and statistics displays use readable topology names.
+  - TEC readers preserve output drivers instead of inserting output buffers.
+  - Large `ortho` results now finish their statistics calculation while the progress display refreshes.
+  - Progress displays now serialize concurrent reports, clear totals for restarted tasks, and respect nested quiet commands.
   - `opdom` logs its default algorithm as grid search; JSON logs encode non-finite statistics as `null`.
   - `show` and `write` reject unsupported drawing options before writing output. Invalid mapping and
     numeric inputs preserve stored elements.
@@ -491,8 +522,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
   - Transactional writers now report filesystem setup and replacement errors as stream failures. They preserve output permissions and symbolic links to existing files, and reject dangling links and non-regular output files.
   - Network DOT export uses transactional replacement, including intermediate drawings produced by `show`.
-  - FQCA imports with at most two layers retain SVG export and viewing.
-  - Stacked FQCA imports preserve all layers and cell metadata. Layout readers reject coordinate overflow; writers replace files only after successful serialization.
+  - Layout readers reject coordinate overflow; writers replace files only after successful serialization.
   - QCA SVG output now uses valid text colors in simple tile mode.
   - SQD readers now reject fractional coordinates and trailing text in numeric attributes.
   - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites
@@ -504,6 +534,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - `physically_valid_parameters` and `operational_domain_ratio` now release the GIL so
+    worker progress callbacks can execute without deadlocking.
   - Added ordered `simulate_outputs`, exposed mapper statistics, and validated truth-table sizes and expressions before native operations. Gate-library errors identify unsupported gates and their coordinates.
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
   - Exposed the defect-matrix reader exceptions at the package root.

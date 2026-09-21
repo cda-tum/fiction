@@ -14,6 +14,8 @@ from rich.console import Group as RenderGroup
 from rich.markup import escape
 from rich.table import Table
 
+from .topologies import DISPLAY_NAMES
+
 GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("Size", ("size x", "size y", "size z", "size area")),
     ("I/O", ("inputs", "outputs")),
@@ -38,6 +40,15 @@ UNITS: dict[str, str] = {
     "critical_path": "critical path",
 }
 """What each grouped figure is called on its shared line."""
+
+
+def display_value(key: str, value: object) -> str:
+    """Format a description value for terminal output.
+
+    Returns:
+        The readable value, preserving the original machine-readable description.
+    """
+    return DISPLAY_NAMES.get(str(value), str(value)) if key == "topology" else str(value)
 
 
 def flatten(description: dict[str, object], prefix: str = "") -> list[tuple[str, object]]:
@@ -110,7 +121,7 @@ def table_rows(description: dict[str, object]) -> list[tuple[str, str]]:
         elif value is None:
             display = "—"
         else:
-            display = str(value)
+            display = display_value(key, value)
         rows.append((label, display))
     return rows
 
@@ -131,7 +142,7 @@ def summary(description: dict[str, object]) -> RenderGroup:
     rendered = Table(box=None, show_header=False, padding=(0, 2))
 
     # the heading stands outside the table, so a long name cannot widen the label column
-    heading = " · ".join(str(rows[key]) for key in HEADINGS if rows.get(key) is not None)
+    heading = " · ".join(display_value(key, rows[key]) for key in HEADINGS if rows.get(key) is not None)
 
     grouped: set[str] = set()
     for title, keys in GROUPS:

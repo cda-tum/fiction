@@ -42,7 +42,8 @@ void read_sqd_layout(nanobind::module_& m)
     m.def("read_sqd_layout",
           static_cast<fiction::sidb::layout (*)(const std::string_view&, const std::string_view&)>(
               &fiction::sidb::io::read_sqd_layout),
-          py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_sidb_io_read_sqd_layout_2));
+          py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_sidb_io_read_sqd_layout_2),
+          py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

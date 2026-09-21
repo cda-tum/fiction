@@ -24,6 +24,7 @@ from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import REGISTRY
 from mnt.fiction.cli.render import table_rows
 from mnt.fiction.cli.stores import CellEntry, element_name
+from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
 from mnt.pyfiction import inml_layout, mol_qca_layout, mol_qca_technology
 
 if TYPE_CHECKING:
@@ -81,6 +82,38 @@ def test_ps_prints_statistics(mux21_shell: Shell) -> None:
     assert "2DDWAVE" in output
     assert "throughput" in output
     assert "critical path" in output
+
+
+def test_layout_summaries_do_not_compute_timing(mux21_shell: Shell, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Placement, selection, listing, and removal skip timing; ps computes it on request."""
+    calls = []
+
+    def timing(layout: object) -> tuple[int, int]:
+        """Record explicit timing requests.
+
+        Returns:
+            Distinct timing figures for the statistics display.
+        """
+        calls.append(layout)
+        return 123, 7
+
+    monkeypatch.setattr("mnt.fiction.cli.stores.critical_path_length_and_throughput", timing)
+    mux21_shell.ok("ortho; ortho; store -g; current -g 1; store -g --pop")
+    assert not calls
+    output = mux21_shell.ok("ps -g")
+    assert len(calls) == 1
+    assert "critical path 123" in output
+    assert "throughput 1/7" in output
+
+
+@pytest.mark.parametrize("layout_type", TOPOLOGIES)
+def test_layout_topology_display_names(shell: Shell, layout_type: type) -> None:
+    """Store and statistics use readable names while JSON retains the canonical topology."""
+    shell.session.gate_layouts.add(layout_type())
+    topology = TOPOLOGIES[layout_type]
+    for command in ("store -g", "ps -g"):
+        assert DISPLAY_NAMES[topology] in shell.ok(command)
+        assert topology in str(shell.session.log[-1]["result"])
 
 
 def test_print_layout(mux21_shell: Shell) -> None:

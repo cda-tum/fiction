@@ -27,14 +27,9 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <cassert>
-#include <cstdint>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
-
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
 
 namespace fiction::synthesis
 {
@@ -90,20 +85,10 @@ class convert_network_impl<NtkDest, NtkSrc, false>
             return children;
         };
 
-#if (PROGRESS_BARS)
-        // initialize a progress bar
-        mockturtle::progress_bar bar{static_cast<uint32_t>(ntk.num_gates()), "[i] network conversion: |{0}|"};
-#endif
-
         ntk.foreach_gate(
-            [&, this](const auto& g, [[maybe_unused]] auto i)
+            [&, this](const auto& g)
             {
                 auto children = gather_fanin_signals(g);
-
-#if (PROGRESS_BARS)
-                // update progress
-                bar(i);
-#endif
 
                 if constexpr (mockturtle::has_is_and_v<TopoNtkSrc> && mockturtle::has_create_and_v<NtkDest>)
                 {

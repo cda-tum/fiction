@@ -49,6 +49,21 @@ words: `tt -e "[(ab)(!ac)]"`. When a command fails, the shell prints the reason 
 the shell itself keeps running. Quoted `;` and `#` are literal characters; Windows backslashes stay intact.
 `--quiet` suppresses notices while retaining requested command results. `NO_COLOR` disables drawing colors.
 
+Long-running commands show a spinner and elapsed time immediately. Counted phases show bars with actual
+completed work: gate placement and mapping, network passes, design-rule checks, and layout export. General
+commands, `gates`, `random`, `tt`, and `area` have no progress display. Readers and opaque library calls
+retain a spinner because their work has no known total. Quiet mode and nonterminal output disable progress;
+the transient display disappears on completion, interruption, or failure.
+
+Each command uses one row, including parallel executions. Counts combine all workers: `quicksim` reports
+iterations, `opdom` reports fixed samples or dynamic point counts, and `clustercomplete` reports compositions.
+`temp` retains its outer phase progress. Nested simulations do not add rows.
+
+`exact` shows the tile dimensions of the most recently started active solver candidate on its aggregate row.
+The dimensions remain visible when the aspect-ratio count advances. `gold` shows total search-graph expansions
+and the dimensions and selected-objective cost of the best accepted solution. Neither search claims a completion
+percentage. The `gold --progress` flag remains accepted for compatibility; Rich controls the display.
+
 ## Stores
 
 Stores hold what the shell has read, created, or designed. There are four of them, each selected by a flag:
@@ -65,7 +80,9 @@ Each store has one _active_ element, the one commands work on, which is the most
   `store --pop` removes the active element instead and makes the one before it active
 - `current -t|-n|-g|-c POSITION` makes an element the active one; positions count from 1, the way `store`
   lists them and the status bar reports them
-- `ps -t|-n|-g|-c` prints the statistics of the active element, and `ps --all` those of every element
+- `ps -t|-n|-g|-c` prints the statistics of the active element, and `ps --all` those of every element.
+  `ps -g` traverses the layout to compute critical-path length and throughput; store listings and command
+  summaries omit these potentially expensive timing calculations.
 - `print -t|-g|-c` prints the active element as text; a simulated SiDB layout is drawn once, with its ground
   state charges in place of the dots, followed by the ground state energy
 - `show -n|-g|-c [-o FILE] [--silent] [-p COMMAND] [--delete]` draws the active element and opens it in the
@@ -96,7 +113,6 @@ format alone and never guesses:
 | `.pla`                 | `read_pla`                 | logic network (AIG) | `-n`  |
 | `.fgl`                 | `read_fgl`                 | gate-level layout   | `-g`  |
 | `.sqd`                 | `read_sqd`                 | SiDB layout         | `-c`  |
-| `.fqca`                | `read_fqca`                | QCA layout          | `-c`  |
 
 The format-specific readers take the same `--type` and `--topology` options as `read` where they apply, and
 reject a file of another format rather than falling back to the suffix.
@@ -106,9 +122,7 @@ technology networks; `.aag` and `.pla` files are read as AIGs by _aigverse_ and 
 layouts accept all nine explicit topology names listed below; `cartesian` is the default.
 The selected topology must match the FGL metadata. Every reader takes one file; the
 `benchmarks` folder of the repository holds many networks to start from, and a shell loop or a `-f` script
-reads a whole folder of them. FQCA imports preserve stacked layouts, including via cells,
-I/O labels, clocks, and cell modes. Imports with at most two layers support SVG drawing; deeper layouts support
-QCA, FQCA, and QLL export. Readers reject coordinates the requested layout type cannot represent.
+reads a whole folder of them. Readers reject coordinates the requested layout type cannot represent.
 
 Each writer selects its format by command name, independently of the filename:
 
@@ -120,14 +134,12 @@ Each writer selects its format by command name, independently of the filename:
 | `write_dot` | `.dot` | gate-level layout, or network with `-n` |
 | `write_fgl` | `.fgl` | gate-level layout |
 | `write_qca` | `.qca` | QCA layout for QCADesigner |
-| `write_fqca` | `.fqca` | QCA layout for QCA-STACK |
 | `write_qcc` | `.qcc` | iNML component for ToPoliNano |
 | `write_qll` | `.qll` | QCA, molQCA, or iNML layout for ToPoliNano, MagCAD, or SCERPA |
 | `write_sqd` | `.sqd` | SiDB layout for SiQAD |
 | `write_svg` | `.svg` | QCA, molQCA, or SiDB drawing |
 
-`--via-layers` and `--no-via-layers` add or omit the inter-layer via cells of `.qca` and `.fqca` files, which
-`.qca` files carry by default and `.fqca` files do not. `--component-name` names a `.qcc` component after the
+`--via-layers` and `--no-via-layers` add or omit the inter-layer via cells of `.qca` files. `--component-name` names a `.qcc` component after the
 file instead of after the layout. `--indexes` labels DOT nodes; `--clock-colors` colors gate-level DOT
 layouts. Both options also apply to SVGs rendered from DOT by `show`. `--simple` applies only to QCA and
 molQCA SVG drawings. Unsupported drawing options fail before creating output. Verilog files name
@@ -154,6 +166,9 @@ two-input AND. An expression is a constant `0` or `1`, a variable `a` to `p`, a 
 `(E...E)`, a disjunction `{E...E}`, an exclusive OR `[E...E]`, or a majority `<EEE>`; `[(ab)(!ac)]` is
 if-then-else. The number of variables follows from the largest variable used. Truth tables specify the function
 that the gate-based SiDB simulations check a layout against.
+
+TEC readers preserve output drivers without adding output buffers. Physical-design algorithms prepare output
+buffers when needed. Shared outputs and outputs connected directly to primary inputs retain their logic functions.
 
 ## Logic networks
 
@@ -213,7 +228,7 @@ small networks; the two heuristics scale to large ones. Every result lands in th
 ```text
 fiction> ps -g
 name           c17
-topology       cartesian
+topology       Cartesian
 clocking       2DDWAVE
 size x         5
 size y         7
@@ -451,7 +466,7 @@ appears once the session closes, not while it runs. It holds a list with one obj
     "runtime_s": 0.41,
     "status": "ok",
     "result": {
-      "gate_layout": {"name": "c17", "topology": "cartesian", "clocking": "2DDWAVE", "size": {"x": 5, "y": 7, "area": 35}, "inputs": 5, "outputs": 2, "gates": 8, "wires": 28, "crossings": 0, "critical_path": 11, "throughput": 1},
+      "gate_layout": {"name": "c17", "topology": "cartesian", "clocking": "2DDWAVE", "size": {"x": 5, "y": 7, "area": 35}, "inputs": 5, "outputs": 2, "gates": 8, "wires": 28, "crossings": 0},
       "stats": {"time_total_s": 0.39, "x_size": 5, "y_size": 7, "num_gates": 8, "num_wires": 28, "num_crossings": 0}
     }
   }
@@ -459,12 +474,12 @@ appears once the session closes, not while it runs. It holds a list with one obj
 ```
 
 `args` holds the parsed options. A failing command has `"status": "error"` and an `error` message instead of a
-`result`. Every store element is described by one schema wherever it appears, the same one `ps` prints:
+`result`. Store descriptions use these keys; `ps` adds requested timing statistics:
 
 - a truth table by `vars` and, up to eight variables, `hex` and `binary`
 - a network by `name`, `type`, `inputs`, `outputs`, `gates`, and `depth`
 - a gate-level layout by `name`, `topology`, `clocking`, `size` (`x`, `y`, `area`), `inputs`, `outputs`, `gates`,
-  `wires`, `crossings`, `critical_path`, and `throughput`
+  `wires`, and `crossings`; `ps -g` also records `critical_path` and `throughput`
 - a cell-level layout by `name`, `technology`, `size`, `inputs`, `outputs`, and `cells`; an SiDB layout uses
   `dots` for its count and adds `lattice` and `defects`, and a simulated one a `simulation` object with `engine`, `stable_states`,
   `ground_state_energy_ev`, and `runtime_s`
@@ -495,11 +510,10 @@ and `-c/--cell-layout`; `--logic_network` becomes `--network`.
 
 | Original command | Python shell | Option and behavior migration |
 | --- | --- | --- |
-| `read` | `read FILE`, or `read_verilog`, `read_aiger`, `read_blif`, `read_pla`, `read_fgl`, `read_sqd`, `read_fqca` | `--aig/--xag/--mig/--tec` become `--type`; format flags become `--format`; positional topology becomes `--topology`; reading a whole directory and `--sort` are gone |
+| `read` | `read FILE`, or `read_verilog`, `read_aiger`, `read_blif`, `read_pla`, `read_fgl`, `read_sqd` | `--aig/--xag/--mig/--tec` become `--type`; format flags become `--format`; positional topology becomes `--topology`; reading a whole directory and `--sort` are gone |
 | `verilog` | `write_verilog FILE.v` | Optional filename and implicit element naming remain |
 | `blif` | `write_blif FILE.blif` | All network types |
 | `fgl` | `write_fgl FILE.fgl` | All nine topologies |
-| `fqca` | `write_fqca FILE.fqca` | `--via_layers` becomes `--via-layers`; stacked QCA supported |
 | `qca` | `write_qca FILE.qca` | `--no_via_layers` becomes `--no-via-layers` |
 | `qcc` | `write_qcc FILE.qcc` | `--component_name` becomes `--component-name` |
 | `qll` | `write_qll FILE.qll` | QCA, molQCA, iNML |
@@ -514,7 +528,7 @@ and `-c/--cell-layout`; `--logic_network` becomes `--network`.
 | `simulate` | `simulate` | `--store`, `--silent`, network/layout selection remain; all outputs retain declaration order even with duplicate names |
 | `exact` | `exact` | `--clk_scheme` becomes `--scheme`; `--async` becomes `--threads`; `--sync_elems` becomes `--synchronization-elements`; `--hex` becomes explicit `--topology`; bounds, crossings, border I/O, desynchronization, minimization, and ToPoliNano constraints remain |
 | `ortho` | `ortho` | `--clock_numbers` becomes `--clock-phases`; `--hex or/er/oc/ec` becomes the corresponding explicit hexagonal topology |
-| `gold` | `gold` | `--num_vertex_expansions/--effort_mode/--cost_objective` become `--expansions/--effort/--cost`; `--tiles_to_skip_between_pis` becomes `--skip-tiles`; random spacing becomes `--randomize-skip-tiles`; `--progress` requests progress, `--verbose` statistics |
+| `gold` | `gold` | `--num_vertex_expansions/--effort_mode/--cost_objective` become `--expansions/--effort/--cost`; `--tiles_to_skip_between_pis` becomes `--skip-tiles`; random spacing becomes `--randomize-skip-tiles`; `--progress` is accepted for compatibility, `--verbose` requests statistics |
 | `hex` | `hex` | `--input_pin_extension/--output_pin_extension` become `--extend-inputs/--extend-outputs`; `--planar` remains |
 | `optimize` | `optimize` | `--wiring_reduction_only/--max_gate_relocations/--planar_optimization` become `--wiring-only/--max-relocations/--planar`; timeout remains |
 | `cell` | `cell` | All four libraries and their established spelling aliases remain |

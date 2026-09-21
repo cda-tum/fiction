@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     output_argument,
     inputs="Active gate-level layout.",
     example="generate mux -b 1; ortho; write_fgl output.fgl",
+    progress=True,
 )
 def write_fgl_command(session: Session, args: argparse.Namespace) -> Result:
     """Write the active gate-level layout as FGL.
@@ -38,5 +39,5 @@ def write_fgl_command(session: Session, args: argparse.Namespace) -> Result:
     """
     element = session.gate_layouts.current()
     path = output_path(element, args.file, ".fgl")
-    write_fgl_layout(element, str(path))
+    write_fgl_layout(element, str(path), on_progress=session.report_progress)
     return written(session, path)

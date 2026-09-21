@@ -20,6 +20,7 @@
 #include <fiction/synthesis/network_conversion.hpp>
 
 #include <cstdint>
+#include <utility>
 
 #include <nanobind/nanobind.h>
 
@@ -70,19 +71,39 @@ void convert_network(nanobind::module_& m)
             {
                 case network_target::AIG:
                 {
-                    return py::cast(fiction::synthesis::convert_network<py_aig_network, NtkSrc>(ntk));
+                    auto converted = [&]()
+                    {
+                        const py::gil_scoped_release release{};
+                        return fiction::synthesis::convert_network<py_aig_network, NtkSrc>(ntk);
+                    }();
+                    return py::cast(std::move(converted));
                 }
                 case network_target::XAG:
                 {
-                    return py::cast(fiction::synthesis::convert_network<py_xag_network, NtkSrc>(ntk));
+                    auto converted = [&]()
+                    {
+                        const py::gil_scoped_release release{};
+                        return fiction::synthesis::convert_network<py_xag_network, NtkSrc>(ntk);
+                    }();
+                    return py::cast(std::move(converted));
                 }
                 case network_target::MIG:
                 {
-                    return py::cast(fiction::synthesis::convert_network<py_mig_network, NtkSrc>(ntk));
+                    auto converted = [&]()
+                    {
+                        const py::gil_scoped_release release{};
+                        return fiction::synthesis::convert_network<py_mig_network, NtkSrc>(ntk);
+                    }();
+                    return py::cast(std::move(converted));
                 }
                 default:
                 {
-                    return py::cast(fiction::synthesis::convert_network<py_tec_network, NtkSrc>(ntk));
+                    auto converted = [&]()
+                    {
+                        const py::gil_scoped_release release{};
+                        return fiction::synthesis::convert_network<py_tec_network, NtkSrc>(ntk);
+                    }();
+                    return py::cast(std::move(converted));
                 }
             }
         },

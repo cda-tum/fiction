@@ -341,7 +341,6 @@ void cell_level_layout(nanobind::module_& m)
     detail::cell_layout<py_qca_layout, py_cartesian_layout>(m, "qca");
     detail::cell_layout<py_mol_qca_layout, py_cartesian_layout>(m, "mol_qca");
     detail::cell_layout<py_inml_layout, py_cartesian_layout>(m, "inml");
-    detail::cell_layout<py_stacked_qca_layout, py_stacked_cartesian_layout>(m, "stacked_qca");
 }
 
 }  // namespace pyfiction

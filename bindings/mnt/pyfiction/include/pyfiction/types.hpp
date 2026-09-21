@@ -108,11 +108,6 @@ using py_even_column_hex_layout =
  */
 using py_stacked_cartesian_layout = fiction::layouts::cartesian_layout<py_cube_coordinate>;
 /**
- * QCA layout preserving all imported layers.
- */
-using py_stacked_qca_layout =
-    fiction::layouts::cell_level_layout<fiction::qca::qca_technology, py_stacked_cartesian_layout>;
-/**
  * Gate-level odd row cartesian layout.
  */
 using py_odd_row_cartesian_gate_layout = fiction::layouts::gate_level_layout<py_odd_row_cartesian_layout>;

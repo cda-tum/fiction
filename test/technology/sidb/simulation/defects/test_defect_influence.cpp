@@ -21,6 +21,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -538,4 +539,52 @@ TEST_CASE("Defect influence propagates worker exceptions", "[defect-influence]")
     params.number_of_threads             = 2;
 
     CHECK_THROWS_AS(defect_influence_grid_search(lyt, std::vector{create_id_tt()}, params), std::invalid_argument);
+}
+
+TEST_CASE("Defect influence reports progress", "[defect-influence]")
+{
+    auto lyt = layout{};
+    lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0}, dot_tag::NORMAL);
+
+    progress_recorder rec{};
+
+    defect_influence_params params{.defect                   = defect{defect_type::DB, -1, 5.6, 5.0},
+                                   .additional_scanning_area = {2, 2},
+                                   .influence_def = defect_influence_params::influence_definition::GROUND_STATE_CHANGE,
+                                   .number_of_threads = 2};
+    params.on_progress = rec.callback();
+
+    SECTION("grid search")
+    {
+        defect_influence_stats stats{};
+        const auto             domain = defect_influence_grid_search(lyt, params, 2, &stats);
+
+        CHECK(!domain.empty());
+        CHECK(rec.is_consistent("defect positions"));
+        CHECK(rec.final_count("defect positions") > 0);
+        CHECK(rec.final_count("defect positions") == stats.num_evaluated_defect_positions);
+    }
+
+    SECTION("random sampling")
+    {
+        const auto domain = defect_influence_random_sampling(lyt, 5, params);
+
+        CHECK(!domain.empty());
+        CHECK(rec.is_consistent("defect positions"));
+        CHECK(rec.final_count("defect positions") == 5);
+    }
+
+    SECTION("QuickTrace")
+    {
+        params.additional_scanning_area = {20, 0};
+        const auto domain               = defect_influence_quicktrace(lyt, 1, params);
+
+        // the contour length is unknown in advance
+        CHECK(rec.is_consistent("contour points"));
+        const auto reports = rec.reports_of("contour points");
+        REQUIRE(!reports.empty());
+        CHECK(rec.final_count("contour points") > 0);
+        CHECK(reports.back().total == 0);
+    }
 }

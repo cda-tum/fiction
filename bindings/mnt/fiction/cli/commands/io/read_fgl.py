@@ -38,6 +38,7 @@ def _read_fgl_arguments(parser: Parser) -> None:
     _read_fgl_arguments,
     inputs="One file.",
     example='read_fgl "layout.fgl" --topology cartesian',
+    progress=True,
 )
 def read_fgl(session: Session, args: argparse.Namespace) -> Result:
     """Read a gate-level layout from an FGL file.

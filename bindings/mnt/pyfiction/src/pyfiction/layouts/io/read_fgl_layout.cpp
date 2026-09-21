@@ -57,40 +57,49 @@ void read_fgl_layout(nanobind::module_& m)
         &fiction::layouts::io::read_fgl_layout<py_hexagonal_gate_layout>;
 
     m.def("read_cartesian_fgl_layout", read_cartesian_fgl_layout_function_pointer, py::arg("filename"),
-          py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3));
+          py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3),
+          py::call_guard<py::gil_scoped_release>());
     m.def("read_shifted_cartesian_fgl_layout", read_shifted_cartesian_fgl_layout_function_pointer, py::arg("filename"),
-          py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3));
+          py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3),
+          py::call_guard<py::gil_scoped_release>());
     m.def("read_hexagonal_fgl_layout", read_hexagonal_fgl_layout_function_pointer, py::arg("filename"),
-          py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3));
+          py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3),
+          py::call_guard<py::gil_scoped_release>());
     m.def(
         "read_odd_row_cartesian_fgl_layout", [](const std::string_view& file, const std::string_view& name)
         { return fiction::layouts::io::read_fgl_layout<py_odd_row_cartesian_gate_layout>(file, name); },
-        py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3));
+        py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3),
+        py::call_guard<py::gil_scoped_release>());
 
     m.def(
         "read_even_row_cartesian_fgl_layout", [](const std::string_view& file, const std::string_view& name)
         { return fiction::layouts::io::read_fgl_layout<py_even_row_cartesian_gate_layout>(file, name); },
-        py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3));
+        py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3),
+        py::call_guard<py::gil_scoped_release>());
 
     m.def(
         "read_even_column_cartesian_fgl_layout", [](const std::string_view& file, const std::string_view& name)
         { return fiction::layouts::io::read_fgl_layout<py_even_column_cartesian_gate_layout>(file, name); },
-        py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3));
+        py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3),
+        py::call_guard<py::gil_scoped_release>());
 
     m.def(
         "read_odd_row_hex_fgl_layout", [](const std::string_view& file, const std::string_view& name)
         { return fiction::layouts::io::read_fgl_layout<py_odd_row_hex_gate_layout>(file, name); }, py::arg("filename"),
-        py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3));
+        py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3),
+        py::call_guard<py::gil_scoped_release>());
 
     m.def(
         "read_odd_column_hex_fgl_layout", [](const std::string_view& file, const std::string_view& name)
         { return fiction::layouts::io::read_fgl_layout<py_odd_column_hex_gate_layout>(file, name); },
-        py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3));
+        py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3),
+        py::call_guard<py::gil_scoped_release>());
 
     m.def(
         "read_even_column_hex_fgl_layout", [](const std::string_view& file, const std::string_view& name)
         { return fiction::layouts::io::read_fgl_layout<py_even_column_hex_gate_layout>(file, name); },
-        py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3));
+        py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3),
+        py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace pyfiction
