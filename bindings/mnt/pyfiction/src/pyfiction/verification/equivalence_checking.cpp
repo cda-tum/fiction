@@ -59,7 +59,7 @@ void equivalence_checking_impl(nanobind::module_& m)
             return stats.eq;
         },
         py::arg("specification"), py::arg("implementation"), py::arg("statistics") = nullptr,
-        DOC(fiction_verification_equivalence_checking));
+        DOC(fiction_verification_equivalence_checking), py::call_guard<py::gil_scoped_release>());
 }
 
 /**

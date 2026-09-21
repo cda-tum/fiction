@@ -25,15 +25,16 @@
 #include <sstream>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/chrono.h>      // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/function.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/chrono.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>   // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -72,7 +73,9 @@ void post_layout_optimization(nanobind::module_& m)
         .def_rw("planar_optimization", &fiction::physical_design::post_layout_optimization_params::planar_optimization,
                 DOC(fiction_physical_design_post_layout_optimization_params_planar_optimization))
         .def_rw("timeout", &fiction::physical_design::post_layout_optimization_params::timeout,
-                DOC(fiction_physical_design_post_layout_optimization_params_timeout));
+                DOC(fiction_physical_design_post_layout_optimization_params_timeout))
+        .def_rw("on_progress", &fiction::physical_design::post_layout_optimization_params::on_progress,
+                DOC(fiction_physical_design_post_layout_optimization_params_on_progress));
 
     py::class_<fiction::physical_design::post_layout_optimization_stats>(
         m, "post_layout_optimization_stats", DOC(fiction_physical_design_post_layout_optimization_stats))
@@ -111,7 +114,8 @@ void post_layout_optimization(nanobind::module_& m)
 
     m.def("post_layout_optimization", &fiction::physical_design::post_layout_optimization<py_cartesian_gate_layout>,
           py::arg("layout"), py::arg("parameters") = fiction::physical_design::post_layout_optimization_params{},
-          py::arg("statistics") = nullptr, DOC(fiction_physical_design_post_layout_optimization));
+          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          DOC(fiction_physical_design_post_layout_optimization));
 }
 
 }  // namespace pyfiction

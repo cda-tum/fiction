@@ -27,6 +27,7 @@
 #include "fiction/technology/sidb/simulation/engines/quicksim.hpp"
 #include "fiction/technology/sidb/simulation/is_ground_state.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -64,6 +65,10 @@ struct time_to_solution_params
      * value.
      */
     double confidence_level = 0.997;
+    /**
+     * Callback that receives the number of completed heuristic repetitions.
+     */
+    utils::progress_callback on_progress{};
 };
 
 /**
@@ -242,6 +247,8 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
     std::vector<result> simulation_results_quicksim{};
     simulation_results_quicksim.reserve(tts_params.repetitions);
 
+    utils::progress_reporter progress{tts_params.on_progress, "repetitions", tts_params.repetitions};
+
     for (uint64_t i = 0; i < tts_params.repetitions; ++i)
     {
         mockturtle::stopwatch<>::duration elapsed{};
@@ -252,6 +259,7 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
             heuristic->simulation_runtime = elapsed;
         }
         simulation_results_quicksim.push_back(std::move(*heuristic));
+        progress.advance();
     }
 
     time_to_solution_for_given_simulation_results(simulation_result, simulation_results_quicksim,

@@ -35,6 +35,7 @@
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/utils/math/math_utils.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/stl/hash.hpp"
 
 #include <btree.h>
@@ -409,6 +410,13 @@ struct operational_domain_params
      * computation to leave cores free for other work.
      */
     std::size_t number_of_threads{std::max(std::size_t{std::thread::hardware_concurrency()}, std::size_t{1})};
+    /**
+     * Callback that receives the number of evaluated parameter points. The total is known for grid search and random
+     * sampling only.
+     */
+    utils::progress_callback on_progress{};
+    /** @brief Reports logical worker activity with a fixed worker count for each invocation. */
+    utils::worker_progress_callback on_worker_progress{};
 };
 /**
  * Statistics for the operational domain computation. The statistics are used across the different operational domain
@@ -618,6 +626,8 @@ class operational_domain_impl
         // expensive operational points
         std::ranges::shuffle(all_step_points, std::mt19937_64{std::random_device{}()});
 
+        progress.set_total(all_step_points.size());
+
         simulate_operational_status_in_parallel(all_step_points);
 
         log_stats();
@@ -636,6 +646,8 @@ class operational_domain_impl
         const mockturtle::stopwatch stop{stats.time_total};
 
         const auto step_point_samples = generate_random_step_points(samples);
+
+        progress.set_total(step_point_samples.size());
 
         simulate_operational_status_in_parallel(step_point_samples);
 
@@ -754,8 +766,10 @@ class operational_domain_impl
                 queue_cv.notify_all();
             };
 
-            const auto worker = [&]()
+            const auto worker = [&](const std::size_t id)
             {
+                const utils::worker_progress_scope worker_scope{worker_progress, id};
+                std::size_t                        completed{};
                 try
                 {
                     while (true)
@@ -777,6 +791,7 @@ class operational_domain_impl
                         ++active_workers;
 
                         lock.unlock();
+                        worker_progress.update(id, "exploring parameter points", completed);
 
                         // determine the operational status and, if the point is operational, its yet unknown neighbors.
                         // No lock is held here, which is what enables the parallelism in the first place
@@ -784,6 +799,7 @@ class operational_domain_impl
                                                     unknown_neighborhood(sp) :
                                                     std::vector<step_point>{};
 
+                        worker_progress.update(id, "exploring parameter points", ++completed);
                         lock.lock();
 
                         if (finished)
@@ -819,7 +835,7 @@ class operational_domain_impl
             {
                 for (std::size_t i = 0; i < number_of_threads; ++i)
                 {
-                    workers.emplace_back(std::async(std::launch::async, worker));
+                    workers.emplace_back(std::async(std::launch::async, worker, i));
                 }
 
                 for (auto& worker_result : workers)
@@ -1201,6 +1217,7 @@ class operational_domain_impl
 
         // Cartesian product of all step point indices
         const auto all_index_combinations = fiction::utils::math::cartesian_combinations(indices);
+        progress.set_total(all_index_combinations.size());
 
         // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
         // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
@@ -1225,12 +1242,16 @@ class operational_domain_impl
 
             threads.emplace_back(
                 std::async(std::launch::async,
-                           [this, &cd, start, end, &all_index_combinations]
+                           [this, &cd, i, start, end, &all_index_combinations]
                            {
+                               const utils::worker_progress_scope worker_scope{worker_progress, i};
+                               std::size_t                        completed{};
+                               worker_progress.update(i, "parameter points", 0, end - start);
                                for (auto it = all_index_combinations.cbegin() + static_cast<int64_t>(start);
                                     it != all_index_combinations.cbegin() + static_cast<int64_t>(end); ++it)
                                {
                                    is_step_point_suitable(cd, step_point{*it});  // construct a step_point
+                                   worker_progress.update(i, "parameter points", ++completed, end - start);
                                }
                            }));
         }
@@ -1432,9 +1453,15 @@ class operational_domain_impl
      */
     std::atomic<std::size_t> num_evaluated_parameter_combinations{0};
     /**
+     * Reports the evaluated parameter points.
+     */
+    utils::progress_reporter progress{params.on_progress, "parameter points"};
+    /**
      * Number of worker threads to distribute the parameter points over, taken from the parameters and floored at `1`.
      */
     const std::size_t number_of_threads{std::max(params.number_of_threads, std::size_t{1})};
+    /** @brief Reports each top-level parameter worker without exposing nested simulations. */
+    utils::worker_progress_reporter worker_progress{params.on_worker_progress, number_of_threads};
     /**
      * Input BDL wires.
      */
@@ -1631,6 +1658,7 @@ class operational_domain_impl
         };
 
         ++num_evaluated_parameter_combinations;
+        progress.advance();
 
         sidb::model::simulation_parameters sim_params = params.operational_params.sim_params;
 
@@ -1705,6 +1733,7 @@ class operational_domain_impl
 
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
+        progress.advance();
 
         sidb::model::simulation_parameters sim_params = params.operational_params.sim_params;
 
@@ -1792,9 +1821,24 @@ class operational_domain_impl
         // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
         const std::size_t num_threads = std::max(std::min(number_of_threads, step_points.size()), std::size_t{1});
 
+        /** @brief Simulates one slice and reports its worker's activity on the calling thread. */
+        const auto worker = [this, &step_points](const std::size_t id, const std::size_t start, const std::size_t end)
+        {
+            const utils::worker_progress_scope worker_scope{worker_progress, id};
+            std::size_t                        completed{};
+            worker_progress.update(id, "parameter points", 0, end - start);
+            std::ranges::for_each(std::ranges::subrange{step_points.cbegin() + static_cast<int64_t>(start),
+                                                        step_points.cbegin() + static_cast<int64_t>(end)},
+                                  [this, id, start, end, &completed](const auto& sp)
+                                  {
+                                      is_step_point_operational(sp);
+                                      worker_progress.update(id, "parameter points", ++completed, end - start);
+                                  });
+        };
+
         if (num_threads == 1)
         {
-            std::ranges::for_each(step_points, [this](const auto& sp) { is_step_point_operational(sp); });
+            worker(0, 0, step_points.size());
             return;
         }
 
@@ -1815,14 +1859,7 @@ class operational_domain_impl
                 break;  // no more work to distribute
             }
 
-            threads.emplace_back(std::async(
-                std::launch::async,
-                [this, start, end, &step_points]
-                {
-                    std::ranges::for_each(std::ranges::subrange{step_points.cbegin() + static_cast<int64_t>(start),
-                                                                step_points.cbegin() + static_cast<int64_t>(end)},
-                                          [this](const auto& sp) { is_step_point_operational(sp); });
-                }));
+            threads.emplace_back(std::async(std::launch::async, worker, i, start, end));
         }
 
         // wait for all threads to complete

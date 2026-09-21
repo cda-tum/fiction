@@ -38,6 +38,7 @@ def _write_fqca_arguments(parser: Parser) -> None:
     _write_fqca_arguments,
     inputs="Active cell-level layout.",
     example="generate mux -b 1; ortho; cell; write_fqca output.fqca",
+    progress=True,
 )
 def write_fqca_command(session: Session, args: argparse.Namespace) -> Result:
     """Write the active QCA layout as a QCA-STACK file.
@@ -49,6 +50,7 @@ def write_fqca_command(session: Session, args: argparse.Namespace) -> Result:
     require_cell_type(element, (qca_layout, stacked_qca_layout), ".fqca")
     path = output_path(element, args.file, ".fqca")
     params = write_fqca_layout_params()
+    params.on_progress = session.report_progress
     params.create_inter_layer_via_cells = args.via_layers
     write_fqca_layout(element, str(path), params)
     return written(session, path)

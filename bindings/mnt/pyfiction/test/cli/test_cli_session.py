@@ -10,22 +10,33 @@
 
 from __future__ import annotations
 
+import io
+import re
+import sys
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING
 
 import pytest
 from rich.cells import cell_len
+from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import tokenize
 from mnt.fiction.cli.registry import REGISTRY, STORE_FLAGS, Category
-from mnt.fiction.cli.session import Session
+from mnt.fiction.cli.session import Session, ignore_progress, ignore_worker_progress
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import Store
-from mnt.pyfiction import orthogonal, orthogonal_stats, set_name
+from mnt.pyfiction import orthogonal, orthogonal_stats, read_technology_network, set_name
 
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
+
+    from rich.console import RenderableType
+    from rich.progress import Task, TaskID
 
     from mnt.pyfiction import technology_network
 
@@ -219,3 +230,307 @@ def test_invalid_numeric_input_is_a_command_failure(
     shell.ok(f'read "{resource("siqad_or_gate.sqd")}"; generate mux -b 1')
     assert message in shell.fails(command)
     assert len(shell.session.networks) == len(shell.session.cell_layouts) == 1
+
+
+@pytest.mark.parametrize("topology", ["cartesian", "even_row_hex", "odd_row_hex", "odd_column_hex", "even_column_hex"])
+@pytest.mark.parametrize("quiet", [False, True])
+def test_progress_respects_quiet_on_terminal(
+    resource: Callable[[str], str], monkeypatch: pytest.MonkeyPatch, topology: str, *, quiet: bool
+) -> None:
+    """Terminal progress respects quiet mode for every orthogonal topology."""
+    monkeypatch.setenv("TERM", "xterm")
+    buffer = io.StringIO()
+    console = Console(file=buffer, width=100, force_terminal=True, color_system=None)
+    session = Session(console=console)
+    session.quiet = quiet
+    try:
+        assert session.execute(f'read "{resource("mux21.v")}"; ortho --topology {topology}')
+    finally:
+        session.close()
+    if quiet:
+        assert not buffer.getvalue()
+    else:
+        assert "ortho" in buffer.getvalue()
+        assert "placing gates" in buffer.getvalue()
+    assert session.report_progress is ignore_progress
+
+
+def test_progress_is_silent_without_terminal(mux21_shell: Shell) -> None:
+    """Without a terminal, the progress display writes nothing."""
+    output = mux21_shell.ok("ortho")
+    assert "placing gates" not in output
+    assert "mux21" in output
+
+
+def test_progress_resets_a_restarted_task(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A task whose count drops is shown from the start again instead of counting backwards."""
+    monkeypatch.setenv("TERM", "xterm")
+    buffer = io.StringIO()
+    session = Session(console=Console(file=buffer, width=100, force_terminal=True, color_system=None))
+    with session.progress("optimize") as report:
+        report("gate relocations", 0, 4)
+        report("gate relocations", 4, 4)
+        report("gate relocations", 0, 3)
+        report("gate relocations", 3, 3)
+        report("wire paths", 7, 0)
+    session.close()
+    assert "gate relocations" in buffer.getvalue()
+    assert "wire paths" in buffer.getvalue()
+
+
+def test_progress_serializes_shared_task_reports(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Concurrent reporters create one bar for a shared task name."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    display = Progress(console=session.console, auto_refresh=False)
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    add_task = display.add_task
+
+    def delayed_add_task(description: str, *, total: float | None = 100, spinner: bool = False) -> TaskID:
+        """Yield while Rich creates a task.
+
+        Returns:
+            The new task's identifier.
+        """
+        time.sleep(0.05)
+        return add_task(description, total=total, spinner=spinner)
+
+    monkeypatch.setattr(display, "add_task", delayed_add_task)
+    ready = threading.Barrier(4)
+    with session.progress("simulation") as report:
+
+        def report_from_worker(_: int) -> None:
+            """Start the reports together."""
+            ready.wait(timeout=5)
+            report("compositions", 1, 0)
+
+        with ThreadPoolExecutor(max_workers=4) as workers:
+            list(workers.map(report_from_worker, range(4)))
+
+    assert sum(task.description == "compositions" for task in display.tasks) == 1
+
+
+def test_progress_restarts_with_an_unknown_total(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A new pass clears the old total even if the old pass completed no items."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    display = Progress(console=session.console, auto_refresh=False)
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    with session.progress("simulation") as report:
+        report("compositions", 0, 4)
+        report("compositions", 0, 0)
+        assert all(task.description != "compositions" for task in display.tasks)
+        report("compositions", 1, 0)
+        task = next(task for task in display.tasks if task.description == "compositions")
+        assert task.total is None
+
+
+def test_quiet_nested_progress_discards_reports() -> None:
+    """A quiet nested command suspends the outer command's progress callback."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    with session.progress("source") as outer:
+        outer_worker = session.report_worker_progress
+        session.quiet = True
+        with session.progress("ortho") as inner:
+            assert inner is ignore_progress
+            assert session.report_progress is ignore_progress
+            assert session.report_worker_progress is ignore_worker_progress
+        assert session.report_progress is outer
+        assert session.report_worker_progress is outer_worker
+
+
+def test_progress_reports_are_dropped_without_terminal(shell: Shell) -> None:
+    """Without a terminal, the callback handed to the algorithms discards the reports."""
+    with shell.session.progress("optimize") as report:
+        report("gate relocations", 0, 4)
+        report("gate relocations", 4, 4)
+    assert not shell.output
+
+
+@pytest.mark.parametrize("workers", [1, 4, 5, 120])
+@pytest.mark.parametrize("height", [6, 24])
+@pytest.mark.parametrize("command", ["exact", "gold", "opdom", "quicksim", "clustercomplete", "temp"])
+def test_parallel_progress_has_one_aggregate_row(
+    workers: int, height: int, command: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Worker-local reports never add rows or overwrite aggregate counts, including at checkpoints."""
+    console = Console(file=io.StringIO(), width=100, height=height, force_terminal=True)
+    session = Session(console=console)
+    display = Progress(console=console, auto_refresh=False)
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    total = 0 if command in {"exact", "gold", "clustercomplete"} else 256
+    active, inactive = True, False
+    with session.progress(command) as report:
+        for worker in range(workers):
+            session.report_worker_progress(
+                worker, workers, f"worker {worker + 1}: 4 \N{MULTIPLICATION SIGN} 6", 1, 2, active
+            )
+            assert len(display.tasks) == 1
+        for checkpoint, width in ((128, 4), (256, 5)):
+            report("aggregate", checkpoint, total)
+            assert len(display.tasks) == 1
+            assert display.tasks[0].completed == checkpoint
+            assert display.tasks[0].total == (total or None)
+            if command == "exact":
+                assert f"{width} \N{MULTIPLICATION SIGN} 6" in display.tasks[0].description
+            for worker in range(workers):
+                session.report_worker_progress(
+                    worker, workers, f"worker {worker + 1}: 5 \N{MULTIPLICATION SIGN} 6", 2, 2, active
+                )
+                assert len(display.tasks) == 1
+                assert display.tasks[0].completed == checkpoint
+        for worker in range(workers):
+            session.report_worker_progress(worker, workers, "finished", 2, 2, inactive)
+        assert len(display.tasks) == 1
+        assert "5 \N{MULTIPLICATION SIGN} 6" not in display.tasks[0].description
+        assert "active" not in display.tasks[0].description
+
+
+def test_exact_retains_an_active_candidate(monkeypatch: pytest.MonkeyPatch) -> None:
+    """When the latest candidate finishes, the remaining active candidate supplies the dimensions."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    display = Progress(console=session.console, auto_refresh=False)
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    active, inactive = True, False
+    with session.progress("exact") as report:
+        session.report_worker_progress(0, 2, "worker 1: 4 \N{MULTIPLICATION SIGN} 6", 0, 0, active)
+        session.report_worker_progress(1, 2, "worker 2: 5 \N{MULTIPLICATION SIGN} 6", 0, 0, active)
+        report("aspect ratios", 128, 0)
+        assert display.tasks[0].description == "exact: 5 \N{MULTIPLICATION SIGN} 6"
+        session.report_worker_progress(1, 2, "finished", 0, 0, inactive)
+        assert display.tasks[0].description == "exact: 4 \N{MULTIPLICATION SIGN} 6"
+        assert display.tasks[0].completed == 128
+
+
+def test_command_progress_is_explicit() -> None:
+    """Only the agreed algorithm and I/O commands enable progress."""
+    disabled = {"gates", "random", "tt", "area"}
+    for name, cmd in REGISTRY.items():
+        assert cmd.progress == (cmd.category is not Category.GENERAL and name not in disabled)
+
+
+def test_store_does_not_start_a_terminal_progress_display(mux21_shell: Shell, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Listing a populated store prints its table without entering a live display."""
+    output = io.StringIO()
+    monkeypatch.setenv("TERM", "xterm-256color")
+    mux21_shell.session.console = Console(file=output, width=200, force_terminal=True, color_system=None)
+    assert mux21_shell.session.execute("store -n")
+    assert "logic networks" in output.getvalue()
+    assert "\x1b[?25l" not in output.getvalue()
+
+
+@pytest.mark.parametrize("workers", [1, 4, 5])
+def test_exact_command_displays_current_dimensions(
+    mux21_shell: Shell, workers: int, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The command displays current solver dimensions for serial and parallel searches."""
+    if REGISTRY["exact"].unavailable:
+        pytest.skip("exact requires Z3")
+    output = io.StringIO()
+    monkeypatch.setenv("TERM", "xterm-256color")
+    mux21_shell.session.console = Console(file=output, width=240, height=24, force_terminal=True, color_system=None)
+    assert mux21_shell.session.execute(f"exact --threads {workers} --timeout 10")
+    assert re.search(r"\d+ \N{MULTIPLICATION SIGN} \d+", output.getvalue())
+
+
+def test_worker_callback_restored_after_failure() -> None:
+    """Progress state cannot leak from a failed command into the next command."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+
+    def fail() -> None:
+        """Fail while a worker has an active row."""
+        active = True
+        with session.progress("exact"):
+            session.report_worker_progress(0, 1, "candidate", 0, 0, active)
+            int("failed")
+
+    with pytest.raises(ValueError, match="failed"):
+        fail()
+    assert session.report_worker_progress is ignore_worker_progress
+    assert session.report_progress is ignore_progress
+
+
+@pytest.mark.parametrize("workers", [4, 5])
+def test_gold_retains_best_accepted_solution(workers: int, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A completed graph and an older report cannot erase the best accepted solution."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    display = Progress(console=session.console, auto_refresh=False)
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    active, inactive = True, False
+    with session.progress("gold") as aggregate:
+        report = session.report_worker_progress
+        report(0, workers, "graph 1: 4 by 6; best 4 by 6, cost 24", 8, 0, active)
+        report(1, workers, "graph 2: 3 by 6; best 3 by 6, cost 18", 9, 0, active)
+        report(1, workers, "finished", 9, 0, inactive)
+        report(0, workers, "graph 1: 5 by 6; best 4 by 6, cost 24", 10, 0, active)
+        aggregate("expansions", 128, 0)
+        assert len(display.tasks) == 1
+        assert "best 3 by 6, cost 18" in display.tasks[0].description
+        assert "best 4 by 6, cost 24" not in display.tasks[0].description
+        assert display.tasks[0].completed == 128
+
+
+def test_worker_callback_restored_after_interruption() -> None:
+    """An interrupt removes the live display and restores both callbacks."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+
+    def interrupt() -> None:
+        """Interrupt an active progress context.
+
+        Raises:
+            KeyboardInterrupt: Simulated user interruption.
+        """
+        with session.progress("exact"):
+            raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        interrupt()
+    assert session.report_progress is ignore_progress
+    assert session.report_worker_progress is ignore_worker_progress
+
+
+def test_spinner_refreshes_during_native_read(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Rich advances both spinner frames and elapsed time during one native reader call."""
+    path = tmp_path / "large.v"
+    count = 200_000
+    path.write_text(
+        "module top(a,b,o);\ninput a,b;\noutput o;\nwire "
+        + ",".join(f"w{index}" for index in range(count))
+        + ";\n"
+        + "".join(f"assign w{index} = a & b;\n" for index in range(count))
+        + "assign o = w0;\nendmodule\n",
+        encoding="utf-8",
+    )
+    reading = False
+    frames: list[str] = []
+    elapsed: list[float] = []
+
+    class RecordingSpinner(SpinnerColumn):
+        """Record frames while the native reader owns the calling thread."""
+
+        def render(self, task: Task) -> RenderableType:
+            """Render the current frame and record its elapsed time.
+
+            Returns:
+                The spinner frame.
+            """
+            frame = super().render(task)
+            if reading:
+                frames.append(str(frame))
+                elapsed.append(task.elapsed or 0)
+            return frame
+
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    display = Progress(RecordingSpinner(), TimeElapsedColumn(), console=session.console, transient=True)
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    interval = sys.getswitchinterval()
+    try:
+        # Only the native call can release the GIL while the reading flag is set.
+        sys.setswitchinterval(10)
+        with session.progress("read"):
+            reading = True
+            read_technology_network(str(path))
+            reading = False
+    finally:
+        sys.setswitchinterval(interval)
+        session.close()
+    assert len(set(frames)) > 1
+    assert max(elapsed) > min(elapsed)

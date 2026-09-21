@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     output_argument,
     inputs="Active network.",
     example="read_verilog circuit.v --type aig; write_aiger output.aig",
+    progress=True,
 )
 def write_aiger_command(session: Session, args: argparse.Namespace) -> Result:
     """Write the active AIG as binary AIGER.

@@ -22,6 +22,7 @@
 #include <string_view>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): enables callback conversion
 #include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
@@ -36,6 +37,8 @@ void write_qca_layout(nanobind::module_& m)
     py::class_<fiction::qca::io::write_qca_layout_params>(m, "write_qca_layout_params",
                                                           DOC(fiction_qca_io_write_qca_layout_params))
         .def(py::init<>(), "Default constructor.")
+        .def_rw("on_progress", &fiction::qca::io::write_qca_layout_params::on_progress,
+                "Receives serialization progress.")
         .def_rw("create_inter_layer_via_cells",
                 &fiction::qca::io::write_qca_layout_params::create_inter_layer_via_cells,
                 DOC(fiction_qca_io_write_qca_layout_params_create_inter_layer_via_cells))
@@ -48,13 +51,15 @@ void write_qca_layout(nanobind::module_& m)
         &fiction::qca::io::write_qca_layout<py_qca_layout>;
 
     m.def("write_qca_layout", write_qca_layout_function_pointer, py::arg("layout"), py::arg("filename"),
-          py::arg("params") = fiction::qca::io::write_qca_layout_params{}, DOC(fiction_qca_io_write_qca_layout));
+          py::arg("params") = fiction::qca::io::write_qca_layout_params{}, DOC(fiction_qca_io_write_qca_layout),
+          py::call_guard<py::gil_scoped_release>());
     m.def(
         "write_qca_layout",
         [](const py_stacked_qca_layout& lyt, const std::string_view& filename,
-           const fiction::qca::io::write_qca_layout_params params)
+           const fiction::qca::io::write_qca_layout_params& params)
         { fiction::qca::io::write_qca_layout(lyt, filename, params); },
-        py::arg("layout"), py::arg("filename"), py::arg("params") = fiction::qca::io::write_qca_layout_params{});
+        py::arg("layout"), py::arg("filename"), py::arg("params") = fiction::qca::io::write_qca_layout_params{},
+        py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

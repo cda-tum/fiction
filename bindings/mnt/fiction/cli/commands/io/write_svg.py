@@ -38,6 +38,7 @@ def _write_svg_arguments(parser: Parser) -> None:
     _write_svg_arguments,
     inputs="Active cell-level layout.",
     example="generate mux -b 1; ortho; cell; write_svg output.svg",
+    progress=True,
 )
 def write_svg_command(session: Session, args: argparse.Namespace) -> Result:
     """Write the active QCA, molecular QCA, or SiDB layout as SVG.
@@ -51,5 +52,5 @@ def write_svg_command(session: Session, args: argparse.Namespace) -> Result:
         args, dot=False, gate_layout=False, qca_svg=isinstance(element, qca_layout | mol_qca_layout)
     )
     path = output_path(element, args.file, ".svg")
-    write_svg(entry, path, simple=args.simple)
+    write_svg(entry, path, simple=args.simple, on_progress=session.report_progress)
     return written(session, path)

@@ -22,12 +22,12 @@
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/utils/atomic_write.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
 #include <array>
-#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <sstream>
@@ -93,6 +93,8 @@ struct write_sidb_layout_svg_params
      * The lattice mode of the SiDB layout.
      */
     sidb_lattice_mode lattice_mode = sidb_lattice_mode::SHOW_LATTICE;
+    /** @brief Receives completed serialization work and the phase total. */
+    utils::progress_callback on_progress{};
 };
 
 namespace detail
@@ -169,11 +171,11 @@ class sidb_layout_svg_writer
      * @param charges Charge distribution to draw, or `nullptr` to use the default SiDB color.
      * @throws std::invalid_argument if the charge distribution sites differ from the layout.
      */
-    sidb_layout_svg_writer(const layout& layout, std::ostream& stream, const write_sidb_layout_svg_params& p,
+    sidb_layout_svg_writer(const layout& layout, std::ostream& stream, write_sidb_layout_svg_params p,
                            const charge_distribution* charges = nullptr) :
             lyt{layout},
             os{stream},
-            ps{p},
+            ps{std::move(p)},
             cd{charges}
     {
         if (cd != nullptr && cd->sites() != lyt.sidbs())
@@ -211,15 +213,19 @@ class sidb_layout_svg_writer
 
         if (ps.lattice_mode == write_sidb_layout_svg_params::sidb_lattice_mode::SHOW_LATTICE)
         {
-            for (const auto& s : sites_in_area(min_site, max_site))
+            const auto               sites = sites_in_area(min_site, max_site);
+            utils::progress_reporter lattice_progress{ps.on_progress, "rendering lattice sites", sites.size()};
+            for (const auto& s : sites)
             {
                 const auto [x, y] = lyt.get_lattice().nm_position(padded(s));
 
                 svg_content << fmt::format(R"(<use xlink:href="#lattice_point" x="{0}" y="{1}" style="fill:{2};"/>)",
                                            x * 10, y * 10, svg::SI_LATTICE);
+                lattice_progress.advance();
             }
         }
 
+        utils::progress_reporter progress{ps.on_progress, "rendering SiDBs", lyt.num_dots()};
         lyt.foreach_dot(
             [&](const auto& s)
             {
@@ -262,6 +268,7 @@ class sidb_layout_svg_writer
                 svg_content << fmt::format(
                     R"(<use xlink:href="#sidb_color" x="{0}" y="{1}" style="fill:{2}; fill-opacity:{3}; stroke:{4}; stroke-width:{5};"/>)",
                     x * 10, y * 10, fill_color, fill_opacity, border_color, ps.sidb_border_width);
+                progress.advance();
             });
 
         const auto [min_x, min_y] = lyt.get_lattice().nm_position(min_site);

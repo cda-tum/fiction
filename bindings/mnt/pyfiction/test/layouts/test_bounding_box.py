@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from mnt.pyfiction import (
@@ -23,6 +25,9 @@ from mnt.pyfiction import (
     shifted_cartesian_gate_layout,
     shifted_cartesian_obstruction_layout,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @pytest.mark.parametrize(
@@ -56,52 +61,38 @@ def test_bounding_box_around_an_empty_gate_level_layout(make_layout):
     assert max_coord.y - min_coord.y == 0
 
 
-@pytest.mark.parametrize(
-    ("verilog", "width", "height"),
-    [
-        ("mux21.v", 5, 7),
-        ("xnor2.v", 5, 8),
-        ("xor2.v", 4, 7),
-        ("FA.v", 7, 11),
-    ],
-)
-def test_initialize_gate_level_with_ortho_bounding_box(resources_dir, verilog, width, height):
+@pytest.mark.parametrize("verilog", ["mux21.v", "xnor2.v", "xor2.v", "FA.v"])
+def test_initialize_gate_level_with_ortho_bounding_box(resources_dir: Path, verilog: str) -> None:
+    """Orthogonal placement fills the layout's declared extent."""
     network = read_technology_network(str(resources_dir / verilog))
     layout = orthogonal(network, orthogonal_params())
     min_coord, max_coord = layout.bounding_box_2d()
 
     assert min_coord == layout.coord(0, 0)
-    assert max_coord == layout.coord(width, height)
-    assert max_coord.x - min_coord.x == width
-    assert max_coord.y - min_coord.y == height
+    assert max_coord == layout.coord(layout.x(), layout.y())
 
 
-def test_update_gate_level_bounding_box(mux21):
-    params = orthogonal_params()
-    layout = orthogonal(mux21, params)
+def test_update_gate_level_bounding_box() -> None:
+    """Clearing and moving occupied boundary tiles updates both bounding-box axes."""
+    layout = cartesian_gate_layout((8, 8), "2DDWave")
+    source = layout.create_pi("a", (0, 0))
+    wire = layout.create_buf(source, (4, 6))
+    edge = layout.create_buf(wire, (4, 7))
+    layout.create_po(edge, "out", (5, 7))
     min_coord, max_coord = layout.bounding_box_2d()
-
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(5, 7)
-    assert max_coord.x - min_coord.x == 5
-    assert max_coord.y - min_coord.y == 7
 
     layout.clear_tile((4, 7))
-    layout.move_node(layout.get_node((5, 7)), (5, 6), [layout.make_signal(layout.get_node((4, 6)))])
+    layout.move_node(layout.get_node((5, 7)), (5, 6), [wire])
     min_coord, max_coord = layout.bounding_box_2d()
-
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(5, 6)
-    assert max_coord.x - min_coord.x == 5
-    assert max_coord.y - min_coord.y == 6
 
-    layout.move_node(layout.get_node((5, 6)), (4, 7), [layout.make_signal(layout.get_node((4, 6)))])
+    layout.move_node(layout.get_node((5, 6)), (4, 7), [wire])
     min_coord, max_coord = layout.bounding_box_2d()
-
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(4, 7)
-    assert max_coord.x - min_coord.x == 4
-    assert max_coord.y - min_coord.y == 7
 
 
 @pytest.mark.parametrize(

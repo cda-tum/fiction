@@ -19,15 +19,18 @@
 #include "fiction/technology/qca/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
+#include <cstddef>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace fiction::qca::io
@@ -42,6 +45,8 @@ struct write_fqca_layout_params
      * Create via cells in between each layer.
      */
     bool create_inter_layer_via_cells = false;
+    /** @brief Receives completed serialization work and the phase total. */
+    utils::progress_callback on_progress{};
 };
 
 class out_of_cell_names_exception : public std::out_of_range
@@ -82,7 +87,16 @@ template <typename Lyt>
 class write_fqca_layout_impl
 {
   public:
-    write_fqca_layout_impl(const Lyt& src, std::ostream& s, const write_fqca_layout_params& p) : lyt{src}, os{s}, ps{p}
+    /**
+     * @brief Stores the layout and serialization parameters.
+     * @param src Layout to serialize.
+     * @param s Output stream.
+     * @param p Serialization parameters.
+     */
+    write_fqca_layout_impl(const Lyt& src, std::ostream& s, write_fqca_layout_params p) :
+            lyt{src},
+            os{s},
+            ps{std::move(p)}
     {}
 
     void run()
@@ -211,6 +225,9 @@ class write_fqca_layout_impl
 
     void write_layout_definition()
     {
+        utils::progress_reporter progress{ps.on_progress, "writing rows",
+                                          (static_cast<std::size_t>(lyt.y()) + 1) *
+                                              (static_cast<std::size_t>(lyt.z()) + 1)};
         // for each layer
         for (decltype(lyt.z()) z = 0; z <= lyt.z(); ++z)
         {
@@ -241,6 +258,7 @@ class write_fqca_layout_impl
                     via_layer_buffer << '\n';
                 }
 
+                progress.advance();
             }  // layer done
 
             if (ps.create_inter_layer_via_cells && (z != lyt.z()))

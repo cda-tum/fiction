@@ -17,7 +17,7 @@ from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.render import table as render_table
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import describe
-from mnt.fiction.cli.topologies import TOPOLOGIES
+from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
 from mnt.pyfiction import cartesian_gate_layout
 
 if TYPE_CHECKING:
@@ -72,7 +72,7 @@ def _cartesian_2ddwave(session: Session) -> GateLayout:
     """Require an active Cartesian layout with 2DDWave clocking."""
     layout = session.gate_layouts.current()
     if not isinstance(layout, cartesian_gate_layout):
-        msg = f"the active layout is {TOPOLOGIES[type(layout)]}; a Cartesian layout is needed"
+        msg = f"the active layout is {DISPLAY_NAMES[TOPOLOGIES[type(layout)]]}; a Cartesian layout is needed"
         raise CommandError(msg)
     if layout.get_clocking_scheme_name().upper() != "2DDWAVE":
         msg = f"the active layout is {layout.get_clocking_scheme_name()}-clocked; 2DDWave is needed"

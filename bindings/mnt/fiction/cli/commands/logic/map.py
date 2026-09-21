@@ -83,7 +83,14 @@ def _map_arguments(parser: Parser) -> None:
     parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
 
 
-@command("map", Category.LOGIC, _map_arguments, inputs="Active network.", example="generate mux -b 1; map --and --inv")
+@command(
+    "map",
+    Category.LOGIC,
+    _map_arguments,
+    inputs="Active network.",
+    example="generate mux -b 1; map --and --inv",
+    progress=True,
+)
 def map_command(session: Session, args: argparse.Namespace) -> Result:
     """Map the active network onto a set of gate types, producing a technology network.
 

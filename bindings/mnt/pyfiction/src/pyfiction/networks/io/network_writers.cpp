@@ -75,13 +75,15 @@ void network_writers(nanobind::module_& m)
         py::arg("network"), py::arg("filename"),
         "Writes the network as a gate-level Verilog file whose module is named `top`, as the readers expect. A "
         "technology network is written as an equivalent XAG, because gate-level Verilog has no buffers or fan-out "
-        "nodes. A file that cannot be written raises a `RuntimeError`.");
+        "nodes. A file that cannot be written raises a `RuntimeError`.",
+        py::call_guard<py::gil_scoped_release>());
 
     m.def(
         "write_blif", [](const Ntk& ntk, const std::string& filename)
         { fiction::detail::atomic_write(filename, [&](std::ostream& os) { mockturtle::write_blif(ntk, os); }); },
         py::arg("network"), py::arg("filename"),
-        "Writes the network as a BLIF file. A file that cannot be written raises a `RuntimeError`.");
+        "Writes the network as a BLIF file. A file that cannot be written raises a `RuntimeError`.",
+        py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail
@@ -105,7 +107,8 @@ void network_writers(nanobind::module_& m)
         { fiction::detail::atomic_write(filename, [&](std::ostream& os) { mockturtle::write_aiger(ntk, os); }); },
         py::arg("network"), py::arg("filename"),
         "Writes the AIG as a binary AIGER file, including its input, output, and network names. A file that "
-        "cannot be written raises a `RuntimeError`.");
+        "cannot be written raises a `RuntimeError`.",
+        py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

@@ -24,7 +24,9 @@ if TYPE_CHECKING:
 from ._common import _read_path_argument
 
 
-@command("read_fqca", Category.IO, _read_path_argument, inputs="One file.", example='read_fqca "layout.fqca"')
+@command(
+    "read_fqca", Category.IO, _read_path_argument, inputs="One file.", example='read_fqca "layout.fqca"', progress=True
+)
 def read_fqca(session: Session, args: argparse.Namespace) -> Result:
     """Read a QCA cell-level layout from a QCA-STACK file.
 
