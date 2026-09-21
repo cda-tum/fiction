@@ -93,7 +93,7 @@ TEST_CASE("Write empty QCAD layout", "[qcad]")
 
         std::ostringstream layout_stream{};
 
-        write_qca_layout(layout, layout_stream, {true});
+        write_qca_layout(layout, layout_stream, {.create_inter_layer_via_cells = true});
 
         CHECK(layout_stream.str() == qcad_layout);
     }
@@ -150,7 +150,7 @@ TEST_CASE("Write empty QCAD layout", "[qcad]")
 
         std::ostringstream layout_stream{};
 
-        write_qca_layout(layout, layout_stream, {false});
+        write_qca_layout(layout, layout_stream, {.create_inter_layer_via_cells = false});
 
         CHECK(layout_stream.str() == qcad_layout);
     }
@@ -767,7 +767,7 @@ TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
 
     std::ostringstream layout_stream{};
 
-    write_qca_layout(layout, layout_stream, {false});
+    write_qca_layout(layout, layout_stream, {.create_inter_layer_via_cells = false});
 
     CHECK(layout_stream.str() == qcad_layout);
 }
@@ -1450,7 +1450,7 @@ TEST_CASE("Write wire crossing", "[qcad]")
 
         std::ostringstream layout_stream{};
 
-        write_qca_layout(layout, layout_stream, {true});
+        write_qca_layout(layout, layout_stream, {.create_inter_layer_via_cells = true});
 
         CHECK(layout_stream.str() == qcad_layout);
     }

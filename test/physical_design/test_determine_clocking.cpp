@@ -142,8 +142,8 @@ TEST_CASE("Determine clock numbers for a 3-phase layout", "[determine-clocking]"
 {
     using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    remove_assign_and_check_clocking(
-        orthogonal<gate_layout>(blueprints::maj1_network<mockturtle::aig_network>(), {clocking::num_clks::THREE}));
+    remove_assign_and_check_clocking(orthogonal<gate_layout>(blueprints::maj1_network<mockturtle::aig_network>(),
+                                                             {.number_of_clock_phases = clocking::num_clks::THREE}));
 }
 
 TEST_CASE("Determine clock numbers for a non-clockable layout", "[determine-clocking]")
