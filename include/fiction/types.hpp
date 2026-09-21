@@ -237,11 +237,6 @@ using qca_cell_clk_lyt =
                                <layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
 
-using stacked_qca_cell_clk_lyt =
-    layouts::cell_level_layout<qca::qca_technology,
-                               layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
-using stacked_qca_cell_clk_lyt_ptr = std::shared_ptr<stacked_qca_cell_clk_lyt>;
-
 using mol_qca_cell_clk_lyt =
     layouts::cell_level_layout<qca::mol_qca_technology,
                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
@@ -268,8 +263,8 @@ using sidb_layout_ptr = std::shared_ptr<sidb::layout>;
  */
 using sidb_sim_result_ptr = std::shared_ptr<sidb::simulation::result>;
 
-using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, mol_qca_cell_clk_lyt_ptr,
-                                   inml_cell_clk_lyt_ptr, sidb_layout_ptr, sidb_sim_result_ptr>;
+using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr, mol_qca_cell_clk_lyt_ptr, inml_cell_clk_lyt_ptr,
+                                   sidb_layout_ptr, sidb_sim_result_ptr>;
 
 /**
  * Every `*_ptr` alias points at the type its name says (`aig_ptr` at `aig_nt`, and so on). The
@@ -290,7 +285,6 @@ static_assert(std::is_same_v<hex_even_row_gate_clk_lyt_ptr::element_type, hex_ev
 static_assert(std::is_same_v<hex_odd_col_gate_clk_lyt_ptr::element_type, hex_odd_col_gate_clk_lyt>);
 static_assert(std::is_same_v<hex_even_col_gate_clk_lyt_ptr::element_type, hex_even_col_gate_clk_lyt>);
 static_assert(std::is_same_v<qca_cell_clk_lyt_ptr::element_type, qca_cell_clk_lyt>);
-static_assert(std::is_same_v<stacked_qca_cell_clk_lyt_ptr::element_type, stacked_qca_cell_clk_lyt>);
 static_assert(std::is_same_v<mol_qca_cell_clk_lyt_ptr::element_type, mol_qca_cell_clk_lyt>);
 static_assert(std::is_same_v<inml_cell_clk_lyt_ptr::element_type, inml_cell_clk_lyt>);
 static_assert(std::is_same_v<sidb_layout_ptr::element_type, sidb::layout>);

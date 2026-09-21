@@ -20,6 +20,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -46,6 +47,7 @@
 #include <new>
 #include <optional>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 #include <unordered_set>
 #include <utility>
@@ -157,7 +159,7 @@ TEST_CASE("Test parameter point", "[operational-domain]")
 
     SECTION("Parameter values - invalid index")
     {
-        REQUIRE_THROWS_AS(p1.get_parameters().at(3), std::out_of_range);
+        REQUIRE_THROWS_AS(static_cast<void>(p1.get_parameters().at(3)), std::out_of_range);
     }
 
     SECTION("Equal parameter points hash equally")
@@ -2176,5 +2178,354 @@ TEST_CASE("Concurrent operational-domain sampling matches grid results", "[opera
                 REQUIRE(expected.has_value());
                 CHECK(*expected == value);
             });
+    }
+}
+
+TEST_CASE("Operational domain reports progress", "[operational-domain]")
+{
+    const auto lyt = blueprints::siqad_or_gate();
+
+    progress_recorder rec{};
+
+    operational_domain_stats  stats{};
+    operational_domain_params params{};
+
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 7, .max = 8, .step = 0.25},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.5, .max = 6, .step = 0.25}};
+
+    params.operational_params.sim_params.mu_minus                                                   = -0.28;
+    params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
+    params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
+    params.on_progress                     = rec.callback();
+
+    SECTION("single worker reports activity")
+    {
+        params.number_of_threads = 1;
+        bool        active_seen{};
+        bool        valid_worker{true};
+        std::size_t completed{};
+        std::size_t total{};
+        bool        active{};
+        params.on_worker_progress = [&](const std::size_t id, const std::size_t workers, std::string_view,
+                                        const std::size_t done, const std::size_t budget, const bool running)
+        {
+            valid_worker = valid_worker && id == 0 && workers == 1;
+            active_seen  = active_seen || running;
+            completed    = done;
+            total        = budget;
+            active       = running;
+        };
+
+        SECTION("grid search")
+        {
+            static_cast<void>(operational_domain_grid_search(lyt, std::vector{create_or_tt()}, params, &stats));
+        }
+        SECTION("random sampling")
+        {
+            static_cast<void>(operational_domain_random_sampling(lyt, std::vector{create_or_tt()}, 5, params, &stats));
+        }
+
+        CHECK(valid_worker);
+        CHECK(active_seen);
+        CHECK_FALSE(active);
+        CHECK(completed == stats.num_evaluated_parameter_combinations);
+        CHECK(total == completed);
+    }
+
+    SECTION("grid search")
+    {
+        const auto op_domain = operational_domain_grid_search(lyt, std::vector{create_or_tt()}, params, &stats);
+
+        CHECK(op_domain.size() == 15);
+        REQUIRE(rec.is_consistent("parameter points"));
+        CHECK(rec.final_count("parameter points") == stats.num_evaluated_parameter_combinations);
+        CHECK(rec.reports_of("parameter points").back().total == 15);
+    }
+
+    SECTION("random sampling")
+    {
+        const auto op_domain = operational_domain_random_sampling(lyt, std::vector{create_or_tt()}, 5, params, &stats);
+
+        REQUIRE(rec.is_consistent("parameter points"));
+        CHECK(rec.final_count("parameter points") == stats.num_evaluated_parameter_combinations);
+        CHECK(rec.reports_of("parameter points").back().total == op_domain.size());
+    }
+
+    SECTION("flood fill")
+    {
+        const auto op_domain = operational_domain_flood_fill(lyt, std::vector{create_or_tt()}, 1, params, &stats);
+
+        // the number of points to evaluate is unknown in advance
+        REQUIRE(rec.is_consistent("parameter points"));
+        CHECK(rec.final_count("parameter points") == stats.num_evaluated_parameter_combinations);
+        CHECK(rec.reports_of("parameter points").back().total == 0);
+    }
+}
+
+TEST_CASE("Parameter hashes distribute regular sweeps across partitions", "[operational-domain]")
+{
+    std::unordered_set<std::size_t> partitions{};
+    for (auto x = 0u; x < 8; ++x)
+    {
+        for (auto y = 0u; y < 8; ++y)
+        {
+            for (auto z = 0u; z < 8; ++z)
+            {
+                const parameter_point point{{5.6 + (x * 0.1024), 5.0 + (y * 0.1024), -0.32 + (z * 0.004096)}};
+                partitions.insert(std::hash<parameter_point>{}(point) % 256);
+            }
+        }
+    }
+    // Partitioned processing must not serialize this regular grid onto one lock.
+    CHECK(partitions.size() > 1);
+}
+
+TEST_CASE("Parallel contour surfaces preserve classifications and avoid duplicate simulations", "[operational-domain]")
+{
+    const layout lyt{blueprints::siqad_and_gate()};
+
+    operational_domain_params params{};
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6004, .step = 0.0001},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0004, .step = 0.0001},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.3196, .step = 0.0001}};
+    const auto reference    = operational_domain_grid_search(lyt, std::vector{create_and_tt()}, params);
+    // Every sample reaches this full region; its five-step extent puts every point within the boundary search.
+    REQUIRE(reference.size() == 125);
+    reference.for_each([](const auto&, const auto& value)
+                       { REQUIRE(std::get<0>(value) == operational_status::OPERATIONAL); });
+    for (const auto threads : {1u, 2u, 8u})
+    {
+        params.number_of_threads = threads;
+        for (const auto samples : {1u, 2000u})
+        {
+            operational_domain_stats                                                     stats{};
+            sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
+                lyt, std::vector{create_and_tt()}, params, stats};
+            const auto domain = impl.contour_tracing(samples);
+            CHECK(stats.num_operational_parameter_combinations > 0);
+            CHECK(stats.num_evaluated_parameter_combinations == domain.size());
+            domain.for_each([&reference](const auto& pp, const auto& status)
+                            { CHECK(reference.contains(pp) == std::optional{status}); });
+            const auto inferred = impl.inferred_operational_parameter_points();
+            for (const auto& pp : inferred)
+            {
+                CHECK(reference.contains(pp) == std::optional{std::tuple{operational_status::OPERATIONAL}});
+            }
+            reference.for_each(
+                [&domain, &inferred](const auto& pp, const auto& status)
+                {
+                    if (std::get<0>(status) == operational_status::OPERATIONAL)
+                    {
+                        CHECK((domain.contains(pp).has_value() || std::ranges::find(inferred, pp) != inferred.end()));
+                    }
+                });
+        }
+    }
+}
+
+TEST_CASE("Contour surfaces infer unsimulated interiors without crossing non-operational points",
+          "[operational-domain]")
+{
+    const layout lyt{blueprints::siqad_and_gate()};
+
+    operational_domain_params params{};
+    params.number_of_threads = 1;
+    params.sweep_dimensions  = {{.dimension = sweep_parameter::EPSILON_R, .min = 4.6, .max = 6.6, .step = 0.2},
+                                {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.6, .max = 6.6, .step = 0.2},
+                                {.dimension = sweep_parameter::MU_MINUS, .min = -0.38, .max = -0.26, .step = 0.01}};
+    operational_domain_stats reference_stats{};
+    const auto reference = operational_domain_grid_search(lyt, std::vector{create_and_tt()}, params, &reference_stats);
+    REQUIRE(reference.size() == 1573);
+    REQUIRE(reference_stats.num_non_operational_parameter_combinations > 0);
+
+    const parameter_point               interior_seed{{5.6, 5.6, -0.32}};
+    const parameter_point               surface_seed{{5.8, 4.6, -0.34}};
+    std::optional<operational_domain>   serial_domain{};
+    std::unordered_set<parameter_point> serial_inferred{};
+    for (const auto threads : {1u, 2u, 8u})
+    {
+        params.number_of_threads = threads;
+        operational_domain_stats                                                     stats{};
+        sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
+            lyt, std::vector{create_and_tt()}, params, stats};
+        const auto domain   = impl.trace_boundary_surface(0, {interior_seed, surface_seed, interior_seed});
+        const auto inferred = impl.inferred_operational_parameter_points();
+        const std::unordered_set<parameter_point> inferred_set{inferred.cbegin(), inferred.cend()};
+
+        CHECK(stats.num_evaluated_parameter_combinations == domain.size());
+        CHECK(inferred_set.contains(interior_seed));
+        CHECK(inferred_set.contains(surface_seed));
+        CHECK(std::ranges::any_of(inferred, [&domain](const auto& pp) { return !domain.contains(pp).has_value(); }));
+        for (const auto& pp : inferred)
+        {
+            CHECK(reference.contains(pp) == std::optional{std::tuple{operational_status::OPERATIONAL}});
+        }
+        domain.for_each([&reference](const auto& pp, const auto& status)
+                        { CHECK(reference.contains(pp) == std::optional{status}); });
+
+        if (serial_domain.has_value())
+        {
+            CHECK(inferred_set == serial_inferred);
+            CHECK(domain.size() == serial_domain->size());
+            domain.for_each([&serial_domain](const auto& pp, const auto& status)
+                            { CHECK(serial_domain->contains(pp) == std::optional{status}); });
+        }
+        else
+        {
+            serial_domain   = domain;
+            serial_inferred = inferred_set;
+        }
+    }
+}
+
+TEST_CASE("Parallel contour interiors preserve coverage and propagate worker failures", "[operational-domain]")
+{
+    const layout              lyt{blueprints::siqad_and_gate()};
+    operational_domain_params params{};
+    params.number_of_threads = 1;
+    params.sweep_dimensions  = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6016, .step = 0.0001},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0016, .step = 0.0001},
+        {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.32 + (16 * 0.0001), .step = 0.0001}};
+    const parameter_point seed{{5.6008, 5.0008, -0.32 + (8 * 0.0001)}};
+
+    SECTION("recovers the full region with unsimulated interior points")
+    {
+        const auto reference = operational_domain_grid_search(lyt, std::vector{create_and_tt()}, params);
+        REQUIRE(reference.size() == 4913);
+        reference.for_each([](const auto&, const auto& value)
+                           { REQUIRE(std::get<0>(value) == operational_status::OPERATIONAL); });
+        std::optional<operational_domain>   serial_domain{};
+        std::unordered_set<parameter_point> serial_inferred{};
+        for (const auto threads : {1u, 8u})
+        {
+            params.number_of_threads = threads;
+            operational_domain_stats                                                     stats{};
+            sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
+                lyt, std::vector{create_and_tt()}, params, stats};
+            const auto                                domain   = impl.trace_boundary_surface(0, {seed});
+            const auto                                inferred = impl.inferred_operational_parameter_points();
+            const std::unordered_set<parameter_point> inferred_set{inferred.cbegin(), inferred.cend()};
+            CHECK(domain.size() < reference.size());
+            CHECK(stats.num_evaluated_parameter_combinations == domain.size());
+            reference.for_each(
+                [&](const auto& pp, const auto& status)
+                {
+                    if (const auto known = domain.contains(pp); known.has_value())
+                    {
+                        CHECK(*known == status);
+                    }
+                    else
+                    {
+                        CHECK(inferred_set.contains(pp));
+                    }
+                });
+            for (const auto& pp : inferred)
+            {
+                CHECK(reference.contains(pp) == std::optional{std::tuple{operational_status::OPERATIONAL}});
+            }
+            if (serial_domain.has_value())
+            {
+                CHECK(inferred_set == serial_inferred);
+                CHECK(domain.size() == serial_domain->size());
+                domain.for_each([&](const auto& pp, const auto& status)
+                                { CHECK(serial_domain->contains(pp) == std::optional{status}); });
+            }
+            else
+            {
+                serial_domain   = domain;
+                serial_inferred = inferred_set;
+            }
+        }
+    }
+
+    SECTION("joins inference workers before propagating a lookup failure")
+    {
+        /**
+         * @brief Rejects a deep interior lookup during inference.
+         */
+        class failing_interior_domain : public operational_domain
+        {
+          public:
+            /**
+             * @brief Reads cached classifications, with an injected failure away from the surface and seed line.
+             * @param pp Parameter point to look up.
+             * @return The cached classification, if present.
+             * @throws std::bad_alloc when inference reaches the selected interior point.
+             */
+            [[nodiscard]] std::optional<std::tuple<operational_status>> contains(const parameter_point& pp) const
+            {
+                if (pp == parameter_point{{5.6004, 5.0004, -0.3196}})
+                {
+                    throw std::bad_alloc{};
+                }
+                return operational_domain::contains(pp);
+            }
+        };
+        for (const auto threads : {2u, 8u})
+        {
+            params.number_of_threads = threads;
+            operational_domain_stats                                                          stats{};
+            sidb::simulation::logic::detail::operational_domain_impl<failing_interior_domain> impl{
+                lyt, std::vector{create_and_tt()}, params, stats};
+            CHECK_THROWS_AS(impl.trace_boundary_surface(0, {seed}), std::bad_alloc);
+        }
+    }
+}
+
+TEST_CASE("Contour surface tracing propagates a worker's storage failure", "[operational-domain]")
+{
+    /**
+     * @brief Accepts sampling and the first-axis boundary search, then rejects surface expansion.
+     */
+    class failing_surface_domain : public operational_domain
+    {
+      public:
+        /**
+         * @brief Stores points on the seed's first-axis line.
+         * @param point Parameter point to store.
+         * @param value Operational status of the point.
+         * @throws std::bad_alloc when a worker expands beyond that line.
+         */
+        void add_value(const parameter_point& point, const std::tuple<operational_status>& value)
+        {
+            if (!seed.has_value())
+            {
+                seed = point;
+            }
+            if (point.get_parameters().at(1) != seed->get_parameters().at(1) ||
+                point.get_parameters().at(2) != seed->get_parameters().at(2))
+            {
+                throw std::bad_alloc{};
+            }
+            operational_domain::add_value(point, value);
+        }
+
+      private:
+        /**
+         * @brief The single random sample, written before surface workers start.
+         */
+        std::optional<parameter_point> seed{};
+    };
+
+    const layout              lyt{blueprints::siqad_and_gate()};
+    operational_domain_params params{};
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6001, .step = 0.0001},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0001, .step = 0.0001},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.3199, .step = 0.0001}};
+    const auto reference    = operational_domain_grid_search(lyt, std::vector{create_and_tt()}, params);
+    REQUIRE(reference.size() == 8);
+    reference.for_each([](const auto&, const auto& value)
+                       { REQUIRE(std::get<0>(value) == operational_status::OPERATIONAL); });
+
+    for (const auto threads : {1u, 2u, 8u})
+    {
+        params.number_of_threads = threads;
+        operational_domain_stats                                                         stats{};
+        sidb::simulation::logic::detail::operational_domain_impl<failing_surface_domain> impl{
+            lyt, std::vector{create_and_tt()}, params, stats};
+        CHECK_THROWS_AS(impl.contour_tracing(1), std::bad_alloc);
     }
 }

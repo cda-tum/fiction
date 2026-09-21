@@ -22,7 +22,7 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.14.1
+  Z3_VERSION: 5.1.0
   # pybind11_mkdoc parses with libclang, so the generated docstrings depend on which libclang is
   # loaded. Pin it explicitly: mkdoc_lib.py otherwise globs /usr/lib/llvm-* and takes the highest
   # version the runner image happens to ship, which can change the output with no commit here.
@@ -34,7 +34,7 @@ env:
 jobs:
   docstrings:
     name: 🐍 pybind11_mkdoc
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     permissions:
       contents: read # required to check out the repository
@@ -54,7 +54,7 @@ jobs:
       - name: Install build dependencies
         run: >
           sudo apt-get update && sudo apt-get install -y
-          cmake ninja-build libreadline-dev libtbb-dev python3-dev
+          cmake ninja-build libtbb-dev python3-dev
           "libclang-${LLVM_VERSION}-dev"
 
       - name: Setup Z3 Solver
@@ -75,7 +75,7 @@ jobs:
 
       - name: Run pybind11_mkdoc
         env:
-          LIBCLANG_PATH: /usr/lib/llvm-${{env.LLVM_VERSION}}/lib/libclang.so.1
+          LIBCLANG_PATH: /usr/lib/llvm-${{env.LLVM_VERSION}}/lib/libclang.so
         # Resolve the flags and the header list into variables first. Inline command
         # substitution would swallow a failure of either: the generator would still run, just
         # without include paths or without inputs, and write a truncated header.

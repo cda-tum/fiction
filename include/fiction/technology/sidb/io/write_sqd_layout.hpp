@@ -21,6 +21,8 @@
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/technology.hpp"
+#include "fiction/utils/atomic_write.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -31,12 +33,12 @@
 
 #include <cassert>
 #include <ctime>
-#include <fstream>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction::sidb::io
@@ -224,8 +226,13 @@ class sqd_writer
      *
      * @param src Layout to write.
      * @param s Output stream.
+     * @param callback Receives completed dot and defect records.
      */
-    sqd_writer(const layout& src, std::ostream& s) : lyt{src}, os{s} {}
+    sqd_writer(const layout& src, std::ostream& s, utils::progress_callback callback = {}) :
+            lyt{src},
+            os{s},
+            on_progress{std::move(callback)}
+    {}
 
     /**
      * Writes the layout with XML-escaped lattice text.
@@ -261,13 +268,24 @@ class sqd_writer
                << siqad::LATTICE_LAYER << siqad::MISC_LAYER;
 
         design << siqad::OPEN_DB_LAYER;
-        lyt.foreach_dot([this, &design](const auto& s) { write_db_dot(design, s); });
+        utils::progress_reporter progress{on_progress, "writing SiDBs and defects", lyt.num_dots() + lyt.num_defects()};
+        lyt.foreach_dot(
+            [this, &design, &progress](const auto& s)
+            {
+                write_db_dot(design, s);
+                progress.advance();
+            });
         design << siqad::CLOSE_DB_LAYER;
 
         if (lyt.num_defects() > 0)
         {
             design << siqad::OPEN_DEFECTS_LAYER;
-            lyt.foreach_defect([&design](const auto& sd) { write_defect(design, sd.first, sd.second); });
+            lyt.foreach_defect(
+                [&design, &progress](const auto& sd)
+                {
+                    write_defect(design, sd.first, sd.second);
+                    progress.advance();
+                });
             design << siqad::CLOSE_DEFECTS_LAYER;
         }
 
@@ -285,6 +303,8 @@ class sqd_writer
      * Output stream.
      */
     std::ostream& os;
+    /** @brief Receives serialization progress. */
+    utils::progress_callback on_progress;
 
     /**
      * Appends a DB dot with its lattice coordinate and dot tag.
@@ -350,10 +370,11 @@ class sqd_writer
  *
  * @param lyt Layout to write.
  * @param os Output stream to write into.
+ * @param on_progress Receives completed dot and defect records.
  */
-inline void write_sqd_layout(const layout& lyt, std::ostream& os)
+inline void write_sqd_layout(const layout& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 {
-    detail::sqd_writer p{lyt, os};
+    detail::sqd_writer p{lyt, os, std::move(on_progress)};
 
     p.run();
 }
@@ -362,19 +383,13 @@ inline void write_sqd_layout(const layout& lyt, std::ostream& os)
  *
  * @param lyt Layout to write.
  * @param filename File to write into.
+ * @param on_progress Receives completed dot and defect records.
  * @throws std::ofstream::failure if the file cannot be opened.
  */
-inline void write_sqd_layout(const layout& lyt, const std::string_view& filename)
+inline void write_sqd_layout(const layout& lyt, const std::string_view& filename,
+                             utils::progress_callback on_progress = {})
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_sqd_layout(lyt, os);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_sqd_layout(lyt, os, on_progress); });
 }
 
 }  // namespace fiction::sidb::io

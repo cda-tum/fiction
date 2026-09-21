@@ -476,3 +476,46 @@ def test_operational_domain_two_bdl_pair_wire():
     assert stats_grid.num_evaluated_parameter_combinations == 8281
     assert stats_grid.num_operational_parameter_combinations == 0
     assert stats_grid.num_non_operational_parameter_combinations == 8281
+
+
+@pytest.mark.parametrize("strategy", ["grid", "flood"])
+def test_domain_reports_progress(resources_dir: Path, strategy: str) -> None:
+    """The parameter points are reported as they are evaluated, ending at the grid size."""
+    lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
+
+    params = operational_domain_params()
+    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.simulation_parameters.base = 2
+    params.operational_params.simulation_parameters.mu_minus = -0.28
+    params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5
+    params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
+    params.sweep_dimensions = [
+        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.70, 5.80, 0.01),
+        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 3.00, 3.10, 0.01),
+    ]
+    params.number_of_threads = 2
+
+    reports = []
+    params.on_progress = lambda task, done, total: reports.append((task, done, total))
+    workers = []
+    params.on_worker_progress = lambda *report: workers.append(report)
+
+    stats = operational_domain_stats()
+    if strategy == "grid":
+        operational_domain_grid_search(lyt, [create_or_tt()], params, stats)
+    else:
+        operational_domain_flood_fill(lyt, [create_or_tt()], 1, params, stats)
+
+    points = [(done, total) for task, done, total in reports if task == "parameter points"]
+    assert points[0] == (0, 0)  # the total is unknown until the grid is set up
+    assert points == sorted(points)
+    assert points[-1][0] == stats.num_evaluated_parameter_combinations == 121
+    assert points[-1][1] == (121 if strategy == "grid" else 0)
+
+    finished = [(done, total) for worker, count, description, done, total, active in workers if not active]
+    if strategy == "grid":
+        assert len(finished) == params.number_of_threads
+    assert sum(done for done, total in finished) == stats.num_evaluated_parameter_combinations
+    assert all(total in (done, 0) for done, total in finished)
+    if strategy == "flood":
+        assert any("exploring" in description and total == 0 for _, _, description, _, total, _ in workers)

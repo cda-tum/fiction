@@ -21,15 +21,17 @@
 #include "fiction/technology/inml/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/atomic_write.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
-#include <fstream>
 #include <functional>
 #include <iostream>
 #include <ostream>
@@ -58,6 +60,8 @@ struct write_qcc_layout_params
      * Filename of the QCC file.
      */
     std::string_view filename{};
+    /** @brief Receives completed serialization work and the phase total. */
+    utils::progress_callback on_progress{};
 };
 
 namespace detail
@@ -113,6 +117,12 @@ template <typename Lyt>
 class write_qcc_layout_impl
 {
   public:
+    /**
+     * @brief Stores the layout and serialization parameters.
+     * @param src Layout to serialize.
+     * @param s Output stream.
+     * @param p Serialization parameters.
+     */
     write_qcc_layout_impl(const Lyt& src, std::ostream& s, write_qcc_layout_params p) :
             lyt{src},
             bb{lyt},
@@ -120,7 +130,7 @@ class write_qcc_layout_impl
             sorted_po_list{sorted_pos()},
             num_magnets{magcad_magnet_count(lyt)},
             os{s},
-            ps{p}
+            ps{std::move(p)}
     {}
 
     void run()
@@ -285,6 +295,7 @@ class write_qcc_layout_impl
 
     void write_layout()
     {
+        utils::progress_reporter      progress{ps.on_progress, "writing rows", (static_cast<std::size_t>(lyt.y()) + 1)};
         std::unordered_set<cell<Lyt>> skip{};
 
         os << qcc::OPEN_LAYOUT;
@@ -353,6 +364,7 @@ class write_qcc_layout_impl
 
                 os << qcc::CLOSE_LAYOUT_ITEM;
             }
+            progress.advance();
         }
         os << qcc::CLOSE_LAYOUT;
     }
@@ -395,17 +407,13 @@ void write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params 
 template <typename Lyt>
 void write_qcc_layout(const Lyt& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
+    fiction::detail::atomic_write(filename,
+                                  [&](std::ostream& os)
+                                  {
+                                      ps.filename = filename;
 
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    ps.filename = filename;
-
-    write_qcc_layout(lyt, os, ps);
-    os.close();
+                                      write_qcc_layout(lyt, os, ps);
+                                  });
 }
 
 }  // namespace fiction::inml::io

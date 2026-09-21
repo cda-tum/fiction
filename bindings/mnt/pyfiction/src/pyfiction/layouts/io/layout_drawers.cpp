@@ -18,12 +18,9 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/io/layout_drawers.hpp>
-#include <fiction/networks/io/dot_drawers.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/utils/progress.hpp>
 
-#include <mockturtle/io/write_dot.hpp>
-
-#include <string>
 #include <string_view>
 
 #include <nanobind/nanobind.h>
@@ -43,6 +40,39 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * Writes a gate-level layout as DOT with the drawer its topology needs.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @tparam ClockColors Color the tiles by clock number instead of by gate type.
+ * @tparam DrawIndexes Label the tiles with their node indices.
+ * @param lyt The layout to draw.
+ * @param filename Path of the file to write.
+ * @param on_progress Receives completed tile rendering.
+ */
+template <typename Lyt, bool ClockColors, bool DrawIndexes>
+void draw(const Lyt& lyt, const std::string_view& filename, const fiction::utils::progress_callback& on_progress)
+{
+    if constexpr (fiction::is_cartesian_layout_v<Lyt>)
+    {
+        fiction::layouts::io::write_dot_layout<
+            Lyt, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
+                                                                                                    on_progress);
+    }
+    else if constexpr (fiction::is_shifted_cartesian_layout_v<Lyt>)
+    {
+        fiction::layouts::io::write_dot_layout<
+            Lyt, fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(
+            lyt, filename, {}, on_progress);
+    }
+    else if constexpr (fiction::is_hexagonal_layout_v<Lyt>)
+    {
+        fiction::layouts::io::write_dot_layout<
+            Lyt, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
+                                                                                                    on_progress);
+    }
+}
+
 template <typename Lyt>
 void write_dot_layout(nanobind::module_& m)
 {
@@ -50,31 +80,29 @@ void write_dot_layout(nanobind::module_& m)
 
     m.def(
         "write_dot_layout",
-        [](const Lyt& lyt, const std::string_view& filename)
+        [](const Lyt& lyt, const std::string_view& filename, const bool clock_colors, const bool indexes,
+           const fiction::utils::progress_callback& on_progress)
         {
-            if constexpr (fiction::is_cartesian_layout_v<Lyt>)
+            if (clock_colors && indexes)
             {
-                fiction::layouts::io::write_dot_layout<Lyt, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt>>(
-                    lyt, filename);
+                draw<Lyt, true, true>(lyt, filename, on_progress);
             }
-            else if constexpr (fiction::is_hexagonal_layout_v<Lyt>)
+            else if (clock_colors)
             {
-                fiction::layouts::io::write_dot_layout<Lyt, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt>>(
-                    lyt, filename);
+                draw<Lyt, true, false>(lyt, filename, on_progress);
+            }
+            else if (indexes)
+            {
+                draw<Lyt, false, true>(lyt, filename, on_progress);
+            }
+            else
+            {
+                draw<Lyt, false, false>(lyt, filename, on_progress);
             }
         },
-        py::arg("layout"), py::arg("filename"), DOC(fiction_layouts_io_write_dot_layout));
-}
-
-template <typename Ntk>
-void write_dot_network(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def(
-        "write_dot_network", [](const Ntk& ntk, const std::string_view& filename)
-        { mockturtle::write_dot(ntk, std::string{filename}, fiction::networks::io::technology_dot_drawer<Ntk>{}); },
-        py::arg("network"), py::arg("filename"));
+        py::arg("layout"), py::arg("filename"), py::arg("clock_colors") = false, py::arg("indexes") = false,
+        py::arg("on_progress").none() = py::none(), DOC(fiction_layouts_io_write_dot_layout),
+        py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail
@@ -84,8 +112,12 @@ void layout_drawers(nanobind::module_& m)
     detail::write_dot_layout<py_cartesian_gate_layout>(m);
     detail::write_dot_layout<py_shifted_cartesian_gate_layout>(m);
     detail::write_dot_layout<py_hexagonal_gate_layout>(m);
-
-    detail::write_dot_network<py_logic_network>(m);
+    detail::write_dot_layout<py_odd_row_cartesian_gate_layout>(m);
+    detail::write_dot_layout<py_even_row_cartesian_gate_layout>(m);
+    detail::write_dot_layout<py_even_column_cartesian_gate_layout>(m);
+    detail::write_dot_layout<py_odd_row_hex_gate_layout>(m);
+    detail::write_dot_layout<py_odd_column_hex_gate_layout>(m);
+    detail::write_dot_layout<py_even_column_hex_gate_layout>(m);
 }
 
 }  // namespace pyfiction

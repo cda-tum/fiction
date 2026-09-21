@@ -19,6 +19,7 @@
 
 #include "fiction/synthesis/network_conversion.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -33,10 +34,6 @@
 #include <random>
 #include <utility>
 #include <vector>
-
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
 
 namespace fiction::synthesis
 {
@@ -81,6 +78,8 @@ struct fanout_substitution_params
      * Seed used for random substitution, generated randomly if not specified.
      */
     std::optional<uint32_t> seed = std::nullopt;
+    /** @brief Reports completed work in each bounded phase. */
+    utils::progress_callback on_progress{};
 };
 
 namespace detail
@@ -114,10 +113,15 @@ template <typename NtkDest, typename NtkSrc>
 class fanout_substitution_impl
 {
   public:
-    fanout_substitution_impl(const NtkSrc& src, const fanout_substitution_params p) :
+    /**
+     * @brief Stores the network and algorithm parameters.
+     * @param src Source network.
+     * @param p Algorithm parameters.
+     */
+    fanout_substitution_impl(const NtkSrc& src, fanout_substitution_params p) :
             ntk_topo{convert_network<NtkDest>(src)},
             available_fanouts{ntk_topo},
-            ps{p}
+            ps{std::move(p)}
     {
         if (ps.strategy == fanout_substitution_params::substitution_strategy::RANDOM)
         {
@@ -136,13 +140,9 @@ class fanout_substitution_impl
         ntk_topo.foreach_pi([this, &substituted, &old2new](const auto& pi)
                             { generate_fanout_tree(substituted, pi, old2new); });
 
-#if (PROGRESS_BARS)
-        // initialize a progress bar
-        mockturtle::progress_bar bar{static_cast<uint32_t>(ntk_topo.num_gates()), "[i] fanout substitution: |{0}|"};
-#endif
-
+        utils::progress_reporter progress{ps.on_progress, "substituting fanouts", ntk_topo.num_gates()};
         ntk_topo.foreach_gate(
-            [&, this](const auto& n, [[maybe_unused]] auto i)
+            [&, this](const auto& n)
             {
                 // gather children, but substitute fanouts where applicable
                 std::vector<mockturtle::signal<mockturtle::topo_view<NtkDest>>> children{};
@@ -168,11 +168,7 @@ class fanout_substitution_impl
 
                 // generate the fanout tree for n
                 generate_fanout_tree(substituted, n, old2new);
-
-#if (PROGRESS_BARS)
-                // update progress
-                bar(i);
-#endif
+                progress.advance();
             });
 
         // add primary outputs to finalize the network
@@ -390,7 +386,12 @@ template <typename Ntk>
 class is_fanout_substituted_impl
 {
   public:
-    is_fanout_substituted_impl(const Ntk& src, fanout_substitution_params p) : ntk{src}, ps{p} {}
+    /**
+     * @brief Stores the network and algorithm parameters.
+     * @param src Source network.
+     * @param p Algorithm parameters.
+     */
+    is_fanout_substituted_impl(const Ntk& src, fanout_substitution_params p) : ntk{src}, ps{std::move(p)} {}
 
     bool run()
     {

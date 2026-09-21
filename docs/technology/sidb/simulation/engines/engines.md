@@ -70,7 +70,7 @@
 
 **Header:** `fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp`
 
-```{doxygenfunction} fiction::sidb::simulation::engines::exhaustive_ground_state_simulation(const layout& lyt, const model::simulation_parameters& params = model::simulation_parameters{})
+```{doxygenfunction} fiction::sidb::simulation::engines::exhaustive_ground_state_simulation
 
 ```
 

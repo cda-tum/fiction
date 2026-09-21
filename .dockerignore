@@ -43,6 +43,8 @@
 # Build directories
 **/*cmake-build-*
 **/build/
+**/build-*/
+.ai/
 
 # IDE files
 **/*.directory
@@ -66,6 +68,7 @@
 # Python
 **/__pycache__
 **/venv/
+**/.venv/
 **/dist/
 **/*.ipynb_checkpoints/
 **/*.ipynb
@@ -77,6 +80,3 @@
 **/*.tar.*
 **/*.7z
 **/*.rar
-
-# Git files
-**/.git

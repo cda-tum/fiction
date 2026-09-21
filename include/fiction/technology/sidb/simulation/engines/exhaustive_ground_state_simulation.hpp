@@ -25,6 +25,7 @@
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/utils/execution_timeout.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -41,6 +42,7 @@ namespace fiction::sidb::simulation::engines
  *
  * @param lyt Layout to simulate.
  * @param params Physical parameters.
+ * @param on_progress Callback that receives the number of enumerated charge configurations.
  * @param deadline Shared caller deadline. `time_point::max()` leaves the simulation unlimited.
  * @return The physically valid charge distributions.
  * @throws std::out_of_range if a site has an invalid lattice basis index.
@@ -48,7 +50,8 @@ namespace fiction::sidb::simulation::engines
  */
 [[nodiscard]] inline result exhaustive_ground_state_simulation(
     const layout& lyt, const model::simulation_parameters& params = model::simulation_parameters{},
-    const std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::time_point::max())
+    const utils::progress_callback&             on_progress = {},
+    const std::chrono::steady_clock::time_point deadline    = std::chrono::steady_clock::time_point::max())
 {
     utils::check_deadline(deadline);
     result simulation_result{};
@@ -68,6 +71,8 @@ namespace fiction::sidb::simulation::engines
         const potential_landscape            land{lyt, params};
         simulation::detail::simulation_state state{land, model::charge_state::NEGATIVE};
 
+        utils::progress_reporter progress{on_progress, "charge configurations", state.max_charge_index() + 1};
+
         while (state.charge_index() < state.max_charge_index())
         {
             utils::check_deadline(deadline);
@@ -77,7 +82,10 @@ namespace fiction::sidb::simulation::engines
             }
 
             state.increase_charge_index_by_one();
+            progress.advance();
         }
+
+        progress.advance();
 
         if (state.is_physically_valid())
         {

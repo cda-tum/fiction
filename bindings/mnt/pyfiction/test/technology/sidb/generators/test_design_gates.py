@@ -100,11 +100,16 @@ def test_siqad_and_gate_skeleton_100():
     assert params.canvas[0] == lattice_site(4, 4, 0)
     assert params.canvas[1] == lattice_site(14, 5, 1)
 
+    reports: list[tuple[str, int, int]] = []
+    params.on_progress = lambda task, done, total: reports.append((task, done, total))
+
     stats = design_sidb_gates_stats()
     designed_gates = design_sidb_gates(layout, [create_and_tt()], params, stats)
 
     assert len(designed_gates) == 23
     assert "total time" in repr(stats)
+    assert reports
+    assert reports[-1][1] == reports[-1][2]
 
 
 def test_nor_gate_111(nor_gate_skeleton):

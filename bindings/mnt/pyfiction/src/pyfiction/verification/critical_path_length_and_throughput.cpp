@@ -45,7 +45,8 @@ void critical_path_length_and_throughput_impl(nanobind::module_& m)
 
             return {result.critical_path_length, result.throughput};
         },
-        py::arg("layout"), DOC(fiction_verification_critical_path_length_and_throughput));
+        py::arg("layout"), py::call_guard<py::gil_scoped_release>(),
+        DOC(fiction_verification_critical_path_length_and_throughput));
 }
 
 }  // namespace detail
@@ -55,6 +56,12 @@ void critical_path_length_and_throughput(nanobind::module_& m)
     detail::critical_path_length_and_throughput_impl<py_cartesian_gate_layout>(m);
     detail::critical_path_length_and_throughput_impl<py_shifted_cartesian_gate_layout>(m);
     detail::critical_path_length_and_throughput_impl<py_hexagonal_gate_layout>(m);
+    detail::critical_path_length_and_throughput_impl<py_odd_row_cartesian_gate_layout>(m);
+    detail::critical_path_length_and_throughput_impl<py_even_row_cartesian_gate_layout>(m);
+    detail::critical_path_length_and_throughput_impl<py_even_column_cartesian_gate_layout>(m);
+    detail::critical_path_length_and_throughput_impl<py_odd_row_hex_gate_layout>(m);
+    detail::critical_path_length_and_throughput_impl<py_odd_column_hex_gate_layout>(m);
+    detail::critical_path_length_and_throughput_impl<py_even_column_hex_gate_layout>(m);
 }
 
 }  // namespace pyfiction

@@ -18,24 +18,32 @@ from mnt.pyfiction import (
     exact_shifted_cartesian,
     orthogonal,
     technology_constraints,
+    technology_network,
 )
 
 
-def test_apply_qca_one_library(mux21):
+def test_apply_qca_one_library(mux21: technology_network) -> None:
+    """Map the library and report every processed source gate."""
     layout = orthogonal(mux21)
 
-    apply_qca_one_library(layout)
+    reports: list[tuple[str, int, int]] = []
+    apply_qca_one_library(layout, lambda task, done, total: reports.append((task, done, total)))
+    assert reports[-1][1] == reports[-1][2] > 0
 
 
-def test_apply_sim7_mol_library(mux21):
+def test_apply_sim7_mol_library(mux21: technology_network) -> None:
+    """Map the library and report every processed source gate."""
     layout = orthogonal(mux21)
 
-    cell_layout = apply_sim7_mol_library(layout)
+    reports: list[tuple[str, int, int]] = []
+    cell_layout = apply_sim7_mol_library(layout, lambda task, done, total: reports.append((task, done, total)))
+    assert reports[-1][1] == reports[-1][2] > 0
     assert cell_layout is not None
     assert cell_layout.num_cells() > 0
 
 
-def test_apply_bestagon_library(mux21):
+def test_apply_bestagon_library(mux21: technology_network) -> None:
+    """Map the library and report every processed source gate."""
     params = exact_params()
     params.scheme = "ROW"
     params.crossings = True
@@ -43,10 +51,13 @@ def test_apply_bestagon_library(mux21):
 
     layout = exact_hexagonal(mux21, params)
 
-    apply_bestagon_library(layout)
+    reports: list[tuple[str, int, int]] = []
+    apply_bestagon_library(layout, lambda task, done, total: reports.append((task, done, total)))
+    assert reports[-1][1] == reports[-1][2] > 0
 
 
-def test_apply_topolinano_library(mux21):
+def test_apply_topolinano_library(mux21: technology_network) -> None:
+    """Map the library and report every processed source gate."""
     params = exact_params()
     params.scheme = "COLUMNAR3"
     params.crossings = True
@@ -55,4 +66,6 @@ def test_apply_topolinano_library(mux21):
 
     layout = exact_shifted_cartesian(mux21, params)
 
-    apply_topolinano_library(layout)
+    reports: list[tuple[str, int, int]] = []
+    apply_topolinano_library(layout, lambda task, done, total: reports.append((task, done, total)))
+    assert reports[-1][1] == reports[-1][2] > 0

@@ -14,13 +14,13 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.14.1
+  Z3_VERSION: 5.1.0
   CMAKE_BUILD_PARALLEL_LEVEL: 4
 
 jobs:
   analyze:
     name: 📝 Analyze ${{ matrix.language }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       actions: read # required by github/codeql-action/init to check the workflow run
       contents: read # required to check out the repository
@@ -82,7 +82,7 @@ jobs:
         if: matrix.language == 'cpp'
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
-          key: "codeql-ubuntu-24.04-clang++-17"
+          key: "codeql-ubuntu-26.04-clang++-17"
           variant: ccache
           # Only `main` writes; pull requests restore its cache. Caches are
           # branch-scoped and the repository shares a 10 GB budget.
@@ -105,7 +105,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
@@ -120,7 +120,7 @@ jobs:
         run: cmake --build --preset ci-codeql
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
         with:
           upload: false
           output: sarif-results
@@ -137,6 +137,6 @@ jobs:
           output: sarif-results/${{ matrix.language }}.sarif
 
       - name: Upload SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
         with:
           sarif_file: sarif-results/${{ matrix.language }}.sarif

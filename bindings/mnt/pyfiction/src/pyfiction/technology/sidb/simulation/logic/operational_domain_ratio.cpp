@@ -57,7 +57,7 @@ void operational_domain_ratio(nanobind::module_& m)
            const operational_domain_ratio_params& params)
         { return fiction::sidb::simulation::logic::operational_domain_ratio(lyt, spec, pp, params); },
         py::arg("lyt"), py::arg("spec"), py::arg("pp"), py::arg("params") = operational_domain_ratio_params{},
-        DOC(fiction_sidb_simulation_logic_operational_domain_ratio));
+        py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_logic_operational_domain_ratio));
 }
 
 }  // namespace pyfiction

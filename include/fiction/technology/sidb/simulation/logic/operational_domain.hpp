@@ -18,7 +18,6 @@
 #pragma once
 
 #include "fiction/technology/sidb/charge_distribution.hpp"
-#include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/critical_temperature.hpp"
@@ -36,14 +35,19 @@
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/utils/math/math_utils.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/stl/hash.hpp"
 
 #include <btree.h>
 #include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
+#include <phmap.h>  // IWYU pragma: keep, defines the container behind the parallel_flat_hash_set_m alias
+#include <phmap_fwd_decl.h>
+#include <phmap_utils.h>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cassert>
 #include <cmath>
@@ -59,7 +63,6 @@
 #include <mutex>
 #include <numeric>
 #include <optional>
-#include <queue>
 #include <random>
 #include <ranges>
 #include <stdexcept>
@@ -87,7 +90,7 @@ struct parameter_point
      *
      * @param values Parameter values for each dimension.
      */
-    explicit parameter_point(const std::vector<double>& values) : parameters(values) {}
+    explicit parameter_point(std::vector<double> values) : parameters{std::move(values)} {}
     /**
      * Equality operator. Checks if this parameter point is equal to another point within a specified tolerance.
      * The tolerance is defined by `constants::ERROR_MARGIN`.
@@ -145,7 +148,7 @@ template <>
 struct hash<fiction::sidb::simulation::logic::parameter_point>
 {
     /**
-     * @brief Computes the hash of a parameter point.
+     * @brief Mixes the quantized parameter values across the hash bits for partitioned processing.
      *
      * @param pp Parameter point to hash.
      * @return Hash of the quantized parameter values.
@@ -162,7 +165,7 @@ struct hash<fiction::sidb::simulation::logic::parameter_point>
                                               fiction::sidb::simulation::logic::parameter_point::quantize(parameter));
         }
 
-        return hash_value;
+        return phmap::phmap_mix<sizeof(size_t)>{}(hash_value);
     }
 };
 
@@ -407,6 +410,13 @@ struct operational_domain_params
      * computation to leave cores free for other work.
      */
     std::size_t number_of_threads{std::max(std::size_t{std::thread::hardware_concurrency()}, std::size_t{1})};
+    /**
+     * Callback that receives the number of evaluated parameter points. The total is known for grid search and random
+     * sampling only.
+     */
+    utils::progress_callback on_progress{};
+    /** @brief Reports logical worker activity with a fixed worker count for each invocation. */
+    utils::worker_progress_callback on_worker_progress{};
 };
 /**
  * Statistics for the operational domain computation. The statistics are used across the different operational domain
@@ -616,6 +626,8 @@ class operational_domain_impl
         // expensive operational points
         std::ranges::shuffle(all_step_points, std::mt19937_64{std::random_device{}()});
 
+        progress.set_total(all_step_points.size());
+
         simulate_operational_status_in_parallel(all_step_points);
 
         log_stats();
@@ -634,6 +646,8 @@ class operational_domain_impl
         const mockturtle::stopwatch stop{stats.time_total};
 
         const auto step_point_samples = generate_random_step_points(samples);
+
+        progress.set_total(step_point_samples.size());
 
         simulate_operational_status_in_parallel(step_point_samples);
 
@@ -752,8 +766,10 @@ class operational_domain_impl
                 queue_cv.notify_all();
             };
 
-            const auto worker = [&]()
+            const auto worker = [&](const std::size_t id)
             {
+                const utils::worker_progress_scope worker_scope{worker_progress, id};
+                std::size_t                        completed{};
                 try
                 {
                     while (true)
@@ -775,6 +791,7 @@ class operational_domain_impl
                         ++active_workers;
 
                         lock.unlock();
+                        worker_progress.update(id, "exploring parameter points", completed);
 
                         // determine the operational status and, if the point is operational, its yet unknown neighbors.
                         // No lock is held here, which is what enables the parallelism in the first place
@@ -782,6 +799,7 @@ class operational_domain_impl
                                                     unknown_neighborhood(sp) :
                                                     std::vector<step_point>{};
 
+                        worker_progress.update(id, "exploring parameter points", ++completed);
                         lock.lock();
 
                         if (finished)
@@ -817,7 +835,7 @@ class operational_domain_impl
             {
                 for (std::size_t i = 0; i < number_of_threads; ++i)
                 {
-                    workers.emplace_back(std::async(std::launch::async, worker));
+                    workers.emplace_back(std::async(std::launch::async, worker, i));
                 }
 
                 for (auto& worker_result : workers)
@@ -964,21 +982,51 @@ class operational_domain_impl
      * This serves the same purpose as the two-dimensional Moore contour trace — sample only the boundary of an
      * operational region and infer its interior — but collects the boundary instead of walking it. A closed curve can
      * be walked because its neighbors admit a cyclic order; a closed surface cannot, so the boundary is gathered by a
-     * breadth-first search over the operational points that have at least one non-operational Moore neighbor. The
+     * parallel breadth-first search over operational points with a non-operational Moore neighbor or a range edge.
+     * Workers share the classification cache and schedule each point once; interior inference runs after they join. The
      * resulting set is closed under the Moore neighborhood, which is what the interior inference requires.
      *
      * @param samples Maximum number of random samples to be taken before tracing.
+     * @param initial_points Additional seeds, rounded up to sweep grid points and deduplicated with the random samples.
+     * @throws std::invalid_argument if an additional seed has the wrong dimensions or lies outside the sweep grid.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] OpDomain trace_boundary_surface(const std::size_t samples)
+    [[nodiscard]] OpDomain trace_boundary_surface(const std::size_t                   samples,
+                                                  const std::vector<parameter_point>& initial_points = {})
     {
         assert(num_dimensions >= 3 && "Boundary surface tracing is intended for three or more dimensions");
 
         const mockturtle::stopwatch stop{stats.time_total};
 
-        const auto step_point_samples = generate_random_step_points(samples);
+        auto step_point_samples = generate_random_step_points(samples);
+
+        for (const auto& pp : initial_points)
+        {
+            step_point_samples.push_back(to_step_point(pp));
+        }
+        if (!initial_points.empty())
+        {
+            std::ranges::sort(step_point_samples);
+            step_point_samples.erase(std::unique(step_point_samples.begin(), step_point_samples.end()),
+                                     step_point_samples.end());
+        }
 
         simulate_operational_status_in_parallel(step_point_samples);
+
+        // Serialize only overlapping cache misses. Each point always uses the same stripe, so two workers cannot
+        // simulate it twice; cache hits do not take a stripe lock. No worker holds more than one stripe at a time.
+        std::array<std::mutex, 256> simulation_mutexes{};
+        const auto                  classify = [this, &simulation_mutexes](const step_point& sp)
+        {
+            const auto pp = to_parameter_point(sp);
+            if (const auto cached = op_domain.contains(pp); cached.has_value())
+            {
+                return std::get<0>(*cached);
+            }
+            const std::scoped_lock lock{
+                simulation_mutexes.at(std::hash<parameter_point>{}(pp) % simulation_mutexes.size())};
+            return is_step_point_operational(sp);
+        };
 
         // a step point is on the boundary if it is operational and borders a non-operational point or the edge of the
         // parameter range. The latter is implied: `moore_neighborhood` does not gather points outside the range, so a
@@ -986,7 +1034,7 @@ class operational_domain_impl
         //
         // the neighborhood is returned alongside the verdict so that the expansion below does not have to rebuild it.
         // It grows as `3^n - 1`, so recomputing it once per popped point gets expensive in higher dimensions
-        const auto neighborhood_and_boundary_status = [this](const step_point& sp)
+        const auto neighborhood_and_boundary_status = [this, &classify](const step_point& sp)
         {
             auto neighborhood = moore_neighborhood(sp);
 
@@ -996,12 +1044,14 @@ class operational_domain_impl
             }
 
             const auto on_boundary =
-                std::ranges::any_of(neighborhood, [this](const auto& m)
-                                    { return is_step_point_operational(m) == operational_status::NON_OPERATIONAL; });
+                std::ranges::any_of(neighborhood, [&classify](const auto& m)
+                                    { return classify(m) == operational_status::NON_OPERATIONAL; });
 
             return std::pair{std::move(neighborhood), on_boundary};
         };
 
+        // Retain completed surfaces so another seed on the same surface does not retrace it.
+        std::vector<phmap::btree_set<step_point>> completed_contours{};
         for (const auto& starting_point : step_point_samples)
         {
             // if the current starting point is non-operational, skip to the next one
@@ -1023,44 +1073,127 @@ class operational_domain_impl
             // find an operational point on the boundary starting from the randomly determined starting point
             const auto boundary_starting_point = find_operational_contour_step_point(starting_point);
 
+            const auto completed =
+                std::ranges::find_if(completed_contours, [&boundary_starting_point](const auto& contour)
+                                     { return contour.contains(boundary_starting_point); });
+            if (completed != completed_contours.end())
+            {
+                infer_operational_status_in_enclosing_contour(starting_point, *completed);
+                continue;
+            }
+
             // all step points visited by the boundary trace; they form a closed surface that encloses the operational
             // region `starting_point` is located in
             phmap::btree_set<step_point> contour{};
 
-            std::queue<step_point>       queue{};
+            std::deque<step_point>       queue{boundary_starting_point};
             phmap::btree_set<step_point> visited{boundary_starting_point};
+            std::mutex                   queue_mutex{};
+            std::condition_variable      queue_cv{};
+            std::size_t                  active_workers = 0;
+            bool                         finished       = false;
 
-            queue.push(boundary_starting_point);
-
-            while (!queue.empty())
+            const auto stop_workers = [&]()
             {
-                const auto sp = queue.front();
-                queue.pop();
+                const std::scoped_lock lock{queue_mutex};
+                finished = true;
+                queue_cv.notify_all();
+            };
 
-                const auto [neighborhood, on_boundary] = neighborhood_and_boundary_status(sp);
-
-                if (!on_boundary)
+            const auto worker = [&]()
+            {
+                try
                 {
-                    continue;
+                    while (true)
+                    {
+                        std::unique_lock lock{queue_mutex};
+                        queue_cv.wait(lock, [&]() { return finished || !queue.empty(); });
+                        if (finished)
+                        {
+                            return;
+                        }
+                        const auto sp = queue.front();
+                        queue.pop_front();
+                        ++active_workers;
+                        lock.unlock();
+
+                        std::vector<step_point> discovered{};
+                        bool                    on_boundary = false;
+                        if (classify(sp) == operational_status::OPERATIONAL)
+                        {
+                            auto neighborhood_status = neighborhood_and_boundary_status(sp);
+                            on_boundary              = neighborhood_status.second;
+                            if (on_boundary)
+                            {
+                                discovered = std::move(neighborhood_status.first);
+                            }
+                        }
+
+                        lock.lock();
+                        if (finished)
+                        {
+                            return;
+                        }
+                        if (on_boundary)
+                        {
+                            contour.insert(sp);
+                        }
+                        for (const auto& m : discovered)
+                        {
+                            if (visited.insert(m).second)
+                            {
+                                queue.push_back(m);
+                            }
+                        }
+                        --active_workers;
+                        finished = queue.empty() && active_workers == 0;
+                        queue_cv.notify_all();
+                    }
                 }
-
-                contour.insert(sp);
-
-                for (const auto& m : neighborhood)
+                catch (...)
                 {
-                    if (!visited.insert(m).second)
-                    {
-                        continue;
-                    }
+                    stop_workers();
+                    throw;
+                }
+            };
 
-                    if (is_step_point_operational(m) == operational_status::OPERATIONAL)
+            std::vector<std::future<void>> workers{};
+            workers.reserve(number_of_threads);
+            try
+            {
+                if (number_of_threads == 1)
+                {
+                    worker();
+                }
+                else
+                {
+                    for (std::size_t i = 0; i < number_of_threads; ++i)
                     {
-                        queue.push(m);
+                        // A small surface can finish before the full worker team starts.
+                        {
+                            const std::scoped_lock lock{queue_mutex};
+                            if (finished)
+                            {
+                                break;
+                            }
+                        }
+                        workers.emplace_back(std::async(std::launch::async, worker));
                     }
                 }
+                for (auto& result : workers)
+                {
+                    result.get();
+                }
+            }
+            catch (...)
+            {
+                // Wake blocked workers before future destruction waits for them.
+                stop_workers();
+                throw;
             }
 
             infer_operational_status_in_enclosing_contour(starting_point, contour);
+            completed_contours.push_back(std::move(contour));
         }
 
         log_stats();
@@ -1084,6 +1217,7 @@ class operational_domain_impl
 
         // Cartesian product of all step point indices
         const auto all_index_combinations = fiction::utils::math::cartesian_combinations(indices);
+        progress.set_total(all_index_combinations.size());
 
         // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
         // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
@@ -1108,12 +1242,16 @@ class operational_domain_impl
 
             threads.emplace_back(
                 std::async(std::launch::async,
-                           [this, &cd, start, end, &all_index_combinations]
+                           [this, &cd, i, start, end, &all_index_combinations]
                            {
+                               const utils::worker_progress_scope worker_scope{worker_progress, i};
+                               std::size_t                        completed{};
+                               worker_progress.update(i, "parameter points", 0, end - start);
                                for (auto it = all_index_combinations.cbegin() + static_cast<int64_t>(start);
                                     it != all_index_combinations.cbegin() + static_cast<int64_t>(end); ++it)
                                {
                                    is_step_point_suitable(cd, step_point{*it});  // construct a step_point
+                                   worker_progress.update(i, "parameter points", ++completed, end - start);
                                }
                            }));
         }
@@ -1202,9 +1340,9 @@ class operational_domain_impl
         return suitable_params_domain;
     }
     /**
-     * Returns the parameter points that were inferred (assumed) to be operational because they are enclosed by a
-     * contour traced by `contour_tracing`. These points have not been simulated and are, therefore, not part of the
-     * returned operational domain. They are exposed to enable inspection of the enclosure inference.
+     * Returns the parameter points marked operational by contour interior inference, including sampled operational
+     * points and reached contour points. Unsimulated points are absent from the returned operational domain; sampled
+     * points can occur in both sets. These points enable inspection of the enclosure inference.
      *
      * @return The parameter points that have been inferred to be operational.
      */
@@ -1303,9 +1441,9 @@ class operational_domain_impl
      */
     struct step_point;
     /**
-     * All the points inferred (assumed) to be operational but not actually simulated.
+     * Points marked operational by contour interior inference, including sampled operational points.
      */
-    phmap::btree_set<step_point> inferred_op_domain;
+    phmap::parallel_flat_hash_set_m<step_point> inferred_op_domain;
     /**
      * Number of simulator invocations.
      */
@@ -1315,9 +1453,15 @@ class operational_domain_impl
      */
     std::atomic<std::size_t> num_evaluated_parameter_combinations{0};
     /**
+     * Reports the evaluated parameter points.
+     */
+    utils::progress_reporter progress{params.on_progress, "parameter points"};
+    /**
      * Number of worker threads to distribute the parameter points over, taken from the parameters and floored at `1`.
      */
     const std::size_t number_of_threads{std::max(params.number_of_threads, std::size_t{1})};
+    /** @brief Reports each top-level parameter worker without exposing nested simulations. */
+    utils::worker_progress_reporter worker_progress{params.on_worker_progress, number_of_threads};
     /**
      * Input BDL wires.
      */
@@ -1349,7 +1493,7 @@ class operational_domain_impl
          *
          * @param steps All dimension step values.
          */
-        explicit step_point(const std::vector<std::size_t>& steps) : step_values(steps) {}
+        explicit step_point(std::vector<std::size_t> steps) : step_values{std::move(steps)} {}
         /**
          * All dimension step values.
          */
@@ -1362,6 +1506,20 @@ class operational_domain_impl
          * @return The lexicographical ordering of the two step points' step values.
          */
         [[nodiscard]] auto operator<=>(const step_point& other) const = default;
+        /**
+         * @brief Hashes the step indices for the inferred-point set.
+         * @param sp Step point to hash.
+         * @return Hash of the step indices.
+         */
+        [[nodiscard]] friend std::size_t hash_value(const step_point& sp) noexcept
+        {
+            std::size_t seed = 0;
+            for (const auto step : sp.step_values)
+            {
+                fiction::utils::stl::hash_combine(seed, step);
+            }
+            return seed;
+        }
     };
     /**
      * Converts a step point to a parameter point.
@@ -1379,7 +1537,7 @@ class operational_domain_impl
             parameter_values.push_back(values.at(d).at(sp.step_values.at(d)));
         }
 
-        return parameter_point{parameter_values};
+        return parameter_point{std::move(parameter_values)};
     }
     /**
      * Converts a parameter point to a step point.
@@ -1412,7 +1570,7 @@ class operational_domain_impl
             step_values.push_back(static_cast<std::size_t>(dis));
         }
 
-        return step_point{step_values};
+        return step_point{std::move(step_values)};
     }
     /**
      * Helper function that sets the value of a sweep dimension in the simulation parameters.
@@ -1500,6 +1658,7 @@ class operational_domain_impl
         };
 
         ++num_evaluated_parameter_combinations;
+        progress.advance();
 
         sidb::model::simulation_parameters sim_params = params.operational_params.sim_params;
 
@@ -1574,6 +1733,7 @@ class operational_domain_impl
 
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
+        progress.advance();
 
         sidb::model::simulation_parameters sim_params = params.operational_params.sim_params;
 
@@ -1601,9 +1761,9 @@ class operational_domain_impl
      * @param sp Step point to check for inferred operational status.
      * @return `true` iff `sp` is contained in `inferred_op_domain`.
      */
-    [[nodiscard]] bool is_step_point_inferred_operational(const step_point& sp) const noexcept
+    [[nodiscard]] bool is_step_point_inferred_operational(const step_point& sp) const
     {
-        return inferred_op_domain.count(sp) > 0;
+        return inferred_op_domain.contains(sp);
     }
     /**
      * Generates unique random `step_points` in the stored parameter range. The number of generated points is at most
@@ -1661,6 +1821,27 @@ class operational_domain_impl
         // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
         const std::size_t num_threads = std::max(std::min(number_of_threads, step_points.size()), std::size_t{1});
 
+        /** @brief Simulates one slice and reports its worker's activity on the calling thread. */
+        const auto worker = [this, &step_points](const std::size_t id, const std::size_t start, const std::size_t end)
+        {
+            const utils::worker_progress_scope worker_scope{worker_progress, id};
+            std::size_t                        completed{};
+            worker_progress.update(id, "parameter points", 0, end - start);
+            std::ranges::for_each(std::ranges::subrange{step_points.cbegin() + static_cast<int64_t>(start),
+                                                        step_points.cbegin() + static_cast<int64_t>(end)},
+                                  [this, id, start, end, &completed](const auto& sp)
+                                  {
+                                      is_step_point_operational(sp);
+                                      worker_progress.update(id, "parameter points", ++completed, end - start);
+                                  });
+        };
+
+        if (num_threads == 1)
+        {
+            worker(0, 0, step_points.size());
+            return;
+        }
+
         // calculate the size of each slice
         const auto slice_size = (step_points.size() + num_threads - 1) / num_threads;
 
@@ -1678,14 +1859,7 @@ class operational_domain_impl
                 break;  // no more work to distribute
             }
 
-            threads.emplace_back(std::async(
-                std::launch::async,
-                [this, start, end, &step_points]
-                {
-                    std::ranges::for_each(std::ranges::subrange{step_points.cbegin() + static_cast<int64_t>(start),
-                                                                step_points.cbegin() + static_cast<int64_t>(end)},
-                                          [this](const auto& sp) { is_step_point_operational(sp); });
-                }));
+            threads.emplace_back(std::async(std::launch::async, worker, i, start, end));
         }
 
         // wait for all threads to complete
@@ -1866,13 +2040,13 @@ class operational_domain_impl
             {
                 auto decremented  = sp.step_values;
                 decremented.at(d) = step - 1;
-                neighbors.emplace_back(decremented);
+                neighbors.emplace_back(std::move(decremented));
             }
             if (step + 1 < indices.at(d).size())
             {
                 auto incremented  = sp.step_values;
                 incremented.at(d) = step + 1;
-                neighbors.emplace_back(incremented);
+                neighbors.emplace_back(std::move(incremented));
             }
         }
 
@@ -1932,7 +2106,7 @@ class operational_domain_impl
 
             if (!is_center && is_in_range)
             {
-                neighbors.emplace_back(neighbor);
+                neighbors.emplace_back(std::move(neighbor));
             }
         }
 
@@ -1954,7 +2128,9 @@ class operational_domain_impl
      * the contour encloses. In two dimensions this is the familiar pairing of a 4-connected path against an
      * 8-connected closed curve. Points on the contour itself are marked, but not expanded from.
      *
-     * Note that no physical simulation is conducted by this function!
+     * Small regions run inline. Larger regions distribute batches across `number_of_threads` workers, with internally
+     * locked insertion into the inferred-point set. All workers finish before the next contour seed is processed.
+     * No physical simulation is conducted by this function.
      *
      * @param starting_point Step point at which to start the inference. If `starting_point` is non-operational, this
      * function might invoke undefined behavior.
@@ -1966,59 +2142,141 @@ class operational_domain_impl
         assert(is_step_point_operational(starting_point) == operational_status::OPERATIONAL &&
                "starting_point must be within the operational domain");
 
-        // if the starting point has already been inferred as operational, this area has been covered before
-        if (is_step_point_inferred_operational(starting_point))
+        if (!inferred_op_domain.insert(starting_point).second || contour.contains(starting_point))
         {
             return;
         }
 
-        // a queue of step points to be marked as inferred operational
-        std::queue<step_point> queue{};
-
-        // mark the starting point as inferred operational and use it to seed the flood fill
-        inferred_op_domain.insert(starting_point);
-        queue.push(starting_point);
-
-        // for each point in the queue
-        while (!queue.empty())
+        std::deque<step_point> queue{starting_point};
+        const auto             expand = [this, &contour](const step_point& sp, std::vector<step_point>& discovered)
         {
-            // fetch the step point and remove it from the queue
-            const auto sp = queue.front();
-            queue.pop();
-
-            // the contour is the boundary of the enclosed area; do not expand beyond it
-            if (contour.count(sp) > 0)
+            if (contour.contains(sp))
             {
-                continue;
+                return;
             }
-
-            for (const auto& m : von_neumann_neighborhood(sp))
+            for (auto& neighbor : von_neumann_neighborhood(sp))
             {
-                // if the point has already been inferred as operational, continue with the next
-                if (is_step_point_inferred_operational(m))
+                if (is_step_point_inferred_operational(neighbor))
                 {
                     continue;
                 }
-
-                // if the point has already been sampled
-                if (const auto operational_status = op_domain.contains(to_parameter_point(m));
-                    operational_status.has_value())
+                const auto known = op_domain.contains(to_parameter_point(neighbor));
+                if (known.has_value() && std::get<0>(*known) == operational_status::NON_OPERATIONAL)
                 {
-                    // and found to be non-operational, continue with the next
-                    if (std::get<0>(operational_status.value()) == operational_status::NON_OPERATIONAL)
-                    {
-                        continue;
-                    }
+                    continue;
                 }
-
-                // otherwise, it is either found operational or can be inferred as such
-                inferred_op_domain.insert(m);
-                queue.push(m);
+                // The internally locked insertion claims each point once, even when workers share neighbors.
+                if (inferred_op_domain.insert(neighbor).second)
+                {
+                    discovered.push_back(std::move(neighbor));
+                }
             }
+        };
+
+        // Small regions finish inline. Larger regions seed enough work to amortize thread startup.
+        std::vector<step_point> discovered{};
+        for (std::size_t processed = 0; !queue.empty() && (number_of_threads == 1 || processed < 1024); ++processed)
+        {
+            auto sp = std::move(queue.front());
+            queue.pop_front();
+            discovered.clear();
+            expand(sp, discovered);
+            for (auto& neighbor : discovered)
+            {
+                queue.push_back(std::move(neighbor));
+            }
+        }
+        if (queue.empty())
+        {
+            return;
+        }
+
+        std::mutex              queue_mutex{};
+        std::condition_variable queue_cv{};
+        std::size_t             active_workers = 0;
+        bool                    finished       = false;
+        const auto              stop_workers   = [&]()
+        {
+            const std::scoped_lock lock{queue_mutex};
+            finished = true;
+            queue_cv.notify_all();
+        };
+        const auto worker = [&]()
+        {
+            try
+            {
+                // Batch queue operations because inference performs no simulations to amortize locking.
+                constexpr std::size_t   batch_size = 64;
+                std::vector<step_point> batch{};
+                std::vector<step_point> next{};
+                batch.reserve(batch_size);
+                next.reserve(batch_size * 2 * num_dimensions);
+                while (true)
+                {
+                    std::unique_lock lock{queue_mutex};
+                    queue_cv.wait(lock, [&]() { return finished || !queue.empty(); });
+                    if (finished)
+                    {
+                        return;
+                    }
+                    batch.clear();
+                    next.clear();
+                    for (std::size_t i = 0; i < batch_size && !queue.empty(); ++i)
+                    {
+                        batch.push_back(std::move(queue.front()));
+                        queue.pop_front();
+                    }
+                    ++active_workers;
+                    lock.unlock();
+
+                    for (const auto& sp : batch)
+                    {
+                        expand(sp, next);
+                    }
+
+                    lock.lock();
+                    if (finished)
+                    {
+                        return;
+                    }
+                    for (auto& neighbor : next)
+                    {
+                        queue.push_back(std::move(neighbor));
+                    }
+                    --active_workers;
+                    finished = queue.empty() && active_workers == 0;
+                    queue_cv.notify_all();
+                }
+            }
+            catch (...)
+            {
+                stop_workers();
+                throw;
+            }
+        };
+
+        std::vector<std::future<void>> workers{};
+        workers.reserve(number_of_threads);
+        try
+        {
+            for (std::size_t i = 0; i < number_of_threads; ++i)
+            {
+                workers.emplace_back(std::async(std::launch::async, worker));
+            }
+            for (auto& result : workers)
+            {
+                result.get();
+            }
+        }
+        catch (...)
+        {
+            // Wake blocked workers before future destruction waits for them.
+            stop_workers();
+            throw;
         }
     }
     /**
-     * Helper function that writes the the statistics of the operational domain computation to the statistics object.
+     * Helper function that writes the statistics of the operational domain computation to the statistics object.
      * Due to data races that can occur during the computation, each value is temporarily held in an atomic variable and
      * written to the statistics object only after the computation has finished.
      */

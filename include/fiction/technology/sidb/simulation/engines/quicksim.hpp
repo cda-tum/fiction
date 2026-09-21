@@ -25,7 +25,9 @@
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/utils/execution_timeout.hpp"
+#include "fiction/utils/progress.hpp"
 
+#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -33,6 +35,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <future>
 #include <limits>
 #include <mutex>
 #include <optional>
@@ -73,6 +76,12 @@ struct quicksim_params
      * `time_point::max()` leaves the caller budget unlimited; `timeout` still applies.
      */
     std::chrono::steady_clock::time_point deadline{std::chrono::steady_clock::time_point::max()};
+    /**
+     * Callback that receives the number of completed iterations across all threads.
+     */
+    utils::progress_callback on_progress{};
+    /** @brief Reports logical worker activity with a fixed worker count for each invocation. */
+    utils::worker_progress_callback on_worker_progress{};
 };
 
 /**
@@ -181,15 +190,23 @@ struct quicksim_params
                      uint64_t{1});  // If the number of set threads is greater than the number of iterations, the
                                     // number of threads defines how many times QuickSim is repeated
 
-        std::vector<std::thread> threads{};
-        threads.reserve(num_threads);
         std::mutex mutex{};  // used to control access to shared resources
 
+        utils::progress_reporter progress{ps.on_progress, "iterations", num_threads * iter_per_thread};
+
+        utils::worker_progress_reporter worker_progress{ps.on_worker_progress, num_threads};
+        // Async futures join during unwinding; Apple libc++ does not expose std::jthread.
+        std::vector<std::future<void>> threads{};
+        threads.reserve(num_threads);
         for (uint64_t z = 0ul; z < num_threads; z++)
         {
-            threads.emplace_back(
-                [&]
+            threads.emplace_back(std::async(
+                std::launch::async,
+                [&, z]
                 {
+                    const utils::worker_progress_scope worker_scope{worker_progress, z};
+                    const auto                         description = fmt::format("worker {}: iterations", z + 1);
+                    worker_progress.update(z, description, 0, iter_per_thread);
                     // if all SiDBs are negatively charged, abort
                     if (predefined_negative_sidb_indices.size() == state.num_sidbs())
                     {
@@ -267,13 +284,16 @@ struct quicksim_params
                                 }
                             }
                         }
+
+                        progress.advance();
+                        worker_progress.update(z, description, l + 1, iter_per_thread);
                     }
-                });
+                }));
         }
 
         for (auto& thread : threads)
         {
-            thread.join();
+            thread.get();
         }
     }
 

@@ -1,0 +1,448 @@
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
+"""Tests of the general commands: help, version, scripts, and the store commands."""
+
+from __future__ import annotations
+
+import os
+import shutil
+import stat
+import sys
+from pathlib import Path
+from types import SimpleNamespace
+from typing import TYPE_CHECKING
+
+import pytest
+
+from mnt.fiction.cli.errors import CommandError
+from mnt.fiction.cli.registry import REGISTRY
+from mnt.fiction.cli.render import table_rows
+from mnt.fiction.cli.stores import CellEntry, element_name
+from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
+from mnt.pyfiction import inml_layout, mol_qca_layout, mol_qca_technology
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from .conftest import Shell
+
+
+def test_help_lists_every_category(shell: Shell) -> None:
+    output = shell.ok("help")
+    for category in ("General", "Input and output", "Logic", "Physical design", "Technology", "Simulation"):
+        assert category in output
+    assert "ortho" in output
+
+
+def test_help_of_a_command(shell: Shell) -> None:
+    assert "usage: read" in shell.ok("help read")
+    assert "unknown command" in shell.fails("help frobnicate")
+
+
+def test_version(shell: Shell) -> None:
+    assert "fiction" in shell.ok("version")
+    assert shell.session.log[-1]["result"]["version"]  # type: ignore[index]
+
+
+def test_quit_stops_the_session(shell: Shell) -> None:
+    shell.ok("quit")
+    assert not shell.session.running
+
+
+def test_store_lists_elements_and_marks_the_active_one(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
+    mux21_shell.ok(f'read "{resource("xor2.v")}"')
+    output = mux21_shell.ok("store -n")
+    assert any("mux21" in line and "TEC" in line for line in output.splitlines())
+    assert any("*" in line and "xor2" in line and "TEC" in line for line in output.splitlines())
+    assert "(empty)" in mux21_shell.ok("store -g")
+
+
+def test_current_selects_an_element(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
+    mux21_shell.ok(f'read "{resource("xor2.v")}"')
+    mux21_shell.ok("current -n 1")
+    assert any("*" in line and "mux21" in line for line in mux21_shell.ok("store -n").splitlines())
+    assert "out of range" in mux21_shell.fails("current -n 7")
+    assert "exactly one store" in mux21_shell.fails("current 0")
+
+
+def test_ps_prints_statistics(mux21_shell: Shell) -> None:
+    output = mux21_shell.ok("ps -n")
+    # the grouped block heads with the identity and folds the counts onto shared lines
+    assert "mux21 · TEC" in output
+    assert "gates" in output
+    assert "Depth" in output
+    mux21_shell.ok("ortho")
+    output = mux21_shell.ok("ps -g")
+    assert "2DDWAVE" in output
+    assert "throughput" in output
+    assert "critical path" in output
+
+
+def test_layout_summaries_do_not_compute_timing(mux21_shell: Shell, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Placement, selection, listing, and removal skip timing; ps computes it on request."""
+    calls = []
+
+    def timing(layout: object) -> tuple[int, int]:
+        """Record explicit timing requests.
+
+        Returns:
+            Distinct timing figures for the statistics display.
+        """
+        calls.append(layout)
+        return 123, 7
+
+    monkeypatch.setattr("mnt.fiction.cli.stores.critical_path_length_and_throughput", timing)
+    mux21_shell.ok("ortho; ortho; store -g; current -g 1; store -g --pop")
+    assert not calls
+    output = mux21_shell.ok("ps -g")
+    assert len(calls) == 1
+    assert "critical path 123" in output
+    assert "throughput 1/7" in output
+
+
+@pytest.mark.parametrize("layout_type", TOPOLOGIES)
+def test_layout_topology_display_names(shell: Shell, layout_type: type) -> None:
+    """Store and statistics use readable names while JSON retains the canonical topology."""
+    shell.session.gate_layouts.add(layout_type())
+    topology = TOPOLOGIES[layout_type]
+    for command in ("store -g", "ps -g"):
+        assert DISPLAY_NAMES[topology] in shell.ok(command)
+        assert topology in str(shell.session.log[-1]["result"])
+
+
+def test_print_layout(mux21_shell: Shell) -> None:
+    mux21_shell.ok("ortho")
+    assert len(mux21_shell.ok("print -g").splitlines()) > 1
+    mux21_shell.ok("cell")
+    assert len(mux21_shell.ok("print -c").splitlines()) > 1
+    assert "show -n" in mux21_shell.fails("print -n")
+
+
+def test_print_truth_table(shell: Shell) -> None:
+    shell.ok("tt -t 1000")
+    output = shell.ok("print -t")
+    assert "hex: 8" in output
+    assert "bin: 1000" in output
+
+
+def test_show_writes_files(mux21_shell: Shell, tmp_path: Path) -> None:
+    mux21_shell.ok(f'show -n --silent -o "{tmp_path / "net.dot"}"')
+    assert "digraph" in (tmp_path / "net.dot").read_text(encoding="utf-8")
+    mux21_shell.ok("ortho")
+    mux21_shell.ok(f'show -g --silent -o "{tmp_path / "lyt.dot"}"')
+    assert (tmp_path / "lyt.dot").stat().st_size > 0
+    mux21_shell.ok("cell")
+    mux21_shell.ok(f'show -c --silent --simple -o "{tmp_path / "lyt.svg"}"')
+    assert "<svg" in (tmp_path / "lyt.svg").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    ("store", "suffix", "option"),
+    [("-n", "dot", "simple"), ("-n", "dot", "clock-colors"), ("-c", "svg", "indexes"), ("-c", "svg", "clock-colors")],
+)
+def test_unsupported_drawing_options_preserve_file(
+    mux21_shell: Shell, tmp_path: Path, store: str, suffix: str, option: str
+) -> None:
+    mux21_shell.ok("ortho; cell")
+    path = tmp_path / f"drawing.{suffix}"
+    path.write_text("original", encoding="utf-8")
+    assert f"--{option} requires" in mux21_shell.fails(f'show --silent -o "{path}" {store} --{option}')
+    assert path.read_text(encoding="utf-8") == "original"
+
+
+@pytest.mark.parametrize("command", ["show -c --silent -o", "write_svg"])
+def test_sidb_drawing_rejects_qca_options(
+    shell: Shell, resource: Callable[[str], str], tmp_path: Path, command: str
+) -> None:
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
+    path = tmp_path / "sidb.svg"
+    assert "--simple requires QCA SVG" in shell.fails(f'{command} "{path}" --simple')
+    assert not path.exists()
+
+
+@pytest.mark.parametrize("simulate", [False, True])
+def test_show_sidb_svg(shell: Shell, resource: Callable[[str], str], tmp_path: Path, *, simulate: bool) -> None:
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
+    if simulate:
+        shell.ok("quickexact")
+    path = tmp_path / "sidb.svg"
+    shell.ok(f'show -c --silent -o "{path}"')
+    assert "<svg" in path.read_text(encoding="utf-8")
+
+
+def test_show_molecular_qca_svg(shell: Shell, tmp_path: Path) -> None:
+    layout = mol_qca_layout((2, 0), "OPEN", "wire")
+    layout.assign_cell_type((0, 0), mol_qca_technology.cell_type.INPUT)
+    layout.assign_cell_type((1, 0), mol_qca_technology.cell_type.NORMAL1)
+    layout.assign_cell_type((2, 0), mol_qca_technology.cell_type.OUTPUT)
+    shell.session.cell_layouts.add(CellEntry(layout))
+    path = tmp_path / "molecular.svg"
+    shell.ok(f'show -c --silent -o "{path}"')
+    assert "<svg" in path.read_text(encoding="utf-8")
+
+
+def test_show_rejects_inml_svg(shell: Shell, tmp_path: Path) -> None:
+    shell.session.cell_layouts.add(CellEntry(inml_layout()))
+    assert "no SVG drawer" in shell.fails(f'show -c --silent -o "{tmp_path / "inml.svg"}"')
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows opens a file through os.startfile, not a command")
+def test_show_opens_the_written_file(mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The viewer is the platform's file opener, which takes the path itself, not a browser URL."""
+    opened: list[list[str]] = []
+    monkeypatch.setattr("mnt.fiction.cli.drawing.subprocess.Popen", lambda command, **_: opened.append(command))
+    path = tmp_path / "network.dot"
+    mux21_shell.ok(f'show -n -o "{path}"')
+    assert opened == [["open" if sys.platform == "darwin" else "xdg-open", str(path)]]
+    assert "digraph" in path.read_text(encoding="utf-8")
+
+
+def test_show_uses_the_shell_association_on_windows(
+    mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Windows has no opener binary, so the file goes to the shell association through os.startfile.
+
+    The branch is forced here rather than skipped off Windows, so that every run covers it.
+    """
+    opened: list[Path] = []
+    monkeypatch.setattr("mnt.fiction.cli.drawing.sys", SimpleNamespace(platform="win32"))
+    monkeypatch.setattr("os.startfile", opened.append, raising=False)
+    started: list[list[str]] = []
+    monkeypatch.setattr("mnt.fiction.cli.drawing.subprocess.Popen", lambda command, **_: started.append(command))
+    path = tmp_path / "network.dot"
+    mux21_shell.ok(f'show -n -o "{path}"')
+    assert opened == [path]
+    assert path.read_text(encoding="utf-8").startswith("digraph")
+    assert started == []
+
+
+def test_show_takes_an_explicit_program(mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """--program replaces the platform opener, substituting '{}' when the command carries one."""
+    opened: list[list[str]] = []
+    monkeypatch.setattr("mnt.fiction.cli.drawing.subprocess.Popen", lambda command, **_: opened.append(command))
+    path = tmp_path / "network.dot"
+    mux21_shell.ok(f"show -n -o \"{path}\" --program 'dot -Tpng'")
+    mux21_shell.ok(f"show -n -o \"{path}\" --program 'viewer --file {{}} --wait'")
+    assert opened == [["dot", "-Tpng", str(path)], ["viewer", "--file", str(path), "--wait"]]
+
+
+def test_show_keeps_its_temporary_file_after_the_session_closes(mux21_shell: Shell) -> None:
+    """The viewer reads the file after `show` returns, so the file must outlive the session."""
+    mux21_shell.ok("show -n --silent")
+    kept = Path(str(mux21_shell.session.log[-1]["result"]["file"]))  # type: ignore[index]
+    mux21_shell.ok("show -n --silent --delete")
+    deleted = Path(str(mux21_shell.session.log[-1]["result"]["file"]))  # type: ignore[index]
+    mux21_shell.session.close()
+    assert kept.is_file()
+    assert not deleted.exists()
+    kept.unlink()
+
+
+def test_clear(mux21_shell: Shell) -> None:
+    mux21_shell.ok("ortho; clear -g")
+    assert len(mux21_shell.session.gate_layouts) == 0
+    assert len(mux21_shell.session.networks) == 1
+    mux21_shell.ok("clear")
+    assert len(mux21_shell.session.networks) == 0
+
+
+def test_run_script_executes_a_file(shell: Shell, tmp_path: Path, resource: Callable[[str], str]) -> None:
+    """A script file, as -f runs it, executes one command per line."""
+    script = tmp_path / "work.fs"
+    script.write_text(f'read "{resource("mux21.v")}"\northo\n', encoding="utf-8")
+    assert shell.session.run_script(script)
+    assert len(shell.session.gate_layouts) == 1
+
+
+def test_run_script_stops_at_a_failure(shell: Shell, tmp_path: Path) -> None:
+    script = tmp_path / "bad.fs"
+    script.write_text("version\nfrobnicate\nversion\n", encoding="utf-8")
+    assert not shell.session.run_script(script)
+    with pytest.raises(CommandError, match="cannot read script"):
+        shell.session.run_script(tmp_path / "missing.fs")
+
+
+@pytest.mark.parametrize("flag", ["-t", "-g", "-c"])
+def test_print_of_an_empty_store_fails(shell: Shell, flag: str) -> None:
+    assert "in store" in shell.fails(f"print {flag}")
+
+
+def test_print_of_a_simulated_sidb_layout_draws_one_picture(shell: Shell, resource: Callable[[str], str]) -> None:
+    """The charge symbols replace the dots in a single picture, as the C++ shell printed it."""
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
+    plain = shell.ok("print -c")
+    shell.ok("quickexact")
+    charged = shell.ok("print -c")
+    assert "●" not in plain
+    assert "●" in charged, charged
+    assert "Ground state energy" in charged
+    # one lattice drawing, not the layout followed by a second one
+    assert charged.count("⋅") <= plain.count("⋅")
+
+
+def test_ps_all_describes_every_element(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
+    """--all walks the store instead of describing only the active element."""
+    mux21_shell.ok(f'read "{resource("xor2.v")}"')
+    output = mux21_shell.ok("ps -n --all")
+    assert "mux21" in output
+    assert "xor2" in output
+    result = mux21_shell.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert [entry["name"] for entry in result["network"]] == ["mux21", "xor2"]
+
+
+def test_store_pop_removes_the_active_element(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
+    """--pop drops the active element and leaves the one before it active, as the C++ shell did."""
+    mux21_shell.ok(f'read "{resource("xor2.v")}"')
+    assert len(mux21_shell.session.networks) == 2
+    output = mux21_shell.ok("store -n --pop")
+    assert "network 1: mux21" in output
+    assert "removed xor2" in output
+    assert len(mux21_shell.session.networks) == 1
+    assert element_name(mux21_shell.session.networks.current()) == "mux21"
+    mux21_shell.ok("store -n --pop")
+    assert len(mux21_shell.session.networks) == 0
+    assert mux21_shell.session.networks.active is None
+    assert "no network in store" in mux21_shell.fails("store -n --pop")
+
+
+def test_store_pop_needs_a_store(mux21_shell: Shell) -> None:
+    """Without a flag, --pop would empty stores the user did not name."""
+    assert "select the stores to remove from" in mux21_shell.fails("store --pop")
+    assert len(mux21_shell.session.networks) == 1
+
+
+def test_store_pop_removes_nothing_when_one_store_is_empty(mux21_shell: Shell) -> None:
+    """Every selected store is checked before any is touched, so a failure changes nothing."""
+    assert "no gate-level layout in store" in mux21_shell.fails("store -n -g --pop")
+    assert len(mux21_shell.session.networks) == 1
+
+
+def test_quit_is_the_only_leave_command(shell: Shell) -> None:
+    """`quit` leaves the shell; the `exit` alias and the `source` command are gone."""
+    listing = shell.ok("help")
+    assert listing.count("quit") == 1
+    assert "exit" not in listing
+    assert "source" not in listing
+    assert "unknown command" in shell.fails("exit")
+    assert "unknown command" in shell.fails("source")
+    shell.ok("quit")
+    assert not shell.session.running
+
+
+def test_full_help_includes_command_descriptions(shell: Shell) -> None:
+    """Redirected full help lists each command with its description without paging."""
+    output = shell.ok("help --all")
+    for command in dict.fromkeys(REGISTRY.values()):
+        assert command.name in output
+        assert command.summary in output
+    assert "help COMMAND" in output
+
+
+def test_render_table_shows_missing_and_plain_values() -> None:
+    """A figure without a value renders as a dash; anything else renders as its text."""
+    rows = dict(table_rows({"depth": 3, "runtime_s": None, "throughput": 2}))
+    assert rows["Depth"] == "3"
+    assert rows["Runtime (s)"] == "—"
+    assert rows["Throughput"] == "1/2"
+
+
+@pytest.mark.parametrize(
+    ("command", "expected"),
+    [
+        ("version", "compiled"),
+        ("print -t", "hex:"),
+        ("store -n", "Index"),
+        ("simulate -n", "(0x"),
+        ("equiv -n -g", "equivalent"),
+        ("area", "nm²"),
+    ],
+)
+def test_quiet_retains_requested_results(mux21_shell: Shell, command: str, expected: str) -> None:
+    mux21_shell.ok("ortho; cell; tt -t 1000")
+    mux21_shell.session.quiet = True
+    assert expected in mux21_shell.ok(command)
+
+
+def test_all_help_has_inputs_defaults_and_example(shell: Shell) -> None:
+    for name in REGISTRY:
+        output = shell.ok(f"help {name}")
+        for section in ("Inputs:", "Restrictions:", "Example:"):
+            assert section in output, name
+
+
+@pytest.mark.parametrize("flags", ["-n", "-g"])
+@pytest.mark.parametrize("symbolic", [False, True])
+def test_real_graphviz_renders_svg(mux21_shell: Shell, tmp_path: Path, flags: str, *, symbolic: bool) -> None:
+    if shutil.which("dot") is None:
+        pytest.skip("Graphviz is not installed")
+    mux21_shell.ok("ortho")
+    destination = tmp_path / "drawing with spaces.svg"
+    target = tmp_path / "target.svg"
+    if symbolic:
+        target.write_text("original", encoding="utf-8")
+        try:
+            destination.symlink_to(target.name)
+        except OSError as error:
+            if sys.platform == "win32" and error.winerror == 1314:
+                pytest.skip("Windows did not grant symbolic-link creation privileges")
+            raise
+    else:
+        destination.write_text("original", encoding="utf-8")
+    if os.name == "posix":
+        destination.chmod(0o600)
+    mux21_shell.ok(f'show {flags} --silent -o "{destination}"')
+    assert "<svg" in destination.read_text(encoding="utf-8")
+    assert "digraph" in destination.with_suffix(".dot").read_text(encoding="utf-8")
+    if os.name == "posix":
+        assert stat.S_IMODE(destination.stat().st_mode) == 0o600
+    if symbolic:
+        assert destination.is_symlink()
+        assert "<svg" in target.read_text(encoding="utf-8")
+        target.unlink()
+        mux21_shell.fails(f'show {flags} --silent -o "{destination}"')
+        assert destination.is_symlink()
+        assert not target.exists()
+
+
+def test_graphviz_failure_preserves_destination(
+    mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("mnt.fiction.cli.drawing.shutil.which", lambda _: None)
+    destination = tmp_path / "drawing.svg"
+    destination.write_text("original", encoding="utf-8")
+    output = mux21_shell.fails(f'show -n --silent -o "{destination}"')
+    assert "Graphviz" in output
+    assert "DOT retained" in output
+    assert destination.read_text(encoding="utf-8") == "original"
+    assert "digraph" in destination.with_suffix(".dot").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("kind", ["directory", "fifo"])
+def test_graphviz_rejects_special_outputs(
+    mux21_shell: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str
+) -> None:
+    """Rendering rejects special output files before invoking Graphviz."""
+    monkeypatch.setattr("mnt.fiction.cli.drawing.shutil.which", lambda _: "dot")
+    destination = tmp_path / "output.svg"
+    if kind == "fifo":
+        if not hasattr(os, "mkfifo"):
+            pytest.skip("POSIX named pipes")
+        os.mkfifo(destination)
+    else:
+        destination.mkdir()
+    assert "not a regular file" in mux21_shell.fails(f'show -n --silent -o "{destination}"')
+    assert destination.is_fifo() if kind == "fifo" else destination.is_dir()
+
+
+@pytest.mark.parametrize("flags", ["-g", "-c"])
+def test_redirected_drawings_have_no_ansi(mux21_shell: Shell, flags: str) -> None:
+    mux21_shell.ok("ortho; cell")
+    output = mux21_shell.ok(f"print {flags}")
+    assert "\x1b" not in output

@@ -21,21 +21,23 @@
 #include "fiction/technology/inml/technology.hpp"
 #include "fiction/technology/qca/technology.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/atomic_write.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
-#include <fstream>
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
-#include <string>
 #include <string_view>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 namespace fiction::fcn::io
@@ -119,12 +121,19 @@ template <typename Lyt>
 class write_qll_layout_impl
 {
   public:
-    write_qll_layout_impl(const Lyt& src, std::ostream& s) :
+    /**
+     * @brief Creates a writer with optional serialization progress.
+     * @param src Layout to write.
+     * @param s Output stream.
+     * @param callback Receives completed serialization work.
+     */
+    write_qll_layout_impl(const Lyt& src, std::ostream& s, utils::progress_callback callback = {}) :
             lyt{src},
             bb{lyt},
             sorted_pi_list{sorted_pis()},
             sorted_po_list{sorted_pos()},
-            os{s}
+            os{s},
+            on_progress{std::move(callback)}
     {}
 
     void run()
@@ -156,6 +165,8 @@ class write_qll_layout_impl
     std::vector<cell<Lyt>> sorted_pi_list, sorted_po_list;
 
     std::ostream& os;
+    /** @brief Receives serialization progress. */
+    utils::progress_callback on_progress;
 
     uint64_t cell_id{1};
 
@@ -292,6 +303,9 @@ class write_qll_layout_impl
 
     void write_layout()
     {
+        utils::progress_reporter      progress{on_progress, "writing rows",
+                                               (static_cast<std::size_t>(lyt.y()) + 1) *
+                                                   (static_cast<std::size_t>(lyt.z()) + 1)};
         std::unordered_set<cell<Lyt>> skip{};
 
         os << qll::OPEN_LAYOUT;
@@ -429,6 +443,7 @@ class write_qll_layout_impl
                         }
                     }
                 }
+                progress.advance();
             }
         }
 
@@ -451,16 +466,17 @@ class write_qll_layout_impl
  *
  * @tparam Lyt Cell-level QCA, molQCA, or iNML layout type.
  * @param lyt The layout to be written.
+ * @param on_progress Receives completed serialization work.
  * @param os The output stream to write into.
  */
 template <typename Lyt>
-void write_qll_layout(const Lyt& lyt, std::ostream& os)
+void write_qll_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_inml_technology_v<Lyt> || has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>,
                   "Lyt must be an iNML, QCA or a molQCA layout");
 
-    detail::write_qll_layout_impl p{lyt, os};
+    detail::write_qll_layout_impl p{lyt, os, std::move(on_progress)};
 
     p.run();
 }
@@ -474,20 +490,13 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os)
  *
  * @tparam Lyt Cell-level QCA, molQCA, or iNML layout type.
  * @param lyt The layout to be written.
+ * @param on_progress Receives completed serialization work.
  * @param filename The file name to create and write into. Should preferably use the `.qll` extension.
  */
 template <typename Lyt>
-void write_qll_layout(const Lyt& lyt, const std::string_view& filename)
+void write_qll_layout(const Lyt& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_qll_layout(lyt, os);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_qll_layout(lyt, os, on_progress); });
 }
 
 }  // namespace fiction::fcn::io

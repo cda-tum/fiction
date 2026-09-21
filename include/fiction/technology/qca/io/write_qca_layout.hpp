@@ -18,16 +18,19 @@
 
 #include "fiction/technology/qca/technology.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/atomic_write.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
-#include <fstream>
 #include <ostream>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace fiction::qca::io
@@ -42,6 +45,8 @@ struct write_qca_layout_params
      * Create via cells in between each layer.
      */
     bool create_inter_layer_via_cells = true;
+    /** @brief Receives completed serialization work and the phase total. */
+    utils::progress_callback on_progress{};
 };
 
 namespace detail
@@ -176,7 +181,17 @@ template <typename Lyt>
 class write_qca_layout_impl
 {
   public:
-    write_qca_layout_impl(const Lyt& src, std::ostream& s, const write_qca_layout_params p) : lyt{src}, os{s}, ps{p} {}
+    /**
+     * @brief Stores the layout and serialization parameters.
+     * @param src Layout to serialize.
+     * @param s Output stream.
+     * @param p Serialization parameters.
+     */
+    write_qca_layout_impl(const Lyt& src, std::ostream& s, write_qca_layout_params p) :
+            lyt{src},
+            os{s},
+            ps{std::move(p)}
+    {}
 
     void run()
     {
@@ -210,6 +225,9 @@ class write_qca_layout_impl
 
     void write_cell_layers()
     {
+        utils::progress_reporter progress{ps.on_progress, "writing rows",
+                                          (static_cast<std::size_t>(lyt.y()) + 1) *
+                                              (static_cast<std::size_t>(lyt.z()) + 1)};
         // for each layer
         for (decltype(lyt.z()) z = 0; z <= lyt.z(); ++z)
         {
@@ -237,6 +255,7 @@ class write_qca_layout_impl
                         write_cell(c, ps.create_inter_layer_via_cells);
                     }
                 }
+                progress.advance();
             }
 
             // close design layer
@@ -470,8 +489,8 @@ class write_qca_layout_impl
 
         // calculate cell position
         const qcad::cell_pos pos{
-            static_cast<float>((c.x * static_cast<decltype(c.x)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET),
-            static_cast<float>((c.y * static_cast<decltype(c.y)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET)};
+            .x = static_cast<float>((c.x * static_cast<decltype(c.x)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET),
+            .y = static_cast<float>((c.y * static_cast<decltype(c.y)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET)};
 
         // write cell position
         os << qcad::X_POS << std::to_string(pos.x) << '\n';
@@ -525,9 +544,11 @@ class write_qca_layout_impl
         os << qcad::STATUS << "0\n";
         os << qcad::PSZ_DESCRIPTION << "Via Layer " << std::to_string(via_counter++) << '\n';
 
+        utils::progress_reporter progress{ps.on_progress, "writing via cells", via_layer_cells.size()};
         for (const auto& v : via_layer_cells)
         {
             write_cell(v, false);
+            progress.advance();
         }
 
         // close design layer
@@ -574,15 +595,7 @@ void write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params 
 template <typename Lyt>
 void write_qca_layout(const Lyt& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_qca_layout(lyt, os, ps);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_qca_layout(lyt, os, ps); });
 }
 
 }  // namespace fiction::qca::io

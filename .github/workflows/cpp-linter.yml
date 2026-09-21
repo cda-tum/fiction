@@ -14,12 +14,12 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.14.1
+  Z3_VERSION: 5.1.0
 
 jobs:
   clangtidy:
     name: 🚨 Clang-Tidy
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read # required to check out the repository
       pull-requests: write # required to post/update the clang-tidy thread comment on the PR
@@ -38,7 +38,7 @@ jobs:
         # bound the wait instead, and retry the transient failures that bounding surfaces
         run: |
           timeout 10m sudo -E apt-get update -o Acquire::Retries=3
-          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 cmake libreadline-dev libtbb-dev python3-dev
+          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 cmake libtbb-dev python3-dev
 
       - name: Install nanobind
         # the ci-tidy preset builds the Python bindings, which need nanobind's CMake package
@@ -64,7 +64,7 @@ jobs:
 
       - name: Run clang-tidy
         id: linter
-        uses: cpp-linter/cpp-linter-action@cab1143a2c149bc41e85b070a9de81716974c18f # v2.21.0
+        uses: cpp-linter/cpp-linter-action@dacf512996b9cfe9d9bcc7b326d1f3a64ab7b91f # v2.22.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

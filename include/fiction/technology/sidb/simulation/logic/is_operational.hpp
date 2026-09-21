@@ -918,7 +918,7 @@ class is_operational_impl
         utils::check_deadline(parameters.deadline);
         if (parameters.sim_engine == engine::EXGS)
         {
-            return engines::exhaustive_ground_state_simulation(lyt_with_input_pattern, parameters.sim_params,
+            return engines::exhaustive_ground_state_simulation(lyt_with_input_pattern, parameters.sim_params, {},
                                                                parameters.deadline);
         }
         if (parameters.sim_engine == engine::QUICKEXACT)

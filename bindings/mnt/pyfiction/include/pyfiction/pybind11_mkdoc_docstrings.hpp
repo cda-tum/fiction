@@ -23,6 +23,23 @@
 #endif
 
 
+static const char *mkd_doc_fiction_detail_atomic_write =
+R"doc(Serialize into a sibling temporary file and replace the destination
+after a successful close.
+
+Args:
+    filename: Destination file.
+    writer: Serialization callback.
+
+Template Args:
+    Writer: Callable accepting an output stream.
+
+Raises:
+    std::ios_base::failure: If creating, writing, closing, or
+                            replacing the file fails.
+
+)doc";
+
 static const char *mkd_doc_fiction_fcn_area =
 R"doc(Computes real-world area requirements in nm² of a given cell-level
 layout. For this purpose, each cell position in the layout is assigned
@@ -327,6 +344,8 @@ static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_has_borde
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_lyt = R"doc()doc";
 
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_on_progress = R"doc(Receives serialization progress.)doc";
+
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_os = R"doc()doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_run = R"doc()doc";
@@ -347,7 +366,15 @@ static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_lay
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_pins = R"doc()doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_qll_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_qll_layout_impl =
+R"doc(Creates a writer with optional serialization progress.
+
+Args:
+    src: Layout to write.
+    s: Output stream.
+    callback: Receives completed serialization work.
+
+)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_technology_settings = R"doc()doc";
 
@@ -362,6 +389,7 @@ This overload uses an output stream to write into.
 
 Args:
     lyt: The layout to be written.
+    on_progress: Receives completed serialization work.
     os: The output stream to write into.
 
 Template Args:
@@ -380,6 +408,7 @@ This overload uses a file name to create and write into.
 
 Args:
     lyt: The layout to be written.
+    on_progress: Receives completed serialization work.
     filename: The file name to create and write into. Should
               preferably use the `.qll` extension.
 
@@ -893,7 +922,15 @@ static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_he
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_layout = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_qcc_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_qcc_layout_impl =
+R"doc(Stores the layout and serialization parameters.
+
+Args:
+    src: Layout to serialize.
+    s: Output stream.
+    p: Serialization parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout =
 R"doc(Writes a cell-level iNML layout to a qcc file that is used by
@@ -933,6 +970,8 @@ Template Args:
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params = R"doc(Parameters for writing QCC layouts.)doc";
 
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params_filename = R"doc(Filename of the QCC file.)doc";
+
+static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params_on_progress = R"doc(Receives completed serialization work and the phase total.)doc";
 
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params_use_filename_as_component_name = R"doc(Use the given filename as the component name inside the QCC file.)doc";
 
@@ -3250,7 +3289,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long =
+static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long_long =
 R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
 integer into four parts (from MSB to LSB):
  - 1 bit for the dead indicator - 1 bit for the z position - 31 bit
@@ -5395,6 +5434,17 @@ R"doc(
 +-------+
 ```)doc";
 
+static const char *mkd_doc_fiction_layouts_io_detail_fgl_xml_text =
+R"doc(Escape user-provided text for an XML element.
+
+Args:
+    value: Layout or port name.
+
+Returns:
+    XML text preserving the original label when parsed.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage =
@@ -5433,17 +5483,59 @@ static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_f
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_fgl_layout_impl_2 = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_number =
+R"doc(Read a nonnegative integer without truncation or trailing characters.
+
+Args:
+    parent: XML element containing the number.
+    name: Child element name.
+
+Returns:
+    Parsed integer.
+
+Raises:
+    fgl_parsing_error: If the element is missing or the number is
+                       invalid.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_position =
+R"doc(Read a position and reject values the layout's coordinate type cannot
+represent.
+
+Args:
+    element: XML element containing x, y, and optionally z.
+    with_z: Whether the z child is required.
+
+Returns:
+    Losslessly represented coordinate.
+
+Raises:
+    fgl_parsing_error: If an axis is invalid or overflows.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_run = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_lyt = R"doc(The layout to be written.)doc";
 
+static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_on_progress = R"doc(Receives serialization progress.)doc";
+
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_os = R"doc(The output stream to which the gate-level layout is written.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_run = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_write_fgl_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_write_fgl_layout_impl =
+R"doc(Creates a writer with optional serialization progress.
+
+Args:
+    src: Layout to write.
+    s: Output stream.
+    callback: Receives completed serialization work.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_io_fgl_parsing_error =
 R"doc(Exception thrown when an error occurs during parsing of a .fgl file
@@ -5701,6 +5793,7 @@ An overloaded variant exists that writes the layout into a file.
 
 Args:
     lyt: Layout
+    on_progress: Receives completed drawing work.
     os: Output stream
 
 )doc";
@@ -5713,6 +5806,7 @@ R"doc(Writes layout in DOT format into a file
 
 Args:
     lyt: Layout
+    on_progress: Receives completed drawing work.
     filename: Filename
 
 )doc";
@@ -5724,6 +5818,7 @@ This overload uses an output stream to write into.
 
 Args:
     lyt: The layout to be written.
+    on_progress: Receives completed serialization work.
     os: The output stream to write into.
 
 Template Args:
@@ -5738,6 +5833,7 @@ This overload uses a file name to create and write into.
 
 Args:
     lyt: The layout to be written.
+    on_progress: Receives completed serialization work.
     filename: The file name to create and write into. Should
               preferably use the .fgl extension.
 
@@ -6544,7 +6640,9 @@ R"doc(Standard constructor. Reads and constructs logic networks. May throw.
 
 Args:
     filename: Path to the file or folder of files to read.
-    out: Output stream to write status updates into.
+    format: Explicit format without a dot, or empty to infer the
+            extension.
+    o: Output stream to write status updates into.
 
 )doc";
 
@@ -7401,6 +7499,8 @@ May pass through, and thereby throw, an
 
 Args:
     lyt: The gate-level layout.
+    on_progress: Optional callback reporting completed nonconstant
+                 gate mappings.
 
 Template Args:
     CellLyt: Type of the returned cell-level layout.
@@ -7800,7 +7900,14 @@ Template Args:
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_apply_gate_library_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_apply_gate_library_impl =
+R"doc(Prepares cell mapping with optional gate counts.
+
+Args:
+    lyt: Gate-level source layout.
+    callback: Receives completed gate mappings.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_assign_gate =
 R"doc(This function assigns a given FCN gate implementation to the total
@@ -7831,6 +7938,17 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_gate_lyt = R"doc(Gate-level layout.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_mapping_count =
+R"doc(Counts nonconstant nodes using the mapping traversal, or skips the
+scan without a callback.
+
+Returns:
+    Number of nodes mapped to cell implementations.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_on_progress = R"doc(Receives completed gate mappings.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_run_parameterized_gate_library =
 R"doc(Run the cell layout generation process.
@@ -8136,19 +8254,35 @@ Returns:
 
 static const char *mkd_doc_fiction_physical_design_detail_east_south_edge_coloring = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl =
+R"doc(Places and routes a network with SMT constraints.
+
+Template Args:
+    Lyt: Target gate-level layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ari = R"doc(Iterator for the factorization of possible aspect ratios.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ari_mutex =
-R"doc(Restricts access to the aspect_ratio_iterator and the
-result_aspect_ratio.)doc";
+R"doc(Restricts access to the aspect-ratio iterator, result, and worker
+context records.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_black_list =
 R"doc(Maps tiles to blacklisted gate types via their truth tables and port
 information.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_exact_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_exact_impl =
+R"doc(Initializes exact placement and routing with a validated clocking
+scheme.
+
+Args:
+    src: Network to place and route; output signals are replaced by
+         output nodes.
+    p: Placement and routing parameters.
+    st: Statistics to update.
+    clocking_scheme: Validated clocking scheme for the target layout.
+    sbl: Gate orientations forbidden at each tile.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_explore_asynchronously =
 R"doc(Thread function for the asynchronous solving strategy. It registers
@@ -8163,15 +8297,20 @@ Args:
     t_num: Thread's identifier.
     ti_list: Pointer to a list of shared thread info that the threads
              use for communication.
+    started: Start of the shared timeout budget.
 
 Returns:
-    A found layout or nullptr if being interrupted.
+    A found layout or `std::nullopt` when interrupted or timed out.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_lower_bound = R"doc(Lower bound for the number of layout tiles.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ntk = R"doc(Specification network.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_progress =
+R"doc(Reports the examined aspect ratios. Their number is not bounded in
+advance, so the total stays unknown.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ps = R"doc(Parameters.)doc";
 
@@ -8312,6 +8451,15 @@ gates.
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_check_point = R"doc(Current solver checkpoint extracted from the solver tree.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_ctx = R"doc(The context used for all solvers.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_current_solver =
+R"doc(Returns the solver for interruption without cancelling model
+evaluation.
+
+Returns:
+    The solver for the current aspect ratio.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_define_gate_fanin_tiles =
 R"doc(Adds constraints to the solver to enforce that a tile which was
@@ -8939,13 +9087,14 @@ free. Symmetry breaking constraints.
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info =
-R"doc(Contains a context pointer and a currently worked on aspect ratio and
-can be shared between multiple worker threads so that they can notify
-each other via context interrupts based on their individual results,
-i.e., a thread that found a result at aspect ratio x * y can interrupt
-all other threads that are working on larger layout sizes.)doc";
+R"doc(Shares worker solvers and aspect ratios under `rar_mutex`.
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_ctx = R"doc(Pointer to a context.)doc";
+A worker with a result interrupts solvers exploring layouts of equal
+or greater area.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_ctx = R"doc(Context that owns the worker solver.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_solver = R"doc(Current solver, kept alive while other workers may interrupt it.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_worker_aspect_ratio = R"doc(Currently examined layout aspect ratio.)doc";
 
@@ -8958,6 +9107,8 @@ Args:
     time: Time passed since beginning of the solving process.
 
 )doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_worker_progress = R"doc(Serializes the active candidate dimensions of each solver worker.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data =
 R"doc(This struct stores information about the fan-in and fan-out
@@ -9519,6 +9670,8 @@ the frontier and cost information.
 
 Args:
     ssg: The search space graph to process.
+    progress: Reports completed expansions of active graphs.
+    worker_progress: Reports each graph under its stable index.
 
 Returns:
     An optional layout. Returns a layout if one is found during
@@ -9529,6 +9682,19 @@ Returns:
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_ps = R"doc(Parameters.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_pst = R"doc(Statistics.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_report_graph =
+R"doc(Reports a graph's current candidate without interpreting search depth
+as completion.
+
+Args:
+    ssg: Search graph with a stable vector index.
+    layout: Current partial layout.
+    placed: Number of nodes placed in this candidate.
+    reporter: Serializes worker descriptions.
+    force: Publish an accepted solution immediately.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_route_double_input_node =
 R"doc(Places a node with two inputs in the layout and routes it.
@@ -10080,6 +10246,10 @@ information.
 Template Args:
     Lyt: The layout type.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_best_description = R"doc(The most recent accepted solution found by this graph.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_completed_expansions = R"doc(Completed expansions of this logical graph.)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_cost = R"doc(The cost objective used to expand a vertex in the search space graph.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_cost_so_far = R"doc(The cost so far for reaching each vertex in the layout.)doc";
@@ -10098,7 +10268,11 @@ static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_pi_
 R"doc(Enum indicating if primary inputs (PIs) can be placed at the top or
 left.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_pi_placement_rng = R"doc(Random engine for this search space graph's PI spacing.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_pi_placement_rng =
+R"doc(Random engine for this search space graph's PI spacing. It is seeded
+from the parameters before use.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_progress_description = R"doc(Most recent candidate description for the worker progress row.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_to_hex =
 R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
@@ -10501,15 +10675,19 @@ static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_
 R"doc(Flag to indicate that the number of used crossing tiles should be
 minimized.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_minimize_wires =
-R"doc(Flag to indicate that the number of used crossing tiles should be
-minimized.)doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_minimize_wires = R"doc(Minimize the number of wire tiles.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_num_threads =
 R"doc(Number of threads to use for exploring the possible aspect ratios.
 
 Note:
     This is an unstable beta feature.)doc";
+
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_on_progress = R"doc(Callback that receives the number of examined aspect ratios.)doc";
+
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_on_worker_progress =
+R"doc(Reports logical worker activity with a fixed worker count for each
+invocation.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_scheme = R"doc(Clocking scheme to be used.)doc";
 
@@ -10525,9 +10703,7 @@ static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_
 R"doc(Technology-specific constraints that are only to be added for a
 certain target technology.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_timeout =
-R"doc(Sets a timeout in ms for the solving process. Standard is 4294967
-seconds as defined by Z3.)doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_timeout = R"doc(Timeout budget for the solving process, in milliseconds.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_upper_bound_area =
 R"doc(Number of total tiles to use as an upper bound.
@@ -10817,6 +10993,14 @@ solution being found. A higher value might lead to better solutions,
 but also requires more runtime. Defaults to 4 expansions for each
 vertex.)doc";
 
+static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_on_progress =
+R"doc(Callback that receives the number of search space graph expansions
+performed so far.)doc";
+
+static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_on_worker_progress =
+R"doc(Reports logical worker activity with a fixed worker count for each
+invocation.)doc";
+
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_planar =
 R"doc(Disable the creation of crossings during layout generation. If set to
 true, gates will only be placed if a crossing-free wiring is found.
@@ -10937,6 +11121,10 @@ R"doc(Extend primary inputs/outputs to the top/bottom row with planar
 rerouting (i.e., without crossings).)doc";
 
 static const char *mkd_doc_fiction_physical_design_hexagonalization_params_io_pin_extension_mode_NONE = R"doc(Do not extend primary inputs/outputs to the top/bottom row (default).)doc";
+
+static const char *mkd_doc_fiction_physical_design_hexagonalization_params_on_progress =
+R"doc(Callback that receives the progress of the gate mapping and the pin
+extension.)doc";
 
 static const char *mkd_doc_fiction_physical_design_hexagonalization_params_output_pin_extension = R"doc(Output extension mode. Defaults to none)doc";
 
@@ -11083,6 +11271,8 @@ Returns:
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_params = R"doc(Parameters for the orthogonal physical design algorithm.)doc";
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_params_number_of_clock_phases = R"doc(Number of clock phases to use. 3 and 4 are supported.)doc";
+
+static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_params_on_progress = R"doc(Callback that receives the progress of the gate placement.)doc";
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats = R"doc()doc";
 
@@ -12282,6 +12472,10 @@ static const char *mkd_doc_fiction_physical_design_post_layout_optimization_para
 R"doc(Maximum number of relocations to try for each gate. Defaults to the
 number of tiles in the given layout if not specified.)doc";
 
+static const char *mkd_doc_fiction_physical_design_post_layout_optimization_params_on_progress =
+R"doc(Callback that receives the progress of the gate relocations and of the
+nested wiring reduction.)doc";
+
 static const char *mkd_doc_fiction_physical_design_post_layout_optimization_params_optimize_pos_only = R"doc(Only optimize PO positions.)doc";
 
 static const char *mkd_doc_fiction_physical_design_post_layout_optimization_params_planar_optimization =
@@ -12484,6 +12678,8 @@ Template Args:
 
 static const char *mkd_doc_fiction_physical_design_wiring_reduction_params = R"doc(Parameters for the wiring reduction algorithm.)doc";
 
+static const char *mkd_doc_fiction_physical_design_wiring_reduction_params_on_progress = R"doc(Callback that receives the number of wire paths processed so far.)doc";
+
 static const char *mkd_doc_fiction_physical_design_wiring_reduction_params_timeout =
 R"doc(Timeout limit (in ms). Specifies the maximum allowed time in
 milliseconds for the optimization process. For large layouts, the
@@ -12534,84 +12730,6 @@ static const char *mkd_doc_fiction_qca_io_detail_qcad_color_green = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_qcad_color_red = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_cell_label_map = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_current_cell_row = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_current_labeled_cell = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_fqca_section = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_fqca_section_CELL_DEFINITION = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_fqca_section_LAYOUT_DEFINITION = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_is = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_lyt = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_max_cell_pos = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_next_cell_layer = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_parse_cell = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_parsing_status = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_read_fqca_layout_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_read_fqca_layout_impl_to_clock_number = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_alphabet_iterator = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_labeled_cell = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_labeled_cell_c = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_labeled_cell_designator = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_labeled_cell_labeled_cell = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_labeled_cells = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_lyt = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_next_cell_designator =
-R"doc(Might throw an 'out_of_cell_names_exception'.
-
-Returns:
-    The next cell designator in the alphabet.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_os = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_ps = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_cell = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_cell_definition = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_fqca_layout_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_header = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_labeled_cell = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_layer_separator = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_layout_definition = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_via_cell = R"doc()doc";
-
 static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_generate_cell_based_svg =
@@ -12641,7 +12759,15 @@ static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_p
 
 static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_run = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_write_mol_qca_layout_svg_impl = R"doc(Default constructor.)doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_write_mol_qca_layout_svg_impl =
+R"doc(Stores the layout and drawing parameters.
+
+Args:
+    layout: Layout to draw.
+    stream: Output stream.
+    p: Drawing parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl = R"doc()doc";
 
@@ -12671,7 +12797,15 @@ static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cel
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_header = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_qca_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_qca_layout_impl =
+R"doc(Stores the layout and serialization parameters.
+
+Args:
+    src: Layout to serialize.
+    s: Output stream.
+    p: Serialization parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_quantum_dots = R"doc()doc";
 
@@ -12712,65 +12846,15 @@ static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_ps = 
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_run = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl = R"doc(Default constructor.)doc";
-
-static const char *mkd_doc_fiction_qca_io_out_of_cell_names_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_out_of_cell_names_exception_out_of_cell_names_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_read_fqca_layout =
-R"doc(Reads a cell-level QCA layout from an fqca file provided as an input
-stream. The format is used by QCA-STACK by Willem Lambooy
-(https://github.com/wlambooy/QCA-STACK).
-
-May throw an unsupported_character_exception,
-undefined_cell_label_exception, or
-unrecognized_cell_definition_exception.
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl =
+R"doc(Stores the layout and drawing parameters.
 
 Args:
-    is: The input stream to read from.
-    layout_name: The name to give to the generated layout.
-
-Template Args:
-    Lyt: The layout type to be created from an input. Must be a
-         clocked cell-level QCA layout.
+    layout: Layout to draw.
+    stream: Output stream.
+    p: Drawing parameters.
 
 )doc";
-
-static const char *mkd_doc_fiction_qca_io_read_fqca_layout_2 =
-R"doc(Reads a cell-level QCA layout from an fqca file provided as a file
-name. The format is used by QCA-STACK by Willem Lambooy
-(https://github.com/wlambooy/QCA-STACK).
-
-May throw an unsupported_character_exception,
-undefined_cell_label_exception, or
-unrecognized_cell_definition_exception.
-
-Args:
-    filename: The file name to open and read from.
-    layout_name: The name to give to the generated layout.
-
-Template Args:
-    Lyt: The layout type to be created from an input. Must be a
-         clocked cell-level QCA layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_io_undefined_cell_label_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_undefined_cell_label_exception_undefined_cell_label_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_undefined_cell_label_exception_undefined_label = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_undefined_cell_label_exception_which = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_unrecognized_cell_definition_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_unrecognized_cell_definition_exception_line = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_unrecognized_cell_definition_exception_unrecognized_cell_definition_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_unrecognized_cell_definition_exception_where = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_unsupported_cell_type_exception = R"doc()doc";
 
@@ -12779,59 +12863,6 @@ static const char *mkd_doc_fiction_qca_io_unsupported_cell_type_exception_coord 
 static const char *mkd_doc_fiction_qca_io_unsupported_cell_type_exception_unsupported_cell_type_exception = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_unsupported_cell_type_exception_where = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_unsupported_character_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_unsupported_character_exception_unsupported_char = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_unsupported_character_exception_unsupported_character_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_unsupported_character_exception_which = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_write_fqca_layout =
-R"doc(Writes a cell-level QCA layout to an fqca file provided as an output
-stream. The format is used by QCA-STACK by Willem Lambooy
-(https://github.com/wlambooy/QCA-STACK).
-
-Might throw an out_of_cell_names_exception in case there are more I/O
-cells in the layout than lowercase + uppercase letters in the English
-alphabet.
-
-Args:
-    lyt: The cell-level QCA layout.
-    os: The output stream to write into.
-    ps: Parameters.
-
-Template Args:
-    Lyt: The layout type to be written. Must be a clocked cell-level
-         QCA layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_io_write_fqca_layout_2 =
-R"doc(Writes a cell-level QCA layout to an fqca file provided as a file
-name. The format is used by QCA-STACK by Willem Lambooy
-(https://github.com/wlambooy/QCA-STACK).
-
-Might throw an out_of_cell_names_exception in case there are more I/O
-cells in the layout than lowercase + uppercase letters in the English
-alphabet.
-
-Args:
-    lyt: The cell-level QCA layout.
-    filename: The file name to create and write into. Should
-              preferably use the `.fqca` extension.
-    ps: Parameters.
-
-Template Args:
-    Lyt: The layout type to be written. Must be a clocked cell-level
-         QCA layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_io_write_fqca_layout_params = R"doc(Parameters for writing FQCA layouts.)doc";
-
-static const char *mkd_doc_fiction_qca_io_write_fqca_layout_params_create_inter_layer_via_cells = R"doc(Create via cells in between each layer.)doc";
 
 static const char *mkd_doc_fiction_qca_io_write_mol_qca_layout_svg =
 R"doc(Writes an SVG representation of a cell-level MolQCA layout to an
@@ -12912,6 +12943,8 @@ static const char *mkd_doc_fiction_qca_io_write_qca_layout_params = R"doc(Parame
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_params_create_inter_layer_via_cells = R"doc(Create via cells in between each layer.)doc";
 
+static const char *mkd_doc_fiction_qca_io_write_qca_layout_params_on_progress = R"doc(Receives completed serialization work and the phase total.)doc";
+
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg =
 R"doc(Writes an SVG representation of a cell-level QCA layout into an output
 stream. Both tile- and cell-based layouts are supported. For tile-
@@ -12959,6 +12992,8 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_params = R"doc(Parameters for writing SVG QCA layouts.)doc";
+
+static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_params_on_progress = R"doc(Receives completed serialization work and the phase total.)doc";
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_params_simple = R"doc(Limit details to create smaller file sizes.)doc";
 
@@ -13979,6 +14014,8 @@ threads.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs = R"doc(Number of canvas SiDBs.)doc";
 
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_on_progress = R"doc(Callback that receives the progress of the design mode's main loop.)doc";
+
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_operational_params = R"doc(Parameters of the operational check.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_cond = R"doc(When to stop.)doc";
@@ -14072,6 +14109,7 @@ Args:
     items: The items.
     fn: The function.
     done: The stop flag.
+    progress: The reporter to advance after each processed item.
 
 Template Args:
     Items: Container type.
@@ -14200,6 +14238,10 @@ static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_number_of_unique_generated_layouts =
 R"doc(Number of unique layouts to generate with
 `generate_multiple_random_layouts`.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_on_progress =
+R"doc(Callback that receives the number of placed SiDBs and, for multiple
+layouts, the number of generated layouts.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_positive_charges = R"doc(Whether positively charged SiDBs may occur in the generated layout.)doc";
 
@@ -14585,6 +14627,8 @@ coordinate, and every surface defect as a `<defect>`.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_lyt = R"doc(Layout to write.)doc";
 
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_on_progress = R"doc(Receives serialization progress.)doc";
+
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_os = R"doc(Output stream.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run = R"doc(Writes the layout with XML-escaped lattice text.)doc";
@@ -14595,6 +14639,7 @@ R"doc(Creates an SQD writer for a lattice layout.
 Args:
     src: Layout to write.
     s: Output stream.
+    callback: Receives completed dot and defect records.
 
 )doc";
 
@@ -14913,6 +14958,8 @@ static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_lattice_
 
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_lattice_point_size = R"doc(Size of the H-Si lattice points in SVG units.)doc";
 
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_on_progress = R"doc(Receives completed serialization work and the phase total.)doc";
+
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_sidb_border_width = R"doc(Border width of the SiDB.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode =
@@ -14934,6 +14981,7 @@ defect layer.
 Args:
     lyt: Layout to write.
     os: Output stream to write into.
+    on_progress: Receives completed dot and defect records.
 
 )doc";
 
@@ -14944,6 +14992,7 @@ the file's content.
 Args:
     lyt: Layout to write.
     filename: File to write into.
+    on_progress: Receives completed dot and defect records.
 
 Raises:
     std::ofstream::failure: if the file cannot be opened.
@@ -16348,6 +16397,14 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature
 R"doc(Maximum simulation temperature beyond which no simulation will be
 conducted (~ 126 °C by default) (unit: K).)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_on_progress =
+R"doc(Callback that receives the number of simulated input patterns (gate-
+based) or the progress of the physical simulation (non-gate-based).)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_on_worker_progress =
+R"doc(Reports logical worker activity with a fixed worker count for each
+invocation.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_operational_params =
 R"doc(The parameters used to determine if a layout is `operational` or `non-
 operational`.)doc";
@@ -16889,6 +16946,8 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_par
 R"doc(Exhaustive simulation algorithm used to simulate the ground state as
 reference.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_on_progress = R"doc(Callback that receives the number of completed heuristic repetitions.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_repetitions =
 R"doc(Number of iterations of the heuristic algorithm used to determine the
 simulation accuracy (`repetitions = 100` means that accuracy is
@@ -17068,6 +17127,10 @@ R"doc(The defect changes the operational status of the layout (a
 specification is required).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_number_of_threads = R"doc(Number of threads to use.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_on_progress =
+R"doc(Callback that receives the number of evaluated defect positions or,
+for *QuickTrace*, contour points.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_operational_params = R"doc(Parameters of the operational check and the simulation.)doc";
 
@@ -17402,6 +17465,7 @@ Worker exceptions propagate to the caller after the workers finish.
 
 Args:
     n: Number of indices.
+    progress: The reporter to advance after each processed index.
     fn: The function to run.
 
 Template Args:
@@ -17594,6 +17658,8 @@ remain representable.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_fixed_sidbs = R"doc(SiDBs that are not displaced.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_number_of_threads = R"doc(Number of threads to use.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_on_progress = R"doc(Callback that receives the number of analyzed displaced layouts.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_operational_params = R"doc(Parameters of the operational check.)doc";
 
@@ -18354,6 +18420,14 @@ reduction to overlapping witnesses for larger cluster sizes that could
 be runtime-impairing, then limiting specifically the length of the
 input to the factorial call.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_engines_clustercomplete_params_on_progress =
+R"doc(Callback that receives the number of unfolded charge space
+compositions.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_clustercomplete_params_on_worker_progress =
+R"doc(Reports logical worker activity with a fixed worker count for each
+invocation.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_engines_clustercomplete_params_report_gss_stats =
 R"doc(Option to decide if the *Ground State Space* statistics are reported
 to the standard output. By default, this option is disabled.)doc";
@@ -18571,7 +18645,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
 state to an 64-bit unsigned integer.
 
@@ -18912,6 +18986,8 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_completed_compositions = R"doc(Completed compositions in the serial traversal.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_extract_work_from_top_cluster =
 R"doc(Work in the form of compositions of charge space elements of the top
 cluster are extracted into a vector and shuffled at random before
@@ -19037,6 +19113,8 @@ pruning.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_mutex_to_protect_the_simulation_results = R"doc(Mutex to protect the simulation results.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_progress = R"doc(Reports unfolded compositions; the total is unknown.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_remove_composition =
 R"doc(A composition is removed from the given clustering state, i.e., the
 projector states in the compositions are removed from the clustering
@@ -19148,6 +19226,8 @@ cluster has an assigned multiset charge configuration, and a store
 containing lower and upper bounds on the local potential for each SiDB
 under this multiset charge configuration assignment.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_worker_completed_compositions = R"doc(Compositions examined by this worker.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_worker_index = R"doc(Worker index in the vector of all workers.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_worker_obtain_work =
@@ -19159,6 +19239,8 @@ Returns:
     terminate), or the work that was obtained.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_worker_progress = R"doc(Worker activity during dynamic composition exploration.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_worker_queue =
 R"doc(A worker queue contains a double-layer queue of work items, a
@@ -20530,6 +20612,8 @@ landscape.
 Args:
     lyt: Layout to simulate.
     params: Physical parameters.
+    on_progress: Callback that receives the number of enumerated
+                 charge configurations.
     deadline: Shared caller deadline. `time_point::max()` leaves the
               simulation unlimited.
 
@@ -20740,6 +20824,8 @@ static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_loc
 R"doc(Local external electrostatic potentials (e.g., locally applied
 electrodes), per site (unit: V).)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_on_progress = R"doc(Callback that receives the number of enumerated charge configurations.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_sim_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim =
@@ -20785,6 +20871,14 @@ static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_itera
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_number_threads =
 R"doc(Number of threads to spawn. By default the number of threads is set to
 the number of available hardware threads.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_on_progress =
+R"doc(Callback that receives the number of completed iterations across all
+threads.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_on_worker_progress =
+R"doc(Reports logical worker activity with a fixed worker count for each
+invocation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_sim_params = R"doc(Simulation parameters for the simulation of the physical SiDB system.)doc";
 
@@ -22536,7 +22630,10 @@ contour encloses. In two dimensions this is the familiar pairing of a
 4-connected path against an 8-connected closed curve. Points on the
 contour itself are marked, but not expanded from.
 
-Note that no physical simulation is conducted by this function!
+Small regions run inline. Larger regions distribute batches across
+`number_of_threads` workers, with internally locked insertion into the
+inferred-point set. All workers finish before the next contour seed is
+processed. No physical simulation is conducted by this function.
 
 Args:
     starting_point: Step point at which to start the inference. If
@@ -22548,15 +22645,15 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_inferred_op_domain =
-R"doc(All the points inferred (assumed) to be operational but not actually
-simulated.)doc";
+R"doc(Points marked operational by contour interior inference, including
+sampled operational points.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_inferred_operational_parameter_points =
-R"doc(Returns the parameter points that were inferred (assumed) to be
-operational because they are enclosed by a contour traced by
-`contour_tracing`. These points have not been simulated and are,
-therefore, not part of the returned operational domain. They are
-exposed to enable inspection of the enclosure inference.
+R"doc(Returns the parameter points marked operational by contour interior
+inference, including sampled operational points and reached contour
+points. Unsimulated points are absent from the returned operational
+domain; sampled points can occur in both sets. These points enable
+inspection of the enclosure inference.
 
 Returns:
     The parameter points that have been inferred to be operational.
@@ -22636,10 +22733,10 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_log_stats =
-R"doc(Helper function that writes the the statistics of the operational
-domain computation to the statistics object. Due to data races that
-can occur during the computation, each value is temporarily held in an
-atomic variable and written to the statistics object only after the
+R"doc(Helper function that writes the statistics of the operational domain
+computation to the statistics object. Due to data races that can occur
+during the computation, each value is temporarily held in an atomic
+variable and written to the statistics object only after the
 computation has finished.
 
 )doc";
@@ -22724,6 +22821,8 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_doma
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_params = R"doc(The parameters for the operational domain computation.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_progress = R"doc(Reports the evaluated parameter points.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_random_sampling =
 R"doc(Performs a random sampling of the specified number of samples within
@@ -22836,17 +22935,25 @@ This serves the same purpose as the two-dimensional Moore contour
 trace — sample only the boundary of an operational region and infer
 its interior — but collects the boundary instead of walking it. A
 closed curve can be walked because its neighbors admit a cyclic order;
-a closed surface cannot, so the boundary is gathered by a breadth-
-first search over the operational points that have at least one non-
-operational Moore neighbor. The resulting set is closed under the
-Moore neighborhood, which is what the interior inference requires.
+a closed surface cannot, so the boundary is gathered by a parallel
+breadth-first search over operational points with a non-operational
+Moore neighbor or a range edge. Workers share the classification cache
+and schedule each point once; interior inference runs after they join.
+The resulting set is closed under the Moore neighborhood, which is
+what the interior inference requires.
 
 Args:
     samples: Maximum number of random samples to be taken before
              tracing.
+    initial_points: Additional seeds, rounded up to sweep grid points
+                    and deduplicated with the random samples.
 
 Returns:
     The (partial) operational domain of the layout.
+
+Raises:
+    std::invalid_argument: if an additional seed has the wrong
+                           dimensions or lies outside the sweep grid.
 
 )doc";
 
@@ -22882,6 +22989,10 @@ Returns:
     The von Neumann neighborhood of `sp`.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_worker_progress =
+R"doc(Reports each top-level parameter worker without exposing nested
+simulations.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_patterns_of =
 R"doc(The input patterns that are not operational for the given reasons.
@@ -23441,6 +23552,14 @@ unavailable. Values below `1` are treated as `1`.
 Pinning it makes wall-clock comparisons reproducible across runs and
 machines, and allows an operational domain computation to leave cores
 free for other work.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_on_progress =
+R"doc(Callback that receives the number of evaluated parameter points. The
+total is known for grid search and random sampling only.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_on_worker_progress =
+R"doc(Reports logical worker activity with a fixed worker count for each
+invocation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_operational_params =
 R"doc(The parameters used to determine if a layout is operational or non-
@@ -24657,7 +24776,14 @@ static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl = R
 
 static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_available_fanouts = R"doc(Queue map of available fanouts.)doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_fanout_substitution_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_fanout_substitution_impl =
+R"doc(Stores the network and algorithm parameters.
+
+Args:
+    src: Source network.
+    p: Algorithm parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_generate_breadth_tree =
 R"doc(BREADTH-FIRST strategy: expand buffers level by level to create
@@ -24718,7 +24844,14 @@ static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl = R"doc()do
 
 static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_balanced = R"doc()doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_is_balanced_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_is_balanced_impl =
+R"doc(Stores the network and algorithm parameters.
+
+Args:
+    src: Source network.
+    p: Algorithm parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_ntk = R"doc()doc";
 
@@ -24730,7 +24863,14 @@ static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_run = R"doc
 
 static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_is_fanout_substituted_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_is_fanout_substituted_impl =
+R"doc(Stores the network and algorithm parameters.
+
+Args:
+    src: Source network.
+    p: Algorithm parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_ntk = R"doc()doc";
 
@@ -24742,7 +24882,14 @@ static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_s
 
 static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_network_balancing_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_network_balancing_impl =
+R"doc(Stores the network and algorithm parameters.
+
+Args:
+    src: Source network.
+    p: Algorithm parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_ntk = R"doc()doc";
 
@@ -24874,6 +25021,8 @@ Note:
 static const char *mkd_doc_fiction_synthesis_fanout_substitution_params = R"doc(Parameters for the fanout substitution algorithm.)doc";
 
 static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_degree = R"doc(Maximum output degree of each fan-out node.)doc";
+
+static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_on_progress = R"doc(Reports completed work in each bounded phase.)doc";
 
 static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_seed =
 R"doc(Seed used for random substitution, generated randomly if not
@@ -25020,6 +25169,8 @@ Note:
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_network_balancing_params = R"doc(Parameters for the network balancing algorithm.)doc";
+
+static const char *mkd_doc_fiction_synthesis_network_balancing_params_on_progress = R"doc(Reports completed work in each bounded phase.)doc";
 
 static const char *mkd_doc_fiction_synthesis_network_balancing_params_unify_outputs = R"doc(Flag to indicate that all output nodes should be in the same rank.)doc";
 
@@ -26279,6 +26430,121 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_utils_progress_reporter =
+R"doc(Forwards the progress of a single task to a `progress_callback`,
+throttling the reports.
+
+A reporter is created at the start of a task with the callback of the
+algorithm's parameters, a task name, and, where known, the total
+number of work items. Each completed item is announced with
+`advance()`, which is safe to call concurrently from any number of
+threads. The reporter forwards the first report, the final report in
+its destructor, and intermediate reports whenever another percent of
+the total (or another 64 items when the total is unknown) was
+completed and at least 100 ms have passed since the last report. An
+empty callback turns every member into a no-op.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_advance =
+R"doc(Records `n` completed work items and forwards a report if one is due.
+
+This function may be called concurrently from any thread.
+
+Args:
+    n: The number of work items completed since the last call.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_count = R"doc(The number of completed work items.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_last_report = R"doc(The count and total of the last report. Guarded by `mutex`.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_last_report_time = R"doc(The time of the last report. Guarded by `mutex`.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_mutex = R"doc(Serializes the reports.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_next_report = R"doc(The count at which the next intermediate report is due.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_on_progress = R"doc(The callback to forward reports to.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_operator_assign = R"doc(Reporters do not support copy assignment.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_operator_assign_2 = R"doc(Reporters do not support move assignment.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_progress_reporter =
+R"doc(Starts a task and reports `done == 0` to the callback.
+
+Args:
+    callback: The callback to forward reports to. May be empty.
+    task: The name of the task, e.g., `"placing gates"`.
+    total: The number of work items the task consists of, or `0` if it
+           is unknown.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_progress_reporter_2 =
+R"doc(Reporters cannot be copied because each reporter owns its
+synchronization state.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_progress_reporter_3 = R"doc(Reporters cannot be moved while worker threads may access them.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_report_locked =
+R"doc(Forwards a report for `done` completed items unless the same report
+was forwarded already.
+
+Must be called with `mutex` held.
+
+Args:
+    done: The number of completed work items to report.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_reported = R"doc(Whether a report was forwarded yet. Guarded by `mutex`.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_reset =
+R"doc(Restarts the task with a new total and reports `done == 0`.
+
+Use this for algorithms that iterate over the same set of items
+repeatedly, e.g., until a fixpoint is reached.
+
+Args:
+    total: The number of work items the task consists of, or `0` if it
+           is unknown.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_set_total =
+R"doc(Sets the total number of work items once it becomes known and forwards
+a report.
+
+Args:
+    total: The number of work items the task consists of, or `0` if it
+           is unknown.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_step =
+R"doc(The number of items between two intermediate reports. Guarded by
+`mutex`.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_step_for =
+R"doc(Computes the number of items between two intermediate reports for a
+given total.
+
+Args:
+    total: The total number of work items, or `0` if unknown.
+
+Returns:
+    One percent of `total`, at least `1`, or `UNKNOWN_TOTAL_STEP` if
+    the total is unknown.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_task_name = R"doc(The name of the task.)doc";
+
+static const char *mkd_doc_fiction_utils_progress_reporter_total_items = R"doc(The total number of work items, or `0` if unknown. Guarded by `mutex`.)doc";
+
 static const char *mkd_doc_fiction_utils_stl_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
@@ -26484,6 +26750,93 @@ complete result.)doc";
 
 static const char *mkd_doc_fiction_utils_timeout_error_timeout_error = R"doc(Constructs an execution-timeout error.)doc";
 
+static const char *mkd_doc_fiction_utils_worker_progress_reporter =
+R"doc(Serializes worker reports and throttles updates to ten per second per
+worker.
+
+Activity transitions and final counts are reported immediately.
+Destruction clears remaining active workers.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_finish =
+R"doc(Publishes the final snapshot and marks the worker inactive.
+
+Args:
+    id: Stable logical worker index.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_mutex = R"doc(Serializes callbacks and state changes.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_on_worker = R"doc(Receives serialized snapshots.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_operator_assign = R"doc(Reporters do not support copy assignment.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_operator_assign_2 = R"doc(Reporters do not support move assignment.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_update =
+R"doc(Updates a worker's snapshot and publishes activity changes
+immediately.
+
+Args:
+    id: Stable logical worker index.
+    description: Human-readable work and candidate description.
+    done: Completed work items.
+    total: Work budget, or 0 if unknown.
+    force: Publish a significant status change immediately.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_progress_reporter =
+R"doc(Creates reporting state only when a callback is present.
+
+Args:
+    callback: Receives worker snapshots.
+    count: Number of logical workers, including workers that may
+           remain idle.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_progress_reporter_2 = R"doc(Reporters own synchronization state and cannot be copied.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_progress_reporter_3 = R"doc(Workers may reference reporters, so reporters cannot be moved.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_state = R"doc(The most recent snapshot of a logical worker, guarded by mutex.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_state_active = R"doc(Whether the worker has unfinished work.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_state_description = R"doc(Current work description.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_state_done = R"doc(Completed work items.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_state_last_report = R"doc(Time of the last published snapshot.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_worker_state_total = R"doc(Work budget, or zero if unknown.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_reporter_workers = R"doc(State indexed by logical worker ID.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope = R"doc(Clears a worker's activity on every exit from a computation.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_id = R"doc(Logical worker ID.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_operator_assign = R"doc(Worker scopes do not support copy assignment.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_operator_assign_2 = R"doc(Worker scopes do not support move assignment.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_progress = R"doc(Shared serialized reporter.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_worker_progress_scope =
+R"doc(Tracks the lifetime of an active worker.
+
+Args:
+    reporter: Shared reporter, which outlives this scope.
+    worker: Logical worker ID.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_worker_progress_scope_2 = R"doc(One scope owns the worker's activity lifetime.)doc";
+
+static const char *mkd_doc_fiction_utils_worker_progress_scope_worker_progress_scope_3 = R"doc(A worker scope stays at its construction site.)doc";
+
 static const char *mkd_doc_fiction_verification_count_gate_types =
 R"doc(Gives a detailed listing of all gate types present in the provided
 network (or layout). This function can distinguish most gate types
@@ -26634,7 +26987,17 @@ static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_
 
 static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_run = R"doc()doc";
 
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_signal_delay = R"doc()doc";
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_signal_delay =
+R"doc(Evaluates an output's incoming paths without consuming the native call
+stack.
+
+Args:
+    t: Output tile whose path information is needed.
+
+Returns:
+    Length, delay, and delay difference of the dominant path.
+
+)doc";
 
 static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl = R"doc()doc";
 
@@ -26714,10 +27077,10 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_gate_level_drvs_impl =
-R"doc(Standard constructor.
+R"doc(Stores the layout, parameters, and statistics.
 
 Args:
-    lyt: Gate layout to check for design rule flaws.
+    src: Gate layout to check for design rule flaws.
     p: Parameters.
     st: Statistics.
 
@@ -26929,6 +27292,8 @@ static const char *mkd_doc_fiction_verification_gate_level_drv_params_io_pins = 
 static const char *mkd_doc_fiction_verification_gate_level_drv_params_missing_connections = R"doc(Check for nodes without connections.)doc";
 
 static const char *mkd_doc_fiction_verification_gate_level_drv_params_non_adjacent_connections = R"doc()doc";
+
+static const char *mkd_doc_fiction_verification_gate_level_drv_params_on_progress = R"doc(Reports completed work in each bounded phase.)doc";
 
 static const char *mkd_doc_fiction_verification_gate_level_drv_params_out = R"doc(Stream to write the report into.)doc";
 
@@ -27154,7 +27519,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_std_hash_operator_call_9 =
-R"doc(Computes the hash of a parameter point.
+R"doc(Mixes the quantized parameter values across the hash bits for
+partitioned processing.
 
 Args:
     pp: Parameter point to hash.

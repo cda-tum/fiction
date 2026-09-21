@@ -1,5 +1,5 @@
 # Prevent CMake from finding a system-installed fmt package to avoid version conflicts.
-# We use the bundled fmt version from alice/mockturtle submodules.
+# cmake/Dependencies.cmake fetches fmt and defines the `fmt` target that mockturtle reuses.
 set(CMAKE_DISABLE_FIND_PACKAGE_fmt TRUE)
 
 # Include Dependencies (FetchContent) configuration
@@ -17,12 +17,12 @@ set(FICTION_SECTION_FLAGS
 # Fetched Dependencies (Managed via FetchContent in Dependencies.cmake)
 ################################################################################
 
-# alice
+# fmt
 target_link_system_libraries(libfiction INTERFACE
-    $<BUILD_INTERFACE:alice>
-    $<INSTALL_INTERFACE:fiction::alice>
+    $<BUILD_INTERFACE:fmt>
+    $<INSTALL_INTERFACE:fiction::fmt>
 )
-install(DIRECTORY ${alice_SOURCE_DIR}/include/ DESTINATION include)
+install(DIRECTORY ${fmt_SOURCE_DIR}/include/ DESTINATION include)
 
 # mockturtle
 target_link_system_libraries(libfiction INTERFACE
@@ -118,8 +118,7 @@ if (FICTION_Z3)
         message(STATUS "Found Z3 solver version: ${Z3_VERSION_STRING}")
         find_package(Threads REQUIRED)
         target_compile_definitions(libfiction INTERFACE FICTION_Z3_SOLVER)
-        target_include_directories(libfiction SYSTEM INTERFACE ${Z3_CXX_INCLUDE_DIRS})
-        target_link_system_libraries(libfiction INTERFACE ${Z3_LIBRARIES})
+        target_link_libraries(libfiction INTERFACE z3::z3lib)
         if (APPLE)
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
         endif ()

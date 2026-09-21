@@ -21,6 +21,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -58,7 +59,7 @@ TEST_CASE("ExGS rejects incomplete simulations after the caller deadline", "[exh
         deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{1};
     }
 
-    CHECK_THROWS_AS(exhaustive_ground_state_simulation(lyt, simulation_parameters{2, -0.32}, deadline),
+    CHECK_THROWS_AS(exhaustive_ground_state_simulation(lyt, simulation_parameters{2, -0.32}, {}, deadline),
                     utils::timeout_error);
 }
 
@@ -394,4 +395,24 @@ TEST_CASE("7 SiDB layout", "[exhaustive-ground-state-simulation]")
     const auto simulation_results = exhaustive_ground_state_simulation(lyt, params);
 
     CHECK(simulation_results.charge_distributions.size() == 1);
+}
+
+TEST_CASE("ExGS reports progress", "[exhaustive-ground-state-simulation]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+
+    progress_recorder rec{};
+
+    const auto simulation_results =
+        exhaustive_ground_state_simulation(lyt, simulation_parameters{2, -0.32}, rec.callback());
+
+    CHECK(simulation_results.charge_distributions.size() == 1);
+
+    // three SiDBs in base 2 have eight charge configurations
+    CHECK(rec.is_consistent("charge configurations"));
+    CHECK(rec.final_count("charge configurations") == 8);
 }
