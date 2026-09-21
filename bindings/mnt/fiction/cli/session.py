@@ -31,11 +31,11 @@ from rich.progress import (
     ProgressColumn,
     SpinnerColumn,
     Task,
-    TaskID,
     TextColumn,
     TimeElapsedColumn,
     TimeRemainingColumn,
 )
+from rich.table import Column
 from rich.text import Text
 
 from mnt.pyfiction import convert_network, technology_network
@@ -135,69 +135,74 @@ class RemainingColumn(TimeRemainingColumn):
         return super().render(task)
 
 
-MAX_WORKER_ROWS = 4
-"""Largest worker group displayed individually."""
-SUMMARY_WORKERS = 2
-"""Maximum candidate descriptions in compact mode."""
+class CommandProgress:
+    """Render aggregate counts and candidate status on one command row."""
 
-
-class WorkerDisplay:
-    """Render a fixed-size worker group with bounded terminal detail."""
-
-    def __init__(self, display: Progress, label: str, spinner: TaskID) -> None:
-        """Share the command display and its spinner row."""
+    def __init__(self, display: Progress, label: str) -> None:
+        """Start the command with an indeterminate spinner."""
         self.display = display
         self.label = label
-        self.spinner = spinner
-        self.bars: dict[int, TaskID] = {}
-        self.descriptions: dict[int, str] = {}
+        self.bar = display.add_task(label, total=None, spinner=True)
+        self.phase = ""
+        self.completed = 0
+        self.total = 0
+        self.candidates: dict[int, str] = {}
         self.best_solution = ""
         self.best_cost = float("inf")
-        self.detailed: bool | None = None
         self.lock = threading.Lock()
 
-    def __call__(self, worker: int, workers: int, description: str, done: int, total: int, active: bool) -> None:  # ruff: ignore[boolean-type-hint-positional-argument] -- native callbacks pass positional arguments
-        """Update one stable worker row, removing it when its work ends."""
+    def description(self) -> str:
+        """Return the current phase and the latest active candidate or best accepted solution."""
+        if self.label == "exact":
+            candidate = next(reversed(self.candidates.values()), "")
+            return f"exact: {candidate}" if candidate else "exact"
+        if self.label == "gold":
+            return "gold: expansions" + self.best_solution
+        return self.phase or self.label
+
+    def report(self, phase: str, done: int, total: int) -> None:
+        """Replace phase counts with aggregate algorithm reports, never worker-local counts."""
         with self.lock:
-            if self.detailed is None:
-                self.detailed = workers <= MAX_WORKER_ROWS and workers + MAX_WORKER_ROWS <= self.display.console.height
-            if self.label == "gold":
-                description, _, best = description.partition("; best ")
+            if phase != self.phase or done < self.completed or (total == 0 and self.total != 0):
+                # Rich preserves the old total when reset receives None; replace the single row instead.
+                self.display.remove_task(self.bar)
+                self.bar = self.display.add_task(self.label, total=total or None)
+            self.phase = phase if done or total else ""
+            self.completed, self.total = done, total
+            self.display.update(
+                self.bar,
+                description=escape(self.description()),
+                completed=done,
+                total=total or None,
+                spinner=not (done or total),
+                refresh=True,
+            )
+
+    def report_worker(
+        self,
+        worker: int,
+        _workers: int,
+        description: str,
+        _done: int,
+        _total: int,
+        active: bool,  # ruff: ignore[boolean-type-hint-positional-argument] -- native callback arguments are positional
+    ) -> None:
+        """Use worker reports only for search status; counts come from the aggregate callback."""
+        with self.lock:
+            if self.label == "exact":
+                self.candidates.pop(worker, None)
+                if active:
+                    self.candidates[worker] = description.partition(": ")[2]
+            elif self.label == "gold":
+                _, _, best = description.partition("; best ")
                 if best:
                     cost = int(best.rsplit(", cost ", 1)[1])
                     if cost < self.best_cost:
                         self.best_cost = cost
                         self.best_solution = "; best " + best
-            if not description.startswith(("worker ", "graph ", "examining ")):
-                description = f"worker {worker + 1}: {description}"
-            if active:
-                self.descriptions[worker] = description
             else:
-                self.descriptions.pop(worker, None)
-            if self.detailed:
-                self.update_row(worker, description, done, total, active=active)
-                self.display.update(self.spinner, description=escape(self.label + self.best_solution))
-            else:
-                descriptions = [self.descriptions[key] for key in sorted(self.descriptions)[:SUMMARY_WORKERS]]
-                summary = f"{self.label}: {len(self.descriptions)} active"
-                if descriptions:
-                    summary += "; " + "; ".join(descriptions)
-                if len(self.descriptions) > SUMMARY_WORKERS:
-                    summary += "; …"
-                self.display.update(self.spinner, description=escape(summary + self.best_solution))
-            self.display.refresh()
-
-    def update_row(self, worker: int, description: str, done: int, total: int, *, active: bool) -> None:
-        """Maintain one worker's bar independently of its changing description."""
-        bar = self.bars.get(worker)
-        if not active:
-            if bar is not None:
-                self.display.remove_task(bar)
-                del self.bars[worker]
-            return
-        if bar is None:
-            bar = self.bars[worker] = self.display.add_task(escape(description), total=total or None)
-        self.display.update(bar, description=escape(description), completed=done, total=total or None)
+                return
+            self.display.update(self.bar, description=escape(self.description()), spinner=False, refresh=True)
 
 
 class Session:
@@ -212,7 +217,7 @@ class Session:
         gate_layouts: The gate-level layout store.
         cell_layouts: The cell-level layout store.
         report_progress: The callback that displays algorithm progress while a command runs.
-        report_worker_progress: The callback that displays bounded worker detail.
+        report_worker_progress: The callback that updates search candidate status.
         running: Cleared by ``quit``; the interactive loop stops when it is ``False``.
     """
 
@@ -457,11 +462,11 @@ class Session:
 
     @contextlib.contextmanager
     def progress(self, label: str) -> Iterator[ProgressCallback]:
-        """Show a spinner for a running command and a bar for every task its algorithms report.
+        """Show one row for the command, with aggregate counts and search candidate status.
 
         The display is transient. Quiet mode and nonterminal output disable the display and
         discard the reports. While the context is open,
-        :attr:`report_progress` is the callback that feeds the bars, so commands hand it to the
+        :attr:`report_progress` is the callback that feeds the row, so commands hand it to the
         algorithms they run.
 
         Args:
@@ -484,7 +489,9 @@ class Session:
             return
         display = Progress(
             SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
+            TextColumn(
+                "[progress.description]{task.description}", table_column=Column(no_wrap=True, overflow="ellipsis")
+            ),
             TaskBarColumn(),
             CountColumn(),
             TimeElapsedColumn(),
@@ -492,33 +499,14 @@ class Session:
             console=self.console,
             transient=True,
         )
-        bars: dict[str, TaskID] = {}
-        counts: dict[str, int] = {}
-        report_lock = threading.Lock()
-
-        def report(task: str, done: int, total: int) -> None:
-            with report_lock:
-                bar = bars.get(task)
-                if bar is not None and (done == 0 or done < counts[task]):
-                    # Rich's reset preserves the old total when passed None, so recreate restarted tasks.
-                    display.remove_task(bar)
-                    bar = None
-                if done == 0 and total == 0:
-                    bars.pop(task, None)
-                    return
-                if bar is None:
-                    bar = bars[task] = display.add_task(task, total=total or None)
-                counts[task] = done
-                display.update(bar, completed=done, total=total or None, refresh=True)
-
         previous = self.report_progress
         previous_worker = self.report_worker_progress
-        self.report_progress = report
         try:
             with display:
-                spinner = display.add_task(label, total=None, spinner=True)
-                self.report_worker_progress = WorkerDisplay(display, label, spinner)
-                yield report
+                reporter = CommandProgress(display, label)
+                self.report_progress = reporter.report
+                self.report_worker_progress = reporter.report_worker
+                yield self.report_progress
         finally:
             self.report_progress = previous
             self.report_worker_progress = previous_worker

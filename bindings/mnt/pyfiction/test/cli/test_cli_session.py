@@ -26,7 +26,7 @@ from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import tokenize
 from mnt.fiction.cli.registry import REGISTRY, STORE_FLAGS, Category
-from mnt.fiction.cli.session import Session, WorkerDisplay, ignore_progress, ignore_worker_progress
+from mnt.fiction.cli.session import Session, ignore_progress, ignore_worker_progress
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import Store
 from mnt.pyfiction import orthogonal, orthogonal_stats, read_technology_network, set_name
@@ -347,32 +347,57 @@ def test_progress_reports_are_dropped_without_terminal(shell: Shell) -> None:
 
 @pytest.mark.parametrize("workers", [1, 4, 5, 120])
 @pytest.mark.parametrize("height", [6, 24])
-def test_worker_display_bounds_detail(workers: int, height: int) -> None:
-    """Small groups show worker rows; large groups and short terminals show a summary."""
-    output = io.StringIO()
-    console = Console(file=output, width=240, height=height, color_system=None)
+@pytest.mark.parametrize("command", ["exact", "gold", "opdom", "quicksim", "clustercomplete", "temp"])
+def test_parallel_progress_has_one_aggregate_row(
+    workers: int, height: int, command: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Worker-local reports never add rows or overwrite aggregate counts, including at checkpoints."""
+    console = Console(file=io.StringIO(), width=100, height=height, force_terminal=True)
+    session = Session(console=console)
     display = Progress(console=console, auto_refresh=False)
-    spinner = display.add_task("exact", total=None, spinner=True)
-    report = WorkerDisplay(display, "exact", spinner)
-    for worker in range(workers):
-        report(worker, workers, f"worker {worker + 1}: 4 \N{MULTIPLICATION SIGN} 6", worker, 10, active=True)
-    console.print(display)
-    text = output.getvalue()
-    if workers <= 4 and workers + 4 <= height:
-        assert f"worker {workers}: 4 \N{MULTIPLICATION SIGN} 6" in text
-        assert "active" not in text
-    else:
-        assert f"{workers} active" in text
-        assert "worker 3:" not in text
-    # Changing descriptions updates a worker rather than accumulating candidate rows.
-    for worker in range(workers):
-        report(worker, workers, f"worker {worker + 1}: 5 \N{MULTIPLICATION SIGN} 6", worker, 10, active=True)
-        report(worker, workers, "finished", worker, 10, active=False)
-    output.seek(0)
-    output.truncate()
-    console.print(display)
-    assert "4 \N{MULTIPLICATION SIGN} 6" not in output.getvalue()
-    assert "5 \N{MULTIPLICATION SIGN} 6" not in output.getvalue()
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    total = 0 if command in {"exact", "gold", "clustercomplete"} else 256
+    active, inactive = True, False
+    with session.progress(command) as report:
+        for worker in range(workers):
+            session.report_worker_progress(
+                worker, workers, f"worker {worker + 1}: 4 \N{MULTIPLICATION SIGN} 6", 1, 2, active
+            )
+            assert len(display.tasks) == 1
+        for checkpoint, width in ((128, 4), (256, 5)):
+            report("aggregate", checkpoint, total)
+            assert len(display.tasks) == 1
+            assert display.tasks[0].completed == checkpoint
+            assert display.tasks[0].total == (total or None)
+            if command == "exact":
+                assert f"{width} \N{MULTIPLICATION SIGN} 6" in display.tasks[0].description
+            for worker in range(workers):
+                session.report_worker_progress(
+                    worker, workers, f"worker {worker + 1}: 5 \N{MULTIPLICATION SIGN} 6", 2, 2, active
+                )
+                assert len(display.tasks) == 1
+                assert display.tasks[0].completed == checkpoint
+        for worker in range(workers):
+            session.report_worker_progress(worker, workers, "finished", 2, 2, inactive)
+        assert len(display.tasks) == 1
+        assert "5 \N{MULTIPLICATION SIGN} 6" not in display.tasks[0].description
+        assert "active" not in display.tasks[0].description
+
+
+def test_exact_retains_an_active_candidate(monkeypatch: pytest.MonkeyPatch) -> None:
+    """When the latest candidate finishes, the remaining active candidate supplies the dimensions."""
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    display = Progress(console=session.console, auto_refresh=False)
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    active, inactive = True, False
+    with session.progress("exact") as report:
+        session.report_worker_progress(0, 2, "worker 1: 4 \N{MULTIPLICATION SIGN} 6", 0, 0, active)
+        session.report_worker_progress(1, 2, "worker 2: 5 \N{MULTIPLICATION SIGN} 6", 0, 0, active)
+        report("aspect ratios", 128, 0)
+        assert display.tasks[0].description == "exact: 5 \N{MULTIPLICATION SIGN} 6"
+        session.report_worker_progress(1, 2, "finished", 0, 0, inactive)
+        assert display.tasks[0].description == "exact: 4 \N{MULTIPLICATION SIGN} 6"
+        assert display.tasks[0].completed == 128
 
 
 def test_command_progress_is_explicit() -> None:
@@ -396,7 +421,7 @@ def test_store_does_not_start_a_terminal_progress_display(mux21_shell: Shell, mo
 def test_exact_command_displays_current_dimensions(
     mux21_shell: Shell, workers: int, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """The command connects solver candidate reports to both detailed and compact displays."""
+    """The command displays current solver dimensions for serial and parallel searches."""
     if REGISTRY["exact"].unavailable:
         pytest.skip("exact requires Z3")
     output = io.StringIO()
@@ -424,20 +449,23 @@ def test_worker_callback_restored_after_failure() -> None:
 
 
 @pytest.mark.parametrize("workers", [4, 5])
-def test_gold_retains_best_accepted_solution(workers: int) -> None:
+def test_gold_retains_best_accepted_solution(workers: int, monkeypatch: pytest.MonkeyPatch) -> None:
     """A completed graph and an older report cannot erase the best accepted solution."""
-    output = io.StringIO()
-    console = Console(file=output, width=240, height=24, color_system=None)
-    display = Progress(console=console, auto_refresh=False)
-    spinner = display.add_task("gold", total=None, spinner=True)
-    report = WorkerDisplay(display, "gold", spinner)
-    report(0, workers, "graph 1: 4 by 6; best 4 by 6, cost 24", 8, 0, active=True)
-    report(1, workers, "graph 2: 3 by 6; best 3 by 6, cost 18", 9, 0, active=True)
-    report(1, workers, "finished", 9, 0, active=False)
-    report(0, workers, "graph 1: 5 by 6; best 4 by 6, cost 24", 10, 0, active=True)
-    console.print(display)
-    assert "best 3 by 6, cost 18" in output.getvalue()
-    assert "best 4 by 6, cost 24" not in output.getvalue()
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    display = Progress(console=session.console, auto_refresh=False)
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    active, inactive = True, False
+    with session.progress("gold") as aggregate:
+        report = session.report_worker_progress
+        report(0, workers, "graph 1: 4 by 6; best 4 by 6, cost 24", 8, 0, active)
+        report(1, workers, "graph 2: 3 by 6; best 3 by 6, cost 18", 9, 0, active)
+        report(1, workers, "finished", 9, 0, inactive)
+        report(0, workers, "graph 1: 5 by 6; best 4 by 6, cost 24", 10, 0, active)
+        aggregate("expansions", 128, 0)
+        assert len(display.tasks) == 1
+        assert "best 3 by 6, cost 18" in display.tasks[0].description
+        assert "best 4 by 6, cost 24" not in display.tasks[0].description
+        assert display.tasks[0].completed == 128
 
 
 def test_worker_callback_restored_after_interruption() -> None:

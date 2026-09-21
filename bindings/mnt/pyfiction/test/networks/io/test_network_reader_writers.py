@@ -58,6 +58,27 @@ def test_readers(resources_dir: Path, reader: Callable[[str], Any], cls: type) -
     assert all(network.fanins(g) for g in network.gates())
 
 
+@pytest.mark.parametrize(("suffix", "gates"), [("v", 1), ("blif", 4), ("aig", 1)])
+def test_tec_reader_preserves_output_drivers(tmp_path: Path, suffix: str, gates: int) -> None:
+    """Reading TEC networks keeps shared gate and PI outputs without adding buffers."""
+    source = tmp_path / "source.v"
+    source.write_text(
+        "module top(a,b,y,z,t);\ninput a,b;\noutput y,z,t;\n"
+        "assign y = a & b;\nassign z = y;\nassign t = a;\nendmodule\n",
+        encoding="utf-8",
+    )
+    network = read_aig_network(str(source))
+    path = tmp_path / f"outputs.{suffix}"
+    writer = {"v": write_verilog, "blif": write_blif, "aig": write_aiger}[suffix]
+    writer(network, str(path))
+    restored = read_technology_network(str(path))
+    # BLIF names each output with an explicit buffer record; the reader preserves those records.
+    assert restored.num_gates() == gates
+    assert restored.num_pos() == 3
+    assert restored.depth() == (2 if suffix == "blif" else 1)
+    assert simulate_outputs(restored) == simulate_outputs(network)
+
+
 def test_reader_reports_diagnostics(tmp_path: Path) -> None:
     broken = tmp_path / "broken.v"
     broken.write_text("module broken(\n", encoding="utf-8")

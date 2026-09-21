@@ -24,7 +24,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <type_traits>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner)
@@ -35,6 +34,12 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Bind a reader that preserves the parsed network's output signals.
+ * @tparam Ntk Network type to read.
+ * @param m Python module.
+ * @param function_name Exported reader name.
+ */
 template <typename Ntk>
 void network_reader(nanobind::module_& m, const char* function_name)
 {
@@ -50,27 +55,25 @@ void network_reader(nanobind::module_& m, const char* function_name)
 
             if (const auto ntks = reader.get_networks(); !ntks.empty())
             {
-                auto ntk = *ntks.front();
-
-                if constexpr (std::is_same_v<Ntk, py_tec_network>)
-                {
-                    ntk.substitute_po_signals();
-                }
-
-                return ntk;
+                return *ntks.front();
             }
 
             throw std::runtime_error(fmt::format("could not parse '{}': {}", filename, diagnostics.str()));
         },
         py::arg("filename"), py::arg("format") = "",
         "Reads a logic network from a Verilog (`.v`), AIGER (`.aig`), or BLIF (`.blif`) file, or the first "
-        "network from a directory of such files. Raises `RuntimeError` with the parser's diagnostics when no "
+        "network from a directory of such files. Preserves output signals without adding output buffers. "
+        "Raises `RuntimeError` with the parser's diagnostics when no "
         "network can be read.",
         py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail
 
+/**
+ * @brief Register readers for the supported logic network types.
+ * @param m Python module.
+ */
 void network_reader(nanobind::module_& m)
 {
     detail::network_reader<py_tec_network>(m, "read_technology_network");

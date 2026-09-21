@@ -71,12 +71,14 @@ def test_store_schemas(shell: Shell, resource: Callable[[str], str]) -> None:
         "gates",
         "wires",
         "crossings",
-        "critical_path",
-        "throughput",
         "synchronization_elements",
     }
     assert layout["clocking"] == "2DDWAVE"
-    assert isinstance(layout["throughput"], int)
+    assert "throughput" not in layout
+    shell.ok("ps -g")
+    timing = log[-1]["result"]["gate_layout"]  # type: ignore[index]
+    assert isinstance(timing["throughput"], int)
+    assert isinstance(timing["critical_path"], int)
     assert set(layout["size"]) >= {"x", "y", "area"}
     stats = log[2]["result"]["stats"]  # type: ignore[index]
     assert isinstance(stats["time_total_s"], float)

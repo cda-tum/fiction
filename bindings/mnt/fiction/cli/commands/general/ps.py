@@ -36,14 +36,14 @@ def ps(session: Session, args: argparse.Namespace) -> Result:
     stores = session.stores
     if not args.all:
         name = one_store(args)
-        description = describe(stores[name].current())
+        description = describe(stores[name].current(), timing=True)
         session.console.print(render_summary(description))
         return {name: description}
 
     listed: dict[str, object] = {}
     for name in selected_stores(args) or list(stores):
         current_store = stores[name]
-        descriptions = [describe(element) for element in current_store]
+        descriptions = [describe(element, timing=True) for element in current_store]
         for index, description in enumerate(descriptions):
             marker = "*" if index == current_store.active else " "
             session.console.print(f"[bold]{STORE_FLAGS[name][2]}[/] {marker}{index + 1}")

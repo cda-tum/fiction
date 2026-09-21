@@ -8,20 +8,21 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import is_balanced, network_balancing, network_balancing_params
+from mnt.pyfiction import is_balanced, network_balancing, network_balancing_params, technology_network
 
 
-def test_balancing(mux21):
-    assert mux21.num_gates() == 5
+def test_balancing(mux21: technology_network) -> None:
+    """Balancing aligns paths in a network whose output is driven directly by a gate."""
+    assert mux21.num_gates() == 4
 
     assert not is_balanced(mux21)
 
     balanced_default = network_balancing(mux21)
-    assert balanced_default.num_gates() == 7
+    assert balanced_default.num_gates() == 6
     assert is_balanced(balanced_default)
 
     unify_params = network_balancing_params()
     unify_params.unify_outputs = True
     balanced_unify = network_balancing(mux21, unify_params)
-    assert balanced_unify.num_gates() == 7
+    assert balanced_unify.num_gates() == 6
     assert is_balanced(balanced_unify, unify_params)
