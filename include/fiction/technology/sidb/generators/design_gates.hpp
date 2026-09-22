@@ -198,20 +198,21 @@ class design_gates_impl
             skeleton_layout{skeleton},
             truth_table{spec},
             params{ps},
-            available_sidbs_in_canvas{
-                [this]
-                {
-                    auto sites =
-                        sites_in_area(params.canvas.first, params.canvas.second, params.operational_params.deadline);
-                    std::erase_if(sites,
-                                  [this](const auto& s)
-                                  {
-                                      utils::check_deadline(params.operational_params.deadline);
-                                      return !skeleton_layout.is_empty_site(s) ||
-                                             skeleton_layout.get_defect(s).type != model::defect_type::NONE;
-                                  });
-                    return sites;
-                }()},
+            available_sidbs_in_canvas{[this]
+                                      {
+                                          utils::check_deadline(params.operational_params.deadline);
+                                          auto sites = sites_in_area(params.canvas.first, params.canvas.second);
+                                          utils::check_deadline(params.operational_params.deadline);
+                                          std::erase_if(sites,
+                                                        [this](const auto& s)
+                                                        {
+                                                            utils::check_deadline(params.operational_params.deadline);
+                                                            return !skeleton_layout.is_empty_site(s) ||
+                                                                   skeleton_layout.get_defect(s).type !=
+                                                                       model::defect_type::NONE;
+                                                        });
+                                          return sites;
+                                      }()},
             stats{st},
             input_bdl_wires{simulation::logic::detect_bdl_wires(
                 skeleton_layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,

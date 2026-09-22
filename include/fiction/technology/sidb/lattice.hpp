@@ -17,13 +17,10 @@
 
 #pragma once
 
-#include "fiction/utils/execution_timeout.hpp"
-
 #include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
-#include <chrono>
 #include <cmath>
 #include <compare>
 #include <cstddef>
@@ -196,16 +193,12 @@ struct lattice_site
  *
  * @param first_corner One corner of the rectangle.
  * @param second_corner The opposite corner.
- * @param deadline Shared execution deadline; unlimited by default.
  * @return The sites in the rectangle in raster order.
  * @throws std::length_error if the rectangle exceeds the maximum vector size.
- * @throws utils::timeout_error if the deadline is reached during enumeration.
  */
-[[nodiscard]] inline std::vector<lattice_site>
-sites_in_area(const lattice_site& first_corner, const lattice_site& second_corner,
-              const std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::time_point::max())
+[[nodiscard]] inline std::vector<lattice_site> sites_in_area(const lattice_site& first_corner,
+                                                             const lattice_site& second_corner)
 {
-    utils::check_deadline(deadline);
     const auto min_x   = std::min(first_corner.x, second_corner.x);
     const auto max_x   = std::max(first_corner.x, second_corner.x);
     const auto min_row = std::min(row_of(first_corner), row_of(second_corner));
@@ -218,21 +211,16 @@ sites_in_area(const lattice_site& first_corner, const lattice_site& second_corne
     {
         throw std::length_error("Lattice-site rectangle exceeds the maximum vector size");
     }
-    if (deadline == std::chrono::steady_clock::time_point::max())
-    {
-        sites.reserve(width * height);
-    }
+    sites.reserve(width * height);
 
     for (auto row = min_row; row <= max_row; ++row)
     {
         for (int64_t x = min_x; x <= max_x; ++x)
         {
-            utils::check_deadline(deadline);
             sites.push_back(site_at_row(static_cast<int32_t>(x), row));
         }
     }
 
-    utils::check_deadline(deadline);
     return sites;
 }
 /**

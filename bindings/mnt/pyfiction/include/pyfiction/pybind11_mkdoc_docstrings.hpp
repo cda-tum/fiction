@@ -24286,7 +24286,6 @@ corners may be given in any order.
 Args:
     first_corner: One corner of the rectangle.
     second_corner: The opposite corner.
-    deadline: Shared execution deadline; unlimited by default.
 
 Returns:
     The sites in the rectangle in raster order.
@@ -24294,8 +24293,6 @@ Returns:
 Raises:
     std::length_error: if the rectangle exceeds the maximum vector
                        size.
-    utils::timeout_error: if the deadline is reached during
-                          enumeration.
 
 )doc";
 
