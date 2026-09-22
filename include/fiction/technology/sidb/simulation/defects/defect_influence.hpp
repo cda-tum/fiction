@@ -26,6 +26,7 @@
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/technology.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
@@ -74,7 +75,8 @@ struct defect_influence_params
      */
     model::defect defect{};
     /**
-     * Parameters of the operational check and the simulation.
+     * Operational and simulation parameters. Their timeout bounds the entire defect domain calculation, including
+     * ground-state comparisons. Expiration throws `utils::timeout_error` without returning a partial result.
      */
     logic::is_operational_params operational_params{};
     /**
@@ -163,7 +165,12 @@ class defect_influence_impl
     defect_influence_impl(const layout& lyt, const defect_influence_params& ps, defect_influence_stats& st) :
             layout_to_analyze{lyt},
             base_layout{lyt},
-            params{ps},
+            params{[&ps]
+                   {
+                       auto checked               = ps;
+                       checked.operational_params = logic::detail::checked_parameters(ps.operational_params);
+                       return checked;
+                   }()},
             stats{st}
     {
         if (params.additional_scanning_area.first < 0 || params.additional_scanning_area.second < 0)
@@ -193,8 +200,9 @@ class defect_influence_impl
 
         auto positions = all_positions();
         std::erase_if(positions,
-                      [step_size](const auto& p)
+                      [this, step_size](const auto& p)
                       {
+                          utils::check_deadline(params.operational_params.deadline);
                           return static_cast<std::size_t>(std::abs(int64_t{p.x})) % step_size != 0 ||
                                  static_cast<std::size_t>(std::abs(row_of(p))) % step_size != 0;
                       });
@@ -271,6 +279,7 @@ class defect_influence_impl
 
         for (std::size_t sample = 0; sample < samples; ++sample)
         {
+            utils::check_deadline(params.operational_params.deadline);
             const auto operational_starting_point = find_non_influential_defect_position_at_left_side(spec);
 
             if (!operational_starting_point.has_value())
@@ -352,7 +361,7 @@ class defect_influence_impl
     /**
      * Parameters.
      */
-    const defect_influence_params& params;
+    const defect_influence_params params;
     /**
      * Statistics.
      */
@@ -402,7 +411,10 @@ class defect_influence_impl
      */
     [[nodiscard]] std::vector<lattice_site> all_positions() const
     {
-        return sites_in_area(site_at_row(nw_x, nw_row), site_at_row(se_x, se_row));
+        utils::check_deadline(params.operational_params.deadline);
+        auto positions = sites_in_area(site_at_row(nw_x, nw_row), site_at_row(se_x, se_row));
+        utils::check_deadline(params.operational_params.deadline);
+        return positions;
     }
     /**
      * @brief Runs `fn(i)` for `i` in `[0, n)` on the configured number of threads.
@@ -479,6 +491,7 @@ class defect_influence_impl
     defect_influence_status is_defect_influential(const std::optional<std::vector<kitty::dynamic_truth_table>>& spec,
                                                   const lattice_site& defect_cell)
     {
+        utils::check_deadline(params.operational_params.deadline);
         ++num_evaluated_defect_positions;
 
         if (const auto op_value = influence_domain.contains(defect_cell); op_value.has_value())
@@ -556,6 +569,7 @@ class defect_influence_impl
     [[nodiscard]] defect_influence_status does_defect_influence_groundstate(const layout&       lyt_without_candidate,
                                                                             const lattice_site& defect_pos)
     {
+        utils::check_deadline(params.operational_params.deadline);
         if (layout_to_analyze.is_empty())
         {
             return defect_influence_status::NON_INFLUENTIAL;
@@ -566,9 +580,10 @@ class defect_influence_impl
             return defect_influence_status::NON_INFLUENTIAL;
         }
 
-        const engines::quickexact_params qe_params{
-            .sim_params            = params.operational_params.sim_params,
-            .base_number_detection = engines::quickexact_params::automatic_base_number_detection::OFF};
+        const engines::quickexact_params qe_params{.sim_params = params.operational_params.sim_params,
+                                                   .base_number_detection =
+                                                       engines::quickexact_params::automatic_base_number_detection::OFF,
+                                                   .deadline = params.operational_params.deadline};
 
         const auto ground_states = engines::quickexact(lyt_without_candidate, qe_params).groundstates();
 
@@ -589,6 +604,7 @@ class defect_influence_impl
 
         for (const auto& gs_defect : ground_states_defect)
         {
+            utils::check_deadline(params.operational_params.deadline);
             if (!std::ranges::any_of(ground_states,
                                      [&gs_defect](const auto& gs) { return gs.same_charge_states(gs_defect); }))
             {
@@ -647,12 +663,14 @@ class defect_influence_impl
      */
     void log_stats() const
     {
+        utils::check_deadline(params.operational_params.deadline);
         stats.num_simulator_invocations      = num_simulator_invocations.load();
         stats.num_evaluated_defect_positions = num_evaluated_defect_positions.load();
 
         influence_domain.for_each(
             [this](const auto& defect_pos [[maybe_unused]], const auto& status)
             {
+                utils::check_deadline(params.operational_params.deadline);
                 if (std::get<0>(status) == defect_influence_status::INFLUENTIAL)
                 {
                     ++stats.num_influencing_defect_positions;
@@ -662,6 +680,7 @@ class defect_influence_impl
                     ++stats.num_non_influencing_defect_positions;
                 }
             });
+        utils::check_deadline(params.operational_params.deadline);
     }
     /**
      * The empty positions in the Moore neighborhood of `c` within the scanning area, in clockwise order starting

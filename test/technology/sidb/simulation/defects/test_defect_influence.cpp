@@ -34,16 +34,19 @@
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <array>
 #include <barrier>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <future>
 #include <limits>
 #include <optional>
 #include <stdexcept>
+#include <thread>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -56,6 +59,24 @@ using namespace fiction::sidb::simulation::defects;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
 using namespace fiction::utils::math;
+
+TEST_CASE("Defect domains share a budget for operational and ground-state analysis",
+          "[defect-influence][application-timeout]")
+{
+    const auto              lyt = blueprints::siqad_and_gate();
+    defect_influence_params params{};
+    params.operational_params.timeout = 0;
+    CHECK_THROWS_AS(defect_influence_grid_search(lyt, {create_and_tt()}, params), utils::timeout_error);
+    CHECK_THROWS_AS(defect_influence_random_sampling(lyt, {create_and_tt()}, 0, params), utils::timeout_error);
+    CHECK_THROWS_AS(defect_influence_quicktrace(lyt, {create_and_tt()}, 0, params), utils::timeout_error);
+
+    params.influence_def = defect_influence_params::influence_definition::GROUND_STATE_CHANGE;
+    CHECK_THROWS_AS(defect_influence_grid_search(lyt, params), utils::timeout_error);
+    params.operational_params.timeout  = 1000;
+    params.operational_params.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{20};
+    params.on_progress = [&](auto, auto, auto) { std::this_thread::sleep_until(params.operational_params.deadline); };
+    CHECK_THROWS_AS(defect_influence_grid_search(lyt, params), utils::timeout_error);
+}
 
 TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
 {

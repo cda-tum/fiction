@@ -33,6 +33,7 @@
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -40,6 +41,7 @@
 #include <algorithm>
 #include <array>
 #include <barrier>
+#include <chrono>
 #include <cstddef>
 #include <functional>
 #include <future>
@@ -48,6 +50,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string_view>
+#include <thread>
 #include <tuple>
 #include <unordered_set>
 #include <utility>
@@ -117,6 +120,33 @@ static void check_op_domain_params_and_operational_status(const OpDomain&       
                 }
             }
         });
+}
+
+TEST_CASE("Domain algorithms share one budget across parameter points", "[operational-domain][application-timeout]")
+{
+    const auto                lyt = blueprints::siqad_or_gate();
+    const std::vector<tt>     spec{create_or_tt()};
+    operational_domain_params params{};
+    operational_domain_stats  stats{};
+    stats.num_evaluated_parameter_combinations = 42;
+    params.operational_params.timeout          = 0;
+
+    CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(operational_domain_random_sampling(lyt, spec, 0, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(operational_domain_flood_fill(lyt, spec, 0, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(operational_domain_contour_tracing(lyt, spec, 0, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(critical_temperature_domain_grid_search(lyt, spec, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(critical_temperature_domain_random_sampling(lyt, spec, 0, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(critical_temperature_domain_flood_fill(lyt, spec, 0, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(critical_temperature_domain_contour_tracing(lyt, spec, 0, params, &stats), utils::timeout_error);
+
+    params.operational_params.timeout  = 1000;
+    params.operational_params.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{20};
+    params.number_of_threads           = 2;
+    params.on_worker_progress          = [&](auto, auto, auto, auto, auto, auto)
+    { std::this_thread::sleep_until(params.operational_params.deadline); };
+    CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params, &stats), utils::timeout_error);
+    CHECK(stats.num_evaluated_parameter_combinations == 42);
 }
 
 TEST_CASE("Test parameter point", "[operational-domain]")

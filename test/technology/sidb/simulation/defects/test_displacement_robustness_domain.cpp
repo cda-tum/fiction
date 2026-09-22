@@ -28,6 +28,7 @@
 #include <fiction/technology/sidb/simulation/defects/displacement_robustness_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <algorithm>
@@ -63,6 +64,21 @@ void check_identical_information_of_stats_and_domain(const displacement_robustne
 }
 
 }  // namespace
+
+TEST_CASE("Displacement analysis honors its budget before generating layouts",
+          "[displacement-robustness-domain][application-timeout]")
+{
+    const auto                            lyt = blueprints::siqad_and_gate();
+    displacement_robustness_domain_params params{};
+    params.operational_params.timeout = 0;
+    displacement_robustness_domain_stats stats{};
+    stats.num_operational_sidb_displacements = 42;
+    CHECK_THROWS_AS(determine_displacement_robustness_domain(lyt, {create_and_tt()}, params, &stats),
+                    utils::timeout_error);
+    CHECK_THROWS_AS(determine_probability_of_fabricating_operational_gate(lyt, {create_and_tt()}, params, 0.1),
+                    utils::timeout_error);
+    CHECK(stats.num_operational_sidb_displacements == 42);
+}
 
 TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB AND gate",
           "[displacement-robustness-domain]")

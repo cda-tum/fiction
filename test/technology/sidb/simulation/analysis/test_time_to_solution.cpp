@@ -31,11 +31,14 @@
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/technology/sidb/technology.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
+#include <stdexcept>
+#include <thread>
 #include <vector>
 
 using namespace fiction;
@@ -45,6 +48,43 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::utils::math;
+
+TEST_CASE("Time-to-solution shares a budget for its reference and repetitions",
+          "[time-to-solution][application-timeout]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0, 0});
+    time_to_solution_params params{};
+    time_to_solution_stats  stats{};
+    stats.acc = 42;
+
+    SECTION("Zero budget")
+    {
+        params.timeout = 0;
+        CHECK_THROWS_AS(time_to_solution(lyt, {}, params, &stats), utils::timeout_error);
+    }
+    SECTION("A reference simulation inherits the deadline")
+    {
+        const quicksim_params qs{.deadline = std::chrono::steady_clock::now()};
+        CHECK_THROWS_AS(time_to_solution(lyt, qs, params, &stats), utils::timeout_error);
+    }
+    SECTION("Repetitions do not restart the budget")
+    {
+        params.deadline    = std::chrono::steady_clock::now() + std::chrono::milliseconds{20};
+        params.timeout     = 1000;
+        params.on_progress = [&](auto, auto, auto) { std::this_thread::sleep_until(params.deadline); };
+        CHECK_THROWS_AS(time_to_solution(lyt, {}, params, &stats), utils::timeout_error);
+    }
+#if (FICTION_ALGLIB_ENABLED)
+    SECTION("ClusterComplete rejects finite budgets")
+    {
+        params.engine  = exact_engine::CLUSTERCOMPLETE;
+        params.timeout = 1000;
+        CHECK_THROWS_AS(time_to_solution(lyt, {}, params, &stats), std::invalid_argument);
+    }
+#endif  // FICTION_ALGLIB_ENABLED
+    CHECK(stats.acc == 42);
+}
 
 TEST_CASE("No heuristic results", "[time-to-solution]")
 {

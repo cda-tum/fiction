@@ -16181,7 +16181,9 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilie
 R"doc(This struct stores the parameters required to simulate the band
 bending resilience of an SiDB layout)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilience_params_assess_population_stability_params = R"doc(Parameters for the assessing physical population stability simulation)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilience_params_assess_population_stability_params =
+R"doc(Population stability parameters. Their timeout bounds the entire
+resilience calculation across all input patterns.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilience_params_bdl_iterator_params = R"doc(Parameters for the input BDL iterator.)doc";
 
@@ -16408,8 +16410,10 @@ R"doc(Reports logical worker activity with a fixed worker count for each
 invocation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_operational_params =
-R"doc(The parameters used to determine if a layout is `operational` or `non-
-operational`.)doc";
+R"doc(Operational parameters. Their timeout bounds the entire temperature
+calculation, including every input pattern and temperature step.
+Finite budgets reject ClusterComplete and throw `utils::timeout_error`
+on expiration.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_stats = R"doc(This struct stores the result of the temperature simulation.)doc";
 
@@ -16836,11 +16840,20 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params = R"doc(Parameters of the population stability analysis.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_deadline =
+R"doc(Shared caller deadline. `time_point::max()` leaves the enclosing
+budget unlimited.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_precision_for_distance_corresponding_to_potential =
 R"doc(Number of decimal places of the distance corresponding to a potential
 difference.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_sim_params = R"doc(Physical parameters of the simulation.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_timeout =
+R"doc(Millisecond budget for simulation and population analysis. The maximum
+value means unlimited; zero expires immediately. Expiration throws
+`utils::timeout_error` without returning a partial result.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physically_valid_parameters =
 R"doc(Determines the physical parameters under which a given charge
@@ -16944,6 +16957,10 @@ example, a 99.7 % (0.997) confidence level means that if the
 simulation were repeated many times, approximately 997 out of 1000 of
 the calculated confidence intervals would contain the true value.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_deadline =
+R"doc(Shared caller deadline. `time_point::max()` leaves the enclosing
+budget unlimited.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_engine =
 R"doc(Exhaustive simulation algorithm used to simulate the ground state as
 reference.)doc";
@@ -16954,6 +16971,13 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_par
 R"doc(Number of iterations of the heuristic algorithm used to determine the
 simulation accuracy (`repetitions = 100` means that accuracy is
 precise to 1 %).)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_timeout =
+R"doc(Millisecond budget for the reference simulation and all heuristic
+repetitions together. The maximum value means unlimited; zero expires
+immediately. Expiration throws `utils::timeout_error` without
+publishing statistics. Finite budgets reject ClusterComplete;
+QuickSim's separate timeout still applies to each heuristic attempt.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats =
 R"doc(This struct stores the time-to-solution, the simulation accuracy and
@@ -17134,7 +17158,11 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_para
 R"doc(Callback that receives the number of evaluated defect positions or,
 for *QuickTrace*, contour points.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_operational_params = R"doc(Parameters of the operational check and the simulation.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_operational_params =
+R"doc(Operational and simulation parameters. Their timeout bounds the entire
+defect domain calculation, including ground-state comparisons.
+Expiration throws `utils::timeout_error` without returning a partial
+result.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_quicktrace =
 R"doc(The *QuickTrace* algorithm which was proposed in \"QuickTrace: An
@@ -17663,7 +17691,10 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustne
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_on_progress = R"doc(Callback that receives the number of analyzed displaced layouts.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_operational_params = R"doc(Parameters of the operational check.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_operational_params =
+R"doc(Operational parameters. Their timeout bounds the entire displacement
+analysis across all layouts and workers. Finite budgets reject
+ClusterComplete and throw `utils::timeout_error` on expiration.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_percentage_of_analyzed_displaced_layouts = R"doc(Share of the displaced layouts to analyze in `RANDOM` mode.)doc";
 
@@ -21999,7 +22030,8 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_checked_parameters =
-R"doc(Validates the shared deadline before setting up an operational check.
+R"doc(Starts the time budget without extending an enclosing deadline and
+validates the simulation engine.
 
 Args:
     params: Operational parameters.
@@ -23299,6 +23331,13 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_s
 R"doc(Strategy to determine whether a layout is operational or non-
 operational.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_timeout =
+R"doc(Millisecond budget for the complete operational check. Domain and
+critical-temperature calculations share this budget across their
+entire calculation. The maximum value means unlimited; zero expires
+immediately. Expiration throws `utils::timeout_error` without
+returning a partial result.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns =
 R"doc(Determines the input patterns for which kinks render the layout non-
 operational.
@@ -23564,8 +23603,9 @@ R"doc(Reports logical worker activity with a fixed worker count for each
 invocation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_operational_params =
-R"doc(The parameters used to determine if a layout is operational or non-
-operational.)doc";
+R"doc(Operational parameters. Their timeout bounds the entire domain
+calculation across all parameter points and workers. Finite budgets
+reject ClusterComplete and throw `utils::timeout_error` on expiration.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_sweep_dimensions =
 R"doc(Dimensions to sweep over together with their value ranges, ordered by

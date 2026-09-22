@@ -70,6 +70,15 @@ TEST_CASE("Operational checks honor a shared caller deadline", "[is-operational]
 #endif  // FICTION_ALGLIB_ENABLED
 }
 
+TEST_CASE("Operational checks accept millisecond budgets", "[is-operational][application-timeout]")
+{
+    const auto                  lyt = blueprints::siqad_or_gate();
+    const is_operational_params params{.timeout = 0};
+    CHECK_THROWS_AS(is_operational(lyt, {create_or_tt()}, params), utils::timeout_error);
+    CHECK_THROWS_AS(operational_input_patterns(lyt, {create_or_tt()}, params), utils::timeout_error);
+    CHECK(params.deadline == std::chrono::steady_clock::time_point::max());
+}
+
 TEST_CASE("Operational checks retain their validated parameters", "[is-operational]")
 {
     const auto                                           lyt = blueprints::siqad_or_gate();

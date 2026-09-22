@@ -28,6 +28,7 @@
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/technology.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <cmath>
@@ -39,6 +40,15 @@ using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::synthesis;
 using namespace fiction::utils::math;
+
+TEST_CASE("Band bending resilience shares its population analysis budget",
+          "[band-bending-resilience][application-timeout]")
+{
+    band_bending_resilience_params params{};
+    params.assess_population_stability_params.timeout = 0;
+    CHECK_THROWS_AS(band_bending_resilience(blueprints::bestagon_and_gate(), {create_and_tt()}, params),
+                    utils::timeout_error);
+}
 
 TEST_CASE("Band bending resilience rejects unusable input wires", "[band-bending-resilience]")
 {

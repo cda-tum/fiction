@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
   - SiDB gate and circuit design accept cooperative millisecond timeouts; circuit budgets
     cover all gates and expired searches throw `utils::timeout_error`.
+  - SiDB simulation applications accept shared millisecond budgets across parameter sweeps,
+    input patterns, and repetitions. Expiration throws `utils::timeout_error` without returning partial results.
   - `utils::progress_callback` and `utils::progress_reporter` let long-running algorithms report
     progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
   - Parallel algorithms accept `on_worker_progress` for stable worker activity and completed counts.
@@ -66,6 +68,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - SiDB gate and circuit timeouts raise Python's `TimeoutError`; gate design releases the GIL
     after copying its inputs.
+  - Operational checks, domain and temperature calculations, population stability, and
+    time-to-solution expose millisecond budgets and raise `TimeoutError` on expiration.
   - Added directory-based test markers, including `pytest -m simulation`.
   - Marked the SiDB circuit-design integration test as `slow`; `pytest -m 'not slow'` skips it.
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered

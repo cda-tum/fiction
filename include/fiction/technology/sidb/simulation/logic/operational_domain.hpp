@@ -34,6 +34,7 @@
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 #include "fiction/utils/progress.hpp"
 #include "fiction/utils/stl/hash.hpp"
@@ -387,7 +388,8 @@ struct operational_domain_value_range
 struct operational_domain_params
 {
     /**
-     * The parameters used to determine if a layout is operational or non-operational.
+     * Operational parameters. Their timeout bounds the entire domain calculation across all parameter points and
+     * workers. Finite budgets reject ClusterComplete and throw `utils::timeout_error` on expiration.
      */
     is_operational_params operational_params{};
     /**
@@ -552,7 +554,12 @@ class operational_domain_impl
                             const operational_domain_params& ps, operational_domain_stats& st) :
             sidb_layout{source_layout},
             truth_table{tt},
-            params{ps},
+            params{[&ps]
+                   {
+                       auto checked               = ps;
+                       checked.operational_params = checked_parameters(ps.operational_params);
+                       return checked;
+                   }()},
             stats{st},
             output_bdl_pairs{
                 detect_bdl_pairs(source_layout, sidb::dot_tag::OUTPUT,
@@ -593,7 +600,12 @@ class operational_domain_impl
                             operational_domain_stats& st) :
             sidb_layout{source_layout},
             truth_table{std::vector<kitty::dynamic_truth_table>{}},
-            params{ps},
+            params{[&ps]
+                   {
+                       auto checked               = ps;
+                       checked.operational_params = checked_parameters(ps.operational_params);
+                       return checked;
+                   }()},
             stats{st},
             num_dimensions{params.sweep_dimensions.size()}
     {
@@ -609,6 +621,7 @@ class operational_domain_impl
      */
     [[nodiscard]] OpDomain grid_search()
     {
+        utils::check_deadline(params.operational_params.deadline);
         const mockturtle::stopwatch stop{stats.time_total};
 
         const auto all_index_combinations = fiction::utils::math::cartesian_combinations(indices);
@@ -617,7 +630,11 @@ class operational_domain_impl
         all_step_points.reserve(all_index_combinations.size());
 
         std::ranges::transform(all_index_combinations, std::back_inserter(all_step_points),
-                               [](const auto& comb) { return step_point{comb}; });
+                               [this](const auto& comb)
+                               {
+                                   utils::check_deadline(params.operational_params.deadline);
+                                   return step_point{comb};
+                               });
 
         // shuffle the step points to simulate in random order. This helps with load-balancing since
         // operational/non-operational points are usually clustered. However, non-operational points can be simulated
@@ -908,6 +925,7 @@ class operational_domain_impl
         // for each sampled point
         for (const auto& starting_point : step_point_samples)
         {
+            utils::check_deadline(params.operational_params.deadline);
             // if the current starting point is non-operational, skip to the next one
             const auto domain_value = op_domain.contains(to_parameter_point(starting_point));
             if (domain_value.has_value())
@@ -1018,6 +1036,7 @@ class operational_domain_impl
         std::array<std::mutex, 256> simulation_mutexes{};
         const auto                  classify = [this, &simulation_mutexes](const step_point& sp)
         {
+            utils::check_deadline(params.operational_params.deadline);
             const auto pp = to_parameter_point(sp);
             if (const auto cached = op_domain.contains(pp); cached.has_value())
             {
@@ -1054,6 +1073,7 @@ class operational_domain_impl
         std::vector<phmap::btree_set<step_point>> completed_contours{};
         for (const auto& starting_point : step_point_samples)
         {
+            utils::check_deadline(params.operational_params.deadline);
             // if the current starting point is non-operational, skip to the next one
             const auto domain_value = op_domain.contains(to_parameter_point(starting_point));
             if (domain_value.has_value())
@@ -1211,6 +1231,7 @@ class operational_domain_impl
     [[nodiscard]] sidb::simulation::domain<parameter_point, uint64_t>
     grid_search_for_physically_valid_parameters(const charge_distribution& cd)
     {
+        utils::check_deadline(params.operational_params.deadline);
         sidb::simulation::domain<parameter_point, uint64_t> suitable_params_domain{};
 
         const mockturtle::stopwatch stop{stats.time_total};
@@ -1270,6 +1291,7 @@ class operational_domain_impl
         op_domain.for_each(
             [&sim_params, &cd, this, &suitable_params_domain](const auto& param_point, const auto& status)
             {
+                utils::check_deadline(params.operational_params.deadline);
                 if constexpr (std::is_same_v<OpDomain, operational_domain>)
                 {
                     if (std::get<0>(status) == operational_status::NON_OPERATIONAL)
@@ -1288,23 +1310,27 @@ class operational_domain_impl
                     {
                         // perform an exact ground state simulation
                         sim_results = sidb::simulation::engines::quickexact(
-                            sidb_layout, sidb::simulation::engines::quickexact_params{
-                                             .sim_params            = sim_params,
-                                             .base_number_detection = sidb::simulation::engines::quickexact_params::
-                                                 automatic_base_number_detection::OFF});
+                            sidb_layout,
+                            sidb::simulation::engines::quickexact_params{
+                                .sim_params = sim_params,
+                                .base_number_detection =
+                                    sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF,
+                                .deadline = params.operational_params.deadline});
                     }
                     else if (params.operational_params.sim_engine == engine::EXGS)
                     {
                         // perform an exhaustive ground state simulation
-                        sim_results =
-                            sidb::simulation::engines::exhaustive_ground_state_simulation(sidb_layout, sim_params);
+                        sim_results = sidb::simulation::engines::exhaustive_ground_state_simulation(
+                            sidb_layout, sim_params, {}, params.operational_params.deadline);
                     }
                     else if (params.operational_params.sim_engine == engine::QUICKSIM)
                     {
                         // perform a heuristic simulation
-                        const sidb::simulation::engines::quicksim_params qs_params{.sim_params      = sim_params,
-                                                                                   .iteration_steps = 500,
-                                                                                   .alpha           = 0.6};
+                        const sidb::simulation::engines::quicksim_params qs_params{
+                            .sim_params      = sim_params,
+                            .iteration_steps = 500,
+                            .alpha           = 0.6,
+                            .deadline        = params.operational_params.deadline};
 
                         if (const auto qs_result = sidb::simulation::engines::quicksim(sidb_layout, qs_params);
                             qs_result.has_value())
@@ -1337,6 +1363,7 @@ class operational_domain_impl
                 }
             });
 
+        utils::check_deadline(params.operational_params.deadline);
         return suitable_params_domain;
     }
     /**
@@ -1365,6 +1392,7 @@ class operational_domain_impl
      */
     void initialize_sweep()
     {
+        utils::check_deadline(params.operational_params.deadline);
         indices.reserve(num_dimensions);
         values.reserve(num_dimensions);
 
@@ -1391,6 +1419,7 @@ class operational_domain_impl
             // generate the values for the dimension
             for (const auto i : indices.at(d))
             {
+                utils::check_deadline(params.operational_params.deadline);
                 values.at(d).push_back(params.sweep_dimensions.at(d).min +
                                        (static_cast<double>(i) * params.sweep_dimensions.at(d).step));
             }
@@ -1619,6 +1648,7 @@ class operational_domain_impl
      */
     operational_status is_step_point_operational(const step_point& sp)
     {
+        utils::check_deadline(params.operational_params.deadline);
         if (const auto op_value = op_domain.contains(to_parameter_point(sp)); op_value.has_value())
         {
             return std::get<0>(*op_value);
@@ -1708,6 +1738,7 @@ class operational_domain_impl
      */
     operational_status is_step_point_suitable(const charge_distribution& cd, const step_point& sp)
     {
+        utils::check_deadline(params.operational_params.deadline);
         // if the point has already been sampled, return the stored operational status
         if (const auto op_value = op_domain.contains(to_parameter_point(sp)); op_value.has_value())
         {
@@ -1774,6 +1805,7 @@ class operational_domain_impl
      */
     [[nodiscard]] std::vector<step_point> generate_random_step_points(const std::size_t samples) const
     {
+        utils::check_deadline(params.operational_params.deadline);
         std::mt19937_64 generator{std::random_device{}()};
 
         // instantiate distributions
@@ -1790,6 +1822,7 @@ class operational_domain_impl
 
         for (std::size_t i = 0; i < samples; ++i)
         {
+            utils::check_deadline(params.operational_params.deadline);
             std::vector<std::size_t> dimension_samples{};
             dimension_samples.reserve(num_dimensions);
 
@@ -1817,6 +1850,7 @@ class operational_domain_impl
      */
     void simulate_operational_status_in_parallel(const std::vector<step_point>& step_points)
     {
+        utils::check_deadline(params.operational_params.deadline);
         // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
         // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
         const std::size_t num_threads = std::max(std::min(number_of_threads, step_points.size()), std::size_t{1});
@@ -2078,6 +2112,7 @@ class operational_domain_impl
         // enumerate the offset vectors in {-1, 0, 1}^n as a mixed-radix counter over base 3
         for (std::size_t offset_index = 0; offset_index < num_offsets; ++offset_index)
         {
+            utils::check_deadline(params.operational_params.deadline);
             auto neighbor    = sp.step_values;
             auto remainder   = offset_index;
             bool is_center   = true;
@@ -2150,6 +2185,7 @@ class operational_domain_impl
         std::deque<step_point> queue{starting_point};
         const auto             expand = [this, &contour](const step_point& sp, std::vector<step_point>& discovered)
         {
+            utils::check_deadline(params.operational_params.deadline);
             if (contour.contains(sp))
             {
                 return;
@@ -2282,12 +2318,14 @@ class operational_domain_impl
      */
     void log_stats() const
     {
+        utils::check_deadline(params.operational_params.deadline);
         stats.num_simulator_invocations            = num_simulator_invocations.load();
         stats.num_evaluated_parameter_combinations = num_evaluated_parameter_combinations.load();
 
         op_domain.for_each(
             [this](const auto& param_point [[maybe_unused]], const auto& status)
             {
+                utils::check_deadline(params.operational_params.deadline);
                 if (std::get<0>(status) == operational_status::OPERATIONAL)
                 {
                     ++stats.num_operational_parameter_combinations;
@@ -2301,6 +2339,7 @@ class operational_domain_impl
         stats.num_total_parameter_points =
             std::accumulate(values.cbegin(), values.cend(), static_cast<std::size_t>(1),
                             [](std::size_t product, const auto& val) { return product * val.size(); });
+        utils::check_deadline(params.operational_params.deadline);
     }
 };
 

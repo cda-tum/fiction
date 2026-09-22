@@ -162,21 +162,28 @@ struct is_operational_params
      * Finite deadlines support QuickExact, ExGS, and QuickSim; ClusterComplete is unsupported.
      */
     std::chrono::steady_clock::time_point deadline{std::chrono::steady_clock::time_point::max()};
+    /**
+     * Millisecond budget for the complete operational check. Domain and critical-temperature calculations share this
+     * budget across their entire calculation. The maximum value means unlimited; zero expires immediately.
+     * Expiration throws `utils::timeout_error` without returning a partial result.
+     */
+    uint64_t timeout{std::numeric_limits<uint64_t>::max()};
 };
 
 namespace detail
 {
 
 /**
- * Validates the shared deadline before setting up an operational check.
+ * Starts the time budget without extending an enclosing deadline and validates the simulation engine.
  *
  * @param params Operational parameters.
  * @return The validated parameters.
  * @throws utils::timeout_error if the deadline expires.
  * @throws std::invalid_argument if ClusterComplete is selected with a finite deadline.
  */
-[[nodiscard]] inline is_operational_params checked_parameters(const is_operational_params& params)
+[[nodiscard]] inline is_operational_params checked_parameters(is_operational_params params)
 {
+    params.deadline = utils::make_deadline(params.timeout, params.deadline);
     utils::check_deadline(params.deadline);
 #if (FICTION_ALGLIB_ENABLED)
     if (params.deadline != std::chrono::steady_clock::time_point::max() && params.sim_engine == engine::CLUSTERCOMPLETE)
