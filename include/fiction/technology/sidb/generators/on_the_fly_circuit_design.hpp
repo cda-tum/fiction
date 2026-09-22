@@ -165,6 +165,8 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * `on_the_fly_circuit_design_params` object.
  * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
  * @return Layout representing the designed circuit on the defective surface.
+ * @throws utils::timeout_error If a gate-design timeout expires.
+ * @throws std::invalid_argument If the simulation engine does not support the requested gate-design timeout.
  */
 template <typename Ntk, typename GateLyt>
 [[nodiscard]] layout on_the_fly_circuit_design_on_defective_surface(
@@ -223,17 +225,6 @@ template <typename Ntk, typename GateLyt>
                 {
                     fmt::print(stderr, "[e] Unsupported gate orientation encountered at tile: {} and ports: {}\n",
                                e.where(), e.which_ports());
-                    break;
-                }
-
-                catch (const utils::timeout_error&)
-                {
-                    throw;
-                }
-
-                catch (...)
-                {
-                    fmt::print(stderr, "[e] An unexpected error occurred during gate design.\n");
                     break;
                 }
             }

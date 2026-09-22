@@ -14357,6 +14357,11 @@ Template Args:
 Returns:
     Layout representing the designed circuit on the defective surface.
 
+Raises:
+    utils::timeout_error: If a gate-design timeout expires.
+    std::invalid_argument: If the simulation engine does not support
+                           the requested gate-design timeout.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params =

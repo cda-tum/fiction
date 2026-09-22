@@ -22,6 +22,7 @@
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 
@@ -29,6 +30,7 @@
 #include <chrono>
 #include <cstdint>
 #include <limits>
+#include <stdexcept>
 #include <string_view>
 
 #if (FICTION_Z3_SOLVER)
@@ -89,7 +91,7 @@ TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-c
 }
 
 #if (FICTION_Z3_SOLVER)
-TEST_CASE("Defect-aware circuit design propagates gate timeouts", "[on-the-fly-circuit-design]")
+TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-circuit-design]")
 {
     mockturtle::aig_network network{};
     const auto              first  = network.create_pi();
@@ -100,15 +102,28 @@ TEST_CASE("Defect-aware circuit design propagates gate timeouts", "[on-the-fly-c
     const sidb::layout              surface{};
 
     on_the_fly_circuit_design_on_defective_surface_params params{};
-    params.exact_design_parameters.scheme                                     = "Row";
-    params.exact_design_parameters.upper_bound_x                              = 3;
-    params.exact_design_parameters.upper_bound_y                              = 3;
-    params.exact_design_parameters.fixed_size                                 = true;
-    params.exact_design_parameters.timeout                                    = 10'000;
-    params.sidb_on_the_fly_gate_library_parameters.design_gate_params.timeout = 0;
+    params.exact_design_parameters.scheme        = "Row";
+    params.exact_design_parameters.upper_bound_x = 3;
+    params.exact_design_parameters.upper_bound_y = 3;
+    params.exact_design_parameters.fixed_size    = true;
+    params.exact_design_parameters.timeout       = 10'000;
+    auto& gates                                  = params.sidb_on_the_fly_gate_library_parameters.design_gate_params;
 
-    CHECK_THROWS_AS(on_the_fly_circuit_design_on_defective_surface(network, tiling, surface, params),
-                    utils::timeout_error);
+    SECTION("Expired gate budget")
+    {
+        gates.timeout = 0;
+        CHECK_THROWS_AS(on_the_fly_circuit_design_on_defective_surface(network, tiling, surface, params),
+                        utils::timeout_error);
+    }
+#if (FICTION_ALGLIB_ENABLED)
+    SECTION("Simulator does not support a finite gate budget")
+    {
+        gates.timeout                       = 60'000;
+        gates.operational_params.sim_engine = simulation::engine::CLUSTERCOMPLETE;
+        CHECK_THROWS_AS(on_the_fly_circuit_design_on_defective_surface(network, tiling, surface, params),
+                        std::invalid_argument);
+    }
+#endif
 }
 #endif
 
