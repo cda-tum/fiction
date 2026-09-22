@@ -13,8 +13,10 @@
  * @brief Tests for `fiction/technology/sidb/on_the_fly_gate_library.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -25,11 +27,13 @@
 #include <fiction/technology/sidb/on_the_fly_gate_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 
 #include <array>
+#include <chrono>
 #include <optional>
 
 using namespace fiction;
@@ -44,6 +48,36 @@ TEST_CASE("Parameterized gate library traits", "[parameterized-gate-library]")
     CHECK(!has_post_layout_optimization_v<on_the_fly_gate_library, inml_cell_clk_lyt>);
     CHECK(!has_post_layout_optimization_v<on_the_fly_gate_library, sidb_cell_clk_lyt>);
     CHECK(!has_post_layout_optimization_v<on_the_fly_gate_library, cart_gate_clk_lyt>);
+}
+
+TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeout", "[parameterized-gate-library]")
+{
+    for (const bool crossing : std::array{false, true})
+    {
+        CAPTURE(crossing);
+        hex_even_row_gate_clk_lyt gate_layout{{2, 2, 1}, clocking::row<hex_even_row_gate_clk_lyt>()};
+        const auto                input1 = gate_layout.create_pi("input1", {0, 0});
+        const auto                input2 = gate_layout.create_pi("input2", {1, 0});
+        const auto                wire1  = gate_layout.create_buf(input1, {1, 1, 0});
+        const auto                wire2  = gate_layout.create_buf(input2, {1, 1, 1});
+        gate_layout.create_po(wire1, "output1", {crossing ? 1u : 0u, 2, 0});
+        gate_layout.create_po(wire2, "output2", {crossing ? 0u : 1u, 2, 0});
+
+        sidb::layout surface{};
+        surface.assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
+
+        on_the_fly_gate_library_params params{};
+        params.design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
+        params.design_gate_params.timeout                       = 0;
+        const auto enclosing_deadline = std::chrono::steady_clock::now() + std::chrono::seconds{2};
+        params.design_gate_params.operational_params.deadline = enclosing_deadline;
+
+        CHECK_THROWS_AS(on_the_fly_gate_library::set_up_gate(gate_layout, {1, 1, 0}, params, surface),
+                        utils::timeout_error);
+        // The zero gate budget must expire, not the enclosing deadline used to bound a regression.
+        CHECK(std::chrono::steady_clock::now() < enclosing_deadline);
+        CHECK(params.design_gate_params.operational_params.deadline == enclosing_deadline);
+    }
 }
 
 TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports", "[parameterized-gate-library]")

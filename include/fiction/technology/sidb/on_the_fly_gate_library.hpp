@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -177,21 +178,25 @@ class on_the_fly_gate_library
      * @tparam Params Type of the parameter used for the gate library.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
-     * @param params Parameters for SiDB gate design.
+     * @param parameters Parameters for SiDB gate design. Each gate shares one budget across predefined-gate
+     * validation and any subsequent search, capped by the enclosing deadline.
      * @param defect_surface Optional atomic defect surface in case atomic defects are present.
      * @return Bestagon gate representation of `t` including mirroring.
      * @throws gate_design_exception if no gate can be designed.
      * @throws fcn::unsupported_gate_orientation_exception if the gate orientation is unsupported.
      * @throws fcn::unsupported_gate_type_exception if the gate type is unsupported.
-     * @throws utils::timeout_error if the shared circuit-design deadline is reached.
+     * @throws utils::timeout_error if the per-gate or enclosing deadline is reached.
      */
     template <typename GateLyt, typename Params>
-    static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const Params& params,
+    static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const Params& parameters,
                             const std::optional<layout>& defect_surface = std::nullopt)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
 
-        utils::check_deadline(params.design_gate_params.operational_params.deadline);
+        auto  params   = parameters;
+        auto& deadline = params.design_gate_params.operational_params.deadline;
+        deadline       = utils::make_deadline(params.design_gate_params.timeout, deadline);
+        utils::check_deadline(deadline);
 
         const auto n = lyt.get_node(t);
         const auto f = lyt.node_function(n);
