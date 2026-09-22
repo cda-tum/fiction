@@ -503,11 +503,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     kink-rejection policy and reported temperatures.
   - The library walkthrough writes QCA layouts only in QCADesigner and SVG formats.
 
-- Gate libraries:
-
-  - SiDB per-gate timeouts now cover predefined crossing and double-wire validation on defective surfaces
-    and any subsequent gate search under one shared deadline.
-
 - I/O:
 
   - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.

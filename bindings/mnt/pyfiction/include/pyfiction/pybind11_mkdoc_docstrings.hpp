@@ -16018,7 +16018,9 @@ tile. In case there is no possible SiDB design, the function throws
 Args:
     lyt: Layout that hosts tile `t`.
     t: Tile to be realized as a Bestagon gate.
-    params: Parameters for SiDB gate design.
+    parameters: Parameters for SiDB gate design. Each gate shares one
+                budget across predefined-gate validation and any
+                subsequent search, capped by the enclosing deadline.
     defect_surface: Optional atomic defect surface in case atomic
                     defects are present.
 
@@ -16036,7 +16038,7 @@ Raises:
                                                  unsupported.
     fcn::unsupported_gate_type_exception: if the gate type is
                                           unsupported.
-    utils::timeout_error: if the shared circuit-design deadline is
+    utils::timeout_error: if the per-gate or enclosing deadline is
                           reached.
 
 )doc";
