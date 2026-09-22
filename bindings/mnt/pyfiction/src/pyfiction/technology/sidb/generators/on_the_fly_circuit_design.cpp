@@ -83,16 +83,16 @@ void on_the_fly_circuit_design(nanobind::module_& m)
 
     m.def(
         "on_the_fly_sidb_circuit_design",
-        [](const py_hexagonal_gate_layout& layout, const circuit_params& params)
+        // NOLINTNEXTLINE(performance-unnecessary-value-param): Own parameters while Python can mutate the original.
+        [](const py_hexagonal_gate_layout& layout, const circuit_params params)
         {
             // Snapshot both inputs before releasing the GIL so Python edits cannot race the design.
-            const auto                   snapshot        = layout.clone();
-            const auto                   params_snapshot = params;
+            const auto                   snapshot = layout.clone();
             const py::gil_scoped_release release{};
 
             try
             {
-                return fiction::sidb::generators::on_the_fly_circuit_design(snapshot, params_snapshot);
+                return fiction::sidb::generators::on_the_fly_circuit_design(snapshot, params);
             }
             catch (const fiction::fcn::unsupported_gate_type_exception<py_offset_coordinate>& error)
             {
