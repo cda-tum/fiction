@@ -418,22 +418,11 @@ class critical_temperature_impl
                          (first_excited_state_energy - ground_state_energy) * 1000);
         }
 
-        std::vector<double> temp_values{};  // unit: K
-
-        // Calculate the number of iterations as an integer
         const auto num_iterations = static_cast<uint64_t>(std::round(params.max_temperature * 100));
-        // Reserve space for the vector
-        temp_values.reserve(num_iterations);
-        for (uint64_t i = 1; i <= num_iterations; i++)
+        for (uint64_t i = 1; i <= num_iterations; ++i)
         {
             utils::check_deadline(params.operational_params.deadline);
-            temp_values.emplace_back(static_cast<double>(i) / 100.0);
-        }
-
-        // This function determines the critical temperature for a given confidence level.
-        for (const auto& temp : temp_values)
-        {
-            utils::check_deadline(params.operational_params.deadline);
+            const auto temp = static_cast<double>(i) / 100.0;
             // If the occupation probability of excited states exceeds the given threshold.
             if (occupation_probability_non_gate_based(distribution, temp) > (1 - params.confidence_level) &&
                 (temp < critical_temperature))
@@ -508,19 +497,11 @@ class critical_temperature_impl
      */
     void determine_critical_temperature(const energy_and_state_type& energy_state_type)
     {
-        // Vector with temperature values from 0.01 to max_temperature * 100 K in 0.01 K steps is generated.
-        std::vector<double> temp_values{};
-        temp_values.reserve(static_cast<uint64_t>(params.max_temperature * 100));
-
-        for (uint64_t i = 1; i <= static_cast<uint64_t>(params.max_temperature * 100); i++)
+        const auto num_iterations = static_cast<uint64_t>(params.max_temperature * 100);
+        for (uint64_t i = 1; i <= num_iterations; ++i)
         {
             utils::check_deadline(params.operational_params.deadline);
-            temp_values.emplace_back(static_cast<double>(i) / 100.0);
-        }
-        // This function determines the Critical Temperature for a given confidence level.
-        for (const auto& temp : temp_values)
-        {
-            utils::check_deadline(params.operational_params.deadline);
+            const auto temp = static_cast<double>(i) / 100.0;
             // If the occupation probability of erroneous states exceeds the given threshold...
             if (occupation_probability_gate_based(energy_state_type, temp) > (1 - params.confidence_level) &&
                 (temp < critical_temperature))

@@ -73,6 +73,14 @@ TEST_CASE("Critical temperature shares one budget across simulation and analysis
         { std::this_thread::sleep_until(params.operational_params.deadline); };
         CHECK_THROWS_AS(critical_temperature_non_gate_based(lyt, params, &stats), utils::timeout_error);
     }
+    SECTION("A large temperature sweep needs no upfront temperature allocation")
+    {
+        layout single_dot{};
+        single_dot.assign_sidb({0, 0, 0});
+        params.max_temperature            = 1e12;
+        params.operational_params.timeout = 100;
+        CHECK_THROWS_AS(critical_temperature_non_gate_based(single_dot, params, &stats), utils::timeout_error);
+    }
 #if (FICTION_ALGLIB_ENABLED)
     SECTION("ClusterComplete rejects finite budgets")
     {
