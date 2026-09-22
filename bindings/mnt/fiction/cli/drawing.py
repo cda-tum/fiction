@@ -166,9 +166,7 @@ def viewer_command(path: Path, program: str | None) -> list[str]:
         if any("{}" in word for word in words):
             return [word.replace("{}", str(path)) for word in words]
         return [*words, str(path)]
-    if sys.platform == "darwin":
-        return ["open", str(path)]
-    return ["xdg-open", str(path)]
+    return ["open" if sys.platform == "darwin" else "xdg-open", str(path)]
 
 
 def open_viewer(path: Path, program: str | None = None) -> None:
