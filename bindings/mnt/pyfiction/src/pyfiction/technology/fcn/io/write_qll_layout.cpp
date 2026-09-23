@@ -16,9 +16,11 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/fcn/io/write_qll_layout.hpp>
+#include <fiction/technology/inml/layout.hpp>
+#include <fiction/technology/mol_qca/layout.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/utils/progress.hpp>
 
 #include <string_view>
@@ -57,9 +59,9 @@ void write_qll_layout(nanobind::module_& m)
 
 void write_qll_layout(nanobind::module_& m)
 {
-    detail::write_qll_layout<py_qca_layout>(m);
-    detail::write_qll_layout<py_inml_layout>(m);
-    detail::write_qll_layout<py_mol_qca_layout>(m);
+    detail::write_qll_layout<fiction::qca::layout>(m);
+    detail::write_qll_layout<fiction::inml::layout>(m);
+    detail::write_qll_layout<fiction::mol_qca::layout>(m);
 }
 
 }  // namespace pyfiction

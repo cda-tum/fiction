@@ -15,9 +15,9 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/qca/io/write_qca_layout_svg.hpp>
+#include <fiction/technology/qca/layout.hpp>
 
 #include <string_view>
 
@@ -43,28 +43,13 @@ void write_qca_layout_svg_impl(nanobind::module_& m)
 
     // QCA plot
     // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_qca_layout_svg_pointer)(const py_qca_layout&, const std::string_view&,
+    void (*const write_qca_layout_svg_pointer)(const fiction::qca::layout&, const std::string_view&,
                                                const fiction::qca::io::write_qca_layout_svg_params&) =
-        &fiction::qca::io::write_qca_layout_svg<py_qca_layout>;
+        &fiction::qca::io::write_qca_layout_svg;
 
     m.def("write_qca_layout_svg", write_qca_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
           py::arg("params") = fiction::qca::io::write_qca_layout_svg_params{}, DOC(fiction_qca_io_write_qca_layout_svg),
           py::call_guard<py::gil_scoped_release>());
-}
-
-void write_mol_qca_layout_svg_impl(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    // MolQCA plot
-    // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_mol_qca_layout_svg_pointer)(const py_mol_qca_layout&, const std::string_view&,
-                                                   const fiction::qca::io::write_qca_layout_svg_params&) =
-        &fiction::qca::io::write_mol_qca_layout_svg<py_mol_qca_layout>;
-
-    m.def("write_mol_qca_layout_svg", write_mol_qca_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
-          py::arg("params") = fiction::qca::io::write_qca_layout_svg_params{},
-          DOC(fiction_qca_io_write_mol_qca_layout_svg), py::call_guard<py::gil_scoped_release>());
 }
 
 }  // namespace detail
@@ -82,7 +67,6 @@ void write_qca_layout_svg(nanobind::module_& m)
                 DOC(fiction_qca_io_write_qca_layout_svg_params_simple));
 
     detail::write_qca_layout_svg_impl(m);
-    detail::write_mol_qca_layout_svg_impl(m);
 }
 
 }  // namespace pyfiction

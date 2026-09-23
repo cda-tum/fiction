@@ -15,9 +15,9 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
+#include <fiction/technology/qca/layout.hpp>
 
 #include <string_view>
 
@@ -46,9 +46,9 @@ void write_qca_layout(nanobind::module_& m)
         ;
 
     // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_qca_layout_function_pointer)(const py_qca_layout&, const std::string_view&,
+    void (*const write_qca_layout_function_pointer)(const fiction::qca::layout&, const std::string_view&,
                                                     fiction::qca::io::write_qca_layout_params) =
-        &fiction::qca::io::write_qca_layout<py_qca_layout>;
+        &fiction::qca::io::write_qca_layout;
 
     m.def("write_qca_layout", write_qca_layout_function_pointer, py::arg("layout"), py::arg("filename"),
           py::arg("params") = fiction::qca::io::write_qca_layout_params{}, DOC(fiction_qca_io_write_qca_layout),

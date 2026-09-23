@@ -26,6 +26,9 @@ namespace pyfiction
 {
 
 void register_layouts(nanobind::module_& m);
+void register_qca(nanobind::module_& m);
+void register_mol_qca(nanobind::module_& m);
+void register_inml(nanobind::module_& m);
 void register_networks(nanobind::module_& m);
 void register_sidb_model(nanobind::module_& m);
 void register_sidb_simulation(nanobind::module_& m);
@@ -34,6 +37,7 @@ void register_layouts_io(nanobind::module_& m);
 void register_networks_io(nanobind::module_& m);
 void register_fcn_io(nanobind::module_& m);
 void register_qca_io(nanobind::module_& m);
+void register_mol_qca_io(nanobind::module_& m);
 void register_inml_io(nanobind::module_& m);
 void register_sidb_io(nanobind::module_& m);
 void register_sidb_simulation_io(nanobind::module_& m);
@@ -60,6 +64,9 @@ NB_MODULE(pyfiction, m)
     // signature or a default argument. Synthesis registers truth tables before the SiDB types
     // and algorithms that use them.
     pyfiction::register_layouts(m);
+    pyfiction::register_qca(m);
+    pyfiction::register_mol_qca(m);
+    pyfiction::register_inml(m);
     pyfiction::register_networks(m);
     pyfiction::register_synthesis(m);
     pyfiction::register_sidb_model(m);
@@ -70,6 +77,7 @@ NB_MODULE(pyfiction, m)
     pyfiction::register_networks_io(m);
     pyfiction::register_fcn_io(m);
     pyfiction::register_qca_io(m);
+    pyfiction::register_mol_qca_io(m);
     pyfiction::register_inml_io(m);
     pyfiction::register_sidb_io(m);
     pyfiction::register_sidb_simulation_io(m);

@@ -22,11 +22,9 @@
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
+#include <fiction/technology/mol_qca/sim7_mol_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
-#include <fiction/technology/qca/sim7_mol_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/utils/progress.hpp>
 
@@ -56,20 +54,20 @@ namespace detail
 /**
  * Apply a gate library and report unsupported gates with their tile coordinates.
  *
- * @tparam CellLyt Destination cell-level layout.
  * @tparam GateLibrary Gate library.
  * @tparam GateLyt Source gate-level layout.
  * @param layout Source layout.
  * @param on_progress Receives completed gate mappings.
- * @return Mapped cell-level layout.
+ * @return The layout type that `GateLibrary` produces.
  * @throws std::invalid_argument If the library cannot implement a gate or its orientation.
  */
-template <typename CellLyt, typename GateLibrary, typename GateLyt>
-CellLyt checked_apply_gate_library(const GateLyt& layout, const fiction::utils::progress_callback& on_progress = {})
+template <typename GateLibrary, typename GateLyt>
+typename GateLibrary::layout checked_apply_gate_library(const GateLyt&                           layout,
+                                                        const fiction::utils::progress_callback& on_progress = {})
 {
     try
     {
-        return fiction::physical_design::apply_gate_library<CellLyt, GateLibrary>(layout, on_progress);
+        return fiction::physical_design::apply_gate_library<GateLibrary>(layout, on_progress);
     }
     catch (const fiction::fcn::unsupported_gate_type_exception<fiction::tile<GateLyt>>& error)
     {
@@ -99,12 +97,8 @@ void apply_gate_library(nanobind::module_& m, const std::string& lib_name)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    /** Destination layout for the library technology. */
-    using py_cartesian_technology_cell_layout = py_cartesian_cell_layout<fiction::technology<GateLibrary>>;
-
-    m.def(fmt::format("apply_{}_library", lib_name).c_str(),
-          &checked_apply_gate_library<py_cartesian_technology_cell_layout, GateLibrary, GateLyt>, py::arg("layout"),
-          py::arg("on_progress").none() = py::none(), py::call_guard<py::gil_scoped_release>(),
+    m.def(fmt::format("apply_{}_library", lib_name).c_str(), &checked_apply_gate_library<GateLibrary, GateLyt>,
+          py::arg("layout"), py::arg("on_progress").none() = py::none(), py::call_guard<py::gil_scoped_release>(),
           DOC(fiction_physical_design_apply_gate_library));
 }
 
@@ -116,23 +110,9 @@ void apply_gate_library(nanobind::module_& m, const std::string& lib_name)
 void apply_gate_library(nanobind::module_& m)
 {
     detail::apply_gate_library<fiction::qca::qca_one_library, py_cartesian_gate_layout>(m, "qca_one");
-    detail::apply_gate_library<fiction::qca::sim7_mol_library, py_cartesian_gate_layout>(m, "sim7_mol");
+    detail::apply_gate_library<fiction::mol_qca::sim7_mol_library, py_cartesian_gate_layout>(m, "sim7_mol");
     detail::apply_gate_library<fiction::inml::topolinano_library, py_shifted_cartesian_gate_layout>(m, "topolinano");
-
-    namespace py = nanobind;
-
-    // the SiDB gate library yields an SiDB layout over the H-Si(100) 2x1 lattice
-    m.def(
-        "apply_bestagon_library",
-        [](const py_hexagonal_gate_layout& lyt, const fiction::utils::progress_callback& on_progress)
-        {
-            return fiction::sidb::to_sidb_layout(
-                detail::checked_apply_gate_library<py_cartesian_cell_layout<fiction::sidb::sidb_technology>,
-                                                   fiction::sidb::bestagon_library, py_hexagonal_gate_layout>(
-                    lyt, on_progress));
-        },
-        py::arg("layout"), py::arg("on_progress").none() = py::none(), py::call_guard<py::gil_scoped_release>(),
-        DOC(fiction_physical_design_apply_gate_library));
+    detail::apply_gate_library<fiction::sidb::bestagon_library, py_hexagonal_gate_layout>(m, "bestagon");
 }
 
 }  // namespace pyfiction

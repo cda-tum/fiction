@@ -18,6 +18,9 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/networks/name_utils.hpp>
+#include <fiction/technology/inml/layout.hpp>
+#include <fiction/technology/mol_qca/layout.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 
 #include <nanobind/nanobind.h>
@@ -65,8 +68,9 @@ void name_utils(nanobind::module_& m)
     detail::get_name<py_odd_row_hex_gate_layout>(m);
     detail::get_name<py_odd_column_hex_gate_layout>(m);
     detail::get_name<py_even_column_hex_gate_layout>(m);
-    detail::get_name<py_qca_layout>(m);
-    detail::get_name<py_inml_layout>(m);
+    detail::get_name<fiction::qca::layout>(m);
+    detail::get_name<fiction::mol_qca::layout>(m);
+    detail::get_name<fiction::inml::layout>(m);
     detail::get_name<fiction::sidb::layout>(m);
     detail::get_name<py_tec_network>(m);
     detail::get_name<py_aig_network>(m);
@@ -82,8 +86,9 @@ void name_utils(nanobind::module_& m)
     detail::set_name<py_odd_row_hex_gate_layout>(m);
     detail::set_name<py_odd_column_hex_gate_layout>(m);
     detail::set_name<py_even_column_hex_gate_layout>(m);
-    detail::set_name<py_qca_layout>(m);
-    detail::set_name<py_inml_layout>(m);
+    detail::set_name<fiction::qca::layout>(m);
+    detail::set_name<fiction::mol_qca::layout>(m);
+    detail::set_name<fiction::inml::layout>(m);
     detail::set_name<fiction::sidb::layout>(m);
     detail::set_name<py_tec_network>(m);
     detail::set_name<py_aig_network>(m);

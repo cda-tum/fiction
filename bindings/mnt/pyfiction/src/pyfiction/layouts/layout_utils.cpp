@@ -19,6 +19,9 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/layout_utils.hpp>
+#include <fiction/technology/inml/layout.hpp>
+#include <fiction/technology/mol_qca/layout.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/traits.hpp>
 
 #include <nanobind/nanobind.h>
@@ -74,14 +77,13 @@ void layout_utils(nanobind::module_& m)
     detail::num_adjacent_coordinates<py_shifted_cartesian_gate_layout>(m);
     detail::num_adjacent_coordinates<py_hexagonal_gate_layout>(m);
 
-    detail::normalize_layout_coordinates<py_qca_layout>(m);
-    detail::normalize_layout_coordinates<py_inml_layout>(m);
+    detail::normalize_layout_coordinates<fiction::qca::layout>(m);
+    detail::normalize_layout_coordinates<fiction::mol_qca::layout>(m);
+    detail::normalize_layout_coordinates<fiction::inml::layout>(m);
 
     detail::random_coordinate<py_cartesian_gate_layout>(m);
     detail::random_coordinate<py_shifted_cartesian_gate_layout>(m);
     detail::random_coordinate<py_hexagonal_gate_layout>(m);
-    detail::random_coordinate<py_qca_layout>(m);
-    detail::random_coordinate<py_inml_layout>(m);
 }
 
 }  // namespace pyfiction

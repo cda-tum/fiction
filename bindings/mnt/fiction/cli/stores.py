@@ -308,7 +308,7 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
 
     Returns:
         Name, technology, size in cells, I/O and dot or cell counts; for SiDB layouts the lattice and defect count;
-        for other technologies the ``tile`` size, i.e., the cells per clock zone; and a ``simulation`` section once
+        for QCA and iNML layouts the ``tile`` size, i.e., the cells per clock zone; and a ``simulation`` section once
         simulated.
     """
     layout = entry.layout
@@ -329,7 +329,8 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
             }
     else:
         description["size"] = {"x": layout.x() + 1, "y": layout.y() + 1, "z": layout.z() + 1, "area": layout.area()}
-        description["tile"] = {"x": layout.get_tile_size_x(), "y": layout.get_tile_size_y()}
+        if not isinstance(layout, mol_qca_layout):
+            description["tile"] = {"x": layout.get_tile_size_x(), "y": layout.get_tile_size_y()}
     description["inputs"] = layout.num_pis()
     description["outputs"] = layout.num_pos()
     if isinstance(layout, sidb_layout):

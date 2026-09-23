@@ -47,12 +47,15 @@ a vertical and horizontal size. Additionally, a spacing between cell
 positions in horizontal and vertical direction is taken into account.
 
 Args:
-    lyt: The cell-level layout whose area is desired.
+    lyt: The layout whose area is desired.
     ps: Area parameters.
     pst: Area statistics.
 
 Template Args:
-    Lyt: Cell-level layout type.
+    Lyt: Layout type with a Cartesian extent, e.g., `qca::layout`,
+         `mol_qca::layout`, or `inml::layout`.
+    Dims: Layout type whose cell dimensions `ps` holds; `Lyt` by
+          default.
 
 Returns:
     Area requirements in nm².
@@ -67,13 +70,13 @@ spacing between cell positions in horizontal and vertical direction is
 taken into account.
 
 Args:
-    bb: The bounding box of the cell-level layout whose area is
-        desired.
+    bb: The bounding box of the layout whose area is desired.
     ps: Area parameters.
     pst: Area statistics.
 
 Template Args:
-    Lyt: Cell-level layout type.
+    Lyt: Cell grid layout type: `qca::layout`, `mol_qca::layout`, or
+         `inml::layout`.
 
 Returns:
     Area requirements in nm².
@@ -98,11 +101,15 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_fcn_area_params =
-R"doc(Parameters for area computation of cell-level layouts. Default
-parameters are loaded from the given cell technology.
+R"doc(Dimensions for area computation of cell-level layouts: the size of a
+cell and the spacing between neighboring cells, in nm. Default
+dimensions are those of the given layout type, e.g.,
+`qca::layout::CELL_WIDTH`.
 
 Template Args:
-    Technology: Cell technology.)doc";
+    Lyt: Layout type whose cell dimensions are the defaults:
+         `qca::layout`, `mol_qca::layout`, `inml::layout`, or
+         `sidb::layout`.)doc";
 
 static const char *mkd_doc_fiction_fcn_area_params_height = R"doc(Height of each cell.)doc";
 
@@ -155,8 +162,7 @@ static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
 embed:rst
 .. code-block:: c++
 
-template <typename CellLyt>
-static void post_layout_optimization(CellLyt& lyt)
+static void post_layout_optimization(Layout& lyt)
 ```
 
 
@@ -198,8 +204,13 @@ static gate_ports<PortType> get_gate_ports()
  given a gate implementation. This interface is for example used in
  `sidb::surface_analysis` to determine which ports to blacklist.
 
+ The library produces layouts of type `Layout`, e.g., `qca::layout` or
+ `sidb::layout`, which `apply_gate_library` returns.
+ `Layout::cell_type` is the element type of the gates; it is an
+ enumeration with an `EMPTY` enumerator.
+
 Template Args:
-    Technology: FCN technology type of the implementing gate library.
+    Layout: Layout type that the library produces.
     GateSizeX: Tile size in x-dimension.
     GateSizeY: Tile size in y-dimension.)doc";
 
@@ -238,13 +249,13 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_mark_cell =
-R"doc(Applies given mark to given `gate` `g` at given port `p` at compile
-time.
+R"doc(Replaces the cell of `gate` `g` at port `p` by the given cell type at
+compile time, e.g., to mark it as input or output.
 
 Args:
-    g: Gate to apply mark to.
-    p: Port specifying where to apply the mark.
-    mark: Mark to be applied
+    g: Gate to mark.
+    p: Port specifying which cell to replace.
+    mark: Cell type to place at `p`.
 
 Returns:
     Marked `gate`.
@@ -344,6 +355,15 @@ static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_has_borde
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_lyt = R"doc()doc";
 
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_num_clocks =
+R"doc(Number of clock phases: the layout's, or 4 for molQCA, whose cells
+name one of four phases themselves.
+
+Returns:
+    Number of clock phases.
+
+)doc";
+
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_on_progress = R"doc(Receives serialization progress.)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_os = R"doc()doc";
@@ -378,42 +398,70 @@ Args:
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_technology_settings = R"doc()doc";
 
+static const char *mkd_doc_fiction_fcn_io_unsupported_cell_type_exception =
+R"doc(Exception thrown when an SVG writer encounters a cell it cannot draw.
+
+Template Args:
+    Coordinate: Cell coordinate type.)doc";
+
+static const char *mkd_doc_fiction_fcn_io_unsupported_cell_type_exception_coord = R"doc(Position of the cell that cannot be drawn.)doc";
+
+static const char *mkd_doc_fiction_fcn_io_unsupported_cell_type_exception_unsupported_cell_type_exception =
+R"doc(Args:
+    c: Position of the cell that cannot be drawn.
+
+)doc";
+
+static const char *mkd_doc_fiction_fcn_io_unsupported_cell_type_exception_where =
+R"doc(Returns:
+    Position of the cell that cannot be drawn.
+
+)doc";
+
 static const char *mkd_doc_fiction_fcn_io_write_qll_layout =
-R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
-used by ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA
-tool and a physical simulator for the iNML technology platform as well
-as SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical
-simulator for the molQCA (mQCA) technology platform.
+R"doc(Writes a QCA, molQCA, or iNML layout to a qll file that is used by
+ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA tool and a
+physical simulator for the iNML technology platform as well as SCERPA
+(https://ieeexplore.ieee.org/document/8935211), a physical simulator
+for the molQCA (mQCA) technology platform.
 
 This overload uses an output stream to write into.
 
 Args:
     lyt: The layout to be written.
-    on_progress: Receives completed serialization work.
     os: The output stream to write into.
+    on_progress: Receives completed serialization work.
 
 Template Args:
-    Lyt: Cell-level QCA, molQCA, or iNML layout type.
+    Lyt: `qca::layout`, `mol_qca::layout`, or `inml::layout`.
+
+Raises:
+    std::invalid_argument: if an iNML layout has no I/O pins or they
+                           are not routed to the layout's borders.
 
 )doc";
 
 static const char *mkd_doc_fiction_fcn_io_write_qll_layout_2 =
-R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
-used by ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA
-tool and a physical simulator for the iNML technology platform as well
-as SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical
-simulator for the molQCA (mQCA) technology platform.
+R"doc(Writes a QCA, molQCA, or iNML layout to a qll file that is used by
+ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA tool and a
+physical simulator for the iNML technology platform as well as SCERPA
+(https://ieeexplore.ieee.org/document/8935211), a physical simulator
+for the molQCA (mQCA) technology platform.
 
 This overload uses a file name to create and write into.
 
 Args:
     lyt: The layout to be written.
-    on_progress: Receives completed serialization work.
     filename: The file name to create and write into. Should
               preferably use the `.qll` extension.
+    on_progress: Receives completed serialization work.
 
 Template Args:
-    Lyt: Cell-level QCA, molQCA, or iNML layout type.
+    Lyt: `qca::layout`, `mol_qca::layout`, or `inml::layout`.
+
+Raises:
+    std::invalid_argument: if an iNML layout has no I/O pins or they
+                           are not routed to the layout's borders.
 
 )doc";
 
@@ -591,10 +639,6 @@ static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_where = R
 
 static const char *mkd_doc_fiction_get_ntk_type_name = R"doc()doc";
 
-static const char *mkd_doc_fiction_get_tech_cell_name = R"doc()doc";
-
-static const char *mkd_doc_fiction_get_tech_impl_name = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_above = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_below = R"doc()doc";
@@ -679,8 +723,6 @@ static const char *mkd_doc_fiction_has_num_virtual_pis = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_ordinal_operations = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_post_layout_optimization = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_set_layout_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_south = R"doc()doc";
@@ -693,160 +735,16 @@ static const char *mkd_doc_fiction_has_update_ranks = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_west = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_inml_technology =
-R"doc(in-plane Nanomagnet Logic (iNML) technology implementation of the FCN
-concept.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_mark_EMPTY = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_mark_INPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_mark_OUTPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_mode = R"doc(iNML cells do not have modes.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_type = R"doc(Possible types of iNML cells.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_type_CROSSWIRE_MAGNET = R"doc(Symbol used for cross-wire magnets.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_type_EMPTY = R"doc(Symbol used for empty iNML cells.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_type_FANOUT_COUPLER_MAGNET = R"doc(Symbol used for coupler (fan-out) magnets.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_type_INPUT = R"doc(Symbol used for input iNML cells.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_type_INVERTER_MAGNET = R"doc(Symbol used for inverter magnets.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_type_NORMAL = R"doc(Symbol used for normal iNML cells.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_type_OUTPUT = R"doc(Symbol used for output iNML cells.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_type_SLANTED_EDGE_DOWN_MAGNET = R"doc(Symbol used for lower slanted edge magnets.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_cell_type_SLANTED_EDGE_UP_MAGNET = R"doc(Symbol used for upper slanted edge magnets.)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_inml_technology = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_is_crosswire_magnet =
-R"doc(Checks whether the given cell type is a crosswire magnet.
+static const char *mkd_doc_fiction_inml_io_detail_skip_component_magnets =
+R"doc(Adds to `skip` the magnets that belong to the MagCAD component
+starting at `c`, so that a writer that scans the layout row by row
+emits every component once. The positions follow the ToPoliNano gate
+library.
 
 Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::CROSSWIRE_MAGNET`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_is_empty_cell =
-R"doc(Checks whether the given cell type is empty.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::EMPTY`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_is_fanout_coupler_magnet =
-R"doc(Checks whether the given cell type is a fanout coupler magnet.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::FANOUT_COUPLER_MAGNET`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_is_input_cell =
-R"doc(Checks whether the given cell type is an input cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::INPUT`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_is_inverter_magnet =
-R"doc(Checks whether the given cell type is an inverter magnet.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::INVERTER_MAGNET`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_is_normal_cell =
-R"doc(Checks whether the given cell type is a normal cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::NORMAL`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_is_normal_cell_mode =
-R"doc(Checks whether the given cell mode is the normal mode. iNML cells do
-not have modes, so this always holds.
-
-Returns:
-    `true`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_is_output_cell =
-R"doc(Checks whether the given cell type is an output cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::OUTPUT`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_is_slanted_edge_down_magnet =
-R"doc(Checks whether the given cell type is a down-slanted edge magnet.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::SLANTED_EDGE_DOWN_MAGNET`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_is_slanted_edge_magnet =
-R"doc(Checks whether the given cell type is a slanted edge magnet, i.e.,
-either up- or down-slanted.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::SLANTED_EDGE_UP_MAGNET` or
-    `cell_type::SLANTED_EDGE_DOWN_MAGNET`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_inml_technology_is_slanted_edge_up_magnet =
-R"doc(Checks whether the given cell type is an up-slanted edge magnet.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::SLANTED_EDGE_UP_MAGNET`.
+    type: Type of the magnet at `c`.
+    c: Position of the magnet that starts the component.
+    skip: Positions to skip.
 
 )doc";
 
@@ -912,9 +810,6 @@ Args:
     os: The output stream to write into.
     ps: Parameters.
 
-Template Args:
-    Lyt: Cell-level iNML layout type.
-
 )doc";
 
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout_2 =
@@ -930,9 +825,6 @@ Args:
               preferably use the `.qcc` extension.
     ps: Parameters.
 
-Template Args:
-    Lyt: Cell-level iNML layout type.
-
 )doc";
 
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params = R"doc(Parameters for writing QCC layouts.)doc";
@@ -943,21 +835,90 @@ static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params_on_progress =
 
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params_use_filename_as_component_name = R"doc(Use the given filename as the component name inside the QCC file.)doc";
 
+static const char *mkd_doc_fiction_inml_layout =
+R"doc(An iNML layout: in-plane nanomagnets on a planar Cartesian grid. Each
+position holds a magnet type and, for inputs and outputs, a name.
+Clock zones are tiles of magnets. Signal crossings are coplanar cross-
+wire magnets, so the layout has no crossing layer. The layout has
+value semantics; copies are independent.)doc";
+
+static const char *mkd_doc_fiction_inml_layout_layout =
+R"doc(Creates an empty layout with open clocking.
+
+Args:
+    ar: Highest magnet position; its z-coordinate is ignored because
+        the layout is planar.
+    name: Layout name.
+    tile_size_x: Clock-zone width in magnets.
+    tile_size_y: Clock-zone height in magnets.
+
+Raises:
+    std::invalid_argument: if either clock-zone dimension is zero.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_layout_layout_2 =
+R"doc(Creates an empty layout clocked by the given scheme.
+
+Args:
+    ar: Highest magnet position; its z-coordinate is ignored because
+        the layout is planar.
+    scheme: Clocking scheme over clock zones.
+    name: Layout name.
+    tile_size_x: Clock-zone width in magnets.
+    tile_size_y: Clock-zone height in magnets.
+
+Raises:
+    std::invalid_argument: if either clock-zone dimension is zero.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_layout_operator_eq =
+R"doc(Compares two layouts: same magnets, names, tile size, and clocking
+scheme name.
+
+Args:
+    other: Right-hand side layout.
+
+Returns:
+    `true` iff both layouts are identical.
+
+)doc";
+
 static const char *mkd_doc_fiction_inml_magcad_magnet_count =
 R"doc(Calculates the number of magnets for an iNML layout the way MagCAD
 (https://topolinano.polito.it/) would do it. That is, counting chains
 of 4 inverters as a single entity.
 
 Args:
-    lyt: The iNML cell-level layout whose area is desired.
-
-Template Args:
-    Lyt: iNML cell-level layout type.
+    lyt: The iNML layout whose magnets are counted.
 
 Returns:
     Number of magnets as counted by MagCAD.
 
 )doc";
+
+static const char *mkd_doc_fiction_inml_magnet_type =
+R"doc(Types of in-plane Nanomagnet Logic (iNML) magnets. The enumerators
+carry the symbols of their ASCII representation.)doc";
+
+static const char *mkd_doc_fiction_inml_magnet_type_CROSSWIRE_MAGNET = R"doc(Magnet of a coplanar cross wire.)doc";
+
+static const char *mkd_doc_fiction_inml_magnet_type_EMPTY = R"doc(No magnet.)doc";
+
+static const char *mkd_doc_fiction_inml_magnet_type_FANOUT_COUPLER_MAGNET = R"doc(Coupler (fan-out) magnet.)doc";
+
+static const char *mkd_doc_fiction_inml_magnet_type_INPUT = R"doc(Primary input magnet.)doc";
+
+static const char *mkd_doc_fiction_inml_magnet_type_INVERTER_MAGNET = R"doc(Inverter magnet.)doc";
+
+static const char *mkd_doc_fiction_inml_magnet_type_NORMAL = R"doc(Regular magnet.)doc";
+
+static const char *mkd_doc_fiction_inml_magnet_type_OUTPUT = R"doc(Primary output magnet.)doc";
+
+static const char *mkd_doc_fiction_inml_magnet_type_SLANTED_EDGE_DOWN_MAGNET = R"doc(Magnet with a lower slanted edge.)doc";
+
+static const char *mkd_doc_fiction_inml_magnet_type_SLANTED_EDGE_UP_MAGNET = R"doc(Magnet with an upper slanted edge.)doc";
 
 static const char *mkd_doc_fiction_inml_topolinano_library =
 R"doc(A concrete FCN gate library as used in \"ToPoliNano\"
@@ -1007,11 +968,8 @@ R"doc(Post-layout optimization that straightens the wire segments to save
 cells.
 
 Args:
-    lyt: The cell-level layout that has been created via application
-         of `set_up_gate`.
-
-Template Args:
-    CellLyt: Cell-level layout type.
+    lyt: The iNML layout that has been created via application of
+         `set_up_gate`.
 
 )doc";
 
@@ -1039,7 +997,7 @@ static const char *mkd_doc_fiction_inml_topolinano_library_topolinano_library = 
 
 static const char *mkd_doc_fiction_is_cartesian_layout = R"doc()doc";
 
-static const char *mkd_doc_fiction_is_cell_level_layout = R"doc()doc";
+static const char *mkd_doc_fiction_is_cell_grid = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_coordinate_layout = R"doc()doc";
 
@@ -1854,699 +1812,268 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_cell_level_layout =
-R"doc(A layout that owns clocking and permits assignment of individual cells
-to coordinates in accordance with an FCN technology, e.g., QCA, iNML,
-or SiDB. This type, thereby, represents layouts on a cell-accurate
-abstraction without a notion of logic functions. Gate libraries can be
-used to transform gate-level layouts into cell-level ones.
-Furthermore, cell-level layouts can be written to files for various
-physical simulators like QCADesigner, ToPoliNano & MagCAD, SiQAD, etc.
+static const char *mkd_doc_fiction_layouts_cell_grid =
+R"doc(A Cartesian grid of cells, each holding a value of `CellType`, plus
+the names of input and output cells and a layout name. It is the
+storage and geometry that the QCA, molQCA, and iNML layouts share, not
+a layout of its own: each technology derives its layout from it and
+adds what that technology needs.
 
-A clock zone, or tile, is a region of :math:`x \times y` cells, e.g.,
-:math:`5 \times 5` cells, that one clock signal governs on every
-layer. The constructor and `set_tile_size_x`/`set_tile_size_y` specify
-these dimensions. Clock zones are addressed by tile position on layer
-0: clock-number overrides, synchronization elements, and the clocked-
-zone iteration functions take clock zones, whereas `get_clock_number`,
-`is_synchronization_element`, and `get_synchronization_element` take
-cells and look up the zone that `get_clock_zone` returns.
+`CellType` is an enumeration with the enumerators `EMPTY`, `INPUT`,
+and `OUTPUT`. Assigning `EMPTY` removes the cell, so the grid stores
+only occupied positions. Primary inputs and outputs are the cells of
+type `INPUT` and `OUTPUT`.
 
-The de-facto standard of cell-level FCN design is to group multiple
-cells into tiles large enough to be addressable by individual clocking
-electrodes buried in the layout substrate. Cell-based clocking, i.e.,
-clock zones of size :math:`1 \times 1` cells are not recommended as
-they are most likely not fabricable in reality.
-
-On the implementation side, this layout distinguishes between `cell`,
-`cell_type`, and `cell_mode`. A `cell` is a coordinate, i.e., a
-position on the layout where a `cell_type` can be assigned. A
-`cell_type` is a concrete variation of a fabricated cell and depends
-on the given technology. QCA offers regular and constant cell types
-while SiDB only provides regular ones. Cell types can also include
-primary input and output cells if they are being treated differently
-in a simulator for instance. A `cell_mode`, on the other hand, is a
-variation of a cell (thus far only known from QCADesigner) that
-provides further attributes like its functionality as a crossing or
-via cell.
+The grid has value semantics; copies are independent.
 
 Template Args:
-    Technology: An FCN technology that provides notions of cell types.
-    CoordinateLayout: Coordinate geometry used for cell positions.)doc";
+    CellType: Enumeration of the cell types of one technology.)doc";
 
-static const char *mkd_doc_fiction_layouts_cell_level_layout_assign_cell_mode =
-R"doc(Assigns a cell mode `m` to a cell position `c` in the layout. If `m`
-is the normal cell mode, a potentially stored cell mode is being
-erased.
+static const char *mkd_doc_fiction_layouts_cell_grid_2 = R"doc()doc";
 
-Args:
-    c: Cell position to assign cell mode `m` to.
-    m: Cell mode to assign to cell position `c`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_assign_cell_name =
-R"doc(Assigns a cell name `n` to a cell position `c` in the layout. If `n`
-is the empty string, a potentially stored cell name is being erased.
-
-Args:
-    c: Cell position to assign cell name `n` to.
-    n: Cell name to assign to cell position `c`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_assign_cell_type =
-R"doc(Assigns a cell type `ct` to a cell position `c` in the layout. If `ct`
-is the empty cell, a potentially stored cell type is being erased. If
-`ct` is a primary input or output type, the number of primary inputs
-or outputs in the layout is increased respectively.
+static const char *mkd_doc_fiction_layouts_cell_grid_assign_cell_name =
+R"doc(Assigns a name to a cell. The empty string removes the name.
 
 Args:
     c: Cell position.
-    ct: Cell type to assign to `c`.
+    n: Cell name.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_cell_level_layout_assign_clock_number =
-R"doc(Overrides a clock number in the stored scheme with the provided one.
+static const char *mkd_doc_fiction_layouts_cell_grid_assign_cell_type =
+R"doc(Assigns a cell type to a position. Assigning `EMPTY` removes the cell
+and its name.
 
 Args:
-    cz: Clock zone to override.
-    cn: New clock number for `cz`.
+    c: Cell position.
+    ct: Cell type.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_cell_level_layout_assign_synchronization_element =
-R"doc(Assigns a synchronization element to the provided clock zone.
+static const char *mkd_doc_fiction_layouts_cell_grid_cell_grid =
+R"doc(Creates an empty grid.
 
 Args:
-    cz: Clock zone to turn into a synchronization element.
-    se: Number of full clock cycles to extend `cz`'s Hold phase by. If
-        this value is 0, `cz` is turned back into a normal clock zone.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout =
-R"doc(Standard constructor. Creates a named cell-level layout of the given
-aspect ratio. To this end, it calls `CoordinateLayout`'s standard
-constructor.
-
-Args:
-    ar: Highest possible position in the layout.
+    ar: Highest cell position in the grid.
     name: Layout name.
-    tile_size_x: Clock zone size in x-dimension in cells.
-    tile_size_y: Clock zone size in y-dimension in cells.
-
-Raises:
-    std::invalid_argument: if either clock-zone dimension is zero.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_2 =
-R"doc(Standard constructor. Creates a named cell-level layout of the given
-aspect ratio and clocks it via the given clocking scheme. To this end,
-it calls `CoordinateLayout`'s standard constructor.
+static const char *mkd_doc_fiction_layouts_cell_grid_cell_grid_2 =
+R"doc(Copies a grid, including its dimensions.
 
 Args:
-    ar: Highest possible position in the layout.
-    scheme: Clocking scheme to apply to this layout.
+    other: Grid to copy.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_cell_grid_3 =
+R"doc(Moves a grid.
+
+Args:
+    other: Grid to move.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_cell_names = R"doc(Names of the named cells.)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_cell_types = R"doc(Types of the occupied cells.)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_count = R"doc(Counts the cells of a type.)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_for_each_of_type =
+R"doc(Applies `fn` to every cell whose type satisfies `pred`, stopping early
+if `fn` returns `false`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_foreach_cell =
+R"doc(Applies a function to every cell position that holds a cell, in
+unspecified order. `fn` takes the position and may return `false` to
+stop the traversal. The grid must not be modified during the
+traversal.
+
+Args:
+    fn: Function to apply.
+
+Template Args:
+    Fn: Callable on `(const cell&)`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_foreach_cell_position =
+R"doc(Applies a function to every position of the grid, occupied or not.
+Same callable contract as `foreach_coordinate`.
+
+Args:
+    fn: Function to apply.
+
+Template Args:
+    Fn: Callable on `(const cell&)`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_foreach_pi =
+R"doc(Applies a function to every primary input cell. Same callable contract
+as `foreach_cell`.
+
+Args:
+    fn: Function to apply.
+
+Template Args:
+    Fn: Callable on `(const cell&)`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_foreach_po =
+R"doc(Applies a function to every primary output cell. Same callable
+contract as `foreach_cell`.
+
+Args:
+    fn: Function to apply.
+
+Template Args:
+    Fn: Callable on `(const cell&)`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_get_cell_name =
+R"doc(The name of a cell.
+
+Args:
+    c: Cell position.
+
+Returns:
+    Name of the cell at `c`, or the empty string if it has none.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_get_cell_type =
+R"doc(The cell type at a position.
+
+Args:
+    c: Cell position.
+
+Returns:
+    Cell type at `c`, `EMPTY` if no cell is there.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_get_layout_name =
+R"doc(The layout name.
+
+Returns:
+    Layout name.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_is_empty =
+R"doc(Whether the grid holds no cell.
+
+Returns:
+    `true` iff there is no cell.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_is_empty_cell =
+R"doc(Whether no cell sits at a position.
+
+Args:
+    c: Cell position.
+
+Returns:
+    `true` iff `c` holds no cell.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_is_pi =
+R"doc(Whether a cell is a primary input, i.e., of type `INPUT`.
+
+Args:
+    c: Cell position.
+
+Returns:
+    `true` iff `c` holds an input cell.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_is_po =
+R"doc(Whether a cell is a primary output, i.e., of type `OUTPUT`.
+
+Args:
+    c: Cell position.
+
+Returns:
+    `true` iff `c` holds an output cell.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_layout_name = R"doc(Layout name.)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_num_cells =
+R"doc(Number of cells.
+
+Returns:
+    Number of cells.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_num_pis =
+R"doc(Number of primary input cells.
+
+Returns:
+    Number of input cells.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_num_pos =
+R"doc(Number of primary output cells.
+
+Returns:
+    Number of output cells.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_operator_assign =
+R"doc(Copies a grid, including its dimensions.
+
+Args:
+    other: Grid to copy.
+
+Returns:
+    This grid.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_operator_assign_2 =
+R"doc(Moves a grid.
+
+Args:
+    other: Grid to move.
+
+Returns:
+    This grid.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_operator_eq =
+R"doc(Compares two grids: same dimensions, name, cell types, and cell names.
+
+Args:
+    other: Right-hand side grid.
+
+Returns:
+    `true` iff both grids are identical.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_grid_set_layout_name =
+R"doc(Sets the layout name.
+
+Args:
     name: Layout name.
-    tile_size_x: Clock zone size in x-dimension in cells.
-    tile_size_y: Clock zone size in y-dimension in cells.
-
-Raises:
-    std::invalid_argument: if either clock-zone dimension is zero.
 
 )doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_3 =
-R"doc(Copy constructor from another layout's storage.
-
-Args:
-    s: Storage of another cell_level_layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_4 =
-R"doc(Copy constructor from another `CoordinateLayout`.
-
-Args:
-    lyt: Coordinate layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_cell_level_layout_storage =
-R"doc(Creates cell storage with nonzero clock-zone dimensions.
-
-Args:
-    name: Layout name.
-    tile_x: Clock-zone width in cells.
-    tile_y: Clock-zone height in cells.
-
-Raises:
-    std::invalid_argument: if either dimension is zero.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_cell_mode_map = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_cell_name_map = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_cell_type_map = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_clocking = R"doc(Scheme, clock overrides, and synchronization delays.)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_inputs = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_layout_name = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_obstructions = R"doc(Persistent manually assigned obstructions.)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_outputs = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_tile_size_x = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_tile_size_y = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_clear_obstructed_connection =
-R"doc(Clears the obstruction status of the connection from coordinate `src`
-to coordinate `tgt` if the obstruction was manually marked via
-`obstruct_connection`.
-
-Args:
-    src: Source coordinate.
-    tgt: Target coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_clear_obstructed_connections =
-R"doc(Clears all obstructed connections that were manually marked via
-`obstruct_connection`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_clear_obstructed_coordinate =
-R"doc(Clears the obstruction status of the given coordinate `c` if the
-obstruction was manually marked via `obstruct_coordinate`.
-
-Args:
-    c: clock_zone to clear.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_clear_obstructed_coordinates =
-R"doc(Clears all obstructed coordinates that were manually marked via
-`obstruct_coordinate`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_clone =
-R"doc(Clones the layout returning a deep copy.
-
-Returns:
-    Deep copy of the layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_degree =
-R"doc(Returns the number of distinct incoming or outgoing neighboring clock
-zones.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    Number of distinct clocked neighbors of `cz`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_foreach_cell =
-R"doc(Applies a function to all cell positions in the layout that have non-
-empty cell types assigned.
-
-Args:
-    fn: Functor to apply to each non-empty cell position.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element_transform`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_foreach_cell_position =
-R"doc(Applies a function to all cell positions in the layout, even empty
-ones. This function, thereby, renames
-`CoordinateLayout::foreach_coordinate`.
-
-Args:
-    fn: Functor to apply to each cell position.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by the functor type in `CoordinateLayout::foreach_coordinate`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_foreach_incoming_clocked_zone =
-R"doc(Applies a function to all incoming clock zones of a given one.
-
-Args:
-    cz: Base clock zone.
-    fn: Functor to apply to each of `cz`'s incoming clock zones.
-
-Template Args:
-    Fn: Functor type.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_foreach_outgoing_clocked_zone =
-R"doc(Applies a function to all outgoing clock zones of a given one.
-
-Args:
-    cz: Base clock zone.
-    fn: Functor to apply to each of `cz`'s outgoing clock zones.
-
-Template Args:
-    Fn: Functor type.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_foreach_pi =
-R"doc(Applies a function to all primary input cell positions in the layout.
-
-Args:
-    fn: Functor to apply to each primary input cell.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element_transform`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_foreach_po =
-R"doc(Applies a function to all primary output cells in the layout.
-
-Args:
-    fn: Functor to apply to each primary output cell.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element_transform`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_get_cell_mode =
-R"doc(Returns the cell mode assigned to cell position `c`. If no cell mode
-is assigned, the default mode is returned.
-
-Args:
-    c: Cell position whose assigned cell mode is desired.
-
-Returns:
-    Cell mode assigned to cell position `c`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_get_cell_name =
-R"doc(Returns the cell name assigned to cell position `c`. If no cell name
-is assigned, the empty string is returned.
-
-Args:
-    c: Cell position whose assigned cell name is desired.
-
-Returns:
-    Cell name assigned to cell position `c`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_get_cell_type =
-R"doc(Returns the cell type assigned to cell position `c`.
-
-Args:
-    c: Cell position whose assigned cell type is desired.
-
-Returns:
-    Cell type assigned to cell position `c`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_get_cells_by_type =
-R"doc(Returns all cells of the given type.
-
-Args:
-    type: Type of cells to return.
-
-Returns:
-    All cells of the layout that have the given type.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_get_clock_number =
-R"doc(Returns the clock number of the clock zone that contains the given
-cell.
-
-Args:
-    c: Cell position.
-
-Returns:
-    Clock number of `get_clock_zone(c)`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_get_clock_zone =
-R"doc(Returns the clock zone that contains the given cell. A clock zone is a
-tile, i.e., a region of `get_tile_size_x()` by `get_tile_size_y()`
-cells that one clock signal governs on every layer. Clock zones are
-therefore addressed by their tile position on layer 0.
-
-Args:
-    c: Cell position.
-
-Returns:
-    Clock zone of the tile that contains `c`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_get_clocking_scheme =
-R"doc(Returns a copy of the stored clocking scheme object.
-
-Returns:
-    A copy of the stored clocking scheme object.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_get_layout_name =
-R"doc(Returns the assigned layout name.
-
-Returns:
-    The layout name.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_get_synchronization_element =
-R"doc(Returns the Hold phase extension in clock cycles of the clock zone
-that contains the given cell.
-
-Args:
-    c: Cell position.
-
-Returns:
-    Synchronization element value, i.e., Hold phase extension, of
-    `get_clock_zone(c)`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_get_tile_size_x =
-R"doc(Returns the underlying clock zone x-dimension size. That is, if this
-cell-level layout was obtained from the application of a gate library,
-this function returns the cell size in x-dimension of each gate in the
-library.
-
-Returns:
-    The clock zone size in cells in the x-dimension.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_get_tile_size_y =
-R"doc(Returns the underlying clock zone y-dimension size. That is, if this
-cell-level layout was obtained from the application of a gate library,
-this function returns the cell size in y-dimension of each gate in the
-library.
-
-Returns:
-    The clock zone size in cells in the y-dimension.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_in_degree =
-R"doc(Returns the number of incoming clock zones to the given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    Number of `cz`'s incoming clock zones.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_incoming_clocked_zones =
-R"doc(Returns a container with all clock zones that are incoming to the
-given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    A container with all clock zones that are incoming to `cz`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_is_clocking_scheme =
-R"doc(Compares the stored clocking scheme against the provided name.
-Predefined names are constants in `fiction::layouts::clocking`.
-
-Args:
-    name: Clocking scheme name.
-
-Returns:
-    `true` iff the layout is clocked by a clocking scheme of name
-    `name`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_is_empty =
-R"doc(Checks whether there are no cells assigned to the layout's
-coordinates.
-
-Returns:
-    `true` iff the layout is empty.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_is_empty_cell =
-R"doc(Returns `true` if no cell type is assigned to cell position `c` or if
-the empty type was assigned.
-
-Args:
-    c: Cell position to check for emptiness.
-
-Returns:
-    `true` iff no cell type was assigned to cell position `c`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_is_obstructed_connection =
-R"doc(Checks if the given coordinate-coordinate connection is obstructed of
-some sort.
-
-Args:
-    src: Source coordinate.
-    tgt: Target coordinate.
-
-Returns:
-    `true` iff the connection from `src` to `tgt` is obstructed.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_is_obstructed_coordinate =
-R"doc(Checks if the given coordinate is obstructed of some sort.
-
-Args:
-    c: Coordinate to check.
-
-Returns:
-    `true` iff `c` is obstructed.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_is_pi =
-R"doc(Checks whether a given cell position is marked as primary input. This
-function does not check against the assigned cell type but whether the
-cell position is stored in the list of PIs. Assigning a cell position
-the primary input cell type automatically enlists it there.
-
-Args:
-    c: Cell position to check.
-
-Returns:
-    `true` iff cell position `c` is marked as primary input.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_is_po =
-R"doc(Checks whether a given cell position is marked as primary output. This
-function does not check against the assigned cell type but whether the
-cell position is stored in the list of POs. Assigning a cell position
-the primary output cell type automatically enlists it there.
-
-Args:
-    c: Cell position to check.
-
-Returns:
-    `true` iff cell position `c` is marked as primary output.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_is_regularly_clocked =
-R"doc(Returns whether the layout is clocked by a regular clocking scheme
-with no overwritten zones.
-
-Returns:
-    `true` iff the layout is clocked by a regular scheme and no zones
-    have been overwritten.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_is_synchronization_element =
-R"doc(Checks whether the clock zone that contains the given cell is a
-synchronization element.
-
-Args:
-    c: Cell position.
-
-Returns:
-    `true` iff `get_clock_zone(c)` is a synchronization element.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_num_cells =
-R"doc(Returns the number of non-empty cell types that were assigned to the
-layout.
-
-Returns:
-    Number of non-empty cell types in the layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_num_cells_of_given_type =
-R"doc(Returns the numbers of cells of the given type.
-
-Args:
-    type: Type of cells which are counted.
-
-Returns:
-    Number of the cells with the given type.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_num_clocks =
-R"doc(Returns the number of clock phases in the layout. Each clock cycle is
-divided into n phases. In QCA, the number of phases is usually 4. In
-iNML it is 3. However, theoretically, any number >= 3 can be utilized.
-
-Returns:
-    The number of different clock signals in the layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_num_pis =
-R"doc(Returns the number of primary input cells in the layout.
-
-Returns:
-    Number of primary input cells.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_num_pos =
-R"doc(Returns the number of primary output cells in the layout.
-
-Returns:
-    Number of primary output cells.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_num_se =
-R"doc(Counts zones with a nonzero Hold-phase extension. @return
-Synchronization element count.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_obstruct_connection =
-R"doc(Marks the connection from coordinate `src` to coordinate `tgt` as
-obstructed.
-
-Args:
-    src: Source coordinate.
-    tgt: Target coordinate.
-
-Note:
-    clock_zones marked this way will not be crossed with wires by path
-    finding algorithms.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_obstruct_coordinate =
-R"doc(Marks the given coordinate as obstructed.
-
-Args:
-    c: clock_zone to obstruct.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_out_degree =
-R"doc(Returns the number of outgoing clock zones from the given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    Number of `cz`'s outgoing clock zones.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_outgoing_clocked_zones =
-R"doc(Returns a container with all clock zones that are outgoing from the
-given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    A container with all clock zones that are outgoing from `cz`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_replace_clocking_scheme =
-R"doc(Replaces the stored clocking scheme with the provided one.
-
-Args:
-    scheme: New clocking scheme.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_set_layout_name =
-R"doc(Assigns or overrides the layout name.
-
-Args:
-    name: Layout name to assign.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_set_tile_size_x =
-R"doc(Sets the underlying clock zone x-dimension size.
-
-Args:
-    tile_size_x: Tile size in the x-dimension in number of cells.
-
-Raises:
-    std::invalid_argument: if `tile_size_x` is zero.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_set_tile_size_y =
-R"doc(Sets the underlying clock zone y-dimension size.
-
-Args:
-    tile_size_y: Tile size in the y-dimension in number of cells.
-
-Raises:
-    std::invalid_argument: if `tile_size_y` is zero.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_level_layout_strg = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_bancs =
 R"doc(Returns the BANCS clocking as defined in \"BANCS: Bidirectional
@@ -6194,17 +5721,22 @@ static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_draw
 static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_shift_row = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_io_print_cell_level_layout =
-R"doc(Writes a simplified 2D representation of a cell-level layout to an
-output stream.
+R"doc(Writes a simplified 2D representation of a cell grid layout, i.e., a
+QCA, molQCA, or iNML layout, to an output stream. Regular cells of
+type `NORMAL` print as `▢`, positions below a crossing as `x`, and
+every other cell as the symbol of its type. Clock-zone colors apply to
+layouts with tile-based clocking and synchronization-element colors to
+layouts with synchronization elements.
 
 Args:
     os: Output stream to write into.
-    layout: The cell-level layout to print.
-    io_color: Flag to utilize color escapes for inputs and outputs.
+    layout: The layout to print.
+    io_color: Flag to utilize color escapes for inputs, outputs, and
+              synchronization elements.
     clk_color: Flag to utilize color escapes for clock zones.
 
 Template Args:
-    Lyt: Cell-level layout type.
+    Lyt: Cell grid layout type.
 
 )doc";
 
@@ -6421,19 +5953,21 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_normalize_layout_coordinates =
-R"doc(A new layout is constructed and returned that is equivalent to the
-given cell-level layout. However, its coordinates are normalized,
-i.e., start at `(0, 0)` and are all positive. To this end, all
-existing coordinates are shifted by an x and y offset.
+R"doc(Returns a copy of the given cell grid layout whose cells are shifted
+towards the origin, so that the smallest occupied x- and y-coordinates
+become 0. Cell types, names, and, where the layout has them, cell
+modes move with their cells; layers, the layout name, and the clocking
+stay unchanged. The dimensions shrink by the shift.
 
 Args:
-    lyt: The layout which is to be normalized.
+    lyt: The layout to normalize.
 
 Template Args:
-    Lyt: Cartesian cell-level layout type.
+    Lyt: Cell grid layout type, e.g., `qca::layout`,
+         `mol_qca::layout`, or `inml::layout`.
 
 Returns:
-    New normalized equivalent layout.
+    Normalized copy of `lyt`.
 
 )doc";
 
@@ -6683,7 +6217,9 @@ Template Args:
     GateSizeX: Horizontal tile size.
     GateSizeY: Vertical tile size.
     GateLyt: Gate-level layout type.
-    CellLyt: Cell-level layout type.
+    Coordinate: Cell coordinate type: `coords::offset`, or
+                `coords::cube` where hexagonal tiles yield negative
+                positions.
 
 Returns:
     Absolute cell position in a layout.
@@ -6723,6 +6259,171 @@ Args:
 
 static const char *mkd_doc_fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout_2 = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_tile_clocking =
+R"doc(Clock zones of a cell grid. A clock zone is a tile, i.e., a region of
+`get_tile_size_x()` by `get_tile_size_y()` cells that one clock signal
+governs on every layer. Clock zones are addressed by their tile
+position on layer 0, and every clock query takes a cell and looks up
+the zone that `get_clock_zone` returns.
+
+Fabricable designs group cells into tiles large enough to be addressed
+by individual clocking electrodes buried in the substrate. Tiles of
+:math:`1 \times 1` cells are most likely not fabricable.
+
+Layouts of technologies with tile-based clocking derive from this
+class next to `cell_grid`.)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_assign_clock_number =
+R"doc(Overrides the clock number of a clock zone.
+
+Args:
+    cz: Clock zone.
+    cn: Clock number.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_checked = R"doc(Returns `size` if it is nonzero.)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_clocking =
+R"doc(Scheme, overridden clock numbers, and synchronization delays per clock
+zone.)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_get_clock_number =
+R"doc(The clock number of the clock zone that contains a cell.
+
+Args:
+    c: Cell position.
+
+Returns:
+    Clock number of `get_clock_zone(c)`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_get_clock_zone =
+R"doc(The clock zone that contains a cell: its tile on layer 0.
+
+Args:
+    c: Cell position.
+
+Returns:
+    Clock zone of `c`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_get_clocking_scheme =
+R"doc(A copy of the clocking scheme.
+
+Returns:
+    Clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_get_tile_size_x =
+R"doc(Tile width in cells.
+
+Returns:
+    Tile width.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_get_tile_size_y =
+R"doc(Tile height in cells.
+
+Returns:
+    Tile height.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_is_clocking_scheme =
+R"doc(Compares the clocking scheme against a name. Predefined names are
+constants in `fiction::layouts::clocking`.
+
+Args:
+    name: Clocking scheme name.
+
+Returns:
+    `true` iff the scheme is called `name`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_is_regularly_clocked =
+R"doc(Whether a regular scheme clocks the layout with no overridden zones.
+
+Returns:
+    `true` iff the clocking is regular.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_num_clocks =
+R"doc(Number of clock phases.
+
+Returns:
+    Number of clock phases.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_operator_eq =
+R"doc(Compares tile sizes and clocking scheme names. Overridden clock
+numbers and synchronization elements are not compared.
+
+Args:
+    other: Right-hand side clocking.
+
+Returns:
+    `true` iff both have the same tile size and scheme name.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_replace_clocking_scheme =
+R"doc(Replaces the clocking scheme.
+
+Args:
+    scheme: New clocking scheme over clock zones.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_set_tile_size_x =
+R"doc(Sets the tile width.
+
+Args:
+    tile_size_x: Tile width in cells.
+
+Raises:
+    std::invalid_argument: if `tile_size_x` is zero.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_set_tile_size_y =
+R"doc(Sets the tile height.
+
+Args:
+    tile_size_y: Tile height in cells.
+
+Raises:
+    std::invalid_argument: if `tile_size_y` is zero.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_tile_clocking =
+R"doc(Creates open clocking with four clocks and tiles of the given size.
+
+Args:
+    tile_size_x: Tile width in cells.
+    tile_size_y: Tile height in cells.
+
+Raises:
+    std::invalid_argument: if either dimension is zero.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_tile_x = R"doc(Tile width in cells.)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_tile_y = R"doc(Tile height in cells.)doc";
+
+static const char *mkd_doc_fiction_layouts_tile_clocking_zone_geometry =
+R"doc(The geometry `clocking::open` needs: clock-zone type and maximum fan-
+in of a Cartesian cell.)doc";
+
 static const char *mkd_doc_fiction_layouts_vertical_shift_cartesian =
 R"doc( 
 ```
@@ -6734,6 +6435,252 @@ R"doc(
 |       |
 +-------+
 ```)doc";
+
+static const char *mkd_doc_fiction_mol_qca_cell_type =
+R"doc(Types of molecular Quantum-dot Cellular Automata (molQCA) cells. The
+enumerators carry the symbols of their ASCII representation. A regular
+cell is clocked individually: `NORMAL1` to `NORMAL4` place it in clock
+phase 0 to 3, which is how the SCERPA simulator addresses clock
+regions and how SIM(7) gates arrange several clock regions in one
+tile.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_cell_type_CONST_0 = R"doc(Cell with a fixed polarization of logic 0.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_cell_type_CONST_1 = R"doc(Cell with a fixed polarization of logic 1.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_cell_type_EMPTY = R"doc(No cell.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_cell_type_INPUT = R"doc(Primary input cell.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_cell_type_NORMAL1 = R"doc(Regular cell in clock phase 0.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_cell_type_NORMAL2 = R"doc(Regular cell in clock phase 1.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_cell_type_NORMAL3 = R"doc(Regular cell in clock phase 2.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_cell_type_NORMAL4 = R"doc(Regular cell in clock phase 3.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_cell_type_OUTPUT = R"doc(Primary output cell.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_clock_number =
+R"doc(The clock phase of a regular molQCA cell.
+
+Args:
+    ct: Cell type.
+
+Returns:
+    Clock phase 0 to 3 of `NORMAL1` to `NORMAL4`; 0 for every other
+    type.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl_generate_cell_based_svg =
+R"doc(Generates an SVG string representing the layout and appends it to the
+output stream.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl_generate_description_color =
+R"doc(Generates and returns a pair of strings representing the description
+and color of the given cell.
+
+Args:
+    c: The cell for which to generate the description and color.
+
+Returns:
+    A pair of strings representing the description and color of the
+    given cell `c`.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl_lyt = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl_os = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl_ps = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl_run = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl_write_mol_qca_layout_svg_impl =
+R"doc(Stores the layout and drawing parameters.
+
+Args:
+    layout: Layout to draw.
+    stream: Output stream.
+    p: Drawing parameters.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_write_mol_qca_layout_svg =
+R"doc(Writes an SVG representation of a molQCA layout to an output stream.
+Each regular cell is colored by its clock phase.
+
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout.
+
+Args:
+    lyt: The layout to be written.
+    os: The output stream to write into.
+    ps: Parameters.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_write_mol_qca_layout_svg_2 =
+R"doc(Writes an SVG representation of a molQCA layout to a file. Each
+regular cell is colored by its clock phase.
+
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout. May throw an
+`std::ofstream::failure` if it cannot open the file.
+
+Args:
+    lyt: The layout to be written.
+    filename: The file name to create and write into. Should
+              preferably use the `.svg` extension.
+    ps: Parameters.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_write_mol_qca_layout_svg_params = R"doc(Parameters for writing SVG molQCA layouts.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_write_mol_qca_layout_svg_params_on_progress = R"doc(Receives completed serialization work and the phase total.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_io_write_mol_qca_layout_svg_params_simple = R"doc(Limit details to create smaller file sizes.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_is_constant =
+R"doc(Whether a molQCA cell has a fixed polarization.
+
+Args:
+    ct: Cell type.
+
+Returns:
+    `true` iff `ct` is `CONST_0` or `CONST_1`.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_is_normal =
+R"doc(Whether a molQCA cell is a regular cell of any clock phase.
+
+Args:
+    ct: Cell type.
+
+Returns:
+    `true` iff `ct` is one of `NORMAL1` to `NORMAL4`.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_layout =
+R"doc(A molQCA layout: molecular QCA cells on a planar Cartesian grid. Each
+cell carries a type, which includes the clock phase of regular cells,
+and, for inputs and outputs, a name. The layout has no crossing layer,
+no cell modes, and no tile-based clocking, since molQCA crossings are
+coplanar and every cell names its own clock phase. The layout has
+value semantics; copies are independent.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_layout_layout =
+R"doc(Creates an empty layout.
+
+Args:
+    ar: Highest cell position; its z-coordinate is ignored because the
+        layout is planar.
+    name: Layout name.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_layout_operator_eq =
+R"doc(Compares two layouts: same dimensions, cells, and names.
+
+Args:
+    other: Right-hand side layout.
+
+Returns:
+    `true` iff both layouts are identical.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_sim7_mol_library =
+R"doc(SIM(7)-MolPDK molecular QCA gate library.
+
+This MolQCA gate library corresponds to the physically simulated
+standard-cell library SIM(7)-MolPDK, introduced in "Bridging the Gap
+Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A
+Physically Simulated Standard-Cell Library" by B. Hien, D. Quinci, Y.
+Ardesi, G. Beretta, F. Ravera, M. Walter, and R. Wille, published at
+IEEE LANANO 2025 in Cusco, Peru. It is based on detailed physical
+simulations using the SCERPA tool, and tiles represent uniform
+:math:`10 \times 10` MolQCA cell blocks.
+
+More information and the open-source implementation are available at
+https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_sim7_mol_library_determine_port_routing =
+R"doc(Determines the 10x10 MolQCA connector positions used by the gate tile
+at `t`.
+
+Connector coordinates are placed at the center of the respective tile
+borders: north `(4, 0)`, east `(9, 4)`, south `(5, 9)`, and west `(0,
+5)`. Primary inputs and outputs without explicit incoming or outgoing
+signals are assigned to the west and east borders, respectively.
+
+Args:
+    lyt: Layout that hosts tile `t`.
+    t: Tile whose port routing is determined.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    RespectClocking: Whether to respect the layout clocking while
+                     tracing incoming and outgoing signals.
+
+Returns:
+    Incoming and outgoing molQCA connector positions for `t`.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_sim7_mol_library_set_up_1_to_3_fanout =
+R"doc(Selects the MolQCA 1-to-3 fan-out implementation for a routed gate
+tile.
+
+1-to-3 fan-outs always drive all three non-input sides. Their
+orientation is therefore determined by the missing outgoing connector
+side, which is the incoming side of the physical fan-out cell.
+
+Args:
+    p: Incoming and outgoing connector positions for the fan-out tile.
+
+Returns:
+    1-to-3 fan-out gate matching `p`'s missing outgoing connector.
+
+Raises:
+    std::out_of_range: If `p` does not describe a supported 1-to-3
+                       fan-out orientation.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_sim7_mol_library_set_up_gate =
+R"doc(Maps a gate-level tile to its MolQCA standard-cell implementation.
+
+Overrides the corresponding function in gate_library. Given a tile
+`t`, this function takes all necessary information from the stored
+grid into account to choose the correct gate representation for that
+tile. May it be a gate or wires. Rotation and special marks like input
+and output, const cells etc. are computed additionally.
+
+Args:
+    lyt: Layout that hosts tile `t`.
+    t: Tile to be realized as a molQCA gate.
+
+Template Args:
+    GateLyt: Cartesian gate-level layout type.
+
+Returns:
+    molQCA gate representation of `t` including I/Os, rotation, const
+    cells, etc.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_sim7_mol_library_sim7_mol_library = R"doc(Deleted constructor to prevent instantiation.)doc";
 
 static const char *mkd_doc_fiction_networks_all_incoming_edge_paths =
 R"doc(Returns a vector of all possible paths to reach the given node from
@@ -7851,18 +7798,23 @@ static const char *mkd_doc_fiction_networks_virtual_pi_network_virtual_storage_v
 
 static const char *mkd_doc_fiction_physical_design_apply_gate_library =
 R"doc(Applies a gate library to a given gate-level layout and, thereby,
-creates and returns a cell-level layout. The gate library type should
-provide all functions specified in gate_library. It is, thus, easiest
-to extend gate_library to implement a new gate library. Examples are
-`qca_one_library`, `topolinano_library`, and `sidb::bestagon_library`.
+creates and returns the layout type the library produces, e.g.,
+`qca::layout` for `qca::qca_one_library` or `sidb::layout` for
+`sidb::bestagon_library`. The gate library type should provide all
+functions specified in `fcn::gate_library`. It is, thus, easiest to
+extend `fcn::gate_library` to implement a new gate library.
+
+A cell grid spans the gate-level layout; if it has tile-based
+clocking, its clock zones are the library's tiles and follow the gate-
+level clocking, and, if it has synchronization elements, each clock
+zone receives the synchronization delay of its gate tile. The delay
+therefore also covers cells that are added to the zone later, e.g.,
+via cells. Input and output cells carry the names of their nodes. An
+SiDB layout lies on the H-Si(100)-2x1 lattice.
 
 May pass through, and thereby throw, an
 `unsupported_gate_type_exception` or an
 `unsupported_gate_orientation_exception`.
-
-Each clock zone of the cell-level layout receives the synchronization
-delay of its gate tile. The delay therefore also covers cells that are
-added to the zone later, e.g., via cells.
 
 Args:
     lyt: The gate-level layout.
@@ -7870,21 +7822,20 @@ Args:
                  gate mappings.
 
 Template Args:
-    CellLyt: Type of the returned cell-level layout.
     GateLibrary: Type of the gate library to apply.
     GateLyt: Type of the gate-level layout to apply the library to.
 
 Returns:
-    A cell-level layout that implements `lyt`'s gate types with
-    building blocks defined in `GateLibrary`.
+    A layout that implements `lyt`'s gate types with building blocks
+    defined in `GateLibrary`.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_apply_gate_library_to_defective_surface =
-R"doc(Applies a static gate library to a gate-level layout on a defective
-SiDB surface: the gates are placed on a Cartesian SiDB cell-level
-layout as with `apply_gate_library`, the result is converted with
-`to_sidb_layout`, and the surface's defects are copied into it.
+R"doc(Applies a static SiDB gate library to a gate-level layout on a
+defective surface: the gates are placed on the surface's lattice as
+with `apply_gate_library`, and the surface's defects are copied into
+the result.
 
 Args:
     lyt: The gate-level layout.
@@ -7901,40 +7852,34 @@ Returns:
 
 static const char *mkd_doc_fiction_physical_design_apply_parameterized_gate_library =
 R"doc(Applies a parameterized gate library to a given gate-level layout and,
-thereby, creates and returns a cell-level layout.
+thereby, creates and returns the layout type the library produces.
 
 May pass through, and thereby throw, an
 `unsupported_gate_type_exception`, an
 `unsupported_gate_orientation_exception` and any further custom
 exceptions of the gate libraries.
 
-Each clock zone of the cell-level layout receives the synchronization
-delay of its gate tile. The delay therefore also covers cells that are
-added to the zone later, e.g., via cells.
-
 Args:
     lyt: The gate-level layout.
     params: Parameter for the gate library.
 
 Template Args:
-    CellLyt: Type of the returned cell-level layout.
     GateLibrary: Type of the gate library to apply.
     GateLyt: Type of the gate-level layout to apply the library to.
     Params: Type of the parameter used for SiDB on-the-fly gate
             library.
 
 Returns:
-    A cell-level layout that implements `lyt`'s gate types with
-    building blocks defined in `GateLibrary`.
+    A layout that implements `lyt`'s gate types with building blocks
+    defined in `GateLibrary`.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_apply_parameterized_gate_library_to_defective_surface =
-R"doc(Applies a parameterized gate library to a gate-level layout on a
-defective SiDB surface: the library designs every gate with the
-surface's defects near its tile in place, the gates are placed on a
-Cartesian SiDB cell-level layout, the result is converted with
-`to_sidb_layout`, and the surface's defects are copied into it.
+R"doc(Applies a parameterized SiDB gate library to a gate-level layout on a
+defective surface: the library designs every gate with the surface's
+defects near its tile in place, the gates are placed on the surface's
+lattice, and the surface's defects are copied into the result.
 
 Args:
     lyt: The gate-level layout.
@@ -8087,6 +8032,25 @@ e.g., if further wire segments were moving the head of the branch.
 Args:
     ntk_node: Node whose branch is to be updated.
     lyt_signal: New signal pointing to the end of the branch.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_cell_grid_extent =
+R"doc(The highest cell position of the Cartesian cell grid that a gate
+library's tiles span when applied to a gate-level layout, respecting
+tilings in which even and odd rows or columns do not line up.
+`apply_gate_library` sizes QCA, molQCA, and iNML layouts this way.
+
+Args:
+    gate_lyt: Gate-level layout.
+
+Template Args:
+    GateLibrary: Gate library whose tile size is used.
+    GateLyt: Gate-level layout type.
+
+Returns:
+    Highest cell position of the grid, including the layer count of
+    `gate_lyt`.
 
 )doc";
 
@@ -8277,14 +8241,16 @@ R"doc(Prepares cell mapping with optional gate counts.
 Args:
     lyt: Gate-level source layout.
     callback: Receives completed gate mappings.
+    lat: Lattice of the produced layout if the library places SiDBs.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_assign_gate =
-R"doc(Assigns a gate implementation to the cells of its tile and the tile's
-synchronization delay to the clock zone that contains the tile. A
-ground wire and a crossing wire share one clock zone, which keeps the
-larger delay.
+R"doc(Assigns a gate implementation to the cells of its tile. Input and
+output cells of a cell grid receive the node name. If the layout has
+synchronization elements, the tile's synchronization delay goes to the
+clock zone that contains the tile; a ground wire and a crossing wire
+share one clock zone, which keeps the larger delay.
 
 Args:
     c: Top-left cell of the tile where the gate is placed.
@@ -8293,24 +8259,36 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_cell_lyt = R"doc(Cell-level layout.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_cell_lyt = R"doc(Produced layout.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_determine_aspect_ratio_for_cell_level_layout =
-R"doc(Computes the (inclusively) bounding coordinate for a cell-level layout
-that is derived from the dimensions of the given gate-level layout,
-while respecting tiling geometry in which even and odd rows/columns do
-not line up.
+static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_create_cell_layout =
+R"doc(Creates the empty layout that receives the gates: an SiDB layout on
+the given lattice, or a cell grid spanning the gate-level layout whose
+clock zones are the library's tiles and follow the gate-level
+clocking.
 
 Args:
-    gate_lyt: Gate-level layout of which the dimensions are read.
+    src: Gate-level source layout.
+    lat: Lattice of an SiDB layout.
 
 Returns:
-    Aspect ratio for a cell-level layout that corresponds to the
-    dimensions of the given gate-level layout.
+    Empty layout.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_gate_lyt = R"doc(Gate-level layout.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_map_gates =
+R"doc(Places the implementation of every nonconstant node in its tile.
+
+Args:
+    set_up_gate: Returns the implementation of a tile.
+
+Template Args:
+    SetUpGate: Callable on `(const GateLyt&, const tile<GateLyt>&)`
+               returning a gate.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_mapping_count =
 R"doc(Counts nonconstant nodes using the mapping traversal, or skips the
@@ -8324,42 +8302,29 @@ Returns:
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_on_progress = R"doc(Receives completed gate mappings.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_run_parameterized_gate_library =
-R"doc(Run the cell layout generation process.
-
-This function performs the cell layout generation process based on the
-SiDB on-the-fly gate library and the gate-level layout information
-provided by `GateLibrary` and `gate_lyt`. It iterates through the
-nodes in the gate-level layout and maps gates to cell implementations
-based on their corresponding positions and types. Optionally, it
-performs post-layout optimization and sets the layout name if certain
-conditions are met.
+R"doc(Maps every gate of the gate-level layout to its implementation from a
+parameterized gate library such as the SiDB on-the-fly gate library,
+and recovers the layout name.
 
 Args:
-    params: Parameters used for the SiDB on-the-fly gate library.
+    params: Parameters of the gate library.
     defect_surface: Optional defect surface.
 
 Template Args:
-    Params: Type of the Parameters used for the SiDB on-the-fly gate
-            library.
+    Params: Type of the parameters of the gate library.
 
 Returns:
-    A `CellLyt` object representing the generated cell layout.
+    The produced layout.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_run_static_gate_library =
-R"doc(Run the cell layout generation process.
-
-This function performs the cell layout generation process based on the
-gate library and the gate-level layout information provided by
-`GateLibrary` and `gate_lyt`. It iterates through the nodes in the
-gate-level layout and maps gates to cell implementations based on
-their corresponding positions and types. Optionally, it performs post-
-layout optimization and sets the layout name if certain conditions are
-met.
+R"doc(Maps every gate of the gate-level layout to its implementation from
+the static gate library, runs the library's post-layout optimization
+if it provides one, and recovers the layout name.
 
 Returns:
-    A `CellLyt` object representing the generated cell layout.
+    The produced layout.
 
 )doc";
 
@@ -11757,8 +11722,8 @@ the target is never obstructed. A coordinate or connection is
 obstructed if the `obstructions` argument marks it or if the layout's
 `is_obstructed_coordinate` or `is_obstructed_connection` reports it.
 Gate-level layouts report their occupied tiles and existing signal
-connections, and cell-level layouts report their occupied cells. Paths
-in gate-level layouts therefore avoid all placed gates and wires.
+connections, so paths in gate-level layouts avoid all placed gates and
+wires.
 
 If crossings are enabled in the parameters, paths in gate-level
 layouts may cross other wires on the crossing layer. Wire crossings
@@ -12281,8 +12246,8 @@ the target is never obstructed. A coordinate or connection is
 obstructed if the `obstructions` argument marks it or if the layout's
 `is_obstructed_coordinate` or `is_obstructed_connection` reports it.
 Gate-level layouts report their occupied tiles and existing signal
-connections, and cell-level layouts report their occupied cells. Paths
-in gate-level layouts therefore avoid all placed gates and wires.
+connections, so paths in gate-level layouts avoid all placed gates and
+wires.
 
 If crossings are enabled in the parameters, paths in gate-level
 layouts may cross other wires on the crossing layer. Wire crossings
@@ -12665,8 +12630,8 @@ the target is never obstructed. A coordinate or connection is
 obstructed if the `obstructions` argument marks it or if the layout's
 `is_obstructed_coordinate` or `is_obstructed_connection` reports it.
 Gate-level layouts report their occupied tiles and existing signal
-connections, and cell-level layouts report their occupied cells. Paths
-in gate-level layouts therefore avoid all placed gates and wires.
+connections, so paths in gate-level layouts avoid all placed gates and
+wires.
 
 If crossings are enabled in the parameters, paths in gate-level
 layouts may cross other wires on the crossing layer. Wire crossings
@@ -13151,6 +13116,32 @@ static const char *mkd_doc_fiction_physical_design_wiring_reduction_stats_y_size
 
 static const char *mkd_doc_fiction_physical_design_wiring_reduction_stats_y_size_before = R"doc(Layout height before the wiring reduction process.)doc";
 
+static const char *mkd_doc_fiction_qca_cell_mode = R"doc(Modes of QCA cells as known from QCADesigner.)doc";
+
+static const char *mkd_doc_fiction_qca_cell_mode_CROSSOVER = R"doc(Cell of a multilayer crossing.)doc";
+
+static const char *mkd_doc_fiction_qca_cell_mode_NORMAL = R"doc(Regular cell.)doc";
+
+static const char *mkd_doc_fiction_qca_cell_mode_ROTATED = R"doc(Cell rotated by 45°.)doc";
+
+static const char *mkd_doc_fiction_qca_cell_mode_VERTICAL = R"doc(Via cell that connects the ground and the crossing layer.)doc";
+
+static const char *mkd_doc_fiction_qca_cell_type =
+R"doc(Types of Quantum-dot Cellular Automata (QCA) cells. The enumerators
+carry the symbols of their ASCII representation.)doc";
+
+static const char *mkd_doc_fiction_qca_cell_type_CONST_0 = R"doc(Cell with a fixed polarization of logic 0.)doc";
+
+static const char *mkd_doc_fiction_qca_cell_type_CONST_1 = R"doc(Cell with a fixed polarization of logic 1.)doc";
+
+static const char *mkd_doc_fiction_qca_cell_type_EMPTY = R"doc(No cell.)doc";
+
+static const char *mkd_doc_fiction_qca_cell_type_INPUT = R"doc(Primary input cell.)doc";
+
+static const char *mkd_doc_fiction_qca_cell_type_NORMAL = R"doc(Regular cell.)doc";
+
+static const char *mkd_doc_fiction_qca_cell_type_OUTPUT = R"doc(Primary output cell.)doc";
+
 static const char *mkd_doc_fiction_qca_io_detail_qcad_cell_pos = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_qcad_cell_pos_x = R"doc()doc";
@@ -13164,45 +13155,6 @@ static const char *mkd_doc_fiction_qca_io_detail_qcad_color_blue = R"doc()doc";
 static const char *mkd_doc_fiction_qca_io_detail_qcad_color_green = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_qcad_color_red = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_generate_cell_based_svg =
-R"doc(Generates an SVG string representing the cell-based clocked cell
-layout and appends it to the output stream.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_generate_description_color =
-R"doc(Generates and returns a pair of strings representing the description
-and color of the given cell.
-
-Args:
-    c: The cell for which to generate the description and color.
-
-Returns:
-    A pair of strings representing the description and color of the
-    given cell `c`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_lyt = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_os = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_ps = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_write_mol_qca_layout_svg_impl =
-R"doc(Stores the layout and drawing parameters.
-
-Args:
-    layout: Layout to draw.
-    stream: Output stream.
-    p: Drawing parameters.
-
-)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl = R"doc()doc";
 
@@ -13291,58 +13243,10 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_io_unsupported_cell_type_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_unsupported_cell_type_exception_coord = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_unsupported_cell_type_exception_unsupported_cell_type_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_unsupported_cell_type_exception_where = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_io_write_mol_qca_layout_svg =
-R"doc(Writes an SVG representation of a cell-level MolQCA layout to an
-output stream. Only cell-based layouts are supported, since the
-clocking scheme is not uniform at the gate level. Currently, only a
-uniform gate size of :math:`10 \times 10` is supported.
-
-May throw an `unsupported_cell_type_exception` if it encounters
-unsupported cell types in the layout.
-
-Args:
-    lyt: The layout to be written.
-    os: The output stream to write into.
-    ps: Parameters.
-
-Template Args:
-    Lyt: Cell-level molQCA layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_io_write_mol_qca_layout_svg_2 =
-R"doc(Writes an SVG representation of a cell-level MolQCA layout to a file.
-Only cell-based layouts are supported, since the clocking scheme is
-not uniform at the gate level. Currently, only a uniform gate size of
-:math:`10 \times 10` is supported.
-
-May throw an `unsupported_cell_type_exception` if it encounters
-unsupported cell types in the layout. May throw an
-`std::ofstream::failure` if it cannot open the file.
-
-Args:
-    lyt: The layout to be written.
-    filename: The file name to create and write into. Should
-              preferably use the `.svg` extension.
-    ps: Parameters.
-
-Template Args:
-    Lyt: Cell-level molQCA layout type.
-
-)doc";
-
 static const char *mkd_doc_fiction_qca_io_write_qca_layout =
-R"doc(Writes a cell-level QCA layout to a qca file that is used by
-QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/), a physical
-simulator for the QCA technology platform.
+R"doc(Writes a QCA layout to a qca file that is used by QCADesigner
+(https://waluslab.ece.ubc.ca/qcadesigner/), a physical simulator for
+the QCA technology platform.
 
 This overload uses an output stream to write into.
 
@@ -13351,15 +13255,12 @@ Args:
     os: The output stream to write into.
     ps: Parameters.
 
-Template Args:
-    Lyt: Cell-level QCA layout type.
-
 )doc";
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_2 =
-R"doc(Writes a cell-level QCA layout to a qca file that is used by
-QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/), a physical
-simulator for the QCA technology platform.
+R"doc(Writes a QCA layout to a qca file that is used by QCADesigner
+(https://waluslab.ece.ubc.ca/qcadesigner/), a physical simulator for
+the QCA technology platform.
 
 This overload uses a file name to create and write into.
 
@@ -13368,9 +13269,6 @@ Args:
     filename: The file name to create and write into. Should
               preferably use the `.qca` extension.
     ps: Parameters.
-
-Template Args:
-    Lyt: Cell-level QCA layout type.
 
 )doc";
 
@@ -13381,10 +13279,10 @@ static const char *mkd_doc_fiction_qca_io_write_qca_layout_params_create_inter_l
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_params_on_progress = R"doc(Receives completed serialization work and the phase total.)doc";
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg =
-R"doc(Writes an SVG representation of a cell-level QCA layout into an output
-stream. Both tile- and cell-based layouts are supported. For tile-
-based layouts, QCA layouts of tile size :math:`5 \times 5` are
-supported exclusively so far.
+R"doc(Writes an SVG representation of a QCA layout into an output stream.
+Both tile- and cell-based layouts are supported. For tile-based
+layouts, QCA layouts of tile size :math:`5 \times 5` are supported
+exclusively so far.
 
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
@@ -13397,16 +13295,13 @@ Args:
     os: The output stream to write into.
     ps: Parameters.
 
-Template Args:
-    Lyt: Cell-level QCA layout type.
-
 )doc";
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_2 =
-R"doc(Writes an SVG representation of a cell-level QCA layout into a file.
-Both tile- and cell-based layouts are supported. For tile-based
-layouts, QCA layouts of tile size :math:`5 \times 5` are supported
-exclusively so far.
+R"doc(Writes an SVG representation of a QCA layout into a file. Both tile-
+and cell-based layouts are supported. For tile-based layouts, QCA
+layouts of tile size :math:`5 \times 5` are supported exclusively so
+far.
 
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
@@ -13421,9 +13316,6 @@ Args:
               preferably use the `.svg` extension.
     ps: Parameters.
 
-Template Args:
-    Lyt: Cell-level QCA layout type.
-
 )doc";
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_params = R"doc(Parameters for writing SVG QCA layouts.)doc";
@@ -13432,236 +13324,137 @@ static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_params_on_progres
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_params_simple = R"doc(Limit details to create smaller file sizes.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_qca_technology =
-R"doc(Molecular Quantum-dot Cellular Automata (molQCA) technology
-implementation of the FCN concept.
-
-MolQCA normal cell symbols encode their SCERPA clock phase directly.
-The helper predicates below keep phase handling centralized for
-writers and gate libraries that need to translate cell symbols into
-simulator-specific metadata.)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_clock_number =
-R"doc(Returns the SCERPA clock number encoded by a molQCA normal cell type.
-
-Non-normal cell types do not encode a clock phase and are mapped to
-phase 0 for callers that need a deterministic fallback.
+static const char *mkd_doc_fiction_qca_is_constant =
+R"doc(Whether a QCA cell has a fixed polarization.
 
 Args:
-    c: Cell type to inspect.
+    ct: Cell type.
 
 Returns:
-    Clock number in the range 0 to 3.
+    `true` iff `ct` is `CONST_0` or `CONST_1`.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
+static const char *mkd_doc_fiction_qca_layout =
+R"doc(A QCA layout: QCA cells on a Cartesian grid with a ground layer (`z =
+0`) and a crossing layer (`z = 1`). Cells carry a type, a mode, and,
+for inputs and outputs, a name. Clock zones are tiles of cells, and
+each clock zone can be a synchronization element that extends its Hold
+phase. The layout has value semantics; copies are independent.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mark_EMPTY = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mark_INPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mark_OUTPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mode = R"doc(Possible cell modes for molQCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mode_CROSSOVER = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mode_NORMAL = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mode_ROTATED = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mode_VERTICAL = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type = R"doc(Possible types of molQCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_CONST_0 = R"doc(Symbol used for constant 0 input molQCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_CONST_1 = R"doc(Symbol used for constant 1 input molQCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_EMPTY = R"doc(Symbol used for empty molQCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_INPUT = R"doc(Symbol used for input molQCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_NORMAL1 = R"doc(Symbol used for normal molQCA cells with clocking 0.)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_NORMAL2 = R"doc(Symbol used for normal molQCA cells with clocking 1.)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_NORMAL3 = R"doc(Symbol used for normal molQCA cells with clocking 2.)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_NORMAL4 = R"doc(Symbol used for normal molQCA cells with clocking 3.)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_OUTPUT = R"doc(Symbol used for output molQCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_const_0_cell =
-R"doc(Checks whether the given cell type is a constant-0 input cell.
+static const char *mkd_doc_fiction_qca_layout_assign_cell_mode =
+R"doc(Assigns a mode to a cell. `cell_mode::NORMAL` removes a stored mode.
 
 Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::CONST_0`.
+    c: Cell position.
+    m: Cell mode.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_const_1_cell =
-R"doc(Checks whether the given cell type is a constant-1 input cell.
+static const char *mkd_doc_fiction_qca_layout_assign_cell_type =
+R"doc(Assigns a cell type to a position. Assigning `EMPTY` removes the cell
+with its name and mode.
 
 Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::CONST_1`.
+    c: Cell position.
+    ct: Cell type.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_constant_cell =
-R"doc(Checks whether the given cell type is a constant input cell, i.e.,
-either `CONST_0` or `CONST_1`.
+static const char *mkd_doc_fiction_qca_layout_assign_synchronization_element =
+R"doc(Turns a clock zone into a synchronization element.
 
 Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::CONST_0` or `cell_type::CONST_1`.
+    cz: Clock zone.
+    se: Number of full clock cycles to extend the Hold phase of `cz`
+        by; 0 turns `cz` back into a normal clock zone.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_crossover_cell_mode =
-R"doc(Checks whether the given cell mode is the crossover mode.
+static const char *mkd_doc_fiction_qca_layout_cell_modes = R"doc(Modes of the cells whose mode is not `cell_mode::NORMAL`.)doc";
+
+static const char *mkd_doc_fiction_qca_layout_get_cell_mode =
+R"doc(The mode of a cell.
 
 Args:
-    m: Cell mode to check.
+    c: Cell position.
 
 Returns:
-    `true` iff `m` is `cell_mode::CROSSOVER`.
+    Mode of the cell at `c`, `cell_mode::NORMAL` if none is stored.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_empty_cell =
-R"doc(Checks whether the given cell type is empty.
+static const char *mkd_doc_fiction_qca_layout_get_synchronization_element =
+R"doc(The Hold-phase extension of the clock zone that contains a cell.
 
 Args:
-    c: Cell type to check.
+    c: Cell position.
 
 Returns:
-    `true` iff `c` is `cell_type::EMPTY`.
+    Hold-phase extension of `get_clock_zone(c)` in full clock cycles.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_input_cell =
-R"doc(Checks whether the given cell type is an input cell.
+static const char *mkd_doc_fiction_qca_layout_is_synchronization_element =
+R"doc(Whether the clock zone that contains a cell is a synchronization
+element.
 
 Args:
-    c: Cell type to check.
+    c: Cell position.
 
 Returns:
-    `true` iff `c` is `cell_type::INPUT`.
+    `true` iff `get_clock_zone(c)` is a synchronization element.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_normal_cell =
-R"doc(Checks whether the given cell type is a normal cell, i.e., any of the
-four clocking phases.
+static const char *mkd_doc_fiction_qca_layout_layout =
+R"doc(Creates an empty layout with open clocking.
 
 Args:
-    c: Cell type to check.
+    ar: Highest cell position; `ar.z = 1` enables the crossing layer.
+    name: Layout name.
+    tile_size_x: Clock-zone width in cells.
+    tile_size_y: Clock-zone height in cells.
 
-Returns:
-    `true` iff `c` is `cell_type::NORMAL1`, `cell_type::NORMAL2`,
-    `cell_type::NORMAL3`, or `cell_type::NORMAL4`.
+Raises:
+    std::invalid_argument: if either clock-zone dimension is zero.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_normal_cell1 =
-R"doc(Checks whether the given cell type is a normal cell with clocking 0.
+static const char *mkd_doc_fiction_qca_layout_layout_2 =
+R"doc(Creates an empty layout clocked by the given scheme.
 
 Args:
-    c: Cell type to check.
+    ar: Highest cell position; `ar.z = 1` enables the crossing layer.
+    scheme: Clocking scheme over clock zones.
+    name: Layout name.
+    tile_size_x: Clock-zone width in cells.
+    tile_size_y: Clock-zone height in cells.
 
-Returns:
-    `true` iff `c` is `cell_type::NORMAL1`.
+Raises:
+    std::invalid_argument: if either clock-zone dimension is zero.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_normal_cell2 =
-R"doc(Checks whether the given cell type is a normal cell with clocking 1.
-
-Args:
-    c: Cell type to check.
+static const char *mkd_doc_fiction_qca_layout_num_se =
+R"doc(Number of synchronization elements.
 
 Returns:
-    `true` iff `c` is `cell_type::NORMAL2`.
+    Number of clock zones with a nonzero Hold-phase extension.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_normal_cell3 =
-R"doc(Checks whether the given cell type is a normal cell with clocking 2.
+static const char *mkd_doc_fiction_qca_layout_operator_eq =
+R"doc(Compares two layouts: same cells, names, modes, tile size, and
+clocking scheme name.
 
 Args:
-    c: Cell type to check.
+    other: Right-hand side layout.
 
 Returns:
-    `true` iff `c` is `cell_type::NORMAL3`.
+    `true` iff both layouts are identical.
 
 )doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_normal_cell4 =
-R"doc(Checks whether the given cell type is a normal cell with clocking 3.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::NORMAL4`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_normal_cell_mode =
-R"doc(Checks whether the given cell mode is the normal mode.
-
-Args:
-    m: Cell mode to check.
-
-Returns:
-    `true` iff `m` is `cell_mode::NORMAL`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_output_cell =
-R"doc(Checks whether the given cell type is an output cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::OUTPUT`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_rotated_cell_mode =
-R"doc(Checks whether the given cell mode is the rotated mode.
-
-Args:
-    m: Cell mode to check.
-
-Returns:
-    `true` iff `m` is `cell_mode::ROTATED`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_is_vertical_cell_mode =
-R"doc(Checks whether the given cell mode is the vertical mode.
-
-Args:
-    m: Cell mode to check.
-
-Returns:
-    `true` iff `m` is `cell_mode::VERTICAL`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_mol_qca_technology_mol_qca_technology = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_qca_one_library =
 R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
@@ -13677,14 +13470,13 @@ schemes. Tiles in QCA ONE are :math:`5 \times 5` QCA cells.)doc";
 static const char *mkd_doc_fiction_qca_qca_one_library_determine_port_routing = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_qca_one_library_post_layout_optimization =
-R"doc(Post-layout optimization that assigns via cell mode to wire crossings.
+R"doc(Post-layout optimization that turns the ends of crossing wires into
+vias: a crossing-layer cell with at most one neighbor gets the via
+mode, and a via cell is added below it on the ground layer.
 
 Args:
-    lyt: The cell-level layout that has been created via application
-         of `set_up_gate`.
-
-Template Args:
-    CellLyt: Cell-level layout type.
+    lyt: The QCA layout that has been created via application of
+         `set_up_gate`.
 
 )doc";
 
@@ -13709,248 +13501,6 @@ Returns:
     cells, etc.
 
 )doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology =
-R"doc(Quantum-dot Cellular Automata (QCA) technology implementation of the
-FCN concept.)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_mark_EMPTY = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_mark_INPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_mark_OUTPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_mode = R"doc(Possible cell modes for QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_mode_CROSSOVER = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_mode_NORMAL = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_mode_ROTATED = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_mode_VERTICAL = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_type = R"doc(Possible types of QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_type_CONST_0 = R"doc(Symbol used for constant 0 input QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_type_CONST_1 = R"doc(Symbol used for constant 1 input QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_type_EMPTY = R"doc(Symbol used for empty QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_type_INPUT = R"doc(Symbol used for input QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_type_NORMAL = R"doc(Symbol used for normal QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_cell_type_OUTPUT = R"doc(Symbol used for output QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_is_const_0_cell =
-R"doc(Checks whether the given cell type is a constant-0 input cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::CONST_0`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_is_const_1_cell =
-R"doc(Checks whether the given cell type is a constant-1 input cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::CONST_1`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_is_constant_cell =
-R"doc(Checks whether the given cell type is a constant input cell, i.e.,
-either `CONST_0` or `CONST_1`.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::CONST_0` or `cell_type::CONST_1`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_is_crossover_cell_mode =
-R"doc(Checks whether the given cell mode is the crossover mode.
-
-Args:
-    m: Cell mode to check.
-
-Returns:
-    `true` iff `m` is `cell_mode::CROSSOVER`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_is_empty_cell =
-R"doc(Checks whether the given cell type is empty.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::EMPTY`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_is_input_cell =
-R"doc(Checks whether the given cell type is an input cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::INPUT`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_is_normal_cell =
-R"doc(Checks whether the given cell type is a normal cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::NORMAL`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_is_normal_cell_mode =
-R"doc(Checks whether the given cell mode is the normal mode.
-
-Args:
-    m: Cell mode to check.
-
-Returns:
-    `true` iff `m` is `cell_mode::NORMAL`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_is_output_cell =
-R"doc(Checks whether the given cell type is an output cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::OUTPUT`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_is_rotated_cell_mode =
-R"doc(Checks whether the given cell mode is the rotated mode.
-
-Args:
-    m: Cell mode to check.
-
-Returns:
-    `true` iff `m` is `cell_mode::ROTATED`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_is_vertical_cell_mode =
-R"doc(Checks whether the given cell mode is the vertical mode.
-
-Args:
-    m: Cell mode to check.
-
-Returns:
-    `true` iff `m` is `cell_mode::VERTICAL`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_qca_technology_qca_technology = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_sim7_mol_library =
-R"doc(SIM(7)-MolPDK molecular QCA gate library.
-
-This MolQCA gate library corresponds to the physically simulated
-standard-cell library SIM(7)-MolPDK, introduced in "Bridging the Gap
-Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A
-Physically Simulated Standard-Cell Library" by B. Hien, D. Quinci, Y.
-Ardesi, G. Beretta, F. Ravera, M. Walter, and R. Wille, published at
-IEEE LANANO 2025 in Cusco, Peru. It is based on detailed physical
-simulations using the SCERPA tool, and tiles represent uniform
-:math:`10 \times 10` MolQCA cell blocks.
-
-More information and the open-source implementation are available at
-https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.)doc";
-
-static const char *mkd_doc_fiction_qca_sim7_mol_library_determine_port_routing =
-R"doc(Determines the 10x10 MolQCA connector positions used by the gate tile
-at `t`.
-
-Connector coordinates are placed at the center of the respective tile
-borders: north `(4, 0)`, east `(9, 4)`, south `(5, 9)`, and west `(0,
-5)`. Primary inputs and outputs without explicit incoming or outgoing
-signals are assigned to the west and east borders, respectively.
-
-Args:
-    lyt: Layout that hosts tile `t`.
-    t: Tile whose port routing is determined.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    RespectClocking: Whether to respect the layout clocking while
-                     tracing incoming and outgoing signals.
-
-Returns:
-    Incoming and outgoing molQCA connector positions for `t`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_sim7_mol_library_set_up_1_to_3_fanout =
-R"doc(Selects the MolQCA 1-to-3 fan-out implementation for a routed gate
-tile.
-
-1-to-3 fan-outs always drive all three non-input sides. Their
-orientation is therefore determined by the missing outgoing connector
-side, which is the incoming side of the physical fan-out cell.
-
-Args:
-    p: Incoming and outgoing connector positions for the fan-out tile.
-
-Returns:
-    1-to-3 fan-out gate matching `p`'s missing outgoing connector.
-
-Raises:
-    std::out_of_range: If `p` does not describe a supported 1-to-3
-                       fan-out orientation.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_sim7_mol_library_set_up_gate =
-R"doc(Maps a gate-level tile to its MolQCA standard-cell implementation.
-
-Overrides the corresponding function in gate_library. Given a tile
-`t`, this function takes all necessary information from the stored
-grid into account to choose the correct gate representation for that
-tile. May it be a gate or wires. Rotation and special marks like input
-and output, const cells etc. are computed additionally.
-
-Args:
-    lyt: Layout that hosts tile `t`.
-    t: Tile to be realized as a molQCA gate.
-
-Template Args:
-    GateLyt: Cartesian gate-level layout type.
-
-Returns:
-    molQCA gate representation of `t` including I/Os, rotation, const
-    cells, etc.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_sim7_mol_library_sim7_mol_library = R"doc(Deleted constructor to prevent instantiation.)doc";
 
 static const char *mkd_doc_fiction_sidb_bestagon_library =
 R"doc(A gate library for the SiDB technology that is based on Y-shaped gates
@@ -14742,7 +14292,7 @@ Raises:
                           individual gate budget expires. No partial
                           circuit is returned. Deadline checks are
                           cooperative and do not interrupt allocation
-                          or layout conversion.
+                          or cell placement.
 
 )doc";
 
@@ -16504,9 +16054,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_row_of =
-R"doc(The row of a site counted in single SiDB rows: `2 * y + z`. This is
-the y-coordinate of the Cartesian cell-level layouts that
-`physical_design::apply_gate_library` produces.
+R"doc(The row of a site counted in single SiDB rows: `2 * y + z`. SiDB gate
+libraries describe their gates on a grid of such rows.
 
 Args:
     s: Site.
@@ -16515,89 +16064,6 @@ Returns:
     Row of `s`.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology =
-R"doc(Silicon Dangling Bond (SiDB) technology implementation of the FCN
-concept.)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mark_EMPTY = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mark_INPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mark_LOGIC = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mark_OUTPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mode = R"doc(SiDB cells do not have modes.)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_is_empty_cell =
-R"doc(Checks whether the given cell type is empty.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::EMPTY`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_is_input_cell =
-R"doc(Checks whether the given cell type is an input cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::INPUT`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_is_logic_cell =
-R"doc(Checks whether the given cell type is a logic cell (e.g., a canvas
-SiDB).
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::LOGIC`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_is_normal_cell =
-R"doc(Checks whether the given cell type is a normal cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::NORMAL`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_is_normal_cell_mode =
-R"doc(Checks whether the given cell mode is the normal mode. SiDB cells do
-not have modes, so this always holds.
-
-Returns:
-    `true`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_is_output_cell =
-R"doc(Checks whether the given cell type is an output cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::OUTPUT`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_sidb_technology_sidb_technology = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilience =
 R"doc(Calculates the band bending resilience of an SiDB gate: the minimum
@@ -24844,37 +24310,22 @@ Returns:
 static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library_skeleton_bestagon_library = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_to_lattice_site =
-R"doc(The lattice site a Cartesian cell-level layout coordinate refers to:
-the coordinate counts single SiDB rows, so row `y` becomes unit cell
-`y / 2`, basis site `y mod 2`.
+R"doc(The site that a gate-library grid coordinate refers to. SiDB gate
+libraries describe gates on a grid whose rows are single SiDB rows, so
+row `y` becomes unit cell `y / 2`, basis site `y mod 2`.
 
 Args:
-    c: Coordinate.
+    c: Grid coordinate.
 
 Template Args:
-    Coordinate: Coordinate type: `layouts::coords::offset` or
-                `layouts::coords::cube`.
+    Coordinate: Grid coordinate type, e.g., `layouts::coords::offset`
+                or `layouts::coords::cube`.
 
 Returns:
-    The lattice site of `c`.
+    The site of `c`.
 
-)doc";
-
-static const char *mkd_doc_fiction_sidb_to_sidb_layout =
-R"doc(Converts a Cartesian SiDB cell-level layout, as produced by placement
-and routing, into an `sidb::layout` on the given lattice. Cell types,
-inputs, outputs, and the layout name carry over; cell names, cell
-modes, tile sizes, and clocking do not.
-
-Args:
-    lyt: Layout to convert.
-    lat: Lattice of the resulting layout; H-Si(100) 2x1 by default.
-
-Template Args:
-    CellLyt: SiDB cell-level layout type.
-
-Returns:
-    The SiDB layout.
+Raises:
+    std::out_of_range: if the row exceeds the range of lattice sites.
 
 )doc";
 

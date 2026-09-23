@@ -18,14 +18,11 @@
 #pragma once
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
-#include <fiction/technology/inml/technology.hpp>
-#include <fiction/technology/qca/technology.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -143,22 +140,4 @@ using py_shifted_cartesian_gate_layout = fiction::layouts::gate_level_layout<py_
  * Hexagonal gate layout.
  */
 using py_hexagonal_gate_layout = fiction::layouts::gate_level_layout<py_hexagonal_layout>;
-/**
- * Cartesian cell layout.
- */
-template <typename Technology>
-using py_cartesian_cell_layout = fiction::layouts::cell_level_layout<Technology, py_cartesian_layout>;
-/**
- * QCA cell layout.
- */
-using py_qca_layout = py_cartesian_cell_layout<fiction::qca::qca_technology>;
-/**
- * iNML cell layout.
- */
-using py_inml_layout = py_cartesian_cell_layout<fiction::inml::inml_technology>;
-/**
- * MolQCA cell layout.
- */
-using py_mol_qca_layout = py_cartesian_cell_layout<fiction::qca::mol_qca_technology>;
-
 }  // namespace pyfiction
