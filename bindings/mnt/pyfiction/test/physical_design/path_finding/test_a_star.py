@@ -11,7 +11,6 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction import (
-    RoutingObstructions,
     a_star,
     a_star_distance,
     a_star_params,
@@ -20,6 +19,7 @@ from mnt.pyfiction import (
     enumerate_all_paths,
     hexagonal_gate_layout,
     hexagonal_layout,
+    obstructions,
     offset_coordinate,
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
@@ -31,7 +31,7 @@ def test_search_constraints_are_local() -> None:
     """Searches combine persistent constraints with independent routing data."""
     layout = cartesian_gate_layout((2, 2), "2DDWave")
     layout.obstruct_coordinate((1, 0))
-    blocked = RoutingObstructions()
+    blocked = obstructions()
     blocked.obstruct_connection((0, 1), (1, 1))
     expected = [(0, 0), (0, 1), (0, 2), (1, 2), (2, 2)]
     for _ in range(2):

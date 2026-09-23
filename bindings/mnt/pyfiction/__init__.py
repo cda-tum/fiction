@@ -30,8 +30,6 @@ if sys.platform == "win32":
         os.add_dll_directory(str(os.environ["ALGLIB_DIR"]))
 
 from .pyfiction import (  # type: ignore[import-not-found]
-    CubeRoutingObstructions,
-    RoutingObstructions,
     __compiled_date__,
     __compiled_time__,
     __repo__,
@@ -205,6 +203,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     normalize_layout_coordinates,
     num_adjacent_coordinates,
     num_clks,
+    obstructions,
     occupation_probability_gate_based,
     occupation_probability_non_gate_based,
     odd_column_hex_gate_layout,
@@ -356,8 +355,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
 )
 
 __all__ = [
-    "CubeRoutingObstructions",
-    "RoutingObstructions",
     "__compiled_date__",
     "__compiled_time__",
     "__repo__",
@@ -531,6 +528,7 @@ __all__ = [
     "normalize_layout_coordinates",
     "num_adjacent_coordinates",
     "num_clks",
+    "obstructions",
     "occupation_probability_gate_based",
     "occupation_probability_non_gate_based",
     "odd_column_hex_gate_layout",

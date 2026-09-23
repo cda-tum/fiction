@@ -11,6 +11,7 @@
 /**
  * @file
  * @brief Python bindings for explicit routing constraints.
+ * @author Marcel Walter (marcelwa)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -22,20 +23,14 @@
 
 namespace pyfiction
 {
-namespace detail
-{
-/**
- * @brief Registers obstruction data for one coordinate type.
- * @tparam Coordinate Coordinate type.
- * @param m Python module.
- * @param name Python class name.
- */
-template <typename Coordinate>
-void register_obstructions(nanobind::module_& m, const char* name)
+
+/** @brief Registers explicit routing constraints on offset coordinates. @param m Python module. */
+void obstructions(nanobind::module_& m)
 {
     namespace py = nanobind;
-    using data   = fiction::layouts::obstructions<Coordinate>;
-    py::class_<data>(m, name, DOC(fiction_layouts_obstructions))
+    using data   = fiction::layouts::obstructions<py_offset_coordinate>;
+
+    py::class_<data>(m, "obstructions", DOC(fiction_layouts_obstructions))
         .def(py::init<>(), "Creates empty routing constraints.")
         .def("obstruct_coordinate", &data::obstruct_coordinate, py::arg("c"),
              DOC(fiction_layouts_obstructions_obstruct_coordinate))
@@ -54,12 +49,5 @@ void register_obstructions(nanobind::module_& m, const char* name)
         .def("is_obstructed_connection", &data::is_obstructed_connection, py::arg("src"), py::arg("tgt"),
              DOC(fiction_layouts_obstructions_is_obstructed_connection));
 }
-}  // namespace detail
 
-/** @brief Registers explicit routing constraints. @param m Python module. */
-void obstructions(nanobind::module_& m)
-{
-    detail::register_obstructions<py_offset_coordinate>(m, "RoutingObstructions");
-    detail::register_obstructions<py_cube_coordinate>(m, "CubeRoutingObstructions");
-}
 }  // namespace pyfiction
