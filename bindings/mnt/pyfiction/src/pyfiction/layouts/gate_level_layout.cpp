@@ -111,7 +111,6 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         .def("out_degree", &GateLyt::out_degree, py::arg("cz"), DOC(fiction_layouts_gate_level_layout_out_degree))
         .def("degree", &GateLyt::degree, py::arg("cz"), DOC(fiction_layouts_gate_level_layout_degree))
 
-
         .def(
             "replace_clocking_scheme",
             [](GateLyt& lyt, const std::string& name)
@@ -125,7 +124,8 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
                     throw std::invalid_argument("Unknown clocking scheme");
                 }
             },
-            py::arg("name"), "Replaces a named scheme and preserves synchronization delays; raises ValueError for an unknown name.")
+            py::arg("name"),
+            "Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are discarded; synchronization elements are kept. Raises ValueError for an unknown name.")
         .def("obstruct_coordinate", &GateLyt::obstruct_coordinate, py::arg("c"),
              DOC(fiction_layouts_gate_level_layout_obstruct_coordinate))
         .def("obstruct_connection", &GateLyt::obstruct_connection, py::arg("src"), py::arg("tgt"),
