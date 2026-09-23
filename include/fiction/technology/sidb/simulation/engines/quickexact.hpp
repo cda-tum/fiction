@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -28,12 +29,14 @@
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/gray_code_iterator.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <unordered_map>
@@ -81,6 +84,10 @@ struct quickexact_params
      */
     double global_potential = 0;
     /**
+     * Shared caller deadline. `time_point::max()` leaves the simulation unlimited.
+     */
+    std::chrono::steady_clock::time_point deadline{std::chrono::steady_clock::time_point::max()};
+    /**
      * Callback that receives the number of enumerated charge configurations.
      */
     utils::progress_callback on_progress{};
@@ -113,6 +120,7 @@ class quickexact_impl
      */
     [[nodiscard]] result run()
     {
+        utils::check_deadline(params.deadline);
         sim_result.algorithm_name = "QuickExact";
         sim_result.sim_params     = params.sim_params;
         sim_result.lyt            = landscape.get_layout();
@@ -309,6 +317,7 @@ class quickexact_impl
         reduced_state.assign_base_number(2);
 
         uint64_t previous_charge_index = 0;
+        uint64_t iterations            = 0;
 
         fiction::utils::math::gray_code_iterator gci{0};
 
@@ -317,6 +326,11 @@ class quickexact_impl
 
         for (gci = 0; gci <= reduced_state.max_charge_index(); ++gci)
         {
+            // Reading the clock per configuration dominates the cheap Gray-code update.
+            if ((iterations++ & 1023u) == 0)
+            {
+                utils::check_deadline(params.deadline);
+            }
             reduced_state.assign_charge_index_by_gray_code(
                 *gci, previous_charge_index, simulation::detail::dependent_dot_mode::VARIABLE,
                 simulation::detail::energy_calculation::KEEP_OLD_ENERGY_VALUE,
@@ -340,6 +354,7 @@ class quickexact_impl
      */
     void three_state_simulation(simulation::detail::simulation_state& reduced_state)
     {
+        uint64_t iterations = 0;
         reduced_state.assign_all_charge_states(model::charge_state::NEGATIVE);
         reduced_state.update_after_charge_change();
         // Not executed to detect if 3-state simulation is required, but to detect the SiDBs that could be positively
@@ -353,8 +368,16 @@ class quickexact_impl
 
         while (reduced_state.charge_index() < reduced_state.max_charge_index())
         {
+            if ((iterations++ & 1023u) == 0)
+            {
+                utils::check_deadline(params.deadline);
+            }
             while (reduced_state.charge_index_of_sub_layout() < reduced_state.max_charge_index_sub_layout())
             {
+                if ((iterations++ & 1023u) == 0)
+                {
+                    utils::check_deadline(params.deadline);
+                }
                 if (reduced_state.is_physically_valid())
                 {
                     record(reduced_state);
@@ -385,6 +408,10 @@ class quickexact_impl
         // charge configurations of the sublayout are iterated
         while (reduced_state.charge_index_of_sub_layout() < reduced_state.max_charge_index_sub_layout())
         {
+            if ((iterations++ & 1023u) == 0)
+            {
+                utils::check_deadline(params.deadline);
+            }
             if (reduced_state.is_physically_valid())
             {
                 record(reduced_state);
@@ -423,9 +450,11 @@ class quickexact_impl
  * @param params Parameter required for the simulation.
  * @return Simulation result: every physically valid charge distribution of `lyt`.
  * @throws std::out_of_range if a site has an invalid lattice basis index.
+ * @throws utils::timeout_error if the shared caller deadline expires. No partial result is returned.
  */
 [[nodiscard]] inline result quickexact(const layout& lyt, const quickexact_params& params = {})
 {
+    utils::check_deadline(params.deadline);
     detail::quickexact_impl p{lyt, params};
 
     return p.run();

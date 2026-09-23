@@ -27,16 +27,20 @@
 #include "fiction/technology/sidb/simulation/engines/quicksim.hpp"
 #include "fiction/technology/sidb/simulation/is_ground_state.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -69,6 +73,17 @@ struct time_to_solution_params
      * Callback that receives the number of completed heuristic repetitions.
      */
     utils::progress_callback on_progress{};
+    /**
+     * Millisecond budget for the reference simulation and all heuristic repetitions together. The maximum value
+     * means unlimited; zero expires immediately. Expiration throws `utils::timeout_error` without publishing
+     * statistics. Finite budgets reject ClusterComplete; QuickSim's separate timeout still applies to each heuristic
+     * attempt.
+     */
+    uint64_t timeout{std::numeric_limits<uint64_t>::max()};
+    /**
+     * Shared caller deadline. `time_point::max()` leaves the enclosing budget unlimited.
+     */
+    std::chrono::steady_clock::time_point deadline{std::chrono::steady_clock::time_point::max()};
 };
 
 /**
@@ -200,6 +215,14 @@ inline void time_to_solution_for_given_simulation_results(const result&         
 inline void time_to_solution(const layout& lyt, const engines::quicksim_params& qs_params,
                              const time_to_solution_params& tts_params = {}, time_to_solution_stats* ps = nullptr)
 {
+    const auto deadline = utils::make_deadline(tts_params.timeout, std::min(tts_params.deadline, qs_params.deadline));
+    utils::check_deadline(deadline);
+#if (FICTION_ALGLIB_ENABLED)
+    if (deadline != std::chrono::steady_clock::time_point::max() && tts_params.engine == exact_engine::CLUSTERCOMPLETE)
+    {
+        throw std::invalid_argument("ClusterComplete does not support a shared deadline");
+    }
+#endif  // FICTION_ALGLIB_ENABLED
     time_to_solution_stats st{};
 
     if (lyt.num_dots() == 0)
@@ -224,7 +247,8 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
     {
         const engines::quickexact_params params{.sim_params = qs_params.sim_params,
                                                 .base_number_detection =
-                                                    engines::quickexact_params::automatic_base_number_detection::OFF};
+                                                    engines::quickexact_params::automatic_base_number_detection::OFF,
+                                                .deadline = deadline};
 
         st.algorithm      = engine_name(exact_engine::QUICKEXACT);
         simulation_result = engines::quickexact(lyt, params);
@@ -241,18 +265,21 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
     else
     {
         st.algorithm      = engine_name(exact_engine::EXGS);
-        simulation_result = engines::exhaustive_ground_state_simulation(lyt, qs_params.sim_params);
+        simulation_result = engines::exhaustive_ground_state_simulation(lyt, qs_params.sim_params, {}, deadline);
     }
 
     std::vector<result> simulation_results_quicksim{};
     simulation_results_quicksim.reserve(tts_params.repetitions);
 
     utils::progress_reporter progress{tts_params.on_progress, "repetitions", tts_params.repetitions};
+    auto                     heuristic_params = qs_params;
+    heuristic_params.deadline                 = deadline;
 
     for (uint64_t i = 0; i < tts_params.repetitions; ++i)
     {
         mockturtle::stopwatch<>::duration elapsed{};
-        auto heuristic = mockturtle::call_with_stopwatch(elapsed, [&] { return engines::quicksim(lyt, qs_params); });
+        auto                              heuristic =
+            mockturtle::call_with_stopwatch(elapsed, [&] { return engines::quicksim(lyt, heuristic_params); });
         if (!heuristic)
         {
             heuristic.emplace();

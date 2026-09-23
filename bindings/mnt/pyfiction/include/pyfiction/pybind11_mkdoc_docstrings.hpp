@@ -13952,6 +13952,10 @@ finish.
 Random placement samples at most `maximal_random_design_attempts`
 candidates without enumerating canvas layouts.
 
+The timeout covers setup and all search phases. Expiration discards
+partial results and stops all workers before throwing. Allocation and
+non-interruptible setup may exceed the cooperative deadline.
+
 *QuickCell* is described in "Towards Fast Automatic Design of Silicon
 Dangling Bond Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus,
 and R. Wille in DATE 2025
@@ -13976,6 +13980,7 @@ Returns:
 Raises:
     std::invalid_argument: if `spec` is empty or the input wire count
                            differs from the specification.
+    utils::timeout_error: if the gate-design deadline is reached.
 
 )doc";
 
@@ -14298,6 +14303,11 @@ Returns:
 
 Raises:
     unsuccessful_gate_design_error: if a gate cannot be designed.
+    utils::timeout_error: if the shared circuit budget or an
+                          individual gate budget expires. No partial
+                          circuit is returned. Deadline checks are
+                          cooperative and do not interrupt allocation
+                          or layout conversion.
 
 )doc";
 
@@ -14328,7 +14338,8 @@ Args:
     defective_surface: The defective surface on which the SiDB circuit
                        is designed.
     params: The parameters used for designing the circuit,
-            encapsulated in an `on_the_fly_circuit_design_params`
+            encapsulated in an
+            `on_the_fly_circuit_design_on_defective_surface_params`
             object.
     stats: Pointer to a structure for collecting statistics. If
            `nullptr`, statistics are discarded.
@@ -14340,6 +14351,15 @@ Template Args:
 Returns:
     Layout representing the designed circuit on the defective surface.
 
+Raises:
+    utils::timeout_error: If a circuit or gate-design timeout expires.
+    std::invalid_argument: If the simulation engine does not support
+                           the requested gate-design timeout.
+
+Note:
+    A circuit or gate timeout aborts the operation. Only a completed,
+    unsuccessful gate search blacklists a tile.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params =
@@ -14349,6 +14369,11 @@ defective surface.)doc";
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params_exact_design_parameters = R"doc(Parameters for the *exact* placement and routing algorithm.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params_sidb_on_the_fly_gate_library_parameters = R"doc(Parameters for the SiDB on-the-fly gate library.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params_timeout =
+R"doc(Total millisecond budget across surface analysis, placement-and-
+routing retries, and gate design. The maximum value means unlimited;
+zero expires immediately. Cancellation is cooperative.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_stats =
 R"doc(Statistics for the on-the-fly defect-aware circuit design.
@@ -14365,6 +14390,13 @@ static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_params = R"doc(This struct stores the parameters to design an SiDB circuit.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_params_sidb_on_the_fly_gate_library_parameters = R"doc(Parameters for the SiDB on-the-fly gate library.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_params_timeout =
+R"doc(Total timeout in milliseconds for all gates and layout conversion. The
+maximum value means unlimited; zero expires immediately. Every gate
+shares the same deadline, including crossings and double wires.
+Timeout checks are cooperative; allocation and non-interruptible setup
+can exceed the budget.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_unsuccessful_gate_design_error =
 R"doc(Exception thrown if the gate design was unsuccessful. Depending on the
@@ -15994,7 +16026,9 @@ tile. In case there is no possible SiDB design, the function throws
 Args:
     lyt: Layout that hosts tile `t`.
     t: Tile to be realized as a Bestagon gate.
-    params: Parameters for SiDB gate design.
+    parameters: Parameters for SiDB gate design. Each gate shares one
+                budget across predefined-gate validation and any
+                subsequent search, capped by the enclosing deadline.
     defect_surface: Optional atomic defect surface in case atomic
                     defects are present.
 
@@ -16012,6 +16046,8 @@ Raises:
                                                  unsupported.
     fcn::unsupported_gate_type_exception: if the gate type is
                                           unsupported.
+    utils::timeout_error: if the per-gate or enclosing deadline is
+                          reached.
 
 )doc";
 
@@ -16153,7 +16189,9 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilie
 R"doc(This struct stores the parameters required to simulate the band
 bending resilience of an SiDB layout)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilience_params_assess_population_stability_params = R"doc(Parameters for the assessing physical population stability simulation)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilience_params_assess_population_stability_params =
+R"doc(Population stability parameters. Their timeout bounds the entire
+resilience calculation across all input patterns.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilience_params_bdl_iterator_params = R"doc(Parameters for the input BDL iterator.)doc";
 
@@ -16380,8 +16418,10 @@ R"doc(Reports logical worker activity with a fixed worker count for each
 invocation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_operational_params =
-R"doc(The parameters used to determine if a layout is `operational` or `non-
-operational`.)doc";
+R"doc(Operational parameters. Their timeout bounds the entire temperature
+calculation, including every input pattern and temperature step.
+Finite budgets reject ClusterComplete and throw `utils::timeout_error`
+on expiration.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_stats = R"doc(This struct stores the result of the temperature simulation.)doc";
 
@@ -16808,11 +16848,20 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params = R"doc(Parameters of the population stability analysis.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_deadline =
+R"doc(Shared caller deadline. `time_point::max()` leaves the enclosing
+budget unlimited.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_precision_for_distance_corresponding_to_potential =
 R"doc(Number of decimal places of the distance corresponding to a potential
 difference.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_sim_params = R"doc(Physical parameters of the simulation.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_timeout =
+R"doc(Millisecond budget for simulation and population analysis. The maximum
+value means unlimited; zero expires immediately. Expiration throws
+`utils::timeout_error` without returning a partial result.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physically_valid_parameters =
 R"doc(Determines the physical parameters under which a given charge
@@ -16916,6 +16965,10 @@ example, a 99.7 % (0.997) confidence level means that if the
 simulation were repeated many times, approximately 997 out of 1000 of
 the calculated confidence intervals would contain the true value.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_deadline =
+R"doc(Shared caller deadline. `time_point::max()` leaves the enclosing
+budget unlimited.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_engine =
 R"doc(Exhaustive simulation algorithm used to simulate the ground state as
 reference.)doc";
@@ -16926,6 +16979,13 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_par
 R"doc(Number of iterations of the heuristic algorithm used to determine the
 simulation accuracy (`repetitions = 100` means that accuracy is
 precise to 1 %).)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_timeout =
+R"doc(Millisecond budget for the reference simulation and all heuristic
+repetitions together. The maximum value means unlimited; zero expires
+immediately. Expiration throws `utils::timeout_error` without
+publishing statistics. Finite budgets reject ClusterComplete;
+QuickSim's separate timeout still applies to each heuristic attempt.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats =
 R"doc(This struct stores the time-to-solution, the simulation accuracy and
@@ -17106,7 +17166,11 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_para
 R"doc(Callback that receives the number of evaluated defect positions or,
 for *QuickTrace*, contour points.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_operational_params = R"doc(Parameters of the operational check and the simulation.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_params_operational_params =
+R"doc(Operational and simulation parameters. Their timeout bounds the entire
+defect domain calculation, including ground-state comparisons.
+Expiration throws `utils::timeout_error` without returning a partial
+result.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_quicktrace =
 R"doc(The *QuickTrace* algorithm which was proposed in \"QuickTrace: An
@@ -17635,7 +17699,10 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustne
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_on_progress = R"doc(Callback that receives the number of analyzed displaced layouts.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_operational_params = R"doc(Parameters of the operational check.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_operational_params =
+R"doc(Operational parameters. Their timeout bounds the entire displacement
+analysis across all layouts and workers. Finite budgets reject
+ClusterComplete and throw `utils::timeout_error` on expiration.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_percentage_of_analyzed_displaced_layouts = R"doc(Share of the displaced layouts to analyze in `RANDOM` mode.)doc";
 
@@ -20588,12 +20655,16 @@ Args:
     params: Physical parameters.
     on_progress: Callback that receives the number of enumerated
                  charge configurations.
+    deadline: Shared caller deadline. `time_point::max()` leaves the
+              simulation unlimited.
 
 Returns:
     The physically valid charge distributions.
 
 Raises:
     std::out_of_range: if a site has an invalid lattice basis index.
+    utils::timeout_error: if the shared caller deadline expires. No
+                          partial result is returned.
 
 )doc";
 
@@ -20759,6 +20830,8 @@ Returns:
 
 Raises:
     std::out_of_range: if a site has an invalid lattice basis index.
+    utils::timeout_error: if the shared caller deadline expires. No
+                          partial result is returned.
 
 )doc";
 
@@ -20779,6 +20852,10 @@ static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_bas
 R"doc(If `ON`, *QuickExact* checks which base number is required for the
 simulation, i.e., whether positively charged SiDBs can occur. If
 `OFF`, the base number from the physical parameters is used.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_deadline =
+R"doc(Shared caller deadline. `time_point::max()` leaves the simulation
+unlimited.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_global_potential =
 R"doc(Global external electrostatic potential (unit: V). Value is applied on
@@ -20816,12 +20893,19 @@ Returns:
 
 Raises:
     std::out_of_range: if a site has an invalid lattice basis index.
+    utils::timeout_error: if the shared caller deadline expires. No
+                          partial result is returned.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params = R"doc(This struct stores the parameters for the *QuickSim* algorithm.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_alpha = R"doc(`alpha` parameter for the *QuickSim* algorithm.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_deadline =
+R"doc(Shared caller deadline. Expiration throws instead of returning an
+incomplete simulation. `time_point::max()` leaves the caller budget
+unlimited; `timeout` still applies.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_params_iteration_steps = R"doc(Number of iterations to run the simulation for.)doc";
 
@@ -21950,6 +22034,38 @@ R"doc(Sanity checks shared by every entry point.
 Args:
     lyt: The layout.
     spec: The specification.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_checked_parameters =
+R"doc(Starts the time budget without extending an enclosing deadline and
+validates the simulation engine.
+
+Args:
+    params: Operational parameters.
+
+Returns:
+    The validated parameters.
+
+Raises:
+    utils::timeout_error: if the deadline expires.
+    std::invalid_argument: if ClusterComplete is selected with a
+                           finite deadline.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_checked_parameters_2 =
+R"doc(Starts one shared budget for an application that embeds operational
+parameters.
+
+Args:
+    params: Application parameters.
+
+Template Args:
+    Params: Application parameter type.
+
+Returns:
+    Parameters with a validated shared deadline.
 
 )doc";
 
@@ -23158,6 +23274,11 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_deadline =
+R"doc(Shared caller deadline for pruning and simulation. `time_point::max()`
+leaves the check unlimited. Finite deadlines support QuickExact, ExGS,
+and QuickSim; ClusterComplete is unsupported.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_input_bdl_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_op_condition =
@@ -23232,6 +23353,13 @@ state.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_strategy_to_analyze_operational_status =
 R"doc(Strategy to determine whether a layout is operational or non-
 operational.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_timeout =
+R"doc(Millisecond budget for the complete operation. Gate design, domains,
+and critical-temperature calculations share this budget across all
+nested checks. The maximum value means unlimited; zero expires
+immediately. Expiration throws `utils::timeout_error` without
+returning a partial result.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns =
 R"doc(Determines the input patterns for which kinks render the layout non-
@@ -23498,8 +23626,9 @@ R"doc(Reports logical worker activity with a fixed worker count for each
 invocation.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_operational_params =
-R"doc(The parameters used to determine if a layout is operational or non-
-operational.)doc";
+R"doc(Operational parameters. Their timeout bounds the entire domain
+calculation across all parameter points and workers. Finite budgets
+reject ClusterComplete and throw `utils::timeout_error` on expiration.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_params_sweep_dimensions =
 R"doc(Dimensions to sweep over together with their value ranges, ordered by
@@ -25189,6 +25318,17 @@ static const char *mkd_doc_fiction_synthesis_technology_mapping_stats_mapper_sta
 
 static const char *mkd_doc_fiction_synthesis_technology_mapping_stats_report = R"doc(Report statistics.)doc";
 
+static const char *mkd_doc_fiction_utils_check_deadline =
+R"doc(Checks a shared monotonic deadline.
+
+Args:
+    deadline: Expiration time; the maximum time point means unlimited.
+
+Raises:
+    timeout_error: if the deadline has been reached.
+
+)doc";
+
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_convert_node_index =
@@ -25815,6 +25955,18 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_utils_make_deadline =
+R"doc(Starts a millisecond budget without extending an enclosing deadline.
+
+Args:
+    timeout: Milliseconds from now; the maximum value means unlimited.
+    enclosing: Deadline shared with an enclosing algorithm.
+
+Returns:
+    The earlier deadline, saturated at the clock's maximum time point.
+
+)doc";
+
 static const char *mkd_doc_fiction_utils_math_binomial_coefficient =
 R"doc(Calculates the binomial coefficient :math:`\binom{n}{k}`.
 
@@ -25877,6 +26029,7 @@ of indices, where each index indicates the position of an entity.
 Args:
     k: The number of entities to distribute.
     n: The number of positions available for distribution.
+    deadline: Shared execution deadline; unlimited by default.
 
 Returns:
     A vector of vectors representing all possible combinations of
@@ -25885,6 +26038,7 @@ Returns:
 Raises:
     std::length_error: if the number of combinations exceeds the
                        vector's capacity.
+    timeout_error: if the deadline is reached during enumeration.
 
 )doc";
 
@@ -26651,6 +26805,12 @@ Returns:
     `val` is not contained.
 
 )doc";
+
+static const char *mkd_doc_fiction_utils_timeout_error =
+R"doc(An algorithm reached its execution deadline without producing a
+complete result.)doc";
+
+static const char *mkd_doc_fiction_utils_timeout_error_timeout_error = R"doc(Constructs an execution-timeout error.)doc";
 
 static const char *mkd_doc_fiction_utils_worker_progress_reporter =
 R"doc(Serializes worker reports and throttles updates to ten per second per

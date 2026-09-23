@@ -15,8 +15,10 @@
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Benjamin Hien (hibenj)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -34,9 +36,11 @@
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <chrono>
 #include <cstddef>
 #include <stdexcept>
 #include <thread>
@@ -77,6 +81,37 @@ TEST_CASE("Gate design propagates worker failures", "[design-sidb-gates]")
 TEST_CASE("Reject an empty gate specification", "[design-sidb-gates]")
 {
     CHECK_THROWS_AS(design_gates(layout{}, std::vector<tt>{}), std::invalid_argument);
+}
+
+TEST_CASE("Gate-design timeouts cover every search mode", "[design-sidb-gates]")
+{
+    const auto lyt = blueprints::two_input_one_output_skeleton_west_west();
+
+    design_gates_params params{};
+
+    SECTION("Zero expires immediately")
+    {
+        params.operational_params.timeout = 0;
+    }
+    SECTION("One positive budget covers setup and every candidate")
+    {
+        params.operational_params.timeout = 20;
+        params.canvas                     = {site_at_row(27, 12), site_at_row(28, 13)};
+        params.number_of_canvas_sidbs     = 1;
+        params.on_progress = [](auto, auto, auto) { std::this_thread::sleep_for(std::chrono::milliseconds{25}); };
+    }
+
+    for (const auto mode :
+         {design_gates_params::design_gates_mode::QUICKCELL,
+          design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+          design_gates_params::design_gates_mode::RANDOM, design_gates_params::design_gates_mode::PRUNING_ONLY})
+    {
+        CAPTURE(mode);
+        params.design_mode = mode;
+        const auto start   = std::chrono::steady_clock::now();
+        CHECK_THROWS_AS(design_gates(lyt, std::vector{create_and_tt()}, params), utils::timeout_error);
+        CHECK(std::chrono::steady_clock::now() - start < std::chrono::seconds{10});
+    }
 }
 
 TEST_CASE("Design AND gate with skeleton, where one input wire and the output wire are orientated to the east.",

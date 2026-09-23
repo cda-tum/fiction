@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/technology/sidb/generators/design_gates.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -26,12 +27,18 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner): Converts the statistics representation.
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
 
+/**
+ * @brief Registers SiDB gate design, its parameters, and statistics.
+ *
+ * @param m Python module.
+ */
 void design_gates(nanobind::module_& m)
 {
     namespace py = nanobind;
@@ -95,11 +102,25 @@ void design_gates(nanobind::module_& m)
 
     m.def(
         "design_sidb_gates",
-        [](const layout& skeleton, const std::vector<py_tt>& spec, const design_gates_params& params,
+        // NOLINTNEXTLINE(performance-unnecessary-value-param): Own inputs while Python can mutate the originals.
+        [](const layout skeleton, const std::vector<py_tt> spec, const design_gates_params params,
            design_gates_stats* stats)
-        { return fiction::sidb::generators::design_gates(skeleton, spec, params, stats); },
+        {
+            // Copy Python-owned inputs before releasing the GIL; publish statistics after reacquiring it.
+            design_gates_stats  local_stats{};
+            std::vector<layout> result{};
+            {
+                const py::gil_scoped_release release{};
+                result = fiction::sidb::generators::design_gates(skeleton, spec, params, &local_stats);
+            }
+            if (stats != nullptr)
+            {
+                *stats = local_stats;
+            }
+            return result;
+        },
         py::arg("skeleton"), py::arg("spec"), py::arg("params") = design_gates_params{}, py::arg("stats") = nullptr,
-        py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_generators_design_gates));
+        DOC(fiction_sidb_generators_design_gates));
 }
 
 }  // namespace pyfiction

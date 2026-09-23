@@ -11,8 +11,10 @@ Convert Cartesian layouts with {ref}`hexagonalization` before designing the SiDB
 The default search uses exhaustive gate design with one canvas SiDB and stops at the first
 solution. Crossings and double wires use predefined implementations when possible.
 The required number of canvas SiDBs depends on the gates; the example uses three with QuickCell.
-The search has no timeout or cancellation parameter; applications that require cancellation
-must run the call in a separate process. The returned layout can be exported as SVG or SiQAD SQD.
+The returned layout can be exported as SVG or SiQAD SQD.
+
+The circuit's `timeout` covers all gate designs; `design_gate_params.operational_params.timeout` can impose a
+shorter per-gate limit. Both use milliseconds; see {ref}`sidb_timeouts` for defaults and limits.
 
 ::::{tab-set}
 :sync-group: language
@@ -59,6 +61,7 @@ gate = layout.create_and(a, b, (1, 1, 0))
 layout.create_po(gate, "f", (0, 2, 0))
 
 params = on_the_fly_sidb_circuit_design_params()
+params.timeout = 60_000  # one minute for the whole circuit
 gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params
 gates.design_mode = design_sidb_gates_mode.QUICKCELL
 gates.number_of_canvas_sidbs = 3

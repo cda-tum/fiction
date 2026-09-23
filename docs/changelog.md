@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
+  - SiDB design and simulation applications support shared millisecond timeouts, including defect-aware circuit retries.
   - `utils::progress_callback` and `utils::progress_reporter` let long-running algorithms report
     progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
   - Parallel algorithms accept `on_worker_progress` for stable worker activity and completed counts.
@@ -62,6 +63,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Shared SiDB deadlines raise `TimeoutError`; gate design releases the GIL.
   - Added directory-based test markers, including `pytest -m simulation`.
   - Marked the SiDB circuit-design integration test as `slow`; `pytest -m 'not slow'` skips it.
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
@@ -407,6 +409,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Operational-domain sampling now reports worker activity when it runs on the calling thread.
   - Contour tracing distributes simulation locks across regular parameter grids.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
+  - Defect-aware circuit design propagates invalid gate-design parameters.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
   - Defect-influence analysis now propagates worker exceptions to the caller.
   - Canvas filtering now rejects SiDBs missing from the simulation state's layout.
@@ -434,6 +437,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
 
 - Build system:
+  - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.
   - QuickSim and ClusterComplete compile with Apple libc++ without experimental library features.
   - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
@@ -521,6 +525,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     worker progress callbacks can execute without deadlocking.
   - Added ordered `simulate_outputs`, exposed mapper statistics, and validated truth-table sizes and expressions before native operations. Gate-library errors identify unsupported gates and their coordinates.
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
+  - `design_sidb_gates_stats.__repr__` now converts the statistics string to Python.
   - Exposed the defect-matrix reader exceptions at the package root.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector

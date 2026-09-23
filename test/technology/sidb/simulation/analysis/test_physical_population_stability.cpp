@@ -24,6 +24,7 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
 #include <fiction/technology/sidb/technology.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 
 #include <cmath>
 
@@ -31,6 +32,15 @@ using namespace fiction;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::analysis;
+
+TEST_CASE("Population stability honors its time budget", "[assess-physical-population-stability][application-timeout]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0, 0});
+    const physical_population_stability_params params{.timeout = 0};
+    CHECK_THROWS_AS(physical_population_stability(lyt, params), utils::timeout_error);
+    CHECK_FALSE(physical_population_stability(lyt, {}).empty());
+}
 
 TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 {

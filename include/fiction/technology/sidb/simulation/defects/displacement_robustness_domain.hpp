@@ -13,6 +13,7 @@
  * @brief Robustness of an SiDB layout against fabrication displacement of its dots.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -20,6 +21,7 @@
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 #include "fiction/utils/progress.hpp"
@@ -102,7 +104,8 @@ struct displacement_robustness_domain_params
      */
     std::pair<uint64_t, uint64_t> displacement_variations = {1, 0};
     /**
-     * Parameters of the operational check.
+     * Operational parameters. Their timeout bounds the entire displacement analysis across all layouts and workers.
+     * Finite budgets reject ClusterComplete and throw `utils::timeout_error` on expiration.
      */
     logic::is_operational_params operational_params{};
     /**
@@ -166,7 +169,7 @@ class displacement_robustness_domain_impl
                                         const displacement_robustness_domain_params& ps,
                                         displacement_robustness_domain_stats&        st) :
             layout_to_analyze{lyt},
-            params{ps},
+            params{logic::detail::checked_parameters(ps)},
             stats{st},
             truth_table{spec},
             generator(rd())
@@ -202,6 +205,7 @@ class displacement_robustness_domain_impl
      */
     displacement_robustness_domain determine_robustness_domain()
     {
+        utils::check_deadline(params.operational_params.deadline);
         const mockturtle::stopwatch stop{stats.time_total};
 
         all_possible_sidb_displacements = calculate_all_possible_displacements_for_each_sidb();
@@ -276,6 +280,7 @@ class displacement_robustness_domain_impl
      */
     [[nodiscard]] double determine_probability_of_fabricating_operational_gate(double fabrication_error_rate)
     {
+        utils::check_deadline(params.operational_params.deadline);
         fabrication_error_rate = std::min(1.0, fabrication_error_rate);
 
         if (fabrication_error_rate < std::numeric_limits<double>::epsilon())
@@ -293,7 +298,7 @@ class displacement_robustness_domain_impl
         }
 
         const auto all_combinations = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            number_of_displaced_sidbs, sidbs_of_the_original_layout.size());
+            number_of_displaced_sidbs, sidbs_of_the_original_layout.size(), params.operational_params.deadline);
 
         const auto max_tested = std::max(
             uint64_t{1}, static_cast<uint64_t>(static_cast<double>(all_combinations.size()) *
@@ -421,6 +426,7 @@ class displacement_robustness_domain_impl
     [[nodiscard]] std::vector<layout> generate_valid_displaced_sidb_layouts()
     {
         auto combinations = utils::math::cartesian_combinations(all_possible_sidb_displacements);
+        utils::check_deadline(params.operational_params.deadline);
         std::ranges::shuffle(combinations, generator);
 
         std::vector<layout> layouts{};
@@ -439,6 +445,7 @@ class displacement_robustness_domain_impl
 
         for (const auto& dot_displacements : combinations)
         {
+            utils::check_deadline(params.operational_params.deadline);
             if (num_generated >= max_generated)
             {
                 break;

@@ -90,6 +90,8 @@ void physical_population_stability(nanobind::module_& m)
         m, "physical_population_stability_params",
         DOC(fiction_sidb_simulation_analysis_physical_population_stability_params))
         .def(py::init<>(), "Default constructor.")
+        .def_rw("timeout", &fiction::sidb::simulation::analysis::physical_population_stability_params::timeout,
+                DOC(fiction_sidb_simulation_analysis_physical_population_stability_params_timeout))
         .def_rw("simulation_parameters",
                 &fiction::sidb::simulation::analysis::physical_population_stability_params::sim_params,
                 DOC(fiction_sidb_simulation_analysis_physical_population_stability_params))

@@ -30,6 +30,11 @@
 namespace pyfiction
 {
 
+/**
+ * @brief Registers exhaustive ground-state simulation without an internal deadline argument.
+ *
+ * @param m Python module.
+ */
 void exhaustive_ground_state_simulation(nanobind::module_& m)
 {
     namespace py = nanobind;

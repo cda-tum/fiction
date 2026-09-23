@@ -19,8 +19,11 @@ include_directories(.)
 
 # Pre-Compiled Header (PCH) carrier for the test suite. Every test executable
 # compiles the same expensive header stack; building the PCH once here and
-# reusing it keeps that work from being repeated in all of them.
-if(FICTION_ENABLE_PCH)
+# reusing it keeps that work from being repeated in all of them. ClangCL can
+# omit exception copy constructors from PCH metadata, corrupting the heap when
+# async workers propagate exceptions. Keep PCH off for this ABI until
+# https://github.com/llvm/llvm-project/issues/53486 is fixed.
+if(FICTION_ENABLE_PCH AND NOT (MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
   add_library(libfiction_test_pch STATIC
               ${CMAKE_CURRENT_SOURCE_DIR}/pch_test.cpp)
   target_link_libraries(
@@ -66,7 +69,7 @@ foreach(FILE IN LISTS FILENAMES)
   # Make Catch2 ignore SIGTERMs sent to applications when timeouts are reached
   target_compile_definitions(${TEST_NAME} PRIVATE CATCH_CONFIG_NO_POSIX_SIGNALS)
 
-  if(FICTION_ENABLE_PCH AND NOT TEST_NAME STREQUAL "test_layout")
+  if(TARGET libfiction_test_pch AND NOT TEST_NAME STREQUAL "test_layout")
     target_precompile_headers(${TEST_NAME} REUSE_FROM libfiction_test_pch)
   endif()
 

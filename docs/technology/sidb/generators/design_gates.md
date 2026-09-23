@@ -2,6 +2,9 @@
 
 # SiDB Gate Designer
 
+Set `operational_params.timeout` in milliseconds to limit a gate search. See {ref}`sidb_timeouts`
+for defaults, exceptions, and cancellation limits.
+
 ::::{tab-set}
 :sync-group: language
 
@@ -26,6 +29,14 @@
 
 :::{tab-item} Python
 :sync: python
+
+The Python call releases the GIL and leaves the input skeleton unchanged.
+
+```python
+params = design_sidb_gates_params()
+params.operational_params.timeout = 5_000  # milliseconds
+gates = design_sidb_gates(skeleton, specification, params)
+```
 
 ```{eval-rst}
 .. autoclass:: mnt.pyfiction.design_sidb_gates_stats

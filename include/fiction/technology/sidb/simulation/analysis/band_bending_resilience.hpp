@@ -13,6 +13,7 @@
  * @brief Minimum potential that induces a charge transition in an SiDB layout.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -20,6 +21,7 @@
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 
@@ -38,7 +40,8 @@ namespace fiction::sidb::simulation::analysis
 struct band_bending_resilience_params
 {
     /**
-     * Parameters for the assessing physical population stability simulation
+     * Population stability parameters. Their timeout bounds the entire resilience calculation across all input
+     * patterns.
      */
     physical_population_stability_params assess_population_stability_params{};
     /**
@@ -63,6 +66,9 @@ struct band_bending_resilience_params
                                                     const band_bending_resilience_params&          params = {},
                                                     const std::optional<transition_type> transition_type = std::nullopt)
 {
+    auto population_params     = params.assess_population_stability_params;
+    population_params.deadline = utils::make_deadline(population_params.timeout, population_params.deadline);
+    utils::check_deadline(population_params.deadline);
     assert(lyt.num_pis() > 0 && "skeleton needs input dots");
     assert(lyt.num_pos() > 0 && "skeleton needs output dots");
     assert(!spec.empty());
@@ -81,7 +87,7 @@ struct band_bending_resilience_params
 
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
     {
-        const auto pop_stability = physical_population_stability(*bii, params.assess_population_stability_params);
+        const auto pop_stability = physical_population_stability(*bii, population_params);
 
         if (pop_stability.empty())
         {
