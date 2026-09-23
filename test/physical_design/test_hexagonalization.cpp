@@ -31,11 +31,40 @@
 #include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/traits.hpp>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
+
+/**
+ * @brief Checks that a hexagonal layout carries no explicit obstructions, i.e., that only occupied tiles and existing
+ * signal connections are obstructed.
+ * @tparam HexLyt Hexagonal gate layout type.
+ * @param hex_layout Layout to check.
+ */
+template <typename HexLyt>
+static void check_no_explicit_obstructions(const HexLyt& hex_layout)
+{
+    hex_layout.foreach_coordinate(
+        [&hex_layout](const auto& src)
+        {
+            CHECK(hex_layout.is_obstructed_coordinate(src) == !hex_layout.is_empty_tile(src));
+
+            hex_layout.foreach_adjacent_coordinate(
+                src,
+                [&hex_layout, &src](const auto& tgt)
+                {
+                    for (const auto& t : {tgt, hex_layout.above(tgt)})
+                    {
+                        CHECK(hex_layout.is_obstructed_connection(src, t) ==
+                              (hex_layout.is_incoming_signal(t, static_cast<mockturtle::signal<HexLyt>>(src)) ||
+                               hex_layout.is_outgoing_signal(src, static_cast<mockturtle::signal<HexLyt>>(t))));
+                    }
+                });
+        });
+}
 
 template <typename Lyt, typename Ntk>
 static void check_mapping_equiv(const Ntk& ntk)
@@ -65,6 +94,7 @@ static void check_mapping_equiv(const Ntk& ntk)
 
     check_eq(ntk, hex_layout_bottom_pos);
     check_eq(layout, hex_layout_bottom_pos);
+    check_no_explicit_obstructions(hex_layout_bottom_pos);
 
     hex_layout_bottom_pos.foreach_po(
         [&hex_layout_bottom_pos](const auto& gate)
@@ -77,6 +107,7 @@ static void check_mapping_equiv(const Ntk& ntk)
 
     check_eq(ntk, hex_layout_top_pis_bottom_pos);
     check_eq(layout, hex_layout_top_pis_bottom_pos);
+    check_no_explicit_obstructions(hex_layout_top_pis_bottom_pos);
 
     hex_layout_top_pis_bottom_pos.foreach_pi([&hex_layout_top_pis_bottom_pos](const auto& gate)
                                              { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == 0); });
