@@ -43,11 +43,8 @@ TEST_CASE("Gate-level layout traits", "[gate-level-layout]")
     using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     CHECK(is_coordinate_layout_v<gate_layout>);
-    CHECK(has_foreach_tile_v<gate_layout>);
-    CHECK(has_foreach_outgoing_clocked_zone_v<gate_layout>);
     CHECK(is_gate_level_layout_v<gate_layout>);
-    CHECK(has_is_empty_tile_v<gate_layout>);
-    CHECK(has_is_empty_v<gate_layout>);
+    CHECK(!is_cell_level_layout_v<gate_layout>);
 }
 
 TEST_CASE("Owned gate capabilities share copies and isolate clones", "[gate-level-layout]")
@@ -1424,16 +1421,6 @@ TEST_CASE("Gate-level cardinal operations", "[gate-level-layout]")
 
     CHECK(layout.has_western_incoming_signal({3, 1}));
     CHECK(layout.has_western_incoming_signal({3, 2}));
-}
-
-TEST_CASE("Clocked layout traits", "[clocked-layout]")
-{
-    using layout = gate_level_layout<cartesian_layout<coords::offset>>;
-
-    CHECK(has_is_incoming_clocked_v<layout>);
-    CHECK(has_is_outgoing_clocked_v<layout>);
-    CHECK(has_foreach_incoming_clocked_zone_v<layout>);
-    CHECK(has_foreach_outgoing_clocked_zone_v<layout>);
 }
 
 TEST_CASE("Deep copy clocked layout", "[clocked-layout]")

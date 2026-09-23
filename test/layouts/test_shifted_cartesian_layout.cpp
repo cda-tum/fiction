@@ -41,7 +41,7 @@ void check_common_traits()
     CHECK(has_below_v<Lyt>);
     CHECK(has_elevation_operations_v<Lyt>);
     CHECK(is_coordinate_layout_v<Lyt>);
-    CHECK(!has_foreach_tile_v<Lyt>);
+    CHECK(!is_gate_level_layout_v<Lyt>);
     CHECK(!is_cartesian_layout_v<Lyt>);
     CHECK(!is_hexagonal_layout_v<Lyt>);
     CHECK(is_shifted_cartesian_layout_v<Lyt>);

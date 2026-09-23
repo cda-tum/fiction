@@ -613,21 +613,9 @@ static const char *mkd_doc_fiction_has_foreach_adjacent_coordinate = R"doc()doc"
 
 static const char *mkd_doc_fiction_has_foreach_adjacent_opposite_coordinates = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_foreach_adjacent_opposite_tiles = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_foreach_adjacent_tile = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_foreach_cell = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_foreach_coordinate = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_foreach_incoming_clocked_zone = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_foreach_outgoing_clocked_zone = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_foreach_real_pi = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_foreach_tile = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_get_functional_implementations = R"doc()doc";
 
@@ -645,23 +633,13 @@ static const char *mkd_doc_fiction_has_is_buf = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_dot = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_is_empty = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_is_empty_cell = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_is_empty_tile = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_is_fanout = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_gamble = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_is_gate_tile = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_is_ge = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_gt = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_is_incoming_clocked = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_inv = R"doc()doc";
 
@@ -675,23 +653,15 @@ static const char *mkd_doc_fiction_has_is_nand = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_nor = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_is_obstructed_connection = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_is_obstructed_coordinate = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_is_onehot = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_or_and = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_is_outgoing_clocked = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_po = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_real_pi = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_virtual_pi = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_is_wire_tile = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_xnor = R"doc()doc";
 

@@ -182,19 +182,17 @@ class bounding_box_2d
      */
     [[nodiscard]] bool is_empty_coordinate(const coordinate<Lyt>& c) const noexcept
     {
-        static_assert(has_is_empty_tile_v<Lyt> || has_is_empty_cell_v<Lyt>,
-                      "Lyt does neither implement the is_empty_tile nor the is_empty_cell function");
+        static_assert(is_gate_level_layout_v<Lyt> || is_cell_level_layout_v<Lyt>,
+                      "Lyt is neither a gate-level nor a cell-level layout");
 
-        if constexpr (has_is_empty_tile_v<Lyt>)
+        if constexpr (is_gate_level_layout_v<Lyt>)
         {
             return layout.is_empty_tile(c);
         }
-        else if constexpr (has_is_empty_cell_v<Lyt>)
+        else
         {
             return layout.is_empty_cell(c);
         }
-
-        return false;
     }
 };
 

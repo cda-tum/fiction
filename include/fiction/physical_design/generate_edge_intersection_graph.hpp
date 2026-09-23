@@ -362,7 +362,7 @@ edge_intersection_graph<Lyt> generate_edge_intersection_graph(const Lyt&        
                                                               generate_edge_intersection_graph_params    ps  = {},
                                                               generate_edge_intersection_graph_stats*    pst = nullptr)
 {
-    static_assert(has_foreach_outgoing_clocked_zone_v<Lyt>, "Lyt is not a clocked layout");
+    static_assert(is_gate_level_layout_v<Lyt> || is_cell_level_layout_v<Lyt>, "Lyt is not a clocked layout");
 
     generate_edge_intersection_graph_stats st{};
 

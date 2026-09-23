@@ -2217,60 +2217,57 @@ class exact_impl
          */
         void enforce_straight_inverters()
         {
-            if constexpr (has_foreach_adjacent_opposite_tiles_v<Lyt>)
-            {
-                apply_to_added_and_updated_tiles(
-                    [this](const auto& t)
-                    {
-                        network.foreach_node(
-                            [this, &t](const auto& inv)
+            apply_to_added_and_updated_tiles(
+                [this](const auto& t)
+                {
+                    network.foreach_node(
+                        [this, &t](const auto& inv)
+                        {
+                            // skip all operations except for inverters
+                            if (network.is_inv(inv))
                             {
-                                // skip all operations except for inverters
-                                if (network.is_inv(inv))
+                                // I/Os inverters are always straight, so they can be skipped as well
+                                if (!skip_const_or_io_node(inv))
                                 {
-                                    // I/Os inverters are always straight, so they can be skipped as well
-                                    if (!skip_const_or_io_node(inv))
-                                    {
-                                        // vector to store possible direction combinations
-                                        z3::expr_vector ve{*ctx};
+                                    // vector to store possible direction combinations
+                                    z3::expr_vector ve{*ctx};
 
-                                        layout.foreach_adjacent_opposite_tiles(
-                                            t,
-                                            [this, &t, &ve](const auto& cp)
+                                    layout.foreach_adjacent_opposite_tiles(
+                                        t,
+                                        [this, &t, &ve](const auto& cp)
+                                        {
+                                            const auto &t1 = cp.first, t2 = cp.second;
+
+                                            if ((layout.is_incoming_clocked(t, t1) &&
+                                                 layout.is_outgoing_clocked(t, t2)) ||
+                                                !layout.is_regularly_clocked())
                                             {
-                                                const auto &t1 = cp.first, t2 = cp.second;
+                                                ve.push_back(get_tc(t1, t) && get_tc(t, t2));
+                                            }
+                                            if ((layout.is_incoming_clocked(t, t2) &&
+                                                 layout.is_outgoing_clocked(t, t1)) ||
+                                                !layout.is_regularly_clocked())
+                                            {
+                                                ve.push_back(get_tc(t2, t) && get_tc(t, t1));
+                                            }
+                                        });
 
-                                                if ((layout.is_incoming_clocked(t, t1) &&
-                                                     layout.is_outgoing_clocked(t, t2)) ||
-                                                    !layout.is_regularly_clocked())
-                                                {
-                                                    ve.push_back(get_tc(t1, t) && get_tc(t, t2));
-                                                }
-                                                if ((layout.is_incoming_clocked(t, t2) &&
-                                                     layout.is_outgoing_clocked(t, t1)) ||
-                                                    !layout.is_regularly_clocked())
-                                                {
-                                                    ve.push_back(get_tc(t2, t) && get_tc(t, t1));
-                                                }
-                                            });
-
-                                        if (!ve.empty())
-                                        {
-                                            // inverter can be placed here; enforce any of the direction combinations
-                                            // found possible above
-                                            solver->add(mk_as_if_se(z3::implies(get_tn(t, inv), z3::mk_or(ve)), t));
-                                        }
-                                        else
-                                        {
-                                            // inverter cannot be placed here, add constraint to avoid this case and
-                                            // speed up solving
-                                            solver->add(mk_as_if_se(!(get_tn(t, inv)), t));
-                                        }
+                                    if (!ve.empty())
+                                    {
+                                        // inverter can be placed here; enforce any of the direction combinations
+                                        // found possible above
+                                        solver->add(mk_as_if_se(z3::implies(get_tn(t, inv), z3::mk_or(ve)), t));
+                                    }
+                                    else
+                                    {
+                                        // inverter cannot be placed here, add constraint to avoid this case and
+                                        // speed up solving
+                                        solver->add(mk_as_if_se(!(get_tn(t, inv)), t));
                                     }
                                 }
-                            });
-                    });
-            }
+                            }
+                        });
+                });
         }
         /**
          * Adds constraints to the solver to prevent negative valued synchronization elements and that gate tiles cannot
@@ -3253,7 +3250,6 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
                          exact_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(has_foreach_tile_v<Lyt>, "Lyt is not a tile-based layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
@@ -3268,16 +3264,6 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
     if (networks::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
     {
         throw networks::high_degree_fanin_exception();
-    }
-
-    if constexpr (!fiction::has_foreach_adjacent_opposite_tiles_v<Lyt>)
-    {
-        if (ps.straight_inverters)
-        {
-            std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
-                         "cannot be guaranteed"
-                      << '\n';
-        }
     }
 
     mockturtle::names_view<networks::technology_network> intermediate_ntk{
@@ -3319,7 +3305,6 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
                                         exact_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(has_foreach_tile_v<Lyt>, "Lyt is not a tile-based layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
@@ -3334,15 +3319,6 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
     if (networks::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
     {
         throw networks::high_degree_fanin_exception();
-    }
-
-    if constexpr (!fiction::has_foreach_adjacent_opposite_tiles_v<Lyt>)
-    {
-        if (ps.straight_inverters)
-        {
-            std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
-                         "cannot be guaranteed\n";
-        }
     }
 
     mockturtle::names_view<networks::technology_network> intermediate_ntk{

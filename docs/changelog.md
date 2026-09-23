@@ -372,8 +372,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `help --docs`.
 - Data structures:
 
-  - **Breaking:** The traits `is_clocked_layout_v`, `has_synchronization_elements_v`, and `is_tile_based_layout_v`,
-    and the alias `wiring_reduction_layout_type`; `create_wiring_reduction_layout` returns a `wiring_reduction_layout`.
+  - **Breaking:** The traits `is_clocked_layout_v`, `has_synchronization_elements_v`, `is_tile_based_layout_v`, and
+    the capability traits that every gate-level or cell-level layout satisfies: the clocked-zone traits
+    `has_is_incoming_clocked_v`, `has_is_outgoing_clocked_v`, `has_foreach_incoming_clocked_zone_v`, and
+    `has_foreach_outgoing_clocked_zone_v`; `has_is_obstructed_coordinate_v` and `has_is_obstructed_connection_v`;
+    `has_foreach_tile_v`, `has_foreach_adjacent_tile_v`, `has_foreach_adjacent_opposite_tiles_v`,
+    `has_is_gate_tile_v`, `has_is_wire_tile_v`, `has_is_empty_tile_v`, `has_is_empty_cell_v`, `has_foreach_cell_v`,
+    and `has_is_empty_v`. Use `is_gate_level_layout_v` or `is_cell_level_layout_v`. The unused `is_offset_coord_v`
+    and `has_offset_coord_v` are gone as well.
+  - **Breaking:** The alias `wiring_reduction_layout_type`; `create_wiring_reduction_layout` returns a
+    `wiring_reduction_layout`.
 - I/O:
 
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.

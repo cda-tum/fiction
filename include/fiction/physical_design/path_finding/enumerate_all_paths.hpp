@@ -163,7 +163,7 @@ class enumerate_all_paths_impl
                 return;  // keep looping
             };
 
-            if constexpr (has_foreach_outgoing_clocked_zone_v<Lyt>)
+            if constexpr (is_gate_level_layout_v<Lyt> || is_cell_level_layout_v<Lyt>)
             {
                 // recurse for all outgoing clock zones
                 layout.foreach_outgoing_clocked_zone(src, explore_successor);

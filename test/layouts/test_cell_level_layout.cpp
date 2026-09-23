@@ -81,9 +81,7 @@ TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", qca_cell_c
                    sidb_cell_clk_lyt, sidb_cell_clk_lyt_cube)
 {
     CHECK(is_cell_level_layout_v<TestType>);
-    CHECK(has_foreach_cell_v<TestType>);
-    CHECK(has_is_empty_cell_v<TestType>);
-    CHECK(has_is_empty_v<TestType>);
+    CHECK(!is_gate_level_layout_v<TestType>);
     CHECK(has_get_layout_name_v<TestType>);
     CHECK(has_set_layout_name_v<TestType>);
 }
