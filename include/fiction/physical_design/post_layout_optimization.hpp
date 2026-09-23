@@ -650,7 +650,7 @@ class post_layout_optimization_impl
      * Utility function to move wires that cross over empty tiles down one layer. This can happen if the wiring of a
      * gate is deleted.
      *
-     * @param lyt Obstructed gate-level layout.
+     * @param lyt Gate-level layout.
      * @param deleted_coords Tiles that got deleted.
      */
     void fix_wires(Lyt& lyt, const std::vector<tile<Lyt>>& deleted_coords) noexcept
@@ -688,12 +688,9 @@ class post_layout_optimization_impl
                     lyt.move_node(lyt.get_node(outgoing_tile), outgoing_tile, {lyt.make_signal(lyt.get_node(ground))});
                 }
 
-                if constexpr (has_is_obstructed_coordinate_v<Lyt>)
-                {
-                    // update obstructions
-                    search_obstructions.obstruct_coordinate(ground);
-                    search_obstructions.clear_obstructed_coordinate(above);
-                }
+                // update obstructions
+                search_obstructions.obstruct_coordinate(ground);
+                search_obstructions.clear_obstructed_coordinate(above);
 
                 moved_tiles.insert(tile);
             }
@@ -732,7 +729,7 @@ class post_layout_optimization_impl
      * the location of the fanins and fanouts, as well as the wiring in between them. Additionally, all wire tiles
      * between fanins and the gate, as well as between the gate and fanouts are collected for deletion.
      *
-     * @param lyt Obstructed gate-level layout.
+     * @param lyt Gate-level layout.
      * @param op coordinate of the gate to be moved.
      * @return fanin and fanout gates, wires to be deleted and old routing paths.
      */
@@ -845,9 +842,9 @@ class post_layout_optimization_impl
     }
     /**
      * This helper function computes a path between two coordinates using the A* algorithm.
-     * It then obstructs the tiles along the path in the given layout.
+     * It then marks the tiles along the path in the search obstructions.
      *
-     * @param lyt Obstructed gate-level layout.
+     * @param lyt Gate-level layout.
      * @param start_tile The starting coordinate of the path.
      * @param end_tile The ending coordinate of the path.
      * @return The computed path as a sequence of coordinates in the layout.
@@ -887,7 +884,7 @@ class post_layout_optimization_impl
     /**
      * Attempts to relocate a gate to a new position within the layout and updates routing connections accordingly.
      *
-     * @param lyt                  Obstructed gate-level layout being optimized.
+     * @param lyt                  Gate-level layout being optimized.
      * @param new_pos              The target tile position to which the gate is to be relocated.
      * @param num_gate_relocations Reference to a counter tracking the number of gate relocations performed.
      * @param current_pos          Reference to the current position of the gate being relocated. This will be updated
@@ -1016,10 +1013,9 @@ class post_layout_optimization_impl
      * Restores the original wiring if relocation of a gate fails.
      *
      * This function moves the gate back to its original position and reinstates the previous wiring paths
-     * between the gate and its fan-in/fan-out connections. It also updates the obstructions in the layout
-     * accordingly.
+     * between the gate and its fan-in/fan-out connections. It also updates the search obstructions accordingly.
      *
-     * @param lyt Obstructed gate-level layout.
+     * @param lyt Gate-level layout.
      * @param old_path_from_fanin_1_to_gate The original routing path from the first fan-in to the gate (if exists).
      * @param old_path_from_fanin_2_to_gate The original routing path from the second fan-in to the gate (if exists).
      * @param old_path_from_gate_to_fanout_1 The original routing path from the gate to the first fan-out (if exists).
@@ -1096,7 +1092,7 @@ class post_layout_optimization_impl
      * - if a new coordinate is found and wiring is possible, it is applied and incoming signals are updated
      * - if no better coordinate is found, the old wiring is restored
      *
-     * @param lyt Obstructed gate-level layout.
+     * @param lyt Gate-level layout.
      * @param old_pos Old position of the gate to be moved.
      * @return `true` if the gate was moved successfully, `false` otherwise.
      */

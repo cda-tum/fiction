@@ -235,7 +235,6 @@ class read_fgl_layout_impl
         {
             if (const auto* elements = clocking->FirstChildElement("synchronization_elements"); elements != nullptr)
             {
-
                 for (const auto* element = elements->FirstChildElement("element"); element != nullptr;
                      element             = element->NextSiblingElement("element"))
                 {

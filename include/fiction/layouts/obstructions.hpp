@@ -11,11 +11,15 @@
 /**
  * @file
  * @brief Explicit coordinate and directed-connection obstructions.
+ * @author Marcel Walter (marcelwa)
  */
+
 #pragma once
+
 #include <phmap.h>
 
 #include <utility>
+
 namespace fiction::layouts
 {
 /**

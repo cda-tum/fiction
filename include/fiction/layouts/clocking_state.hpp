@@ -11,8 +11,11 @@
 /**
  * @file
  * @brief Clocking and synchronization state shared by gate and cell layouts.
+ * @author Marcel Walter (marcelwa)
  */
+
 #pragma once
+
 #include "fiction/layouts/clocking_scheme.hpp"
 
 #include <cstdint>
@@ -219,7 +222,10 @@ class state
     }
 
   private:
-    /** @brief Scheme and manually overridden clock numbers. */
+    /**
+     * @brief Scheme and manually overridden clock numbers. `scheme` has `const` members and is not assignable, so the
+     * state holds it through a pointer to support `replace_clocking_scheme` and copy assignment.
+     */
     std::unique_ptr<clocking_scheme_t> clocking;
     /** @brief Nonzero synchronization delays indexed by coordinate. */
     std::unordered_map<Coordinate, sync_elem_t> synchronization{};

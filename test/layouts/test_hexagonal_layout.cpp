@@ -364,7 +364,7 @@ TEST_CASE("Cardinal and ordinal operations: odd row", "[hexagonal-layout]")
 {
     using layout = hexagonal_layout<coords::offset, odd_row_hex>;
 
-    layout const lyt{{3, 3, 1}};
+    const layout lyt{{3, 3, 1}};
 
     const coordinate<layout> c{2, 2};
     const coordinate<layout> ac{2, 2, 1};
@@ -435,7 +435,7 @@ TEST_CASE("Cardinal and ordinal operations: even row", "[hexagonal-layout]")
 {
     using layout = hexagonal_layout<coords::offset, even_row_hex>;
 
-    layout const lyt{{3, 3, 1}};
+    const layout lyt{{3, 3, 1}};
 
     const coordinate<layout> c{2, 2};
     const coordinate<layout> ac{2, 2, 1};
@@ -506,7 +506,7 @@ TEST_CASE("Cardinal and ordinal operations: odd column", "[hexagonal-layout]")
 {
     using layout = hexagonal_layout<coords::offset, odd_column_hex>;
 
-    layout const lyt{{3, 3, 1}};
+    const layout lyt{{3, 3, 1}};
 
     const coordinate<layout> c{2, 2};
     const coordinate<layout> ac{2, 2, 1};
@@ -577,7 +577,7 @@ TEST_CASE("Cardinal and ordinal operations: even column", "[hexagonal-layout]")
 {
     using layout = hexagonal_layout<coords::offset, even_column_hex>;
 
-    layout const lyt{{3, 3, 1}};
+    const layout lyt{{3, 3, 1}};
 
     const coordinate<layout> c{2, 2};
     const coordinate<layout> ac{2, 2, 1};
@@ -650,7 +650,7 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     {
         using layout = hexagonal_layout<coords::offset, odd_row_hex>;
 
-        layout const lyt{{2, 2}};
+        const layout lyt{{2, 2}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
         const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
@@ -671,7 +671,7 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     {
         using layout = hexagonal_layout<coords::offset, even_row_hex>;
 
-        layout const lyt{{2, 2}};
+        const layout lyt{{2, 2}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
         const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
@@ -692,7 +692,7 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     {
         using layout = hexagonal_layout<coords::offset, odd_column_hex>;
 
-        layout const lyt{{2, 2}};
+        const layout lyt{{2, 2}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
         const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
@@ -713,7 +713,7 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     {
         using layout = hexagonal_layout<coords::offset, even_column_hex>;
 
-        layout const lyt{{2, 2}};
+        const layout lyt{{2, 2}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
         const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};

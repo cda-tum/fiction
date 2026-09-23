@@ -581,8 +581,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
 
             SECTION("(0,0) to (3,3) with coordinate obstruction via PIs")  // path of length 7
             {
-                auto                                                obstr_lyt = layout;
-                obstructions<coordinate<decltype(obstr_lyt)>> const search_obstructions{};
+                auto obstr_lyt = layout;
 
                 // create some PIs as obstruction
                 obstr_lyt.create_pi("obstruction", {3, 0});
@@ -591,9 +590,8 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
                 obstr_lyt.create_pi("obstruction", {2, 2});
                 // effectively blocking (3,2) as well
 
-                const auto collection =
-                    yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1, {},
-                                                     search_obstructions);  // only one path possible
+                const auto collection = yen_k_shortest_paths<coord_path>(
+                    obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1);  // only one path possible
 
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
@@ -642,15 +640,13 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
 
             SECTION("(0,0) to (3,3) with coordinate obstruction via PIs")  // path of length 7
             {
-                auto                                                obstr_lyt = layout;
-                obstructions<coordinate<decltype(obstr_lyt)>> const search_obstructions{};
+                auto obstr_lyt = layout;
 
                 // create a PI as obstruction
                 obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
 
-                const auto collection =
-                    yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1, {},
-                                                     search_obstructions);  // only one path possible
+                const auto collection = yen_k_shortest_paths<coord_path>(
+                    obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1);  // only one path possible
 
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
@@ -708,16 +704,15 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
-                    auto                                                obstr_lyt = layout;
-                    obstructions<coordinate<decltype(obstr_lyt)>> const search_obstructions{};
+                    auto obstr_lyt = layout;
 
                     // create a path as obstruction
                     const auto pi = obstr_lyt.create_pi("obstruction PI", {1, 0});  // obstructs 1 coordinate
                     const auto w  = obstr_lyt.create_buf(pi, {1, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w, "obstruction PO", {1, 2});  // obstructs 1 coordinate
 
-                    const auto collection = yen_k_shortest_paths<coord_path>(
-                        obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, 1, params, search_obstructions);
+                    const auto collection =
+                        yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, 1, params);
 
                     REQUIRE(collection.size() == 1);
                     const auto& path = collection[0];
@@ -730,16 +725,15 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
-                    auto                                                obstr_lyt = layout;
-                    obstructions<coordinate<decltype(obstr_lyt)>> const search_obstructions{};
+                    auto obstr_lyt = layout;
 
                     // create a path as obstruction
                     const auto pi = obstr_lyt.create_pi("obstruction PI", {2, 1});  // obstructs 1 coordinate
                     const auto w  = obstr_lyt.create_buf(pi, {1, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w, "obstruction PO", {0, 1});  // obstructs 1 coordinate
 
-                    const auto collection = yen_k_shortest_paths<coord_path>(
-                        obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, 1, params, search_obstructions);
+                    const auto collection =
+                        yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, 1, params);
 
                     REQUIRE(collection.size() == 1);
                     const auto& path = collection[0];
@@ -758,8 +752,7 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
 
                 SECTION("(0,0) to (3,3) with obstruction and crossings")  // 2 valid paths
                 {
-                    auto                                                obstr_lyt = layout;
-                    obstructions<coordinate<decltype(obstr_lyt)>> const search_obstructions{};
+                    auto obstr_lyt = layout;
 
                     // create two paths as obstruction
                     const auto pi1 = obstr_lyt.create_pi("obstruction PI 1", {1, 0});  // obstructs 1 coordinate
@@ -772,8 +765,8 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
                     const auto w22 = obstr_lyt.create_buf(w21, {2, 2});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w22, "obstruction PO", {2, 3});  // obstructs 1 coordinate
 
-                    const auto collection = yen_k_shortest_paths<coord_path>(
-                        obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 2, params, search_obstructions);
+                    const auto collection =
+                        yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 2, params);
 
                     REQUIRE(collection.size() == 2);
                     CHECK(collection.contains(
@@ -794,8 +787,7 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
 
                 SECTION("(0,0) to (3,2) with obstruction and crossings")  // 1 valid paths
                 {
-                    auto                                                obstr_lyt = layout;
-                    obstructions<coordinate<decltype(obstr_lyt)>> const search_obstructions{};
+                    auto obstr_lyt = layout;
 
                     // create two paths as obstruction
                     const auto pi1 = obstr_lyt.create_pi("obstruction PI 1", {1, 0});  // obstructs 1 coordinate
@@ -806,8 +798,8 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
                     const auto w2  = obstr_lyt.create_buf(pi2, {2, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w2, "obstruction PO", {3, 1});   // obstructs 1 coordinate
 
-                    const auto collection = yen_k_shortest_paths<coord_path>(
-                        obstr_lyt, {.source = {0, 0}, .target = {3, 2}}, 1, params, search_obstructions);
+                    const auto collection =
+                        yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 2}}, 1, params);
 
                     REQUIRE(collection.size() == 1);
                     const auto& path = collection[0];

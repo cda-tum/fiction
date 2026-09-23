@@ -145,7 +145,7 @@ TEST_CASE("Technology mapping", "[mockturtle]")
 
         const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
         REQUIRE(read_genlib_result == lorina::return_code::success);
-        mockturtle::tech_library<3> const gate_lib{gates};
+        const mockturtle::tech_library<3> gate_lib{gates};
 
         check_all(gate_lib);
     }
@@ -156,7 +156,7 @@ TEST_CASE("Technology mapping", "[mockturtle]")
 
         const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
         REQUIRE(read_genlib_result == lorina::return_code::success);
-        mockturtle::tech_library<2> const gate_lib{gates};
+        const mockturtle::tech_library<2> gate_lib{gates};
 
         check_all(gate_lib);
     }
@@ -169,7 +169,7 @@ TEST_CASE("Technology mapping", "[mockturtle]")
 
         const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
         REQUIRE(read_genlib_result == lorina::return_code::success);
-        mockturtle::tech_library<3> const gate_lib{gates};
+        const mockturtle::tech_library<3> gate_lib{gates};
 
         check_all(gate_lib);
     }

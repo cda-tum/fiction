@@ -250,8 +250,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 
             SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
             {
-                auto                                                obstr_lyt = layout;
-                obstructions<coordinate<decltype(obstr_lyt)>> const search_obstructions{};
+                auto obstr_lyt = layout;
 
                 // create some PIs as obstruction
                 obstr_lyt.create_pi("obstruction", {3, 0});
@@ -262,8 +261,8 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 
                 const auto path = a_star<coord_path>(
                     obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor<decltype(obstr_lyt)>(),
-                    unit_cost_functor<decltype(obstr_lyt)>(), {}, search_obstructions);  // only one path possible
-                const auto dist = a_star_distance(obstr_lyt, {0, 0}, {3, 3}, search_obstructions);
+                    unit_cost_functor<decltype(obstr_lyt)>());  // only one path possible
+                const auto dist = a_star_distance(obstr_lyt, {0, 0}, {3, 3});
 
                 CHECK(path.size() == 7);
                 CHECK(dist == 6);
@@ -282,16 +281,15 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 
             SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
             {
-                auto                                                obstr_lyt = layout;
-                obstructions<coordinate<decltype(obstr_lyt)>> const search_obstructions{};
+                auto obstr_lyt = layout;
 
                 // create a PI as obstruction
                 obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
 
                 const auto path = a_star<coord_path>(
                     obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor<decltype(obstr_lyt)>(),
-                    unit_cost_functor<decltype(obstr_lyt)>(), {}, search_obstructions);  // only one path possible
-                const auto dist = a_star_distance(obstr_lyt, {0, 0}, {3, 3}, search_obstructions);
+                    unit_cost_functor<decltype(obstr_lyt)>());  // only one path possible
+                const auto dist = a_star_distance(obstr_lyt, {0, 0}, {3, 3});
 
                 CHECK(path.size() == 7);
                 CHECK(dist == 6);
@@ -329,16 +327,15 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
-                    auto                                                obstr_lyt = layout;
-                    obstructions<coordinate<decltype(obstr_lyt)>> const search_obstructions{};
+                    auto obstr_lyt = layout;
 
                     // create a path as obstruction
                     const auto pi = obstr_lyt.create_pi("obstruction PI", {1, 0});  // obstructs 1 coordinate
                     const auto w  = obstr_lyt.create_buf(pi, {1, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w, "obstruction PO", {1, 2});  // obstructs 1 coordinate
 
-                    const auto path = a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, dist(),
-                                                         cost(), params, search_obstructions);
+                    const auto path =
+                        a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, dist(), cost(), params);
 
                     CHECK(path == coord_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1}, {2, 2}}});
                 }
@@ -349,16 +346,15 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
-                    auto                                                obstr_lyt = layout;
-                    obstructions<coordinate<decltype(obstr_lyt)>> const search_obstructions{};
+                    auto obstr_lyt = layout;
 
                     // create a path as obstruction
                     const auto pi = obstr_lyt.create_pi("obstruction PI", {2, 1});  // obstructs 1 coordinate
                     const auto w  = obstr_lyt.create_buf(pi, {1, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w, "obstruction PO", {0, 1});  // obstructs 1 coordinate
 
-                    const auto path = a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, dist(),
-                                                         cost(), params, search_obstructions);
+                    const auto path =
+                        a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, dist(), cost(), params);
 
                     CHECK(path == coord_path{{{0, 0}, {1, 0}, {1, 1, 1}, {1, 2}, {2, 2}}});
                 }
@@ -375,8 +371,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
 
                 SECTION("(0,0) to (3,3) with obstruction and crossings")  // 2 valid paths
                 {
-                    auto                                                obstr_lyt = layout;
-                    obstructions<coordinate<decltype(obstr_lyt)>> const search_obstructions{};
+                    auto obstr_lyt = layout;
 
                     // create two paths as obstruction
                     const auto pi1 = obstr_lyt.create_pi("obstruction PI 1", {1, 0});  // obstructs 1 coordinate
@@ -389,8 +384,8 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
                     const auto w22 = obstr_lyt.create_buf(w21, {2, 2});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w22, "obstruction PO", {2, 3});  // obstructs 1 coordinate
 
-                    const auto path = a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, dist(),
-                                                         cost(), params, search_obstructions);
+                    const auto path =
+                        a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, dist(), cost(), params);
 
                     CHECK((path == coord_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {3, 1}, {3, 2}, {3, 3}}} ||
                            path == coord_path{{{0, 0}, {0, 1}, {0, 2}, {1, 2, 1}, {2, 2, 1}, {3, 2}, {3, 3}}}));
@@ -408,8 +403,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
 
                 SECTION("(0,0) to (3,2) with obstruction and crossings")  // 1 valid paths
                 {
-                    auto                                                obstr_lyt = layout;
-                    obstructions<coordinate<decltype(obstr_lyt)>> const search_obstructions{};
+                    auto obstr_lyt = layout;
 
                     // create two paths as obstruction
                     const auto pi1 = obstr_lyt.create_pi("obstruction PI 1", {1, 0});  // obstructs 1 coordinate
@@ -420,8 +414,8 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
                     const auto w2  = obstr_lyt.create_buf(pi2, {2, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w2, "obstruction PO", {3, 1});   // obstructs 1 coordinate
 
-                    const auto path = a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 2}}, dist(),
-                                                         cost(), params, search_obstructions);
+                    const auto path =
+                        a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 2}}, dist(), cost(), params);
 
                     CHECK(path == coord_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {2, 2}, {3, 2}}});
                 }

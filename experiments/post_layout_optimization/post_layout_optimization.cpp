@@ -84,7 +84,7 @@ int main()  // NOLINT
     // stats
     orthogonal_physical_design_stats      orthogonal_stats{};
     post_layout_optimization_stats        post_layout_optimization_stats{};
-    post_layout_optimization_params const post_layout_optimization_params{};
+    const post_layout_optimization_params post_layout_optimization_params{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 

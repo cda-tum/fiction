@@ -178,7 +178,7 @@ int main()  // NOLINT
 
         // compute area
         area_stats                         area_stats{};
-        area_params<sidb_technology> const area_ps{};
+        const area_params<sidb_technology> area_ps{};
         area(cell_level_layout, area_ps, &area_stats);
 
         // log results
