@@ -11,10 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
-  - SiDB gate and circuit design accept cooperative millisecond timeouts; circuit budgets
-    cover all gates and expired searches throw `utils::timeout_error`.
-  - SiDB simulation applications accept shared millisecond budgets across parameter sweeps,
-    input patterns, and repetitions. Expiration throws `utils::timeout_error` without returning partial results.
+  - SiDB design and simulation applications support shared millisecond timeouts.
   - `utils::progress_callback` and `utils::progress_reporter` let long-running algorithms report
     progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
   - Parallel algorithms accept `on_worker_progress` for stable worker activity and completed counts.
@@ -66,10 +63,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
-  - SiDB gate and circuit timeouts raise Python's `TimeoutError`; gate design releases the GIL
-    after copying its inputs.
-  - Operational checks, domain and temperature calculations, population stability, and
-    time-to-solution expose millisecond budgets and raise `TimeoutError` on expiration.
+  - Shared SiDB deadlines raise `TimeoutError`; gate design releases the GIL.
   - Added directory-based test markers, including `pytest -m simulation`.
   - Marked the SiDB circuit-design integration test as `slow`; `pytest -m 'not slow'` skips it.
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
@@ -415,8 +409,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Operational-domain sampling now reports worker activity when it runs on the calling thread.
   - Contour tracing distributes simulation locks across regular parameter grids.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
-  - Defect-aware circuit design now propagates invalid gate-design parameters to the caller.
-  - SiDB timeout checks now skip per-cell setup, parameter conversion, and redundant nested checks.
+  - Defect-aware circuit design propagates invalid gate-design parameters.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
   - Defect-influence analysis now propagates worker exceptions to the caller.
   - Canvas filtering now rejects SiDBs missing from the simulation state's layout.

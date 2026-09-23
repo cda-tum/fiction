@@ -10,12 +10,12 @@ io/io
 logic/logic
 ```
 
-## Execution Budgets
+(sidb_timeouts)=
 
-Simulation applications accept cooperative millisecond budgets. The default, `2**64 - 1`,
-is unlimited; `0` expires immediately. Each calculation starts one deadline and shares it
-across its parameter points, input patterns, temperature steps, and worker threads.
-Nested simulations cannot restart or extend that deadline.
+## Timeouts
+
+SiDB timeouts use milliseconds: `2**64 - 1` (default) is unlimited; `0` expires immediately.
+Nested calls and workers share the enclosing deadline without extending it.
 
 | Application | Budget in its parameters |
 | --- | --- |
@@ -26,23 +26,15 @@ Nested simulations cannot restart or extend that deadline.
 | Population stability and time-to-solution | `timeout` |
 | Band-bending resilience | `assess_population_stability_params.timeout` |
 
-Expiration throws `fiction::utils::timeout_error` in C++ and the built-in `TimeoutError`
-from existing Python bindings. No partial result or completed statistics are published.
-Progress callbacks may have reported work before cancellation. Algorithms that deliberately
-sample only part of a domain retain their normal sampling behavior when they finish.
+Expiration throws `fiction::utils::timeout_error` in C++ or `TimeoutError` in Python,
+without publishing partial results or statistics.
 
-Finite budgets support QuickExact, ExGS, and QuickSim wherever the application supports
-those engines. Selecting ClusterComplete with a finite budget raises `std::invalid_argument`
-(`ValueError` in Python). Time-to-solution also retains QuickSim's separate per-attempt
-`quicksim_params.timeout`; that setting is not the budget for the whole measurement.
+Finite budgets support QuickExact, ExGS, and QuickSim. ClusterComplete rejects them with
+`std::invalid_argument` (`ValueError` in Python). QuickSim's `quicksim_params.timeout`
+remains a separate per-attempt limit in time-to-solution measurements.
 
-Cancellation is cooperative. Checks run at algorithm boundaries and during repeated search or
-simulation work, not between individual cell assignments, parameter conversions, or counter updates.
-Allocations, layout preprocessing, lattice and Cartesian-product
-enumeration, sorting, individual post-processing operations, and callbacks are not interruptible.
-They may exceed the budget before the next check raises an exception. Final progress callbacks
-can also run during cleanup after the last check. Use a separate process when a hard wall-clock
-cutoff is required. Small geometry helpers do not take timeout parameters.
+Cancellation is cooperative: individual operations and callbacks can overrun the budget before
+the next check, and cleanup callbacks can run afterward. Use a separate process for a hard deadline.
 
 ::::{tab-set}
 :sync-group: language
@@ -53,14 +45,7 @@ cutoff is required. Small geometry helpers do not take timeout parameters.
 ```cpp
 fiction::sidb::simulation::logic::operational_domain_params params{};
 params.operational_params.timeout = 5'000;
-try
-{
-    const auto domain = fiction::sidb::simulation::logic::operational_domain_grid_search(layout, spec, params);
-}
-catch (const fiction::utils::timeout_error&)
-{
-    // No domain was returned.
-}
+const auto domain = fiction::sidb::simulation::logic::operational_domain_grid_search(layout, spec, params);
 ```
 
 :::
@@ -73,10 +58,7 @@ from mnt import pyfiction as pf
 
 params = pf.operational_domain_params()
 params.operational_params.timeout = 5_000
-try:
-    domain = pf.operational_domain_grid_search(layout, spec, params)
-except TimeoutError:
-    print("The domain calculation exceeded its budget.")
+domain = pf.operational_domain_grid_search(layout, spec, params)
 ```
 
 :::
