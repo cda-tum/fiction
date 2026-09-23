@@ -125,12 +125,7 @@ class enumerate_all_paths_impl
     /**
      * Recursively enumerate all paths from `src` to `tgt` in the given layout. This function is called recursively
      * until the target coordinate is reached. Along each path, each coordinate can occur at maximum once. This function
-     * does not generate duplicate or looping paths. If the given layout implements the obstruction interface (see
-     * `obstructions`), paths will not be routed via obstructed coordinates or connections. If the given layout is
-     * a gate-level layout and implements the obstruction interface (see `obstructions`), paths may contain wire
-     * crossings if specified in the parameters. Wire crossings are only allowed over other wires and only if the
-     * crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
-     * cross only in a single point (orthogonal crossings + knock-knees/double wires).
+     * does not generate duplicate or looping paths. Obstructions and crossings follow `enumerate_all_paths`.
      *
      * @param src Source coordinate.
      * @param tgt Target coordinate.
@@ -149,51 +144,20 @@ class enumerate_all_paths_impl
         }
         else  // destination is not reached yet
         {
-            const auto explore_successor = [&, this](auto successor)  // make a copy
-                noexcept
+            const auto explore_successor = [&, this](const auto& adjacent) noexcept
             {
-                // return to ground layer to avoid getting stuck in crossing layer
-                successor = layout.below(successor);
-
-                // check if successor is obstructed
-                if (physical_design::detail::routing_coordinate_obstructed(layout, successor, search_obstructions) &&
-                    successor != tgt)
+                const auto next = physical_design::detail::routing_successor(layout, src, adjacent, tgt,
+                                                                             params.crossings, search_obstructions);
+                if (!next.has_value())
                 {
-                    // if crossings are enabled, check if it is possible to switch to the crossing layer
-                    if (params.crossings &&
-                        (is_crossable_wire(layout, src, successor) || layout.above(successor) == tgt))
-                    {
-                        // if the crossing layer is not obstructed
-                        if (const auto above_successor = layout.above(successor);
-                            above_successor != successor && (!physical_design::detail::routing_coordinate_obstructed(
-                                                                 layout, above_successor, search_obstructions) ||
-                                                             above_successor == tgt))
-                        {
-                            // allow exploring the crossing layer
-                            successor = above_successor;
-                        }
-                        else
-                        {
-                            return;  // skip the obstructed coordinate and keep looping
-                        }
-                    }
-                    else
-                    {
-                        return;  // skip the obstructed coordinate and keep looping
-                    }
-                }
-
-                // check if the connection to the successor is obstructed
-                if (physical_design::detail::routing_connection_obstructed(layout, src, successor, search_obstructions))
-                {
-                    return;  // skip the obstructed connection and keep looping
+                    return;  // skip the obstructed step and keep looping
                 }
 
                 // if the successor has not yet been visited
-                if (!is_visited(successor))
+                if (!is_visited(*next))
                 {
                     // recurse
-                    recursively_enumerate_all_paths(successor, tgt, p);
+                    recursively_enumerate_all_paths(*next, tgt, p);
                 }
 
                 return;  // keep looping
@@ -226,13 +190,16 @@ class enumerate_all_paths_impl
  * algorithm does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each
  * path, each coordinate can occur at maximum once.
  *
- * If the given layout implements the obstruction interface (see `obstructions`), paths will not be routed via
- * obstructed coordinates or connections.
+ * Paths do not pass obstructed coordinates or connections, except that the target is never obstructed. A coordinate
+ * or connection is obstructed if the `obstructions` argument marks it or if the layout's `is_obstructed_coordinate`
+ * or `is_obstructed_connection` reports it. Gate-level layouts report their occupied tiles and existing signal
+ * connections, and cell-level layouts report their occupied cells. Paths in gate-level layouts therefore avoid all
+ * placed gates and wires.
  *
- * If the given layout is a gate-level layout and implements the obstruction interface (see `obstructions`), paths
- * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
- * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
- * cross only in a single point (orthogonal crossings + knock-knees/double wires).
+ * If crossings are enabled in the parameters, paths in gate-level layouts may cross other wires on the crossing layer.
+ * Wire crossings are only allowed over other wires and only if the crossing layer is not obstructed. Furthermore, it
+ * is ensured that crossings do not run along another wire but cross only in a single point (orthogonal crossings +
+ * knock-knees/double wires).
  *
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:

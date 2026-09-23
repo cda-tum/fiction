@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <cassert>
 #include <functional>
+#include <optional>
 #include <set>
 #include <vector>
 
@@ -231,6 +232,55 @@ template <typename Lyt>
 
     return false;
 }
+
+namespace detail
+{
+/**
+ * @brief Resolves the coordinate that a path search enters when it steps from `current` to the adjacent coordinate
+ * `successor`. The search returns to the ground layer, switches to the crossing layer to pass over a crossable wire if
+ * `crossings` is set, and rejects obstructed coordinates and connections. The target is never obstructed.
+ * @tparam Lyt Layout type.
+ * @param lyt Layout.
+ * @param current Coordinate that the search expands.
+ * @param successor Coordinate adjacent to `current`.
+ * @param target Target coordinate of the search.
+ * @param crossings Whether paths may cross wires on the crossing layer.
+ * @param extra Search constraints.
+ * @return The coordinate to enter, or `std::nullopt` if the step is obstructed.
+ */
+template <typename Lyt>
+[[nodiscard]] std::optional<coordinate<Lyt>>
+routing_successor(const Lyt& lyt, const coordinate<Lyt>& current, coordinate<Lyt> successor,
+                  const coordinate<Lyt>& target, const bool crossings,
+                  const layouts::obstructions<coordinate<Lyt>>& extra) noexcept
+{
+    // return to ground layer to avoid getting stuck in crossing layer
+    successor = lyt.below(successor);
+
+    if (routing_coordinate_obstructed(lyt, successor, extra) && successor != target)
+    {
+        // an obstructed successor can only be passed on a free crossing layer above a crossable wire
+        const auto above_successor = lyt.above(successor);
+
+        if (!crossings || !(is_crossable_wire(lyt, current, successor) || above_successor == target) ||
+            above_successor == successor ||
+            (routing_coordinate_obstructed(lyt, above_successor, extra) && above_successor != target))
+        {
+            return std::nullopt;
+        }
+
+        successor = above_successor;
+    }
+
+    if (routing_connection_obstructed(lyt, current, successor, extra))
+    {
+        return std::nullopt;
+    }
+
+    return successor;
+}
+}  // namespace detail
+
 /**
  * Establishes a wire routing along the given path in the given layout. To this end, the given path's source and target
  * coordinates are assumed to be populated by other gates or wires that the new path shall connect to.

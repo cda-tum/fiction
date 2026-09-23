@@ -202,10 +202,11 @@ class yen_k_shortest_paths_impl
         return p.size();
     }
     /**
-     * Resets all temporary obstructions.
+     * Resets all temporary obstructions to the caller's obstructions.
      */
     void reset_temporary_obstructions() noexcept
     {
+        // copying costs O(|caller obstructions|) per spur node; undo only the spur's own marks if that ever dominates
         search_obstructions = initial_obstructions;
     }
 };
@@ -224,13 +225,16 @@ class yen_k_shortest_paths_impl
  * algorithm does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each
  * path, each coordinate can occur at maximum once.
  *
- * If the given layout implements the obstruction interface (see `obstructions`), paths will not be routed via
- * obstructed coordinates or connections.
+ * Paths do not pass obstructed coordinates or connections, except that the target is never obstructed. A coordinate
+ * or connection is obstructed if the `obstructions` argument marks it or if the layout's `is_obstructed_coordinate`
+ * or `is_obstructed_connection` reports it. Gate-level layouts report their occupied tiles and existing signal
+ * connections, and cell-level layouts report their occupied cells. Paths in gate-level layouts therefore avoid all
+ * placed gates and wires.
  *
- * If the given layout is a gate-level layout and implements the obstruction interface (see `obstructions`), paths
- * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
- * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
- * cross only in a single point (orthogonal crossings + knock-knees/double wires).
+ * If crossings are enabled in the parameters, paths in gate-level layouts may cross other wires on the crossing layer.
+ * Wire crossings are only allowed over other wires and only if the crossing layer is not obstructed. Furthermore, it
+ * is ensured that crossings do not run along another wire but cross only in a single point (orthogonal crossings +
+ * knock-knees/double wires).
  *
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:

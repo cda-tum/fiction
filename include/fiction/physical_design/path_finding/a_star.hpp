@@ -209,45 +209,16 @@ class a_star_impl
      */
     void expand(const coordinate<Lyt>& current) noexcept
     {
-        const auto explore_successor = [this, current](auto successor)  // make a copy
-            noexcept
+        const auto explore_successor = [this, current](const auto& adjacent) noexcept
         {
-            // return to ground layer to avoid getting stuck in crossing layer
-            successor = layout.below(successor);
-
-            // check if successor is obstructed
-            if (physical_design::detail::routing_coordinate_obstructed(layout, successor, search_obstructions) &&
-                successor != objective.target)
+            const auto next = physical_design::detail::routing_successor(layout, current, adjacent, objective.target,
+                                                                         params.crossings, search_obstructions);
+            if (!next.has_value())
             {
-                // if crossings are enabled, check if it is possible to switch to the crossing layer
-                if (params.crossings &&
-                    (is_crossable_wire(layout, current, successor) || layout.above(successor) == objective.target))
-                {
-                    // if the crossing layer is not obstructed
-                    if (const auto above_successor = layout.above(successor);
-                        above_successor != successor && (!physical_design::detail::routing_coordinate_obstructed(
-                                                             layout, above_successor, search_obstructions) ||
-                                                         above_successor == objective.target))
-                    {
-                        // allow exploring the crossing layer
-                        successor = above_successor;
-                    }
-                    else
-                    {
-                        return;  // skip the obstructed coordinate and keep looping
-                    }
-                }
-                else
-                {
-                    return;  // skip the obstructed coordinate and keep looping
-                }
+                return;  // skip the obstructed step and keep looping
             }
 
-            // check if the connection to the successor is obstructed
-            if (physical_design::detail::routing_connection_obstructed(layout, current, successor, search_obstructions))
-            {
-                return;  // skip the obstructed connection and keep looping
-            }
+            const auto successor = *next;
 
             if (is_visited(successor))
             {
@@ -376,13 +347,16 @@ class a_star_impl
  * function should neither be complex to calculate nor overestimating the remaining costs. Common heuristics to be used
  * are the Manhattan and the Euclidean distance functions. See `distance_functor` for implementations.
  *
- * If the given layout implements the obstruction interface (see `obstructions`), paths will not be routed via
- * obstructed coordinates and connections.
+ * Paths do not pass obstructed coordinates or connections, except that the target is never obstructed. A coordinate
+ * or connection is obstructed if the `obstructions` argument marks it or if the layout's `is_obstructed_coordinate`
+ * or `is_obstructed_connection` reports it. Gate-level layouts report their occupied tiles and existing signal
+ * connections, and cell-level layouts report their occupied cells. Paths in gate-level layouts therefore avoid all
+ * placed gates and wires.
  *
- * If the given layout is a gate-level layout and implements the obstruction interface (see `obstructions`), paths
- * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
- * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
- * cross only in a single point (orthogonal crossings + knock-knees/double wires).
+ * If crossings are enabled in the parameters, paths in gate-level layouts may cross other wires on the crossing layer.
+ * Wire crossings are only allowed over other wires and only if the crossing layer is not obstructed. Furthermore, it
+ * is ensured that crossings do not run along another wire but cross only in a single point (orthogonal crossings +
+ * knock-knees/double wires).
  *
  * In certain cases it might be desirable to determine regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
