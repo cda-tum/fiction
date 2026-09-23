@@ -21,8 +21,21 @@ namespace pyfiction
 
 void version_info(nanobind::module_& m);
 
+/**
+ * @brief Registers the Python translator for execution timeouts.
+ *
+ * @param m Python module.
+ */
+void execution_timeout(nanobind::module_& m);
+
+/**
+ * @brief Registers utility bindings.
+ *
+ * @param m Python module.
+ */
 void register_utils(nanobind::module_& m)
 {
+    execution_timeout(m);
     version_info(m);
 }
 

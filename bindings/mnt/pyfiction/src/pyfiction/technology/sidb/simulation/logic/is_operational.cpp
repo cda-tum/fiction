@@ -170,6 +170,8 @@ void is_operational(nanobind::module_& m)
     py::class_<fiction::sidb::simulation::logic::is_operational_params>(
         m, "is_operational_params", DOC(fiction_sidb_simulation_logic_is_operational_params))
         .def(py::init<>(), "Default constructor.")
+        .def_rw("timeout", &fiction::sidb::simulation::logic::is_operational_params::timeout,
+                DOC(fiction_sidb_simulation_logic_is_operational_params_timeout))
         .def_rw("simulation_parameters", &fiction::sidb::simulation::logic::is_operational_params::sim_params,
                 DOC(fiction_sidb_simulation_logic_is_operational_params_sim_params))
         .def_rw("sim_engine", &fiction::sidb::simulation::logic::is_operational_params::sim_engine,

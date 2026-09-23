@@ -13,6 +13,7 @@
  * @brief Potential margin each SiDB has before its charge state flips.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -26,8 +27,10 @@
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -104,6 +107,15 @@ struct physical_population_stability_params
      * Number of decimal places of the distance corresponding to a potential difference.
      */
     uint64_t precision_for_distance_corresponding_to_potential = 2;
+    /**
+     * Millisecond budget for simulation and population analysis. The maximum value means unlimited; zero expires
+     * immediately. Expiration throws `utils::timeout_error` without returning a partial result.
+     */
+    uint64_t timeout{std::numeric_limits<uint64_t>::max()};
+    /**
+     * Shared caller deadline. `time_point::max()` leaves the enclosing budget unlimited.
+     */
+    std::chrono::steady_clock::time_point deadline{std::chrono::steady_clock::time_point::max()};
 };
 
 namespace detail
@@ -133,7 +145,8 @@ class physical_population_stability_impl
      */
     [[nodiscard]] std::vector<population_stability_information> run()
     {
-        const engines::quickexact_params quickexact_parameters{.sim_params = params.sim_params};
+        const auto                       deadline = utils::make_deadline(params.timeout, params.deadline);
+        const engines::quickexact_params quickexact_parameters{.sim_params = params.sim_params, .deadline = deadline};
 
         auto simulation_results = engines::quickexact(sidb_layout, quickexact_parameters);
 
@@ -150,6 +163,7 @@ class physical_population_stability_impl
 
         for (const auto& cd : simulation_results.charge_distributions)
         {
+            utils::check_deadline(deadline);
             if (!seen.insert(cd.charge_states()).second)
             {
                 continue;

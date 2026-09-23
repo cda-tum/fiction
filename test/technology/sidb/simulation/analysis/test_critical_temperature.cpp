@@ -35,9 +35,12 @@
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 
+#include <chrono>
 #include <cmath>
 #include <stdexcept>
+#include <thread>
 #include <vector>
 
 using namespace fiction;
@@ -47,6 +50,47 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
+
+TEST_CASE("Critical temperature shares one budget across simulation and analysis",
+          "[critical-temperature][application-timeout]")
+{
+    const auto                  lyt = blueprints::siqad_and_gate();
+    critical_temperature_params params{};
+    critical_temperature_stats  stats{};
+    stats.num_valid_lyt = 42;
+
+    SECTION("Zero budget")
+    {
+        params.operational_params.timeout = 0;
+        CHECK_THROWS_AS(critical_temperature_gate_based(lyt, {create_and_tt()}, params, &stats), utils::timeout_error);
+        CHECK_THROWS_AS(critical_temperature_non_gate_based(lyt, params, &stats), utils::timeout_error);
+    }
+    SECTION("The enclosing budget is not restarted by simulation")
+    {
+        params.operational_params.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{20};
+        params.operational_params.timeout  = 1000;
+        params.on_progress                 = [&](auto, auto, auto)
+        { std::this_thread::sleep_until(params.operational_params.deadline); };
+        CHECK_THROWS_AS(critical_temperature_non_gate_based(lyt, params, &stats), utils::timeout_error);
+    }
+    SECTION("A large temperature sweep needs no upfront temperature allocation")
+    {
+        layout single_dot{};
+        single_dot.assign_sidb({0, 0, 0});
+        params.max_temperature            = 1e12;
+        params.operational_params.timeout = 100;
+        CHECK_THROWS_AS(critical_temperature_non_gate_based(single_dot, params, &stats), utils::timeout_error);
+    }
+#if (FICTION_ALGLIB_ENABLED)
+    SECTION("ClusterComplete rejects finite budgets")
+    {
+        params.operational_params.sim_engine = engine::CLUSTERCOMPLETE;
+        params.operational_params.timeout    = 1000;
+        CHECK_THROWS_AS(critical_temperature_non_gate_based(lyt, params, &stats), std::invalid_argument);
+    }
+#endif  // FICTION_ALGLIB_ENABLED
+    CHECK(stats.num_valid_lyt == 42);
+}
 
 TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 {
