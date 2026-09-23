@@ -20,6 +20,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/combination_utils.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 

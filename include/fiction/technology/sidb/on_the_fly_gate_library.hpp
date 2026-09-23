@@ -32,7 +32,6 @@
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/execution_timeout.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <phmap.h>
