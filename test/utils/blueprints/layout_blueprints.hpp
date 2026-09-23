@@ -22,8 +22,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/technology/inml/technology.hpp>
-#include <fiction/technology/qca/technology.hpp>
+#include <fiction/technology/inml/layout.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/technology.hpp>
@@ -791,20 +791,19 @@ GateLyt po_extension_corner_case_layout() noexcept
     return layout;
 }
 
-template <typename CellLyt>
-CellLyt single_layer_qca_and_gate() noexcept
+inline fiction::qca::layout single_layer_qca_and_gate()
 {
-    CellLyt layout{{4, 4}, "AND"};
+    fiction::qca::layout layout{{4, 4}, "AND"};
 
-    layout.assign_cell_type({0, 2}, fiction::qca::qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 4}, fiction::qca::qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0}, fiction::qca::qca_technology::cell_type::CONST_0);
-    layout.assign_cell_type({2, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 2}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({4, 2}, fiction::qca::qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2}, fiction::qca::cell_type::INPUT);
+    layout.assign_cell_type({2, 4}, fiction::qca::cell_type::INPUT);
+    layout.assign_cell_type({2, 0}, fiction::qca::cell_type::CONST_0);
+    layout.assign_cell_type({2, 1}, fiction::qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, fiction::qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, fiction::qca::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, fiction::qca::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2}, fiction::qca::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2}, fiction::qca::cell_type::OUTPUT);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 4}, "b");
@@ -813,34 +812,33 @@ CellLyt single_layer_qca_and_gate() noexcept
     return layout;
 }
 
-template <typename CellLyt>
-CellLyt two_layer_qca_wire_crossing() noexcept
+inline fiction::qca::layout two_layer_qca_wire_crossing()
 {
-    CellLyt layout{{4, 4, 1}, "Crossover"};
+    fiction::qca::layout layout{{4, 4, 1}, "Crossover"};
 
-    layout.assign_cell_type({0, 2}, fiction::qca::qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0}, fiction::qca::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({0, 2}, fiction::qca::cell_type::INPUT);
+    layout.assign_cell_type({2, 0}, fiction::qca::cell_type::INPUT);
 
-    layout.assign_cell_type({2, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 1}, fiction::qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, fiction::qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, fiction::qca::cell_type::NORMAL);
 
-    layout.assign_cell_type({0, 2, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 2, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({4, 2, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 2, 1}, fiction::qca::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2, 1}, fiction::qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 1}, fiction::qca::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2, 1}, fiction::qca::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2, 1}, fiction::qca::cell_type::NORMAL);
 
-    layout.assign_cell_mode({0, 2}, fiction::qca::qca_technology::cell_mode::VERTICAL);
-    layout.assign_cell_mode({0, 2, 1}, fiction::qca::qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({1, 2, 1}, fiction::qca::qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({2, 2, 1}, fiction::qca::qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({3, 2, 1}, fiction::qca::qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({4, 2, 1}, fiction::qca::qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({4, 2}, fiction::qca::qca_technology::cell_mode::VERTICAL);
+    layout.assign_cell_mode({0, 2}, fiction::qca::cell_mode::VERTICAL);
+    layout.assign_cell_mode({0, 2, 1}, fiction::qca::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({1, 2, 1}, fiction::qca::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 2, 1}, fiction::qca::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({3, 2, 1}, fiction::qca::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({4, 2, 1}, fiction::qca::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({4, 2}, fiction::qca::cell_mode::VERTICAL);
 
-    layout.assign_cell_type({4, 2}, fiction::qca::qca_technology::cell_type::OUTPUT);
-    layout.assign_cell_type({2, 4}, fiction::qca::qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({4, 2}, fiction::qca::cell_type::OUTPUT);
+    layout.assign_cell_type({2, 4}, fiction::qca::cell_type::OUTPUT);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 0}, "b");
@@ -850,24 +848,23 @@ CellLyt two_layer_qca_wire_crossing() noexcept
     return layout;
 }
 
-template <typename CellLyt>
-CellLyt single_layer_inml_maj_gate() noexcept
+inline fiction::inml::layout single_layer_inml_maj_gate()
 {
-    CellLyt layout{{4, 4}, "MAJ"};
+    fiction::inml::layout layout{{4, 4}, "MAJ"};
 
-    layout.assign_cell_type({0, 0}, fiction::inml::inml_technology::cell_type::INPUT);
-    layout.assign_cell_type({0, 2}, fiction::inml::inml_technology::cell_type::INPUT);
-    layout.assign_cell_type({0, 4}, fiction::inml::inml_technology::cell_type::INPUT);
-    layout.assign_cell_type({1, 0}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 2}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 4}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 0}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 1}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 4}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({4, 2}, fiction::inml::inml_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 0}, fiction::inml::magnet_type::INPUT);
+    layout.assign_cell_type({0, 2}, fiction::inml::magnet_type::INPUT);
+    layout.assign_cell_type({0, 4}, fiction::inml::magnet_type::INPUT);
+    layout.assign_cell_type({1, 0}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({1, 2}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({1, 4}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({2, 0}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({2, 1}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({2, 2}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({2, 3}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({2, 4}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({3, 2}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({4, 2}, fiction::inml::magnet_type::OUTPUT);
 
     layout.assign_cell_name({0, 0}, "a");
     layout.assign_cell_name({0, 2}, "b");
@@ -877,33 +874,32 @@ CellLyt single_layer_inml_maj_gate() noexcept
     return layout;
 }
 
-template <typename CellLyt>
-CellLyt single_layer_inml_coupler_with_inverter() noexcept
+inline fiction::inml::layout single_layer_inml_coupler_with_inverter()
 {
-    CellLyt layout{{11, 4}, "Coupler with inverter"};
+    fiction::inml::layout layout{{11, 4}, "Coupler with inverter"};
 
-    layout.assign_cell_type({0, 2}, fiction::inml::inml_technology::cell_type::INPUT);
-    layout.assign_cell_type({1, 2}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 1}, fiction::inml::inml_technology::cell_type::FANOUT_COUPLER_MAGNET);
-    layout.assign_cell_type({3, 2}, fiction::inml::inml_technology::cell_type::FANOUT_COUPLER_MAGNET);
-    layout.assign_cell_type({3, 3}, fiction::inml::inml_technology::cell_type::FANOUT_COUPLER_MAGNET);
-    layout.assign_cell_type({4, 1}, fiction::inml::inml_technology::cell_type::FANOUT_COUPLER_MAGNET);
-    layout.assign_cell_type({4, 3}, fiction::inml::inml_technology::cell_type::FANOUT_COUPLER_MAGNET);
-    layout.assign_cell_type({5, 1}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({6, 1}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({5, 3}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({6, 3}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({7, 1}, fiction::inml::inml_technology::cell_type::INVERTER_MAGNET);
-    layout.assign_cell_type({8, 1}, fiction::inml::inml_technology::cell_type::INVERTER_MAGNET);
-    layout.assign_cell_type({9, 1}, fiction::inml::inml_technology::cell_type::INVERTER_MAGNET);
-    layout.assign_cell_type({10, 1}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({7, 3}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({8, 3}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({9, 3}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({10, 3}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({11, 1}, fiction::inml::inml_technology::cell_type::OUTPUT);
-    layout.assign_cell_type({11, 3}, fiction::inml::inml_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2}, fiction::inml::magnet_type::INPUT);
+    layout.assign_cell_type({1, 2}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({2, 2}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({3, 1}, fiction::inml::magnet_type::FANOUT_COUPLER_MAGNET);
+    layout.assign_cell_type({3, 2}, fiction::inml::magnet_type::FANOUT_COUPLER_MAGNET);
+    layout.assign_cell_type({3, 3}, fiction::inml::magnet_type::FANOUT_COUPLER_MAGNET);
+    layout.assign_cell_type({4, 1}, fiction::inml::magnet_type::FANOUT_COUPLER_MAGNET);
+    layout.assign_cell_type({4, 3}, fiction::inml::magnet_type::FANOUT_COUPLER_MAGNET);
+    layout.assign_cell_type({5, 1}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({6, 1}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({5, 3}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({6, 3}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({7, 1}, fiction::inml::magnet_type::INVERTER_MAGNET);
+    layout.assign_cell_type({8, 1}, fiction::inml::magnet_type::INVERTER_MAGNET);
+    layout.assign_cell_type({9, 1}, fiction::inml::magnet_type::INVERTER_MAGNET);
+    layout.assign_cell_type({10, 1}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({7, 3}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({8, 3}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({9, 3}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({10, 3}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({11, 1}, fiction::inml::magnet_type::OUTPUT);
+    layout.assign_cell_type({11, 3}, fiction::inml::magnet_type::OUTPUT);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({11, 1}, "not a");
@@ -912,22 +908,21 @@ CellLyt single_layer_inml_coupler_with_inverter() noexcept
     return layout;
 }
 
-template <typename CellLyt>
-CellLyt single_layer_inml_crosswire() noexcept
+inline fiction::inml::layout single_layer_inml_crosswire()
 {
-    CellLyt layout{{5, 2}, "Crosswire"};
+    fiction::inml::layout layout{{5, 2}, "Crosswire"};
 
-    layout.assign_cell_type({0, 0}, fiction::inml::inml_technology::cell_type::INPUT);
-    layout.assign_cell_type({0, 2}, fiction::inml::inml_technology::cell_type::INPUT);
-    layout.assign_cell_type({1, 0}, fiction::inml::inml_technology::cell_type::CROSSWIRE_MAGNET);
-    layout.assign_cell_type({1, 2}, fiction::inml::inml_technology::cell_type::CROSSWIRE_MAGNET);
-    layout.assign_cell_type({2, 1}, fiction::inml::inml_technology::cell_type::CROSSWIRE_MAGNET);
-    layout.assign_cell_type({3, 0}, fiction::inml::inml_technology::cell_type::CROSSWIRE_MAGNET);
-    layout.assign_cell_type({3, 2}, fiction::inml::inml_technology::cell_type::CROSSWIRE_MAGNET);
-    layout.assign_cell_type({4, 0}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({4, 2}, fiction::inml::inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({5, 0}, fiction::inml::inml_technology::cell_type::OUTPUT);
-    layout.assign_cell_type({5, 2}, fiction::inml::inml_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 0}, fiction::inml::magnet_type::INPUT);
+    layout.assign_cell_type({0, 2}, fiction::inml::magnet_type::INPUT);
+    layout.assign_cell_type({1, 0}, fiction::inml::magnet_type::CROSSWIRE_MAGNET);
+    layout.assign_cell_type({1, 2}, fiction::inml::magnet_type::CROSSWIRE_MAGNET);
+    layout.assign_cell_type({2, 1}, fiction::inml::magnet_type::CROSSWIRE_MAGNET);
+    layout.assign_cell_type({3, 0}, fiction::inml::magnet_type::CROSSWIRE_MAGNET);
+    layout.assign_cell_type({3, 2}, fiction::inml::magnet_type::CROSSWIRE_MAGNET);
+    layout.assign_cell_type({4, 0}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({4, 2}, fiction::inml::magnet_type::NORMAL);
+    layout.assign_cell_type({5, 0}, fiction::inml::magnet_type::OUTPUT);
+    layout.assign_cell_type({5, 2}, fiction::inml::magnet_type::OUTPUT);
 
     layout.assign_cell_name({0, 0}, "a");
     layout.assign_cell_name({0, 2}, "b");

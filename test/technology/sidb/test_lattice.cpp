@@ -18,6 +18,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 
 #include <fmt/format.h>
@@ -31,6 +32,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::layouts;
 using namespace fiction::sidb;
 
 TEST_CASE("Lattice sites", "[lattice]")
@@ -158,6 +160,15 @@ TEST_CASE("Lattice sites", "[lattice]")
         const std::unordered_set<lattice_site> set{{0, 0, 0}, {0, 0, 1}, {0, 0, 0}, {-1, 0, 0}};
         CHECK(set.size() == 3);
     }
+}
+
+TEST_CASE("Grid coordinate to site", "[lattice]")
+{
+    CHECK(to_lattice_site(coords::offset{3, 0}) == lattice_site{3, 0, 0});
+    CHECK(to_lattice_site(coords::offset{3, 1}) == lattice_site{3, 0, 1});
+    CHECK(to_lattice_site(coords::offset{3, 7}) == lattice_site{3, 3, 1});
+    CHECK(to_lattice_site(coords::cube{-3, -1}) == lattice_site{-3, -1, 1});
+    CHECK(to_lattice_site(coords::cube{-3, -2}) == lattice_site{-3, -1, 0});
 }
 
 TEST_CASE("Sites in an area", "[lattice]")

@@ -27,10 +27,9 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/mol_qca/sim7_mol_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
-#include <fiction/technology/qca/sim7_mol_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -80,8 +79,6 @@ void check_equivalence(const sidb::layout& layout_designed, const std::string& p
 }
 }  // namespace
 
-using cell_lyt = sidb_cell_clk_lyt_cube;
-
 TEST_CASE("Gate-library application assigns synchronization to clock zones", "[apply-gate-library]")
 {
     const auto check_zone_delay = [](const auto& cells, const tile<cart_gate_clk_lyt>& delayed_tile)
@@ -104,7 +101,7 @@ TEST_CASE("Gate-library application assigns synchronization to clock zones", "[a
         layout.create_po(wire, "f", {2, 0});
         layout.assign_synchronization_element({1, 0}, 2);
 
-        check_zone_delay(apply_gate_library<qca_cell_clk_lyt, qca_one_library>(layout), {1, 0});
+        check_zone_delay(apply_gate_library<qca_one_library>(layout), {1, 0});
     }
     SECTION("Crossing")
     {
@@ -112,7 +109,7 @@ TEST_CASE("Gate-library application assigns synchronization to clock zones", "[a
         auto layout = blueprints::crossing_layout<cart_gate_clk_lyt>();
         layout.assign_synchronization_element({2, 1}, 2);
 
-        const auto cells = apply_gate_library<qca_cell_clk_lyt, qca_one_library>(layout);
+        const auto cells = apply_gate_library<qca_one_library>(layout);
 
         check_zone_delay(cells, {2, 1});
 
@@ -138,8 +135,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 
     SECTION("Apply static Bestagon gate library")
     {
-        const auto bestagon_and =
-            to_sidb_layout(apply_gate_library<sidb_cell_clk_lyt, bestagon_library, hex_even_row_gate_clk_lyt>(layout));
+        const auto bestagon_and = (apply_gate_library<bestagon_library, hex_even_row_gate_clk_lyt>(layout));
 
         CHECK(bestagon_and.num_dots() == 18);
 
@@ -167,12 +163,10 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
             params.design_gate_params = design_gate_params;
 
             REQUIRE_NOTHROW(
-                apply_parameterized_gate_library<cell_lyt, on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout,
-                                                                                                               params));
+                apply_parameterized_gate_library<on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout, params));
 
-            const auto bestagon_and = to_sidb_layout(
-                apply_parameterized_gate_library<cell_lyt, on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout,
-                                                                                                               params));
+            const auto bestagon_and =
+                (apply_parameterized_gate_library<on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout, params));
 
             check_equivalence(
                 bestagon_and,
@@ -211,8 +205,8 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
             design_gate_params.number_of_canvas_sidbs = 1;
             params.design_gate_params                 = design_gate_params;
 
-            CHECK_THROWS(apply_parameterized_gate_library<cell_lyt, on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
-                layout, params));
+            CHECK_THROWS(
+                apply_parameterized_gate_library<on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout, params));
         }
     }
 }
@@ -231,8 +225,7 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
 
     SECTION("Apply static Bestagon gate library")
     {
-        const auto double_wire =
-            to_sidb_layout(apply_gate_library<cell_lyt, bestagon_library, hex_even_row_gate_clk_lyt>(layout));
+        const auto double_wire = (apply_gate_library<bestagon_library, hex_even_row_gate_clk_lyt>(layout));
 
         check_equivalence(double_wire,
                           fmt::format("{}/resources/bestagon_library/multi_tile_layout/double_wire.sqd", TEST_PATH));
@@ -254,9 +247,8 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
                 on_the_fly_gate_library_params::complex_gate_design_policy::USING_PREDEFINED;
             params.design_gate_params = design_gate_params;
 
-            const auto bestagon_double_wire = to_sidb_layout(
-                apply_parameterized_gate_library<cell_lyt, on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout,
-                                                                                                               params));
+            const auto bestagon_double_wire =
+                (apply_parameterized_gate_library<on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout, params));
 
             check_equivalence(
                 bestagon_double_wire,
@@ -273,9 +265,8 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
             params.using_predefined_crossing_and_double_wire_if_possible =
                 on_the_fly_gate_library_params::complex_gate_design_policy::DESIGN_ON_THE_FLY;
 
-            const auto bestagon_double_wire = to_sidb_layout(
-                apply_parameterized_gate_library<cell_lyt, on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout,
-                                                                                                               params));
+            const auto bestagon_double_wire =
+                (apply_parameterized_gate_library<on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout, params));
 
             check_equivalence(
                 bestagon_double_wire,
@@ -321,24 +312,18 @@ TEST_CASE("On-the-fly SiDB fanout gate", "[apply-gate-library]")
 
     const auto fanout_gate = on_the_fly_gate_library::set_up_gate(layout, {1, 1}, params);
 
-    CHECK(std::ranges::any_of(fanout_gate,
-                              [](const auto& row)
-                              {
-                                  return std::ranges::any_of(row, [](const auto cell)
-                                                             { return cell == sidb_technology::cell_type::LOGIC; });
-                              }));
+    CHECK(std::ranges::any_of(
+        fanout_gate, [](const auto& row)
+        { return std::ranges::any_of(row, [](const auto cell) { return cell == sidb::dot_tag::LOGIC; }); }));
 
     sidb::layout surface{};
     surface.assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
 
     const auto fanout_gate_with_defect = on_the_fly_gate_library::set_up_gate(layout, {1, 1}, params, surface);
 
-    CHECK(std::ranges::any_of(fanout_gate_with_defect,
-                              [](const auto& row)
-                              {
-                                  return std::ranges::any_of(row, [](const auto cell)
-                                                             { return cell == sidb_technology::cell_type::LOGIC; });
-                              }));
+    CHECK(std::ranges::any_of(
+        fanout_gate_with_defect, [](const auto& row)
+        { return std::ranges::any_of(row, [](const auto cell) { return cell == sidb::dot_tag::LOGIC; }); }));
 }
 
 TEST_CASE("On-the-fly SiDB crossing gate", "[apply-gate-library]")
@@ -360,12 +345,9 @@ TEST_CASE("On-the-fly SiDB crossing gate", "[apply-gate-library]")
 
     const auto crossing_gate = on_the_fly_gate_library::set_up_gate(layout, {1, 1, 0}, params);
 
-    CHECK(std::ranges::any_of(crossing_gate,
-                              [](const auto& row)
-                              {
-                                  return std::ranges::any_of(row, [](const auto cell)
-                                                             { return cell == sidb_technology::cell_type::LOGIC; });
-                              }));
+    CHECK(std::ranges::any_of(
+        crossing_gate, [](const auto& row)
+        { return std::ranges::any_of(row, [](const auto cell) { return cell == sidb::dot_tag::LOGIC; }); }));
 
     sidb::layout surface{};
     surface.assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
@@ -385,8 +367,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Apply static Bestagon gate library")
         {
-            const auto inverter =
-                to_sidb_layout(apply_gate_library<cell_lyt, bestagon_library, hex_even_row_gate_clk_lyt>(layout));
+            const auto inverter = (apply_gate_library<bestagon_library, hex_even_row_gate_clk_lyt>(layout));
 
             check_equivalence(inverter,
                               fmt::format("{}/resources/bestagon_library/multi_tile_layout/INV.sqd", TEST_PATH));
@@ -404,9 +385,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
             params.design_gate_params = design_gate_params;
 
-            const auto inverter = to_sidb_layout(
-                apply_parameterized_gate_library<cell_lyt, on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout,
-                                                                                                               params));
+            const auto inverter =
+                (apply_parameterized_gate_library<on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout, params));
 
             check_equivalence(inverter,
                               fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/INV.sqd", TEST_PATH));
@@ -444,8 +424,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Apply static Bestagon gate library")
         {
-            const auto or_layout =
-                to_sidb_layout(apply_gate_library<cell_lyt, bestagon_library, hex_even_row_gate_clk_lyt>(layout));
+            const auto or_layout = (apply_gate_library<bestagon_library, hex_even_row_gate_clk_lyt>(layout));
 
             check_equivalence(or_layout,
                               fmt::format("{}/resources/bestagon_library/multi_tile_layout/OR.sqd", TEST_PATH));
@@ -463,9 +442,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
             params.design_gate_params = design_gate_params;
 
-            const auto or_layout = to_sidb_layout(
-                apply_parameterized_gate_library<cell_lyt, on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout,
-                                                                                                               params));
+            const auto or_layout =
+                (apply_parameterized_gate_library<on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout, params));
 
             check_equivalence(or_layout,
                               fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/OR.sqd", TEST_PATH));
@@ -503,8 +481,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Apply static Bestagon gate library")
         {
-            const auto nand_layout =
-                to_sidb_layout(apply_gate_library<cell_lyt, bestagon_library, hex_even_row_gate_clk_lyt>(layout));
+            const auto nand_layout = (apply_gate_library<bestagon_library, hex_even_row_gate_clk_lyt>(layout));
 
             check_equivalence(nand_layout,
                               fmt::format("{}/resources/bestagon_library/multi_tile_layout/NAND.sqd", TEST_PATH));
@@ -522,9 +499,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
             params.design_gate_params = design_gate_params;
 
-            const auto nand_layout = to_sidb_layout(
-                apply_parameterized_gate_library<cell_lyt, on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout,
-                                                                                                               params));
+            const auto nand_layout =
+                (apply_parameterized_gate_library<on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout, params));
 
             check_equivalence(
                 nand_layout, fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/NAND.sqd", TEST_PATH));
@@ -567,8 +543,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Apply static Bestagon gate library")
         {
-            const auto nor_layout =
-                to_sidb_layout(apply_gate_library<cell_lyt, bestagon_library, hex_even_row_gate_clk_lyt>(layout));
+            const auto nor_layout = (apply_gate_library<bestagon_library, hex_even_row_gate_clk_lyt>(layout));
 
             check_equivalence(nor_layout,
                               fmt::format("{}/resources/bestagon_library/multi_tile_layout/NOR.sqd", TEST_PATH));
@@ -586,9 +561,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
             params.design_gate_params = design_gate_params;
 
-            const auto nor_layout = to_sidb_layout(
-                apply_parameterized_gate_library<cell_lyt, on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout,
-                                                                                                               params));
+            const auto nor_layout =
+                (apply_parameterized_gate_library<on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout, params));
 
             check_equivalence(nor_layout,
                               fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/NOR.sqd", TEST_PATH));
@@ -606,8 +580,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Apply static Bestagon gate library")
         {
-            const auto xor_layout =
-                to_sidb_layout(apply_gate_library<cell_lyt, bestagon_library, hex_even_row_gate_clk_lyt>(layout));
+            const auto xor_layout = (apply_gate_library<bestagon_library, hex_even_row_gate_clk_lyt>(layout));
 
             check_equivalence(xor_layout,
                               fmt::format("{}/resources/bestagon_library/multi_tile_layout/XOR.sqd", TEST_PATH));
@@ -625,9 +598,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
             params.design_gate_params = design_gate_params;
 
-            const auto xor_layout = to_sidb_layout(
-                apply_parameterized_gate_library<cell_lyt, on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout,
-                                                                                                               params));
+            const auto xor_layout =
+                (apply_parameterized_gate_library<on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout, params));
 
             check_equivalence(xor_layout,
                               fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/XOR.sqd", TEST_PATH));
@@ -647,9 +619,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
             params.design_gate_params = design_gate_params;
 
-            const auto xor_layout = to_sidb_layout(
-                apply_parameterized_gate_library<cell_lyt, on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout,
-                                                                                                               params));
+            const auto xor_layout =
+                (apply_parameterized_gate_library<on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout, params));
 
             check_equivalence(
                 xor_layout,
@@ -669,8 +640,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Apply static Bestagon gate library")
         {
-            const auto xnor_layout =
-                to_sidb_layout(apply_gate_library<cell_lyt, bestagon_library, hex_even_row_gate_clk_lyt>(layout));
+            const auto xnor_layout = (apply_gate_library<bestagon_library, hex_even_row_gate_clk_lyt>(layout));
 
             check_equivalence(xnor_layout,
                               fmt::format("{}/resources/bestagon_library/multi_tile_layout/XNOR.sqd", TEST_PATH));
@@ -688,9 +658,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
             params.design_gate_params = design_gate_params;
 
-            const auto xnor_layout = to_sidb_layout(
-                apply_parameterized_gate_library<cell_lyt, on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout,
-                                                                                                               params));
+            const auto xnor_layout =
+                (apply_parameterized_gate_library<on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(layout, params));
 
             check_equivalence(
                 xnor_layout, fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/XNOR.sqd", TEST_PATH));
@@ -706,7 +675,7 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
     {
         const auto gate_lyt = blueprints::straight_wire_gate_layout<GateLyt>();
 
-        const auto layout = apply_gate_library<qca_cell_clk_lyt, qca_one_library, GateLyt>(gate_lyt);
+        const auto layout = apply_gate_library<qca_one_library, GateLyt>(gate_lyt);
 
         CHECK(layout.x() == 16);
         CHECK(layout.y() == 14);
@@ -717,7 +686,7 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
     {
         const auto gate_lyt = blueprints::optimization_layout_corner_case_outputs_2<GateLyt>();
 
-        const auto layout = apply_gate_library<qca_cell_clk_lyt, qca_one_library, GateLyt>(gate_lyt);
+        const auto layout = apply_gate_library<qca_one_library, GateLyt>(gate_lyt);
 
         CHECK(layout.x() == 21);
         CHECK(layout.y() == 14);
@@ -731,7 +700,7 @@ TEST_CASE("Apply molecular QCA gate library end-to-end", "[apply-gate-library]")
 
     const auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
 
-    const auto cell_layout = apply_gate_library<mol_qca_cell_clk_lyt, sim7_mol_library>(layout);
+    const auto cell_layout = apply_gate_library<mol_qca::sim7_mol_library>(layout);
 
     CHECK(cell_layout.num_cells() > 0u);
 }
@@ -743,17 +712,16 @@ TEST_CASE("Gate-library progress counts completed mappings", "[apply-gate-librar
     gate_lyt.foreach_node([&](const auto& n) { expected += !gate_lyt.is_constant(n); });
     std::size_t completed{};
     std::size_t reports{};
-    const auto  layout =
-        apply_gate_library<qca_cell_clk_lyt, qca_one_library>(gate_lyt,
-                                                              [&](const auto, const auto done, const auto total)
-                                                              {
-                                                                  CHECK(total == expected);
-                                                                  CHECK(done >= completed);
-                                                                  CHECK(done <= total);
-                                                                  completed = done;
-                                                                  ++reports;
-                                                              });
+    const auto  layout = apply_gate_library<qca_one_library>(gate_lyt,
+                                                             [&](const auto, const auto done, const auto total)
+                                                             {
+                                                                CHECK(total == expected);
+                                                                CHECK(done >= completed);
+                                                                CHECK(done <= total);
+                                                                completed = done;
+                                                                ++reports;
+                                                             });
     CHECK(reports >= 2);
     CHECK(completed == expected);
-    CHECK(layout.num_cells() == apply_gate_library<qca_cell_clk_lyt, qca_one_library>(gate_lyt).num_cells());
+    CHECK(layout.num_cells() == apply_gate_library<qca_one_library>(gate_lyt).num_cells());
 }

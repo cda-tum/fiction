@@ -44,6 +44,7 @@ using grid = cell_grid<test_cell>;
 TEST_CASE("Cell grid traits", "[cell-grid]")
 {
     CHECK(is_cartesian_layout_v<grid>);
+    CHECK(is_cell_grid_v<grid>);
     CHECK(has_get_layout_name_v<grid>);
     CHECK(has_set_layout_name_v<grid>);
 }

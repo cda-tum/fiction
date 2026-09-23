@@ -16,8 +16,7 @@
 
 #pragma once
 
-#include "fiction/technology/inml/technology.hpp"
-#include "fiction/traits.hpp"
+#include "fiction/technology/inml/layout.hpp"
 
 #include <cstdint>
 
@@ -27,23 +26,18 @@ namespace fiction::inml
  * Calculates the number of magnets for an iNML layout the way MagCAD (https://topolinano.polito.it/) would do it.
  * That is, counting chains of 4 inverters as a single entity.
  *
- * @tparam Lyt iNML cell-level layout type.
- * @param lyt The iNML cell-level layout whose area is desired.
+ * @param lyt The iNML layout whose magnets are counted.
  * @return Number of magnets as counted by MagCAD.
  */
-template <typename Lyt>
-uint64_t magcad_magnet_count(const Lyt& lyt) noexcept
+[[nodiscard]] inline uint64_t magcad_magnet_count(const layout& lyt) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_inml_technology_v<Lyt>, "Lyt is not an iNML layout");
-
     uint64_t num_inv_cells{0ull};
 
-    // count inverter cells
+    // count inverter magnets
     lyt.foreach_cell(
         [&lyt, &num_inv_cells](const auto& c)
         {
-            if (lyt.get_cell_type(c) == inml::inml_technology::cell_type::INVERTER_MAGNET)
+            if (lyt.get_cell_type(c) == magnet_type::INVERTER_MAGNET)
             {
                 ++num_inv_cells;
             }

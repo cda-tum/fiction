@@ -25,7 +25,6 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -41,7 +40,7 @@ using namespace fiction::synthesis;
 /**
  * This is simply a test library, its gates do not represent real entities that would work when fabricated.
  */
-class dummy_gate_library : public gate_library<sidb_technology, 3, 3>
+class dummy_gate_library : public gate_library<sidb::layout, 3, 3>
 {
   public:
     dummy_gate_library() = delete;

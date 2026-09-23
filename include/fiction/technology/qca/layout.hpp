@@ -17,6 +17,7 @@
 #pragma once
 
 #include "fiction/layouts/cell_grid.hpp"
+#include "fiction/layouts/clocking_state.hpp"
 #include "fiction/layouts/tile_clocking.hpp"
 
 #include <phmap.h>

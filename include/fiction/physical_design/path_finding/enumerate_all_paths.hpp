@@ -163,7 +163,7 @@ class enumerate_all_paths_impl
                 return;  // keep looping
             };
 
-            if constexpr (is_gate_level_layout_v<Lyt> || is_cell_level_layout_v<Lyt>)
+            if constexpr (is_gate_level_layout_v<Lyt>)
             {
                 // recurse for all outgoing clock zones
                 layout.foreach_outgoing_clocked_zone(src, explore_successor);
@@ -193,8 +193,7 @@ class enumerate_all_paths_impl
  * Paths do not pass obstructed coordinates or connections, except that the target is never obstructed. A coordinate
  * or connection is obstructed if the `obstructions` argument marks it or if the layout's `is_obstructed_coordinate`
  * or `is_obstructed_connection` reports it. Gate-level layouts report their occupied tiles and existing signal
- * connections, and cell-level layouts report their occupied cells. Paths in gate-level layouts therefore avoid all
- * placed gates and wires.
+ * connections, so paths in gate-level layouts avoid all placed gates and wires.
  *
  * If crossings are enabled in the parameters, paths in gate-level layouts may cross other wires on the crossing layer.
  * Wire crossings are only allowed over other wires and only if the crossing layer is not obstructed. Furthermore, it

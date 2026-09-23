@@ -44,7 +44,7 @@ TEST_CASE("Gate-level layout traits", "[gate-level-layout]")
 
     CHECK(is_coordinate_layout_v<gate_layout>);
     CHECK(is_gate_level_layout_v<gate_layout>);
-    CHECK(!is_cell_level_layout_v<gate_layout>);
+    CHECK(!is_cell_grid_v<gate_layout>);
 }
 
 TEST_CASE("Owned gate capabilities share copies and isolate clones", "[gate-level-layout]")

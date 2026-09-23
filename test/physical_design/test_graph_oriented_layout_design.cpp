@@ -23,7 +23,6 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/networks/network_utils.hpp>
@@ -31,7 +30,6 @@
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
-#include <fiction/technology/qca/technology.hpp>
 #include <fiction/traits.hpp>
 
 #include <mockturtle/networks/aig.hpp>
@@ -126,7 +124,6 @@ TEST_CASE("Layout equivalence after graph-oriented layout design", "[graph-orien
 TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
 {
     using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
-    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     const auto check = [](const auto& ntk)
     {
@@ -138,7 +135,7 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
 
-        CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(required_value(layout)));
+        CHECK_NOTHROW(apply_gate_library<qca_one_library>(required_value(layout)));
     };
 
     check(blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>());

@@ -28,7 +28,6 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -169,7 +168,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
     gate_lyt.create_nand({}, {}, {0, 0});
     gate_lyt.create_nand({}, {}, {2, 2});
 
-    const auto cell_lyt = to_sidb_layout(apply_gate_library<sidb_cell_clk_lyt, bestagon_library>(gate_lyt));
+    const auto cell_lyt = (apply_gate_library<bestagon_library>(gate_lyt));
 
     clustercomplete_params params{.sim_params = simulation_parameters{2}};
 

@@ -19,16 +19,17 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/networks/technology_network.hpp>                   // technology-mapped network type
-#include <fiction/physical_design/apply_gate_library.hpp>            // layout conversion to cell-level
-#include <fiction/physical_design/exact.hpp>                         // SMT-based physical design of FCN layouts
-#include <fiction/synthesis/technology_mapping_library.hpp>          // pre-defined gate types for technology mapping
-#include <fiction/technology/fcn/area.hpp>                           // area requirement calculations
-#include <fiction/technology/sidb/bestagon_library.hpp>              // a pre-defined SiDB gate library
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>  // conversion to the physical SiDB layout
-#include <fiction/technology/sidb/io/write_sqd_layout.hpp>           // writer for SiQAD files (physical simulation)
-#include <fiction/technology/sidb/technology.hpp>                    // cell implementations
-#include <fiction/types.hpp>                                         // pre-defined types suitable for the FCN domain
+#include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grids
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/networks/technology_network.hpp>           // technology-mapped network type
+#include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
+#include <fiction/physical_design/exact.hpp>                 // SMT-based physical design of FCN layouts
+#include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
+#include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
+#include <fiction/technology/sidb/bestagon_library.hpp>      // a pre-defined SiDB gate library
+#include <fiction/technology/sidb/io/write_sqd_layout.hpp>   // writer for SiQAD files (physical simulation)
+#include <fiction/technology/sidb/layout.hpp>                // SiDB layouts
+#include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
 #include <fmt/format.h>                                        // output formatting
@@ -48,7 +49,7 @@
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
 #include <cstdint>
-#include <cstdio>
+#include <cstdio>  // NOLINT(misc-include-cleaner): provides the stderr macro, which include-cleaner does not attribute
 #include <cstdlib>
 #include <sstream>
 #include <string>
@@ -56,6 +57,7 @@
 
 using namespace fiction;
 using namespace fiction::fcn;
+using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::sidb;
@@ -66,7 +68,6 @@ using namespace fiction::verification;
 int main()  // NOLINT
 {
     using gate_lyt = hex_even_row_gate_clk_lyt;
-    using cell_lyt = sidb_cell_clk_lyt;
 
     const std::string layouts_folder = fmt::format("{}/bestagon/layouts", EXPERIMENTS_PATH);
 
@@ -184,15 +185,15 @@ int main()  // NOLINT
             const auto cp_tp = critical_path_length_and_throughput(*gate_level_layout);
 
             // apply gate library
-            const auto cell_level_layout = apply_gate_library<cell_lyt, bestagon_library>(*gate_level_layout);
+            const auto cell_level_layout = apply_gate_library<bestagon_library>(*gate_level_layout);
 
-            // compute area
-            area_stats                         area_stats{};
-            const area_params<sidb_technology> area_ps{};
-            area(cell_level_layout, area_ps, &area_stats);
+            // the area of the Cartesian cell grid that the Bestagon tiles span
+            area_stats area_stats{};
+            area(cartesian_layout<coords::offset>{cell_grid_extent<bestagon_library>(*gate_level_layout)},
+                 area_params<layout>{}, &area_stats);
 
             // write a SiQAD simulation file
-            write_sqd_layout(to_sidb_layout(cell_level_layout), fmt::format("{}/{}.sqd", layouts_folder, benchmark));
+            write_sqd_layout(cell_level_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // log results
             bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
@@ -200,7 +201,7 @@ int main()  // NOLINT
                          depth_mapped_network.depth(), gate_level_layout->x() + 1, gate_level_layout->y() + 1,
                          (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1), gate_level_layout->num_gates(),
                          gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
-                         mockturtle::to_seconds(exact_stats.time_total), *eq, cell_level_layout.num_cells(),
+                         mockturtle::to_seconds(exact_stats.time_total), *eq, cell_level_layout.num_dots(),
                          area_stats.area);
         }
         else  // no layout was obtained

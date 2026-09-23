@@ -51,6 +51,27 @@ class layout
      */
     using dot_tag = sidb::dot_tag;
     /**
+     * Element type of the gates of SiDB gate libraries.
+     */
+    using cell_type = dot_tag;
+    /**
+     * Width of an SiDB in nm. Dots are 0-dimensional entities for simulation purposes.
+     */
+    static constexpr double CELL_WIDTH = 0.0;
+    /**
+     * Height of an SiDB in nm. Dots are 0-dimensional entities for simulation purposes.
+     */
+    static constexpr double CELL_HEIGHT = 0.0;
+    /**
+     * Horizontal spacing between two SiDBs in nm, as in SiQAD.
+     */
+    static constexpr double CELL_HSPACE = 0.384;
+    /**
+     * Average vertical spacing between two SiDB rows in nm, as in SiQAD. SiDBs on the same dimer row sit closer
+     * together, SiDBs on different dimer rows further apart.
+     */
+    static constexpr double CELL_VSPACE = 0.384;
+    /**
      * Creates an empty layout on the H-Si(100)-2x1 lattice.
      */
     layout() = default;

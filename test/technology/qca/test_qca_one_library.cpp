@@ -22,9 +22,11 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/types.hpp>
+
+#include <type_traits>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -32,10 +34,7 @@ using namespace fiction::qca;
 
 TEST_CASE("QCA ONE library traits", "[qca-one-library]")
 {
-    CHECK(has_post_layout_optimization_v<qca_one_library, qca_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<qca_one_library, inml_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<qca_one_library, sidb_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<qca_one_library, cart_gate_clk_lyt>);
+    CHECK(std::is_same_v<qca_one_library::layout, qca::layout>);
     CHECK(!has_get_functional_implementations_v<qca_one_library>);
     CHECK(!has_get_gate_ports_v<qca_one_library>);
 }

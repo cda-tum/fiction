@@ -18,13 +18,9 @@
 
 #pragma once
 
-#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/technology/inml/technology.hpp"
-#include "fiction/technology/qca/technology.hpp"
-#include "fiction/technology/sidb/technology.hpp"
 
 #include <mockturtle/traits.hpp>
 
@@ -35,6 +31,12 @@
 
 namespace fiction
 {
+
+namespace layouts
+{
+template <typename CellType>
+class cell_grid;
+}  // namespace layouts
 
 /**
  * This file includes fiction's trait system that is modeled after mockturtle/traits.hpp. It allows to check at compile
@@ -410,41 +412,21 @@ using clock_zone = typename Lyt::clock_zone;
 template <typename Lyt>
 using cell = typename Lyt::cell;
 
-template <typename Lyt>
-using technology = typename Lyt::technology;
-
-template <typename CoordinateType>
-inline constexpr const bool is_cube_coord_v = std::is_same_v<CoordinateType, layouts::coords::cube>;
-
-template <typename Lyt>
-inline constexpr const bool has_qca_technology_v = std::is_same_v<technology<Lyt>, qca::qca_technology>;
-template <typename Lyt>
-inline constexpr const bool has_inml_technology_v = std::is_same_v<technology<Lyt>, inml::inml_technology>;
-template <typename Lyt>
-inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Lyt>, sidb::sidb_technology>;
-template <typename Lyt>
-inline constexpr const bool has_mol_qca_technology_v = std::is_same_v<technology<Lyt>, qca::mol_qca_technology>;
-template <typename Lyt>
-inline constexpr const bool has_cube_coord_v = is_cube_coord_v<coordinate<Lyt>>;
-
-#pragma region is_cell_level_layout
+#pragma region is_cell_grid
 template <class Lyt, class = void>
-struct is_cell_level_layout : std::false_type
+struct is_cell_grid : std::false_type
 {};
 
 template <class Lyt>
-struct is_cell_level_layout<
-    Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt>,
-                          std::void_t<typename Lyt::base_type, cell<Lyt>, typename Lyt::cell_type,
-                                      typename Lyt::cell_mode, technology<Lyt>, typename Lyt::storage,
-                                      decltype(std::declval<Lyt>().get_cell_type(cell<Lyt>())),
-                                      decltype(std::declval<Lyt>().is_empty_cell(cell<Lyt>())),
-                                      decltype(std::declval<Lyt>().get_cell_mode(cell<Lyt>())),
-                                      decltype(std::declval<Lyt>().get_cell_name(cell<Lyt>()))>>> : std::true_type
+struct is_cell_grid<Lyt, std::enable_if_t<std::is_base_of_v<layouts::cell_grid<typename Lyt::cell_type>, Lyt>>>
+        : std::true_type
 {};
 
+/**
+ * Whether `Lyt` is a cell grid layout, i.e., a QCA, molQCA, or iNML layout that derives from `layouts::cell_grid`.
+ */
 template <class Lyt>
-inline constexpr bool is_cell_level_layout_v = is_cell_level_layout<Lyt>::value;
+inline constexpr bool is_cell_grid_v = is_cell_grid<Lyt>::value;
 #pragma endregion
 
 #pragma region has_set_layout_name
@@ -550,23 +532,6 @@ struct has_get_gate_ports<
 
 template <class Lib>
 inline constexpr bool has_get_gate_ports_v = has_get_gate_ports<Lib>::value;
-#pragma endregion
-
-#pragma region has_post_layout_optimization
-template <class Lib, class Lyt, class = void>
-struct has_post_layout_optimization : std::false_type
-{};
-
-template <class Lib, class Lyt>
-struct has_post_layout_optimization<
-    Lib, Lyt,
-    std::enable_if_t<std::conjunction_v<is_cell_level_layout<Lyt>, std::is_same<technology<Lib>, technology<Lyt>>>,
-                     std::void_t<decltype(std::declval<Lib>().post_layout_optimization(std::declval<Lyt>))>>>
-        : std::true_type
-{};
-
-template <class Lib, class Lyt>
-inline constexpr bool has_post_layout_optimization_v = has_post_layout_optimization<Lib, Lyt>::value;
 #pragma endregion
 
 /**

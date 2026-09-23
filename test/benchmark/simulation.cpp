@@ -22,7 +22,6 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
@@ -304,9 +303,8 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
         return lyt;
     };
 
-    const auto cl_4_seg =
-        to_sidb_layout(apply_gate_library<sidb_cell_clk_lyt, bestagon_library, hex_odd_row_gate_clk_lyt>(
-            create_diagonal_wire_with_n_non_terminating_segments(2)));
+    const auto cl_4_seg = (apply_gate_library<bestagon_library, hex_odd_row_gate_clk_lyt>(
+        create_diagonal_wire_with_n_non_terminating_segments(2)));
 
     BENCHMARK("4 Segment Diagonal Bestagon Wire (multi-threaded)")
     {
@@ -314,9 +312,8 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
         return clustercomplete(cl_4_seg, sim_params);
     };
 
-    const auto cl_3_seg =
-        to_sidb_layout(apply_gate_library<sidb_cell_clk_lyt, bestagon_library, hex_odd_row_gate_clk_lyt>(
-            create_diagonal_wire_with_n_non_terminating_segments(1)));
+    const auto cl_3_seg = (apply_gate_library<bestagon_library, hex_odd_row_gate_clk_lyt>(
+        create_diagonal_wire_with_n_non_terminating_segments(1)));
 
     BENCHMARK("3 Segment Diagonal Bestagon Wire (single-threaded)")
     {

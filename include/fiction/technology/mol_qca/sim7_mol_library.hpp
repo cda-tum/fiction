@@ -19,7 +19,7 @@
 
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
-#include "fiction/technology/qca/technology.hpp"
+#include "fiction/technology/mol_qca/layout.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -27,7 +27,7 @@
 
 #include <stdexcept>
 
-namespace fiction::qca
+namespace fiction::mol_qca
 {
 
 /**
@@ -42,7 +42,7 @@ namespace fiction::qca
  * More information and the open-source implementation are available at
  * https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.
  */
-class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 10>
+class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
 {
   public:
     /**
@@ -685,4 +685,4 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
          rotate_270(MAJORITY)}};
 };
 
-}  // namespace fiction::qca
+}  // namespace fiction::mol_qca

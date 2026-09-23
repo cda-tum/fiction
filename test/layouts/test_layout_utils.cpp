@@ -20,9 +20,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_utils.hpp>
+#include <fiction/technology/qca/layout.hpp>
 
 using namespace fiction;
 using namespace fiction::fcn;
@@ -125,4 +127,32 @@ TEST_CASE("Generate random coords::cube coordinate", "[layout-utils]")
         CHECK(randomly_generated_coordinate.z >= 3);
         CHECK(randomly_generated_coordinate.z <= 6);
     }
+}
+
+TEST_CASE("Normalize QCA layout coordinates", "[layout-utils]")
+{
+    qca::layout lyt{{6, 5, 1}, clocking::use<qca::layout>(), "crossing", 2, 2};
+
+    lyt.assign_cell_type({3, 2}, qca::cell_type::INPUT);
+    lyt.assign_cell_name({3, 2}, "a");
+    lyt.assign_cell_type({4, 3}, qca::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 3, 1}, qca::cell_type::NORMAL);
+    lyt.assign_cell_mode({4, 3, 1}, qca::cell_mode::VERTICAL);
+
+    const auto normalized = normalize_layout_coordinates(lyt);
+
+    CHECK(normalized.x() == 3);
+    CHECK(normalized.y() == 3);
+    CHECK(normalized.z() == 1);
+    CHECK(normalized.num_cells() == 3);
+    CHECK(normalized.get_cell_type({0, 0}) == qca::cell_type::INPUT);
+    CHECK(normalized.get_cell_name({0, 0}) == "a");
+    CHECK(normalized.get_cell_type({1, 1}) == qca::cell_type::NORMAL);
+    CHECK(normalized.get_cell_type({1, 1, 1}) == qca::cell_type::NORMAL);
+    CHECK(normalized.get_cell_mode({1, 1, 1}) == qca::cell_mode::VERTICAL);
+    CHECK(normalized.get_layout_name() == "crossing");
+    CHECK(normalized.is_clocking_scheme(clocking::USE_NAME));
+    CHECK(normalized.get_tile_size_x() == 2);
+
+    CHECK(lyt.get_cell_type({3, 2}) == qca::cell_type::INPUT);
 }

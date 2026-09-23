@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Tests for `fiction/technology/qca/sim7_mol_library.hpp`.
+ * @brief Tests for `fiction/technology/mol_qca/sim7_mol_library.hpp`.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */
@@ -25,53 +25,22 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
-#include <fiction/technology/qca/sim7_mol_library.hpp>
-#include <fiction/technology/qca/technology.hpp>
+#include <fiction/technology/mol_qca/layout.hpp>
+#include <fiction/technology/mol_qca/sim7_mol_library.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/types.hpp>
+
+#include <type_traits>
 
 using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
-using namespace fiction::qca;
+using namespace fiction::mol_qca;
 
 TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
 {
-    CHECK(!has_post_layout_optimization_v<sim7_mol_library, mol_qca_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<sim7_mol_library, qca_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<sim7_mol_library, inml_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<sim7_mol_library, sidb_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<sim7_mol_library, cart_gate_clk_lyt>);
+    CHECK(std::is_same_v<sim7_mol_library::layout, mol_qca::layout>);
     CHECK(!has_get_functional_implementations_v<sim7_mol_library>);
     CHECK(!has_get_gate_ports_v<sim7_mol_library>);
-}
-
-TEST_CASE("Molecular QCA technology helpers", "[molecular-qca-library]")
-{
-    CHECK(mol_qca_technology::is_empty_cell(mol_qca_technology::cell_type::EMPTY));
-    CHECK(mol_qca_technology::is_normal_cell(mol_qca_technology::cell_type::NORMAL1));
-    CHECK(mol_qca_technology::is_normal_cell(mol_qca_technology::cell_type::NORMAL2));
-    CHECK(mol_qca_technology::is_normal_cell(mol_qca_technology::cell_type::NORMAL3));
-    CHECK(mol_qca_technology::is_normal_cell(mol_qca_technology::cell_type::NORMAL4));
-    CHECK(!mol_qca_technology::is_normal_cell(mol_qca_technology::cell_type::INPUT));
-
-    CHECK(mol_qca_technology::cell_clock_number(mol_qca_technology::cell_type::NORMAL1) == 0);
-    CHECK(mol_qca_technology::cell_clock_number(mol_qca_technology::cell_type::NORMAL2) == 1);
-    CHECK(mol_qca_technology::cell_clock_number(mol_qca_technology::cell_type::NORMAL3) == 2);
-    CHECK(mol_qca_technology::cell_clock_number(mol_qca_technology::cell_type::NORMAL4) == 3);
-    CHECK(mol_qca_technology::cell_clock_number(mol_qca_technology::cell_type::OUTPUT) == 0);
-
-    CHECK(mol_qca_technology::is_input_cell(mol_qca_technology::cell_type::INPUT));
-    CHECK(mol_qca_technology::is_output_cell(mol_qca_technology::cell_type::OUTPUT));
-    CHECK(mol_qca_technology::is_const_0_cell(mol_qca_technology::cell_type::CONST_0));
-    CHECK(mol_qca_technology::is_const_1_cell(mol_qca_technology::cell_type::CONST_1));
-    CHECK(mol_qca_technology::is_constant_cell(mol_qca_technology::cell_type::CONST_0));
-    CHECK(mol_qca_technology::is_constant_cell(mol_qca_technology::cell_type::CONST_1));
-
-    CHECK(mol_qca_technology::is_normal_cell_mode(mol_qca_technology::cell_mode::NORMAL));
-    CHECK(mol_qca_technology::is_rotated_cell_mode(mol_qca_technology::cell_mode::ROTATED));
-    CHECK(mol_qca_technology::is_vertical_cell_mode(mol_qca_technology::cell_mode::VERTICAL));
-    CHECK(mol_qca_technology::is_crossover_cell_mode(mol_qca_technology::cell_mode::CROSSOVER));
 }
 
 TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")

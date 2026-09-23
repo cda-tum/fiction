@@ -17,13 +17,13 @@
 
 #pragma once
 
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/hash.hpp>
@@ -65,7 +65,7 @@ using surface_black_list =
  * @return The black list.
  */
 template <typename GateLibrary, typename GateLyt>
-    requires std::same_as<fiction::technology<GateLibrary>, sidb::sidb_technology>
+    requires std::same_as<typename GateLibrary::layout, sidb::layout>
 [[nodiscard]] auto
 surface_analysis(const GateLyt& gate_lyt, const sidb::layout& surface,
                  const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,
@@ -100,13 +100,10 @@ surface_analysis(const GateLyt& gate_lyt, const sidb::layout& surface,
                 {
                     if (const auto cell_type = gate[y][x]; cell_type != sidb::dot_tag::EMPTY)
                     {
-                        const cell<sidb_cell_clk_lyt_cube> relative_cell_pos{x, y, t.z};
-
                         const auto sidb_pos = sidb::to_lattice_site(
                             layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
-                                                                        GateLibrary::gate_y_size(), GateLyt,
-                                                                        sidb_cell_clk_lyt_cube>(gate_lyt, t,
-                                                                                                relative_cell_pos));
+                                                                        GateLibrary::gate_y_size()>(
+                                gate_lyt, t, layouts::coords::cube{x, y, t.z}));
 
                         if (sidbs_affected_by_defects.contains(sidb_pos))
                         {

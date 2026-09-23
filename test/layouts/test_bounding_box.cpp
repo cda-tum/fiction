@@ -21,7 +21,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>
-#include <fiction/technology/qca/technology.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -97,29 +97,29 @@ TEST_CASE("Update 2D gate-level bounding box", "[bounding-box]")
 
 TEST_CASE("2D bounding box around an empty cell-level layout", "[bounding-box]")
 {
-    const auto lyt = qca_cell_clk_lyt{};
-    const auto bb  = bounding_box_2d<qca_cell_clk_lyt>{lyt};
-    CHECK(bb.get_min() == cell<qca_cell_clk_lyt>{0, 0});
-    CHECK(bb.get_max() == cell<qca_cell_clk_lyt>{0, 0});
+    const auto lyt = qca::layout{};
+    const auto bb  = bounding_box_2d<qca::layout>{lyt};
+    CHECK(bb.get_min() == cell<qca::layout>{0, 0});
+    CHECK(bb.get_max() == cell<qca::layout>{0, 0});
     CHECK(bb.get_x_size() == 0);
     CHECK(bb.get_y_size() == 0);
 }
 
 TEST_CASE("Initialize 2D cell-level bounding box", "[bounding-box]")
 {
-    const auto lyt_and = blueprints::single_layer_qca_and_gate<qca_cell_clk_lyt>();
+    const auto lyt_and = blueprints::single_layer_qca_and_gate();
 
     const bounding_box_2d bb_and{lyt_and};
 
-    CHECK(bb_and.get_min() == cell<qca_cell_clk_lyt>{0, 0});
-    CHECK(bb_and.get_max() == cell<qca_cell_clk_lyt>{4, 4});
+    CHECK(bb_and.get_min() == cell<qca::layout>{0, 0});
+    CHECK(bb_and.get_max() == cell<qca::layout>{4, 4});
     CHECK(bb_and.get_x_size() == 4);
     CHECK(bb_and.get_y_size() == 4);
 }
 
 TEST_CASE("Update 2D cell-level bounding box", "[bounding-box]")
 {
-    auto lyt_and = blueprints::single_layer_qca_and_gate<qca_cell_clk_lyt>();
+    auto lyt_and = blueprints::single_layer_qca_and_gate();
 
     bounding_box_2d bb_and{lyt_and};
 
@@ -127,15 +127,15 @@ TEST_CASE("Update 2D cell-level bounding box", "[bounding-box]")
     lyt_and.resize({7, 7});
 
     // erase an input cell and the constant cell
-    lyt_and.assign_cell_type({0, 2}, qca_technology::cell_type::EMPTY);
-    lyt_and.assign_cell_type({2, 0}, qca_technology::cell_type::EMPTY);
+    lyt_and.assign_cell_type({0, 2}, qca::cell_type::EMPTY);
+    lyt_and.assign_cell_type({2, 0}, qca::cell_type::EMPTY);
 
     // add a wire segment below
-    lyt_and.assign_cell_type({1, 6}, qca_technology::cell_type::NORMAL);
-    lyt_and.assign_cell_type({2, 6}, qca_technology::cell_type::NORMAL);
-    lyt_and.assign_cell_type({3, 6}, qca_technology::cell_type::NORMAL);
-    lyt_and.assign_cell_type({4, 6}, qca_technology::cell_type::NORMAL);
-    lyt_and.assign_cell_type({5, 6}, qca_technology::cell_type::NORMAL);
+    lyt_and.assign_cell_type({1, 6}, qca::cell_type::NORMAL);
+    lyt_and.assign_cell_type({2, 6}, qca::cell_type::NORMAL);
+    lyt_and.assign_cell_type({3, 6}, qca::cell_type::NORMAL);
+    lyt_and.assign_cell_type({4, 6}, qca::cell_type::NORMAL);
+    lyt_and.assign_cell_type({5, 6}, qca::cell_type::NORMAL);
 
     // still the old bounding box
     CHECK(bb_and.get_min() == tile<cart_gate_clk_lyt>{0, 0});
