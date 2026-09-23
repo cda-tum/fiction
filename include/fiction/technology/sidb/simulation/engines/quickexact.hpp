@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -184,8 +185,6 @@ class quickexact_impl
 
         sim_result.simulation_runtime = time_counter;
 
-        utils::check_deadline(params.deadline);
-
         return sim_result;
     }
 
@@ -318,6 +317,7 @@ class quickexact_impl
         reduced_state.assign_base_number(2);
 
         uint64_t previous_charge_index = 0;
+        uint64_t iterations            = 0;
 
         fiction::utils::math::gray_code_iterator gci{0};
 
@@ -326,7 +326,11 @@ class quickexact_impl
 
         for (gci = 0; gci <= reduced_state.max_charge_index(); ++gci)
         {
-            utils::check_deadline(params.deadline);
+            // Reading the clock per configuration dominates the cheap Gray-code update.
+            if ((iterations++ & 1023u) == 0)
+            {
+                utils::check_deadline(params.deadline);
+            }
             reduced_state.assign_charge_index_by_gray_code(
                 *gci, previous_charge_index, simulation::detail::dependent_dot_mode::VARIABLE,
                 simulation::detail::energy_calculation::KEEP_OLD_ENERGY_VALUE,
@@ -350,6 +354,7 @@ class quickexact_impl
      */
     void three_state_simulation(simulation::detail::simulation_state& reduced_state)
     {
+        uint64_t iterations = 0;
         reduced_state.assign_all_charge_states(model::charge_state::NEGATIVE);
         reduced_state.update_after_charge_change();
         // Not executed to detect if 3-state simulation is required, but to detect the SiDBs that could be positively
@@ -363,10 +368,16 @@ class quickexact_impl
 
         while (reduced_state.charge_index() < reduced_state.max_charge_index())
         {
-            utils::check_deadline(params.deadline);
-            while (reduced_state.charge_index_of_sub_layout() < reduced_state.max_charge_index_sub_layout())
+            if ((iterations++ & 1023u) == 0)
             {
                 utils::check_deadline(params.deadline);
+            }
+            while (reduced_state.charge_index_of_sub_layout() < reduced_state.max_charge_index_sub_layout())
+            {
+                if ((iterations++ & 1023u) == 0)
+                {
+                    utils::check_deadline(params.deadline);
+                }
                 if (reduced_state.is_physically_valid())
                 {
                     record(reduced_state);
@@ -397,7 +408,10 @@ class quickexact_impl
         // charge configurations of the sublayout are iterated
         while (reduced_state.charge_index_of_sub_layout() < reduced_state.max_charge_index_sub_layout())
         {
-            utils::check_deadline(params.deadline);
+            if ((iterations++ & 1023u) == 0)
+            {
+                utils::check_deadline(params.deadline);
+            }
             if (reduced_state.is_physically_valid())
             {
                 record(reduced_state);

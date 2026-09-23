@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -41,6 +42,7 @@
 #include <cstdint>
 #include <set>
 #include <stdexcept>
+#include <thread>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -65,10 +67,50 @@ TEST_CASE("QuickExact rejects incomplete simulations after the caller deadline",
         {
             lyt.assign_sidb({i, 0, 0}, dot_tag::NORMAL);
         }
-        params.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{1};
+        params.deadline    = std::chrono::steady_clock::now() + std::chrono::milliseconds{20};
+        params.on_progress = [&](auto, auto done, auto total)
+        {
+            if (done > 0 && done < total)
+            {
+                std::this_thread::sleep_until(params.deadline);
+            }
+        };
+        SECTION("Two-state enumeration")
+        {
+            params.sim_params.base = 2;
+        }
+        SECTION("Three-state enumeration")
+        {
+            params.sim_params.base = 3;
+        }
     }
 
     CHECK_THROWS_AS(quickexact(lyt, params), utils::timeout_error);
+}
+
+TEST_CASE("QuickExact returns completed results after a slow final callback", "[quickexact]")
+{
+    layout lyt{};
+    for (int32_t i = 0; i < 8; ++i)
+    {
+        lyt.assign_sidb({i, 0, 0}, dot_tag::NORMAL);
+    }
+    quickexact_params params{.sim_params            = simulation_parameters{2, -0.32},
+                             .base_number_detection = quickexact_params::automatic_base_number_detection::OFF};
+    const auto        expected = quickexact(lyt, params);
+    params.deadline            = std::chrono::steady_clock::now() + std::chrono::seconds{1};
+    bool completed             = false;
+    params.on_progress         = [&](auto, auto done, auto total)
+    {
+        if (done == total)
+        {
+            completed = true;
+            std::this_thread::sleep_until(params.deadline);
+        }
+    };
+    const auto actual = quickexact(lyt, params);
+    CHECK(completed);
+    CHECK(actual.charge_distributions.size() == expected.charge_distributions.size());
 }
 
 TEST_CASE("Empty layout QuickExact simulation", "[quickexact]")
