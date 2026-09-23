@@ -379,8 +379,6 @@ class is_operational_impl
 
         const potential_landscape land{lyt_with_input_pattern, parameters.sim_params};
 
-        utils::check_deadline(parameters.deadline);
-
         if (parameters.sim_params.base == 2 && analysis::can_positive_charges_occur(land))
         {
             utils::check_deadline(parameters.deadline);
@@ -427,7 +425,6 @@ class is_operational_impl
         {
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
-                utils::check_deadline(parameters.deadline);
                 if (is_layout_invalid(i))
                 {
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
@@ -478,8 +475,6 @@ class is_operational_impl
                 {
                     utils::check_deadline(parameters.deadline);
                     const auto [op_status, non_op_reason] = verify_logic_match_of_cd(gs, i);
-
-                    utils::check_deadline(parameters.deadline);
 
                     if (op_status == operational_status::NON_OPERATIONAL &&
                         non_op_reason == non_operationality_reason::LOGIC_MISMATCH)
@@ -632,7 +627,6 @@ class is_operational_impl
      */
     [[nodiscard]] std::optional<double> is_physical_validity_feasible(simulation::detail::simulation_state& state)
     {
-        utils::check_deadline(parameters.deadline);
         assert(!canvas_lyt.is_empty() && "The canvas layout must not be empty.");
 
         const auto& lyt = state.landscape().get_layout();
@@ -797,7 +791,6 @@ class is_operational_impl
         {
             for (uint64_t output_wire_index = 0; output_wire_index < max_output_pattern_index; ++output_wire_index)
             {
-                utils::check_deadline(parameters.deadline);
                 if (output_wire_index == logical_correct_output_pattern && kink_states_input == input_pattern)
                 {
                     continue;
@@ -815,7 +808,6 @@ class is_operational_impl
             }
         }
 
-        utils::check_deadline(parameters.deadline);
         return false;
     }
 
@@ -922,7 +914,6 @@ class is_operational_impl
      */
     [[nodiscard]] result physical_simulation_of_layout(const layout& lyt_with_input_pattern) const
     {
-        utils::check_deadline(parameters.deadline);
         if (parameters.sim_engine == engine::EXGS)
         {
             return engines::exhaustive_ground_state_simulation(lyt_with_input_pattern, parameters.sim_params, {},

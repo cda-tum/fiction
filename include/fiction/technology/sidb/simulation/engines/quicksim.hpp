@@ -160,7 +160,6 @@ struct quicksim_params
 
         for (std::size_t i = 0; i < state.num_sidbs(); ++i)
         {
-            utils::check_deadline(ps.deadline);
             // no execution policy: predefined_negative_sidb_indices holds a handful of entries, where the dispatch
             // costs an order of magnitude more than the search itself
             if (std::ranges::find(predefined_negative_sidb_indices, i) == predefined_negative_sidb_indices.cend())
@@ -218,7 +217,6 @@ struct quicksim_params
 
                     for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
-                        utils::check_deadline(ps.deadline);
                         for (const auto sidb_index_with_unknown_charge_state :
                              all_sidb_indices_with_unknown_charge_state)
                         {

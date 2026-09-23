@@ -200,9 +200,8 @@ class defect_influence_impl
 
         auto positions = all_positions();
         std::erase_if(positions,
-                      [this, step_size](const auto& p)
+                      [step_size](const auto& p)
                       {
-                          utils::check_deadline(params.operational_params.deadline);
                           return static_cast<std::size_t>(std::abs(int64_t{p.x})) % step_size != 0 ||
                                  static_cast<std::size_t>(std::abs(row_of(p))) % step_size != 0;
                       });
@@ -411,10 +410,7 @@ class defect_influence_impl
      */
     [[nodiscard]] std::vector<lattice_site> all_positions() const
     {
-        utils::check_deadline(params.operational_params.deadline);
-        auto positions = sites_in_area(site_at_row(nw_x, nw_row), site_at_row(se_x, se_row));
-        utils::check_deadline(params.operational_params.deadline);
-        return positions;
+        return sites_in_area(site_at_row(nw_x, nw_row), site_at_row(se_x, se_row));
     }
     /**
      * @brief Runs `fn(i)` for `i` in `[0, n)` on the configured number of threads.
@@ -569,7 +565,6 @@ class defect_influence_impl
     [[nodiscard]] defect_influence_status does_defect_influence_groundstate(const layout&       lyt_without_candidate,
                                                                             const lattice_site& defect_pos)
     {
-        utils::check_deadline(params.operational_params.deadline);
         if (layout_to_analyze.is_empty())
         {
             return defect_influence_status::NON_INFLUENTIAL;
@@ -670,7 +665,6 @@ class defect_influence_impl
         influence_domain.for_each(
             [this](const auto& defect_pos [[maybe_unused]], const auto& status)
             {
-                utils::check_deadline(params.operational_params.deadline);
                 if (std::get<0>(status) == defect_influence_status::INFLUENTIAL)
                 {
                     ++stats.num_influencing_defect_positions;

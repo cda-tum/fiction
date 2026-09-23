@@ -313,7 +313,6 @@ class displacement_robustness_domain_impl
 
         for (const auto& displaced_indices : all_combinations)
         {
-            utils::check_deadline(params.operational_params.deadline);
             if (tested >= max_tested)
             {
                 break;
@@ -389,7 +388,6 @@ class displacement_robustness_domain_impl
         layout_to_analyze.foreach_dot(
             [&](const auto& c)
             {
-                utils::check_deadline(params.operational_params.deadline);
                 if (params.fixed_sidbs.contains(c))
                 {
                     all.push_back({c});
@@ -424,7 +422,6 @@ class displacement_robustness_domain_impl
                                             site_at_row(static_cast<int32_t>(max_x), max_row)));
             });
 
-        utils::check_deadline(params.operational_params.deadline);
         return all;
     }
     /**
@@ -434,7 +431,6 @@ class displacement_robustness_domain_impl
      */
     [[nodiscard]] std::vector<layout> generate_valid_displaced_sidb_layouts()
     {
-        utils::check_deadline(params.operational_params.deadline);
         auto combinations = utils::math::cartesian_combinations(all_possible_sidb_displacements);
         utils::check_deadline(params.operational_params.deadline);
         std::ranges::shuffle(combinations, generator);

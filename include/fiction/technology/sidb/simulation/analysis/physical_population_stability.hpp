@@ -144,8 +144,7 @@ class physical_population_stability_impl
      */
     [[nodiscard]] std::vector<population_stability_information> run()
     {
-        const auto deadline = utils::make_deadline(params.timeout, params.deadline);
-        utils::check_deadline(deadline);
+        const auto                       deadline = utils::make_deadline(params.timeout, params.deadline);
         const engines::quickexact_params quickexact_parameters{.sim_params = params.sim_params, .deadline = deadline};
 
         auto simulation_results = engines::quickexact(sidb_layout, quickexact_parameters);
@@ -181,7 +180,6 @@ class physical_population_stability_impl
 
             for (std::size_t i = 0; i < cd.size(); ++i)
             {
-                utils::check_deadline(deadline);
                 const auto& c = cd.sites()[i];
 
                 switch (cd.get_charge_state_by_index(i))

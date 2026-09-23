@@ -467,7 +467,6 @@ class critical_temperature_impl
 
         for (const auto& [energy, state_type] : est)
         {
-            utils::check_deadline(params.operational_params.deadline);
             // Check if there is at least one ground state that satisfies the logic (transparent). Round the energy
             // value of the given valid_layout to six decimal places to overcome possible rounding errors and for
             // comparability with the min_energy.
@@ -587,7 +586,6 @@ class critical_temperature_impl
      */
     [[nodiscard]] result physical_simulation_of_layout(const layout& lyt_with_input_pattern)
     {
-        utils::check_deadline(params.operational_params.deadline);
         if (params.operational_params.sim_engine == engine::EXGS)
         {
             // perform exhaustive ground state simulation

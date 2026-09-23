@@ -200,13 +200,10 @@ class design_gates_impl
             params{ps},
             available_sidbs_in_canvas{[this]
                                       {
-                                          utils::check_deadline(params.operational_params.deadline);
                                           auto sites = sites_in_area(params.canvas.first, params.canvas.second);
-                                          utils::check_deadline(params.operational_params.deadline);
                                           std::erase_if(sites,
                                                         [this](const auto& s)
                                                         {
-                                                            utils::check_deadline(params.operational_params.deadline);
                                                             return !skeleton_layout.is_empty_site(s) ||
                                                                    skeleton_layout.get_defect(s).type !=
                                                                        model::defect_type::NONE;
@@ -547,7 +544,6 @@ class design_gates_impl
 
         for (std::size_t i = 0; i < num_threads; ++i)
         {
-            utils::check_deadline(params.operational_params.deadline);
             workers.emplace_back(
                 std::async(std::launch::async,
                            [this, i, chunk_size, &items, &fn, &done, &progress]
@@ -609,7 +605,6 @@ class design_gates_impl
 
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
-                utils::check_deadline(params.operational_params.deadline);
                 const auto reason = is_operational_impl.is_layout_invalid(i);
 
                 if (!reason.has_value())

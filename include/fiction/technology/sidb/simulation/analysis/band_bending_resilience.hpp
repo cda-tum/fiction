@@ -79,7 +79,6 @@ struct band_bending_resilience_params
 
     if (!bii.is_valid() || bii.num_input_pairs() != spec.front().num_vars())
     {
-        utils::check_deadline(population_params.deadline);
         return std::numeric_limits<double>::infinity();
     }
 
@@ -87,7 +86,6 @@ struct band_bending_resilience_params
 
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
     {
-        utils::check_deadline(population_params.deadline);
         const auto pop_stability = physical_population_stability(*bii, population_params);
 
         if (pop_stability.empty())

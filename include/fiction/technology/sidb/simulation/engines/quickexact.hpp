@@ -165,7 +165,6 @@ class quickexact_impl
                 // charge index is increased and the corresponding charge distribution is checked for physical validity.
                 while (state.charge_index() < state.max_charge_index())
                 {
-                    utils::check_deadline(params.deadline);
                     if (state.is_physically_valid())
                     {
                         sim_result.charge_distributions.push_back(state.snapshot());
@@ -245,7 +244,6 @@ class quickexact_impl
 
         for (const auto i : preassigned_negative_sidbs)
         {
-            utils::check_deadline(params.deadline);
             reduced.assign_sidb(sites[i], dot_tag::EMPTY);
             // IMPORTANT: The pre-assigned negatively charged SiDBs (they have to be negatively charged to
             // fulfill the population stability) are considered as negatively charged defects in the layout.
@@ -256,7 +254,6 @@ class quickexact_impl
 
         for (std::size_t i = 0; i < landscape.num_sidbs(); ++i)
         {
-            utils::check_deadline(params.deadline);
             if (!std::ranges::binary_search(preassigned_negative_sidbs, i))
             {
                 free_sidbs.push_back(i);

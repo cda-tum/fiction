@@ -630,11 +630,7 @@ class operational_domain_impl
         all_step_points.reserve(all_index_combinations.size());
 
         std::ranges::transform(all_index_combinations, std::back_inserter(all_step_points),
-                               [this](const auto& comb)
-                               {
-                                   utils::check_deadline(params.operational_params.deadline);
-                                   return step_point{comb};
-                               });
+                               [](const auto& comb) { return step_point{comb}; });
 
         // shuffle the step points to simulate in random order. This helps with load-balancing since
         // operational/non-operational points are usually clustered. However, non-operational points can be simulated
@@ -1392,7 +1388,6 @@ class operational_domain_impl
      */
     void initialize_sweep()
     {
-        utils::check_deadline(params.operational_params.deadline);
         indices.reserve(num_dimensions);
         values.reserve(num_dimensions);
 
@@ -1419,7 +1414,6 @@ class operational_domain_impl
             // generate the values for the dimension
             for (const auto i : indices.at(d))
             {
-                utils::check_deadline(params.operational_params.deadline);
                 values.at(d).push_back(params.sweep_dimensions.at(d).min +
                                        (static_cast<double>(i) * params.sweep_dimensions.at(d).step));
             }
@@ -2325,7 +2319,6 @@ class operational_domain_impl
         op_domain.for_each(
             [this](const auto& param_point [[maybe_unused]], const auto& status)
             {
-                utils::check_deadline(params.operational_params.deadline);
                 if (std::get<0>(status) == operational_status::OPERATIONAL)
                 {
                     ++stats.num_operational_parameter_combinations;

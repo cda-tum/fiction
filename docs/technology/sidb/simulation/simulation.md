@@ -36,7 +36,9 @@ those engines. Selecting ClusterComplete with a finite budget raises `std::inval
 (`ValueError` in Python). Time-to-solution also retains QuickSim's separate per-attempt
 `quicksim_params.timeout`; that setting is not the budget for the whole measurement.
 
-Cancellation is cooperative. Allocations, layout preprocessing, lattice and Cartesian-product
+Cancellation is cooperative. Checks run at algorithm boundaries and during repeated search or
+simulation work, not between individual cell assignments, parameter conversions, or counter updates.
+Allocations, layout preprocessing, lattice and Cartesian-product
 enumeration, sorting, individual post-processing operations, and callbacks are not interruptible.
 They may exceed the budget before the next check raises an exception. Final progress callbacks
 can also run during cleanup after the last check. Use a separate process when a hard wall-clock
