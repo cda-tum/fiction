@@ -14,11 +14,11 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::qca::io::write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params ps = {})
+```{doxygenfunction} fiction::qca::io::write_qca_layout(const qca::layout& lyt, std::ostream& os, write_qca_layout_params ps = {})
 
 ```
 
-```{doxygenfunction} fiction::qca::io::write_qca_layout(const Lyt& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
+```{doxygenfunction} fiction::qca::io::write_qca_layout(const qca::layout& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
 
 ```
 
@@ -52,23 +52,15 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::qca::io::write_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
+```{doxygenfunction} fiction::qca::io::write_qca_layout_svg(const qca::layout& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
 
 ```
 
-```{doxygenfunction} fiction::qca::io::write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
+```{doxygenfunction} fiction::qca::io::write_qca_layout_svg(const qca::layout& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
 
 ```
 
-```{doxygenclass} fiction::qca::io::unsupported_cell_type_exception
-
-```
-
-```{doxygenfunction} fiction::qca::io::write_mol_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
-
-```
-
-```{doxygenfunction} fiction::qca::io::write_mol_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
+```{doxygenclass} fiction::fcn::io::unsupported_cell_type_exception
 
 ```
 
@@ -82,8 +74,6 @@
    :members:
 
 .. autofunction:: mnt.pyfiction.write_qca_layout_svg
-
-.. autofunction:: mnt.pyfiction.write_mol_qca_layout_svg
 ```
 
 :::

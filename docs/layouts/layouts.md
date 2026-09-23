@@ -5,7 +5,7 @@
 
 bounding_box
 cartesian_layout
-cell_level_layout
+cell_grid
 clocking_scheme
 clocking_state
 coordinates

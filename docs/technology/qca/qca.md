@@ -6,7 +6,14 @@
 io/io
 ```
 
-## Quantum-dot Cellular Automata (QCA)
+## Quantum-dot Cellular Automata (QCA) Layout
+
+A QCA layout places QCA cells on a Cartesian grid with a ground layer and a crossing layer. Each cell has a type, a
+mode as known from QCADesigner (regular, rotated, via, or crossover), and, for inputs and outputs, a name. Clock zones
+are tiles of cells, and each clock zone can be a synchronization element that extends its Hold phase. See
+{doc}`../../layouts/cell_grid` for the cell storage and the clock zones that QCA shares with other technologies.
+
+A QCA layout can be obtained from a gate-level layout by applying the {ref}`QCA ONE library <apply-gate-library>`.
 
 ::::{tab-set}
 :sync-group: language
@@ -14,9 +21,18 @@ io/io
 :::{tab-item} C++
 :sync: cpp
 
-**Header:** `fiction/technology/qca/technology.hpp`
+**Header:** `fiction/technology/qca/layout.hpp`
 
-```{doxygenstruct} fiction::qca::qca_technology
+```{doxygenenum} fiction::qca::cell_type
+```
+
+```{doxygenenum} fiction::qca::cell_mode
+```
+
+```{doxygenfunction} fiction::qca::is_constant
+```
+
+```{doxygenclass} fiction::qca::layout
 :members:
 ```
 
@@ -26,35 +42,13 @@ io/io
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.qca_technology
+.. autoclass:: mnt.pyfiction.qca_cell_type
    :members:
-```
 
-:::
+.. autoclass:: mnt.pyfiction.qca_cell_mode
+   :members:
 
-::::
-
-## Molecular Quantum-dot Cellular Automata (MolQCA)
-
-::::{tab-set}
-:sync-group: language
-
-:::{tab-item} C++
-:sync: cpp
-
-**Header:** `fiction/technology/qca/technology.hpp`
-
-```{doxygenstruct} fiction::qca::mol_qca_technology
-:members:
-```
-
-:::
-
-:::{tab-item} Python
-:sync: python
-
-```{eval-rst}
-.. autoclass:: mnt.pyfiction.mol_qca_technology
+.. autoclass:: mnt.pyfiction.qca_layout
    :members:
 ```
 
@@ -67,15 +61,5 @@ io/io
 **Header:** `fiction/technology/qca/qca_one_library.hpp`
 
 ```{doxygenclass} fiction::qca::qca_one_library
-:members:
-```
-
-(molQCA)=
-
-## Molecular QCA Library
-
-**Header:** `fiction/technology/qca/sim7_mol_library.hpp`
-
-```{doxygenclass} fiction::qca::sim7_mol_library
 :members:
 ```

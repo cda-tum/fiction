@@ -137,15 +137,12 @@ distribution per physically valid state beside a single copy of the simulated la
 
 ::::
 
-## Conversion from Cell-level Layouts
+## Gate-library Coordinates
 
-Placement and routing produce Cartesian SiDB cell-level layouts whose rows count single SiDB rows. These functions
-map such layouts and their coordinates onto lattice sites.
+SiDB gate libraries describe their gates on a grid whose rows are single SiDB rows. `apply_gate_library` maps these
+grid coordinates onto lattice sites with the following function.
 
-**Header:** `fiction/technology/sidb/cell_level_layout_conversion.hpp`
+**Header:** `fiction/technology/sidb/lattice.hpp`
 
 ```{doxygenfunction} fiction::sidb::to_lattice_site
-```
-
-```{doxygenfunction} fiction::sidb::to_sidb_layout
 ```
