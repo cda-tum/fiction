@@ -84,7 +84,8 @@ def test_store_schemas(shell: Shell, resource: Callable[[str], str]) -> None:
     assert isinstance(stats["time_total_s"], float)
     cell = log[3]["result"]["cell_layout"]  # type: ignore[index]
     assert cell["technology"] == "QCA"
-    assert set(cell) >= {"name", "technology", "size", "inputs", "outputs", "cells", "area_nm2"}
+    assert set(cell) >= {"name", "technology", "size", "tile", "inputs", "outputs", "cells", "area_nm2"}
+    assert cell["tile"] == {"x": 5, "y": 5}
 
 
 def test_help_is_logged(shell: Shell) -> None:

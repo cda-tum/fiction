@@ -292,7 +292,7 @@ def describe_gate_layout(layout: GateLayout, *, timing: bool = False) -> dict[st
         "gates": layout.num_gates(),
         "wires": layout.num_wires(),
         "crossings": layout.num_crossings(),
-        "synchronization_elements": layout.num_se() if hasattr(layout, "num_se") else 0,
+        "synchronization_elements": layout.num_se(),
     }
     if timing:
         critical_path, throughput = critical_path_length_and_throughput(layout)
@@ -307,8 +307,9 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
         entry: The store element.
 
     Returns:
-        Name, technology, size, I/O and dot or cell counts; for SiDB layouts the lattice and defect count;
-        and a ``simulation`` section once simulated.
+        Name, technology, size in cells, I/O and dot or cell counts; for SiDB layouts the lattice and defect count;
+        for other technologies the ``tile`` size, i.e., the cells per clock zone; and a ``simulation`` section once
+        simulated.
     """
     layout = entry.layout
     description: dict[str, object] = {
@@ -328,6 +329,7 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
             }
     else:
         description["size"] = {"x": layout.x() + 1, "y": layout.y() + 1, "z": layout.z() + 1, "area": layout.area()}
+        description["tile"] = {"x": layout.get_tile_size_x(), "y": layout.get_tile_size_y()}
     description["inputs"] = layout.num_pis()
     description["outputs"] = layout.num_pos()
     if isinstance(layout, sidb_layout):

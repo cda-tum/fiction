@@ -82,6 +82,13 @@ def test_ps_prints_statistics(mux21_shell: Shell) -> None:
     assert "2DDWAVE" in output
     assert "throughput" in output
     assert "critical path" in output
+    assert " tiles)" in output
+    mux21_shell.ok("cell --library qca-one")
+    output = mux21_shell.ok("ps -c")
+    # cell-level layouts measure their grid in cells; a clock zone spans a tile of 5 x 5 QCA ONE cells
+    assert "cells per layer)" in output
+    assert " tiles)" not in output
+    assert "5 x 5 cells per clock zone" in output
 
 
 def test_layout_summaries_do_not_compute_timing(mux21_shell: Shell, monkeypatch: pytest.MonkeyPatch) -> None:
