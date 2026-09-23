@@ -109,7 +109,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
-  - Path searches accept separate `obstructions` data for temporary constraints and preserve caller-owned constraints.
+  - **Breaking:** A*, path enumeration, and Yen's algorithm route around the gates and wires of every gate-level
+    layout and take temporary constraints as a separate `obstructions` argument, leaving the caller's data unchanged.
+    `&a_star_distance<Lyt, Dist>` no longer converts to a `distance_functor`; use `a_star_distance_functor`.
   - Avoid redundant progress-callback copies in algorithms and layout writers.
   - Critical-path analysis collapses wire chains to reduce traversal overhead on large layouts.
   - Avoid helper threads for single-worker sampling and contour exploration.
@@ -178,6 +180,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - **Breaking:** Gate and cell layouts own clocking, synchronization, and obstructions. Instantiate them directly on coordinate layouts; remove `clocked_layout`, `synchronization_element_layout`, `obstruction_layout`, and `tile_based_layout` wrappers.
+  - **Breaking:** Cell-level layouts address clock zones by tile: all cells of a tile, on every layer, share its
+    clock number and synchronization element. `get_clock_zone` returns the clock zone of a cell.
   - Population-stability results expose the critical dot as `critical_dot` in C++ and Python.
   - SiDB layouts use dot operations and `dot_tag` for dot roles. `assign_sidb` defaults to the
     `NORMAL` tag. Lattice-site constructors
@@ -340,7 +344,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
-  - **Breaking:** Use clocking and obstruction methods directly on gate and cell layouts. `RoutingObstructions` and `CubeRoutingObstructions` hold additional path-search constraints. Cell layouts expose `clone` and tile-size accessors.
+  - **Breaking:** Use clocking and obstruction methods directly on gate and cell layouts. `obstructions` holds
+    additional path-search constraints. Cell layouts expose `clone`, `get_clock_zone`, and tile-size accessors, and
+    their `get_clock_number` looks up the tile that contains the cell.
 
   - **Breaking:** The Python class `sidb_layout` names the lattice-based `sidb::layout`
 
@@ -362,9 +368,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     gate-based SiDB simulations, `temp -g` and `opdom`, alone.
   - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
     `help --docs`.
+- Data structures:
+
+  - **Breaking:** The traits `is_clocked_layout_v`, `has_synchronization_elements_v`, and `is_tile_based_layout_v`,
+    and the alias `wiring_reduction_layout_type`; `create_wiring_reduction_layout` returns a `wiring_reduction_layout`.
 - I/O:
 
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
+- Python bindings:
+
+  - **Breaking:** The classes `clocked_cartesian_layout`, `clocked_shifted_cartesian_layout`,
+    `clocked_hexagonal_layout`, their row and column variants, `clocked_stacked_cartesian_layout`, and
+    `cartesian_obstruction_layout`, `shifted_cartesian_obstruction_layout`, and `hexagonal_obstruction_layout`. Use
+    the `*_gate_layout` classes. `qca_layout`, `mol_qca_layout`, and `inml_layout` no longer provide
+    `is_incoming_clocked` and `is_outgoing_clocked`.
 - **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
   `charge_distribution_surface`, and the lattice orientation tags; `model/nm_position.hpp` and
   `model/nm_distance.hpp` (use `lattice::nm_position` and `lattice::nm_distance`); the SiQAD coordinate
@@ -476,9 +493,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Cell layouts reject zero clock-zone dimensions in constructors and setters.
   - Gate layouts constructed from coordinate layouts initialize their logic functions.
   - Clocked degree counts each eligible neighbor once, including neighbors enabled by synchronization.
-  - Clocking-scheme queries compare bounded string views.
   - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.
-  - Clocked-layout clones preserve clock overrides without sharing later clock-number edits.
+  - Gate- and cell-level layout clones preserve clock overrides without sharing later clock-number edits.
   - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
     Potential landscapes validate basis indices even for isolated SiDBs and defects.
   - SiDB cell conversion now rejects coordinates outside the target coordinate range.
@@ -511,7 +527,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Gate libraries:
 
-  - Gate-library application preserves synchronization delays on nonempty emitted cells.
+  - Gate-library application assigns the synchronization delay of each tile to its clock zone.
 
 - I/O:
 

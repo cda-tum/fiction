@@ -24,9 +24,6 @@
 .. autofunction:: mnt.pyfiction.hexagonal_gate_layout.bounding_box_2d
    :no-index:
 
-
-
-
 .. autofunction:: mnt.pyfiction.qca_layout.bounding_box_2d
    :no-index:
 
