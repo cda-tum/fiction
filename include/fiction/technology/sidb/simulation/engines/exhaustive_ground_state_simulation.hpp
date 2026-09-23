@@ -76,7 +76,11 @@ namespace fiction::sidb::simulation::engines
 
         while (state.charge_index() < state.max_charge_index())
         {
-            utils::check_deadline(deadline);
+            // Reading the clock per configuration costs more than the configuration's validity check.
+            if ((state.charge_index() & 1023u) == 0)
+            {
+                utils::check_deadline(deadline);
+            }
             if (state.is_physically_valid())
             {
                 simulation_result.charge_distributions.push_back(state.snapshot());

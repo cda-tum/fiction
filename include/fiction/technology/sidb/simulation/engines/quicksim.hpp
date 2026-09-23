@@ -122,7 +122,7 @@ struct quicksim_params
     mockturtle::stopwatch<>::duration time_counter{};
 
     // Track the start time for timeout
-    const auto start_time = std::chrono::high_resolution_clock::now();
+    const auto start_time = std::chrono::steady_clock::now();
 
     // measure run time (artificial scope)
     {
@@ -221,9 +221,12 @@ struct quicksim_params
                         for (const auto sidb_index_with_unknown_charge_state :
                              all_sidb_indices_with_unknown_charge_state)
                         {
-                            utils::check_deadline(ps.deadline);
-                            // Check if the timeout has been reached before starting the iterations
-                            const auto current_time = std::chrono::high_resolution_clock::now();
+                            // One clock read serves the shared deadline and the per-call timeout
+                            const auto current_time = std::chrono::steady_clock::now();
+                            if (current_time >= ps.deadline)
+                            {
+                                throw utils::timeout_error{};
+                            }
                             const auto elapsed_time =
                                 std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time)
                                     .count();
@@ -260,7 +263,6 @@ struct quicksim_params
 
                             for (uint64_t num = 0ul; num < upper_limit; num++)
                             {
-                                utils::check_deadline(ps.deadline);
                                 worker_state.adjacent_search(ps.alpha, negative_sidbs_indices);
                                 worker_state.validity_check();
 
