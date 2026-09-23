@@ -292,8 +292,6 @@ inline void time_to_solution(const layout& lyt, const engines::quicksim_params& 
     time_to_solution_for_given_simulation_results(simulation_result, simulation_results_quicksim,
                                                   tts_params.confidence_level, &st);
 
-    utils::check_deadline(deadline);
-
     if (ps != nullptr)
     {
         *ps = st;

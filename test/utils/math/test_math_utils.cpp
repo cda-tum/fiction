@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #include <catch2/catch_template_test_macros.hpp>
@@ -22,6 +23,7 @@
 #include <fiction/utils/math/combination_utils.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -79,6 +81,20 @@ TEMPLATE_TEST_CASE("integral_abs should compute the absolute value of a number o
     const auto x = static_cast<TestType>(-42);
 
     CHECK(integral_abs(integral_abs(x) - (x < 0 ? -x : x)) == 0);
+}
+
+TEST_CASE("Combination enumeration honors a shared deadline", "[execution-timeout]")
+{
+    const auto expired = std::chrono::steady_clock::now();
+    CHECK_THROWS_AS(determine_all_combinations_of_distributing_k_entities_on_n_positions(2, 5, expired),
+                    fiction::utils::timeout_error);
+    CHECK(determine_all_combinations_of_distributing_k_entities_on_n_positions(3, 25,
+                                                                               expired + std::chrono::seconds{10}) ==
+          determine_all_combinations_of_distributing_k_entities_on_n_positions(3, 25));
+    // C(1000, 5) fits max_size but cannot be materialized during this budget.
+    CHECK_THROWS_AS(determine_all_combinations_of_distributing_k_entities_on_n_positions(
+                        5, 1000, std::chrono::steady_clock::now() + std::chrono::milliseconds{20}),
+                    fiction::utils::timeout_error);
 }
 
 TEST_CASE("Binomial Coefficient Tests")

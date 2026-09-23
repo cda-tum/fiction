@@ -13,6 +13,7 @@
  * @brief Robustness of an SiDB layout against fabrication displacement of its dots.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -168,12 +169,7 @@ class displacement_robustness_domain_impl
                                         const displacement_robustness_domain_params& ps,
                                         displacement_robustness_domain_stats&        st) :
             layout_to_analyze{lyt},
-            params{[&ps]
-                   {
-                       auto checked               = ps;
-                       checked.operational_params = logic::detail::checked_parameters(ps.operational_params);
-                       return checked;
-                   }()},
+            params{logic::detail::checked_parameters(ps)},
             stats{st},
             truth_table{spec},
             generator(rd())
@@ -274,7 +270,6 @@ class displacement_robustness_domain_impl
             thread.get();
         }
 
-        utils::check_deadline(params.operational_params.deadline);
         return domain;
     }
     /**
@@ -332,7 +327,6 @@ class displacement_robustness_domain_impl
             ++tested;
         }
 
-        utils::check_deadline(params.operational_params.deadline);
         return static_cast<double>(stats.num_operational_sidb_displacements) /
                static_cast<double>(stats.num_non_operational_sidb_displacements +
                                    stats.num_operational_sidb_displacements);
@@ -477,7 +471,6 @@ class displacement_robustness_domain_impl
             ++num_generated;
         }
 
-        utils::check_deadline(params.operational_params.deadline);
         return layouts;
     }
     /**

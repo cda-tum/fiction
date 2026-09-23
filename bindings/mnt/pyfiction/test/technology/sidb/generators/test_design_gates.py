@@ -96,7 +96,7 @@ def test_siqad_and_gate_skeleton_100():
     assert params.operational_params.simulation_parameters.mu_minus == -0.28
     assert params.number_of_canvas_sidbs == 1
     assert params.maximal_random_design_attempts == 1_000_000
-    assert params.timeout == 2**64 - 1
+    assert params.operational_params.timeout == 2**64 - 1
     assert params.canvas[0] == lattice_site(4, 4, 0)
     assert params.canvas[1] == lattice_site(14, 5, 1)
 
@@ -173,13 +173,11 @@ def test_nor_gate_111_quickcell(nor_gate_skeleton):
         design_sidb_gates_mode.PRUNING_ONLY,
     ],
 )
-@pytest.mark.parametrize("timeout", [0, 1])
-def test_gate_design_timeout(nor_gate_skeleton: sidb_layout, mode: design_sidb_gates_mode, timeout: int) -> None:
+def test_gate_design_timeout(nor_gate_skeleton: sidb_layout, mode: design_sidb_gates_mode) -> None:
     """Every search mode raises TimeoutError without changing its inputs or publishing partial statistics."""
     params = design_sidb_gates_params()
-    params.timeout = timeout
+    params.operational_params.timeout = 0
     params.design_mode = mode
-    params.canvas = (lattice_site(0, 0, 0), lattice_site(1_000, 1_000, 0))
     params.number_of_canvas_sidbs = 3
     params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
     stats = design_sidb_gates_stats()
@@ -190,6 +188,6 @@ def test_gate_design_timeout(nor_gate_skeleton: sidb_layout, mode: design_sidb_g
         design_sidb_gates(nor_gate_skeleton, [create_nor_tt()], params, stats)
 
     assert nor_gate_skeleton.sidbs() == initial_dots
-    assert params.timeout == timeout
+    assert params.operational_params.timeout == 0
     assert params.number_of_canvas_sidbs == 3
     assert repr(stats) == initial_stats

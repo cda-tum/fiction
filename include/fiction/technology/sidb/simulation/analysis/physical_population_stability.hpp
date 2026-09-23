@@ -13,6 +13,7 @@
  * @brief Potential margin each SiDB has before its charge state flips.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -229,7 +230,6 @@ class physical_population_stability_impl
             popstability_information.push_back(std::move(info));
         }
 
-        utils::check_deadline(deadline);
         return popstability_information;
     }
 

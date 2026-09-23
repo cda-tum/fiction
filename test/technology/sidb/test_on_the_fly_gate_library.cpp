@@ -68,7 +68,7 @@ TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeou
 
         on_the_fly_gate_library_params params{};
         params.design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-        params.design_gate_params.timeout                       = 0;
+        params.design_gate_params.operational_params.timeout    = 0;
         const auto enclosing_deadline = std::chrono::steady_clock::now() + std::chrono::seconds{2};
         params.design_gate_params.operational_params.deadline = enclosing_deadline;
 

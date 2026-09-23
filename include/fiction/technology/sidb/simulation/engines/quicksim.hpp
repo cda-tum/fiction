@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -284,8 +285,6 @@ struct quicksim_params
     }
 
     st.simulation_runtime = time_counter;
-
-    utils::check_deadline(ps.deadline);
 
     if (timeout_limit_reached.load(std::memory_order_relaxed) || st.charge_distributions.empty())
     {

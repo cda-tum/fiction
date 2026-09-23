@@ -13,6 +13,7 @@
  * @brief Designs SiDB gate implementations for a given Boolean function and skeleton.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -117,12 +118,6 @@ struct design_gates_params
      * When to stop.
      */
     termination_condition termination_cond = termination_condition::AFTER_FIRST_SOLUTION;
-    /**
-     * Timeout in milliseconds, including candidate generation and simulation. The maximum value means unlimited;
-     * zero expires immediately. Checks are cooperative, so allocation and non-interruptible setup can exceed the
-     * budget. Finite budgets support QUICKEXACT, EXGS, and QUICKSIM, but not CLUSTERCOMPLETE.
-     */
-    uint64_t timeout = std::numeric_limits<uint64_t>::max();
     /**
      * Callback that receives the progress of the design mode's main loop.
      */
@@ -553,12 +548,12 @@ class design_gates_impl
 
                                for (std::size_t j = start_index; j < end_index; ++j)
                                {
-                                   utils::check_deadline(params.operational_params.deadline);
                                    if (done && params.termination_cond ==
                                                    design_gates_params::termination_condition::AFTER_FIRST_SOLUTION)
                                    {
                                        return;
                                    }
+                                   utils::check_deadline(params.operational_params.deadline);
 
                                    fn(items[j]);
                                    progress.advance();
@@ -744,9 +739,7 @@ class design_gates_impl
                                                       const design_gates_params&                     params = {},
                                                       design_gates_stats*                            stats  = nullptr)
 {
-    auto timed_params                        = params;
-    timed_params.operational_params.deadline = utils::make_deadline(params.timeout, params.operational_params.deadline);
-    utils::check_deadline(timed_params.operational_params.deadline);
+    const auto timed_params = simulation::logic::detail::checked_parameters(params);
     if (spec.empty())
     {
         throw std::invalid_argument{"spec must not be empty"};
@@ -775,7 +768,6 @@ class design_gates_impl
         result = p.run_quickcell();
     }
 
-    utils::check_deadline(timed_params.operational_params.deadline);
     if (stats != nullptr)
     {
         *stats = st;

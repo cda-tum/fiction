@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Benjamin Hien (hibenj)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #include <catch2/catch_message.hpp>
@@ -90,13 +91,14 @@ TEST_CASE("Gate-design timeouts cover every search mode", "[design-sidb-gates]")
 
     SECTION("Zero expires immediately")
     {
-        params.timeout = 0;
+        params.operational_params.timeout = 0;
     }
-    SECTION("A positive budget covers canvas enumeration")
+    SECTION("One positive budget covers setup and every candidate")
     {
-        params.timeout                = 1;
-        params.canvas                 = {site_at_row(0, 0), site_at_row(1'000, 1'000)};
-        params.number_of_canvas_sidbs = 0;
+        params.operational_params.timeout = 20;
+        params.canvas                     = {site_at_row(27, 12), site_at_row(28, 13)};
+        params.number_of_canvas_sidbs     = 1;
+        params.on_progress = [](auto, auto, auto) { std::this_thread::sleep_for(std::chrono::milliseconds{25}); };
     }
 
     for (const auto mode :

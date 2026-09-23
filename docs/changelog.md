@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
-  - SiDB design and simulation applications support shared millisecond timeouts.
+  - SiDB design and simulation applications support shared millisecond timeouts, including defect-aware circuit retries.
   - `utils::progress_callback` and `utils::progress_reporter` let long-running algorithms report
     progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
   - Parallel algorithms accept `on_worker_progress` for stable worker activity and completed counts.

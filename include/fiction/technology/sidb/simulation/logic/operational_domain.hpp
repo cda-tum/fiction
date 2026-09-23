@@ -13,6 +13,7 @@
  * @brief The parameter region in which an SiDB layout stays operational.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -554,12 +555,7 @@ class operational_domain_impl
                             const operational_domain_params& ps, operational_domain_stats& st) :
             sidb_layout{source_layout},
             truth_table{tt},
-            params{[&ps]
-                   {
-                       auto checked               = ps;
-                       checked.operational_params = checked_parameters(ps.operational_params);
-                       return checked;
-                   }()},
+            params{checked_parameters(ps)},
             stats{st},
             output_bdl_pairs{
                 detect_bdl_pairs(source_layout, sidb::dot_tag::OUTPUT,
@@ -600,12 +596,7 @@ class operational_domain_impl
                             operational_domain_stats& st) :
             sidb_layout{source_layout},
             truth_table{std::vector<kitty::dynamic_truth_table>{}},
-            params{[&ps]
-                   {
-                       auto checked               = ps;
-                       checked.operational_params = checked_parameters(ps.operational_params);
-                       return checked;
-                   }()},
+            params{checked_parameters(ps)},
             stats{st},
             num_dimensions{params.sweep_dimensions.size()}
     {
@@ -2312,7 +2303,6 @@ class operational_domain_impl
      */
     void log_stats() const
     {
-        utils::check_deadline(params.operational_params.deadline);
         stats.num_simulator_invocations            = num_simulator_invocations.load();
         stats.num_evaluated_parameter_combinations = num_evaluated_parameter_combinations.load();
 
@@ -2332,7 +2322,6 @@ class operational_domain_impl
         stats.num_total_parameter_points =
             std::accumulate(values.cbegin(), values.cend(), static_cast<std::size_t>(1),
                             [](std::size_t product, const auto& val) { return product * val.size(); });
-        utils::check_deadline(params.operational_params.deadline);
     }
 };
 

@@ -32,6 +32,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string_view>
+#include <thread>
 
 #if (FICTION_Z3_SOLVER)
 #include <mockturtle/networks/aig.hpp>
@@ -64,7 +65,7 @@ TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-c
     on_the_fly_circuit_design_params params{};
     auto&                            gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params;
     CHECK(params.timeout == std::numeric_limits<uint64_t>::max());
-    CHECK(gates.timeout == std::numeric_limits<uint64_t>::max());
+    CHECK(gates.operational_params.timeout == std::numeric_limits<uint64_t>::max());
 
     SECTION("Zero circuit budget expires with unlimited gate budgets")
     {
@@ -72,14 +73,13 @@ TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-c
     }
     SECTION("Zero gate budget expires within a positive circuit budget")
     {
-        params.timeout = 10'000;
-        gates.timeout  = 0;
+        params.timeout                   = 10'000;
+        gates.operational_params.timeout = 0;
     }
     SECTION("Unlimited gate budgets cannot override a finite circuit budget")
     {
-        params.timeout               = 1;
-        gates.canvas                 = {site_at_row(0, 0), site_at_row(1'000, 1'000)};
-        gates.number_of_canvas_sidbs = 0;
+        params.timeout    = 20;
+        gates.on_progress = [](auto, auto, auto) { std::this_thread::sleep_for(std::chrono::milliseconds{25}); };
     }
 
     const auto start = std::chrono::steady_clock::now();
@@ -109,16 +109,29 @@ TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-cir
     params.exact_design_parameters.timeout       = 10'000;
     auto& gates                                  = params.sidb_on_the_fly_gate_library_parameters.design_gate_params;
 
+    SECTION("Expired circuit budget")
+    {
+        params.timeout = 0;
+        CHECK_THROWS_AS(on_the_fly_circuit_design_on_defective_surface(network, tiling, surface, params),
+                        utils::timeout_error);
+    }
+    SECTION("The circuit budget also covers gate design")
+    {
+        params.timeout    = 20;
+        gates.on_progress = [](auto, auto, auto) { std::this_thread::sleep_for(std::chrono::milliseconds{25}); };
+        CHECK_THROWS_AS(on_the_fly_circuit_design_on_defective_surface(network, tiling, surface, params),
+                        utils::timeout_error);
+    }
     SECTION("Expired gate budget")
     {
-        gates.timeout = 0;
+        gates.operational_params.timeout = 0;
         CHECK_THROWS_AS(on_the_fly_circuit_design_on_defective_surface(network, tiling, surface, params),
                         utils::timeout_error);
     }
 #if (FICTION_ALGLIB_ENABLED)
     SECTION("Simulator does not support a finite gate budget")
     {
-        gates.timeout                       = 60'000;
+        gates.operational_params.timeout    = 60'000;
         gates.operational_params.sim_engine = simulation::engine::CLUSTERCOMPLETE;
         CHECK_THROWS_AS(on_the_fly_circuit_design_on_defective_surface(network, tiling, surface, params),
                         std::invalid_argument);

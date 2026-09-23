@@ -13,6 +13,7 @@
  * @brief Designs SiDB circuits gate by gate, optionally around a defective surface.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -25,6 +26,8 @@
 #include "fiction/types.hpp"
 #include "fiction/utils/execution_timeout.hpp"
 
+#include <algorithm>
+#include <chrono>
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
@@ -95,6 +98,11 @@ struct on_the_fly_circuit_design_on_defective_surface_params
      * Parameters for the *exact* placement and routing algorithm.
      */
     physical_design::exact_physical_design_params exact_design_parameters = {};
+    /**
+     * Total millisecond budget across surface analysis, placement-and-routing retries, and gate design.
+     * The maximum value means unlimited; zero expires immediately. Cancellation is cooperative.
+     */
+    uint64_t timeout = std::numeric_limits<uint64_t>::max();
 };
 
 #endif
@@ -162,10 +170,11 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @param lattice_tiling The lattice tiling used for the circuit design.
  * @param defective_surface The defective surface on which the SiDB circuit is designed.
  * @param params The parameters used for designing the circuit, encapsulated in an
- * `on_the_fly_circuit_design_params` object.
+ * `on_the_fly_circuit_design_on_defective_surface_params` object.
  * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
  * @return Layout representing the designed circuit on the defective surface.
- * @throws utils::timeout_error If a gate-design timeout expires.
+ * @note A circuit or gate timeout aborts the operation. Only a completed, unsuccessful gate search blacklists a tile.
+ * @throws utils::timeout_error If a circuit or gate-design timeout expires.
  * @throws std::invalid_argument If the simulation engine does not support the requested gate-design timeout.
  */
 template <typename Ntk, typename GateLyt>
@@ -177,6 +186,10 @@ template <typename Ntk, typename GateLyt>
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt is not a hexagonal");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
+    auto  library_params = params.sidb_on_the_fly_gate_library_parameters;
+    auto& deadline       = library_params.design_gate_params.operational_params.deadline;
+    deadline             = utils::make_deadline(params.timeout, deadline);
+    utils::check_deadline(deadline);
     on_the_fly_circuit_design_on_defective_surface_stats<GateLyt> st{};
 
     physical_design::exact_physical_design_stats exact_stats{};
@@ -197,9 +210,21 @@ template <typename Ntk, typename GateLyt>
 
         while (!gate_level_layout.has_value())
         {
+            auto exact_params = params.exact_design_parameters;
+            if (deadline != std::chrono::steady_clock::time_point::max())
+            {
+                const auto remaining =
+                    std::chrono::ceil<std::chrono::milliseconds>(deadline - std::chrono::steady_clock::now()).count();
+                if (remaining <= 0)
+                {
+                    throw utils::timeout_error{};
+                }
+                exact_params.timeout =
+                    static_cast<unsigned>(std::min<uint64_t>(exact_params.timeout, static_cast<uint64_t>(remaining)));
+            }
             // P&R with *exact* and the pre-determined blacklist
-            gate_level_layout = physical_design::exact_with_blacklist<GateLyt>(
-                ntk, black_list, params.exact_design_parameters, &exact_stats);
+            gate_level_layout =
+                physical_design::exact_with_blacklist<GateLyt>(ntk, black_list, exact_params, &exact_stats);
             st.exact_stats = exact_stats;
 
             if (gate_level_layout.has_value())
@@ -209,8 +234,7 @@ template <typename Ntk, typename GateLyt>
                 try
                 {
                     lyt = physical_design::apply_parameterized_gate_library_to_defective_surface<
-                        sidb::on_the_fly_gate_library>(
-                        *gate_level_layout, params.sidb_on_the_fly_gate_library_parameters, defective_surface);
+                        sidb::on_the_fly_gate_library>(*gate_level_layout, library_params, defective_surface);
                 }
 
                 // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
@@ -231,6 +255,7 @@ template <typename Ntk, typename GateLyt>
             // P&R was unsuccessful
             else
             {
+                utils::check_deadline(deadline);
                 throw unsuccessful_pr_error("Placement and routing is impossible with the current blacklist.");
             }
         }
@@ -275,11 +300,9 @@ template <typename GateLyt>
     utils::check_deadline(deadline);
     try
     {
-        auto result = to_sidb_layout(
+        return to_sidb_layout(
             physical_design::apply_parameterized_gate_library<sidb_cell_clk_lyt_cube, sidb::on_the_fly_gate_library>(
                 gate_lyt, library_params));
-        utils::check_deadline(deadline);
-        return result;
     }
 
     // Report an unsuccessful gate design to the circuit-design caller.

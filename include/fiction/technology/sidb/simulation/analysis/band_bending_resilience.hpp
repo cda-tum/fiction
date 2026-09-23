@@ -13,6 +13,7 @@
  * @brief Minimum potential that induces a charge transition in an SiDB layout.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -111,7 +112,6 @@ struct band_bending_resilience_params
         }
     }
 
-    utils::check_deadline(population_params.deadline);
     return minimal_pop_stability_for_all_inputs;
 }
 

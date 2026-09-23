@@ -19,6 +19,8 @@ Nested calls and workers share the enclosing deadline without extending it.
 
 | Application | Budget in its parameters |
 | --- | --- |
+| Gate design | `operational_params.timeout` |
+| Circuit design, including defect-aware placement and routing | `timeout` |
 | Operational checks and input-pattern analysis | `timeout` |
 | Operational and critical-temperature domains, physical-validity sweeps | `operational_params.timeout` |
 | Critical temperature, defect influence, displacement robustness and fabrication probability | `operational_params.timeout` |
@@ -27,7 +29,9 @@ Nested calls and workers share the enclosing deadline without extending it.
 | Band-bending resilience | `assess_population_stability_params.timeout` |
 
 Expiration throws `fiction::utils::timeout_error` in C++ or `TimeoutError` in Python,
-without publishing partial results or statistics.
+without publishing partial results or statistics. A completed result is returned even if the
+last operation or callback overruns the deadline. Circuit design aborts on a gate timeout;
+only a completed, unsuccessful gate search triggers defect-aware placement-and-routing retries.
 
 Finite budgets support QuickExact, ExGS, and QuickSim. ClusterComplete rejects them with
 `std::invalid_argument` (`ValueError` in Python). QuickSim's `quicksim_params.timeout`

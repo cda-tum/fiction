@@ -13,6 +13,7 @@
  * @brief Determines at which positions a defect disturbs an SiDB layout.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -165,12 +166,7 @@ class defect_influence_impl
     defect_influence_impl(const layout& lyt, const defect_influence_params& ps, defect_influence_stats& st) :
             layout_to_analyze{lyt},
             base_layout{lyt},
-            params{[&ps]
-                   {
-                       auto checked               = ps;
-                       checked.operational_params = logic::detail::checked_parameters(ps.operational_params);
-                       return checked;
-                   }()},
+            params{logic::detail::checked_parameters(ps)},
             stats{st}
     {
         if (params.additional_scanning_area.first < 0 || params.additional_scanning_area.second < 0)
@@ -658,7 +654,6 @@ class defect_influence_impl
      */
     void log_stats() const
     {
-        utils::check_deadline(params.operational_params.deadline);
         stats.num_simulator_invocations      = num_simulator_invocations.load();
         stats.num_evaluated_defect_positions = num_evaluated_defect_positions.load();
 
@@ -674,7 +669,6 @@ class defect_influence_impl
                     ++stats.num_non_influencing_defect_positions;
                 }
             });
-        utils::check_deadline(params.operational_params.deadline);
     }
     /**
      * The empty positions in the Moore neighborhood of `c` within the scanning area, in clockwise order starting

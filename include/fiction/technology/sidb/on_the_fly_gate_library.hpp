@@ -193,10 +193,8 @@ class on_the_fly_gate_library
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
 
-        auto  params   = parameters;
-        auto& deadline = params.design_gate_params.operational_params.deadline;
-        deadline       = utils::make_deadline(params.design_gate_params.timeout, deadline);
-        utils::check_deadline(deadline);
+        auto params               = parameters;
+        params.design_gate_params = simulation::logic::detail::checked_parameters(params.design_gate_params);
 
         const auto n = lyt.get_node(t);
         const auto f = lyt.node_function(n);

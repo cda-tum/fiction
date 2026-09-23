@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Benjamin Hien (hibenj)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -163,8 +164,8 @@ struct is_operational_params
      */
     std::chrono::steady_clock::time_point deadline{std::chrono::steady_clock::time_point::max()};
     /**
-     * Millisecond budget for the complete operational check. Domain and critical-temperature calculations share this
-     * budget across their entire calculation. The maximum value means unlimited; zero expires immediately.
+     * Millisecond budget for the complete operation. Gate design, domains, and critical-temperature calculations
+     * share this budget across all nested checks. The maximum value means unlimited; zero expires immediately.
      * Expiration throws `utils::timeout_error` without returning a partial result.
      */
     uint64_t timeout{std::numeric_limits<uint64_t>::max()};
@@ -184,6 +185,7 @@ namespace detail
 [[nodiscard]] inline is_operational_params checked_parameters(is_operational_params params)
 {
     params.deadline = utils::make_deadline(params.timeout, params.deadline);
+    params.timeout  = std::numeric_limits<uint64_t>::max();
     utils::check_deadline(params.deadline);
 #if (FICTION_ALGLIB_ENABLED)
     if (params.deadline != std::chrono::steady_clock::time_point::max() && params.sim_engine == engine::CLUSTERCOMPLETE)
@@ -191,6 +193,20 @@ namespace detail
         throw std::invalid_argument("ClusterComplete does not support a shared deadline");
     }
 #endif  // FICTION_ALGLIB_ENABLED
+    return params;
+}
+
+/**
+ * Starts one shared budget for an application that embeds operational parameters.
+ *
+ * @tparam Params Application parameter type.
+ * @param params Application parameters.
+ * @return Parameters with a validated shared deadline.
+ */
+template <typename Params>
+[[nodiscard]] Params checked_parameters(Params params)
+{
+    params.operational_params = checked_parameters(params.operational_params);
     return params;
 }
 
@@ -381,7 +397,6 @@ class is_operational_impl
 
         if (parameters.sim_params.base == 2 && analysis::can_positive_charges_occur(land))
         {
-            utils::check_deadline(parameters.deadline);
             return layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES;
         }
 
@@ -401,7 +416,6 @@ class is_operational_impl
             return std::nullopt;
         }
 
-        utils::check_deadline(parameters.deadline);
         return layout_invalidity_reason::PHYSICAL_INFEASIBILITY;
     }
     /**
@@ -438,7 +452,6 @@ class is_operational_impl
                 is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
             canvas_filtering_applicable)
         {
-            utils::check_deadline(parameters.deadline);
             return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
         }
 
@@ -457,7 +470,6 @@ class is_operational_impl
                 if (parameters.sim_params.base == 2 &&
                     analysis::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params))
                 {
-                    utils::check_deadline(parameters.deadline);
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
                 }
 
@@ -491,7 +503,6 @@ class is_operational_impl
             }
         }
 
-        utils::check_deadline(parameters.deadline);
         return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
     }
     /**
@@ -605,7 +616,6 @@ class is_operational_impl
             }
         }
 
-        utils::check_deadline(parameters.deadline);
         return non_operational;
     }
     /**
@@ -683,7 +693,6 @@ class is_operational_impl
             }
         }
 
-        utils::check_deadline(parameters.deadline);
         if (std::isinf(min_energy))
         {
             return std::nullopt;

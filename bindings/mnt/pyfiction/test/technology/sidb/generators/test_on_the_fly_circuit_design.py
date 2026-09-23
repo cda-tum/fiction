@@ -50,7 +50,7 @@ def test_parameters() -> None:
     params = on_the_fly_sidb_circuit_design_params()
     library = params.sidb_on_the_fly_gate_library_parameters
     assert params.timeout == 2**64 - 1
-    assert library.design_gate_params.timeout == 2**64 - 1
+    assert library.design_gate_params.operational_params.timeout == 2**64 - 1
     assert isinstance(library, sidb_on_the_fly_gate_library_params)
     assert library.design_gate_params.design_mode == design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
     assert library.design_gate_params.number_of_canvas_sidbs == 1
@@ -83,7 +83,7 @@ def test_circuit_timeout(and_circuit: hexagonal_gate_layout, *, per_gate: bool) 
     gates.design_mode = design_sidb_gates_mode.QUICKCELL
     gates.number_of_canvas_sidbs = 3
     if per_gate:
-        gates.timeout = 0
+        gates.operational_params.timeout = 0
     else:
         params.timeout = 0
 
@@ -93,7 +93,7 @@ def test_circuit_timeout(and_circuit: hexagonal_gate_layout, *, per_gate: bool) 
     assert and_circuit.num_pis() == 2
     assert and_circuit.num_pos() == 1
     assert and_circuit.is_and(and_circuit.get_node((1, 1, 0)))
-    assert (gates.timeout if per_gate else params.timeout) == 0
+    assert (gates.operational_params.timeout if per_gate else params.timeout) == 0
 
 
 @pytest.mark.parametrize("timeout", [-1, 2**64, 1.5])
@@ -103,7 +103,7 @@ def test_invalid_timeout(timeout: float) -> None:
     with pytest.raises(TypeError):
         params.timeout = timeout
     with pytest.raises(TypeError):
-        params.sidb_on_the_fly_gate_library_parameters.design_gate_params.timeout = timeout
+        params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.timeout = timeout
 
 
 @pytest.mark.slow

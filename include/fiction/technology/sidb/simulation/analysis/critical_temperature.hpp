@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -160,12 +161,7 @@ class critical_temperature_impl
     critical_temperature_impl(layout source_layout, const critical_temperature_params& ps,
                               critical_temperature_stats& st) :
             sidb_layout{std::move(source_layout)},
-            params{[&ps]
-                   {
-                       auto checked               = ps;
-                       checked.operational_params = logic::detail::checked_parameters(ps.operational_params);
-                       return checked;
-                   }()},
+            params{logic::detail::checked_parameters(ps)},
             stats{st},
             bii(logic::bdl_input_iterator{sidb_layout, params.operational_params.input_bdl_iterator_params}),
             critical_temperature{ps.max_temperature}
@@ -196,12 +192,7 @@ class critical_temperature_impl
                               const std::vector<logic::bdl_wire>& output_wires) :
             // a shallow copy, so that the `is_empty()`, `num_pos()` and `num_dots()` guards keep working
             sidb_layout{input_pattern_lyts.front()},
-            params{[&ps]
-                   {
-                       auto checked               = ps;
-                       checked.operational_params = logic::detail::checked_parameters(ps.operational_params);
-                       return checked;
-                   }()},
+            params{logic::detail::checked_parameters(ps)},
             stats{st},
             // the input pattern layouts make the iterator redundant; this is the same no-op instantiation that
             // `is_operational_impl` uses on its pre-generated-layouts path
@@ -445,9 +436,8 @@ class critical_temperature_impl
      *
      * @return The critical temperature (unit: K).
      */
-    [[nodiscard]] double get_critical_temperature() const
+    [[nodiscard]] double get_critical_temperature() const noexcept
     {
-        utils::check_deadline(params.operational_params.deadline);
         return critical_temperature;
     }
 
@@ -461,7 +451,8 @@ class critical_temperature_impl
      * @param min_energy Minimal energy of all physically valid charge distributions of a given layout (unit: eV).
      * @return State type (i.e. transparent, erroneous) of the ground state is returned.
      */
-    [[nodiscard]] bool is_ground_state_transparent(const energy_and_state_type& est, const double min_energy) const
+    [[nodiscard]] bool is_ground_state_transparent(const energy_and_state_type& est,
+                                                   const double                 min_energy) const noexcept
     {
         bool ground_state_is_transparent = false;
 

@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -93,8 +94,6 @@ namespace fiction::sidb::simulation::engines
         }
     }
     simulation_result.simulation_runtime = time_counter;
-
-    utils::check_deadline(deadline);
 
     return simulation_result;
 }

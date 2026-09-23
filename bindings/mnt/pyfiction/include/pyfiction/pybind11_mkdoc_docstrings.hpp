@@ -3289,7 +3289,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long =
+static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long_long =
 R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
 integer into four parts (from MSB to LSB):
  - 1 bit for the dead indicator - 1 bit for the z position - 31 bit
@@ -14026,13 +14026,6 @@ static const char *mkd_doc_fiction_sidb_generators_design_gates_params_terminati
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED = R"doc(Enumerate every combination of canvas SiDBs.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_timeout =
-R"doc(Timeout in milliseconds, including candidate generation and
-simulation. The maximum value means unlimited; zero expires
-immediately. Checks are cooperative, so allocation and non-
-interruptible setup can exceed the budget. Finite budgets support
-QUICKEXACT, EXGS, and QUICKSIM, but not CLUSTERCOMPLETE.)doc";
-
 static const char *mkd_doc_fiction_sidb_generators_design_gates_stats = R"doc(Statistics of the gate designers.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts = R"doc(Number of canvas layouts, saturated at `std::size_t`'s maximum.)doc";
@@ -14345,7 +14338,8 @@ Args:
     defective_surface: The defective surface on which the SiDB circuit
                        is designed.
     params: The parameters used for designing the circuit,
-            encapsulated in an `on_the_fly_circuit_design_params`
+            encapsulated in an
+            `on_the_fly_circuit_design_on_defective_surface_params`
             object.
     stats: Pointer to a structure for collecting statistics. If
            `nullptr`, statistics are discarded.
@@ -14358,9 +14352,13 @@ Returns:
     Layout representing the designed circuit on the defective surface.
 
 Raises:
-    utils::timeout_error: If a gate-design timeout expires.
+    utils::timeout_error: If a circuit or gate-design timeout expires.
     std::invalid_argument: If the simulation engine does not support
                            the requested gate-design timeout.
+
+Note:
+    A circuit or gate timeout aborts the operation. Only a completed,
+    unsuccessful gate search blacklists a tile.
 
 )doc";
 
@@ -14371,6 +14369,11 @@ defective surface.)doc";
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params_exact_design_parameters = R"doc(Parameters for the *exact* placement and routing algorithm.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params_sidb_on_the_fly_gate_library_parameters = R"doc(Parameters for the SiDB on-the-fly gate library.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params_timeout =
+R"doc(Total millisecond budget across surface analysis, placement-and-
+routing retries, and gate design. The maximum value means unlimited;
+zero expires immediately. Cancellation is cooperative.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_stats =
 R"doc(Statistics for the on-the-fly defect-aware circuit design.
@@ -18683,7 +18686,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
 state to an 64-bit unsigned integer.
 
@@ -22051,6 +22054,21 @@ Raises:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_checked_parameters_2 =
+R"doc(Starts one shared budget for an application that embeds operational
+parameters.
+
+Args:
+    params: Application parameters.
+
+Template Args:
+    Params: Application parameter type.
+
+Returns:
+    Parameters with a validated shared deadline.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl = R"doc(Chains the BDL pairs of a layout into wires.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_detect_bdl_wires_impl_aggregate_bdl_pairs =
@@ -23337,9 +23355,9 @@ R"doc(Strategy to determine whether a layout is operational or non-
 operational.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_params_timeout =
-R"doc(Millisecond budget for the complete operational check. Domain and
-critical-temperature calculations share this budget across their
-entire calculation. The maximum value means unlimited; zero expires
+R"doc(Millisecond budget for the complete operation. Gate design, domains,
+and critical-temperature calculations share this budget across all
+nested checks. The maximum value means unlimited; zero expires
 immediately. Expiration throws `utils::timeout_error` without
 returning a partial result.)doc";
 

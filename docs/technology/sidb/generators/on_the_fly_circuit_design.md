@@ -13,7 +13,7 @@ solution. Crossings and double wires use predefined implementations when possibl
 The required number of canvas SiDBs depends on the gates; the example uses three with QuickCell.
 The returned layout can be exported as SVG or SiQAD SQD.
 
-The circuit's `timeout` covers all gate designs; `design_gate_params.timeout` can impose a
+The circuit's `timeout` covers all gate designs; `design_gate_params.operational_params.timeout` can impose a
 shorter per-gate limit. Both use milliseconds; see {ref}`sidb_timeouts` for defaults and limits.
 
 ::::{tab-set}

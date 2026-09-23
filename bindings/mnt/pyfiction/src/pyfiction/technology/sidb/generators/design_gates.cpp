@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/technology/sidb/generators/design_gates.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -94,7 +95,6 @@ void design_gates(nanobind::module_& m)
                 DOC(fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs))
         .def_rw("maximal_random_design_attempts", &design_gates_params::maximal_random_design_attempts,
                 DOC(fiction_sidb_generators_design_gates_params_maximal_random_design_attempts))
-        .def_rw("timeout", &design_gates_params::timeout, DOC(fiction_sidb_generators_design_gates_params_timeout))
         .def_rw("termination_cond", &design_gates_params::termination_cond,
                 DOC(fiction_sidb_generators_design_gates_params_termination_condition))
         .def_rw("on_progress", &design_gates_params::on_progress,
