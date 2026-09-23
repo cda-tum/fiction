@@ -409,25 +409,35 @@ TEST_CASE("Cell capabilities retain coordinate conventions and independent clone
         fiction::layouts::cell_level_layout<fiction::qca::qca_technology,
                                             fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>;
     layout original{{5, 5}, fiction::layouts::clocking::twoddwave<layout>(), "cells", 2, 2};
+    CHECK(original.get_clock_zone({3, 2}) == coords::offset{1, 1});
+    CHECK(original.get_clock_zone({3, 2, 1}) == coords::offset{1, 1});
+
+    // clock numbers and synchronization elements belong to clock zones, i.e., to 2 x 2 cell tiles on every layer
     original.assign_clock_number({1, 1}, 3);
     CHECK(original.get_clock_number({2, 2}) == 3);
     CHECK(original.get_clock_number({3, 3}) == 3);
-    original.assign_synchronization_element({2, 2}, 2);
+    CHECK(original.get_clock_number({2, 3, 1}) == 3);
+    original.assign_synchronization_element({1, 1}, 2);
+    CHECK(original.num_se() == 1);
     CHECK(original.get_synchronization_element({2, 2}) == 2);
-    CHECK(original.get_synchronization_element({3, 3}) == 0);
+    CHECK(original.get_synchronization_element({3, 3}) == 2);
+    CHECK(original.is_synchronization_element({3, 2, 1}));
+    CHECK(original.get_synchronization_element({4, 4}) == 0);
+    CHECK(!original.is_synchronization_element({1, 1}));
     original.obstruct_coordinate({4, 4});
     original.obstruct_connection({0, 0}, {0, 1});
     auto copy = original.clone();
     CHECK(copy.get_clock_number({3, 3}) == 3);
-    CHECK(copy.get_synchronization_element({2, 2}) == 2);
+    CHECK(copy.get_synchronization_element({3, 3}) == 2);
     CHECK(copy.is_obstructed_coordinate({4, 4}));
     CHECK(copy.is_obstructed_connection({0, 0}, {0, 1}));
     copy.assign_clock_number({1, 1}, 0);
-    copy.assign_synchronization_element({2, 2}, 0);
+    copy.assign_synchronization_element({1, 1}, 0);
     copy.clear_obstructed_coordinates();
     copy.clear_obstructed_connections();
+    CHECK(copy.num_se() == 0);
     CHECK(original.get_clock_number({3, 3}) == 3);
-    CHECK(original.get_synchronization_element({2, 2}) == 2);
+    CHECK(original.get_synchronization_element({3, 3}) == 2);
     CHECK(original.is_obstructed_coordinate({4, 4}));
     CHECK(original.is_obstructed_connection({0, 0}, {0, 1}));
 }

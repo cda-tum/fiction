@@ -533,7 +533,7 @@ class write_qca_layout_svg_impl
     /**
      * Alias for an SVG description of a latch tile containing also its clock zone and its offset.
      */
-    using svg_latch = std::tuple<std::string, typename Lyt::clock_number_t, uint32_t>;
+    using svg_latch = std::tuple<std::string, typename Lyt::clock_number_t, typename Lyt::sync_elem_t>;
     /**
      * Maps coordinates of latch tiles to tuples containing their string representation, their clock zone,
      * and their latch offset.
@@ -560,7 +560,6 @@ class write_qca_layout_svg_impl
         }
         else if (const auto ct = lyt.get_cell_type(c); Lyt::technology::is_normal_cell(ct))
         {
-
             cell_color =
                 lyt.is_synchronization_element(c) ? svg::CLOCK_ZONE_LATCH_CELL : cell_colors[lyt.get_clock_number(c)];
 
@@ -674,15 +673,15 @@ class write_qca_layout_svg_impl
         lyt.foreach_cell_position(
             [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_tile, &progress](const auto& c)
             {
-                const auto            clock_zone = lyt.get_clock_number(c);
-                const coordinate<Lyt> tile_coords{c.x / lyt.get_tile_size_x(), c.y / lyt.get_tile_size_y()};
-                coord_to_tile[tile_coords] = {svg::TILE, clock_zone};
+                const auto tile_coords  = lyt.get_clock_zone(c);
+                const auto clock_number = lyt.get_clock_number(c);
+                coord_to_tile.try_emplace(tile_coords, svg::TILE, clock_number);
 
                 if (!lyt.is_empty_cell(c))
                 {
                     if (const auto delay = lyt.get_synchronization_element(c); delay > 0)
                     {
-                        coord_to_latch_tile.try_emplace(tile_coords, svg::LATCH, clock_zone, delay);
+                        coord_to_latch_tile.try_emplace(tile_coords, svg::LATCH, clock_number, delay);
                     }
 
                     const coordinate<Lyt> in_tile{c.x % lyt.get_tile_size_x(), c.y % lyt.get_tile_size_y()};
@@ -711,6 +710,7 @@ class write_qca_layout_svg_impl
         {
             if (coord_to_latch_tile.contains(coord))
             {
+                assembly.advance();
                 continue;
             }
             const auto [descr, czone] = tdscr;

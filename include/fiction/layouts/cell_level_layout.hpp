@@ -46,9 +46,11 @@ namespace fiction::layouts
  * layouts into cell-level ones. Furthermore, cell-level layouts can be written to files for various physical simulators
  * like QCADesigner, ToPoliNano & MagCAD, SiQAD, etc.
  *
- * In this layout, each coordinate, i.e., clock zone has the dimensions of a single cell. Clock numbers can, however, be
- * assigned in a way, that they form larger zones, e.g., of \f$5 \times 5\f$ cells. These dimensions can be specified
- * in the constructor. Clock lookup divides cell coordinates by these dimensions before querying the stored scheme.
+ * A clock zone, or tile, is a region of \f$x \times y\f$ cells, e.g., \f$5 \times 5\f$ cells, that one clock
+ * signal governs on every layer. The constructor and `set_tile_size_x`/`set_tile_size_y` specify these dimensions.
+ * Clock zones are addressed by tile position on layer 0: clock-number overrides, synchronization elements, and the
+ * clocked-zone iteration functions take clock zones, whereas `get_clock_number`, `is_synchronization_element`, and
+ * `get_synchronization_element` take cells and look up the zone that `get_clock_zone` returns.
  *
  * The de-facto standard of cell-level FCN design is to group multiple cells into tiles large enough to be addressable
  * by individual clocking electrodes buried in the layout substrate. Cell-based clocking, i.e., clock zones of size
@@ -575,14 +577,26 @@ class cell_level_layout : public CoordinateLayout
         strg->clocking.assign_clock_number(cz, cn);
     }
     /**
-     * Returns the clock number for a cell position after dividing x and y by the tile dimensions.
+     * Returns the clock zone that contains the given cell. A clock zone is a tile, i.e., a region of
+     * `get_tile_size_x()` by `get_tile_size_y()` cells that one clock signal governs on every layer. Clock zones are
+     * therefore addressed by their tile position on layer 0.
      *
-     * @param cz Cell position.
-     * @return Clock number of the cell's containing zone.
+     * @param c Cell position.
+     * @return Clock zone of the tile that contains `c`.
      */
-    [[nodiscard]] clock_number_t get_clock_number(const clock_zone& cz) const noexcept
+    [[nodiscard]] clock_zone get_clock_zone(const cell& c) const noexcept
     {
-        return strg->clocking.get_clock_number({cz.x / strg->tile_size_x, cz.y / strg->tile_size_y, cz.z});
+        return {c.x / strg->tile_size_x, c.y / strg->tile_size_y};
+    }
+    /**
+     * Returns the clock number of the clock zone that contains the given cell.
+     *
+     * @param c Cell position.
+     * @return Clock number of `get_clock_zone(c)`.
+     */
+    [[nodiscard]] clock_number_t get_clock_number(const cell& c) const noexcept
+    {
+        return strg->clocking.get_clock_number(get_clock_zone(c));
     }
     /**
      * Returns the number of clock phases in the layout. Each clock cycle is divided into n phases. In QCA, the number
@@ -636,24 +650,24 @@ class cell_level_layout : public CoordinateLayout
         strg->clocking.assign_synchronization_element(cz, se);
     }
     /**
-     * Check whether the provided clock zone is a synchronization element.
+     * Checks whether the clock zone that contains the given cell is a synchronization element.
      *
-     * @param cz Clock zone to check.
-     * @return `true` iff `cz` is a synchronization element.
+     * @param c Cell position.
+     * @return `true` iff `get_clock_zone(c)` is a synchronization element.
      */
-    [[nodiscard]] bool is_synchronization_element(const clock_zone& cz) const noexcept
+    [[nodiscard]] bool is_synchronization_element(const cell& c) const noexcept
     {
-        return strg->clocking.is_synchronization_element(cz);
+        return strg->clocking.is_synchronization_element(get_clock_zone(c));
     }
     /**
-     * Returns the Hold phase extension in clock cycles of clock zone `cz`.
+     * Returns the Hold phase extension in clock cycles of the clock zone that contains the given cell.
      *
-     * @param cz Clock zone to check.
-     * @return Synchronization element value, i.e., Hold phase extension, of clock zone `cz`.
+     * @param c Cell position.
+     * @return Synchronization element value, i.e., Hold phase extension, of `get_clock_zone(c)`.
      */
-    [[nodiscard]] sync_elem_t get_synchronization_element(const clock_zone& cz) const noexcept
+    [[nodiscard]] sync_elem_t get_synchronization_element(const cell& c) const noexcept
     {
-        return strg->clocking.get_synchronization_element(cz);
+        return strg->clocking.get_synchronization_element(get_clock_zone(c));
     }
 
     /** @brief Counts zones with a nonzero Hold-phase extension. @return Synchronization element count. */

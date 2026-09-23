@@ -43,17 +43,22 @@ A cell-level layout can be obtained from a `gate_level_layout` by the {ref}`appl
 
 ::::
 
-## Clock and synchronization coordinates
+## Clock zones
 
-`get_clock_number(c)` takes a cell position and queries the clock zone at
-`(c.x / tile_size_x, c.y / tile_size_y, c.z)`. `assign_clock_number(cz, number)` takes
-the unscaled clock-zone coordinate. For a tile size of 2 by 2, assigning zone `(1, 1)`
-changes the clock returned for cells `(2, 2)` through `(3, 3)`.
+A clock zone is a tile: a region of `tile_size_x` by `tile_size_y` cells that one clock
+signal governs on every layer. Usually, one gate or one wire fits into a tile.
+`get_clock_zone(c)` returns the clock zone of cell `c` at `(c.x / tile_size_x, c.y / tile_size_y, 0)`.
+
+Clock numbers and synchronization elements belong to clock zones.
+`assign_clock_number(cz, number)` and `assign_synchronization_element(cz, delay)` take the
+clock-zone coordinate, whereas `get_clock_number(c)`, `is_synchronization_element(c)`, and
+`get_synchronization_element(c)` take a cell and look up its clock zone. For a tile size of
+2 by 2, assigning zone `(1, 1)` changes the result for cells `(2, 2)` through `(3, 3)` on
+every layer. `num_se()` counts the clock zones with a nonzero synchronization delay.
+
 Clock-zone dimensions must be positive. The constructor and tile-size setters reject zero;
 a rejected setter call preserves the stored dimensions. Python exposes these dimensions
 through `get_tile_size_x`, `get_tile_size_y`, `set_tile_size_x`, and `set_tile_size_y`.
 
-Synchronization assignment and lookup use the supplied coordinate directly, without
-tile-size conversion. `num_se()` counts stored nonzero synchronization entries.
 Manual obstructions use cell positions. An occupied cell remains obstructed after clearing
 manual obstructions. Ordinary C++ copies share storage; `clone()` produces independent state.

@@ -1893,12 +1893,14 @@ used to transform gate-level layouts into cell-level ones.
 Furthermore, cell-level layouts can be written to files for various
 physical simulators like QCADesigner, ToPoliNano & MagCAD, SiQAD, etc.
 
-In this layout, each coordinate, i.e., clock zone has the dimensions
-of a single cell. Clock numbers can, however, be assigned in a way,
-that they form larger zones, e.g., of :math:`5 \times 5` cells. These
-dimensions can be specified in the constructor. Clock lookup divides
-cell coordinates by these dimensions before querying the stored
-scheme.
+A clock zone, or tile, is a region of :math:`x \times y` cells, e.g.,
+:math:`5 \times 5` cells, that one clock signal governs on every
+layer. The constructor and `set_tile_size_x`/`set_tile_size_y` specify
+these dimensions. Clock zones are addressed by tile position on layer
+0: clock-number overrides, synchronization elements, and the clocked-
+zone iteration functions take clock zones, whereas `get_clock_number`,
+`is_synchronization_element`, and `get_synchronization_element` take
+cells and look up the zone that `get_clock_zone` returns.
 
 The de-facto standard of cell-level FCN design is to group multiple
 cells into tiles large enough to be addressable by individual clocking
@@ -2232,14 +2234,28 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_get_clock_number =
-R"doc(Returns the clock number for a cell position after dividing x and y by
-the tile dimensions.
+R"doc(Returns the clock number of the clock zone that contains the given
+cell.
 
 Args:
-    cz: Cell position.
+    c: Cell position.
 
 Returns:
-    Clock number of the cell's containing zone.
+    Clock number of `get_clock_zone(c)`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_get_clock_zone =
+R"doc(Returns the clock zone that contains the given cell. A clock zone is a
+tile, i.e., a region of `get_tile_size_x()` by `get_tile_size_y()`
+cells that one clock signal governs on every layer. Clock zones are
+therefore addressed by their tile position on layer 0.
+
+Args:
+    c: Cell position.
+
+Returns:
+    Clock zone of the tile that contains `c`.
 
 )doc";
 
@@ -2260,14 +2276,15 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_get_synchronization_element =
-R"doc(Returns the Hold phase extension in clock cycles of clock zone `cz`.
+R"doc(Returns the Hold phase extension in clock cycles of the clock zone
+that contains the given cell.
 
 Args:
-    cz: Clock zone to check.
+    c: Cell position.
 
 Returns:
     Synchronization element value, i.e., Hold phase extension, of
-    clock zone `cz`.
+    `get_clock_zone(c)`.
 
 )doc";
 
@@ -2413,13 +2430,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_is_synchronization_element =
-R"doc(Check whether the provided clock zone is a synchronization element.
+R"doc(Checks whether the clock zone that contains the given cell is a
+synchronization element.
 
 Args:
-    cz: Clock zone to check.
+    c: Cell position.
 
 Returns:
-    `true` iff `cz` is a synchronization element.
+    `true` iff `get_clock_zone(c)` is a synchronization element.
 
 )doc";
 
@@ -2848,7 +2866,10 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_state_clocking = R"doc(Scheme and manually overridden clock numbers.)doc";
+static const char *mkd_doc_fiction_layouts_clocking_state_clocking =
+R"doc(Scheme and manually overridden clock numbers. `scheme` has `const`
+members and is not assignable, so the state holds it through a pointer
+to support `replace_clocking_scheme` and copy assignment.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_state_get_clock_number =
 R"doc(Returns the clock number for the given clock zone.
@@ -7869,8 +7890,9 @@ May pass through, and thereby throw, an
 `unsupported_gate_type_exception` or an
 `unsupported_gate_orientation_exception`.
 
-Each nonempty emitted cell receives the synchronization delay of its
-gate tile.
+Each clock zone of the cell-level layout receives the synchronization
+delay of its gate tile. The delay therefore also covers cells that are
+added to the zone later, e.g., via cells.
 
 Args:
     lyt: The gate-level layout.
@@ -7916,8 +7938,9 @@ May pass through, and thereby throw, an
 `unsupported_gate_orientation_exception` and any further custom
 exceptions of the gate libraries.
 
-Each nonempty emitted cell receives the synchronization delay of its
-gate tile.
+Each clock zone of the cell-level layout receives the synchronization
+delay of its gate tile. The delay therefore also covers cells that are
+added to the zone later, e.g., via cells.
 
 Args:
     lyt: The gate-level layout.
@@ -8288,8 +8311,10 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_assign_gate =
-R"doc(Assigns a gate implementation and its synchronization delay to each
-nonempty cell.
+R"doc(Assigns a gate implementation to the cells of its tile and the tile's
+synchronization delay to the clock zone that contains the tile. A
+ground wire and a crossing wire share one clock zone, which keeps the
+larger delay.
 
 Args:
     c: Top-left cell of the tile where the gate is placed.
@@ -10322,7 +10347,7 @@ R"doc(Attempts to relocate a gate to a new position within the layout and
 updates routing connections accordingly.
 
 Args:
-    lyt: Obstructed gate-level layout being optimized.
+    lyt: Gate-level layout being optimized.
     new_pos: The target tile position to which the gate is to be
              relocated.
     num_gate_relocations: Reference to a counter tracking the number
@@ -10351,7 +10376,7 @@ R"doc(Utility function to move wires that cross over empty tiles down one
 layer. This can happen if the wiring of a gate is deleted.
 
 Args:
-    lyt: Obstructed gate-level layout.
+    lyt: Gate-level layout.
     deleted_coords: Tiles that got deleted.
 
 )doc";
@@ -10364,7 +10389,7 @@ wire tiles between fanins and the gate, as well as between the gate
 and fanouts are collected for deletion.
 
 Args:
-    lyt: Obstructed gate-level layout.
+    lyt: Gate-level layout.
     op: coordinate of the gate to be moved.
 
 Returns:
@@ -10374,11 +10399,11 @@ Returns:
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_get_path_and_obstruct =
 R"doc(This helper function computes a path between two coordinates using the
-A* algorithm. It then obstructs the tiles along the path in the given
-layout.
+A* algorithm. It then marks the tiles along the path in the search
+obstructions.
 
 Args:
-    lyt: Obstructed gate-level layout.
+    lyt: Gate-level layout.
     start_tile: The starting coordinate of the path.
     end_tile: The ending coordinate of the path.
 
@@ -10400,7 +10425,7 @@ routing is possible. This includes:
   old wiring is restored
 
 Args:
-    lyt: Obstructed gate-level layout.
+    lyt: Gate-level layout.
     old_pos: Old position of the gate to be moved.
 
 Returns:
@@ -10425,11 +10450,11 @@ R"doc(Restores the original wiring if relocation of a gate fails.
 
 This function moves the gate back to its original position and
 reinstates the previous wiring paths between the gate and its fan-
-in/fan-out connections. It also updates the obstructions in the layout
+in/fan-out connections. It also updates the search obstructions
 accordingly.
 
 Args:
-    lyt: Obstructed gate-level layout.
+    lyt: Gate-level layout.
     old_path_from_fanin_1_to_gate: The original routing path from the
                                    first fan-in to the gate (if
                                    exists).
@@ -10570,6 +10595,30 @@ R"doc(Flag indicating whether the primary input was the first fanin and the
 fanout gate is asymmetric.
 
 If this flag is true, the fanin signals need to be reordered.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_routing_successor =
+R"doc(Resolves the coordinate that a path search enters when it steps from
+`current` to the adjacent coordinate `successor`. The search returns
+to the ground layer, switches to the crossing layer to pass over a
+crossable wire if `crossings` is set, and rejects obstructed
+coordinates and connections. The target is never obstructed.
+
+Args:
+    lyt: Layout.
+    current: Coordinate that the search expands.
+    successor: Coordinate adjacent to `current`.
+    target: Target coordinate of the search.
+    crossings: Whether paths may cross wires on the crossing layer.
+    extra: Search constraints.
+
+Template Args:
+    Lyt: Layout type.
+
+Returns:
+    The coordinate to enter, or `std::nullopt` if the step is
+    obstructed.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler = R"doc()doc";
 
@@ -10916,57 +10965,13 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_is_obstructed_connection =
-R"doc(Checks if the given coordinate-coordinate connection is obstructed of
-some sort.
-
-Args:
-    src: Source coordinate.
-    tgt: Target coordinate.
-
-Returns:
-    `true` iff the connection from `src` to `tgt` is obstructed.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_is_obstructed_coordinate =
-R"doc(Checks if the given coordinate is obstructed of some sort.
-
-Args:
-    c: Coordinate to check.
-
-Returns:
-    `true` iff `c` is obstructed.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_obstruct_connection =
-R"doc(Marks the connection from coordinate `src` to coordinate `tgt` as
-obstructed.
-
-Args:
-    src: Source coordinate.
-    tgt: Target coordinate.
-
-Note:
-    Coordinates marked this way will not be crossed with wires by path
-    finding algorithms.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_obstruct_coordinate =
-R"doc(Marks the given coordinate as obstructed.
-
-Args:
-    c: Coordinate to obstruct.
-
-)doc";
-
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_search_dir =
 R"doc(The current search direction: horizontal (from left to right) and
 vertical (from top to bottom).)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_search_obstructions = R"doc(Constraints of this wiring-cut search.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_search_obstructions =
+R"doc(Constraints of this wiring-cut search, passed to path searches on this
+layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_wiring_reduction_layout =
 R"doc(This constructor initializes the `wiring_reduction_layout` with an
@@ -11777,17 +11782,20 @@ calculate nor overestimating the remaining costs. Common heuristics to
 be used are the Manhattan and the Euclidean distance functions. See
 `distance_functor` for implementations.
 
-If the given layout implements the obstruction interface (see
-`obstructions`), paths will not be routed via obstructed coordinates
-and connections.
+Paths do not pass obstructed coordinates or connections, except that
+the target is never obstructed. A coordinate or connection is
+obstructed if the `obstructions` argument marks it or if the layout's
+`is_obstructed_coordinate` or `is_obstructed_connection` reports it.
+Gate-level layouts report their occupied tiles and existing signal
+connections, and cell-level layouts report their occupied cells. Paths
+in gate-level layouts therefore avoid all placed gates and wires.
 
-If the given layout is a gate-level layout and implements the
-obstruction interface (see `obstructions`), paths may contain wire
-crossings if specified in the parameters. Wire crossings are only
-allowed over other wires and only if the crossing layer is not
-obstructed. Furthermore, it is ensured that crossings do not run along
-another wire but cross only in a single point (orthogonal crossings +
-knock-knees/double wires).
+If crossings are enabled in the parameters, paths in gate-level
+layouts may cross other wires on the crossing layer. Wire crossings
+are only allowed over other wires and only if the crossing layer is
+not obstructed. Furthermore, it is ensured that crossings do not run
+along another wire but cross only in a single point (orthogonal
+crossings + knock-knees/double wires).
 
 In certain cases it might be desirable to determine regular coordinate
 paths even if the layout implements a clocking interface. This can be
@@ -12134,15 +12142,7 @@ R"doc(Recursively enumerate all paths from `src` to `tgt` in the given
 layout. This function is called recursively until the target
 coordinate is reached. Along each path, each coordinate can occur at
 maximum once. This function does not generate duplicate or looping
-paths. If the given layout implements the obstruction interface (see
-`obstructions`), paths will not be routed via obstructed coordinates
-or connections. If the given layout is a gate-level layout and
-implements the obstruction interface (see `obstructions`), paths may
-contain wire crossings if specified in the parameters. Wire crossings
-are only allowed over other wires and only if the crossing layer is
-not obstructed. Furthermore, it is ensured that crossings do not run
-along another wire but cross only in a single point (orthogonal
-crossings + knock-knees/double wires).
+paths. Obstructions and crossings follow `enumerate_all_paths`.
 
 Args:
     src: Source coordinate.
@@ -12193,7 +12193,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_reset_temporary_obstructions = R"doc(Resets all temporary obstructions.)doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_reset_temporary_obstructions = R"doc(Resets all temporary obstructions to the caller's obstructions.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_run =
 R"doc(Enumerate up to k shortest paths in a layout that start at
@@ -12306,17 +12306,20 @@ does neither generate duplicate nor looping paths, even in a cyclic
 clocking scheme. That is, along each path, each coordinate can occur
 at maximum once.
 
-If the given layout implements the obstruction interface (see
-`obstructions`), paths will not be routed via obstructed coordinates
-or connections.
+Paths do not pass obstructed coordinates or connections, except that
+the target is never obstructed. A coordinate or connection is
+obstructed if the `obstructions` argument marks it or if the layout's
+`is_obstructed_coordinate` or `is_obstructed_connection` reports it.
+Gate-level layouts report their occupied tiles and existing signal
+connections, and cell-level layouts report their occupied cells. Paths
+in gate-level layouts therefore avoid all placed gates and wires.
 
-If the given layout is a gate-level layout and implements the
-obstruction interface (see `obstructions`), paths may contain wire
-crossings if specified in the parameters. Wire crossings are only
-allowed over other wires and only if the crossing layer is not
-obstructed. Furthermore, it is ensured that crossings do not run along
-another wire but cross only in a single point (orthogonal crossings +
-knock-knees/double wires).
+If crossings are enabled in the parameters, paths in gate-level
+layouts may cross other wires on the crossing layer. Wire crossings
+are only allowed over other wires and only if the crossing layer is
+not obstructed. Furthermore, it is ensured that crossings do not run
+along another wire but cross only in a single point (orthogonal
+crossings + knock-knees/double wires).
 
 In certain cases it might be desirable to enumerate regular coordinate
 paths even if the layout implements a clocking interface. This can be
@@ -12687,17 +12690,20 @@ This algorithm does neither generate duplicate nor looping paths, even
 in a cyclic clocking scheme. That is, along each path, each coordinate
 can occur at maximum once.
 
-If the given layout implements the obstruction interface (see
-`obstructions`), paths will not be routed via obstructed coordinates
-or connections.
+Paths do not pass obstructed coordinates or connections, except that
+the target is never obstructed. A coordinate or connection is
+obstructed if the `obstructions` argument marks it or if the layout's
+`is_obstructed_coordinate` or `is_obstructed_connection` reports it.
+Gate-level layouts report their occupied tiles and existing signal
+connections, and cell-level layouts report their occupied cells. Paths
+in gate-level layouts therefore avoid all placed gates and wires.
 
-If the given layout is a gate-level layout and implements the
-obstruction interface (see `obstructions`), paths may contain wire
-crossings if specified in the parameters. Wire crossings are only
-allowed over other wires and only if the crossing layer is not
-obstructed. Furthermore, it is ensured that crossings do not run along
-another wire but cross only in a single point (orthogonal crossings +
-knock-knees/double wires).
+If crossings are enabled in the parameters, paths in gate-level
+layouts may cross other wires on the crossing layer. Wire crossings
+are only allowed over other wires and only if the crossing layer is
+not obstructed. Furthermore, it is ensured that crossings do not run
+along another wire but cross only in a single point (orthogonal
+crossings + knock-knees/double wires).
 
 In certain cases it might be desirable to enumerate regular coordinate
 paths even if the layout implements a clocking interface. This can be

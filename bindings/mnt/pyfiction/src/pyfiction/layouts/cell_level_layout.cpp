@@ -183,6 +183,8 @@ void cell_layout(nanobind::module_& m, const std::string& tech_name)
 
         .def("assign_clock_number", &CellLyt::assign_clock_number, py::arg("cz"), py::arg("cn"),
              DOC(fiction_layouts_cell_level_layout_assign_clock_number))
+        .def("get_clock_zone", &CellLyt::get_clock_zone, py::arg("c"),
+             DOC(fiction_layouts_cell_level_layout_get_clock_zone))
         .def("get_clock_number", &CellLyt::get_clock_number, py::arg("cz"),
              DOC(fiction_layouts_cell_level_layout_get_clock_number))
         .def("num_clocks", &CellLyt::num_clocks, DOC(fiction_layouts_cell_level_layout_num_clocks))
@@ -217,7 +219,9 @@ void cell_layout(nanobind::module_& m, const std::string& tech_name)
                     throw std::invalid_argument("Unknown clocking scheme");
                 }
             },
-            py::arg("name"), "Replaces the scheme while preserving synchronization delays.")
+            py::arg("name"),
+            "Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are "
+            "discarded; synchronization elements are kept. Raises ValueError for an unknown name.")
         .def("obstruct_coordinate", &CellLyt::obstruct_coordinate, py::arg("c"),
              DOC(fiction_layouts_cell_level_layout_obstruct_coordinate))
         .def("obstruct_connection", &CellLyt::obstruct_connection, py::arg("src"), py::arg("tgt"),

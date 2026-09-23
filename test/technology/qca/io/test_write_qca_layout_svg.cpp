@@ -496,7 +496,7 @@ TEST_CASE("Render synchronized QCA cells in tiled SVG", "[write-qca-layout-svg]"
     layout.assign_cell_type({2, 2}, qca_technology::cell_type::NORMAL);
     layout.assign_cell_type({1, 2}, qca_technology::cell_type::INPUT);
     layout.assign_clock_number({0, 0}, clock);
-    layout.assign_synchronization_element({2, 2}, 1);
+    layout.assign_synchronization_element({0, 0}, 1);
 
     std::ostringstream stream{};
     write_qca_layout_svg(layout, stream, {.simple = simple});
