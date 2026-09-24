@@ -532,6 +532,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Clocked degree counts each eligible neighbor once, including neighbors enabled by synchronization.
   - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.
   - Gate- and cell-level layout clones preserve clock overrides without sharing later clock-number edits.
+  - `clocking::get_scheme` now keeps the phase count of `2DDWAVEHEX3` on non-hexagonal layouts.
   - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
     Potential landscapes validate basis indices even for isolated SiDBs and defects.
   - SiDB cell conversion now rejects coordinates outside the target coordinate range.
@@ -573,6 +574,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - QCA SVG output now preserves synchronized cell positions, draws mixed tiles once, and includes partial boundary tiles.
   - FGL round trips now preserve three-phase clocking across all supported topologies.
   - `read_fgl_layout` now restores irregular clock numbers on crossing layers.
+  - `read_fgl_layout` now reads BANCS layouts whose clocking scheme is named `BANCS3`.
   - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
   - Transactional writers now report filesystem setup and replacement errors as stream failures. They preserve output permissions and symbolic links to existing files, and reject dangling links and non-regular output files.
   - Network DOT export uses transactional replacement, including intermediate drawings produced by `show`.

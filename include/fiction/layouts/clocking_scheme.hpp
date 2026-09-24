@@ -534,11 +534,11 @@ static auto twoddwave_hex(const num_clks& n = num_clks::FOUR) noexcept
         }
 
         // not a supported hexagonal orientation; fall back to regular 2DDWave clocking
-        return twoddwave<Lyt>();
+        return twoddwave<Lyt>(n);
     }
     else  // not a hexagonal layout; fall back to regular 2DDWave clocking
     {
-        return twoddwave<Lyt>();
+        return twoddwave<Lyt>(n);
     }
 }
 /**
@@ -815,7 +815,8 @@ std::optional<scheme<clock_zone<Lyt>>> get_scheme(const std::string_view& scheme
         {CFE_NAME, cfe<Lyt>()},
         {RIPPLE_NAME, ripple<Lyt>()},
         {SRS_NAME, srs<Lyt>()},
-        {BANCS_NAME, bancs<Lyt>()}};
+        {BANCS_NAME, bancs<Lyt>()},
+        {"BANCS3", bancs<Lyt>()}};
 
     std::string upper_name{scheme_name};
     std::ranges::transform(upper_name, upper_name.begin(), [](const char ch)

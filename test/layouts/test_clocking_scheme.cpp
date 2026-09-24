@@ -1657,6 +1657,11 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
     check({"srs", "SRS", "sRs", "SrS"}, clocking::SRS_NAME);
     check({"bancs", "BANCS", "BaNCs", "banCS"}, clocking::BANCS_NAME);
 
+    check({"bancs3", "BANCS3"}, clocking::BANCS_NAME);
+
+    CHECK(clocking::get_scheme<clk_lyt>("2DDWAVEHEX3")->num_clocks == 3u);
+    CHECK(clocking::get_scheme<clk_lyt>("BANCS3")->num_clocks == 3u);
+
     CHECK(!clocking::get_scheme<clk_lyt>("").has_value());
     CHECK(!clocking::get_scheme<clk_lyt>("Column").has_value());
     CHECK(!clocking::get_scheme<clk_lyt>("Rows").has_value());

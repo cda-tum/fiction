@@ -180,7 +180,7 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
                    hex_odd_col_gate_clk_lyt, hex_even_col_gate_clk_lyt)
 {
     for (const auto* const name : {"OPEN3", "OPEN4", "COLUMNAR3", "COLUMNAR4", "ROW3", "ROW4", "2DDWAVE3", "2DDWAVE4",
-                                   "2DDWAVEHEX3", "2DDWAVEHEX4"})
+                                   "2DDWAVEHEX3", "2DDWAVEHEX4", "BANCS"})
     {
         if constexpr (!is_hexagonal_layout_v<TestType>)
         {
