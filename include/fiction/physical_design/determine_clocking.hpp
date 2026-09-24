@@ -330,8 +330,6 @@ class sat_clocking_handler
                     if (model.at(variables.at({t, clk})) == bill::lbool_type::true_)
                     {
                         layout.assign_clock_number(t, clk);
-                        layout.assign_clock_number(layout.above(t), clk);
-                        layout.assign_clock_number(layout.below(t), clk);
                     }
                 }
             });

@@ -191,6 +191,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     molQCA cells name their own clock phase, so molQCA layouts have no clock zones.
   - **Breaking:** QCA and iNML layouts address clock zones by tile: all cells of a tile, on every layer, share its
     clock number. `get_clock_zone` returns the clock zone of a cell.
+  - Gate-level `assign_clock_number` now clocks every layer of a tile and ignores the `z` coordinate;
+    `get_clock_number` returns the same clock number on all layers.
   - **Breaking:** molQCA lives in `technology/mol_qca/` and `namespace fiction::mol_qca`, together with
     `sim7_mol_library` and `write_mol_qca_layout_svg`. iNML names its element type `inml::magnet_type`.
   - Population-stability results expose the critical dot as `critical_dot` in C++ and Python.
@@ -570,6 +572,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - QCA SVG output now includes synchronized cells in tiled layouts and wraps latch clock labels within the clock cycle.
   - QCA SVG output now preserves synchronized cell positions, draws mixed tiles once, and includes partial boundary tiles.
   - FGL round trips now preserve three-phase clocking across all supported topologies.
+  - `read_fgl_layout` now restores irregular clock numbers on crossing layers.
   - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
   - Transactional writers now report filesystem setup and replacement errors as stream failures. They preserve output permissions and symbolic links to existing files, and reject dangling links and non-regular output files.
   - Network DOT export uses transactional replacement, including intermediate drawings produced by `show`.

@@ -1495,6 +1495,12 @@ TEST_CASE("Clock zone assignment", "[clocked-layout]")
         CHECK(layout.get_clock_number({0, 1}) == 2);
         CHECK(layout.get_clock_number({1, 1}) == 3);
 
+        // a clock zone spans every layer of its tile
+        CHECK(layout.get_clock_number({1, 1, 1}) == 3);
+        layout.assign_clock_number({0, 1, 1}, 3);
+        CHECK(layout.get_clock_number({0, 1, 0}) == 3);
+        layout.assign_clock_number({0, 1}, 2);
+
         CHECK(layout.is_incoming_clocked({1, 1}, {1, 0}));
         CHECK(layout.is_incoming_clocked({1, 1}, {0, 1}));
         CHECK(!layout.is_incoming_clocked({1, 0}, {0, 0}));

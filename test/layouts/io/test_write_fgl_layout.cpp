@@ -213,3 +213,18 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
         compare_written_and_read_layout(original, restored);
     }
 }
+
+TEST_CASE("FGL preserves clock numbers on crossing layers", "[write-fgl-layout]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    gate_layout original{{2, 2, 1}, clocking::open<gate_layout>(), "crossing clocks"};
+    original.assign_clock_number({1, 1, 1}, 2);
+
+    std::stringstream stream{};
+    write_fgl_layout(original, stream);
+    const auto restored = read_fgl_layout<gate_layout>(stream);
+
+    CHECK(restored.get_clock_number({1, 1, 0}) == 2);
+    CHECK(restored.get_clock_number({1, 1, 1}) == 2);
+}

@@ -2730,14 +2730,8 @@ class exact_impl
                         {
                             if (model.eval(get_tcl(t, i), true).bool_value() == Z3_L_TRUE)
                             {
-                                // assign clock number to tile t
+                                // the clock number applies to every layer of tile t
                                 layout.assign_clock_number(t, static_cast<typename Lyt::clock_number_t>(i));
-                                // and to the tile above
-                                layout.assign_clock_number(layout.above(t),
-                                                           static_cast<typename Lyt::clock_number_t>(i));
-                                // NOTE if this algorithm is ever to be extended for stacked FCN, this function needs to
-                                // assign the clock zone to all tiles in the z direction or the clocking lookup must
-                                // only consider the ground tile
                             }
                         }
                     });

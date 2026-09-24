@@ -1753,7 +1753,8 @@ class gate_level_layout : public CoordinateLayout
         strg->data.clocking.replace_clocking_scheme(scheme);
     }
     /**
-     * Overrides a clock number in the stored scheme with the provided one.
+     * Overrides the clock number of a tile in the stored scheme. The clock number applies to every layer of the tile,
+     * so the z-coordinate of `cz` is ignored.
      *
      * @param cz Clock zone to override.
      * @param cn New clock number for `cz`.
@@ -1763,7 +1764,8 @@ class gate_level_layout : public CoordinateLayout
         strg->data.clocking.assign_clock_number(cz, cn);
     }
     /**
-     * Returns the clock number for the given clock zone.
+     * Returns the clock number of a tile. Every layer of a tile has the same clock number, so the z-coordinate of `cz`
+     * is ignored.
      *
      * @param cz Clock zone.
      * @return Clock number of `cz`.

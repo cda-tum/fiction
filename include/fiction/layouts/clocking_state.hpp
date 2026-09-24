@@ -74,24 +74,26 @@ class state
         clocking = std::make_unique<clocking_scheme_t>(scheme);
     }
     /**
-     * Overrides a clock number in the stored scheme with the provided one.
+     * Overrides the clock number of a clock zone in the stored scheme. A clock zone spans every layer, so the override
+     * ignores the z-coordinate of `cz`.
      *
      * @param cz Clock zone to override.
      * @param cn New clock number for `cz`.
      */
     void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
     {
-        clocking->override_clock_number(cz, cn);
+        clocking->override_clock_number(clock_zone{cz.x, cz.y}, cn);
     }
     /**
-     * Returns the clock number for the given clock zone.
+     * Returns the clock number of a clock zone. A clock zone spans every layer, so the lookup ignores the z-coordinate
+     * of `cz`.
      *
      * @param cz Clock zone.
      * @return Clock number of `cz`.
      */
     [[nodiscard]] clock_number_t get_clock_number(const clock_zone& cz) const noexcept
     {
-        return (*clocking)(cz);
+        return (*clocking)(clock_zone{cz.x, cz.y});
     }
     /**
      * Returns the number of clock phases in the layout. Each clock cycle is divided into n phases. In QCA, the number
