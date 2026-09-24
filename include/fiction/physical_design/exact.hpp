@@ -210,13 +210,13 @@ class exact_impl
      * @param sbl Gate orientations forbidden at each tile.
      */
     exact_impl(mockturtle::names_view<networks::technology_network>& src, exact_physical_design_params p,
-               exact_physical_design_stats& st, const layouts::clocking::scheme& clocking_scheme,
+               exact_physical_design_stats& st, layouts::clocking::scheme clocking_scheme,
                const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
             progress{ps.on_progress, "aspect ratios"},
             worker_progress{ps.on_worker_progress, std::max(std::size_t{1}, ps.num_threads)},
-            scheme{clocking_scheme},
+            scheme{std::move(clocking_scheme)},
             black_list{sbl}
     {
         // create PO nodes in the network
@@ -3247,7 +3247,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
 
-    const auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
+    auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
 
     if (!clocking_scheme.has_value())
     {
@@ -3268,7 +3268,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, *clocking_scheme};
+    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, std::move(*clocking_scheme)};
 
     auto result = p.run();
 
@@ -3304,7 +3304,7 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
 
-    const auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
+    auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
 
     if (!clocking_scheme.has_value())
     {
@@ -3325,7 +3325,7 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, *clocking_scheme, black_list};
+    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, std::move(*clocking_scheme), black_list};
 
     auto result = p.run();
 
