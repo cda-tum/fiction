@@ -36,7 +36,7 @@ namespace blueprints
 {
 
 template <typename GateLyt>
-GateLyt straight_wire_gate_layout() noexcept
+GateLyt straight_wire_gate_layout()
 {
     GateLyt layout{{2, 2}, fiction::layouts::clocking::twoddwave()};
 
@@ -48,7 +48,7 @@ GateLyt straight_wire_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt three_wire_paths_gate_layout() noexcept
+GateLyt three_wire_paths_gate_layout()
 {
     GateLyt layout{{4, 4}, fiction::layouts::clocking::use()};
 
@@ -68,7 +68,7 @@ GateLyt three_wire_paths_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt xor_maj_gate_layout() noexcept
+GateLyt xor_maj_gate_layout()
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
@@ -102,7 +102,7 @@ GateLyt xor_maj_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt and_or_gate_layout() noexcept
+GateLyt and_or_gate_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::layouts::clocking::open()};
 
@@ -125,7 +125,7 @@ GateLyt and_or_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt and_not_gate_layout() noexcept
+GateLyt and_not_gate_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::layouts::clocking::open()};
 
@@ -148,7 +148,7 @@ GateLyt and_not_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt or_not_gate_layout() noexcept
+GateLyt or_not_gate_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::twoddwave()};
 
@@ -162,7 +162,7 @@ GateLyt or_not_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt and_or_inv_gate_layout() noexcept
+GateLyt and_or_inv_gate_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{4, 2, 0}, fiction::layouts::clocking::twoddwave()};
 
@@ -187,7 +187,7 @@ GateLyt and_or_inv_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt use_and_gate_layout() noexcept
+GateLyt use_and_gate_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{3, 3, 0}, fiction::layouts::clocking::use()};
 
@@ -213,7 +213,7 @@ GateLyt use_and_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt res_maj_gate_layout() noexcept
+GateLyt res_maj_gate_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::res()};
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -230,7 +230,7 @@ GateLyt res_maj_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt single_input_tautology_gate_layout() noexcept
+GateLyt single_input_tautology_gate_layout()
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
@@ -249,7 +249,7 @@ GateLyt single_input_tautology_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt tautology_gate_layout() noexcept
+GateLyt tautology_gate_layout()
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
@@ -269,7 +269,7 @@ GateLyt tautology_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt res_tautology_gate_layout() noexcept
+GateLyt res_tautology_gate_layout()
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
@@ -290,7 +290,7 @@ GateLyt res_tautology_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt open_tautology_gate_layout() noexcept
+GateLyt open_tautology_gate_layout()
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
@@ -319,7 +319,7 @@ GateLyt open_tautology_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt crossing_layout() noexcept
+GateLyt crossing_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 1}, fiction::layouts::clocking::twoddwave()};
 
@@ -400,7 +400,7 @@ GateLyt unbalanced_and_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt non_structural_all_function_gate_layout() noexcept
+GateLyt non_structural_all_function_gate_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{3, 5, 0}, fiction::layouts::clocking::open()};
 
@@ -447,7 +447,7 @@ GateLyt non_structural_all_function_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt se_gate_layout() noexcept
+GateLyt se_gate_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{2, 1, 0}, fiction::layouts::clocking::twoddwave()};
 
@@ -466,7 +466,7 @@ GateLyt se_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt shifted_cart_and_or_inv_gate_layout() noexcept
+GateLyt shifted_cart_and_or_inv_gate_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{4, 2, 0},
                    fiction::layouts::clocking::columnar(fiction::layouts::clocking::num_clks::THREE)};
@@ -489,7 +489,7 @@ GateLyt shifted_cart_and_or_inv_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt row_clocked_and_xor_gate_layout() noexcept
+GateLyt row_clocked_and_xor_gate_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{2, 3, 0}, fiction::layouts::clocking::row()};
 
@@ -509,7 +509,7 @@ GateLyt row_clocked_and_xor_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt unclockable_gate_layout() noexcept
+GateLyt unclockable_gate_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::open()};
 
@@ -524,7 +524,7 @@ GateLyt unclockable_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt optimization_layout() noexcept
+GateLyt optimization_layout()
 {
     GateLyt layout{{2, 3, 1}, fiction::layouts::clocking::twoddwave()};
 
@@ -545,7 +545,7 @@ GateLyt optimization_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_1() noexcept
+GateLyt optimization_layout_corner_case_outputs_1()
 {
     GateLyt layout{{2, 3, 1}, fiction::layouts::clocking::twoddwave()};
 
@@ -564,7 +564,7 @@ GateLyt optimization_layout_corner_case_outputs_1() noexcept
 }
 
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_2() noexcept
+GateLyt optimization_layout_corner_case_outputs_2()
 {
     GateLyt layout{{3, 2, 1}, fiction::layouts::clocking::twoddwave()};
 
@@ -583,7 +583,7 @@ GateLyt optimization_layout_corner_case_outputs_2() noexcept
 }
 
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_3() noexcept
+GateLyt optimization_layout_corner_case_outputs_3()
 {
     GateLyt layout{{4, 1, 0}, fiction::layouts::clocking::twoddwave()};
 
@@ -602,7 +602,7 @@ GateLyt optimization_layout_corner_case_outputs_3() noexcept
 }
 
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_4() noexcept
+GateLyt optimization_layout_corner_case_outputs_4()
 {
     GateLyt layout{{2, 2, 0}, fiction::layouts::clocking::twoddwave()};
 
@@ -619,7 +619,7 @@ GateLyt optimization_layout_corner_case_outputs_4() noexcept
 }
 
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_5() noexcept
+GateLyt optimization_layout_corner_case_outputs_5()
 {
     GateLyt layout{{2, 4, 1}, fiction::layouts::clocking::twoddwave()};
 
@@ -638,7 +638,7 @@ GateLyt optimization_layout_corner_case_outputs_5() noexcept
 }
 
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_inputs() noexcept
+GateLyt optimization_layout_corner_case_inputs()
 {
     GateLyt layout{{3, 2, 0}, fiction::layouts::clocking::twoddwave()};
 
@@ -652,7 +652,7 @@ GateLyt optimization_layout_corner_case_inputs() noexcept
 }
 
 template <typename GateLyt>
-GateLyt planar_unoptimized_layout() noexcept
+GateLyt planar_unoptimized_layout()
 {
     GateLyt layout{{4, 4, 0}, fiction::layouts::clocking::twoddwave()};
 
@@ -672,7 +672,7 @@ GateLyt planar_unoptimized_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt planar_optimization_layout() noexcept
+GateLyt planar_optimization_layout()
 {
     GateLyt layout{{2, 2, 1}, fiction::layouts::clocking::twoddwave()};
 
@@ -693,7 +693,7 @@ GateLyt planar_optimization_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt pi_not_in_border_optimization_layout() noexcept
+GateLyt pi_not_in_border_optimization_layout()
 {
     GateLyt layout{{2, 1, 0}, fiction::layouts::clocking::twoddwave()};
 
@@ -704,7 +704,7 @@ GateLyt pi_not_in_border_optimization_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt po_not_in_border_optimization_layout() noexcept
+GateLyt po_not_in_border_optimization_layout()
 {
     GateLyt layout{{1, 2, 0}, fiction::layouts::clocking::twoddwave()};
 
@@ -715,7 +715,7 @@ GateLyt po_not_in_border_optimization_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt po_have_to_be_moved_to_border_optimization_layout() noexcept
+GateLyt po_have_to_be_moved_to_border_optimization_layout()
 {
     GateLyt layout{{2, 3, 0}, fiction::layouts::clocking::twoddwave()};
 
@@ -736,7 +736,7 @@ GateLyt po_have_to_be_moved_to_border_optimization_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt ge_gt_le_lt_layout() noexcept
+GateLyt ge_gt_le_lt_layout()
 {
     GateLyt layout{{6, 2, 1}, fiction::layouts::clocking::twoddwave()};
 
@@ -762,7 +762,7 @@ GateLyt ge_gt_le_lt_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt po_extension_corner_case_layout() noexcept
+GateLyt po_extension_corner_case_layout()
 {
     GateLyt layout{{4, 3, 1}, fiction::layouts::clocking::twoddwave()};
 

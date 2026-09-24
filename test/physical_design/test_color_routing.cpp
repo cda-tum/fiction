@@ -19,9 +19,13 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/physical_design/color_routing.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/graph/graph_coloring.hpp>
+
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
