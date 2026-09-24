@@ -17,12 +17,13 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
-#include <fiction/physical_design/path_finding/distance.hpp>
 #include <fiction/physical_design/path_finding/distance_map.hpp>
+
+#include <cstdint>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -30,7 +31,7 @@ using namespace fiction::physical_design::path_finding;
 
 TEST_CASE("Distance map", "[distance-map]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     using dist    = uint64_t;
 
     SECTION("2DDWave clocking")
@@ -109,7 +110,7 @@ TEST_CASE("Distance map", "[distance-map]")
 
 TEST_CASE("Sparse distance map", "[distance-map]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     using dist    = uint64_t;
 
     SECTION("2DDWave clocking")
@@ -188,14 +189,15 @@ TEST_CASE("Sparse distance map", "[distance-map]")
 
 TEST_CASE("Smart distance cache functor", "[distance-map]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     using dist    = uint64_t;
 
     SECTION("2DDWave clocking")
     {
         const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::twoddwave<clk_lyt>()};
 
-        const auto dist_map_func = smart_distance_cache_functor<clk_lyt, dist>{layout, &a_star_distance<clk_lyt, dist>};
+        const auto dist_map_func =
+            smart_distance_cache_functor<clk_lyt, dist>{layout, a_star_distance_functor<clk_lyt, dist>{}};
 
         layout.foreach_coordinate(
             [&layout, &dist_map_func](const auto& c1)
@@ -216,7 +218,8 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
     {
         const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::use<clk_lyt>()};
 
-        const auto dist_map_func = smart_distance_cache_functor<clk_lyt, dist>{layout, &a_star_distance<clk_lyt, dist>};
+        const auto dist_map_func =
+            smart_distance_cache_functor<clk_lyt, dist>{layout, a_star_distance_functor<clk_lyt, dist>{}};
 
         layout.foreach_coordinate(
             [&layout, &dist_map_func](const auto& c1)
@@ -237,7 +240,8 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
     {
         const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::res<clk_lyt>()};
 
-        const auto dist_map_func = smart_distance_cache_functor<clk_lyt, dist>{layout, &a_star_distance<clk_lyt, dist>};
+        const auto dist_map_func =
+            smart_distance_cache_functor<clk_lyt, dist>{layout, a_star_distance_functor<clk_lyt, dist>{}};
 
         layout.foreach_coordinate(
             [&layout, &dist_map_func](const auto& c1)
@@ -258,7 +262,8 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
     {
         const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::cfe<clk_lyt>()};
 
-        const auto dist_map_func = smart_distance_cache_functor<clk_lyt, dist>{layout, &a_star_distance<clk_lyt, dist>};
+        const auto dist_map_func =
+            smart_distance_cache_functor<clk_lyt, dist>{layout, a_star_distance_functor<clk_lyt, dist>{}};
 
         layout.foreach_coordinate(
             [&layout, &dist_map_func](const auto& c1)

@@ -14,9 +14,6 @@ from mnt.pyfiction import (
     cartesian_gate_layout,
     cartesian_layout,
     chebyshev_distance,
-    clocked_cartesian_layout,
-    clocked_hexagonal_layout,
-    clocked_shifted_cartesian_layout,
     euclidean_distance,
     hexagonal_gate_layout,
     hexagonal_layout,
@@ -30,15 +27,12 @@ from mnt.pyfiction import (
 
 ALL_LAYOUTS = [
     pytest.param(lambda: cartesian_layout((4, 4)), id="cartesian_layout"),
-    pytest.param(lambda: clocked_cartesian_layout((4, 4), "2DDWave"), id="clocked_cartesian_layout"),
     pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
     pytest.param(lambda: shifted_cartesian_layout((4, 4)), id="shifted_cartesian_layout"),
-    pytest.param(lambda: clocked_shifted_cartesian_layout((4, 4), "2DDWave"), id="clocked_shifted_cartesian_layout"),
     pytest.param(
         lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
     ),
     pytest.param(lambda: hexagonal_layout((4, 4)), id="hexagonal_layout"),
-    pytest.param(lambda: clocked_hexagonal_layout((4, 4), "2DDWave"), id="clocked_hexagonal_layout"),
     pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
 ]
 

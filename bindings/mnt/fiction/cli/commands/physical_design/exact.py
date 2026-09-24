@@ -18,7 +18,7 @@ from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import positive_float, positive_int
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.statistics import stats_to_dict
-from mnt.fiction.cli.topologies import CLOCKED_LAYOUTS, FGL_READERS
+from mnt.fiction.cli.topologies import FGL_READERS, GATE_LAYOUTS
 
 if TYPE_CHECKING:
     import argparse
@@ -48,7 +48,7 @@ def _clocking_scheme(name: str, topology: str) -> str:
     """
     scheme = name.upper()
     try:
-        CLOCKED_LAYOUTS[topology]((0, 0), scheme)
+        GATE_LAYOUTS[topology]((0, 0), scheme)
     except RuntimeError as error:
         msg = f"'{name}' is not a clocking scheme for {topology} layouts; see the CLI documentation for the list"
         raise CommandError(msg) from error

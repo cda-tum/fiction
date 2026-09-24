@@ -23,21 +23,48 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/hexagonalization.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/traits.hpp>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
+
+/**
+ * @brief Checks that a hexagonal layout carries no explicit obstructions, i.e., that only occupied tiles and existing
+ * signal connections are obstructed.
+ * @tparam HexLyt Hexagonal gate layout type.
+ * @param hex_layout Layout to check.
+ */
+template <typename HexLyt>
+static void check_no_explicit_obstructions(const HexLyt& hex_layout)
+{
+    hex_layout.foreach_coordinate(
+        [&hex_layout](const auto& src)
+        {
+            CHECK(hex_layout.is_obstructed_coordinate(src) == !hex_layout.is_empty_tile(src));
+
+            hex_layout.foreach_adjacent_coordinate(
+                src,
+                [&hex_layout, &src](const auto& tgt)
+                {
+                    for (const auto& t : {tgt, hex_layout.above(tgt)})
+                    {
+                        CHECK(hex_layout.is_obstructed_connection(src, t) ==
+                              (hex_layout.is_incoming_signal(t, static_cast<mockturtle::signal<HexLyt>>(src)) ||
+                               hex_layout.is_outgoing_signal(src, static_cast<mockturtle::signal<HexLyt>>(t))));
+                    }
+                });
+        });
+}
 
 template <typename Lyt, typename Ntk>
 static void check_mapping_equiv(const Ntk& ntk)
@@ -67,6 +94,7 @@ static void check_mapping_equiv(const Ntk& ntk)
 
     check_eq(ntk, hex_layout_bottom_pos);
     check_eq(layout, hex_layout_bottom_pos);
+    check_no_explicit_obstructions(hex_layout_bottom_pos);
 
     hex_layout_bottom_pos.foreach_po(
         [&hex_layout_bottom_pos](const auto& gate)
@@ -79,6 +107,7 @@ static void check_mapping_equiv(const Ntk& ntk)
 
     check_eq(ntk, hex_layout_top_pis_bottom_pos);
     check_eq(layout, hex_layout_top_pis_bottom_pos);
+    check_no_explicit_obstructions(hex_layout_top_pis_bottom_pos);
 
     hex_layout_top_pis_bottom_pos.foreach_pi([&hex_layout_top_pis_bottom_pos](const auto& gate)
                                              { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == 0); });
@@ -224,7 +253,7 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+        using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
         check_mapping_equiv_all<gate_layout>();
     }
@@ -232,7 +261,7 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
 
 TEST_CASE("Cartesian to hexagonal")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
     using hex_lyt     = hex_even_row_gate_clk_lyt;
 
     constexpr const auto layout_height = 3;
@@ -278,7 +307,7 @@ TEST_CASE("Cartesian to hexagonal")
 
 TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
     using hex_lyt     = hex_even_row_gate_clk_lyt;
 
     const auto ntk    = blueprints::mux21_network<technology_network>();

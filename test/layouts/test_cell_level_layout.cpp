@@ -21,7 +21,6 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/inml/technology.hpp>
@@ -30,7 +29,9 @@
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
+#include <stdexcept>
 #include <string>
+#include <string_view>
 
 using namespace fiction;
 using namespace fiction::inml;
@@ -38,20 +39,56 @@ using namespace fiction::layouts;
 using namespace fiction::qca;
 using namespace fiction::sidb;
 
+TEST_CASE("Cell clock zones have positive dimensions", "[cell-level-layout]")
+{
+    using layout = qca_cell_clk_lyt;
+    CHECK_THROWS_AS((layout{{2, 2}, "", 0, 1}), std::invalid_argument);
+    CHECK_THROWS_AS((layout{{2, 2}, "", 1, 0}), std::invalid_argument);
+    CHECK_THROWS_AS((layout{{2, 2}, clocking::twoddwave<layout>(), "", 0, 1}), std::invalid_argument);
+    CHECK_THROWS_AS((layout{{2, 2}, clocking::twoddwave<layout>(), "", 1, 0}), std::invalid_argument);
+    layout cells{{4, 4}, "", 2, 3};
+    CHECK_THROWS_AS(cells.set_tile_size_x(0), std::invalid_argument);
+    CHECK_THROWS_AS(cells.set_tile_size_y(0), std::invalid_argument);
+    CHECK(cells.get_tile_size_x() == 2);
+    CHECK(cells.get_tile_size_y() == 3);
+    CHECK(cells.get_clock_number({4, 4}) == 0);
+}
+
+TEMPLATE_TEST_CASE("Clocking capabilities across coordinate geometries", "[cell-level-layout]", cart_gate_clk_lyt,
+                   cart_odd_row_gate_clk_lyt, hex_even_row_gate_clk_lyt, qca_cell_clk_lyt, inml_cell_clk_lyt,
+                   sidb_cell_clk_lyt_cube)
+{
+    TestType                   layout{{4, 4}};
+    const coordinate<TestType> center{2, 2};
+    CHECK(layout.degree(center) == 0);
+    const auto neighbors = layout.adjacent_coordinates(center);
+    REQUIRE(neighbors.size() >= 2);
+    layout.assign_synchronization_element(neighbors[0], 1);
+    layout.assign_synchronization_element(neighbors[1], 2);
+    CHECK(layout.in_degree(center) == 2);
+    CHECK(layout.out_degree(center) == 2);
+    CHECK(layout.degree(center) == 2);
+    layout.assign_synchronization_element(center, 1);
+    CHECK(layout.degree(center) == neighbors.size());
+    CHECK(layout.num_se() == 3);
+
+    const std::string bounded_name{"OPEN suffix"};
+    CHECK(layout.is_clocking_scheme(std::string_view{bounded_name.data(), 4}));
+    CHECK_FALSE(layout.is_clocking_scheme(bounded_name));
+}
+
 TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", qca_cell_clk_lyt, inml_cell_clk_lyt,
                    sidb_cell_clk_lyt, sidb_cell_clk_lyt_cube)
 {
     CHECK(is_cell_level_layout_v<TestType>);
-    CHECK(has_foreach_cell_v<TestType>);
-    CHECK(has_is_empty_cell_v<TestType>);
-    CHECK(has_is_empty_v<TestType>);
+    CHECK(!is_gate_level_layout_v<TestType>);
     CHECK(has_get_layout_name_v<TestType>);
     CHECK(has_set_layout_name_v<TestType>);
 }
 
 TEST_CASE("Deep copy cell-level layout", "[cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     cell_layout original{{5, 5, 0}, clocking::twoddwave<cell_layout>(), "Original", 2, 2};
     original.assign_cell_type({0, 2}, qca_technology::cell_type::NORMAL);
@@ -173,7 +210,7 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
 
 TEST_CASE("Cell type assignment", "[cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     REQUIRE(has_get_layout_name_v<cell_layout>);
     REQUIRE(has_set_layout_name_v<cell_layout>);
@@ -271,7 +308,7 @@ TEST_CASE("Cell type assignment", "[cell-level-layout]")
 
 TEST_CASE("Cell mode assignment", "[cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 
@@ -334,7 +371,7 @@ TEST_CASE("Cell mode assignment", "[cell-level-layout]")
 
 TEST_CASE("Clock zone assignment to cells", "[cell-level-layout]")
 {
-    using clk_cell_lyt = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using clk_cell_lyt = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     const clk_cell_lyt layout{clk_cell_lyt::aspect_ratio{4, 4, 0}, clocking::twoddwave<clk_cell_lyt>(), "Lyt", 2, 2};
 
@@ -363,4 +400,42 @@ TEST_CASE("Clock zone assignment to cells", "[cell-level-layout]")
     CHECK(layout.get_clock_number({2, 4}) == 3);
     CHECK(layout.get_clock_number({3, 4}) == 3);
     CHECK(layout.get_clock_number({4, 4}) == 0);
+}
+TEST_CASE("Cell capabilities retain coordinate conventions and independent clones", "[cell-level-layout]")
+{
+    using layout =
+        fiction::layouts::cell_level_layout<fiction::qca::qca_technology,
+                                            fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>;
+    layout original{{5, 5}, fiction::layouts::clocking::twoddwave<layout>(), "cells", 2, 2};
+    CHECK(original.get_clock_zone({3, 2}) == coords::offset{1, 1});
+    CHECK(original.get_clock_zone({3, 2, 1}) == coords::offset{1, 1});
+
+    // clock numbers and synchronization elements belong to clock zones, i.e., to 2 x 2 cell tiles on every layer
+    original.assign_clock_number({1, 1}, 3);
+    CHECK(original.get_clock_number({2, 2}) == 3);
+    CHECK(original.get_clock_number({3, 3}) == 3);
+    CHECK(original.get_clock_number({2, 3, 1}) == 3);
+    original.assign_synchronization_element({1, 1}, 2);
+    CHECK(original.num_se() == 1);
+    CHECK(original.get_synchronization_element({2, 2}) == 2);
+    CHECK(original.get_synchronization_element({3, 3}) == 2);
+    CHECK(original.is_synchronization_element({3, 2, 1}));
+    CHECK(original.get_synchronization_element({4, 4}) == 0);
+    CHECK(!original.is_synchronization_element({1, 1}));
+    original.obstruct_coordinate({4, 4});
+    original.obstruct_connection({0, 0}, {0, 1});
+    auto copy = original.clone();
+    CHECK(copy.get_clock_number({3, 3}) == 3);
+    CHECK(copy.get_synchronization_element({3, 3}) == 2);
+    CHECK(copy.is_obstructed_coordinate({4, 4}));
+    CHECK(copy.is_obstructed_connection({0, 0}, {0, 1}));
+    copy.assign_clock_number({1, 1}, 0);
+    copy.assign_synchronization_element({1, 1}, 0);
+    copy.clear_obstructed_coordinates();
+    copy.clear_obstructed_connections();
+    CHECK(copy.num_se() == 0);
+    CHECK(original.get_clock_number({3, 3}) == 3);
+    CHECK(original.get_synchronization_element({3, 3}) == 2);
+    CHECK(original.is_obstructed_coordinate({4, 4}));
+    CHECK(original.is_obstructed_connection({0, 0}, {0, 1}));
 }

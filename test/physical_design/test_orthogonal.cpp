@@ -23,11 +23,9 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
@@ -115,7 +113,7 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+        using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
         check_ortho_equiv_all<gate_layout>();
     }
@@ -123,29 +121,25 @@ TEST_CASE("Layout equivalence", "[algorithms]")
     {
         SECTION("odd row")
         {
-            using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, odd_row_hex>>>>;
+            using gate_layout = gate_level_layout<hexagonal_layout<coords::offset, odd_row_hex>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
         SECTION("even row")
         {
-            using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, even_row_hex>>>>;
+            using gate_layout = gate_level_layout<hexagonal_layout<coords::offset, even_row_hex>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
         SECTION("odd column")
         {
-            using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, odd_column_hex>>>>;
+            using gate_layout = gate_level_layout<hexagonal_layout<coords::offset, odd_column_hex>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
         SECTION("even column")
         {
-            using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, even_column_hex>>>>;
+            using gate_layout = gate_level_layout<hexagonal_layout<coords::offset, even_column_hex>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
@@ -154,8 +148,8 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 
 TEST_CASE("Gate library application", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     const auto check = [](const auto& ntk)
     {
@@ -180,7 +174,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
 
 TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>();
     maj.set_network_name("maj");
@@ -201,7 +195,7 @@ TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
 
 TEST_CASE("Orthogonal physical design reports progress", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     const auto ntk = blueprints::mux21_network<technology_network>();
 

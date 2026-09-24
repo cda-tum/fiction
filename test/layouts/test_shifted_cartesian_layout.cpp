@@ -17,10 +17,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/traits.hpp>
-
-#include <iostream>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -42,7 +41,7 @@ void check_common_traits()
     CHECK(has_below_v<Lyt>);
     CHECK(has_elevation_operations_v<Lyt>);
     CHECK(is_coordinate_layout_v<Lyt>);
-    CHECK(!is_tile_based_layout_v<Lyt>);
+    CHECK(!is_gate_level_layout_v<Lyt>);
     CHECK(!is_cartesian_layout_v<Lyt>);
     CHECK(!is_hexagonal_layout_v<Lyt>);
     CHECK(is_shifted_cartesian_layout_v<Lyt>);

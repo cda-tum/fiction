@@ -9,7 +9,7 @@ directs information flow and provides a notion of timing for both combinational 
 clocking information is assigned to the coordinates of a layout by the means of a clocking scheme.
 
 This header provides the `clocking_scheme` class that defines general floor plans of clock numbers for
-{ref}`clocked layouts<clocked layout>` as well as pre-defined schemes from the literature.
+gate-level and cell-level layouts as well as pre-defined schemes from the literature.
 
 ```{doxygenclass} fiction::layouts::clocking::scheme
 :members:

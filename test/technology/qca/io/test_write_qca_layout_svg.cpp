@@ -487,3 +487,67 @@ TEST_CASE("Write QCA SVG files with the selected detail level", "[write-qca-layo
     CHECK_THROWS_AS(write_qca_layout_svg(layout, std::filesystem::temp_directory_path().string(), params),
                     std::ofstream::failure);
 }
+
+TEST_CASE("Render synchronized QCA cells in tiled SVG", "[write-qca-layout-svg]")
+{
+    const auto       simple = GENERATE(false, true);
+    const auto       clock  = GENERATE(uint8_t{0}, uint8_t{3});
+    qca_cell_clk_lyt layout{{4, 4}, "Synchronized QCA tile", 5, 5};
+    layout.assign_cell_type({2, 2}, qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, qca_technology::cell_type::INPUT);
+    layout.assign_clock_number({0, 0}, clock);
+    layout.assign_synchronization_element({0, 0}, 1);
+
+    std::ostringstream stream{};
+    write_qca_layout_svg(layout, stream, {.simple = simple});
+    const auto            svg = stream.str();
+    tinyxml2::XMLDocument document{};
+    REQUIRE(document.Parse(svg.c_str()) == tinyxml2::XML_SUCCESS);
+    CHECK(contains(svg, "fill:#ffe33a;"));
+    CHECK(contains(svg, "fill:#008dc8;"));
+    CHECK(contains(svg, "<circle") == !simple);
+    CHECK(contains(svg, fmt::format(">{}</tspan>", clock + 1)) == !simple);
+    CHECK_FALSE(contains(svg, ">5</tspan>"));
+}
+
+TEST_CASE("QCA SVG synchronization preserves cell positions", "[write-qca-layout-svg]")
+{
+    const auto       simple = GENERATE(false, true);
+    qca_cell_clk_lyt layout{{0, 0}, "Synchronized cell"};
+    layout.assign_cell_type({0, 0}, qca_technology::cell_type::NORMAL);
+    std::ostringstream before{};
+    write_qca_layout_svg(layout, before, {.simple = simple});
+    layout.assign_synchronization_element({0, 0}, 1);
+    std::ostringstream after{};
+    write_qca_layout_svg(layout, after, {.simple = simple});
+
+    tinyxml2::XMLDocument original{}, synchronized{};
+    REQUIRE(original.Parse(before.str().c_str()) == tinyxml2::XML_SUCCESS);
+    REQUIRE(synchronized.Parse(after.str().c_str()) == tinyxml2::XML_SUCCESS);
+    const auto* original_cell = original.FirstChildElement("svg")->FirstChildElement("g")->FirstChildElement("g");
+    const auto* synchronized_cell =
+        synchronized.FirstChildElement("svg")->FirstChildElement("g")->FirstChildElement("g");
+    REQUIRE(original_cell != nullptr);
+    REQUIRE(synchronized_cell != nullptr);
+    REQUIRE(original_cell->Attribute("transform") != nullptr);
+    REQUIRE(synchronized_cell->Attribute("transform") != nullptr);
+    CHECK(std::string{original_cell->Attribute("transform")} == synchronized_cell->Attribute("transform"));
+}
+
+TEST_CASE("QCA SVG includes partial boundary tiles", "[write-qca-layout-svg]")
+{
+    const auto       simple = GENERATE(false, true);
+    qca_cell_clk_lyt layout{{0, 0}, "Partial tile", 5, 5};
+    layout.assign_cell_type({0, 0}, qca_technology::cell_type::NORMAL);
+    std::ostringstream partial{};
+    write_qca_layout_svg(layout, partial, {.simple = simple});
+    layout.resize({4, 4});
+    std::ostringstream full{};
+    write_qca_layout_svg(layout, full, {.simple = simple});
+
+    tinyxml2::XMLDocument partial_document{}, full_document{};
+    REQUIRE(partial_document.Parse(partial.str().c_str()) == tinyxml2::XML_SUCCESS);
+    REQUIRE(full_document.Parse(full.str().c_str()) == tinyxml2::XML_SUCCESS);
+    CHECK(std::string{partial_document.FirstChildElement("svg")->Attribute("viewBox")} ==
+          full_document.FirstChildElement("svg")->Attribute("viewBox"));
+}

@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Layout that assigns gates and wires to the tiles of a clocked layout.
+ * @brief Gate-level layout with clocking, synchronization, and obstructions.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)
@@ -19,6 +19,8 @@
 #pragma once
 
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/clocking_state.hpp"
+#include "fiction/layouts/obstructions.hpp"
 #include "fiction/networks/mockturtle_utils.hpp"
 #include "fiction/traits.hpp"
 
@@ -36,8 +38,10 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -57,8 +61,8 @@ namespace fiction::layouts
 {
 
 /**
- * A layout type to layer on top of a clocked layout that allows the assignment of gates to clock zones (aka tiles in
- * this context). This class represents a gate-level FCN layout and, thus, adds a notion of Boolean logic. The
+ * A gate-level FCN layout owns gates, clocking, synchronization delays, and persistent obstructions. Clock zones are
+ * tiles in the coordinate geometry supplied by `CoordinateLayout`. The
  * gate_level_layout class fulfills the requirements of a `mockturtle` logic network so that it can be used in many of
  * `mockturtle`'s algorithms. Since a layout has to assign fixed positions to its gates (logic nodes), most generative
  * member functions like `create_pi`, `create_po`, `create_and`, etc. require additional coordinate parameters.
@@ -99,19 +103,36 @@ namespace fiction::layouts
  * `mockturtle/networks/klut.hpp`. Therefore, `mockturtle` API functions are only sporadically documented where their
  * behavior might differ. Information on their functionality can be found in `mockturtle`'s docs.
  *
- * @tparam ClockedLayout The clocked layout that is to be extended by gate functions.
+ * @tparam CoordinateLayout Coordinate geometry used for gate placement.
  */
-template <typename ClockedLayout>
-class gate_level_layout : public ClockedLayout
+template <typename CoordinateLayout>
+class gate_level_layout : public CoordinateLayout
 {
   public:
 #pragma region Types and constructors
 
-    using tile = typename ClockedLayout::clock_zone;
+    /** @brief Coordinate identifying a clock zone. */
+    using clock_zone = typename CoordinateLayout::coordinate;
+    /** @brief Clocking scheme for this layout. */
+    using clocking_scheme_t = clocking::scheme<clock_zone>;
+    /** @brief Clock phase index. */
+    using clock_number_t = typename clocking_scheme_t::clock_number;
+    /** @brief Number of clocked neighbors. */
+    using degree_t = uint8_t;
+    /** @brief Hold-phase extension in full clock cycles. */
+    using sync_elem_t = typename clocking::state<clock_zone>::sync_elem_t;
+
+    /** @brief Coordinate identifying a gate position. */
+    using tile = typename CoordinateLayout::coordinate;
 
     template <typename Node, typename Tile>
     struct gate_level_layout_storage_data
     {
+
+        /** @brief Scheme, clock overrides, and synchronization delays. */
+        clocking::state<clock_zone> clocking{clocking::open<gate_level_layout>()};
+        /** @brief Persistent manually assigned obstructions. */
+        layouts::obstructions<clock_zone>                         obstructions{};
         mockturtle::truth_table_cache<kitty::dynamic_truth_table> fn_cache;
 
         const Tile const0{0x8000000000000000ull};
@@ -150,8 +171,10 @@ class gate_level_layout : public ClockedLayout
         }
     };
 
-    static constexpr auto min_fanin_size = std::max(ClockedLayout::min_fanin_size, 1u);  // NOLINT(*-identifier-naming)
-    static constexpr auto max_fanin_size = ClockedLayout::max_fanin_size;                // NOLINT(*-identifier-naming)
+    /** @brief Minimum fan-in storage required by the mockturtle network interface. */
+    // NOLINTNEXTLINE(readability-identifier-naming) -- mockturtle requires this member name.
+    static constexpr auto min_fanin_size = std::max(CoordinateLayout::min_fanin_size, 1u);
+    static constexpr auto max_fanin_size = CoordinateLayout::max_fanin_size;  // NOLINT(*-identifier-naming)
 
     using base_type = gate_level_layout;
     using node      = uint32_t;
@@ -167,36 +190,37 @@ class gate_level_layout : public ClockedLayout
 
     /**
      * Standard constructor. Creates a named gate-level layout of the given aspect ratio. To this end, it calls
-     * `ClockedLayout`'s standard constructor.
+     * `CoordinateLayout`'s standard constructor.
      *
      * @param ar Highest possible position in the layout.
      * @param name Layout name.
      */
-    explicit gate_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}, const std::string& name = {}) :
-            ClockedLayout(ar),
+    explicit gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar = {}, const std::string& name = {}) :
+            CoordinateLayout(ar),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
-        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
 
         initialize_truth_table_cache();
         strg->data.layout_name = name;
     }
     /**
      * Standard constructor. Creates a gate-level layout of the given aspect ratio and clocks it via the given clocking
-     * scheme. To this end, it calls `ClockedLayout`'s standard constructor.
+     * scheme. To this end, it calls `CoordinateLayout`'s standard constructor.
      *
      * @param ar Highest possible position in the layout.
      * @param scheme Clocking scheme to apply to this layout.
      * @param name Layout name.
      */
-    gate_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking::scheme<tile>& scheme,
+    gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking::scheme<tile>& scheme,
                       const std::string& name = {}) :
-            ClockedLayout(ar, scheme),
+            CoordinateLayout(ar),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
-        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+        replace_clocking_scheme(scheme);
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
 
         initialize_truth_table_cache();
         strg->data.layout_name = name;
@@ -210,7 +234,7 @@ class gate_level_layout : public ClockedLayout
             strg{std::move(s)},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
-        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
     }
     /**
      * Copy constructor from another layout's storage.
@@ -220,19 +244,20 @@ class gate_level_layout : public ClockedLayout
      */
     gate_level_layout(storage s, event_storage e) : strg{std::move(s)}, evnts{std::move(e)}
     {
-        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
     }
     /**
-     * Copy constructor from another `ClockedLayout`.
+     * Copy constructor from another `CoordinateLayout`.
      *
-     * @param lyt Clocked layout.
+     * @param lyt Coordinate layout.
      */
-    explicit gate_level_layout(const ClockedLayout& lyt) :
-            ClockedLayout(lyt),
+    explicit gate_level_layout(const CoordinateLayout& lyt) :
+            CoordinateLayout(lyt),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
-        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+        initialize_truth_table_cache();
     }
     /**
      * Clones the layout returning a deep copy.
@@ -241,9 +266,10 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] gate_level_layout clone() const noexcept
     {
-        gate_level_layout copy{ClockedLayout::clone()};
-        copy.strg  = std::make_shared<gate_level_layout_storage>(*strg);
-        copy.evnts = std::make_shared<mockturtle::network_events<base_type>>(*evnts);
+        gate_level_layout copy{*this};
+        static_cast<CoordinateLayout&>(copy) = CoordinateLayout::clone();
+        copy.strg                            = std::make_shared<gate_level_layout_storage>(*strg);
+        copy.evnts                           = std::make_shared<mockturtle::network_events<base_type>>(*evnts);
 
         return copy;
     }
@@ -819,14 +845,14 @@ class gate_level_layout : public ClockedLayout
                     strg->data.num_wires--;
 
                     // decrease crossing count
-                    if (ClockedLayout::is_crossing_layer(t) && !is_empty_tile(ClockedLayout::below(t)))
+                    if (CoordinateLayout::is_crossing_layer(t) && !is_empty_tile(CoordinateLayout::below(t)))
                     {
                         strg->data.num_crossings--;
                     }
 
-                    if (ClockedLayout::is_ground_layer(t) &&
-                        ClockedLayout::is_crossing_layer(ClockedLayout::above(t)) &&
-                        !is_empty_tile(ClockedLayout::above(t)))
+                    if (CoordinateLayout::is_ground_layer(t) &&
+                        CoordinateLayout::is_crossing_layer(CoordinateLayout::above(t)) &&
+                        !is_empty_tile(CoordinateLayout::above(t)))
                     {
                         strg->data.num_crossings--;
                     }
@@ -1130,12 +1156,11 @@ class gate_level_layout : public ClockedLayout
 
                 if constexpr (RespectClocking)
                 {
-                    return ClockedLayout::is_adjacent_elevation_of(nt, ct) &&
-                           ClockedLayout::is_incoming_clocked(nt, ct);
+                    return CoordinateLayout::is_adjacent_elevation_of(nt, ct) && this->is_incoming_clocked(nt, ct);
                 }
                 else
                 {
-                    return ClockedLayout::is_adjacent_elevation_of(nt, ct);
+                    return CoordinateLayout::is_adjacent_elevation_of(nt, ct);
                 }
             },
             [this](const auto& c) -> signal { return make_signal(get_node(c.index)); }, std::forward<Fn>(fn));
@@ -1154,7 +1179,7 @@ class gate_level_layout : public ClockedLayout
     [[nodiscard]] auto incoming_data_flow(const tile& t) const noexcept
     {
         std::vector<tile> data_flow{};
-        data_flow.reserve(ClockedLayout::get_clocking_scheme().max_in_degree);  // reserve memory
+        data_flow.reserve(get_clocking_scheme().max_in_degree);  // reserve memory
 
         auto fanin_collector = [&data_flow](const auto& fin) { data_flow.push_back(static_cast<tile>(fin)); };
 
@@ -1211,11 +1236,11 @@ class gate_level_layout : public ClockedLayout
 
             apply_if_parent(out_t);
 
-            if (const auto above_t = ClockedLayout::above(out_t); above_t != out_t)
+            if (const auto above_t = CoordinateLayout::above(out_t); above_t != out_t)
             {
                 apply_if_parent(above_t);
             }
-            if (const auto below_t = ClockedLayout::below(out_t); below_t != out_t)
+            if (const auto below_t = CoordinateLayout::below(out_t); below_t != out_t)
             {
                 apply_if_parent(below_t);
             }
@@ -1223,11 +1248,11 @@ class gate_level_layout : public ClockedLayout
 
         if constexpr (RespectClocking)
         {
-            ClockedLayout::foreach_outgoing_clocked_zone(nt, std::move(fanout_collector));
+            this->foreach_outgoing_clocked_zone(nt, std::move(fanout_collector));
         }
         else
         {
-            ClockedLayout::foreach_adjacent_coordinate(nt, std::move(fanout_collector));
+            CoordinateLayout::foreach_adjacent_coordinate(nt, std::move(fanout_collector));
         }
     }
     /**
@@ -1244,8 +1269,8 @@ class gate_level_layout : public ClockedLayout
     [[nodiscard]] auto outgoing_data_flow(const tile& t) const noexcept
     {
         std::vector<tile> data_flow{};
-        data_flow.reserve(RespectClocking ? ClockedLayout::get_clocking_scheme().max_out_degree :
-                                            ClockedLayout::max_fanin_size);  // reserve memory
+        data_flow.reserve(RespectClocking ? get_clocking_scheme().max_out_degree :
+                                            CoordinateLayout::max_fanin_size);  // reserve memory
 
         const auto fanout_collector = [this, &data_flow](const auto& fout) { data_flow.push_back(get_tile(fout)); };
 
@@ -1348,7 +1373,7 @@ class gate_level_layout : public ClockedLayout
         auto in_signal_checker = [this, &s, &incoming_signal](const auto& i)
         {
             if (const auto it = static_cast<tile>(i);
-                i == s || ClockedLayout::above(it) == s || ClockedLayout::below(it) == s)
+                i == s || CoordinateLayout::above(it) == s || CoordinateLayout::below(it) == s)
             {
                 incoming_signal = true;
                 return false;  // abort iteration
@@ -1371,7 +1396,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_northern_incoming_signal(const tile& t) const noexcept
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::north(t)));
+        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::north(t)));
     }
     /**
      * Checks whether the given tile has an incoming one in north-eastern direction.
@@ -1383,7 +1408,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_north_eastern_incoming_signal(const tile& t) const noexcept
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::north_east(t)));
+        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::north_east(t)));
     }
     /**
      * Checks whether the given tile has an incoming one in eastern direction.
@@ -1395,7 +1420,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_eastern_incoming_signal(const tile& t) const noexcept
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::east(t)));
+        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::east(t)));
     }
     /**
      * Checks whether the given tile has an incoming one in south-eastern direction.
@@ -1407,7 +1432,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_south_eastern_incoming_signal(const tile& t) const noexcept
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::south_east(t)));
+        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::south_east(t)));
     }
     /**
      * Checks whether the given tile has an incoming one in southern direction.
@@ -1419,7 +1444,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_southern_incoming_signal(const tile& t) const noexcept
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::south(t)));
+        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::south(t)));
     }
     /**
      * Checks whether the given tile has an incoming one in south-western direction.
@@ -1431,7 +1456,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_south_western_incoming_signal(const tile& t) const noexcept
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::south_west(t)));
+        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::south_west(t)));
     }
     /**
      * Checks whether the given tile has an incoming one in western direction.
@@ -1443,7 +1468,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_western_incoming_signal(const tile& t) const noexcept
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::west(t)));
+        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::west(t)));
     }
     /**
      * Checks whether the given tile has an incoming one in north-western direction.
@@ -1455,7 +1480,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_north_western_incoming_signal(const tile& t) const noexcept
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::north_west(t)));
+        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::north_west(t)));
     }
     /**
      * Checks whether the given tile has no incoming tiles.
@@ -1484,7 +1509,8 @@ class gate_level_layout : public ClockedLayout
         bool outgoing_signal    = false;
         auto out_signal_checker = [this, &s, &outgoing_signal](const auto& o)
         {
-            if (const auto ot = get_tile(o); ot == s || ClockedLayout::above(ot) == s || ClockedLayout::below(ot) == s)
+            if (const auto ot = get_tile(o);
+                ot == s || CoordinateLayout::above(ot) == s || CoordinateLayout::below(ot) == s)
             {
                 outgoing_signal = true;
                 return false;  // abort iteration
@@ -1507,7 +1533,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_northern_outgoing_signal(const tile& t) const noexcept
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::north(t)));
+        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::north(t)));
     }
     /**
      * Checks whether the given tile has an outgoing one in north-eastern direction.
@@ -1519,7 +1545,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_north_eastern_outgoing_signal(const tile& t) const noexcept
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::north_east(t)));
+        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::north_east(t)));
     }
     /**
      * Checks whether the given tile has an outgoing one in eastern direction.
@@ -1531,7 +1557,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_eastern_outgoing_signal(const tile& t) const noexcept
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::east(t)));
+        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::east(t)));
     }
     /**
      * Checks whether the given tile has an outgoing one in south-eastern direction.
@@ -1543,7 +1569,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_south_eastern_outgoing_signal(const tile& t) const noexcept
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::south_east(t)));
+        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::south_east(t)));
     }
     /**
      * Checks whether the given tile has an outgoing one in southern direction.
@@ -1555,7 +1581,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_southern_outgoing_signal(const tile& t) const noexcept
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::south(t)));
+        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::south(t)));
     }
     /**
      * Checks whether the given tile has an outgoing one in south-western direction.
@@ -1567,7 +1593,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_south_western_outgoing_signal(const tile& t) const noexcept
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::south_west(t)));
+        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::south_west(t)));
     }
     /**
      * Checks whether the given tile has an outgoing one in western direction.
@@ -1579,7 +1605,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_western_outgoing_signal(const tile& t) const noexcept
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::west(t)));
+        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::west(t)));
     }
     /**
      * Checks whether the given tile has an outgoing one in north-western direction.
@@ -1591,7 +1617,7 @@ class gate_level_layout : public ClockedLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_north_western_outgoing_signal(const tile& t) const noexcept
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(ClockedLayout::north_west(t)));
+        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::north_west(t)));
     }
     /**
      * Checks whether the given tile has no outgoing tiles.
@@ -1607,7 +1633,7 @@ class gate_level_layout : public ClockedLayout
     }
     /**
      * Checks whether the given tile `t` has its incoming and outgoing signals on opposite sides of the tile. For this
-     * purpose, the function relies on `foreach_adjacent_opposite_coordinates` of the underlying `ClockedLayout`.
+     * purpose, the function relies on `foreach_adjacent_opposite_coordinates` of the underlying `CoordinateLayout`.
      *
      * This function is very helpful for many gate libraries to check for (non-)straight gates, which might look
      * different.
@@ -1622,7 +1648,7 @@ class gate_level_layout : public ClockedLayout
     {
         auto opposite_signals = false;
 
-        ClockedLayout::foreach_adjacent_opposite_coordinates(
+        CoordinateLayout::foreach_adjacent_opposite_coordinates(
             t,
             [this, &t, &opposite_signals](const auto& sp)
             {
@@ -1717,6 +1743,430 @@ class gate_level_layout : public ClockedLayout
 
 #pragma endregion
 
+    /**
+     * Replaces the stored clocking scheme with the provided one.
+     *
+     * @param scheme New clocking scheme.
+     */
+    void replace_clocking_scheme(const clocking_scheme_t& scheme) noexcept
+    {
+        strg->data.clocking.replace_clocking_scheme(scheme);
+    }
+    /**
+     * Overrides a clock number in the stored scheme with the provided one.
+     *
+     * @param cz Clock zone to override.
+     * @param cn New clock number for `cz`.
+     */
+    void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
+    {
+        strg->data.clocking.assign_clock_number(cz, cn);
+    }
+    /**
+     * Returns the clock number for the given clock zone.
+     *
+     * @param cz Clock zone.
+     * @return Clock number of `cz`.
+     */
+    [[nodiscard]] clock_number_t get_clock_number(const clock_zone& cz) const noexcept
+    {
+        return strg->data.clocking.get_clock_number(cz);
+    }
+    /**
+     * Returns the number of clock phases in the layout. Each clock cycle is divided into n phases. In QCA, the number
+     * of phases is usually 4. In iNML it is 3. However, theoretically, any number >= 3 can be utilized.
+     *
+     * @return The number of different clock signals in the layout.
+     */
+    [[nodiscard]] clock_number_t num_clocks() const noexcept
+    {
+        return strg->data.clocking.num_clocks();
+    }
+    /**
+     * Returns whether the layout is clocked by a regular clocking scheme with no overwritten zones.
+     *
+     * @return `true` iff the layout is clocked by a regular scheme and no zones have been overwritten.
+     */
+    [[nodiscard]] bool is_regularly_clocked() const noexcept
+    {
+        return strg->data.clocking.is_regularly_clocked();
+    }
+    /**
+     * Compares the stored clocking scheme against the provided name. Predefined names are constants in
+     * `fiction::layouts::clocking`.
+     *
+     * @param name Clocking scheme name.
+     * @return `true` iff the layout is clocked by a clocking scheme of name `name`.
+     */
+    [[nodiscard]] bool is_clocking_scheme(const std::string_view& name) const noexcept
+    {
+        return strg->data.clocking.is_clocking_scheme(name);
+    }
+    /**
+     * Returns a copy of the stored clocking scheme object.
+     *
+     * @return A copy of the stored clocking scheme object.
+     */
+    [[nodiscard]] clocking_scheme_t get_clocking_scheme() const noexcept
+    {
+        return strg->data.clocking.get_clocking_scheme();
+    }
+    /**
+     * Evaluates whether clock zone `cz2` feeds information to clock zone `cz1`, i.e., whether `cz2` is clocked with a
+     * clock number that is lower by 1 modulo `num_clocks()`, or either zone is a synchronization element.
+     *
+     * @param cz1 Base clock zone.
+     * @param cz2 Clock zone to check whether its clock number is lower by 1.
+     * @return `true` iff `cz2` can feed information to `cz1`.
+     */
+    [[nodiscard]] bool is_incoming_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
+    {
+        return strg->data.clocking.is_incoming_clocked(cz1, cz2);
+    }
+    /**
+     * Evaluates whether clock zone `cz2` accepts information from clock zone `cz1`, i.e., whether `cz2` is clocked with
+     * a clock number that is higher by 1 modulo `num_clocks()`, or either zone is a synchronization element.
+     *
+     * @param cz1 Base clock zone.
+     * @param cz2 Clock zone to check whether its clock number is higher by 1.
+     * @return `true` iff `cz2` can accept information from `cz1`.
+     */
+    [[nodiscard]] bool is_outgoing_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
+    {
+        return strg->data.clocking.is_outgoing_clocked(cz1, cz2);
+    }
+
+    /**
+     * Assigns a synchronization element to the provided clock zone.
+     *
+     * @param cz Clock zone to turn into a synchronization element.
+     * @param se Number of full clock cycles to extend `cz`'s Hold phase by. If this value is 0, `cz` is turned back
+     * into a normal clock zone.
+     */
+    void assign_synchronization_element(const clock_zone& cz, const sync_elem_t se) noexcept
+    {
+        strg->data.clocking.assign_synchronization_element(cz, se);
+    }
+    /**
+     * Check whether the provided clock zone is a synchronization element.
+     *
+     * @param cz Clock zone to check.
+     * @return `true` iff `cz` is a synchronization element.
+     */
+    [[nodiscard]] bool is_synchronization_element(const clock_zone& cz) const noexcept
+    {
+        return strg->data.clocking.is_synchronization_element(cz);
+    }
+    /**
+     * Returns the Hold phase extension in clock cycles of clock zone `cz`.
+     *
+     * @param cz Clock zone to check.
+     * @return Synchronization element value, i.e., Hold phase extension, of clock zone `cz`.
+     */
+    [[nodiscard]] sync_elem_t get_synchronization_element(const clock_zone& cz) const noexcept
+    {
+        return strg->data.clocking.get_synchronization_element(cz);
+    }
+
+    /** @brief Counts zones with a nonzero Hold-phase extension. @return Synchronization element count. */
+    [[nodiscard]] uint32_t num_se() const noexcept
+    {
+        return strg->data.clocking.num_se();
+    }
+    /**
+     * Marks the given coordinate as obstructed.
+     *
+     * @param c clock_zone to obstruct.
+     */
+    void obstruct_coordinate(const clock_zone& c) noexcept
+    {
+        strg->data.obstructions.obstruct_coordinate(c);
+    }
+    /**
+     * Marks the connection from coordinate `src` to coordinate `tgt` as obstructed.
+     *
+     * @note clock_zones marked this way will not be crossed with wires by path finding algorithms.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     */
+    void obstruct_connection(const clock_zone& src, const clock_zone& tgt) noexcept
+    {
+        strg->data.obstructions.obstruct_connection(src, tgt);
+    }
+    /**
+     * Clears the obstruction status of the given coordinate `c` if the obstruction was manually marked via
+     * `obstruct_coordinate`.
+     *
+     * @param c clock_zone to clear.
+     */
+    void clear_obstructed_coordinate(const clock_zone& c) noexcept
+    {
+        strg->data.obstructions.clear_obstructed_coordinate(c);
+    }
+    /**
+     * Clears the obstruction status of the connection from coordinate `src` to coordinate `tgt` if the obstruction was
+     * manually marked via `obstruct_connection`.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     */
+    void clear_obstructed_connection(const clock_zone& src, const clock_zone& tgt) noexcept
+    {
+        strg->data.obstructions.clear_obstructed_connection(src, tgt);
+    }
+    /**
+     * Clears all obstructed coordinates that were manually marked via `obstruct_coordinate`.
+     */
+    void clear_obstructed_coordinates() noexcept
+    {
+        strg->data.obstructions.clear_obstructed_coordinates();
+    }
+    /**
+     * Clears all obstructed connections that were manually marked via `obstruct_connection`.
+     */
+    void clear_obstructed_connections() noexcept
+    {
+        strg->data.obstructions.clear_obstructed_connections();
+    }
+    /**
+     * Checks if the given coordinate is obstructed of some sort.
+     *
+     * @param c Coordinate to check.
+     * @return `true` iff `c` is obstructed.
+     */
+    [[nodiscard]] bool is_obstructed_coordinate(const clock_zone& c) const noexcept
+    {
+        return strg->data.obstructions.is_obstructed_coordinate(c) || !is_empty_tile(c);
+    }
+    /**
+     * Checks if the given coordinate-coordinate connection is obstructed of some sort.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     * @return `true` iff the connection from `src` to `tgt` is obstructed.
+     */
+    [[nodiscard]] bool is_obstructed_connection(const clock_zone& src, const clock_zone& tgt) const noexcept
+    {
+        return strg->data.obstructions.is_obstructed_connection(src, tgt) ||
+               is_incoming_signal(tgt, static_cast<signal>(src)) || is_outgoing_signal(src, static_cast<signal>(tgt));
+    }
+
+#pragma region Iteration
+
+    /**
+     * Returns a container with all clock zones that are incoming to the given one.
+     *
+     * @param cz Base clock zone.
+     * @return A container with all clock zones that are incoming to `cz`.
+     */
+    [[nodiscard]] auto incoming_clocked_zones(const clock_zone& cz) const noexcept
+    {
+        std::vector<clock_zone> incoming{};
+
+        foreach_incoming_clocked_zone(cz, [&incoming](const auto& ct) { incoming.push_back(ct); });
+
+        return incoming;
+    }
+    /**
+     * Applies a function to all incoming clock zones of a given one.
+     *
+     * @tparam Fn Functor type.
+     * @param cz Base clock zone.
+     * @param fn Functor to apply to each of `cz`'s incoming clock zones.
+     */
+    template <typename Fn>
+    void foreach_incoming_clocked_zone(const clock_zone& cz, Fn&& fn) const
+    {
+        CoordinateLayout::foreach_adjacent_coordinate(cz,
+                                                      [this, &cz, &fn](const auto& ct)
+                                                      {
+                                                          if (is_incoming_clocked(cz, ct))
+                                                          {
+                                                              std::invoke(std::forward<Fn>(fn), ct);
+                                                          }
+                                                      });
+    }
+    /**
+     * Returns a container with all clock zones that are outgoing from the given one.
+     *
+     * @param cz Base clock zone.
+     * @return A container with all clock zones that are outgoing from `cz`.
+     */
+    [[nodiscard]] auto outgoing_clocked_zones(const clock_zone& cz) const noexcept
+    {
+        std::vector<clock_zone> outgoing{};
+
+        foreach_outgoing_clocked_zone(cz, [&outgoing](const auto& ct) { outgoing.push_back(ct); });
+
+        return outgoing;
+    }
+    /**
+     * Applies a function to all outgoing clock zones of a given one.
+     *
+     * @tparam Fn Functor type.
+     * @param cz Base clock zone.
+     * @param fn Functor to apply to each of `cz`'s outgoing clock zones.
+     */
+    template <typename Fn>
+    void foreach_outgoing_clocked_zone(const clock_zone& cz, Fn&& fn) const
+    {
+        CoordinateLayout::foreach_adjacent_coordinate(cz,
+                                                      [this, &cz, &fn](const auto& ct)
+                                                      {
+                                                          if (is_outgoing_clocked(cz, ct))
+                                                          {
+                                                              std::invoke(std::forward<Fn>(fn), ct);
+                                                          }
+                                                      });
+    }
+
+#pragma endregion
+
+#pragma region Structural properties
+    /**
+     * Returns the number of incoming clock zones to the given one.
+     *
+     * @param cz Base clock zone.
+     * @return Number of `cz`'s incoming clock zones.
+     */
+    [[nodiscard]] degree_t in_degree(const clock_zone& cz) const noexcept
+    {
+        degree_t idg{0};
+        foreach_incoming_clocked_zone(cz, [&idg](const auto&) { ++idg; });
+
+        return idg;
+    }
+    /**
+     * Returns the number of outgoing clock zones from the given one.
+     *
+     * @param cz Base clock zone.
+     * @return Number of `cz`'s outgoing clock zones.
+     */
+    [[nodiscard]] degree_t out_degree(const clock_zone& cz) const noexcept
+    {
+        degree_t odg{0};
+        foreach_outgoing_clocked_zone(cz, [&odg](const auto&) { ++odg; });
+
+        return odg;
+    }
+    /**
+     * Returns the number of distinct incoming or outgoing neighboring clock zones.
+     *
+     * @param cz Base clock zone.
+     * @return Number of distinct clocked neighbors of `cz`.
+     */
+    [[nodiscard]] degree_t degree(const clock_zone& cz) const noexcept
+    {
+        degree_t count{0};
+        CoordinateLayout::foreach_adjacent_coordinate(cz,
+                                                      [this, &cz, &count](const auto& adjacent)
+                                                      {
+                                                          if (is_incoming_clocked(cz, adjacent) ||
+                                                              is_outgoing_clocked(cz, adjacent))
+                                                          {
+                                                              ++count;
+                                                          }
+                                                      });
+        return count;
+    }
+
+#pragma endregion
+#pragma region Iteration
+
+    /**
+     * @brief Returns the tiles in the coordinate range.
+     * @param start First tile.
+     * @param stop Exclusive end tile; a dead tile selects the layout end.
+     * @return Tile range.
+     */
+    [[nodiscard]] auto tiles(const tile& start = {}, const tile& stop = {}) const
+    {
+        return CoordinateLayout::coordinates(start, stop);
+    }
+
+    /**
+     * @brief Applies a function to each tile in the coordinate range.
+     * @tparam Fn Functor type.
+     * @param fn Functor applied to each tile.
+     * @param start First tile.
+     * @param stop Exclusive end tile; a dead tile selects the layout end.
+     */
+    template <typename Fn>
+    void foreach_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
+    {
+        CoordinateLayout::foreach_coordinate(std::forward<Fn>(fn), start, stop);
+    }
+
+    /**
+     * @brief Returns ground-layer tiles in the coordinate range.
+     * @param start First tile.
+     * @param stop Exclusive end tile; a dead tile selects the layout end.
+     * @return Tile range.
+     */
+    [[nodiscard]] auto ground_tiles(const tile& start = {}, const tile& stop = {}) const
+    {
+        return CoordinateLayout::ground_coordinates(start, stop);
+    }
+
+    /**
+     * @brief Applies a function to each ground-layer tile in the coordinate range.
+     * @tparam Fn Functor type.
+     * @param fn Functor applied to each tile.
+     * @param start First tile.
+     * @param stop Exclusive end tile; a dead tile selects the layout end.
+     */
+    template <typename Fn>
+    void foreach_ground_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
+    {
+        CoordinateLayout::foreach_ground_coordinate(std::forward<Fn>(fn), start, stop);
+    }
+
+    /**
+     * @brief Returns adjacent tiles.
+     * @param t Base tile.
+     * @return Adjacent tiles in the coordinate geometry.
+     */
+    std::vector<tile> adjacent_tiles(const tile& t) const noexcept
+    {
+        return CoordinateLayout::adjacent_coordinates(t);
+    }
+
+    /**
+     * @brief Applies a function to each adjacent tile.
+     * @tparam Fn Functor type.
+     * @param t Base tile.
+     * @param fn Functor applied to adjacent tiles.
+     */
+    template <typename Fn>
+    void foreach_adjacent_tile(const tile& t, Fn&& fn) const
+    {
+        CoordinateLayout::foreach_adjacent_coordinate(t, std::forward<Fn>(fn));
+    }
+
+    /**
+     * @brief Returns pairs of opposite adjacent tiles.
+     * @param t Base tile.
+     * @return Adjacent tiles in the coordinate geometry.
+     */
+    std::vector<std::pair<tile, tile>> adjacent_opposite_tiles(const tile& t) const noexcept
+    {
+        return CoordinateLayout::adjacent_opposite_coordinates(t);
+    }
+
+    /**
+     * @brief Applies a function to each pair of opposite adjacent tiles.
+     * @tparam Fn Functor type.
+     * @param t Base tile.
+     * @param fn Functor applied to adjacent tiles.
+     */
+    template <typename Fn>
+    void foreach_adjacent_opposite_tiles(const tile& t, Fn&& fn) const
+    {
+        CoordinateLayout::foreach_adjacent_opposite_coordinates(t, std::forward<Fn>(fn));
+    }
+
+#pragma endregion
   private:
     storage strg;
 
@@ -1775,13 +2225,14 @@ class gate_level_layout : public ClockedLayout
             {
                 strg->data.num_wires++;
 
-                if (ClockedLayout::is_crossing_layer(t) && !is_empty_tile(ClockedLayout::below(t)))
+                if (CoordinateLayout::is_crossing_layer(t) && !is_empty_tile(CoordinateLayout::below(t)))
                 {
                     strg->data.num_crossings++;
                 }
 
-                if (ClockedLayout::is_ground_layer(t) && ClockedLayout::is_crossing_layer(ClockedLayout::above(t)) &&
-                    !is_empty_tile(ClockedLayout::above(t)))
+                if (CoordinateLayout::is_ground_layer(t) &&
+                    CoordinateLayout::is_crossing_layer(CoordinateLayout::above(t)) &&
+                    !is_empty_tile(CoordinateLayout::above(t)))
                 {
                     strg->data.num_crossings++;
                 }

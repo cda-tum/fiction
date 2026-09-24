@@ -70,21 +70,15 @@ void layout_utils(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::num_adjacent_coordinates<py_cartesian_obstruction_layout>(m);
     detail::num_adjacent_coordinates<py_cartesian_gate_layout>(m);
-    detail::num_adjacent_coordinates<py_shifted_cartesian_obstruction_layout>(m);
     detail::num_adjacent_coordinates<py_shifted_cartesian_gate_layout>(m);
-    detail::num_adjacent_coordinates<py_hexagonal_obstruction_layout>(m);
     detail::num_adjacent_coordinates<py_hexagonal_gate_layout>(m);
 
     detail::normalize_layout_coordinates<py_qca_layout>(m);
     detail::normalize_layout_coordinates<py_inml_layout>(m);
 
-    detail::random_coordinate<py_cartesian_obstruction_layout>(m);
     detail::random_coordinate<py_cartesian_gate_layout>(m);
-    detail::random_coordinate<py_shifted_cartesian_obstruction_layout>(m);
     detail::random_coordinate<py_shifted_cartesian_gate_layout>(m);
-    detail::random_coordinate<py_hexagonal_obstruction_layout>(m);
     detail::random_coordinate<py_hexagonal_gate_layout>(m);
     detail::random_coordinate<py_qca_layout>(m);
     detail::random_coordinate<py_inml_layout>(m);

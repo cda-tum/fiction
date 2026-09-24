@@ -20,10 +20,8 @@
 #include "../utils/blueprints/network_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/physical_design/determine_clocking.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/traits.hpp>
@@ -45,7 +43,7 @@ void remove_clocking(Lyt& lyt) noexcept
 
 TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto lyt = orthogonal<gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>());
     remove_clocking(lyt);
@@ -73,7 +71,7 @@ TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
         return determine_clocking(lyt, params);
     };
 
-#if !defined(BILL_WINDOWS_PLATFORM)
+#ifndef BILL_WINDOWS_PLATFORM
     BENCHMARK("determine_clocking: maple")
     {
         params.sat_engine = bill::solvers::maple;

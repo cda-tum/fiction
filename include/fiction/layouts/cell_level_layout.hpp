@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Layout that assigns individual cells to the clock zones of a clocked layout.
+ * @brief Technology cell layout with clocking, synchronization, and obstructions.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)
@@ -19,6 +19,8 @@
 #pragma once
 
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/clocking_state.hpp"
+#include "fiction/layouts/obstructions.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
@@ -26,7 +28,9 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -36,15 +40,17 @@ namespace fiction::layouts
 {
 
 /**
- * A layout type to layer on top of a clocked layout that allows the assignment of individual cells to clock zones in
+ * A layout that owns clocking and permits assignment of individual cells to coordinates in
  * accordance with an FCN technology, e.g., QCA, iNML, or SiDB. This type, thereby, represents layouts on a
  * cell-accurate abstraction without a notion of logic functions. Gate libraries can be used to transform gate-level
  * layouts into cell-level ones. Furthermore, cell-level layouts can be written to files for various physical simulators
  * like QCADesigner, ToPoliNano & MagCAD, SiQAD, etc.
  *
- * In this layout, each coordinate, i.e., clock zone has the dimensions of a single cell. Clock numbers can, however, be
- * assigned in a way, that they form larger zones, e.g., of \f$5 \times 5\f$ cells. These dimensions can be specified
- * in the constructor. They affect the way, clock numbers are fetched from the underlying clocked layout.
+ * A clock zone, or tile, is a region of \f$x \times y\f$ cells, e.g., \f$5 \times 5\f$ cells, that one clock
+ * signal governs on every layer. The constructor and `set_tile_size_x`/`set_tile_size_y` specify these dimensions.
+ * Clock zones are addressed by tile position on layer 0: clock-number overrides, synchronization elements, and the
+ * clocked-zone iteration functions take clock zones, whereas `get_clock_number`, `is_synchronization_element`, and
+ * `get_synchronization_element` take cells and look up the zone that `get_clock_zone` returns.
  *
  * The de-facto standard of cell-level FCN design is to group multiple cells into tiles large enough to be addressable
  * by individual clocking electrodes buried in the layout substrate. Cell-based clocking, i.e., clock zones of size
@@ -58,26 +64,54 @@ namespace fiction::layouts
  * known from QCADesigner) that provides further attributes like its functionality as a crossing or via cell.
  *
  * @tparam Technology An FCN technology that provides notions of cell types.
- * @tparam ClockedLayout The clocked layout that is to be extended by cell positions.
+ * @tparam CoordinateLayout Coordinate geometry used for cell positions.
  */
-template <typename Technology, typename ClockedLayout>
-class cell_level_layout : public ClockedLayout
+template <typename Technology, typename CoordinateLayout>
+class cell_level_layout : public CoordinateLayout
 {
   public:
 #pragma region Types and constructors
 
-    using cell      = typename ClockedLayout::coordinate;
+    /** @brief Coordinate identifying a clock zone. */
+    using clock_zone = typename CoordinateLayout::coordinate;
+    /** @brief Clocking scheme for this layout. */
+    using clocking_scheme_t = clocking::scheme<clock_zone>;
+    /** @brief Clock phase index. */
+    using clock_number_t = typename clocking_scheme_t::clock_number;
+    /** @brief Number of clocked neighbors. */
+    using degree_t = uint8_t;
+    /** @brief Hold-phase extension in full clock cycles. */
+    using sync_elem_t = typename clocking::state<clock_zone>::sync_elem_t;
+
+    using cell      = typename CoordinateLayout::coordinate;
     using cell_type = typename Technology::cell_type;
     using cell_mode = typename Technology::cell_mode;
 
     template <typename Cell>
     struct cell_level_layout_storage
     {
+
+        /** @brief Scheme, clock overrides, and synchronization delays. */
+        clocking::state<clock_zone> clocking{clocking::open<cell_level_layout>()};
+        /** @brief Persistent manually assigned obstructions. */
+        layouts::obstructions<clock_zone> obstructions{};
+        /**
+         * @brief Creates cell storage with nonzero clock-zone dimensions.
+         * @param name Layout name.
+         * @param tile_x Clock-zone width in cells.
+         * @param tile_y Clock-zone height in cells.
+         * @throws std::invalid_argument if either dimension is zero.
+         */
         explicit cell_level_layout_storage(const std::string_view& name, uint16_t tile_x = 1u, uint16_t tile_y = 1u) :
                 layout_name{name},
                 tile_size_x{tile_x},
                 tile_size_y{tile_y}
-        {}
+        {
+            if (tile_x == 0 || tile_y == 0)
+            {
+                throw std::invalid_argument("Clock-zone dimensions must be positive");
+            }
+        }
 
         std::string layout_name;
 
@@ -100,36 +134,39 @@ class cell_level_layout : public ClockedLayout
 
     /**
      * Standard constructor. Creates a named cell-level layout of the given aspect ratio. To this end, it calls
-     * `ClockedLayout`'s standard constructor.
+     * `CoordinateLayout`'s standard constructor.
      *
      * @param ar Highest possible position in the layout.
      * @param name Layout name.
      * @param tile_size_x Clock zone size in x-dimension in cells.
      * @param tile_size_y Clock zone size in y-dimension in cells.
+     * @throws std::invalid_argument if either clock-zone dimension is zero.
      */
-    explicit cell_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}, const std::string& name = "",
+    explicit cell_level_layout(const typename CoordinateLayout::aspect_ratio& ar = {}, const std::string& name = "",
                                const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
-            ClockedLayout(ar),
+            CoordinateLayout(ar),
             strg{std::make_shared<cell_level_layout_storage<cell>>(name, tile_size_x, tile_size_y)}
     {
-        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
     }
     /**
      * Standard constructor. Creates a named cell-level layout of the given aspect ratio and clocks it via the given
-     * clocking scheme. To this end, it calls `ClockedLayout`'s standard constructor.
+     * clocking scheme. To this end, it calls `CoordinateLayout`'s standard constructor.
      *
      * @param ar Highest possible position in the layout.
      * @param scheme Clocking scheme to apply to this layout.
      * @param name Layout name.
      * @param tile_size_x Clock zone size in x-dimension in cells.
      * @param tile_size_y Clock zone size in y-dimension in cells.
+     * @throws std::invalid_argument if either clock-zone dimension is zero.
      */
-    cell_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking::scheme<cell>& scheme,
+    cell_level_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking::scheme<cell>& scheme,
                       const std::string& name = "", const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
-            ClockedLayout(ar, scheme),
+            CoordinateLayout(ar),
             strg{std::make_shared<cell_level_layout_storage<cell>>(name, tile_size_x, tile_size_y)}
     {
-        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+        replace_clocking_scheme(scheme);
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
     }
     /**
      * Copy constructor from another layout's storage.
@@ -138,15 +175,15 @@ class cell_level_layout : public ClockedLayout
      */
     explicit cell_level_layout(std::shared_ptr<cell_level_layout_storage<cell>> s) : strg{std::move(s)} {}
     /**
-     * Copy constructor from another `ClockedLayout`.
+     * Copy constructor from another `CoordinateLayout`.
      *
-     * @param lyt Clocked layout.
+     * @param lyt Coordinate layout.
      */
-    explicit cell_level_layout(const ClockedLayout& lyt) :
-            ClockedLayout(lyt),
-            strg{std::make_shared<cell_level_layout_storage<cell>>("", 1, 1)}
+    explicit cell_level_layout(const CoordinateLayout& lyt) :
+            CoordinateLayout(lyt),
+            strg{std::make_shared<cell_level_layout_storage<cell>>("")}
     {
-        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
     }
     /**
      * Clones the layout returning a deep copy.
@@ -155,8 +192,9 @@ class cell_level_layout : public ClockedLayout
      */
     [[nodiscard]] cell_level_layout clone() const noexcept
     {
-        cell_level_layout copy{ClockedLayout::clone()};
-        copy.strg = std::make_shared<cell_level_layout_storage<cell>>(*strg);
+        cell_level_layout copy{*this};
+        static_cast<CoordinateLayout&>(copy) = CoordinateLayout::clone();
+        copy.strg                            = std::make_shared<cell_level_layout_storage<cell>>(*strg);
 
         return copy;
     }
@@ -419,9 +457,14 @@ class cell_level_layout : public ClockedLayout
      * Sets the underlying clock zone x-dimension size.
      *
      * @param tile_size_x Tile size in the x-dimension in number of cells.
+     * @throws std::invalid_argument if `tile_size_x` is zero.
      */
-    void set_tile_size_x(const uint16_t tile_size_x) noexcept
+    void set_tile_size_x(const uint16_t tile_size_x)
     {
+        if (tile_size_x == 0)
+        {
+            throw std::invalid_argument("Clock-zone width must be positive");
+        }
         strg->tile_size_x = tile_size_x;
     }
     /**
@@ -438,37 +481,16 @@ class cell_level_layout : public ClockedLayout
      * Sets the underlying clock zone y-dimension size.
      *
      * @param tile_size_y Tile size in the y-dimension in number of cells.
+     * @throws std::invalid_argument if `tile_size_y` is zero.
      */
-    void set_tile_size_y(const uint16_t tile_size_y) noexcept
+    void set_tile_size_y(const uint16_t tile_size_y)
     {
+        if (tile_size_y == 0)
+        {
+            throw std::invalid_argument("Clock-zone height must be positive");
+        }
         strg->tile_size_y = tile_size_y;
     }
-
-#pragma endregion
-
-#pragma region Clocking
-
-    /**
-     * Returns the clock number of cell position `c` by accessing `ClockedLayout`'s underlying clocking scheme and
-     * respecting this layout's clock zone size.
-     *
-     * @param c Cell position whose clock number is desired.
-     * @return Clock number of cell position `c`.
-     */
-    [[nodiscard]] typename ClockedLayout::clock_number_t get_clock_number(const cell& c) const noexcept
-    {
-        return ClockedLayout::get_clock_number({c.x / strg->tile_size_x, c.y / strg->tile_size_y, c.z});
-    }
-    /**
-     * Function is deleted for cell-level layouts.
-     */
-    [[maybe_unused]] bool is_incoming_clocked(const typename ClockedLayout::clock_zone& cz1,
-                                              const typename ClockedLayout::clock_zone& cz2) const noexcept = delete;
-    /**
-     * Function is deleted for cell-level layouts.
-     */
-    [[maybe_unused]] bool is_outgoing_clocked(const typename ClockedLayout::clock_zone& cz1,
-                                              const typename ClockedLayout::clock_zone& cz2) const noexcept = delete;
 
 #pragma endregion
 
@@ -491,16 +513,16 @@ class cell_level_layout : public ClockedLayout
     }
     /**
      * Applies a function to all cell positions in the layout, even empty ones. This function, thereby, renames
-     * `ClockedLayout::foreach_coordinate`.
+     * `CoordinateLayout::foreach_coordinate`.
      *
      * @tparam Fn Functor type that has to comply with the restrictions imposed by the functor type in
-     * `ClockedLayout::foreach_coordinate`.
+     * `CoordinateLayout::foreach_coordinate`.
      * @param fn Functor to apply to each cell position.
      */
     template <typename Fn>
     void foreach_cell_position(Fn&& fn) const
     {
-        ClockedLayout::foreach_coordinate(std::forward<Fn>(fn));
+        CoordinateLayout::foreach_coordinate(std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all primary input cell positions in the layout.
@@ -531,6 +553,323 @@ class cell_level_layout : public ClockedLayout
         mockturtle::detail::foreach_element_transform<iterator_type, cell>(
             strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return static_cast<cell>(o); },
             std::forward<Fn>(fn));
+    }
+
+#pragma endregion
+
+    /**
+     * Replaces the stored clocking scheme with the provided one.
+     *
+     * @param scheme New clocking scheme.
+     */
+    void replace_clocking_scheme(const clocking_scheme_t& scheme) noexcept
+    {
+        strg->clocking.replace_clocking_scheme(scheme);
+    }
+    /**
+     * Overrides a clock number in the stored scheme with the provided one.
+     *
+     * @param cz Clock zone to override.
+     * @param cn New clock number for `cz`.
+     */
+    void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
+    {
+        strg->clocking.assign_clock_number(cz, cn);
+    }
+    /**
+     * Returns the clock zone that contains the given cell. A clock zone is a tile, i.e., a region of
+     * `get_tile_size_x()` by `get_tile_size_y()` cells that one clock signal governs on every layer. Clock zones are
+     * therefore addressed by their tile position on layer 0.
+     *
+     * @param c Cell position.
+     * @return Clock zone of the tile that contains `c`.
+     */
+    [[nodiscard]] clock_zone get_clock_zone(const cell& c) const noexcept
+    {
+        return {c.x / strg->tile_size_x, c.y / strg->tile_size_y};
+    }
+    /**
+     * Returns the clock number of the clock zone that contains the given cell.
+     *
+     * @param c Cell position.
+     * @return Clock number of `get_clock_zone(c)`.
+     */
+    [[nodiscard]] clock_number_t get_clock_number(const cell& c) const noexcept
+    {
+        return strg->clocking.get_clock_number(get_clock_zone(c));
+    }
+    /**
+     * Returns the number of clock phases in the layout. Each clock cycle is divided into n phases. In QCA, the number
+     * of phases is usually 4. In iNML it is 3. However, theoretically, any number >= 3 can be utilized.
+     *
+     * @return The number of different clock signals in the layout.
+     */
+    [[nodiscard]] clock_number_t num_clocks() const noexcept
+    {
+        return strg->clocking.num_clocks();
+    }
+    /**
+     * Returns whether the layout is clocked by a regular clocking scheme with no overwritten zones.
+     *
+     * @return `true` iff the layout is clocked by a regular scheme and no zones have been overwritten.
+     */
+    [[nodiscard]] bool is_regularly_clocked() const noexcept
+    {
+        return strg->clocking.is_regularly_clocked();
+    }
+    /**
+     * Compares the stored clocking scheme against the provided name. Predefined names are constants in
+     * `fiction::layouts::clocking`.
+     *
+     * @param name Clocking scheme name.
+     * @return `true` iff the layout is clocked by a clocking scheme of name `name`.
+     */
+    [[nodiscard]] bool is_clocking_scheme(const std::string_view& name) const noexcept
+    {
+        return strg->clocking.is_clocking_scheme(name);
+    }
+    /**
+     * Returns a copy of the stored clocking scheme object.
+     *
+     * @return A copy of the stored clocking scheme object.
+     */
+    [[nodiscard]] clocking_scheme_t get_clocking_scheme() const noexcept
+    {
+        return strg->clocking.get_clocking_scheme();
+    }
+
+    /**
+     * Assigns a synchronization element to the provided clock zone.
+     *
+     * @param cz Clock zone to turn into a synchronization element.
+     * @param se Number of full clock cycles to extend `cz`'s Hold phase by. If this value is 0, `cz` is turned back
+     * into a normal clock zone.
+     */
+    void assign_synchronization_element(const clock_zone& cz, const sync_elem_t se) noexcept
+    {
+        strg->clocking.assign_synchronization_element(cz, se);
+    }
+    /**
+     * Checks whether the clock zone that contains the given cell is a synchronization element.
+     *
+     * @param c Cell position.
+     * @return `true` iff `get_clock_zone(c)` is a synchronization element.
+     */
+    [[nodiscard]] bool is_synchronization_element(const cell& c) const noexcept
+    {
+        return strg->clocking.is_synchronization_element(get_clock_zone(c));
+    }
+    /**
+     * Returns the Hold phase extension in clock cycles of the clock zone that contains the given cell.
+     *
+     * @param c Cell position.
+     * @return Synchronization element value, i.e., Hold phase extension, of `get_clock_zone(c)`.
+     */
+    [[nodiscard]] sync_elem_t get_synchronization_element(const cell& c) const noexcept
+    {
+        return strg->clocking.get_synchronization_element(get_clock_zone(c));
+    }
+
+    /** @brief Counts zones with a nonzero Hold-phase extension. @return Synchronization element count. */
+    [[nodiscard]] uint32_t num_se() const noexcept
+    {
+        return strg->clocking.num_se();
+    }
+    /**
+     * Marks the given coordinate as obstructed.
+     *
+     * @param c clock_zone to obstruct.
+     */
+    void obstruct_coordinate(const clock_zone& c) noexcept
+    {
+        strg->obstructions.obstruct_coordinate(c);
+    }
+    /**
+     * Marks the connection from coordinate `src` to coordinate `tgt` as obstructed.
+     *
+     * @note clock_zones marked this way will not be crossed with wires by path finding algorithms.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     */
+    void obstruct_connection(const clock_zone& src, const clock_zone& tgt) noexcept
+    {
+        strg->obstructions.obstruct_connection(src, tgt);
+    }
+    /**
+     * Clears the obstruction status of the given coordinate `c` if the obstruction was manually marked via
+     * `obstruct_coordinate`.
+     *
+     * @param c clock_zone to clear.
+     */
+    void clear_obstructed_coordinate(const clock_zone& c) noexcept
+    {
+        strg->obstructions.clear_obstructed_coordinate(c);
+    }
+    /**
+     * Clears the obstruction status of the connection from coordinate `src` to coordinate `tgt` if the obstruction was
+     * manually marked via `obstruct_connection`.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     */
+    void clear_obstructed_connection(const clock_zone& src, const clock_zone& tgt) noexcept
+    {
+        strg->obstructions.clear_obstructed_connection(src, tgt);
+    }
+    /**
+     * Clears all obstructed coordinates that were manually marked via `obstruct_coordinate`.
+     */
+    void clear_obstructed_coordinates() noexcept
+    {
+        strg->obstructions.clear_obstructed_coordinates();
+    }
+    /**
+     * Clears all obstructed connections that were manually marked via `obstruct_connection`.
+     */
+    void clear_obstructed_connections() noexcept
+    {
+        strg->obstructions.clear_obstructed_connections();
+    }
+    /**
+     * Checks if the given coordinate is obstructed of some sort.
+     *
+     * @param c Coordinate to check.
+     * @return `true` iff `c` is obstructed.
+     */
+    [[nodiscard]] bool is_obstructed_coordinate(const clock_zone& c) const noexcept
+    {
+        return strg->obstructions.is_obstructed_coordinate(c) || !is_empty_cell(c);
+    }
+    /**
+     * Checks if the given coordinate-coordinate connection is obstructed of some sort.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     * @return `true` iff the connection from `src` to `tgt` is obstructed.
+     */
+    [[nodiscard]] bool is_obstructed_connection(const clock_zone& src, const clock_zone& tgt) const noexcept
+    {
+        return strg->obstructions.is_obstructed_connection(src, tgt);
+    }
+
+#pragma region Iteration
+
+    /**
+     * Returns a container with all clock zones that are incoming to the given one.
+     *
+     * @param cz Base clock zone.
+     * @return A container with all clock zones that are incoming to `cz`.
+     */
+    [[nodiscard]] auto incoming_clocked_zones(const clock_zone& cz) const noexcept
+    {
+        std::vector<clock_zone> incoming{};
+
+        foreach_incoming_clocked_zone(cz, [&incoming](const auto& ct) { incoming.push_back(ct); });
+
+        return incoming;
+    }
+    /**
+     * Applies a function to all incoming clock zones of a given one.
+     *
+     * @tparam Fn Functor type.
+     * @param cz Base clock zone.
+     * @param fn Functor to apply to each of `cz`'s incoming clock zones.
+     */
+    template <typename Fn>
+    void foreach_incoming_clocked_zone(const clock_zone& cz, Fn&& fn) const
+    {
+        CoordinateLayout::foreach_adjacent_coordinate(cz,
+                                                      [this, &cz, &fn](const auto& ct)
+                                                      {
+                                                          if (strg->clocking.is_incoming_clocked(cz, ct))
+                                                          {
+                                                              std::invoke(std::forward<Fn>(fn), ct);
+                                                          }
+                                                      });
+    }
+    /**
+     * Returns a container with all clock zones that are outgoing from the given one.
+     *
+     * @param cz Base clock zone.
+     * @return A container with all clock zones that are outgoing from `cz`.
+     */
+    [[nodiscard]] auto outgoing_clocked_zones(const clock_zone& cz) const noexcept
+    {
+        std::vector<clock_zone> outgoing{};
+
+        foreach_outgoing_clocked_zone(cz, [&outgoing](const auto& ct) { outgoing.push_back(ct); });
+
+        return outgoing;
+    }
+    /**
+     * Applies a function to all outgoing clock zones of a given one.
+     *
+     * @tparam Fn Functor type.
+     * @param cz Base clock zone.
+     * @param fn Functor to apply to each of `cz`'s outgoing clock zones.
+     */
+    template <typename Fn>
+    void foreach_outgoing_clocked_zone(const clock_zone& cz, Fn&& fn) const
+    {
+        CoordinateLayout::foreach_adjacent_coordinate(cz,
+                                                      [this, &cz, &fn](const auto& ct)
+                                                      {
+                                                          if (strg->clocking.is_outgoing_clocked(cz, ct))
+                                                          {
+                                                              std::invoke(std::forward<Fn>(fn), ct);
+                                                          }
+                                                      });
+    }
+
+#pragma endregion
+
+#pragma region Structural properties
+    /**
+     * Returns the number of incoming clock zones to the given one.
+     *
+     * @param cz Base clock zone.
+     * @return Number of `cz`'s incoming clock zones.
+     */
+    [[nodiscard]] degree_t in_degree(const clock_zone& cz) const noexcept
+    {
+        degree_t idg{0};
+        foreach_incoming_clocked_zone(cz, [&idg](const auto&) { ++idg; });
+
+        return idg;
+    }
+    /**
+     * Returns the number of outgoing clock zones from the given one.
+     *
+     * @param cz Base clock zone.
+     * @return Number of `cz`'s outgoing clock zones.
+     */
+    [[nodiscard]] degree_t out_degree(const clock_zone& cz) const noexcept
+    {
+        degree_t odg{0};
+        foreach_outgoing_clocked_zone(cz, [&odg](const auto&) { ++odg; });
+
+        return odg;
+    }
+    /**
+     * Returns the number of distinct incoming or outgoing neighboring clock zones.
+     *
+     * @param cz Base clock zone.
+     * @return Number of distinct clocked neighbors of `cz`.
+     */
+    [[nodiscard]] degree_t degree(const clock_zone& cz) const noexcept
+    {
+        degree_t count{0};
+        CoordinateLayout::foreach_adjacent_coordinate(cz,
+                                                      [this, &cz, &count](const auto& adjacent)
+                                                      {
+                                                          if (strg->clocking.is_incoming_clocked(cz, adjacent) ||
+                                                              strg->clocking.is_outgoing_clocked(cz, adjacent))
+                                                          {
+                                                              ++count;
+                                                          }
+                                                      });
+        return count;
     }
 
 #pragma endregion

@@ -17,6 +17,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/obstructions.hpp>
 #include <fiction/physical_design/path_finding/k_shortest_paths.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/traits.hpp>
@@ -47,10 +48,12 @@ void yen_k_shortest_paths_impl(nanobind::module_& m)
     m.def(
         "yen_k_shortest_paths",
         [](const Lyt& lyt, const fiction::coordinate<Lyt>& source, const fiction::coordinate<Lyt>& target,
-           const uint32_t k, const fiction::physical_design::path_finding::yen_k_shortest_paths_params& params)
+           const uint32_t k, const fiction::physical_design::path_finding::yen_k_shortest_paths_params& params,
+           const fiction::layouts::obstructions<fiction::coordinate<Lyt>>& obstructions)
         {
             const auto k_paths = fiction::physical_design::path_finding::yen_k_shortest_paths<
-                fiction::physical_design::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, k, params);
+                fiction::physical_design::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, k, params,
+                                                                            obstructions);
 
             std::vector<std::vector<fiction::coordinate<Lyt>>> paths{};
             paths.reserve(k_paths.size());
@@ -63,7 +66,8 @@ void yen_k_shortest_paths_impl(nanobind::module_& m)
             return paths;
         },
         py::arg("layout"), py::arg("source"), py::arg("target"), py::arg("k"),
-        py::arg("params") = fiction::physical_design::path_finding::yen_k_shortest_paths_params{},
+        py::arg("params")       = fiction::physical_design::path_finding::yen_k_shortest_paths_params{},
+        py::arg("obstructions") = fiction::layouts::obstructions<fiction::coordinate<Lyt>>{},
         DOC(fiction_physical_design_path_finding_yen_k_shortest_paths));
 }
 
@@ -83,17 +87,11 @@ void k_shortest_paths(nanobind::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::yen_k_shortest_paths_impl<py_cartesian_obstruction_layout>(m);
     detail::yen_k_shortest_paths_impl<py_cartesian_gate_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_cartesian_clocked_layout>(m);
     detail::yen_k_shortest_paths_impl<py_cartesian_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_shifted_cartesian_obstruction_layout>(m);
     detail::yen_k_shortest_paths_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_shifted_cartesian_clocked_layout>(m);
     detail::yen_k_shortest_paths_impl<py_shifted_cartesian_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_hexagonal_obstruction_layout>(m);
     detail::yen_k_shortest_paths_impl<py_hexagonal_gate_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_hexagonal_clocked_layout>(m);
     detail::yen_k_shortest_paths_impl<py_hexagonal_layout>(m);
 }
 

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/traits.hpp"
 
@@ -44,8 +45,10 @@ template <typename Path, typename Lyt>
 class enumerate_all_paths_impl
 {
   public:
-    enumerate_all_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const enumerate_all_paths_params& p) :
+    enumerate_all_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const enumerate_all_paths_params& p,
+                             const layouts::obstructions<coordinate<Lyt>>& extra) :
             layout{lyt},
+            search_obstructions{extra},
             objective{obj},
             params{p}
     {}
@@ -73,6 +76,8 @@ class enumerate_all_paths_impl
      * The layout whose paths are to be enumerated.
      */
     const Lyt& layout;
+    /** @brief Additional constraints owned by the caller. */
+    const layouts::obstructions<coordinate<Lyt>>& search_obstructions;
     /**
      * The source-target coordinate pair.
      */
@@ -120,12 +125,7 @@ class enumerate_all_paths_impl
     /**
      * Recursively enumerate all paths from `src` to `tgt` in the given layout. This function is called recursively
      * until the target coordinate is reached. Along each path, each coordinate can occur at maximum once. This function
-     * does not generate duplicate or looping paths. If the given layout implements the obstruction interface (see
-     * `obstruction_layout`), paths will not be routed via obstructed coordinates or connections. If the given layout is
-     * a gate-level layout and implements the obstruction interface (see `obstruction_layout`), paths may contain wire
-     * crossings if specified in the parameters. Wire crossings are only allowed over other wires and only if the
-     * crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
-     * cross only in a single point (orthogonal crossings + knock-knees/double wires).
+     * does not generate duplicate or looping paths. Obstructions and crossings follow `enumerate_all_paths`.
      *
      * @param src Source coordinate.
      * @param tgt Target coordinate.
@@ -144,60 +144,26 @@ class enumerate_all_paths_impl
         }
         else  // destination is not reached yet
         {
-            const auto explore_successor = [&, this](auto successor)  // make a copy
-                noexcept
+            const auto explore_successor = [&, this](const auto& adjacent) noexcept
             {
-                // return to ground layer to avoid getting stuck in crossing layer
-                successor = layout.below(successor);
-
-                // check if successor is obstructed
-                if constexpr (has_is_obstructed_coordinate_v<Lyt>)
+                const auto next = physical_design::detail::routing_successor(layout, src, adjacent, tgt,
+                                                                             params.crossings, search_obstructions);
+                if (!next.has_value())
                 {
-                    if (layout.is_obstructed_coordinate(successor) && successor != tgt)
-                    {
-                        // if crossings are enabled, check if it is possible to switch to the crossing layer
-                        if (params.crossings && is_crossable_wire(layout, src, successor))
-                        {
-                            // if the crossing layer is not obstructed
-                            if (const auto above_successor = layout.above(successor);
-                                above_successor != successor && above_successor != tgt &&
-                                !layout.is_obstructed_coordinate(above_successor))
-                            {
-                                // allow exploring the crossing layer
-                                successor = above_successor;
-                            }
-                            else
-                            {
-                                return;  // skip the obstructed coordinate and keep looping
-                            }
-                        }
-                        else
-                        {
-                            return;  // skip the obstructed coordinate and keep looping
-                        }
-                    }
-                }
-
-                // check if the connection to the successor is obstructed
-                if constexpr (has_is_obstructed_connection_v<Lyt>)
-                {
-                    if (layout.is_obstructed_connection(src, successor))
-                    {
-                        return;  // skip the obstructed connection and keep looping
-                    }
+                    return;  // skip the obstructed step and keep looping
                 }
 
                 // if the successor has not yet been visited
-                if (!is_visited(successor))
+                if (!is_visited(*next))
                 {
                     // recurse
-                    recursively_enumerate_all_paths(successor, tgt, p);
+                    recursively_enumerate_all_paths(*next, tgt, p);
                 }
 
                 return;  // keep looping
             };
 
-            if constexpr (is_clocked_layout_v<Lyt>)
+            if constexpr (is_gate_level_layout_v<Lyt> || is_cell_level_layout_v<Lyt>)
             {
                 // recurse for all outgoing clock zones
                 layout.foreach_outgoing_clocked_zone(src, explore_successor);
@@ -220,22 +186,25 @@ class enumerate_all_paths_impl
 /**
  * Enumerates all possible paths in a layout that start at a given source coordinate and lead to given target
  * coordinate. This function automatically detects whether the given layout implements a clocking interface (see
- * `clocked_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This algorithm
- * does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each path, each
- * coordinate can occur at maximum once.
+ * `gate_level_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
+ * algorithm does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each
+ * path, each coordinate can occur at maximum once.
  *
- * If the given layout implements the obstruction interface (see `obstruction_layout`), paths will not be routed via
- * obstructed coordinates or connections.
+ * Paths do not pass obstructed coordinates or connections, except that the target is never obstructed. A coordinate
+ * or connection is obstructed if the `obstructions` argument marks it or if the layout's `is_obstructed_coordinate`
+ * or `is_obstructed_connection` reports it. Gate-level layouts report their occupied tiles and existing signal
+ * connections, and cell-level layouts report their occupied cells. Paths in gate-level layouts therefore avoid all
+ * placed gates and wires.
  *
- * If the given layout is a gate-level layout and implements the obstruction interface (see `obstruction_layout`), paths
- * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
- * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
- * cross only in a single point (orthogonal crossings + knock-knees/double wires).
+ * If crossings are enabled in the parameters, paths in gate-level layouts may cross other wires on the crossing layer.
+ * Wire crossings are only allowed over other wires and only if the crossing layer is not obstructed. Furthermore, it
+ * is ensured that crossings do not run along another wire but cross only in a single point (orthogonal crossings +
+ * knock-knees/double wires).
  *
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = clocked_layout<cartesian_layout<>>;
+ * using clk_lyt = gate_level_layout<cartesian_layout<>>;
  * using path = layout_coordinate_path<cartesian_layout<>>;
  * clk_lyt layout = ...;
  * auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target});
@@ -246,15 +215,18 @@ class enumerate_all_paths_impl
  * @param layout The layout whose paths are to be enumerated.
  * @param objective Source-target coordinate pair.
  * @param params Parameters.
+ * @param obstructions Additional coordinate and connection constraints; the search does not modify them.
  * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
  */
 template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path> enumerate_all_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
-                                                        const enumerate_all_paths_params& params = {}) noexcept
+[[nodiscard]] path_collection<Path>
+enumerate_all_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
+                    const enumerate_all_paths_params&             params       = {},
+                    const layouts::obstructions<coordinate<Lyt>>& obstructions = {}) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
-    return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, params}.run();
+    return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, params, obstructions}.run();
 }
 
 }  // namespace fiction::physical_design::path_finding

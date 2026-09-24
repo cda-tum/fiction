@@ -16,21 +16,19 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/layouts/coordinates.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/synchronization_element_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <lorina/common.hpp>
 #include <lorina/genlib.hpp>
 #include <mockturtle/algorithms/mapper.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
@@ -38,6 +36,9 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/tech_library.hpp>
+
+#include <sstream>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -48,7 +49,7 @@ TEST_CASE("Simulation", "[mockturtle]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
@@ -95,8 +96,7 @@ TEST_CASE("Simulation", "[mockturtle]")
 
     SECTION("Synchronization elements")
     {
-        using se_layout = gate_level_layout<
-            synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>>;
+        using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
         REQUIRE(mockturtle::has_compute_v<se_layout, kitty::dynamic_truth_table>);
 
@@ -145,7 +145,7 @@ TEST_CASE("Technology mapping", "[mockturtle]")
 
         const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
         REQUIRE(read_genlib_result == lorina::return_code::success);
-        mockturtle::tech_library<3> gate_lib{gates};
+        const mockturtle::tech_library<3> gate_lib{gates};
 
         check_all(gate_lib);
     }
@@ -156,7 +156,7 @@ TEST_CASE("Technology mapping", "[mockturtle]")
 
         const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
         REQUIRE(read_genlib_result == lorina::return_code::success);
-        mockturtle::tech_library<2> gate_lib{gates};
+        const mockturtle::tech_library<2> gate_lib{gates};
 
         check_all(gate_lib);
     }
@@ -169,7 +169,7 @@ TEST_CASE("Technology mapping", "[mockturtle]")
 
         const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
         REQUIRE(read_genlib_result == lorina::return_code::success);
-        mockturtle::tech_library<3> gate_lib{gates};
+        const mockturtle::tech_library<3> gate_lib{gates};
 
         check_all(gate_lib);
     }

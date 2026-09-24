@@ -104,11 +104,8 @@ void color_routing(nanobind::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::color_routing_impl<py_cartesian_obstruction_layout>(m);
     detail::color_routing_impl<py_cartesian_gate_layout>(m);
-    detail::color_routing_impl<py_shifted_cartesian_obstruction_layout>(m);
     detail::color_routing_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::color_routing_impl<py_hexagonal_obstruction_layout>(m);
     detail::color_routing_impl<py_hexagonal_gate_layout>(m);
 }
 

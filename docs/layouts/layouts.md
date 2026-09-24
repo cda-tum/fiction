@@ -6,15 +6,13 @@
 bounding_box
 cartesian_layout
 cell_level_layout
-clocked_layout
 clocking_scheme
+clocking_state
 coordinates
 gate_level_layout
 hexagonal_layout
-obstruction_layout
+obstructions
 shifted_cartesian_layout
-synchronization_element_layout
-tile_based_layout
 io/io
 ```
 

@@ -613,21 +613,9 @@ static const char *mkd_doc_fiction_has_foreach_adjacent_coordinate = R"doc()doc"
 
 static const char *mkd_doc_fiction_has_foreach_adjacent_opposite_coordinates = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_foreach_adjacent_opposite_tiles = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_foreach_adjacent_tile = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_foreach_cell = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_foreach_coordinate = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_foreach_incoming_clocked_zone = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_foreach_outgoing_clocked_zone = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_foreach_real_pi = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_foreach_tile = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_get_functional_implementations = R"doc()doc";
 
@@ -645,23 +633,13 @@ static const char *mkd_doc_fiction_has_is_buf = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_dot = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_is_empty = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_is_empty_cell = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_is_empty_tile = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_is_fanout = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_gamble = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_is_gate_tile = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_is_ge = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_gt = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_is_incoming_clocked = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_inv = R"doc()doc";
 
@@ -675,23 +653,15 @@ static const char *mkd_doc_fiction_has_is_nand = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_nor = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_is_obstructed_connection = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_is_obstructed_coordinate = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_is_onehot = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_or_and = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_is_outgoing_clocked = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_po = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_real_pi = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_virtual_pi = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_is_wire_tile = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_xnor = R"doc()doc";
 
@@ -718,8 +688,6 @@ static const char *mkd_doc_fiction_has_south = R"doc()doc";
 static const char *mkd_doc_fiction_has_south_east = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_south_west = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_synchronization_elements = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_update_ranks = R"doc()doc";
 
@@ -1073,8 +1041,6 @@ static const char *mkd_doc_fiction_is_cartesian_layout = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_cell_level_layout = R"doc()doc";
 
-static const char *mkd_doc_fiction_is_clocked_layout = R"doc()doc";
-
 static const char *mkd_doc_fiction_is_coordinate_layout = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_gate_level_layout = R"doc()doc";
@@ -1083,11 +1049,7 @@ static const char *mkd_doc_fiction_is_hexagonal_layout = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_shifted_cartesian_layout = R"doc()doc";
 
-static const char *mkd_doc_fiction_is_tile_based_layout = R"doc()doc";
-
 static const char *mkd_doc_fiction_is_virtual_network_type = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_bounding_box_2d =
 R"doc(A 2D bounding box object that computes a minimum-sized box around all
@@ -1893,20 +1855,22 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout =
-R"doc(A layout type to layer on top of a clocked layout that allows the
-assignment of individual cells to clock zones in accordance with an
-FCN technology, e.g., QCA, iNML, or SiDB. This type, thereby,
-represents layouts on a cell-accurate abstraction without a notion of
-logic functions. Gate libraries can be used to transform gate-level
-layouts into cell-level ones. Furthermore, cell-level layouts can be
-written to files for various physical simulators like QCADesigner,
-ToPoliNano & MagCAD, SiQAD, etc.
+R"doc(A layout that owns clocking and permits assignment of individual cells
+to coordinates in accordance with an FCN technology, e.g., QCA, iNML,
+or SiDB. This type, thereby, represents layouts on a cell-accurate
+abstraction without a notion of logic functions. Gate libraries can be
+used to transform gate-level layouts into cell-level ones.
+Furthermore, cell-level layouts can be written to files for various
+physical simulators like QCADesigner, ToPoliNano & MagCAD, SiQAD, etc.
 
-In this layout, each coordinate, i.e., clock zone has the dimensions
-of a single cell. Clock numbers can, however, be assigned in a way,
-that they form larger zones, e.g., of :math:`5 \times 5` cells. These
-dimensions can be specified in the constructor. They affect the way,
-clock numbers are fetched from the underlying clocked layout.
+A clock zone, or tile, is a region of :math:`x \times y` cells, e.g.,
+:math:`5 \times 5` cells, that one clock signal governs on every
+layer. The constructor and `set_tile_size_x`/`set_tile_size_y` specify
+these dimensions. Clock zones are addressed by tile position on layer
+0: clock-number overrides, synchronization elements, and the clocked-
+zone iteration functions take clock zones, whereas `get_clock_number`,
+`is_synchronization_element`, and `get_synchronization_element` take
+cells and look up the zone that `get_clock_zone` returns.
 
 The de-facto standard of cell-level FCN design is to group multiple
 cells into tiles large enough to be addressable by individual clocking
@@ -1928,8 +1892,7 @@ via cell.
 
 Template Args:
     Technology: An FCN technology that provides notions of cell types.
-    ClockedLayout: The clocked layout that is to be extended by cell
-                   positions.)doc";
+    CoordinateLayout: Coordinate geometry used for cell positions.)doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_assign_cell_mode =
 R"doc(Assigns a cell mode `m` to a cell position `c` in the layout. If `m`
@@ -1964,9 +1927,28 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_cell_level_layout_assign_clock_number =
+R"doc(Overrides a clock number in the stored scheme with the provided one.
+
+Args:
+    cz: Clock zone to override.
+    cn: New clock number for `cz`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_assign_synchronization_element =
+R"doc(Assigns a synchronization element to the provided clock zone.
+
+Args:
+    cz: Clock zone to turn into a synchronization element.
+    se: Number of full clock cycles to extend `cz`'s Hold phase by. If
+        this value is 0, `cz` is turned back into a normal clock zone.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout =
 R"doc(Standard constructor. Creates a named cell-level layout of the given
-aspect ratio. To this end, it calls `ClockedLayout`'s standard
+aspect ratio. To this end, it calls `CoordinateLayout`'s standard
 constructor.
 
 Args:
@@ -1975,12 +1957,15 @@ Args:
     tile_size_x: Clock zone size in x-dimension in cells.
     tile_size_y: Clock zone size in y-dimension in cells.
 
+Raises:
+    std::invalid_argument: if either clock-zone dimension is zero.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_2 =
 R"doc(Standard constructor. Creates a named cell-level layout of the given
 aspect ratio and clocks it via the given clocking scheme. To this end,
-it calls `ClockedLayout`'s standard constructor.
+it calls `CoordinateLayout`'s standard constructor.
 
 Args:
     ar: Highest possible position in the layout.
@@ -1988,6 +1973,9 @@ Args:
     name: Layout name.
     tile_size_x: Clock zone size in x-dimension in cells.
     tile_size_y: Clock zone size in y-dimension in cells.
+
+Raises:
+    std::invalid_argument: if either clock-zone dimension is zero.
 
 )doc";
 
@@ -2000,16 +1988,27 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_4 =
-R"doc(Copy constructor from another `ClockedLayout`.
+R"doc(Copy constructor from another `CoordinateLayout`.
 
 Args:
-    lyt: Clocked layout.
+    lyt: Coordinate layout.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_cell_level_layout_storage = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_cell_level_layout_storage =
+R"doc(Creates cell storage with nonzero clock-zone dimensions.
+
+Args:
+    name: Layout name.
+    tile_x: Clock-zone width in cells.
+    tile_y: Clock-zone height in cells.
+
+Raises:
+    std::invalid_argument: if either dimension is zero.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_cell_mode_map = R"doc()doc";
 
@@ -2017,9 +2016,13 @@ static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_s
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_cell_type_map = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_clocking = R"doc(Scheme, clock overrides, and synchronization delays.)doc";
+
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_inputs = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_layout_name = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_obstructions = R"doc(Persistent manually assigned obstructions.)doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_outputs = R"doc()doc";
 
@@ -2027,11 +2030,55 @@ static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_s
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_cell_level_layout_storage_tile_size_y = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_cell_level_layout_clear_obstructed_connection =
+R"doc(Clears the obstruction status of the connection from coordinate `src`
+to coordinate `tgt` if the obstruction was manually marked via
+`obstruct_connection`.
+
+Args:
+    src: Source coordinate.
+    tgt: Target coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_clear_obstructed_connections =
+R"doc(Clears all obstructed connections that were manually marked via
+`obstruct_connection`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_clear_obstructed_coordinate =
+R"doc(Clears the obstruction status of the given coordinate `c` if the
+obstruction was manually marked via `obstruct_coordinate`.
+
+Args:
+    c: clock_zone to clear.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_clear_obstructed_coordinates =
+R"doc(Clears all obstructed coordinates that were manually marked via
+`obstruct_coordinate`.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_cell_level_layout_clone =
 R"doc(Clones the layout returning a deep copy.
 
 Returns:
     Deep copy of the layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_degree =
+R"doc(Returns the number of distinct incoming or outgoing neighboring clock
+zones.
+
+Args:
+    cz: Base clock zone.
+
+Returns:
+    Number of distinct clocked neighbors of `cz`.
 
 )doc";
 
@@ -2051,14 +2098,38 @@ Template Args:
 static const char *mkd_doc_fiction_layouts_cell_level_layout_foreach_cell_position =
 R"doc(Applies a function to all cell positions in the layout, even empty
 ones. This function, thereby, renames
-`ClockedLayout::foreach_coordinate`.
+`CoordinateLayout::foreach_coordinate`.
 
 Args:
     fn: Functor to apply to each cell position.
 
 Template Args:
     Fn: Functor type that has to comply with the restrictions imposed
-        by the functor type in `ClockedLayout::foreach_coordinate`.
+        by the functor type in `CoordinateLayout::foreach_coordinate`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_foreach_incoming_clocked_zone =
+R"doc(Applies a function to all incoming clock zones of a given one.
+
+Args:
+    cz: Base clock zone.
+    fn: Functor to apply to each of `cz`'s incoming clock zones.
+
+Template Args:
+    Fn: Functor type.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_foreach_outgoing_clocked_zone =
+R"doc(Applies a function to all outgoing clock zones of a given one.
+
+Args:
+    cz: Base clock zone.
+    fn: Functor to apply to each of `cz`'s outgoing clock zones.
+
+Template Args:
+    Fn: Functor type.
 
 )doc";
 
@@ -2133,15 +2204,36 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_get_clock_number =
-R"doc(Returns the clock number of cell position `c` by accessing
-`ClockedLayout`'s underlying clocking scheme and respecting this
-layout's clock zone size.
+R"doc(Returns the clock number of the clock zone that contains the given
+cell.
 
 Args:
-    c: Cell position whose clock number is desired.
+    c: Cell position.
 
 Returns:
-    Clock number of cell position `c`.
+    Clock number of `get_clock_zone(c)`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_get_clock_zone =
+R"doc(Returns the clock zone that contains the given cell. A clock zone is a
+tile, i.e., a region of `get_tile_size_x()` by `get_tile_size_y()`
+cells that one clock signal governs on every layer. Clock zones are
+therefore addressed by their tile position on layer 0.
+
+Args:
+    c: Cell position.
+
+Returns:
+    Clock zone of the tile that contains `c`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_get_clocking_scheme =
+R"doc(Returns a copy of the stored clocking scheme object.
+
+Returns:
+    A copy of the stored clocking scheme object.
 
 )doc";
 
@@ -2150,6 +2242,19 @@ R"doc(Returns the assigned layout name.
 
 Returns:
     The layout name.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_get_synchronization_element =
+R"doc(Returns the Hold phase extension in clock cycles of the clock zone
+that contains the given cell.
+
+Args:
+    c: Cell position.
+
+Returns:
+    Synchronization element value, i.e., Hold phase extension, of
+    `get_clock_zone(c)`.
 
 )doc";
 
@@ -2175,6 +2280,42 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_cell_level_layout_in_degree =
+R"doc(Returns the number of incoming clock zones to the given one.
+
+Args:
+    cz: Base clock zone.
+
+Returns:
+    Number of `cz`'s incoming clock zones.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_incoming_clocked_zones =
+R"doc(Returns a container with all clock zones that are incoming to the
+given one.
+
+Args:
+    cz: Base clock zone.
+
+Returns:
+    A container with all clock zones that are incoming to `cz`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_is_clocking_scheme =
+R"doc(Compares the stored clocking scheme against the provided name.
+Predefined names are constants in `fiction::layouts::clocking`.
+
+Args:
+    name: Clocking scheme name.
+
+Returns:
+    `true` iff the layout is clocked by a clocking scheme of name
+    `name`.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_cell_level_layout_is_empty =
 R"doc(Checks whether there are no cells assigned to the layout's
 coordinates.
@@ -2196,9 +2337,29 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_cell_level_layout_is_incoming_clocked = R"doc(Function is deleted for cell-level layouts.)doc";
+static const char *mkd_doc_fiction_layouts_cell_level_layout_is_obstructed_connection =
+R"doc(Checks if the given coordinate-coordinate connection is obstructed of
+some sort.
 
-static const char *mkd_doc_fiction_layouts_cell_level_layout_is_outgoing_clocked = R"doc(Function is deleted for cell-level layouts.)doc";
+Args:
+    src: Source coordinate.
+    tgt: Target coordinate.
+
+Returns:
+    `true` iff the connection from `src` to `tgt` is obstructed.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_is_obstructed_coordinate =
+R"doc(Checks if the given coordinate is obstructed of some sort.
+
+Args:
+    c: Coordinate to check.
+
+Returns:
+    `true` iff `c` is obstructed.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_is_pi =
 R"doc(Checks whether a given cell position is marked as primary input. This
@@ -2228,6 +2389,28 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_cell_level_layout_is_regularly_clocked =
+R"doc(Returns whether the layout is clocked by a regular clocking scheme
+with no overwritten zones.
+
+Returns:
+    `true` iff the layout is clocked by a regular scheme and no zones
+    have been overwritten.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_is_synchronization_element =
+R"doc(Checks whether the clock zone that contains the given cell is a
+synchronization element.
+
+Args:
+    c: Cell position.
+
+Returns:
+    `true` iff `get_clock_zone(c)` is a synchronization element.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_cell_level_layout_num_cells =
 R"doc(Returns the number of non-empty cell types that were assigned to the
 layout.
@@ -2248,6 +2431,16 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_cell_level_layout_num_clocks =
+R"doc(Returns the number of clock phases in the layout. Each clock cycle is
+divided into n phases. In QCA, the number of phases is usually 4. In
+iNML it is 3. However, theoretically, any number >= 3 can be utilized.
+
+Returns:
+    The number of different clock signals in the layout.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_cell_level_layout_num_pis =
 R"doc(Returns the number of primary input cells in the layout.
 
@@ -2261,6 +2454,65 @@ R"doc(Returns the number of primary output cells in the layout.
 
 Returns:
     Number of primary output cells.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_num_se =
+R"doc(Counts zones with a nonzero Hold-phase extension. @return
+Synchronization element count.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_obstruct_connection =
+R"doc(Marks the connection from coordinate `src` to coordinate `tgt` as
+obstructed.
+
+Args:
+    src: Source coordinate.
+    tgt: Target coordinate.
+
+Note:
+    clock_zones marked this way will not be crossed with wires by path
+    finding algorithms.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_obstruct_coordinate =
+R"doc(Marks the given coordinate as obstructed.
+
+Args:
+    c: clock_zone to obstruct.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_out_degree =
+R"doc(Returns the number of outgoing clock zones from the given one.
+
+Args:
+    cz: Base clock zone.
+
+Returns:
+    Number of `cz`'s outgoing clock zones.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_outgoing_clocked_zones =
+R"doc(Returns a container with all clock zones that are outgoing from the
+given one.
+
+Args:
+    cz: Base clock zone.
+
+Returns:
+    A container with all clock zones that are outgoing from `cz`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cell_level_layout_replace_clocking_scheme =
+R"doc(Replaces the stored clocking scheme with the provided one.
+
+Args:
+    scheme: New clocking scheme.
 
 )doc";
 
@@ -2278,6 +2530,9 @@ R"doc(Sets the underlying clock zone x-dimension size.
 Args:
     tile_size_x: Tile size in the x-dimension in number of cells.
 
+Raises:
+    std::invalid_argument: if `tile_size_x` is zero.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_set_tile_size_y =
@@ -2286,257 +2541,12 @@ R"doc(Sets the underlying clock zone y-dimension size.
 Args:
     tile_size_y: Tile size in the y-dimension in number of cells.
 
+Raises:
+    std::invalid_argument: if `tile_size_y` is zero.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_strg = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout =
-R"doc(A layout type to layer on top of a coordinate layout, e.g.,
-`cartesian_layout`, `hexagonal_layout`, or `tile_based_layout`. This
-type extends the layout by providing a notion of FCN clocking. To this
-end, it utilizes a clocking scheme that assigns each coordinate in the
-extended coordinate layout a clock number. These clock numbers can be
-manually overwritten if necessary.
-
-In the context of this layout type, coordinates are renamed as clock
-zones.
-
-Template Args:
-    CoordinateLayout: The coordinate layout type whose coordinates
-                      should be clocked.)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_assign_clock_number =
-R"doc(Overrides a clock number in the stored scheme with the provided one.
-
-Args:
-    cz: Clock zone to override.
-    cn: New clock number for `cz`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_clocked_layout =
-R"doc(Standard constructor. Creates a clocked layout of the given aspect
-ratio and clocks it via the irregular 'open' clocking scheme. This
-scheme is intended to be used if all clock zones are to be manually
-assigned.
-
-Args:
-    ar: Highest possible position in the layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_clocked_layout_2 =
-R"doc(Standard constructor. Creates a clocked layout of the given aspect
-ratio and clocks it via the given clocking scheme.
-
-Args:
-    ar: Highest possible position in the layout.
-    scheme: Clocking scheme to apply to this layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_clocked_layout_3 =
-R"doc(Copy constructor from another layout's storage.
-
-Args:
-    s: Storage of another clocked_layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_clocked_layout_4 =
-R"doc(Copy constructor from another `CoordinateLayout`.
-
-Args:
-    lyt: Coordinate layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_clocked_layout_storage = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_clocked_layout_storage_clocked_layout_storage = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_clocked_layout_storage_clocking = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_clone =
-R"doc(Clones the layout returning a deep copy.
-
-Returns:
-    Deep copy of the layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_degree =
-R"doc(Returns the number of incoming plus outgoing clock zones of the given
-one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    Number of `cz`'s incoming plus outgoing clock zones.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_foreach_incoming_clocked_zone =
-R"doc(Applies a function to all incoming clock zones of a given one.
-
-Args:
-    cz: Base clock zone.
-    fn: Functor to apply to each of `cz`'s incoming clock zones.
-
-Template Args:
-    Fn: Functor type.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_foreach_outgoing_clocked_zone =
-R"doc(Applies a function to all outgoing clock zones of a given one.
-
-Args:
-    cz: Base clock zone.
-    fn: Functor to apply to each of `cz`'s outgoing clock zones.
-
-Template Args:
-    Fn: Functor type.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_get_clock_number =
-R"doc(Returns the clock number for the given clock zone.
-
-Args:
-    cz: Clock zone.
-
-Returns:
-    Clock number of `cz`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_get_clocking_scheme =
-R"doc(Returns a copy of the stored clocking scheme object.
-
-Returns:
-    A copy of the stored clocking scheme object.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_in_degree =
-R"doc(Returns the number of incoming clock zones to the given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    Number of `cz`'s incoming clock zones.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_incoming_clocked_zones =
-R"doc(Returns a container with all clock zones that are incoming to the
-given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    A container with all clock zones that are incoming to `cz`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_is_clocking_scheme =
-R"doc(Compares the stored clocking scheme against the provided name. Names
-of pre-defined clocking schemes are given in the `clocking::name`
-namespace.
-
-Args:
-    name: Clocking scheme name.
-
-Returns:
-    `true` iff the layout is clocked by a clocking scheme of name
-    `name`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_is_incoming_clocked =
-R"doc(Evaluates whether clock zone `cz2` feeds information to clock zone
-`cz1`, i.e., whether `cz2` is clocked with a clock number that is
-lower by 1 modulo `num_clocks()`.
-
-Args:
-    cz1: Base clock zone.
-    cz2: Clock zone to check whether its clock number is lower by 1.
-
-Returns:
-    `true` iff `cz2` can feed information to `cz1`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_is_outgoing_clocked =
-R"doc(Evaluates whether clock zone `cz2` accepts information from clock zone
-`cz1`, i.e., whether `cz2` is clocked with a clock number that is
-higher by 1 modulo `num_clocks()`.
-
-Args:
-    cz1: Base clock zone.
-    cz2: Clock zone to check whether its clock number is higher by 1.
-
-Returns:
-    `true` iff `cz2` can accept information from `cz1`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_is_regularly_clocked =
-R"doc(Returns whether the layout is clocked by a regular clocking scheme
-with no overwritten zones.
-
-Returns:
-    `true` iff the layout is clocked by a regular scheme and no zones
-    have been overwritten.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_num_clocks =
-R"doc(Returns the number of clock phases in the layout. Each clock cycle is
-divided into n phases. In QCA, the number of phases is usually 4. In
-iNML it is 3. However, theoretically, any number >= 3 can be utilized.
-
-Returns:
-    The number of different clock signals in the layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_out_degree =
-R"doc(Returns the number of outgoing clock zones from the given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    Number of `cz`'s outgoing clock zones.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_outgoing_clocked_zones =
-R"doc(Returns a container with all clock zones that are outgoing from the
-given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    A container with all clock zones that are outgoing from `cz`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_replace_clocking_scheme =
-R"doc(Replaces the stored clocking scheme with the provided one.
-
-Args:
-    scheme: New clocking scheme.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocked_layout_strg = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_bancs =
 R"doc(Returns the BANCS clocking as defined in \"BANCS: Bidirectional
@@ -2696,8 +2706,8 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme =
 R"doc(Clocking scheme type that assigns a clock number to each element of
-the provided type `ClockZone`. Clocking scheme objects are utilized,
-e.g., in clocked_layout.
+the provided type `ClockZone`. Clocking scheme objects are owned by
+gate and cell layouts.
 
 Usually, a clocking scheme is defined by the means of a cutout that
 can be seamlessly extended in all directions to provide repeating
@@ -2797,6 +2807,178 @@ Returns:
     SRS clocking scheme.
 
 )doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state =
+R"doc(Clock numbers and synchronization delays, independent of layout
+geometry.
+
+Copies own independent schemes and synchronization maps.
+
+Template Args:
+    Coordinate: Coordinate identifying a clock zone.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_assign_clock_number =
+R"doc(Overrides a clock number in the stored scheme with the provided one.
+
+Args:
+    cz: Clock zone to override.
+    cn: New clock number for `cz`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_assign_synchronization_element =
+R"doc(Assigns a synchronization element to the provided clock zone.
+
+Args:
+    cz: Clock zone to turn into a synchronization element.
+    se: Number of full clock cycles to extend `cz`'s Hold phase by. If
+        this value is 0, `cz` is turned back into a normal clock zone.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_clocking =
+R"doc(Scheme and manually overridden clock numbers. `scheme` has `const`
+members and is not assignable, so the state holds it through a pointer
+to support `replace_clocking_scheme` and copy assignment.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_get_clock_number =
+R"doc(Returns the clock number for the given clock zone.
+
+Args:
+    cz: Clock zone.
+
+Returns:
+    Clock number of `cz`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_get_clocking_scheme =
+R"doc(Returns a copy of the stored clocking scheme object.
+
+Returns:
+    A copy of the stored clocking scheme object.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_get_synchronization_element =
+R"doc(Returns the Hold phase extension in clock cycles of clock zone `cz`.
+
+Args:
+    cz: Clock zone to check.
+
+Returns:
+    Synchronization element value, i.e., Hold phase extension, of
+    clock zone `cz`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_is_clocking_scheme =
+R"doc(Compares the stored clocking scheme against the provided name.
+Predefined names are constants in `fiction::layouts::clocking`.
+
+Args:
+    name: Clocking scheme name.
+
+Returns:
+    `true` iff the layout is clocked by a clocking scheme of name
+    `name`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_is_incoming_clocked =
+R"doc(Evaluates whether clock zone `cz2` feeds information to clock zone
+`cz1`, i.e., whether `cz2` is clocked with a clock number that is
+lower by 1 modulo `num_clocks()`, or either zone is a synchronization
+element.
+
+Args:
+    cz1: Base clock zone.
+    cz2: Clock zone to check whether its clock number is lower by 1.
+
+Returns:
+    `true` iff `cz2` can feed information to `cz1`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_is_outgoing_clocked =
+R"doc(Evaluates whether clock zone `cz2` accepts information from clock zone
+`cz1`, i.e., whether `cz2` is clocked with a clock number that is
+higher by 1 modulo `num_clocks()`, or either zone is a synchronization
+element.
+
+Args:
+    cz1: Base clock zone.
+    cz2: Clock zone to check whether its clock number is higher by 1.
+
+Returns:
+    `true` iff `cz2` can accept information from `cz1`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_is_regularly_clocked =
+R"doc(Returns whether the layout is clocked by a regular clocking scheme
+with no overwritten zones.
+
+Returns:
+    `true` iff the layout is clocked by a regular scheme and no zones
+    have been overwritten.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_is_synchronization_element =
+R"doc(Check whether the provided clock zone is a synchronization element.
+
+Args:
+    cz: Clock zone to check.
+
+Returns:
+    `true` iff `cz` is a synchronization element.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_num_clocks =
+R"doc(Returns the number of clock phases in the layout. Each clock cycle is
+divided into n phases. In QCA, the number of phases is usually 4. In
+iNML it is 3. However, theoretically, any number >= 3 can be utilized.
+
+Returns:
+    The number of different clock signals in the layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_num_se =
+R"doc(Counts zones with a nonzero Hold-phase extension. @return
+Synchronization element count.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_operator_assign =
+R"doc(Copies independent state. @param other Source state. @return This
+state.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_operator_assign_2 = R"doc(Moves clocking state. @param other Source state. @return This state.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_replace_clocking_scheme =
+R"doc(Replaces the stored clocking scheme with the provided one.
+
+Args:
+    scheme: New clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_state = R"doc(Creates state with the given scheme. @param s Initial scheme.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_state_2 =
+R"doc(Copies clocking and synchronization independently. @param other Source
+state.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_state_3 = R"doc(Moves clocking state. @param other Source state.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_synchronization = R"doc(Nonzero synchronization delays indexed by coordinate.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_twoddwave =
 R"doc(Returns the 2DDWave clocking as defined in \"Clocking and Cell
@@ -3430,19 +3612,18 @@ _____
 ```)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout =
-R"doc(A layout type to layer on top of a clocked layout that allows the
-assignment of gates to clock zones (aka tiles in this context). This
-class represents a gate-level FCN layout and, thus, adds a notion of
-Boolean logic. The gate_level_layout class fulfills the requirements
-of a `mockturtle` logic network so that it can be used in many of
-`mockturtle`'s algorithms. Since a layout has to assign fixed
-positions to its gates (logic nodes), most generative member functions
-like `create_pi`, `create_po`, `create_and`, etc. require additional
-coordinate parameters. Consequently, `mockturtle`'s algorithms cannot
-be used to generate gate_level_layout networks. To make the class
-compliant with the API anyways, these member functions have their
-parameters defaulted but they are, in fact required to create
-meaningful layouts.
+R"doc(A gate-level FCN layout owns gates, clocking, synchronization delays,
+and persistent obstructions. Clock zones are tiles in the coordinate
+geometry supplied by `CoordinateLayout`. The gate_level_layout class
+fulfills the requirements of a `mockturtle` logic network so that it
+can be used in many of `mockturtle`'s algorithms. Since a layout has
+to assign fixed positions to its gates (logic nodes), most generative
+member functions like `create_pi`, `create_po`, `create_and`, etc.
+require additional coordinate parameters. Consequently, `mockturtle`'s
+algorithms cannot be used to generate gate_level_layout networks. To
+make the class compliant with the API anyways, these member functions
+have their parameters defaulted but they are, in fact required to
+create meaningful layouts.
 
 The following notion is utilized in this implementation:
 - a node `n` is an index representing the `n`th created gate. All
@@ -3494,10 +3675,82 @@ their behavior might differ. Information on their functionality can be
 found in `mockturtle`'s docs.
 
 Template Args:
-    ClockedLayout: The clocked layout that is to be extended by gate
-                   functions.)doc";
+    CoordinateLayout: Coordinate geometry used for gate placement.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_adjacent_opposite_tiles =
+R"doc(Returns pairs of opposite adjacent tiles.
+
+Args:
+    t: Base tile.
+
+Returns:
+    Adjacent tiles in the coordinate geometry.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_adjacent_tiles =
+R"doc(Returns adjacent tiles.
+
+Args:
+    t: Base tile.
+
+Returns:
+    Adjacent tiles in the coordinate geometry.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_assign_clock_number =
+R"doc(Overrides a clock number in the stored scheme with the provided one.
+
+Args:
+    cz: Clock zone to override.
+    cn: New clock number for `cz`.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_assign_node = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_assign_synchronization_element =
+R"doc(Assigns a synchronization element to the provided clock zone.
+
+Args:
+    cz: Clock zone to turn into a synchronization element.
+    se: Number of full clock cycles to extend `cz`'s Hold phase by. If
+        this value is 0, `cz` is turned back into a normal clock zone.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_obstructed_connection =
+R"doc(Clears the obstruction status of the connection from coordinate `src`
+to coordinate `tgt` if the obstruction was manually marked via
+`obstruct_connection`.
+
+Args:
+    src: Source coordinate.
+    tgt: Target coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_obstructed_connections =
+R"doc(Clears all obstructed connections that were manually marked via
+`obstruct_connection`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_obstructed_coordinate =
+R"doc(Clears the obstruction status of the given coordinate `c` if the
+obstruction was manually marked via `obstruct_coordinate`.
+
+Args:
+    c: clock_zone to clear.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_obstructed_coordinates =
+R"doc(Clears all obstructed coordinates that were manually marked via
+`obstruct_coordinate`.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_tile =
 R"doc(Removes all assigned nodes from the given tile and marks them as dead.
@@ -3600,6 +3853,18 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_create_xor = R"doc(
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_decr_value = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_degree =
+R"doc(Returns the number of distinct incoming or outgoing neighboring clock
+zones.
+
+Args:
+    cz: Base clock zone.
+
+Returns:
+    Number of distinct clocked neighbors of `cz`.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_events = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_evnts = R"doc()doc";
@@ -3633,6 +3898,30 @@ Template Args:
 
 Returns:
     Number of fanouts to `n`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_adjacent_opposite_tiles =
+R"doc(Applies a function to each pair of opposite adjacent tiles.
+
+Args:
+    t: Base tile.
+    fn: Functor applied to adjacent tiles.
+
+Template Args:
+    Fn: Functor type.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_adjacent_tile =
+R"doc(Applies a function to each adjacent tile.
+
+Args:
+    t: Base tile.
+    fn: Functor applied to adjacent tiles.
+
+Template Args:
+    Fn: Functor type.
 
 )doc";
 
@@ -3697,6 +3986,31 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_ground_tile =
+R"doc(Applies a function to each ground-layer tile in the coordinate range.
+
+Args:
+    fn: Functor applied to each tile.
+    start: First tile.
+    stop: Exclusive end tile; a dead tile selects the layout end.
+
+Template Args:
+    Fn: Functor type.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_incoming_clocked_zone =
+R"doc(Applies a function to all incoming clock zones of a given one.
+
+Args:
+    cz: Base clock zone.
+    fn: Functor to apply to each of `cz`'s incoming clock zones.
+
+Template Args:
+    Fn: Functor type.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_node =
 R"doc(Applies a function to all nodes (excluding dead ones) in the layout.
 
@@ -3706,6 +4020,18 @@ Args:
 Template Args:
     Fn: Functor type that has to comply with the restrictions imposed
         by `mockturtle::foreach_element_if`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_outgoing_clocked_zone =
+R"doc(Applies a function to all outgoing clock zones of a given one.
+
+Args:
+    cz: Base clock zone.
+    fn: Functor to apply to each of `cz`'s outgoing clock zones.
+
+Template Args:
+    Fn: Functor type.
 
 )doc";
 
@@ -3738,6 +4064,19 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_tile =
+R"doc(Applies a function to each tile in the coordinate range.
+
+Args:
+    fn: Functor applied to each tile.
+    start: First tile.
+    stop: Exclusive end tile; a dead tile selects the layout end.
+
+Template Args:
+    Fn: Functor type.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_wire =
 R"doc(Applies a function to all wires (excluding dead ones) in the layout.
 Uses `is_wire` to check whether a node is a wire.
@@ -3753,7 +4092,7 @@ Template Args:
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout =
 R"doc(Standard constructor. Creates a named gate-level layout of the given
-aspect ratio. To this end, it calls `ClockedLayout`'s standard
+aspect ratio. To this end, it calls `CoordinateLayout`'s standard
 constructor.
 
 Args:
@@ -3765,7 +4104,7 @@ Args:
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_2 =
 R"doc(Standard constructor. Creates a gate-level layout of the given aspect
 ratio and clocks it via the given clocking scheme. To this end, it
-calls `ClockedLayout`'s standard constructor.
+calls `CoordinateLayout`'s standard constructor.
 
 Args:
     ar: Highest possible position in the layout.
@@ -3792,14 +4131,16 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_5 =
-R"doc(Copy constructor from another `ClockedLayout`.
+R"doc(Copy constructor from another `CoordinateLayout`.
 
 Args:
-    lyt: Clocked layout.
+    lyt: Coordinate layout.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_clocking = R"doc(Scheme, clock overrides, and synchronization delays.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_const0 = R"doc()doc";
 
@@ -3819,6 +4160,8 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_s
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_num_wires = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_obstructions = R"doc(Persistent manually assigned obstructions.)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_tile_node_map = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_trav_id = R"doc()doc";
@@ -3832,6 +4175,25 @@ indicates dead nodes) `data[0].h2`: Application-specific value
 Visited flags)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_node_operator_eq = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_get_clock_number =
+R"doc(Returns the clock number for the given clock zone.
+
+Args:
+    cz: Clock zone.
+
+Returns:
+    Clock number of `cz`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_get_clocking_scheme =
+R"doc(Returns a copy of the stored clocking scheme object.
+
+Returns:
+    A copy of the stored clocking scheme object.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_constant = R"doc()doc";
 
@@ -3870,6 +4232,18 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_output_name = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_get_synchronization_element =
+R"doc(Returns the Hold phase extension in clock cycles of clock zone `cz`.
+
+Args:
+    cz: Clock zone to check.
+
+Returns:
+    Synchronization element value, i.e., Hold phase extension, of
+    clock zone `cz`.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_tile =
 R"doc(The inverse function of `get_node`. Fetches the tile that the provided
 node is placed on. Returns a default dead tile if the node is not
@@ -3881,6 +4255,18 @@ Args:
 Returns:
     Tile at which `n` is placed or a default dead tile if `n` is not
     placed.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_ground_tiles =
+R"doc(Returns ground-layer tiles in the coordinate range.
+
+Args:
+    start: First tile.
+    stop: Exclusive end tile; a dead tile selects the layout end.
+
+Returns:
+    Tile range.
 
 )doc";
 
@@ -4052,7 +4438,7 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_has_opposite_incomi
 R"doc(Checks whether the given tile `t` has its incoming and outgoing
 signals on opposite sides of the tile. For this purpose, the function
 relies on `foreach_adjacent_opposite_coordinates` of the underlying
-`ClockedLayout`.
+`CoordinateLayout`.
 
 This function is very helpful for many gate libraries to check for
 (non-)straight gates, which might look different.
@@ -4201,6 +4587,29 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_in_degree =
+R"doc(Returns the number of incoming clock zones to the given one.
+
+Args:
+    cz: Base clock zone.
+
+Returns:
+    Number of `cz`'s incoming clock zones.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_incoming_clocked_zones =
+R"doc(Returns a container with all clock zones that are incoming to the
+given one.
+
+Args:
+    cz: Base clock zone.
+
+Returns:
+    A container with all clock zones that are incoming to `cz`.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_incoming_data_flow =
 R"doc(Returns a container that contains all tiles that feed information to
 the given one. Thereby, only incoming clocked zones (+/- one layer to
@@ -4260,6 +4669,19 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_ci = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_clocking_scheme =
+R"doc(Compares the stored clocking scheme against the provided name.
+Predefined names are constants in `fiction::layouts::clocking`.
+
+Args:
+    name: Clocking scheme name.
+
+Returns:
+    `true` iff the layout is clocked by a clocking scheme of name
+    `name`.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_co = R"doc()doc";
 
@@ -4370,6 +4792,21 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_is_ge = R"doc()doc"
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_gt = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_incoming_clocked =
+R"doc(Evaluates whether clock zone `cz2` feeds information to clock zone
+`cz1`, i.e., whether `cz2` is clocked with a clock number that is
+lower by 1 modulo `num_clocks()`, or either zone is a synchronization
+element.
+
+Args:
+    cz1: Base clock zone.
+    cz2: Clock zone to check whether its clock number is lower by 1.
+
+Returns:
+    `true` iff `cz2` can feed information to `cz1`.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_incoming_signal =
 R"doc(Checks whether signal `s` is incoming to tile `t`. That is, whether
 tile `t` hosts a node that has a fanin assigned to the tile that
@@ -4409,7 +4846,46 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_is_nand = R"doc()do
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_nor = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_obstructed_connection =
+R"doc(Checks if the given coordinate-coordinate connection is obstructed of
+some sort.
+
+Args:
+    src: Source coordinate.
+    tgt: Target coordinate.
+
+Returns:
+    `true` iff the connection from `src` to `tgt` is obstructed.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_obstructed_coordinate =
+R"doc(Checks if the given coordinate is obstructed of some sort.
+
+Args:
+    c: Coordinate to check.
+
+Returns:
+    `true` iff `c` is obstructed.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_or = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_outgoing_clocked =
+R"doc(Evaluates whether clock zone `cz2` accepts information from clock zone
+`cz1`, i.e., whether `cz2` is clocked with a clock number that is
+higher by 1 modulo `num_clocks()`, or either zone is a synchronization
+element.
+
+Args:
+    cz1: Base clock zone.
+    cz2: Clock zone to check whether its clock number is higher by 1.
+
+Returns:
+    `true` iff `cz2` can accept information from `cz1`.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_outgoing_signal =
 R"doc(Checks whether signal `s` is outgoing from tile `t`. That is, whether
@@ -4473,6 +4949,27 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_regularly_clocked =
+R"doc(Returns whether the layout is clocked by a regular clocking scheme
+with no overwritten zones.
+
+Returns:
+    `true` iff the layout is clocked by a regular scheme and no zones
+    have been overwritten.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_synchronization_element =
+R"doc(Check whether the provided clock zone is a synchronization element.
+
+Args:
+    cz: Clock zone to check.
+
+Returns:
+    `true` iff `cz` is a synchronization element.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_wire = R"doc(Equivalent to `is_buf`.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_wire_tile =
@@ -4525,6 +5022,16 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_node_to_index = R"d
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_cis = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_num_clocks =
+R"doc(Returns the number of clock phases in the layout. Each clock cycle is
+divided into n phases. In QCA, the number of phases is usually 4. In
+iNML it is 3. However, theoretically, any number >= 3 can be utilized.
+
+Returns:
+    The number of different clock signals in the layout.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_cos = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_crossings =
@@ -4553,12 +5060,63 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_num_pos = R"doc()do
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_registers = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_num_se =
+R"doc(Counts zones with a nonzero Hold-phase extension. @return
+Synchronization element count.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_wires =
 R"doc(Returns the number of placed nodes in the layout that compute the
 identity function including PIs and POs.
 
 Returns:
     Number of wires in the layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_obstruct_connection =
+R"doc(Marks the connection from coordinate `src` to coordinate `tgt` as
+obstructed.
+
+Args:
+    src: Source coordinate.
+    tgt: Target coordinate.
+
+Note:
+    clock_zones marked this way will not be crossed with wires by path
+    finding algorithms.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_obstruct_coordinate =
+R"doc(Marks the given coordinate as obstructed.
+
+Args:
+    c: clock_zone to obstruct.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_out_degree =
+R"doc(Returns the number of outgoing clock zones from the given one.
+
+Args:
+    cz: Base clock zone.
+
+Returns:
+    Number of `cz`'s outgoing clock zones.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_outgoing_clocked_zones =
+R"doc(Returns a container with all clock zones that are outgoing from the
+given one.
+
+Args:
+    cz: Base clock zone.
+
+Returns:
+    A container with all clock zones that are outgoing from `cz`.
 
 )doc";
 
@@ -4585,6 +5143,14 @@ Returns:
 static const char *mkd_doc_fiction_layouts_gate_level_layout_pi_at = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_po_at = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_replace_clocking_scheme =
+R"doc(Replaces the stored clocking scheme with the provided one.
+
+Args:
+    scheme: New clocking scheme.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_revive_node = R"doc()doc";
 
@@ -4613,6 +5179,18 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_strg = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_tiles =
+R"doc(Returns the tiles in the coordinate range.
+
+Args:
+    start: First tile.
+    stop: Exclusive end tile; a dead tile selects the layout end.
+
+Returns:
+    Tile range.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_trav_id = R"doc()doc";
 
@@ -5875,21 +6453,97 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_obstruction_layout =
-R"doc(A layout type to layer on top of any coordinate layout. It implements
-a unified obstruction interface that determines whether a coordinate
-is blocked by something. That could either be due to prior placement
-of cells, gates, and wires or because of fabrication defects.
+static const char *mkd_doc_fiction_layouts_obstructions =
+R"doc(Explicit obstructions stored by layouts or supplied to a routing
+search.
 
-Currently, this layout type supports obstruction rules for
-gate_level_layout and cell_level_layout.
+Copies are independent. This object contains no layout or occupancy
+information.
 
 Template Args:
-    Lyt: Any coordinate layout type that is to be extended by an
-         obstruction interface.
-    has_obstruction_interface: Automatically determines whether an
-                               obstruction interface is already
-                               present.)doc";
+    Coordinate: Coordinate identifying a position.)doc";
+
+static const char *mkd_doc_fiction_layouts_obstructions_clear_obstructed_connection =
+R"doc(Clears the obstruction status of the connection from coordinate `src`
+to coordinate `tgt` if the obstruction was manually marked via
+`obstruct_connection`.
+
+Args:
+    src: Source coordinate.
+    tgt: Target coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_obstructions_clear_obstructed_connections =
+R"doc(Clears all obstructed connections that were manually marked via
+`obstruct_connection`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_obstructions_clear_obstructed_coordinate =
+R"doc(Clears the obstruction status of the given coordinate `c` if the
+obstruction was manually marked via `obstruct_coordinate`.
+
+Args:
+    c: Coordinate to clear.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_obstructions_clear_obstructed_coordinates =
+R"doc(Clears all obstructed coordinates that were manually marked via
+`obstruct_coordinate`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_obstructions_is_obstructed_connection =
+R"doc(Checks if the given coordinate-coordinate connection is obstructed of
+some sort.
+
+Args:
+    src: Source coordinate.
+    tgt: Target coordinate.
+
+Returns:
+    `true` iff the connection from `src` to `tgt` is obstructed.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_obstructions_is_obstructed_coordinate =
+R"doc(Checks if the given coordinate is obstructed of some sort.
+
+Args:
+    c: Coordinate to check.
+
+Returns:
+    `true` iff `c` is obstructed.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_obstructions_obstruct_connection =
+R"doc(Marks the connection from coordinate `src` to coordinate `tgt` as
+obstructed.
+
+Args:
+    src: Source coordinate.
+    tgt: Target coordinate.
+
+Note:
+    Coordinates marked this way will not be crossed with wires by path
+    finding algorithms.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_obstructions_obstruct_coordinate =
+R"doc(Marks the given coordinate as obstructed.
+
+Args:
+    c: Coordinate to obstruct.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_obstructions_obstructed_connections = R"doc(Explicitly blocked directed connections.)doc";
+
+static const char *mkd_doc_fiction_layouts_obstructions_obstructed_coordinates = R"doc(Explicitly blocked positions.)doc";
 
 static const char *mkd_doc_fiction_layouts_odd_column_cartesian =
 R"doc( 
@@ -6068,297 +6722,6 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout =
-R"doc(This layout provides synchronization elements on top of a clocked
-layout as a technology extension to the FCN concept proposed in
-\"Synchronization of Clocked Field-Coupled Circuits\" by F. Sill
-Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO
-2018. More in-depth information can be found in \"Design Automation
-for Field-coupled Nanotechnologies\" by M. Walter, R. Wille, F. Sill
-Torres, and R. Drechsler published by Springer Nature in 2022.
-
-A synchronization element is a clock zone whose clock signal is
-altered such that it provides an extended Hold phase of a multitude of
-full clock cycles. It thereby stalls information in place and acts as
-a latch. Additionally, the pipeline-like behavior of FCN circuits
-allows clock zones that act as synchronization elements to transmit
-information to every clock number instead of just its consecutive one.
-
-The exploration of synchronization elements further allows for
-interesting sequential applications like D Latches built from single
-MAJ gates as also proposed in the above publications. However, fiction
-does not yet support sequential FCN circuits. Therefore, support for
-these applications is limited. It is advised to use synchronization
-elements only on wire tiles.
-
-Template Args:
-    ClockedLayout: The clocked layout type whose clocking system
-                   should be extended by synchronization elements.)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_assign_synchronization_element =
-R"doc(Assigns a synchronization element to the provided clock zone.
-
-Args:
-    cz: Clock zone to turn into a synchronization element.
-    se: Number of full clock cycles to extend `cz`'s Hold phase by. If
-        this value is 0, `cz` is turned back into a normal clock zone.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_clone =
-R"doc(Clones the layout returning a deep copy.
-
-Returns:
-    Deep copy of the layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_degree =
-R"doc(Overwrites the function from `ClockedLayout` to account for
-synchronization elements. Returns the number of incoming plus outgoing
-clock zones of the given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    Number of `cz`'s incoming plus outgoing clock zones.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_foreach_incoming_clocked_zone =
-R"doc(Overwrites the function from `ClockedLayout` to account for
-synchronization elements. Applies a function to all incoming clock
-zones of a given one in accordance with `incoming_clocked_zones`.
-
-Args:
-    cz: Base clock zone.
-    fn: Functor to apply to each of `cz`'s incoming clock zones.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_foreach_outgoing_clocked_zone =
-R"doc(Overwrites the function from `ClockedLayout` to account for
-synchronization elements. Applies a function to all outgoing clock
-zones of a given one in accordance with `outgoing_clocked_zones`.
-
-Args:
-    cz: Base clock zone.
-    fn: Functor to apply to each of `cz`'s outgoing clock zones.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_get_synchronization_element =
-R"doc(Returns the Hold phase extension in clock cycles of clock zone `cz`.
-
-Args:
-    cz: Clock zone to check.
-
-Returns:
-    Synchronization element value, i.e., Hold phase extension, of
-    clock zone `cz`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_in_degree =
-R"doc(Overwrites the function from `ClockedLayout` to account for
-synchronization elements. Returns the number of incoming clock zones
-to the given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    Number of `cz`'s incoming clock zones.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_incoming_clocked_zones =
-R"doc(Overwrites the function from `ClockedLayout` to account for
-synchronization elements. Returns a container with all clock zones
-that are incoming to the given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    A container with all clock zones that are incoming to `cz`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_is_incoming_clocked =
-R"doc(Overwrites the function from `ClockedLayout` to account for
-synchronization elements. Evaluates whether clock zone `cz2` feeds
-information to clock zone `cz1`, i.e., whether `cz2` is clocked with a
-clock number that is lower by 1 modulo `num_clocks()` or if one of
-them is a synchronization element. Due to their extended Hold phase,
-they feed information to any clock number.
-
-Args:
-    cz1: Base clock zone.
-    cz2: Clock zone to check whether it feeds information to `cz1`.
-
-Returns:
-    `true` iff `cz2`'s clock number is lower by 1 modulo
-    `num_clocks()` or if `cz1` or `cz2` are synchronization elements.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_is_outgoing_clocked =
-R"doc(Overwrites the function from `ClockedLayout` to account for
-synchronization elements. Evaluates whether clock zone `cz1` feeds
-information to clock zone `cz2`, i.e., whether `cz2` is clocked with a
-clock number that is higher by 1 modulo `num_clocks()` or if one of
-them is a synchronization element. Due to their extended Hold phase,
-they feed information to any clock number.
-
-Args:
-    cz1: Base clock zone.
-    cz2: Clock zone to check whether it accepts information from
-         `cz1`.
-
-Returns:
-    `true` iff `cz2`'s clock number is higher by 1 modulo
-    `num_clocks()` or if `cz1` or `cz2` are synchronization elements.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_is_synchronization_element =
-R"doc(Check whether the provided clock zone is a synchronization element.
-
-Args:
-    cz: Clock zone to check.
-
-Returns:
-    `true` iff `cz` is a synchronization element.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_num_se =
-R"doc(Returns the number of clock zones acting as synchronization elements
-in the layout.
-
-Returns:
-    Number of synchronization elements in the layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_out_degree =
-R"doc(Overwrites the function from `ClockedLayout` to account for
-synchronization elements. Returns the number of outgoing clock zones
-from the given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    Number of `cz`'s outgoing clock zones.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_outgoing_clocked_zones =
-R"doc(Overwrites the function from `ClockedLayout` to account for
-synchronization elements. Returns a container with all clock zones
-that are outgoing from the given one.
-
-Args:
-    cz: Base clock zone.
-
-Returns:
-    A container with all clock zones that are outgoing from `cz`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_strg = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_synchronization_element_layout =
-R"doc(Standard constructor. Creates a clocked synchronization element layout
-of the given aspect ratio. To this end, it calls `ClockedLayout`'s
-standard constructor.
-
-Args:
-    ar: Highest possible position in the layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_synchronization_element_layout_2 =
-R"doc(Standard constructor. Creates a clocked synchronization element layout
-of the given aspect ratio and clocks it via the given clocking scheme.
-To this end, it calls `ClockedLayout`'s standard constructor.
-
-Args:
-    ar: Highest possible position in the layout.
-    scheme: Clocking scheme to apply to this layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_synchronization_element_layout_3 =
-R"doc(Copy constructor from another layout's storage.
-
-Args:
-    s: Storage of another synchronization_element_layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_synchronization_element_layout_4 =
-R"doc(Copy constructor from another `ClockedLayout`.
-
-Args:
-    lyt: Clocked layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_synchronization_element_layout_storage = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_synchronization_element_layout_storage_se_map = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_synchronization_element_layout_synchronization_element_layout_storage_synchronization_element_layout_storage = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout =
-R"doc(This class provides a tile-based naming scheme for coordinate-based
-functions. It does not add any functionality, but it might be useful
-to adopt tile_based_layout to provide an intuition of abstraction in
-the code. For instance, in a gate_level_layout, the coordinates, in
-fact, refer to groups of coordinates in lower-level abstractions.
-These are called 'tiles' in the literature. Therefore, it might be
-helpful for a reader of the code to provide this abstraction level-
-dependent information.
-
-Template Args:
-    CoordinateLayout: A coordinate layout type.)doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout_adjacent_opposite_tiles = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout_adjacent_tiles = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout_clone = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout_foreach_adjacent_opposite_tiles = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout_foreach_adjacent_tile = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout_foreach_ground_tile = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout_foreach_tile = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout_ground_tiles = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout_tile_based_layout = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout_tile_based_layout_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout_tile_based_layout_3 = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_tile_based_layout_tiles = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_vertical_shift_cartesian =
 R"doc( 
@@ -7497,6 +7860,10 @@ May pass through, and thereby throw, an
 `unsupported_gate_type_exception` or an
 `unsupported_gate_orientation_exception`.
 
+Each clock zone of the cell-level layout receives the synchronization
+delay of its gate tile. The delay therefore also covers cells that are
+added to the zone later, e.g., via cells.
+
 Args:
     lyt: The gate-level layout.
     on_progress: Optional callback reporting completed nonconstant
@@ -7540,6 +7907,10 @@ May pass through, and thereby throw, an
 `unsupported_gate_type_exception`, an
 `unsupported_gate_orientation_exception` and any further custom
 exceptions of the gate libraries.
+
+Each clock zone of the cell-level layout receives the synchronization
+delay of its gate tile. The delay therefore also covers cells that are
+added to the zone later, e.g., via cells.
 
 Args:
     lyt: The gate-level layout.
@@ -7910,8 +8281,10 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_assign_gate =
-R"doc(This function assigns a given FCN gate implementation to the total
-cell layout.
+R"doc(Assigns a gate implementation to the cells of its tile and the tile's
+synchronization delay to the clock zone that contains the tile. A
+ground wire and a crossing wire share one clock zone, which keeps the
+larger delay.
 
 Args:
     c: Top-left cell of the tile where the gate is placed.
@@ -8177,8 +8550,8 @@ based on a Cartesian layout.
 
 This function generates a new layout suitable for finding excess
 wiring by shifting the input layout based on specified offsets. The
-generated layout is wrapped in an obstruction_layout. The shifted
-layout is constructed by iterating through the input Cartesian layout
+generated search layout owns its obstruction data. The shifted layout
+is constructed by iterating through the input Cartesian layout
 diagonally and obstructing connections and coordinates accordingly.
 
 Args:
@@ -8187,8 +8560,8 @@ Args:
               0 if not specified.
     y_offset: The offset for shifting in the y-direction. Defaults to
               0 if not specified.
-    search_direction: If set to horizontally, paths are searched from
-                      left to right, otherwise from top to bottom.
+    direction: If set to horizontally, paths are searched from left to
+               right, otherwise from top to bottom.
 
 Template Args:
     Lyt: Type of the input Cartesian gate-level layout.
@@ -9419,6 +9792,7 @@ priorities.
 
 Args:
     ssg: The search space graph.
+    worker_progress: Reports each graph under its stable index.
 
 Returns:
     A pair containing a vector of next positions with their priorities
@@ -9898,7 +10272,7 @@ R"doc(Struct to hold information necessary for gate placement during layout
 generation for one vertex.
 
 Template Args:
-    ObstrLyt: The type of the layout.)doc";
+    Lyt: The type of the layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_placement_info_current_node = R"doc(The index of the current node being placed.)doc";
 
@@ -9943,7 +10317,7 @@ R"doc(Attempts to relocate a gate to a new position within the layout and
 updates routing connections accordingly.
 
 Args:
-    lyt: Obstructed gate-level layout being optimized.
+    lyt: Gate-level layout being optimized.
     new_pos: The target tile position to which the gate is to be
              relocated.
     num_gate_relocations: Reference to a counter tracking the number
@@ -9972,7 +10346,7 @@ R"doc(Utility function to move wires that cross over empty tiles down one
 layer. This can happen if the wiring of a gate is deleted.
 
 Args:
-    lyt: Obstructed gate-level layout.
+    lyt: Gate-level layout.
     deleted_coords: Tiles that got deleted.
 
 )doc";
@@ -9985,7 +10359,7 @@ wire tiles between fanins and the gate, as well as between the gate
 and fanouts are collected for deletion.
 
 Args:
-    lyt: Obstructed gate-level layout.
+    lyt: Gate-level layout.
     op: coordinate of the gate to be moved.
 
 Returns:
@@ -9995,11 +10369,11 @@ Returns:
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_get_path_and_obstruct =
 R"doc(This helper function computes a path between two coordinates using the
-A* algorithm. It then obstructs the tiles along the path in the given
-layout.
+A* algorithm. It then marks the tiles along the path in the search
+obstructions.
 
 Args:
-    lyt: Obstructed gate-level layout.
+    lyt: Gate-level layout.
     start_tile: The starting coordinate of the path.
     end_tile: The ending coordinate of the path.
 
@@ -10021,7 +10395,7 @@ routing is possible. This includes:
   old wiring is restored
 
 Args:
-    lyt: Obstructed gate-level layout.
+    lyt: Gate-level layout.
     old_pos: Old position of the gate to be moved.
 
 Returns:
@@ -10046,11 +10420,11 @@ R"doc(Restores the original wiring if relocation of a gate fails.
 
 This function moves the gate back to its original position and
 reinstates the previous wiring paths between the gate and its fan-
-in/fan-out connections. It also updates the obstructions in the layout
+in/fan-out connections. It also updates the search obstructions
 accordingly.
 
 Args:
-    lyt: Obstructed gate-level layout.
+    lyt: Gate-level layout.
     old_path_from_fanin_1_to_gate: The original routing path from the
                                    first fan-in to the gate (if
                                    exists).
@@ -10071,6 +10445,8 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_run = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_search_obstructions = R"doc(Temporary constraints used while moving gates and routing wires.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_start = R"doc(Start time.)doc";
 
@@ -10131,6 +10507,30 @@ Args:
 
 static const char *mkd_doc_fiction_physical_design_detail_recursively_paint_edges = R"doc()doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_routing_connection_obstructed =
+R"doc(Combines layout connections with explicit search constraints.
+
+Template Args:
+    Lyt: Layout type. @param lyt Layout. @param src Source. @param tgt
+         Target. @param extra Search constraints.
+
+Returns:
+    Whether the directed connection is obstructed.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_routing_coordinate_obstructed =
+R"doc(Combines layout occupancy with explicit search constraints.
+
+Template Args:
+    Lyt: Layout type. @param lyt Layout. @param c Position. @param
+         extra Search constraints.
+
+Returns:
+    Whether the position is obstructed.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_routing_objective_with_fanin_update_information =
 R"doc(Encapsulates a routing objective with fanin update information.
 
@@ -10165,6 +10565,30 @@ R"doc(Flag indicating whether the primary input was the first fanin and the
 fanout gate is asymmetric.
 
 If this flag is true, the fanin signals need to be reordered.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_routing_successor =
+R"doc(Resolves the coordinate that a path search enters when it steps from
+`current` to the adjacent coordinate `successor`. The search returns
+to the ground layer, switches to the crossing layer to pass over a
+crossable wire if `crossings` is set, and rejects obstructed
+coordinates and connections. The target is never obstructed.
+
+Args:
+    lyt: Layout.
+    current: Coordinate that the search expands.
+    successor: Coordinate adjacent to `current`.
+    target: Target coordinate of the search.
+    crossings: Whether paths may cross wires on the crossing layer.
+    extra: Search constraints.
+
+Template Args:
+    Lyt: Layout type.
+
+Returns:
+    The coordinate to enter, or `std::nullopt` if the step is
+    obstructed.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler = R"doc()doc";
 
@@ -10514,6 +10938,10 @@ Returns:
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_search_dir =
 R"doc(The current search direction: horizontal (from left to right) and
 vertical (from top to bottom).)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_search_obstructions =
+R"doc(Constraints of this wiring-cut search, passed to path searches on this
+layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_wiring_reduction_layout =
 R"doc(This constructor initializes the `wiring_reduction_layout` with an
@@ -11313,7 +11741,7 @@ static const char *mkd_doc_fiction_physical_design_path_finding_a_star =
 R"doc(The A* path finding algorithm for shortest loop-less paths between a
 given source and target coordinate in a layout. This function
 automatically detects whether the given layout implements a clocking
-interface (see `clocked_layout`) and respects the underlying
+interface (see `gate_level_layout`) and respects the underlying
 information flow imposed by `layout`'s clocking scheme.
 
 A* is an extension of Dijkstra's algorithm for shortest paths but
@@ -11324,17 +11752,20 @@ calculate nor overestimating the remaining costs. Common heuristics to
 be used are the Manhattan and the Euclidean distance functions. See
 `distance_functor` for implementations.
 
-If the given layout implements the obstruction interface (see
-`obstruction_layout`), paths will not be routed via obstructed
-coordinates and connections.
+Paths do not pass obstructed coordinates or connections, except that
+the target is never obstructed. A coordinate or connection is
+obstructed if the `obstructions` argument marks it or if the layout's
+`is_obstructed_coordinate` or `is_obstructed_connection` reports it.
+Gate-level layouts report their occupied tiles and existing signal
+connections, and cell-level layouts report their occupied cells. Paths
+in gate-level layouts therefore avoid all placed gates and wires.
 
-If the given layout is a gate-level layout and implements the
-obstruction interface (see `obstruction_layout`), paths may contain
-wire crossings if specified in the parameters. Wire crossings are only
-allowed over other wires and only if the crossing layer is not
-obstructed. Furthermore, it is ensured that crossings do not run along
-another wire but cross only in a single point (orthogonal crossings +
-knock-knees/double wires).
+If crossings are enabled in the parameters, paths in gate-level
+layouts may cross other wires on the crossing layer. Wire crossings
+are only allowed over other wires and only if the crossing layer is
+not obstructed. Furthermore, it is ensured that crossings do not run
+along another wire but cross only in a single point (orthogonal
+crossings + knock-knees/double wires).
 
 In certain cases it might be desirable to determine regular coordinate
 paths even if the layout implements a clocking interface. This can be
@@ -11342,7 +11773,7 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = clocked_layout<cartesian_layout<>>;
+using clk_lyt = gate_level_layout<cartesian_layout<>>;
 using path = layout_coordinate_path<cartesian_layout<>>;
 clk_lyt layout = ...;
 auto shortest_path = a_star<path>(static_cast<cartesian_layout<>>(layout), {source, target});
@@ -11367,6 +11798,8 @@ Args:
              estimation function.
     cost_fn: A cost functor that implements the desired cost function.
     params: Parameters.
+    obstructions: Additional coordinate and connection constraints;
+                  the search does not modify them.
 
 Template Args:
     Path: Type of the returned path.
@@ -11398,6 +11831,8 @@ Args:
             `target` is to be determined.
     source: Source coordinate.
     target: Target coordinate.
+    obstructions: Additional constraints; caller and layout
+                  obstructions remain unchanged.
 
 Template Args:
     Lyt: Coordinate layout type.
@@ -11622,6 +12057,8 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_search_obstructions = R"doc(Additional constraints owned by the caller.)doc";
+
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_set_g =
 R"doc(Updates the g-value of the given coordinate to the given value.
 
@@ -11675,15 +12112,7 @@ R"doc(Recursively enumerate all paths from `src` to `tgt` in the given
 layout. This function is called recursively until the target
 coordinate is reached. Along each path, each coordinate can occur at
 maximum once. This function does not generate duplicate or looping
-paths. If the given layout implements the obstruction interface (see
-`obstruction_layout`), paths will not be routed via obstructed
-coordinates or connections. If the given layout is a gate-level layout
-and implements the obstruction interface (see `obstruction_layout`),
-paths may contain wire crossings if specified in the parameters. Wire
-crossings are only allowed over other wires and only if the crossing
-layer is not obstructed. Furthermore, it is ensured that crossings do
-not run along another wire but cross only in a single point
-(orthogonal crossings + knock-knees/double wires).
+paths. Obstructions and crossings follow `enumerate_all_paths`.
 
 Args:
     src: Source coordinate.
@@ -11702,15 +12131,17 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_search_obstructions = R"doc(Additional constraints owned by the caller.)doc";
+
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_visited = R"doc(Set of visited coordinates.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl = R"doc()doc";
 
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_initial_obstructions = R"doc(Caller constraints retained across spur searches.)doc";
+
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_k_shortest_paths = R"doc(The list of k shortest paths that is created during the algorithm.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_layout =
-R"doc(The layout in which k shortest paths are to be found extended by an
-obstruction functionality layer.)doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_layout = R"doc(The caller's layout, queried without modification.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_num_shortest_paths = R"doc(The number of paths to determine, i.e., k.)doc";
 
@@ -11732,7 +12163,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_reset_temporary_obstructions = R"doc(Resets all temporary obstructions.)doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_reset_temporary_obstructions = R"doc(Resets all temporary obstructions to the caller's obstructions.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_run =
 R"doc(Enumerate up to k shortest paths in a layout that start at
@@ -11744,15 +12175,9 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_search_obstructions = R"doc(Independent constraints for the current spur search.)doc";
+
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_shortest_path_candidates = R"doc(A set of potential shortest paths.)doc";
-
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_temporarily_obstructed_connections =
-R"doc(A temporary storage for coordinates that are obstructed during the
-algorithm.)doc";
-
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_temporarily_obstructed_coordinates =
-R"doc(A temporary storage for coordinates that are obstructed during the
-algorithm.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_yen_k_shortest_paths_impl = R"doc()doc";
 
@@ -11845,23 +12270,26 @@ static const char *mkd_doc_fiction_physical_design_path_finding_enumerate_all_pa
 R"doc(Enumerates all possible paths in a layout that start at a given source
 coordinate and lead to given target coordinate. This function
 automatically detects whether the given layout implements a clocking
-interface (see `clocked_layout`) and respects the underlying
+interface (see `gate_level_layout`) and respects the underlying
 information flow imposed by `layout`'s clocking scheme. This algorithm
 does neither generate duplicate nor looping paths, even in a cyclic
 clocking scheme. That is, along each path, each coordinate can occur
 at maximum once.
 
-If the given layout implements the obstruction interface (see
-`obstruction_layout`), paths will not be routed via obstructed
-coordinates or connections.
+Paths do not pass obstructed coordinates or connections, except that
+the target is never obstructed. A coordinate or connection is
+obstructed if the `obstructions` argument marks it or if the layout's
+`is_obstructed_coordinate` or `is_obstructed_connection` reports it.
+Gate-level layouts report their occupied tiles and existing signal
+connections, and cell-level layouts report their occupied cells. Paths
+in gate-level layouts therefore avoid all placed gates and wires.
 
-If the given layout is a gate-level layout and implements the
-obstruction interface (see `obstruction_layout`), paths may contain
-wire crossings if specified in the parameters. Wire crossings are only
-allowed over other wires and only if the crossing layer is not
-obstructed. Furthermore, it is ensured that crossings do not run along
-another wire but cross only in a single point (orthogonal crossings +
-knock-knees/double wires).
+If crossings are enabled in the parameters, paths in gate-level
+layouts may cross other wires on the crossing layer. Wire crossings
+are only allowed over other wires and only if the crossing layer is
+not obstructed. Furthermore, it is ensured that crossings do not run
+along another wire but cross only in a single point (orthogonal
+crossings + knock-knees/double wires).
 
 In certain cases it might be desirable to enumerate regular coordinate
 paths even if the layout implements a clocking interface. This can be
@@ -11869,7 +12297,7 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = clocked_layout<cartesian_layout<>>;
+using clk_lyt = gate_level_layout<cartesian_layout<>>;
 using path = layout_coordinate_path<cartesian_layout<>>;
 clk_lyt layout = ...;
 auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target});
@@ -11881,6 +12309,8 @@ Args:
     layout: The layout whose paths are to be enumerated.
     objective: Source-target coordinate pair.
     params: Parameters.
+    obstructions: Additional coordinate and connection constraints;
+                  the search does not modify them.
 
 Template Args:
     Path: Type of the returned individual paths.
@@ -12224,23 +12654,26 @@ This implementation uses the A* algorithm with the Manhattan distance
 function internally.
 
 This function automatically detects whether the given layout
-implements a clocking interface (see `clocked_layout`) and respects
+implements a clocking interface (see `gate_level_layout`) and respects
 the underlying information flow imposed by `layout`'s clocking scheme.
 This algorithm does neither generate duplicate nor looping paths, even
 in a cyclic clocking scheme. That is, along each path, each coordinate
 can occur at maximum once.
 
-If the given layout implements the obstruction interface (see
-`obstruction_layout`), paths will not be routed via obstructed
-coordinates or connections.
+Paths do not pass obstructed coordinates or connections, except that
+the target is never obstructed. A coordinate or connection is
+obstructed if the `obstructions` argument marks it or if the layout's
+`is_obstructed_coordinate` or `is_obstructed_connection` reports it.
+Gate-level layouts report their occupied tiles and existing signal
+connections, and cell-level layouts report their occupied cells. Paths
+in gate-level layouts therefore avoid all placed gates and wires.
 
-If the given layout is a gate-level layout and implements the
-obstruction interface (see obstruction_layout), paths may contain wire
-crossings if specified in the parameters. Wire crossings are only
-allowed over other wires and only if the crossing layer is not
-obstructed. Furthermore, it is ensured that crossings do not run along
-another wire but cross only in a single point (orthogonal crossings +
-knock-knees/double wires).
+If crossings are enabled in the parameters, paths in gate-level
+layouts may cross other wires on the crossing layer. Wire crossings
+are only allowed over other wires and only if the crossing layer is
+not obstructed. Furthermore, it is ensured that crossings do not run
+along another wire but cross only in a single point (orthogonal
+crossings + knock-knees/double wires).
 
 In certain cases it might be desirable to enumerate regular coordinate
 paths even if the layout implements a clocking interface. This can be
@@ -12248,7 +12681,7 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = clocked_layout<cartesian_layout<>>;
+using clk_lyt = gate_level_layout<cartesian_layout<>>;
 using path = layout_coordinate_path<cartesian_layout<>>;
 clk_lyt layout = ...;
 auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target}, k);
@@ -12268,6 +12701,8 @@ Args:
     objective: Source-target coordinate pair.
     k: Maximum number of shortest paths to find.
     params: Parameters.
+    obstructions: Additional constraints; caller and layout
+                  obstructions remain unchanged.
 
 Template Args:
     Path: Type of the returned individual paths.

@@ -15,7 +15,7 @@
  */
 
 #pragma once
-
+#include "fiction/layouts/obstructions.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -23,11 +23,49 @@
 #include <algorithm>
 #include <cassert>
 #include <functional>
+#include <optional>
 #include <set>
 #include <vector>
 
 namespace fiction::physical_design
 {
+namespace detail
+{
+/** @brief Combines layout occupancy with explicit search constraints.
+ * @tparam Lyt Layout type. @param lyt Layout. @param c Position. @param extra Search constraints.
+ * @return Whether the position is obstructed.
+ */
+template <typename Lyt>
+[[nodiscard]] bool routing_coordinate_obstructed(const Lyt& lyt, const coordinate<Lyt>& c,
+                                                 const layouts::obstructions<coordinate<Lyt>>& extra) noexcept
+{
+    if constexpr (is_gate_level_layout_v<Lyt> || is_cell_level_layout_v<Lyt>)
+    {
+        return extra.is_obstructed_coordinate(c) || lyt.is_obstructed_coordinate(c);
+    }
+    else
+    {
+        return extra.is_obstructed_coordinate(c);
+    }
+}
+/** @brief Combines layout connections with explicit search constraints.
+ * @tparam Lyt Layout type. @param lyt Layout. @param src Source. @param tgt Target. @param extra Search constraints.
+ * @return Whether the directed connection is obstructed.
+ */
+template <typename Lyt>
+[[nodiscard]] bool routing_connection_obstructed(const Lyt& lyt, const coordinate<Lyt>& src, const coordinate<Lyt>& tgt,
+                                                 const layouts::obstructions<coordinate<Lyt>>& extra) noexcept
+{
+    if constexpr (is_gate_level_layout_v<Lyt> || is_cell_level_layout_v<Lyt>)
+    {
+        return extra.is_obstructed_connection(src, tgt) || lyt.is_obstructed_connection(src, tgt);
+    }
+    else
+    {
+        return extra.is_obstructed_connection(src, tgt);
+    }
+}
+}  // namespace detail
 
 /**
  * Routing objectives are source-target pairs.
@@ -194,6 +232,55 @@ template <typename Lyt>
 
     return false;
 }
+
+namespace detail
+{
+/**
+ * @brief Resolves the coordinate that a path search enters when it steps from `current` to the adjacent coordinate
+ * `successor`. The search returns to the ground layer, switches to the crossing layer to pass over a crossable wire if
+ * `crossings` is set, and rejects obstructed coordinates and connections. The target is never obstructed.
+ * @tparam Lyt Layout type.
+ * @param lyt Layout.
+ * @param current Coordinate that the search expands.
+ * @param successor Coordinate adjacent to `current`.
+ * @param target Target coordinate of the search.
+ * @param crossings Whether paths may cross wires on the crossing layer.
+ * @param extra Search constraints.
+ * @return The coordinate to enter, or `std::nullopt` if the step is obstructed.
+ */
+template <typename Lyt>
+[[nodiscard]] std::optional<coordinate<Lyt>>
+routing_successor(const Lyt& lyt, const coordinate<Lyt>& current, coordinate<Lyt> successor,
+                  const coordinate<Lyt>& target, const bool crossings,
+                  const layouts::obstructions<coordinate<Lyt>>& extra) noexcept
+{
+    // return to ground layer to avoid getting stuck in crossing layer
+    successor = lyt.below(successor);
+
+    if (routing_coordinate_obstructed(lyt, successor, extra) && successor != target)
+    {
+        // an obstructed successor can only be passed on a free crossing layer above a crossable wire
+        const auto above_successor = lyt.above(successor);
+
+        if (!crossings || !(is_crossable_wire(lyt, current, successor) || above_successor == target) ||
+            above_successor == successor ||
+            (routing_coordinate_obstructed(lyt, above_successor, extra) && above_successor != target))
+        {
+            return std::nullopt;
+        }
+
+        successor = above_successor;
+    }
+
+    if (routing_connection_obstructed(lyt, current, successor, extra))
+    {
+        return std::nullopt;
+    }
+
+    return successor;
+}
+}  // namespace detail
+
 /**
  * Establishes a wire routing along the given path in the given layout. To this end, the given path's source and target
  * coordinates are assumed to be populated by other gates or wires that the new path shall connect to.

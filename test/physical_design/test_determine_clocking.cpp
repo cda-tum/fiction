@@ -21,13 +21,11 @@
 #include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/physical_design/determine_clocking.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/traits.hpp>
@@ -60,7 +58,7 @@ void remove_assign_and_check_clocking(Lyt lyt)
              bill::solvers::ghack,
              bill::solvers::glucose_41,
              bill::solvers::bsat2,
-#if !defined(BILL_WINDOWS_PLATFORM)
+#ifndef BILL_WINDOWS_PLATFORM
              bill::solvers::maple,
              bill::solvers::bmcg,
 #endif
@@ -81,7 +79,7 @@ void remove_assign_and_check_clocking(Lyt lyt)
 
 TEST_CASE("Determine clock numbers for an empty layout", "[determine-clocking]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     gate_layout layout{{5, 5}};
 
@@ -90,7 +88,7 @@ TEST_CASE("Determine clock numbers for an empty layout", "[determine-clocking]")
 
 TEST_CASE("Determine clock numbers for simple layouts", "[determine-clocking]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     remove_assign_and_check_clocking(blueprints::straight_wire_gate_layout<gate_layout>());
     remove_assign_and_check_clocking(blueprints::and_not_gate_layout<gate_layout>());
@@ -104,7 +102,7 @@ TEST_CASE("Determine clock numbers for simple layouts", "[determine-clocking]")
 
 TEST_CASE("Determine clock numbers for complex layouts", "[determine-clocking]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     remove_assign_and_check_clocking(orthogonal<gate_layout>(blueprints::maj1_network<mockturtle::aig_network>()));
     remove_assign_and_check_clocking(orthogonal<gate_layout>(blueprints::maj4_network<mockturtle::aig_network>()));
@@ -118,15 +116,13 @@ TEST_CASE("Determine clock numbers for non-Cartesian layout topologies", "[deter
     {
         SECTION("odd column")
         {
-            using gate_layout = gate_level_layout<
-                clocked_layout<tile_based_layout<shifted_cartesian_layout<coords::offset, odd_column_cartesian>>>>;
+            using gate_layout = gate_level_layout<shifted_cartesian_layout<coords::offset, odd_column_cartesian>>;
 
             remove_assign_and_check_clocking(blueprints::shifted_cart_and_or_inv_gate_layout<gate_layout>());
         }
         SECTION("even row")
         {
-            using gate_layout = gate_level_layout<
-                clocked_layout<tile_based_layout<shifted_cartesian_layout<coords::offset, even_row_cartesian>>>>;
+            using gate_layout = gate_level_layout<shifted_cartesian_layout<coords::offset, even_row_cartesian>>;
 
             remove_assign_and_check_clocking(blueprints::row_clocked_and_xor_gate_layout<gate_layout>());
         }
@@ -135,8 +131,7 @@ TEST_CASE("Determine clock numbers for non-Cartesian layout topologies", "[deter
     {
         SECTION("even row")
         {
-            using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, even_row_hex>>>>;
+            using gate_layout = gate_level_layout<hexagonal_layout<coords::offset, even_row_hex>>;
 
             remove_assign_and_check_clocking(blueprints::row_clocked_and_xor_gate_layout<gate_layout>());
         }
@@ -145,15 +140,15 @@ TEST_CASE("Determine clock numbers for non-Cartesian layout topologies", "[deter
 
 TEST_CASE("Determine clock numbers for a 3-phase layout", "[determine-clocking]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    remove_assign_and_check_clocking(
-        orthogonal<gate_layout>(blueprints::maj1_network<mockturtle::aig_network>(), {clocking::num_clks::THREE}));
+    remove_assign_and_check_clocking(orthogonal<gate_layout>(blueprints::maj1_network<mockturtle::aig_network>(),
+                                                             {.number_of_clock_phases = clocking::num_clks::THREE}));
 }
 
 TEST_CASE("Determine clock numbers for a non-clockable layout", "[determine-clocking]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto lyt = blueprints::unclockable_gate_layout<gate_layout>();
 

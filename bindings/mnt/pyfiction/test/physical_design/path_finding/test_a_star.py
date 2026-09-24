@@ -16,27 +16,44 @@ from mnt.pyfiction import (
     a_star_params,
     cartesian_gate_layout,
     cartesian_layout,
-    cartesian_obstruction_layout,
-    clocked_cartesian_layout,
-    clocked_hexagonal_layout,
-    clocked_shifted_cartesian_layout,
+    enumerate_all_paths,
     hexagonal_gate_layout,
     hexagonal_layout,
-    hexagonal_obstruction_layout,
+    obstructions,
     offset_coordinate,
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
-    shifted_cartesian_obstruction_layout,
+    yen_k_shortest_paths,
 )
 
+
+def test_search_constraints_are_local() -> None:
+    """Searches combine persistent constraints with independent routing data."""
+    layout = cartesian_gate_layout((2, 2), "2DDWave")
+    layout.obstruct_coordinate((1, 0))
+    blocked = obstructions()
+    blocked.obstruct_connection((0, 1), (1, 1))
+    expected = [(0, 0), (0, 1), (0, 2), (1, 2), (2, 2)]
+    for _ in range(2):
+        assert a_star(layout, (0, 0), (2, 2), obstructions=blocked) == expected
+        assert a_star_distance(layout, (0, 0), (2, 2), obstructions=blocked) == 4
+        assert enumerate_all_paths(layout, (0, 0), (2, 2), obstructions=blocked) == [expected]
+        assert yen_k_shortest_paths(layout, (0, 0), (2, 2), 4, obstructions=blocked) == [expected]
+        assert layout.is_obstructed_coordinate((1, 0))
+        assert not layout.is_obstructed_connection((0, 1), (1, 1))
+        assert blocked.is_obstructed_connection((0, 1), (1, 1))
+        assert not blocked.is_obstructed_coordinate((1, 0))
+
+    grid = cartesian_layout((1, 1))
+    blocked.obstruct_coordinate((1, 0))
+    assert a_star(grid, (0, 0), (1, 1), obstructions=blocked) == []
+
+
 CLOCKED_LAYOUTS = [
-    pytest.param(lambda: clocked_cartesian_layout((4, 4), "2DDWave"), id="clocked_cartesian_layout"),
     pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
-    pytest.param(lambda: clocked_shifted_cartesian_layout((4, 4), "2DDWave"), id="clocked_shifted_cartesian_layout"),
     pytest.param(
         lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
     ),
-    pytest.param(lambda: clocked_hexagonal_layout((4, 4), "2DDWave"), id="clocked_hexagonal_layout"),
     pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
 ]
 
@@ -70,16 +87,16 @@ def test_clocked_path_finding(make_lyt):
     "make_lyt",
     [
         pytest.param(
-            lambda: cartesian_obstruction_layout(cartesian_gate_layout((4, 4), "2DDWave", "Layout")),
-            id="cartesian_obstruction_layout",
+            lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
+            id="cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout")),
-            id="shifted_cartesian_obstruction_layout",
+            lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
+            id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_obstruction_layout(hexagonal_gate_layout((4, 4), "2DDWave", "Layout")),
-            id="hexagonal_obstruction_layout",
+            lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"),
+            id="hexagonal_gate_layout",
         ),
     ],
 )
@@ -110,16 +127,16 @@ def test_path_finding_with_obstructions(make_lyt):
     "make_lyt",
     [
         pytest.param(
-            lambda: cartesian_obstruction_layout(cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout")),
-            id="cartesian_obstruction_layout",
+            lambda: cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout"),
+            id="cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout")),
-            id="shifted_cartesian_obstruction_layout",
+            lambda: shifted_cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout"),
+            id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_obstruction_layout(hexagonal_gate_layout((2, 1, 1), "2DDWave", "Layout")),
-            id="hexagonal_obstruction_layout",
+            lambda: hexagonal_gate_layout((2, 1, 1), "2DDWave", "Layout"),
+            id="hexagonal_gate_layout",
         ),
     ],
 )

@@ -15,9 +15,11 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "fiction/layouts/bounding_box.hpp"
 #include "fiction_experiments.hpp"
 
+#include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>                        // read networks from files
 #include <fiction/physical_design/orthogonal.hpp>                        // scalable heuristic for physical design
 #include <fiction/physical_design/post_layout_optimization.hpp>          // post-layout optimization
@@ -55,7 +57,7 @@ Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout<>>;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                             uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, double, float, std::string>
@@ -80,10 +82,9 @@ int main()  // NOLINT
                          "equivalent"};
 
     // stats
-    orthogonal_physical_design_stats orthogonal_stats{};
-    post_layout_optimization_stats   post_layout_optimization_stats{};
-    post_layout_optimization_params  post_layout_optimization_params{};
-    // post_layout_optimization_params.max_gate_relocations = 1;
+    orthogonal_physical_design_stats      orthogonal_stats{};
+    post_layout_optimization_stats        post_layout_optimization_stats{};
+    const post_layout_optimization_params post_layout_optimization_params{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
@@ -112,9 +113,15 @@ int main()  // NOLINT
         // check equivalence
         const auto eq_stats = equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
 
-        const std::string eq_result = eq_stats == eq_type::STRONG ? "STRONG" :
-                                      eq_stats == eq_type::WEAK   ? "WEAK" :
-                                                                    "NO";
+        std::string eq_result{"NO"};
+        if (eq_stats == eq_type::STRONG)
+        {
+            eq_result = "STRONG";
+        }
+        else if (eq_stats == eq_type::WEAK)
+        {
+            eq_result = "WEAK";
+        }
 
         // calculate bounding box
         const auto bounding_box_after_optimization = bounding_box_2d(gate_level_layout);

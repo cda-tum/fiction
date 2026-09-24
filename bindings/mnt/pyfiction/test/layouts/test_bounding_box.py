@@ -14,16 +14,13 @@ import pytest
 
 from mnt.pyfiction import (
     cartesian_gate_layout,
-    cartesian_obstruction_layout,
     hexagonal_gate_layout,
-    hexagonal_obstruction_layout,
     inml_layout,
     orthogonal,
     orthogonal_params,
     qca_layout,
     read_technology_network,
     shifted_cartesian_gate_layout,
-    shifted_cartesian_obstruction_layout,
 )
 
 if TYPE_CHECKING:
@@ -38,18 +35,6 @@ if TYPE_CHECKING:
             lambda: shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
         ),
         pytest.param(lambda: hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
-        pytest.param(
-            lambda: cartesian_obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-            id="cartesian_obstruction_layout",
-        ),
-        pytest.param(
-            lambda: shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-            id="shifted_cartesian_obstruction_layout",
-        ),
-        pytest.param(
-            lambda: hexagonal_obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-            id="hexagonal_obstruction_layout",
-        ),
     ],
 )
 def test_bounding_box_around_an_empty_gate_level_layout(make_layout):

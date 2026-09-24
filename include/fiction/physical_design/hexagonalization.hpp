@@ -18,7 +18,7 @@
 #pragma once
 
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/obstruction_layout.hpp"
+#include "fiction/layouts/obstructions.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
@@ -798,13 +798,12 @@ class hexagonalization_impl
                 }
 
                 // perform routing using A*
-                auto layout_obstruct = layouts::obstruction_layout<HexLyt>(hex_layout);
-                using path           = layout_coordinate_path<decltype(layout_obstruct)>;
+                layouts::obstructions<coordinate<HexLyt>> search_obstructions{};
+                using path           = layout_coordinate_path<decltype(hex_layout)>;
                 const auto crossings = ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
                 const physical_design::path_finding::a_star_params params_astar{crossings};
-                using dist =
-                    physical_design::path_finding::manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
-                using cost = physical_design::path_finding::unit_cost_functor<decltype(layout_obstruct), uint8_t>;
+                using dist = physical_design::path_finding::manhattan_distance_functor<decltype(hex_layout), uint64_t>;
+                using cost = physical_design::path_finding::unit_cost_functor<decltype(hex_layout), uint8_t>;
 
                 // for each routing objective, find a path and route it
                 utils::progress_reporter input_progress{ps.on_progress, "input pins", objectives.size()};
@@ -822,7 +821,7 @@ class hexagonalization_impl
                     }
 
                     if (auto new_path = physical_design::path_finding::a_star<path>(
-                            layout_obstruct, {obj.source, target}, dist(), cost(), params_astar);
+                            hex_layout, {obj.source, target}, dist(), cost(), params_astar, search_obstructions);
                         !new_path.empty())
                     {
                         // for planar extension, if target is in the crossing layer, update path
@@ -837,7 +836,7 @@ class hexagonalization_impl
                         {
                             x_max = std::max(static_cast<uint64_t>(t.x), x_max);
                             y_max = std::max(static_cast<uint64_t>(t.y), y_max);
-                            layout_obstruct.obstruct_coordinate(t);
+                            search_obstructions.obstruct_coordinate(t);
                         }
                         // if the flag is set, re-collect and update fanins
                         if (obj.update_first_fanin)
@@ -915,14 +914,13 @@ class hexagonalization_impl
                 }
 
                 // perform routing using A*
-                auto layout_obstruct = layouts::obstruction_layout<HexLyt>(hex_layout);
-                using path           = layout_coordinate_path<decltype(layout_obstruct)>;
+                layouts::obstructions<coordinate<HexLyt>> search_obstructions{};
+                using path = layout_coordinate_path<decltype(hex_layout)>;
                 const auto crossings =
                     ps.output_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
                 const physical_design::path_finding::a_star_params params_astar{crossings};
-                using dist =
-                    physical_design::path_finding::manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
-                using cost = physical_design::path_finding::unit_cost_functor<decltype(layout_obstruct), uint8_t>;
+                using dist = physical_design::path_finding::manhattan_distance_functor<decltype(hex_layout), uint64_t>;
+                using cost = physical_design::path_finding::unit_cost_functor<decltype(hex_layout), uint8_t>;
 
                 // for each routing objective, find a path and route it
                 utils::progress_reporter output_progress{ps.on_progress, "output pins", objectives.size()};
@@ -932,36 +930,34 @@ class hexagonalization_impl
                     auto source        = obj.source;
                     auto update_source = false;
 
-                    const auto above_coord = layout_obstruct.above(obj.source);
-                    if (!layout_obstruct.is_empty_tile(above_coord))
+                    const auto above_coord = hex_layout.above(obj.source);
+                    if (!hex_layout.is_empty_tile(above_coord))
                     {
-                        const auto below_coord      = layout_obstruct.below(obj.source);
-                        const auto south_east_coord = layout_obstruct.south_east(below_coord);
-                        const auto south_west_coord = layout_obstruct.south_west(below_coord);
+                        const auto below_coord      = hex_layout.below(obj.source);
+                        const auto south_east_coord = hex_layout.south_east(below_coord);
+                        const auto south_west_coord = hex_layout.south_west(below_coord);
 
-                        if (layout_obstruct.is_empty_tile(south_west_coord) &&
-                            !layout_obstruct.is_empty_tile(south_east_coord))
+                        if (hex_layout.is_empty_tile(south_west_coord) && !hex_layout.is_empty_tile(south_east_coord))
                         {
-                            if (!layout_obstruct.is_po(layout_obstruct.get_node(south_east_coord)))
+                            if (!hex_layout.is_po(hex_layout.get_node(south_east_coord)))
                             {
-                                const auto above_south_east_coord = layout_obstruct.above(south_east_coord);
-                                layout_obstruct.obstruct_connection(below_coord, south_east_coord);
-                                layout_obstruct.obstruct_connection(above_coord, south_east_coord);
-                                layout_obstruct.obstruct_connection(below_coord, above_south_east_coord);
-                                layout_obstruct.obstruct_connection(above_coord, above_south_east_coord);
+                                const auto above_south_east_coord = hex_layout.above(south_east_coord);
+                                search_obstructions.obstruct_connection(below_coord, south_east_coord);
+                                search_obstructions.obstruct_connection(above_coord, south_east_coord);
+                                search_obstructions.obstruct_connection(below_coord, above_south_east_coord);
+                                search_obstructions.obstruct_connection(above_coord, above_south_east_coord);
                             }
                         }
 
-                        if (layout_obstruct.is_empty_tile(south_east_coord) &&
-                            !layout_obstruct.is_empty_tile(south_west_coord))
+                        if (hex_layout.is_empty_tile(south_east_coord) && !hex_layout.is_empty_tile(south_west_coord))
                         {
-                            if (!layout_obstruct.is_po(layout_obstruct.get_node(south_west_coord)))
+                            if (!hex_layout.is_po(hex_layout.get_node(south_west_coord)))
                             {
-                                const auto above_south_west_coord = layout_obstruct.above(south_west_coord);
-                                layout_obstruct.obstruct_connection(below_coord, south_west_coord);
-                                layout_obstruct.obstruct_connection(above_coord, south_west_coord);
-                                layout_obstruct.obstruct_connection(below_coord, above_south_west_coord);
-                                layout_obstruct.obstruct_connection(above_coord, above_south_west_coord);
+                                const auto above_south_west_coord = hex_layout.above(south_west_coord);
+                                search_obstructions.obstruct_connection(below_coord, south_west_coord);
+                                search_obstructions.obstruct_connection(above_coord, south_west_coord);
+                                search_obstructions.obstruct_connection(below_coord, above_south_west_coord);
+                                search_obstructions.obstruct_connection(above_coord, above_south_west_coord);
                             }
                         }
                     }
@@ -974,7 +970,7 @@ class hexagonalization_impl
                     }
 
                     if (auto new_path = physical_design::path_finding::a_star<path>(
-                            layout_obstruct, {source, obj.target}, dist(), cost(), params_astar);
+                            hex_layout, {source, obj.target}, dist(), cost(), params_astar, search_obstructions);
                         !new_path.empty())
                     {
                         // for planar extension, if source or target are in the crossing layer, update path
@@ -989,7 +985,7 @@ class hexagonalization_impl
                         {
                             x_max = std::max(static_cast<uint64_t>(t.x), x_max);
                             y_max = std::max(static_cast<uint64_t>(t.y), y_max);
-                            layout_obstruct.obstruct_coordinate(t);
+                            search_obstructions.obstruct_coordinate(t);
                         }
                     }
                     else

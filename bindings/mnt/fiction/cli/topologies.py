@@ -47,5 +47,5 @@ NAMES = {**NATIVE_NAMES, "shifted_cartesian": "shifted_cartesian", "hexagonal": 
 FGL_READERS = {name: getattr(pyfiction, f"read_{native}_fgl_layout") for name, native in NAMES.items()}
 """The reader for each accepted FGL topology."""
 
-CLOCKED_LAYOUTS = {name: getattr(pyfiction, f"clocked_{native}_layout") for name, native in NAMES.items()}
-"""Clocked constructors used to validate a topology's clocking schemes."""
+GATE_LAYOUTS = {name: getattr(pyfiction, f"{native}_gate_layout") for name, native in NAMES.items()}
+"""Gate constructors used to validate a topology's clocking schemes."""

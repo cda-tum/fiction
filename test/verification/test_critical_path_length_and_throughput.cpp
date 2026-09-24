@@ -19,12 +19,9 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/synchronization_element_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
 
 #include <mockturtle/views/depth_view.hpp>
@@ -60,7 +57,7 @@ void check(const Lyt& lyt, const uint64_t throughput) noexcept
 
 TEST_CASE("Balanced layout", "[throughput]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     check(blueprints::and_or_gate_layout<gate_layout>(), 1);
     check(blueprints::xor_maj_gate_layout<gate_layout>(), 1);
@@ -70,8 +67,7 @@ TEST_CASE("Balanced layout", "[throughput]")
 
     SECTION("Synchronization Elements")
     {
-        using se_gate_layout = gate_level_layout<
-            synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>>;
+        using se_gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
         check(blueprints::se_gate_layout<se_gate_layout>(), 1);
     }
@@ -79,14 +75,14 @@ TEST_CASE("Balanced layout", "[throughput]")
 
 TEST_CASE("Unbalanced layout", "[throughput]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     check(blueprints::unbalanced_and_layout<gate_layout>(), 2);
 }
 
 TEST_CASE("Critical path analysis handles long routes", "[throughput]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     constexpr uint64_t length{100'000};
     gate_layout        layout{{length, 1}, clocking::twoddwave<gate_layout>()};

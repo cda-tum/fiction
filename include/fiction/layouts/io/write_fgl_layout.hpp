@@ -206,29 +206,27 @@ class write_fgl_layout_impl
             }
             os << fgl::CLOSE_CLOCK_ZONES;
         }
-        if constexpr (has_synchronization_elements_v<Lyt>)
+
+        if (lyt.num_se() != 0)
         {
-            if (lyt.num_se() != 0)
-            {
-                os << "      <synchronization_elements>\n";
-                utils::progress_reporter synchronization{on_progress, "scanning synchronization elements",
-                                                         (static_cast<std::size_t>(lyt.x()) + 1) *
-                                                             (static_cast<std::size_t>(lyt.y()) + 1) *
-                                                             (static_cast<std::size_t>(lyt.z()) + 1)};
-                lyt.foreach_coordinate(
-                    [this, &synchronization](const auto& coordinate)
+            os << "      <synchronization_elements>\n";
+            utils::progress_reporter synchronization{on_progress, "scanning synchronization elements",
+                                                     (static_cast<std::size_t>(lyt.x()) + 1) *
+                                                         (static_cast<std::size_t>(lyt.y()) + 1) *
+                                                         (static_cast<std::size_t>(lyt.z()) + 1)};
+            lyt.foreach_coordinate(
+                [this, &synchronization](const auto& coordinate)
+                {
+                    if (const auto delay = lyt.get_synchronization_element(coordinate); delay != 0)
                     {
-                        if (const auto delay = lyt.get_synchronization_element(coordinate); delay != 0)
-                        {
-                            os << fmt::format(
-                                "        <element><x>{}</x><y>{}</y><z>{}</z><delay>{}</delay></element>\n",
-                                coordinate.x, coordinate.y, coordinate.z, delay);
-                        }
-                        synchronization.advance();
-                    });
-                os << "      </synchronization_elements>\n";
-            }
+                        os << fmt::format("        <element><x>{}</x><y>{}</y><z>{}</z><delay>{}</delay></element>\n",
+                                          coordinate.x, coordinate.y, coordinate.z, delay);
+                    }
+                    synchronization.advance();
+                });
+            os << "      </synchronization_elements>\n";
         }
+
         os << fgl::CLOSE_CLOCKING;
         os << fgl::CLOSE_LAYOUT_METADATA;
 

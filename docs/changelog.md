@@ -111,6 +111,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - **Breaking:** A*, path enumeration, and Yen's algorithm route around the gates and wires of every gate-level
+    layout and take temporary constraints as a separate `obstructions` argument, leaving the caller's data unchanged.
+    `&a_star_distance<Lyt, Dist>` no longer converts to a `distance_functor`; use `a_star_distance_functor`.
   - Avoid redundant progress-callback copies in algorithms and layout writers.
   - Critical-path analysis collapses wire chains to reduce traversal overhead on large layouts.
   - Avoid helper threads for single-worker sampling and contour exploration.
@@ -178,6 +181,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** Gate and cell layouts own clocking, synchronization, and obstructions. Instantiate them directly on coordinate layouts; remove `clocked_layout`, `synchronization_element_layout`, `obstruction_layout`, and `tile_based_layout` wrappers.
+  - **Breaking:** Cell-level layouts address clock zones by tile: all cells of a tile, on every layer, share its
+    clock number and synchronization element. `get_clock_zone` returns the clock zone of a cell.
   - Population-stability results expose the critical dot as `critical_dot` in C++ and Python.
   - SiDB layouts use dot operations and `dot_tag` for dot roles. `assign_sidb` defaults to the
     `NORMAL` tag. Lattice-site constructors
@@ -199,6 +205,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
+  - Gate-layout experiments use direct capability headers and simpler status reporting.
 
 - Gate libraries:
   - `apply_gate_library_to_defective_surface` and `apply_parameterized_gate_library_to_defective_surface`
@@ -339,6 +346,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** Use clocking and obstruction methods directly on gate and cell layouts. `obstructions` holds
+    additional path-search constraints. Cell layouts expose `clone`, `get_clock_zone`, and tile-size accessors, and
+    their `get_clock_number` looks up the tile that contains the cell.
+
   - **Breaking:** The Python class `sidb_layout` names the lattice-based `sidb::layout`
 
   - **Breaking:** `critical_temperature_stats.is_ground_state_transparent` is renamed
@@ -359,9 +370,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     gate-based SiDB simulations, `temp -g` and `opdom`, alone.
   - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
     `help --docs`.
+- Data structures:
+
+  - **Breaking:** The traits `is_clocked_layout_v`, `has_synchronization_elements_v`, `is_tile_based_layout_v`, and
+    the capability traits that every gate-level or cell-level layout satisfies: the clocked-zone traits
+    `has_is_incoming_clocked_v`, `has_is_outgoing_clocked_v`, `has_foreach_incoming_clocked_zone_v`, and
+    `has_foreach_outgoing_clocked_zone_v`; `has_is_obstructed_coordinate_v` and `has_is_obstructed_connection_v`;
+    `has_foreach_tile_v`, `has_foreach_adjacent_tile_v`, `has_foreach_adjacent_opposite_tiles_v`,
+    `has_is_gate_tile_v`, `has_is_wire_tile_v`, `has_is_empty_tile_v`, `has_is_empty_cell_v`, `has_foreach_cell_v`,
+    and `has_is_empty_v`. Use `is_gate_level_layout_v` or `is_cell_level_layout_v`. The unused `is_offset_coord_v`
+    and `has_offset_coord_v` are gone as well.
+  - **Breaking:** The alias `wiring_reduction_layout_type`; `create_wiring_reduction_layout` returns a
+    `wiring_reduction_layout`.
 - I/O:
 
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
+- Python bindings:
+
+  - **Breaking:** The classes `clocked_cartesian_layout`, `clocked_shifted_cartesian_layout`,
+    `clocked_hexagonal_layout`, their row and column variants, `clocked_stacked_cartesian_layout`, and
+    `cartesian_obstruction_layout`, `shifted_cartesian_obstruction_layout`, and `hexagonal_obstruction_layout`. Use
+    the `*_gate_layout` classes. `qca_layout`, `mol_qca_layout`, and `inml_layout` no longer provide
+    `is_incoming_clocked` and `is_outgoing_clocked`.
 - **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
   `charge_distribution_surface`, and the lattice orientation tags; `model/nm_position.hpp` and
   `model/nm_distance.hpp` (use `lattice::nm_position` and `lattice::nm_distance`); the SiQAD coordinate
@@ -402,6 +432,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Yen's algorithm now returns no paths for a zero limit and preserves valid alternatives at each spur node.
+  - Path enumeration now reaches occupied crossing-layer targets under the same constraints as A*.
   - Critical-path analysis now handles long routed paths without overflowing the native stack.
   - `network_balancing` accepts networks without primary outputs.
   - `gold` counts expansions only when a search-space graph expands.
@@ -470,8 +502,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+  - Cell layouts reject zero clock-zone dimensions in constructors and setters.
+  - Gate layouts constructed from coordinate layouts initialize their logic functions.
+  - Clocked degree counts each eligible neighbor once, including neighbors enabled by synchronization.
   - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.
-  - Clocked-layout clones preserve clock overrides without sharing later clock-number edits.
+  - Gate- and cell-level layout clones preserve clock overrides without sharing later clock-number edits.
   - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
     Potential landscapes validate basis indices even for isolated SiDBs and defects.
   - SiDB cell conversion now rejects coordinates outside the target coordinate range.
@@ -502,9 +537,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     kink-rejection policy and reported temperatures.
   - The library walkthrough writes QCA layouts only in QCADesigner and SVG formats.
 
+- Gate libraries:
+
+  - Gate-library application assigns the synchronization delay of each tile to its clock zone.
+
 - I/O:
 
   - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.
+  - QCA SVG output now includes synchronized cells in tiled layouts and wraps latch clock labels within the clock cycle.
+  - QCA SVG output now preserves synchronized cell positions, draws mixed tiles once, and includes partial boundary tiles.
   - FGL round trips now preserve three-phase clocking across all supported topologies.
   - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
   - Transactional writers now report filesystem setup and replacement errors as stream failures. They preserve output permissions and symbolic links to existing files, and reject dangling links and non-regular output files.

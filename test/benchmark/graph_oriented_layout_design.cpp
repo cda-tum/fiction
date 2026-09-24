@@ -21,12 +21,9 @@
 #include "../utils/blueprints/network_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
-#include <fiction/traits.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 
@@ -36,7 +33,7 @@ using namespace fiction::physical_design;
 
 TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
     auto ntk    = blueprints::mux21_network<mockturtle::aig_network>();
     auto params = graph_oriented_layout_design_params{};

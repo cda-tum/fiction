@@ -18,6 +18,7 @@ from .topologies import DISPLAY_NAMES
 
 GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("Size", ("size x", "size y", "size z", "size area")),
+    ("Tile", ("tile x", "tile y")),
     ("I/O", ("inputs", "outputs")),
     ("Elements", ("gates", "wires", "crossings", "synchronization_elements", "cells", "dots")),
     ("Timing", ("critical_path", "throughput")),
@@ -28,7 +29,6 @@ HEADINGS: tuple[str, ...] = ("name", "type", "technology", "topology", "lattice"
 """Identity keys that head a ``ps`` block instead of taking a row of their own."""
 
 UNITS: dict[str, str] = {
-    "size area": "tiles",
     "inputs": "in",
     "outputs": "out",
     "gates": "gates",
@@ -104,6 +104,8 @@ def table_rows(description: dict[str, object]) -> list[tuple[str, str]]:
         "size y": "Height",
         "size z": "Layers",
         "size area": "Grid area",
+        "tile x": "Tile width",
+        "tile y": "Tile height",
         "critical_path": "Critical path",
         "runtime_s": "Runtime (s)",
         "time_total_s": "Runtime (s)",
@@ -151,9 +153,13 @@ def summary(description: dict[str, object]) -> RenderGroup:
             continue
         grouped.update(present)
         if title == "Size":
+            # gate-level layouts measure their grid in tiles; cell-level layouts in cells on each layer
+            unit = "cells per layer" if "technology" in rows else "tiles"
             extent = " x ".join(str(rows[key]) for key in present if key != "size area")
             area = rows.get("size area")
-            value = f"{extent} ({area} tiles)" if extent and area is not None else extent or f"{area} tiles"
+            value = f"{extent} ({area} {unit})" if extent and area is not None else extent or f"{area} {unit}"
+        elif title == "Tile":
+            value = f"{' x '.join(str(rows[key]) for key in present)} cells per clock zone"
         elif title == "I/O":
             value = " / ".join(f"{rows[key]} {UNITS[key]}" for key in present)
         elif title == "Timing":

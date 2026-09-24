@@ -16,16 +16,17 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>            // custom reader for folders of networks
-#include <fiction/networks/name_utils.hpp>                   // name utilities
 #include <fiction/physical_design/determine_clocking.hpp>    // SAT-based clock number assignment
 #include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
 #include <fiction/synthesis/technology_mapping_library.hpp>  // library for technology mapping
 #include <fiction/types.hpp>                                 // pre-defined types
 #include <fiction/verification/equivalence_checking.hpp>     // SAT-based equivalence checking
 
-#include <fmt/format.h>                       // output formatting
-#include <lorina/lorina.hpp>                  // Verilog/BLIF/AIGER/... file parsing
+#include <fmt/format.h>  // output formatting
+#include <lorina/genlib.hpp>
 #include <mockturtle/algorithms/mapper.hpp>   // technology mapping
 #include <mockturtle/io/genlib_reader.hpp>    // call-backs for the GENLIB format
 #include <mockturtle/utils/stopwatch.hpp>     // time measurements
@@ -58,7 +59,7 @@ int main()  // NOLINT
 {
     const std::string network_folder = fmt::format("{}/../benchmarks/IWLS93/", EXPERIMENTS_PATH);
 
-    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout<>>;
 
     experiments::experiment<std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, bool>
         clock_number_assignment_exp{"clock number assignment",
@@ -77,7 +78,8 @@ int main()  // NOLINT
 
     std::vector<mockturtle::gate> gates{};
 
-    const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
+    [[maybe_unused]] const auto read_genlib_result =
+        lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
     assert(read_genlib_result == lorina::return_code::success);
     const mockturtle::tech_library<2> gate_lib{gates};
 

@@ -211,12 +211,9 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             {
                 color = color | detail::CLOCK_COLOR[layout.get_clock_number(t)];
             }
-            if constexpr (has_synchronization_elements_v<Lyt>)
+            if (io_color && layout.is_synchronization_element(t))
             {
-                if (io_color && layout.is_synchronization_element(t))
-                {
-                    color = color | detail::SE_COLOR;
-                }
+                color = color | detail::SE_COLOR;
             }
             if (io_color && layout.is_pi_tile(t))
             {
@@ -294,12 +291,9 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             {
                 const auto ct = layout.get_cell_type(c);
 
-                if constexpr (has_synchronization_elements_v<Lyt>)
+                if (io_color && layout.is_synchronization_element(c))
                 {
-                    if (io_color && layout.is_synchronization_element(c))
-                    {
-                        color = color | detail::SE_COLOR;
-                    }
+                    color = color | detail::SE_COLOR;
                 }
                 if (io_color && Lyt::technology::is_input_cell(ct))
                 {

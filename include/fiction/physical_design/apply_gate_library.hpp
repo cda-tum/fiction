@@ -200,7 +200,8 @@ class apply_gate_library_impl
         return count;
     }
     /**
-     * This function assigns a given FCN gate implementation to the total cell layout.
+     * Assigns a gate implementation to the cells of its tile and the tile's synchronization delay to the clock zone
+     * that contains the tile. A ground wire and a crossing wire share one clock zone, which keeps the larger delay.
      *
      * @param c Top-left cell of the tile where the gate is placed.
      * @param g Gate implementation.
@@ -211,6 +212,12 @@ class apply_gate_library_impl
         const auto start_x = c.x;
         const auto start_y = c.y;
         const auto layer   = c.z;
+
+        if (const auto delay = gate_lyt.get_synchronization_element(gate_lyt.get_tile(n));
+            delay > cell_lyt.get_synchronization_element(c))
+        {
+            cell_lyt.assign_synchronization_element(cell_lyt.get_clock_zone(c), delay);
+        }
 
         for (auto y = 0ul; y < g.size(); ++y)
         {
@@ -270,6 +277,9 @@ class apply_gate_library_impl
  * May pass through, and thereby throw, an `unsupported_gate_type_exception` or an
  * `unsupported_gate_orientation_exception`.
  *
+ * Each clock zone of the cell-level layout receives the synchronization delay of its gate tile. The delay therefore
+ * also covers cells that are added to the zone later, e.g., via cells.
+ *
  * @tparam CellLyt Type of the returned cell-level layout.
  * @tparam GateLibrary Type of the gate library to apply.
  * @tparam GateLyt Type of the gate-level layout to apply the library to.
@@ -328,6 +338,9 @@ template <typename GateLibrary, typename GateLyt>
  *
  * May pass through, and thereby throw, an `unsupported_gate_type_exception`, an
  * `unsupported_gate_orientation_exception` and any further custom exceptions of the gate libraries.
+ *
+ * Each clock zone of the cell-level layout receives the synchronization delay of its gate tile. The delay therefore
+ * also covers cells that are added to the zone later, e.g., via cells.
  *
  * @tparam CellLyt Type of the returned cell-level layout.
  * @tparam GateLibrary Type of the gate library to apply.

@@ -8,7 +8,49 @@
 
 from __future__ import annotations
 
+import pytest
+
 from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_dot_tag
+
+
+def test_owned_cell_capabilities_and_clone() -> None:
+    """Clock numbers and synchronization elements belong to clock zones, i.e., to tiles of cells."""
+    layout = qca_layout((4, 4), "2DDWave")
+    layout.set_tile_size_x(2)
+    layout.set_tile_size_y(2)
+    assert layout.get_tile_size_x() == 2
+    assert layout.get_tile_size_y() == 2
+    assert layout.is_clocking_scheme("2DDWAVE")
+    with pytest.raises(ValueError, match="positive"):
+        layout.set_tile_size_x(0)
+    with pytest.raises(ValueError, match="positive"):
+        layout.set_tile_size_y(0)
+    assert layout.get_tile_size_x() == 2
+    assert layout.get_tile_size_y() == 2
+    assert layout.get_clock_zone((3, 2)) == (1, 1)
+    layout.assign_clock_number((1, 1), 3)
+    layout.assign_synchronization_element((1, 1), 2)
+    layout.obstruct_coordinate((3, 3))
+    layout.obstruct_connection((1, 0), (2, 0))
+    assert layout.get_clock_number((2, 2)) == 3
+    assert layout.get_synchronization_element((2, 2)) == 2
+    assert layout.get_synchronization_element((3, 3)) == 2
+    assert layout.get_synchronization_element((1, 1)) == 0
+    copy = layout.clone()
+    copy.assign_clock_number((1, 1), 0)
+    copy.assign_synchronization_element((1, 1), 0)
+    copy.clear_obstructed_coordinates()
+    copy.clear_obstructed_connections()
+    assert layout.get_clock_number((2, 2)) == 3
+    assert layout.num_se() == 1
+    assert layout.is_obstructed_coordinate((3, 3))
+    assert layout.is_obstructed_connection((1, 0), (2, 0))
+
+    layout.replace_clocking_scheme("USE")
+    assert layout.is_clocking_scheme("USE")
+    assert layout.get_synchronization_element((2, 2)) == 2
+    with pytest.raises(ValueError, match="Unknown clocking scheme"):
+        layout.replace_clocking_scheme("3DDWave")
 
 
 def test_qca_technology():

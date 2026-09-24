@@ -16,12 +16,13 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
 
@@ -518,7 +519,7 @@ TEST_CASE("A* distance", "[distance]")
         }
         SECTION("clocking path distance")
         {
-            using clk_lyt = clocked_layout<lyt>;
+            using clk_lyt = gate_level_layout<lyt>;
 
             SECTION("2DDWave")
             {
@@ -589,7 +590,7 @@ TEST_CASE("A* distance functor", "[distance]")
         }
         SECTION("clocking path distance")
         {
-            using clk_lyt = clocked_layout<lyt>;
+            using clk_lyt = gate_level_layout<lyt>;
 
             SECTION("2DDWave")
             {

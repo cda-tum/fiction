@@ -17,6 +17,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/obstructions.hpp>
 #include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/traits.hpp>
@@ -46,10 +47,12 @@ void enumerate_all_paths_impl(nanobind::module_& m)
     m.def(
         "enumerate_all_paths",
         [](const Lyt& lyt, const fiction::coordinate<Lyt>& source, const fiction::coordinate<Lyt>& target,
-           const fiction::physical_design::path_finding::enumerate_all_paths_params& params)
+           const fiction::physical_design::path_finding::enumerate_all_paths_params& params,
+           const fiction::layouts::obstructions<fiction::coordinate<Lyt>>&           obstructions)
         {
             const auto all_paths = fiction::physical_design::path_finding::enumerate_all_paths<
-                fiction::physical_design::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, params);
+                fiction::physical_design::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, params,
+                                                                            obstructions);
 
             std::vector<std::vector<fiction::coordinate<Lyt>>> paths{};
             paths.reserve(all_paths.size());
@@ -62,7 +65,8 @@ void enumerate_all_paths_impl(nanobind::module_& m)
             return paths;
         },
         py::arg("layout"), py::arg("source"), py::arg("target"),
-        py::arg("params") = fiction::physical_design::path_finding::enumerate_all_paths_params{},
+        py::arg("params")       = fiction::physical_design::path_finding::enumerate_all_paths_params{},
+        py::arg("obstructions") = fiction::layouts::obstructions<fiction::coordinate<Lyt>>{},
         DOC(fiction_physical_design_path_finding_enumerate_all_paths));
 }
 
@@ -82,17 +86,11 @@ void enumerate_all_paths(nanobind::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::enumerate_all_paths_impl<py_cartesian_obstruction_layout>(m);
     detail::enumerate_all_paths_impl<py_cartesian_gate_layout>(m);
-    detail::enumerate_all_paths_impl<py_cartesian_clocked_layout>(m);
     detail::enumerate_all_paths_impl<py_cartesian_layout>(m);
-    detail::enumerate_all_paths_impl<py_shifted_cartesian_obstruction_layout>(m);
     detail::enumerate_all_paths_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::enumerate_all_paths_impl<py_shifted_cartesian_clocked_layout>(m);
     detail::enumerate_all_paths_impl<py_shifted_cartesian_layout>(m);
-    detail::enumerate_all_paths_impl<py_hexagonal_obstruction_layout>(m);
     detail::enumerate_all_paths_impl<py_hexagonal_gate_layout>(m);
-    detail::enumerate_all_paths_impl<py_hexagonal_clocked_layout>(m);
     detail::enumerate_all_paths_impl<py_hexagonal_layout>(m);
 }
 
