@@ -59,7 +59,7 @@ void defect(nanobind::module_& m)
 
     py::class_<fiction::sidb::model::defect>(m, "sidb_defect", DOC(fiction_sidb_model_defect))
         .def(py::init<const fiction::sidb::model::defect_type, const int64_t, const double, const double>(),
-             py::arg("defect_type") = fiction::sidb::model::defect_type::UNKNOWN, py::arg("electric_charge") = 0.0,
+             py::arg("defect_type") = fiction::sidb::model::defect_type::UNKNOWN, py::arg("electric_charge") = 0,
              py::arg("relative_permittivity") = 0.0, py::arg("screening_distance") = 0.0)
 
         .def_ro("type", &fiction::sidb::model::defect::type, DOC(fiction_sidb_model_defect_type))
