@@ -19,9 +19,9 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 
 #include <cstdint>
-#include <memory>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
 
 namespace fiction::layouts::clocking
 {
@@ -43,27 +43,7 @@ class state
     /** @brief Hold-phase extension in full clock cycles. */
     using sync_elem_t = uint8_t;
     /** @brief Creates state with the given scheme. @param s Initial scheme. */
-    explicit state(const clocking_scheme_t& s) : clocking{std::make_unique<clocking_scheme_t>(s)} {}
-    /** @brief Copies clocking and synchronization independently. @param other Source state. */
-    state(const state& other) :
-            clocking{std::make_unique<clocking_scheme_t>(*other.clocking)},
-            synchronization{other.synchronization}
-    {}
-    /** @brief Moves clocking state. @param other Source state. */
-    state(state&& other) noexcept = default;
-    /** @brief Copies independent state. @param other Source state. @return This state. */
-    state& operator=(const state& other)
-    {
-        if (this != &other)
-        {
-            *this = state{other};
-        }
-        return *this;
-    }
-    /** @brief Moves clocking state. @param other Source state. @return This state. */
-    state& operator=(state&& other) noexcept = default;
-    /** @brief Releases the owned scheme and synchronization map. */
-    ~state() = default;
+    explicit state(clocking_scheme_t s) : clocking{std::move(s)} {}
     /**
      * Replaces the stored clocking scheme with the provided one.
      *
@@ -71,7 +51,7 @@ class state
      */
     void replace_clocking_scheme(const clocking_scheme_t& scheme) noexcept
     {
-        clocking = std::make_unique<clocking_scheme_t>(scheme);
+        clocking = scheme;
     }
     /**
      * Overrides the clock number of a clock zone in the stored scheme. A clock zone spans every layer, so the override
@@ -82,7 +62,7 @@ class state
      */
     void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
     {
-        clocking->override_clock_number(static_cast<int64_t>(cz.x), static_cast<int64_t>(cz.y), cn);
+        clocking.override_clock_number(static_cast<int64_t>(cz.x), static_cast<int64_t>(cz.y), cn);
     }
     /**
      * Returns the clock number of a clock zone. A clock zone spans every layer, so the lookup ignores the z-coordinate
@@ -93,7 +73,7 @@ class state
      */
     [[nodiscard]] clock_number_t get_clock_number(const clock_zone& cz) const noexcept
     {
-        return (*clocking)(static_cast<int64_t>(cz.x), static_cast<int64_t>(cz.y));
+        return clocking(static_cast<int64_t>(cz.x), static_cast<int64_t>(cz.y));
     }
     /**
      * Returns the number of clock phases in the layout. Each clock cycle is divided into n phases. In QCA, the number
@@ -103,7 +83,7 @@ class state
      */
     [[nodiscard]] clock_number_t num_clocks() const noexcept
     {
-        return clocking->num_clocks();
+        return clocking.num_clocks();
     }
     /**
      * Returns whether the layout is clocked by a regular clocking scheme with no overwritten zones.
@@ -112,7 +92,7 @@ class state
      */
     [[nodiscard]] bool is_regularly_clocked() const noexcept
     {
-        return clocking->is_regular();
+        return clocking.is_regular();
     }
     /**
      * Compares the stored clocking scheme against the provided name. Predefined names are constants in
@@ -123,7 +103,7 @@ class state
      */
     [[nodiscard]] bool is_clocking_scheme(const std::string_view& name) const noexcept
     {
-        return clocking->name() == name;
+        return clocking.name() == name;
     }
     /**
      * Returns a copy of the stored clocking scheme object.
@@ -132,7 +112,7 @@ class state
      */
     [[nodiscard]] clocking_scheme_t get_clocking_scheme() const noexcept
     {
-        return *clocking;
+        return clocking;
     }
     /**
      * Evaluates whether clock zone `cz2` feeds information to clock zone `cz1`, i.e., whether `cz2` is clocked with a
@@ -225,10 +205,9 @@ class state
 
   private:
     /**
-     * @brief Scheme and manually overridden clock numbers. `scheme` has `const` members and is not assignable, so the
-     * state holds it through a pointer to support `replace_clocking_scheme` and copy assignment.
+     * @brief Scheme and manually overridden clock numbers.
      */
-    std::unique_ptr<clocking_scheme_t> clocking;
+    clocking_scheme_t clocking;
     /** @brief Nonzero synchronization delays indexed by coordinate. */
     std::unordered_map<Coordinate, sync_elem_t> synchronization{};
 };
