@@ -20,7 +20,7 @@
 
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
-#include "fiction/technology/inml/technology.hpp"
+#include "fiction/technology/inml/layout.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
@@ -40,7 +40,7 @@ namespace fiction::inml
  * \times 4\f$ magnet positions with one empty row in most tiles (except for MAJ which needs to be handled differently
  * as this library is not uniform otherwise). Theoretically, it allows for multiple wires in the same tile.
  */
-class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
+class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
 {
   public:
     explicit topolinano_library() = delete;
@@ -124,13 +124,13 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
                     {
                         const auto inp_mark_pos = p.inp.empty() ? opposite(*p.out.begin()) : *p.inp.begin();
 
-                        wire = mark_cell(wire, inp_mark_pos, inml::inml_technology::cell_mark::INPUT);
+                        wire = mark_cell(wire, inp_mark_pos, inml::magnet_type::INPUT);
                     }
                     if (lyt.is_po(n))
                     {
                         const auto out_mark_pos = p.out.empty() ? opposite(*p.inp.begin()) : *p.out.begin();
 
-                        wire = mark_cell(wire, out_mark_pos, inml::inml_technology::cell_mark::OUTPUT);
+                        wire = mark_cell(wire, out_mark_pos, inml::magnet_type::OUTPUT);
                     }
 
                     return wire;
@@ -148,14 +148,10 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
     /**
      * Post-layout optimization that straightens the wire segments to save cells.
      *
-     * @tparam CellLyt Cell-level layout type.
-     * @param lyt The cell-level layout that has been created via application of `set_up_gate`.
+     * @param lyt The iNML layout that has been created via application of `set_up_gate`.
      */
-    template <typename CellLyt>
-    static void post_layout_optimization(CellLyt& lyt) noexcept
+    static void post_layout_optimization(inml::layout& lyt)
     {
-        static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt must be a cell-level layout");
-
         enum class status : std::uint8_t
         {
             SEARCH,
@@ -174,11 +170,9 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
                 // upper hump
                 if (const auto inp = lyt.get_cell_type(hump.front()), out = lyt.get_cell_type(hump.back()),
                     fts = lyt.get_cell_type(lyt.south(hump.front())), bts = lyt.get_cell_type(lyt.south(hump.back()));
-                    (inp == inml::inml_technology::cell_type::INPUT ||
-                     fts == inml::inml_technology::cell_type::NORMAL) &&
-                    (bts == inml::inml_technology::cell_type::NORMAL ||
-                     out == inml::inml_technology::cell_type::OUTPUT ||
-                     bts == inml::inml_technology::cell_type::INVERTER_MAGNET))
+                    (inp == inml::magnet_type::INPUT || fts == inml::magnet_type::NORMAL) &&
+                    (bts == inml::magnet_type::NORMAL || out == inml::magnet_type::OUTPUT ||
+                     bts == inml::magnet_type::INVERTER_MAGNET))
                 {
                     // hump found, check if there is enough space below for merging
                     if (std::all_of(hump.begin() + 1, hump.end() - 2,
@@ -188,13 +182,12 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
                         for (const auto& hc : hump)
                         {
                             const auto s = lyt.south(hc);
-                            if (lyt.get_cell_type(s) != inml::inml_technology::cell_type::INVERTER_MAGNET)
+                            if (lyt.get_cell_type(s) != inml::magnet_type::INVERTER_MAGNET)
                             {
                                 lyt.assign_cell_type(s, lyt.get_cell_type(hc));
-                                lyt.assign_cell_mode(s, lyt.get_cell_mode(hc));
                                 lyt.assign_cell_name(s, lyt.get_cell_name(hc));
                             }
-                            lyt.assign_cell_type(hc, inml::inml_technology::cell_type::EMPTY);
+                            lyt.assign_cell_type(hc, inml::magnet_type::EMPTY);
                             lyt.assign_cell_name(hc, "");
                         }
 
@@ -204,10 +197,8 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
                 // if there are normal cells north of first and last hump cell, this is a lower hump
                 else if (const auto ftn = lyt.get_cell_type(lyt.north(hump.front())),
                          btn            = lyt.get_cell_type(lyt.north(hump.back()));
-                         (inp == inml::inml_technology::cell_type::INPUT ||
-                          ftn == inml::inml_technology::cell_type::NORMAL) &&
-                         (btn == inml::inml_technology::cell_type::NORMAL ||
-                          out == inml::inml_technology::cell_type::OUTPUT))
+                         (inp == inml::magnet_type::INPUT || ftn == inml::magnet_type::NORMAL) &&
+                         (btn == inml::magnet_type::NORMAL || out == inml::magnet_type::OUTPUT))
                 {
                     // hump found, check if there is enough space above for merging
                     if (std::all_of(hump.begin() + 1, hump.end() - 2,
@@ -218,9 +209,8 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
                         {
                             const auto n = lyt.north(hc);
                             lyt.assign_cell_type(n, lyt.get_cell_type(hc));
-                            lyt.assign_cell_mode(n, lyt.get_cell_mode(hc));
                             lyt.assign_cell_name(n, lyt.get_cell_name(hc));
-                            lyt.assign_cell_type(hc, inml::inml_technology::cell_type::EMPTY);
+                            lyt.assign_cell_type(hc, inml::magnet_type::EMPTY);
                             lyt.assign_cell_name(hc, "");
                         }
 
@@ -240,28 +230,28 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
 
             for (decltype(lyt.y()) row = 0; row <= lyt.y(); ++row)
             {
-                std::vector<cell<CellLyt>> hump{};
+                std::vector<inml::layout::cell> hump{};
 
                 for (decltype(lyt.x()) column = 0; column <= lyt.x(); ++column)
                 {
                     // simple state machine for identifying humps and removing them
-                    switch (const auto c = cell<CellLyt>{column, row}; st)
+                    switch (const auto c = inml::layout::cell{column, row}; st)
                     {
                         case status::SEARCH:
                         {
                             switch (const auto t = lyt.get_cell_type(c); t)
                             {
                                 // encountering a normal, input, or inverter magnet triggers collecting hump cells
-                                case inml::inml_technology::cell_type::NORMAL:
-                                case inml::inml_technology::cell_type::INPUT:
-                                case inml::inml_technology::cell_type::INVERTER_MAGNET:
+                                case inml::magnet_type::NORMAL:
+                                case inml::magnet_type::INPUT:
+                                case inml::magnet_type::INVERTER_MAGNET:
                                 {
                                     st = status::COLLECT;
                                     hump.push_back(c);
                                     break;
                                 }
                                 // remain searching
-                                case inml::inml_technology::cell_type::EMPTY:
+                                case inml::magnet_type::EMPTY:
                                 {
                                     break;
                                 }
@@ -279,15 +269,15 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
                             switch (const auto t = lyt.get_cell_type(c); t)
                             {
                                 // collect cells
-                                case inml::inml_technology::cell_type::NORMAL:
-                                case inml::inml_technology::cell_type::INVERTER_MAGNET:
+                                case inml::magnet_type::NORMAL:
+                                case inml::magnet_type::INVERTER_MAGNET:
                                 {
                                     hump.push_back(c);
                                     break;
                                 }
                                 // interesting branch: could be a hump
-                                case inml::inml_technology::cell_type::EMPTY:
-                                case inml::inml_technology::cell_type::OUTPUT:
+                                case inml::magnet_type::EMPTY:
+                                case inml::magnet_type::OUTPUT:
                                 {
                                     handle(hump);
                                     // discard hump cells and start searching again
@@ -307,7 +297,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
                         }
                         case status::SKIP:
                         {
-                            if (const auto t = lyt.get_cell_type(c); t == inml::inml_technology::cell_type::EMPTY)
+                            if (const auto t = lyt.get_cell_type(c); t == inml::magnet_type::EMPTY)
                             {
                                 // skipping over, return to searching
                                 st = status::SEARCH;

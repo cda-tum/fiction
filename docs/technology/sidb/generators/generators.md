@@ -38,6 +38,9 @@ on_the_fly_circuit_design
 .. autoclass:: mnt.pyfiction.generate_random_sidb_layout_params
    :members:
 
+.. autoclass:: mnt.pyfiction.positive_charges
+   :members:
+
 .. autofunction:: mnt.pyfiction.generate_random_sidb_layout
 
 .. autofunction:: mnt.pyfiction.generate_multiple_random_sidb_layouts

@@ -64,11 +64,11 @@ Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Benc
 
 **Header:** `fiction/layouts/io/write_fgl_layout.hpp`
 
-```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const Lyt& lyt, std::ostream& os)
+```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 
 ```
 
-```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const Lyt& lyt, const std::string_view& filename)
+```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const Lyt& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
 
 ```
 
@@ -127,11 +127,11 @@ Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Benc
 
 ```
 
-```{doxygenfunction} fiction::layouts::io::write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})
+```{doxygenfunction} fiction::layouts::io::write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {}, utils::progress_callback on_progress = {})
 
 ```
 
-```{doxygenfunction} fiction::layouts::io::write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {})
+```{doxygenfunction} fiction::layouts::io::write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {}, utils::progress_callback on_progress = {})
 
 ```
 

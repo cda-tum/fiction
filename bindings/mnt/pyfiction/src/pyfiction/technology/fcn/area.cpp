@@ -15,12 +15,12 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/fcn/area.hpp>
+#include <fiction/technology/inml/layout.hpp>
+#include <fiction/technology/mol_qca/layout.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/sidb/layout.hpp>
-#include <fiction/technology/sidb/technology.hpp>
-#include <fiction/traits.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
@@ -36,54 +36,44 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Binds `area` for a layout type, with the layout's cell dimensions as default arguments.
+ *
+ * @tparam Lyt Layout type.
+ * @param m Python module.
+ * @param doc Docstring of the bound `area` overload.
+ */
 template <typename Lyt>
-void area(nanobind::module_& m)
+void area(nanobind::module_& m, const char* doc)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    using tech = fiction::technology<Lyt>;
-
     m.def(
         "area",
-        [](const Lyt& lyt, const double width = tech::CELL_WIDTH, const double height = tech::CELL_HEIGHT,
-           const double hspace = tech::CELL_HSPACE, const double vspace = tech::CELL_VSPACE)
+        [](const Lyt& lyt, const double width, const double height, const double hspace, const double vspace)
         {
-            fiction::fcn::area_stats              stats{};
-            const fiction::fcn::area_params<tech> params{width, height, hspace, vspace};
+            fiction::fcn::area_stats stats{};
 
-            return fiction::fcn::area<Lyt>(lyt, params, &stats);
+            return fiction::fcn::area(
+                lyt,
+                fiction::fcn::area_params<Lyt>{.width = width, .height = height, .hspace = hspace, .vspace = vspace},
+                &stats);
         },
-        py::arg("layout"), py::arg("width") = tech::CELL_WIDTH, py::arg("height") = tech::CELL_HEIGHT,
-        py::arg("hspace") = tech::CELL_HSPACE, py::arg("vspace") = tech::CELL_VSPACE,
-        DOC(fiction_layouts_coords_area_of));
+        nanobind::arg("layout"), nanobind::arg("width") = Lyt::CELL_WIDTH, nanobind::arg("height") = Lyt::CELL_HEIGHT,
+        nanobind::arg("hspace") = Lyt::CELL_HSPACE, nanobind::arg("vspace") = Lyt::CELL_VSPACE, doc);
 }
 
 }  // namespace detail
 
+/**
+ * @brief Registers `area` for QCA, molQCA, iNML, and SiDB layouts.
+ *
+ * @param m Python module.
+ */
 void area(nanobind::module_& m)
 {
-    detail::area<py_qca_layout>(m);
-    detail::area<py_inml_layout>(m);
-    detail::area<py_mol_qca_layout>(m);
-
-    namespace py    = nanobind;
-    using sidb_tech = fiction::sidb::sidb_technology;
-
-    m.def(
-        "area",
-        [](const fiction::sidb::layout& lyt, const double width, const double height, const double hspace,
-           const double vspace)
-        {
-            fiction::fcn::area_stats                   stats{};
-            const fiction::fcn::area_params<sidb_tech> params{.width  = width,
-                                                              .height = height,
-                                                              .hspace = hspace,
-                                                              .vspace = vspace};
-            return fiction::fcn::area(lyt, params, &stats);
-        },
-        py::arg("layout"), py::arg("width") = sidb_tech::CELL_WIDTH, py::arg("height") = sidb_tech::CELL_HEIGHT,
-        py::arg("hspace") = sidb_tech::CELL_HSPACE, py::arg("vspace") = sidb_tech::CELL_VSPACE,
-        DOC(fiction_fcn_area_3));
+    detail::area<fiction::qca::layout>(m, DOC(fiction_fcn_area));
+    detail::area<fiction::mol_qca::layout>(m, DOC(fiction_fcn_area));
+    detail::area<fiction::inml::layout>(m, DOC(fiction_fcn_area));
+    detail::area<fiction::sidb::layout>(m, DOC(fiction_fcn_area_3));
 }
 
 }  // namespace pyfiction

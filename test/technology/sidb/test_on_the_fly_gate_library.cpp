@@ -35,6 +35,7 @@
 #include <array>
 #include <chrono>
 #include <optional>
+#include <type_traits>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -44,10 +45,7 @@ using namespace fiction::synthesis;
 
 TEST_CASE("Parameterized gate library traits", "[parameterized-gate-library]")
 {
-    CHECK(!has_post_layout_optimization_v<on_the_fly_gate_library, qca_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<on_the_fly_gate_library, inml_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<on_the_fly_gate_library, sidb_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<on_the_fly_gate_library, cart_gate_clk_lyt>);
+    CHECK(std::is_same_v<on_the_fly_gate_library::layout, sidb::layout>);
 }
 
 TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeout", "[parameterized-gate-library]")

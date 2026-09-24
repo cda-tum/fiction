@@ -159,8 +159,8 @@ struct lattice_site
     }
 };
 /**
- * The row of a site counted in single SiDB rows: `2 * y + z`. This is the y-coordinate of the Cartesian cell-level
- * layouts that `physical_design::apply_gate_library` produces.
+ * The row of a site counted in single SiDB rows: `2 * y + z`. SiDB gate libraries describe their gates on a grid of
+ * such rows.
  *
  * @param s Site.
  * @return Row of `s`.
@@ -186,6 +186,20 @@ struct lattice_site
         throw std::out_of_range("Row exceeds the lattice-site range");
     }
     return {x, static_cast<int32_t>(y), static_cast<int8_t>(row - (2 * y))};
+}
+/**
+ * The site that a gate-library grid coordinate refers to. SiDB gate libraries describe gates on a grid whose rows are
+ * single SiDB rows, so row `y` becomes unit cell `y / 2`, basis site `y mod 2`.
+ *
+ * @tparam Coordinate Grid coordinate type, e.g., `layouts::coords::offset` or `layouts::coords::cube`.
+ * @param c Grid coordinate.
+ * @return The site of `c`.
+ * @throws std::out_of_range if the row exceeds the range of lattice sites.
+ */
+template <typename Coordinate>
+[[nodiscard]] constexpr lattice_site to_lattice_site(const Coordinate& c)
+{
+    return site_at_row(static_cast<int32_t>(c.x), static_cast<int64_t>(c.y));
 }
 /**
  * All sites in the rectangle spanned by two corner sites, in raster order (top to bottom, left to right), both corners

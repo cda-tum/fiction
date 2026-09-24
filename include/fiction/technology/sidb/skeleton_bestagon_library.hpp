@@ -21,7 +21,7 @@
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
-#include "fiction/technology/sidb/technology.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/traits.hpp"
 
 namespace fiction::sidb
@@ -31,8 +31,7 @@ namespace fiction::sidb
  * This library contains SiDB I/O wires designed for both 1- and 2-input functions.
  * Each wire comprises 2 BDL pairs. The library contains all mirrored versions, a double wire and a crossing.
  */
-class skeleton_bestagon_library
-        : public fcn::gate_library<sidb::sidb_technology, 60, 46>  // width and height of a hexagon
+class skeleton_bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>  // width and height of a hexagon
 {
   public:
     explicit skeleton_bestagon_library() = delete;

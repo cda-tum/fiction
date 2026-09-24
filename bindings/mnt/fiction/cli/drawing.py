@@ -30,6 +30,7 @@ from mnt.pyfiction import (
     write_dot_layout,
     write_dot_network,
     write_mol_qca_layout_svg,
+    write_mol_qca_layout_svg_params,
     write_qca_layout_svg,
     write_qca_layout_svg_params,
     write_sidb_layout_svg,
@@ -122,14 +123,16 @@ def write_svg(entry: CellEntry, path: Path, *, simple: bool, on_progress: Progre
         CommandError: For iNML layouts, which have no SVG drawer.
     """
     layout = entry.layout
-    if isinstance(layout, qca_layout | mol_qca_layout):
+    if isinstance(layout, qca_layout):
         params = write_qca_layout_svg_params()
         params.simple = simple
         params.on_progress = on_progress
-        if isinstance(layout, qca_layout):
-            write_qca_layout_svg(layout, str(path), params)
-        else:
-            write_mol_qca_layout_svg(layout, str(path), params)
+        write_qca_layout_svg(layout, str(path), params)
+    elif isinstance(layout, mol_qca_layout):
+        mol_params = write_mol_qca_layout_svg_params()
+        mol_params.simple = simple
+        mol_params.on_progress = on_progress
+        write_mol_qca_layout_svg(layout, str(path), mol_params)
     elif isinstance(layout, sidb_layout):
         sidb_params = write_sidb_layout_svg_params()
         sidb_params.on_progress = on_progress

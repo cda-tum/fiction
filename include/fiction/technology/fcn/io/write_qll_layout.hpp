@@ -18,9 +18,10 @@
 #pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
-#include "fiction/technology/inml/technology.hpp"
-#include "fiction/technology/qca/technology.hpp"
-#include "fiction/traits.hpp"
+#include "fiction/technology/inml/io/magcad_components.hpp"
+#include "fiction/technology/inml/layout.hpp"
+#include "fiction/technology/mol_qca/layout.hpp"
+#include "fiction/technology/qca/layout.hpp"
 #include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/progress.hpp"
 #include "fiction/utils/version_info.hpp"
@@ -28,13 +29,13 @@
 #include <fmt/format.h>
 
 #include <algorithm>
-#include <array>
-#include <cstddef>
+#include <concepts>
 #include <cstdint>
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
 #include <string_view>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -102,19 +103,6 @@ inline constexpr const char* PROPERTY_LENGTH      = "length";
 inline constexpr const char* PIN =
     "\t\t<pin tech=\"{}\" name=\"{}\" direction=\"{}\" id=\"{}\" x=\"{}\" y=\"{}\" layer=\"{}\"/>\n";
 
-inline constexpr const std::array<const char*, 6> COMPONENTS{"Magnet", "Coupler",  "Cross Wire",
-                                                             "And",    "Inverter", "Or"};
-
-inline const std::unordered_map<inml::inml_technology::cell_type, uint8_t> INML_COMPONENT_SELECTOR{
-    {inml::inml_technology::cell_type::NORMAL, 0},
-    {inml::inml_technology::cell_type::INPUT, 0},
-    {inml::inml_technology::cell_type::OUTPUT, 0},
-    {inml::inml_technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
-    {inml::inml_technology::cell_type::CROSSWIRE_MAGNET, 2},
-    {inml::inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
-    {inml::inml_technology::cell_type::INVERTER_MAGNET, 4},
-    {inml::inml_technology::cell_type::SLANTED_EDGE_UP_MAGNET, 5}};
-
 }  // namespace qll
 
 template <typename Lyt>
@@ -138,7 +126,7 @@ class write_qll_layout_impl
 
     void run()
     {
-        if (has_inml_technology_v<Lyt> && !has_border_io_pins())
+        if (std::is_same_v<Lyt, inml::layout> && !has_border_io_pins())
         {
             throw std::invalid_argument(
                 "the layout does not fulfill all requirements to be written as a QLL file because it does not have "
@@ -162,7 +150,7 @@ class write_qll_layout_impl
 
     const layouts::bounding_box_2d<Lyt> bb;
 
-    std::vector<cell<Lyt>> sorted_pi_list, sorted_po_list;
+    std::vector<typename Lyt::cell> sorted_pi_list, sorted_po_list;
 
     std::ostream& os;
     /** @brief Receives serialization progress. */
@@ -172,44 +160,42 @@ class write_qll_layout_impl
 
     static constexpr auto tech_name = []
     {
-        if constexpr (has_inml_technology_v<Lyt>)
+        if constexpr (std::is_same_v<Lyt, inml::layout>)
         {
             return "iNML";
         }
-        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
+        else
         {
             return "MolFCN";
         }
-        else
-        {
-            return "?";
-        }
     }();
 
-    [[nodiscard]] std::vector<cell<Lyt>> sorted_pis() const noexcept
+    [[nodiscard]] std::vector<typename Lyt::cell> sorted_pis() const noexcept
     {
-        std::vector<cell<Lyt>> pi_list{};
+        std::vector<typename Lyt::cell> pi_list{};
         lyt.foreach_pi([&pi_list](const auto& pi) { pi_list.push_back(pi); });
-        std::ranges::sort(pi_list, [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
+        std::ranges::sort(pi_list,
+                          [](const auto& c1, const auto& c2) { return c1.y < c2.y || (c1.y == c2.y && c1.x < c2.x); });
 
         return pi_list;
     }
 
-    [[nodiscard]] std::vector<cell<Lyt>> sorted_pos() const noexcept
+    [[nodiscard]] std::vector<typename Lyt::cell> sorted_pos() const noexcept
     {
-        std::vector<cell<Lyt>> po_list{};
+        std::vector<typename Lyt::cell> po_list{};
         lyt.foreach_po([&po_list](const auto& po) { po_list.push_back(po); });
-        std::ranges::sort(po_list, [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
+        std::ranges::sort(po_list,
+                          [](const auto& c1, const auto& c2) { return c1.y < c2.y || (c1.y == c2.y && c1.x < c2.x); });
 
         return po_list;
     }
 
-    [[nodiscard]] auto bb_x(const cell<Lyt>& c) const noexcept
+    [[nodiscard]] auto bb_x(const typename Lyt::cell& c) const noexcept
     {
         return static_cast<decltype(c.x)>(c.x - bb.get_min().x);
     }
 
-    [[nodiscard]] auto bb_y(const cell<Lyt>& c) const noexcept
+    [[nodiscard]] auto bb_y(const typename Lyt::cell& c) const noexcept
     {
         return static_cast<decltype(c.y)>(c.y - bb.get_min().y);
     }
@@ -244,6 +230,22 @@ class write_qll_layout_impl
         return all_border_pins;
     }
 
+    /**
+     * @brief Number of clock phases: the layout's, or 4 for molQCA, whose cells name one of four phases themselves.
+     * @return Number of clock phases.
+     */
+    [[nodiscard]] uint32_t num_clocks() const noexcept
+    {
+        if constexpr (std::is_same_v<Lyt, mol_qca::layout>)
+        {
+            return 4u;
+        }
+        else
+        {
+            return static_cast<uint32_t>(lyt.num_clocks());
+        }
+    }
+
     void write_header()
     {
         os << fmt::format(qll::VERSION_HEADER, FICTION_VERSION, FICTION_REPO);
@@ -255,13 +257,13 @@ class write_qll_layout_impl
 
         os << fmt::format(qll::OPEN_SETTINGS, tech_name);
 
-        os << fmt::format(qll::GENERAL_SETTINGS, lyt.x(), lyt.y(), (lyt.z() > 0 ? "true" : "false"), lyt.num_clocks());
+        os << fmt::format(qll::GENERAL_SETTINGS, lyt.x(), lyt.y(), (lyt.z() > 0 ? "true" : "false"), num_clocks());
 
-        if constexpr (has_inml_technology_v<Lyt>)
+        if constexpr (std::is_same_v<Lyt, inml::layout>)
         {
             os << qll::INML_SETTINGS;
         }
-        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
+        else
         {
             os << qll::MQCA_SETTINGS;
         }
@@ -274,14 +276,14 @@ class write_qll_layout_impl
     {
         os << qll::OPEN_COMPONENTS;
 
-        if constexpr (has_inml_technology_v<Lyt>)
+        if constexpr (std::is_same_v<Lyt, inml::layout>)
         {
-            for (const auto& comp : qll::COMPONENTS)
+            for (const auto& comp : inml::io::detail::COMPONENTS)
             {
                 os << fmt::format(qll::INML_COMPONENT_ITEM, tech_name, comp);
             }
         }
-        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
+        else
         {
             os << qll::MQCA_COMPONENT_ITEM;
         }
@@ -303,10 +305,8 @@ class write_qll_layout_impl
 
     void write_layout()
     {
-        utils::progress_reporter      progress{on_progress, "writing rows",
-                                               (static_cast<std::size_t>(lyt.y()) + 1) *
-                                                   (static_cast<std::size_t>(lyt.z()) + 1)};
-        std::unordered_set<cell<Lyt>> skip{};
+        utils::progress_reporter               progress{on_progress, "writing rows", (lyt.y() + 1) * (lyt.z() + 1)};
+        std::unordered_set<typename Lyt::cell> skip{};
 
         os << qll::OPEN_LAYOUT;
 
@@ -316,7 +316,7 @@ class write_qll_layout_impl
             {
                 for (decltype(lyt.x()) col = 0; col <= lyt.x(); ++col)
                 {
-                    const auto c    = cell<Lyt>{col, row, layer};
+                    const auto c    = typename Lyt::cell{col, row, layer};
                     const auto type = lyt.get_cell_type(c);
 
                     // skip empty cells and cells marked as to be skipped as well (duh...)
@@ -326,43 +326,12 @@ class write_qll_layout_impl
                     }
 
                     // write iNML cell
-                    if constexpr (has_inml_technology_v<Lyt>)
+                    if constexpr (std::is_same_v<Lyt, inml::layout>)
                     {
-                        // if an AND or an OR structure is encountered, the next two magnets in southern direction need
-                        // to be skipped
-                        if (type == inml::inml_technology::cell_type::SLANTED_EDGE_UP_MAGNET ||
-                            type == inml::inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET)
-                        {
-                            skip.insert({c.x, c.y + 1});
-                            skip.insert({c.x, c.y + 2});
-                        }
-                        // if a coupler is encountered, skip all magnets relating to the fan-out structure
-                        else if (type == inml::inml_technology::cell_type::FANOUT_COUPLER_MAGNET)
-                        {
-                            skip.insert({c.x, c.y + 1});
-                            skip.insert({c.x, c.y + 2});
-                            skip.insert({c.x + 1, c.y});
-                            skip.insert({c.x + 1, c.y + 2});
-                        }
-                        // if a cross wire is encountered, skip all magnets relating to the crossing structure
-                        else if (type == inml::inml_technology::cell_type::CROSSWIRE_MAGNET)
-                        {
-                            skip.insert({c.x + 2, c.y});
-                            skip.insert({c.x, c.y + 2});
-                            skip.insert({c.x + 1, c.y + 1});
-                            skip.insert({c.x + 2, c.y + 2});
-                        }
-                        // inverters are single structures taking up 4 magnets in the library, so skip the next 3 if
-                        // encountered one
-                        else if (type == inml::inml_technology::cell_type::INVERTER_MAGNET)
-                        {
-                            skip.insert({c.x + 1, c.y});
-                            skip.insert({c.x + 2, c.y});
-                            skip.insert({c.x + 3, c.y});
-                        }
+                        inml::io::detail::skip_component_magnets(type, c, skip);
 
-                        if (const auto it = qll::INML_COMPONENT_SELECTOR.find(type);
-                            it != qll::INML_COMPONENT_SELECTOR.end())
+                        if (const auto it = inml::io::detail::COMPONENT_SELECTOR.find(type);
+                            it != inml::io::detail::COMPONENT_SELECTOR.end())
                         {
                             os << fmt::format(qll::OPEN_INML_LAYOUT_ITEM, it->second, cell_id++, bb_x(c), bb_y(c));
                         }
@@ -373,7 +342,7 @@ class write_qll_layout_impl
 
                         os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, lyt.get_clock_number(c));
 
-                        if (type == inml::inml_technology::cell_type::INVERTER_MAGNET)
+                        if (type == inml::magnet_type::INVERTER_MAGNET)
                         {
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_LENGTH, 4);
                         }
@@ -381,26 +350,26 @@ class write_qll_layout_impl
                         os << qll::CLOSE_LAYOUT_ITEM;
                     }
                     // write mQCA cell
-                    else if constexpr (has_qca_technology_v<Lyt>)
+                    else if constexpr (std::is_same_v<Lyt, qca::layout>)
                     {
                         const auto mode = lyt.get_cell_mode(c);
 
                         // write normal cell
-                        if (qca::qca_technology::is_normal_cell(type))
+                        if (type == qca::cell_type::NORMAL)
                         {
                             os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, lyt.get_clock_number(c));
                             os << qll::CLOSE_LAYOUT_ITEM;
                         }
                         // constant cells are handled as input pins
-                        else if (qca::qca_technology::is_constant_cell(type))
+                        else if (qca::is_constant(type))
                         {
-                            const auto const_name = qca::qca_technology::is_const_0_cell(type) ? "const0" : "const1";
+                            const auto const_name = (type == qca::cell_type::CONST_0) ? "const0" : "const1";
                             os << fmt::format(qll::PIN, tech_name, const_name, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
                         }
 
                         // write via cell
-                        if (qca::qca_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
+                        if (mode == qca::cell_mode::VERTICAL && c.z != lyt.z())
                         {
                             os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
                                               (c.z * 2) + 1);
@@ -409,36 +378,22 @@ class write_qll_layout_impl
                         }
                     }
                     // write molQCA cell
-                    else if constexpr (has_mol_qca_technology_v<Lyt>)
+                    else if constexpr (std::is_same_v<Lyt, mol_qca::layout>)
                     {
-                        const auto mode = lyt.get_cell_mode(c);
-
                         // write normal cell
-                        if (qca::mol_qca_technology::is_normal_cell(type))
+                        if (mol_qca::is_normal(type))
                         {
-                            // Phase is encoded in the cell symbol, not in the gate-layout clock number, because each
-                            // 10×10 tile spans a full a→d phase cycle; correctness relies on the clocking scheme
-                            // keeping path lengths tile-synchronized.
-                            const auto phase = qca::mol_qca_technology::cell_clock_number(type);
+                            // each regular molQCA cell names its own clock phase
+                            const auto phase = mol_qca::clock_number(type);
 
                             os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, phase);
                             os << qll::CLOSE_LAYOUT_ITEM;
-
-                            // write via cell
-                            if (qca::mol_qca_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
-                            {
-                                os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
-                                                  (c.z * 2) + 1);
-                                os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, phase);
-                                os << qll::CLOSE_LAYOUT_ITEM;
-                            }
                         }
                         // constant cells are handled as input pins
-                        else if (qca::mol_qca_technology::is_constant_cell(type))
+                        else if (mol_qca::is_constant(type))
                         {
-                            const auto const_name =
-                                qca::mol_qca_technology::is_const_0_cell(type) ? "const0" : "const1";
+                            const auto const_name = (type == mol_qca::cell_type::CONST_0) ? "const0" : "const1";
                             os << fmt::format(qll::PIN, tech_name, const_name, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
                         }
                     }
@@ -457,43 +412,48 @@ class write_qll_layout_impl
 }  // namespace detail
 
 /**
- * Writes a cell-level QCA, molQCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
+ * Layouts that the QLL format describes: QCA, molQCA, and iNML layouts.
+ */
+template <typename Lyt>
+concept qll_layout =
+    std::same_as<Lyt, qca::layout> || std::same_as<Lyt, mol_qca::layout> || std::same_as<Lyt, inml::layout>;
+
+/**
+ * Writes a QCA, molQCA, or iNML layout to a qll file that is used by ToPoliNano & MagCAD
  * (https://topolinano.polito.it/), an EDA tool and a physical simulator for the iNML technology platform as well as
  * SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical simulator for the molQCA (mQCA) technology
  * platform.
  *
  * This overload uses an output stream to write into.
  *
- * @tparam Lyt Cell-level QCA, molQCA, or iNML layout type.
+ * @tparam Lyt `qca::layout`, `mol_qca::layout`, or `inml::layout`.
  * @param lyt The layout to be written.
- * @param on_progress Receives completed serialization work.
  * @param os The output stream to write into.
+ * @param on_progress Receives completed serialization work.
+ * @throws std::invalid_argument if an iNML layout has no I/O pins or they are not routed to the layout's borders.
  */
-template <typename Lyt>
+template <qll_layout Lyt>
 void write_qll_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_inml_technology_v<Lyt> || has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>,
-                  "Lyt must be an iNML, QCA or a molQCA layout");
-
     detail::write_qll_layout_impl p{lyt, os, std::move(on_progress)};
 
     p.run();
 }
 /**
- * Writes a cell-level QCA, molQCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
+ * Writes a QCA, molQCA, or iNML layout to a qll file that is used by ToPoliNano & MagCAD
  * (https://topolinano.polito.it/), an EDA tool and a physical simulator for the iNML technology platform as well as
  * SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical simulator for the molQCA (mQCA) technology
  * platform.
  *
  * This overload uses a file name to create and write into.
  *
- * @tparam Lyt Cell-level QCA, molQCA, or iNML layout type.
+ * @tparam Lyt `qca::layout`, `mol_qca::layout`, or `inml::layout`.
  * @param lyt The layout to be written.
- * @param on_progress Receives completed serialization work.
  * @param filename The file name to create and write into. Should preferably use the `.qll` extension.
+ * @param on_progress Receives completed serialization work.
+ * @throws std::invalid_argument if an iNML layout has no I/O pins or they are not routed to the layout's borders.
  */
-template <typename Lyt>
+template <qll_layout Lyt>
 void write_qll_layout(const Lyt& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
 {
     fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_qll_layout(lyt, os, on_progress); });

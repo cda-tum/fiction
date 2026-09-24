@@ -18,10 +18,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
-#include <fiction/technology/qca/technology.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/utils/version_info.hpp>
 
 #include <fmt/format.h>
@@ -36,7 +34,7 @@ using namespace fiction::qca::io;
 
 TEST_CASE("Write empty QCAD layout", "[qcad]")
 {
-    using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
+    using qca_layout = qca::layout;
 
     const qca_layout layout{{2, 2, 1}, "empty layout"};
 
@@ -158,19 +156,19 @@ TEST_CASE("Write empty QCAD layout", "[qcad]")
 
 TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
 {
-    using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
+    using qca_layout = qca::layout;
 
     qca_layout layout{{4, 4}, "AND"};
 
-    layout.assign_cell_type({0, 2}, qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 4}, qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0}, qca_technology::cell_type::CONST_0);
-    layout.assign_cell_type({2, 1}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 2}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({4, 2}, qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2}, qca::cell_type::INPUT);
+    layout.assign_cell_type({2, 4}, qca::cell_type::INPUT);
+    layout.assign_cell_type({2, 0}, qca::cell_type::CONST_0);
+    layout.assign_cell_type({2, 1}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2}, qca::cell_type::OUTPUT);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 4}, "b");
@@ -774,24 +772,24 @@ TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
 
 TEST_CASE("Write wire crossing", "[qcad]")
 {
-    using qca_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
+    using qca_layout = qca::layout;
 
     qca_layout layout{{4, 4, 1}, "Crossover"};
 
-    layout.assign_cell_type({0, 2, 0}, qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0, 0}, qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({1, 2, 0}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2, 0}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2, 0}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 1, 1}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2, 1}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3, 1}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 4, 0}, qca_technology::cell_type::OUTPUT);
-    layout.assign_cell_type({4, 2, 0}, qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_type({2, 0, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_type({1, 2, 0}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 0}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2, 0}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 1, 1}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 1}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3, 1}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 4, 0}, qca::cell_type::OUTPUT);
+    layout.assign_cell_type({4, 2, 0}, qca::cell_type::OUTPUT);
 
-    layout.assign_cell_mode({2, 1, 1}, qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({2, 2, 1}, qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({2, 3, 1}, qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 1, 1}, qca::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 2, 1}, qca::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 3, 1}, qca::cell_mode::CROSSOVER);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 0}, "b");

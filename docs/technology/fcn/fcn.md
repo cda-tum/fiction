@@ -56,11 +56,11 @@ io/io
 :members:
 ```
 
-```{doxygenfunction} fiction::fcn::area(const Lyt& lyt, const area_params<technology<Lyt>>& ps = {}, area_stats* pst = nullptr)
+```{doxygenfunction} fiction::fcn::area(const Lyt& lyt, const area_params<Dims>& ps = {}, area_stats* pst = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::fcn::area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<technology<Lyt>>& ps = {}, area_stats* pst = nullptr)
+```{doxygenfunction} fiction::fcn::area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<Lyt>& ps = {}, area_stats* pst = nullptr)
 
 ```
 

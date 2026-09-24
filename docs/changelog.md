@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
+  - `physical_design::cell_grid_extent` returns the extent of the cell grid that a gate library spans on a
+    gate-level layout
   - SiDB design and simulation applications support shared millisecond timeouts, including defect-aware circuit retries.
   - `utils::progress_callback` and `utils::progress_reporter` let long-running algorithms report
     progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
@@ -38,8 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
-    `sidb::layout` stores tagged dots and defects without templates. `to_sidb_layout` converts
-    Cartesian cell-level layouts
+    `sidb::layout` stores tagged dots and defects without templates
   - `sidb::charge_distribution` assigns one charge state per SiDB and carries its energy;
     `sidb::simulation::result` stores one layout plus its physically valid configurations
   - `sidb::simulation::potential_landscape` stores static electrostatics for reuse across
@@ -145,6 +146,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     SiDB header dependency
   - `graph_oriented_layout_design`, `post_layout_optimization`, and `wiring_reduction` are no longer
     `noexcept`, so an exception of a progress callback propagates to the caller
+  - **Breaking:** `fcn::area_params` takes the layout type whose cell dimensions it defaults to, e.g.,
+    `area_params<qca::layout>`
 
 - Build system:
 
@@ -181,9 +184,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
-  - **Breaking:** Gate and cell layouts own clocking, synchronization, and obstructions. Instantiate them directly on coordinate layouts; remove `clocked_layout`, `synchronization_element_layout`, `obstruction_layout`, and `tile_based_layout` wrappers.
-  - **Breaking:** Cell-level layouts address clock zones by tile: all cells of a tile, on every layer, share its
-    clock number and synchronization element. `get_clock_zone` returns the clock zone of a cell.
+  - **Breaking:** Gate-level layouts own clocking, synchronization, and obstructions. Instantiate them directly on coordinate layouts; remove `clocked_layout`, `synchronization_element_layout`, `obstruction_layout`, and `tile_based_layout` wrappers.
+  - **Breaking:** QCA, molQCA, and iNML have dedicated layout types, `qca::layout`, `mol_qca::layout`, and
+    `inml::layout`, which replace `cell_level_layout`. Each carries only what its technology needs, and copies are
+    independent. molQCA and iNML layouts are planar, only QCA cells have modes and synchronization elements, and
+    molQCA cells name their own clock phase, so molQCA layouts have no clock zones.
+  - **Breaking:** QCA and iNML layouts address clock zones by tile: all cells of a tile, on every layer, share its
+    clock number. `get_clock_zone` returns the clock zone of a cell.
+  - **Breaking:** molQCA lives in `technology/mol_qca/` and `namespace fiction::mol_qca`, together with
+    `sim7_mol_library` and `write_mol_qca_layout_svg`. iNML names its element type `inml::magnet_type`.
   - Population-stability results expose the critical dot as `critical_dot` in C++ and Python.
   - SiDB layouts use dot operations and `dot_tag` for dot roles. `assign_sidb` defaults to the
     `NORMAL` tag. Lattice-site constructors
@@ -202,12 +211,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
+  - QCA, molQCA, and iNML each document their layout on a page of its own, like SiDB, and the Python tabs list every
+    bound symbol of their sections.
 
 - Experiments:
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
+  - The Bestagon and hexagonalization experiments compute their unchanged area from the cell-grid extent.
   - Gate-layout experiments use direct capability headers and simpler status reporting.
 
 - Gate libraries:
+  - **Breaking:** `apply_gate_library<GateLibrary>` and `apply_parameterized_gate_library<GateLibrary>` return the
+    layout type of the library and take no cell-layout template argument. SiDB libraries produce an `sidb::layout`
+    directly. `fcn::gate_library` takes the produced layout type instead of a technology tag.
   - `apply_gate_library_to_defective_surface` and `apply_parameterized_gate_library_to_defective_surface`
     take the defective surface as a `sidb::layout` and return one that carries its defects.
     SiDB gate placement, surface analysis, and circuit design no longer take a cell-layout template argument.
@@ -227,13 +242,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     data they serialize: `layouts/io/`, `networks/io/`, `synthesis/io/`,
     `technology/<tech>/io/`, and `technology/sidb/simulation/io/` for the writers of
     simulation results. The SVG writer is split by the technology it draws into
-    `qca/io/write_qca_layout_svg.hpp` and `sidb/io/write_sidb_layout_svg.hpp`; the QLL
+    `qca/io/write_qca_layout_svg.hpp`, `mol_qca/io/write_mol_qca_layout_svg.hpp`, and
+    `sidb/io/write_sidb_layout_svg.hpp`; the QLL
     writer, which serves iNML, QCA, and molQCA alike, sits in `fcn/io/`
-  - `technology/` is split by technology into `fcn/`, `qca/`, `inml/`, and `sidb/`.
+  - `technology/` is split by technology into `fcn/`, `qca/`, `mol_qca/`, `inml/`, and `sidb/`.
     The SiDB subtree gains `surfaces/`, `model/`, `simulation/` (with `engines/`,
     `analysis/`, `defects/`, `logic/`, and `io/`), `generators/`, and `io/`. The
-    `cell_technologies.hpp` umbrella is gone; each technology's tag is in its own
-    `technology.hpp`
+    `cell_technologies.hpp` umbrella is gone; each technology's layout is in its own
+    `layout.hpp`
   - `utils/` exists once, at the top, and holds what is domain-agnostic: `math/`, `stl/`,
     `graph/` (`graph_coloring`, `mincross`), `optimization/` (`simulated_annealing`),
     and `io/` (`csv_writer`). A module's own helpers sit directly in the module, so
@@ -248,10 +264,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     becomes `fiction::sidb::model::simulation_parameters`, `design_sidb_gates` becomes
     `fiction::sidb::generators::design_gates`, and `gate_library::fcn_gate` becomes
     `gate`. Published names are kept, so `qca_one_library` stays
-    `fiction::qca::qca_one_library`, and so do the technology tags `qca_technology`,
-    `mol_qca_technology`, `inml_technology` and `sidb_technology`: bare `technology`
-    reads as nothing in a `Technology` template argument and would shadow the
-    `fiction::technology<Lyt>` trait in its own namespace
+    `fiction::qca::qca_one_library`
   - The coordinate types are renamed: `fiction::offset::ucoord_t` becomes
     `fiction::layouts::coords::offset`, and likewise for `cube` and `siqad`
   - The cluster hierarchy that `clustercomplete` and `ground_state_space` build is
@@ -346,9 +359,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
-  - **Breaking:** Use clocking and obstruction methods directly on gate and cell layouts. `obstructions` holds
-    additional path-search constraints. Cell layouts expose `clone`, `get_clock_zone`, and tile-size accessors, and
-    their `get_clock_number` looks up the tile that contains the cell.
+  - **Breaking:** Use clocking and obstruction methods directly on gate-level layouts. `obstructions` holds
+    additional path-search constraints. `qca_layout` and `inml_layout` expose `get_clock_zone` and tile-size
+    accessors, and their `get_clock_number` looks up the tile that contains the cell.
+
+  - **Breaking:** Cell types are flat enums: `qca_cell_type`, `qca_cell_mode`, `mol_qca_cell_type`, and
+    `inml_magnet_type`. `mol_qca_layout` takes no clocking scheme, and `write_mol_qca_layout_svg` takes
+    `write_mol_qca_layout_svg_params`. Cell layouts support `copy.copy` and `==`.
 
   - **Breaking:** The Python class `sidb_layout` names the lattice-based `sidb::layout`
 
@@ -373,15 +390,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - **Breaking:** The traits `is_clocked_layout_v`, `has_synchronization_elements_v`, `is_tile_based_layout_v`, and
-    the capability traits that every gate-level or cell-level layout satisfies: the clocked-zone traits
+    the capability traits that every gate-level layout satisfies: the clocked-zone traits
     `has_is_incoming_clocked_v`, `has_is_outgoing_clocked_v`, `has_foreach_incoming_clocked_zone_v`, and
     `has_foreach_outgoing_clocked_zone_v`; `has_is_obstructed_coordinate_v` and `has_is_obstructed_connection_v`;
     `has_foreach_tile_v`, `has_foreach_adjacent_tile_v`, `has_foreach_adjacent_opposite_tiles_v`,
     `has_is_gate_tile_v`, `has_is_wire_tile_v`, `has_is_empty_tile_v`, `has_is_empty_cell_v`, `has_foreach_cell_v`,
-    and `has_is_empty_v`. Use `is_gate_level_layout_v` or `is_cell_level_layout_v`. The unused `is_offset_coord_v`
+    and `has_is_empty_v`. Use `is_gate_level_layout_v` or `is_cell_grid_v`. The unused `is_offset_coord_v`
     and `has_offset_coord_v` are gone as well.
   - **Breaking:** The alias `wiring_reduction_layout_type`; `create_wiring_reduction_layout` returns a
     `wiring_reduction_layout`.
+  - **Breaking:** `cell_level_layout`; the technology tags `qca_technology`, `mol_qca_technology`, `inml_technology`,
+    and `sidb_technology` with their predicates and `cell_mark` enums; the traits `technology`,
+    `has_*_technology_v`, `is_cell_level_layout_v`, and `has_post_layout_optimization_v`; the aliases
+    `qca_cell_clk_lyt`, `mol_qca_cell_clk_lyt`, `inml_cell_clk_lyt`, `sidb_cell_clk_lyt`, `sidb_cell_clk_lyt_cube`,
+    and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts and
+    `is_cell_grid_v`.
+  - **Breaking:** The header `sidb/technology.hpp`. `sidb::dot_tag` is defined in `sidb/layout.hpp`, like the cell
+    types of the other technologies.
 - I/O:
 
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
@@ -392,13 +417,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `cartesian_obstruction_layout`, `shifted_cartesian_obstruction_layout`, and `hexagonal_obstruction_layout`. Use
     the `*_gate_layout` classes. `qca_layout`, `mol_qca_layout`, and `inml_layout` no longer provide
     `is_incoming_clocked` and `is_outgoing_clocked`.
+  - **Breaking:** The classes `qca_technology`, `mol_qca_technology`, and `inml_technology`. Cell layouts no longer
+    provide `clone`, obstruction methods, clocked-neighborhood queries, `get_cells_by_type`, and
+    `num_cells_of_given_type`; `mol_qca_layout` has no clocking and no cell modes.
 - **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
   `charge_distribution_surface`, and the lattice orientation tags; `model/nm_position.hpp` and
   `model/nm_distance.hpp` (use `lattice::nm_position` and `lattice::nm_distance`); the SiQAD coordinate
   `layouts::coords::siqad` with `from_siqad`/`to_siqad` (an SQD file's `(n, m, l)` triple is a
   `lattice_site`); the type aliases `sidb_cell_clk_lyt_siqad`, `sidb_100_*`, `sidb_111_*`, `cds_*`, and
-  `sidb_defect_*` (`sidb_cell_clk_lyt` and `sidb_cell_clk_lyt_cube` stay as placement targets, converted with
-  `to_sidb_layout`); the traits `is_siqad_coord_v`, `has_siqad_coord_v`, `is_charge_distribution_surface_v`,
+  `sidb_defect_*`; the traits `is_siqad_coord_v`, `has_siqad_coord_v`, `is_charge_distribution_surface_v`,
   `is_sidb_lattice*_v`, `is_sidb_defect_surface_v`, `has_*_sidb_defect_v`, and `has_*_charge_state_v`;
   `convert_layout_to_siqad_coordinates`, `convert_layout_to_fiction_coordinates`, and
   `all_coordinates_in_spanned_area` (use `sidb::sites_in_area`); the SiDB branches of `bounding_box_2d` and
@@ -410,7 +437,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Breaking:** `layouts::coords::to_cube`, the offset-to-cube coordinate conversion, which lost its last caller
   with the SiQAD coordinate type
 - **Breaking:** `sidb::to_cell_level_layout`, `sidb::to_cell`, and `sidb::to_cube`. Physical design converts in
-  one direction only; use `to_sidb_layout` and `to_lattice_site`
+  one direction only; use `to_lattice_site`
 - **Breaking:** The tuple interface of `sidb::simulation::logic::parameter_point`
   (`get<I>`, `std::tuple_size`, `std::tuple_element`). It was fixed at two dimensions and would have bound only
   two of three coordinates in a 3D sweep; use `get_parameters()`
@@ -472,6 +499,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.
   - QuickSim and ClusterComplete compile with Apple libc++ without experimental library features.
   - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
+  - `pyfiction` built against such a Z3 finds `libz3` at import time, so Read the Docs renders the Python API again.
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
   - CMake now verifies the `fmt` 12.2.0 archive with its matching SHA-256 checksum.
   - Installed CMake packages include the `fmt` headers and their header-only compile definition.

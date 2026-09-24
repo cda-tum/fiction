@@ -27,7 +27,6 @@
 #include <fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 

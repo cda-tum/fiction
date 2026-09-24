@@ -16,10 +16,9 @@
 
 #if (FICTION_Z3_SOLVER)
 
-#include <fiction/layouts/cartesian_layout.hpp>   // Cartesian grid layouts
-#include <fiction/layouts/cell_level_layout.hpp>  // cell-level abstraction of layouts
-#include <fiction/layouts/clocking_scheme.hpp>    // clocking schemes
-#include <fiction/layouts/coordinates.hpp>        // coordinate systems
+#include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grid layouts
+#include <fiction/layouts/clocking_scheme.hpp>   // clocking schemes
+#include <fiction/layouts/coordinates.hpp>       // coordinate systems
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>               // DOT drawers and writer for layouts
 #include <fiction/networks/io/dot_drawers.hpp>                 // DOT drawers and writer for logic networks
@@ -30,9 +29,8 @@
 #include <fiction/technology/fcn/area.hpp>                     // area requirement calculations
 #include <fiction/technology/qca/io/write_qca_layout.hpp>      // writer for QCADesigner files (physical simulation)
 #include <fiction/technology/qca/io/write_qca_layout_svg.hpp>  // SVG writer for cell-level layout representation
+#include <fiction/technology/qca/layout.hpp>                   // QCA cell-level layouts
 #include <fiction/technology/qca/qca_one_library.hpp>          // a pre-defined QCA gate library
-#include <fiction/technology/qca/technology.hpp>               // pre-defined cell implementations
-#include <fiction/traits.hpp>                                  // layout technology traits
 #include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
@@ -87,20 +85,18 @@ void print_gate_layout_properties(const Lyt& lyt)
               << '\n';
 }
 
-template <typename CellLyt>
-void print_cell_layout_properties(const CellLyt& cell_lyt)
+void print_cell_layout_properties(const qca::layout& cell_lyt)
 {
-    const area_params<technology<CellLyt>> ps{};
-    area_stats                             st{};
+    area_stats st{};
     // determine area
-    area(cell_lyt, ps, &st);
+    area(cell_lyt, {}, &st);
 
     // print statistics
     std::cout
         << fmt::format(
-               "[i] Cell-level {} layout: aspect ratio = {} × {}, inputs = {}, outputs = {}, cells = {}, area = {}nm²",
-               tech_impl_name<technology<CellLyt>>, cell_lyt.x() + 1, cell_lyt.y() + 1, cell_lyt.num_pis(),
-               cell_lyt.num_pos(), cell_lyt.num_cells(), st.area)
+               "[i] Cell-level QCA layout: aspect ratio = {} × {}, inputs = {}, outputs = {}, cells = {}, area = {}nm²",
+               cell_lyt.x() + 1, cell_lyt.y() + 1, cell_lyt.num_pis(), cell_lyt.num_pos(), cell_lyt.num_cells(),
+               st.area)
         << '\n';
 }
 
@@ -221,9 +217,6 @@ int main(int argc, char* argv[])  // NOLINT
     // defining the type of gate-level layout to use (also already pre-defined in fiction/types.hpp as cart_gate_clk_lyt
     using fcn_gate_level_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    // defining the type of cell-level layout to use (also already pre-defined in fiction/types.hpp as qca_cell_clk_lyt
-    using qca_cell_level_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
-
     std::cout << "[i] orthogonal physical design\n";
 
     // set up parameters for orthogonal physical design
@@ -240,8 +233,8 @@ int main(int argc, char* argv[])  // NOLINT
     write_dot_layout<fcn_gate_level_layout, gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
         ortho_gate_lyt, designs + "ortho_lyt.dot");
 
-    // apply the QCA ONE gate library to retrieve a cell-level layout
-    auto ortho_cell_layout = apply_gate_library<qca_cell_level_layout, qca_one_library>(ortho_gate_lyt);
+    // apply the QCA ONE gate library to retrieve a QCA layout
+    auto ortho_cell_layout = apply_gate_library<qca_one_library>(ortho_gate_lyt);
 
     // print cell properties
     print_cell_layout_properties(ortho_cell_layout);
@@ -281,8 +274,8 @@ int main(int argc, char* argv[])  // NOLINT
             write_dot_layout<fcn_gate_level_layout, gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
                 *exact_gate_lyt, designs + "exact_lyt.dot");
 
-            // apply the QCA ONE gate library to retrieve a cell-level layout
-            auto exact_cell_layout = apply_gate_library<qca_cell_level_layout, qca_one_library>(*exact_gate_lyt);
+            // apply the QCA ONE gate library to retrieve a QCA layout
+            auto exact_cell_layout = apply_gate_library<qca_one_library>(*exact_gate_lyt);
 
             // print cell properties
             print_cell_layout_properties(exact_cell_layout);

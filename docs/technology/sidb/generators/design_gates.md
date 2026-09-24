@@ -45,6 +45,12 @@ gates = design_sidb_gates(skeleton, specification, params)
 .. autoclass:: mnt.pyfiction.design_sidb_gates_params
    :members:
 
+.. autoclass:: mnt.pyfiction.design_sidb_gates_mode
+   :members:
+
+.. autoclass:: mnt.pyfiction.termination_condition
+   :members:
+
 .. autofunction:: mnt.pyfiction.design_sidb_gates
 ```
 

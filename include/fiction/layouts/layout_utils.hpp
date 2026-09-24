@@ -19,15 +19,10 @@
 
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/stl/hash.hpp"
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <limits>
 #include <random>
 #include <utility>
 
@@ -58,23 +53,23 @@ template <typename Lyt>
  * @tparam GateSizeX Horizontal tile size.
  * @tparam GateSizeY Vertical tile size.
  * @tparam GateLyt Gate-level layout type.
- * @tparam CellLyt Cell-level layout type.
+ * @tparam Coordinate Cell coordinate type: `coords::offset`, or `coords::cube` where hexagonal tiles yield negative
+ * positions.
  * @param gate_lyt The gate-level layout whose tiles are to be considered.
  * @param t Tile within gate_lyt.
  * @param relative_c Relative cell position within t.
  * @return Absolute cell position in a layout.
  */
-template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename CellLyt>
-[[nodiscard]] cell<CellLyt> relative_to_absolute_cell_position(const GateLyt& gate_lyt, const tile<GateLyt>& t,
-                                                               const cell<CellLyt>& relative_c) noexcept
+template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coordinate>
+[[nodiscard]] Coordinate relative_to_absolute_cell_position(const GateLyt& gate_lyt, const tile<GateLyt>& t,
+                                                            const Coordinate& relative_c) noexcept
 {
-    static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
 
     assert(relative_c.x < GateSizeX && relative_c.y < GateSizeY &&
            "relative_c must be within the bounds of a single tile");
 
-    cell<CellLyt> absolute_c{};
+    Coordinate absolute_c{};
 
     // Cartesian layouts
     if constexpr (is_cartesian_layout_v<GateLyt>)
@@ -247,57 +242,58 @@ template <typename Lyt>
 }
 
 /**
- * A new layout is constructed and returned that is equivalent to the given cell-level layout. However, its coordinates
- * are normalized, i.e., start at `(0, 0)` and are all positive. To this end, all existing coordinates are shifted by an
- * x and y offset.
+ * Returns a copy of the given cell grid layout whose cells are shifted towards the origin, so that the smallest
+ * occupied x- and y-coordinates become 0. Cell types, names, and, where the layout has them, cell modes move with their
+ * cells; layers, the layout name, and the clocking stay unchanged. The dimensions shrink by the shift.
  *
- * @tparam Lyt Cartesian cell-level layout type.
- * @param lyt The layout which is to be normalized.
- * @return New normalized equivalent layout.
+ * @tparam Lyt Cell grid layout type, e.g., `qca::layout`, `mol_qca::layout`, or `inml::layout`.
+ * @param lyt The layout to normalize.
+ * @return Normalized copy of `lyt`.
  */
 template <typename Lyt>
-Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
+[[nodiscard]] Lyt normalize_layout_coordinates(const Lyt& lyt)
 {
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
-    auto x_offset = std::numeric_limits<decltype(lyt.x())>::max();
-    auto y_offset = std::numeric_limits<decltype(lyt.y())>::max();
+    if (lyt.is_empty())
+    {
+        return lyt;
+    }
+
+    auto x_offset = lyt.x();
+    auto y_offset = lyt.y();
 
     lyt.foreach_cell(
         [&x_offset, &y_offset](const auto& c)
         {
-            if (c.y < y_offset)
-            {
-                y_offset = c.y;
-            }
-            if (c.x < x_offset)
-            {
-                x_offset = c.x;
-            }
+            x_offset = std::min(x_offset, static_cast<decltype(x_offset)>(c.x));
+            y_offset = std::min(y_offset, static_cast<decltype(y_offset)>(c.y));
         });
 
-    Lyt lyt_new{};
+    constexpr bool has_cell_modes =
+        requires(Lyt& l, const coordinate<Lyt>& c) { l.assign_cell_mode(c, l.get_cell_mode(c)); };
 
-    assert(lyt.x() - x_offset >= 0 && "x_offset is too large");
-    assert(lyt.y() - y_offset >= 0 && "y_offset is too large");
+    Lyt normalized{lyt};
 
-    lyt_new.resize(
-        {static_cast<std::size_t>(lyt.x() - x_offset), static_cast<std::size_t>(lyt.y() - y_offset), lyt.z()});
+    lyt.foreach_cell([&normalized](const auto& c) { normalized.assign_cell_type(c, Lyt::cell_type::EMPTY); });
 
-    lyt_new.set_layout_name(lyt.get_layout_name());
-    lyt_new.set_tile_size_x(lyt.get_tile_size_x());
-    lyt_new.set_tile_size_y(lyt.get_tile_size_y());
+    normalized.resize({lyt.x() - x_offset, lyt.y() - y_offset, lyt.z()});
 
     lyt.foreach_cell(
-        [&lyt_new, &lyt, &x_offset, &y_offset](const auto& c)
+        [&normalized, &lyt, x_offset, y_offset](const auto& c)
         {
-            lyt_new.assign_cell_type({c.x - x_offset, c.y - y_offset}, lyt.get_cell_type(c));
-            lyt_new.assign_cell_mode({c.x - x_offset, c.y - y_offset}, lyt.get_cell_mode(c));
-            lyt_new.assign_cell_name({c.x - x_offset, c.y - y_offset}, lyt.get_cell_name(c));
+            const coordinate<Lyt> shifted{c.x - x_offset, c.y - y_offset, c.z};
+
+            normalized.assign_cell_type(shifted, lyt.get_cell_type(c));
+            normalized.assign_cell_name(shifted, lyt.get_cell_name(c));
+
+            if constexpr (has_cell_modes)
+            {
+                normalized.assign_cell_mode(shifted, lyt.get_cell_mode(c));
+            }
         });
 
-    return lyt_new;
+    return normalized;
 }
 /**
  * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the

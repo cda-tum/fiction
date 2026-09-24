@@ -21,7 +21,7 @@ from mnt.fiction.cli.topologies import FGL_READERS
 from mnt.pyfiction import (
     aig_network,
     inml_layout,
-    inml_technology,
+    inml_magnet_type,
     mig_network,
     read_sqd_layout,
     set_name,
@@ -283,7 +283,7 @@ def test_write_qcc_component_name(shell: Shell, tmp_path: Path) -> None:
     """--component-name names the QCC component after the file, as the C++ `qcc -c` did."""
     layout = inml_layout((3, 0))
     layout.set_layout_name("mygate")
-    cell = inml_technology.cell_type
+    cell = inml_magnet_type
     layout.assign_cell_type((0, 0), cell.INPUT)
     layout.assign_cell_type((1, 0), cell.NORMAL)
     layout.assign_cell_type((2, 0), cell.NORMAL)

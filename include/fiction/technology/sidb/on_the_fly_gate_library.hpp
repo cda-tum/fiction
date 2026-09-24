@@ -19,17 +19,16 @@
 
 #pragma once
 
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/generators/design_gates.hpp"
 #include "fiction/technology/sidb/generators/is_gate_design_impossible.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -163,8 +162,7 @@ struct on_the_fly_gate_library_params
  * defects, thus enabling the design of SiDB circuits in the presence of atomic defects. The skeleton (i.e., the
  * pre-defined input and output wires) are hexagonal in shape.
  */
-class on_the_fly_gate_library
-        : public fcn::gate_library<sidb::sidb_technology, 60, 46>  // width and height of a hexagon
+class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  // width and height of a hexagon
 {
   public:
     explicit on_the_fly_gate_library() = delete;
@@ -202,13 +200,13 @@ class on_the_fly_gate_library
         // center cell of the Bestagon tile. IMPORTANT: There is no center for the specified Bestagon library. The
         // middle is at 22.66666 (34*2/3). However, this is not an integer and does not specify a cell. Cell close to it
         // is chosen.
-        const auto center_cell = to_lattice_site(
-            layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, sidb_cell_clk_lyt_cube>(
-                lyt, t, cell<sidb_cell_clk_lyt_cube>{gate_x_size() / 2, gate_y_size() / 2}));
+        const auto center_cell =
+            to_lattice_site(layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size()>(
+                lyt, t, layouts::coords::cube{gate_x_size() / 2, gate_y_size() / 2}));
         // center cell of the current tile
-        const auto absolute_cell = to_lattice_site(
-            layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, sidb_cell_clk_lyt_cube>(
-                lyt, t, cell<sidb_cell_clk_lyt_cube>{0, 0}));
+        const auto absolute_cell =
+            to_lattice_site(layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size()>(
+                lyt, t, layouts::coords::cube{0, 0}));
 
         auto complex_gate_param                                      = params;
         complex_gate_param.design_gate_params.number_of_canvas_sidbs = params.canvas_sidb_complex_gates;

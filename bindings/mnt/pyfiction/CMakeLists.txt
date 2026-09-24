@@ -58,6 +58,24 @@ nanobind_add_module(
   pyfiction
   pyfiction.cpp)
 target_link_libraries(pyfiction PRIVATE libfiction)
+
+# `CMAKE_INSTALL_RPATH_USE_LINK_PATH` skips link directories inside the source
+# or build tree. A `z3-solver` wheel installed into a virtual environment in the
+# checkout, as `nox -s docs` does on Read the Docs, is such a directory, and the
+# module then fails to load `libz3`. Wheel builds link a Z3 outside the tree.
+foreach(z3_library IN LISTS Z3_LIBRARIES)
+  get_filename_component(z3_library_dir "${z3_library}" DIRECTORY)
+  cmake_path(IS_PREFIX CMAKE_SOURCE_DIR "${z3_library_dir}" NORMALIZE
+             z3_in_source_tree)
+  cmake_path(IS_PREFIX CMAKE_BINARY_DIR "${z3_library_dir}" NORMALIZE
+             z3_in_binary_tree)
+  if(z3_in_source_tree OR z3_in_binary_tree)
+    set_property(
+      TARGET pyfiction
+      APPEND
+      PROPERTY INSTALL_RPATH "${z3_library_dir}")
+  endif()
+endforeach()
 target_include_directories(pyfiction
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_property(TARGET pyfiction PROPERTY POSITION_INDEPENDENT_CODE ON)

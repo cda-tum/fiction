@@ -235,19 +235,26 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     os << "\n";
 }
 /**
- * Writes a simplified 2D representation of a cell-level layout to an output stream.
+ * Writes a simplified 2D representation of a cell grid layout, i.e., a QCA, molQCA, or iNML layout, to an output
+ * stream. Regular cells of type `NORMAL` print as `▢`, positions below a crossing as `x`, and every other cell as the
+ * symbol of its type. Clock-zone colors apply to layouts with tile-based clocking and synchronization-element colors to
+ * layouts with synchronization elements.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt Cell grid layout type.
  * @param os Output stream to write into.
- * @param layout The cell-level layout to print.
- * @param io_color Flag to utilize color escapes for inputs and outputs.
+ * @param layout The layout to print.
+ * @param io_color Flag to utilize color escapes for inputs, outputs, and synchronization elements.
  * @param clk_color Flag to utilize color escapes for clock zones.
  */
 template <typename Lyt>
 void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_color = true,
                              const bool clk_color = false)
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    using cell_type = typename Lyt::cell_type;
+
+    constexpr bool has_clocking = requires(const Lyt& l, const cell<Lyt>& c) { l.get_clock_number(c); };
+    constexpr bool has_synchronization_elements =
+        requires(const Lyt& l, const cell<Lyt>& c) { l.is_synchronization_element(c); };
 
     // empty layout
     if (layout.num_cells() == 0ul)
@@ -273,13 +280,16 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     {
         for (decltype(layout.x()) x_pos = 0; x_pos <= layout.x(); ++x_pos)
         {
-            cell<Lyt> c{x_pos, y_pos};
+            const cell<Lyt> c{x_pos, y_pos};
 
             fmt::text_style color{};
 
-            if (clk_color)
+            if constexpr (has_clocking)
             {
-                color = color | detail::CLOCK_COLOR[layout.get_clock_number(c)];
+                if (clk_color)
+                {
+                    color = color | detail::CLOCK_COLOR[layout.get_clock_number(c)];
+                }
             }
 
             // crossing case
@@ -291,22 +301,29 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             {
                 const auto ct = layout.get_cell_type(c);
 
-                if (io_color && layout.is_synchronization_element(c))
+                if constexpr (has_synchronization_elements)
                 {
-                    color = color | detail::SE_COLOR;
+                    if (io_color && layout.is_synchronization_element(c))
+                    {
+                        color = color | detail::SE_COLOR;
+                    }
                 }
-                if (io_color && Lyt::technology::is_input_cell(ct))
+                if (io_color && ct == cell_type::INPUT)
                 {
                     color = color | detail::INP_COLOR;
                 }
-                else if (io_color && Lyt::technology::is_output_cell(ct))
+                else if (io_color && ct == cell_type::OUTPUT)
                 {
                     color = color | detail::OUT_COLOR;
                 }
 
-                os << fmt::format(
-                    color,
-                    fmt::runtime(Lyt::technology::is_normal_cell(ct) ? "▢" : std::string(1u, static_cast<char>(ct))));
+                auto is_regular = false;
+                if constexpr (requires { cell_type::NORMAL; })
+                {
+                    is_regular = ct == cell_type::NORMAL;
+                }
+
+                os << fmt::format(color, fmt::runtime(is_regular ? "▢" : std::string(1u, static_cast<char>(ct))));
             }
         }
         os << '\n';
@@ -334,7 +351,7 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
     {
         print_gate_level_layout(os, lyt);
     }
-    else if constexpr (is_cell_level_layout_v<Lyt>)
+    else if constexpr (is_cell_grid_v<Lyt>)
     {
         print_cell_level_layout(os, lyt);
     }

@@ -21,7 +21,7 @@
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
-#include "fiction/technology/sidb/technology.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/traits.hpp"
 
 #include <phmap.h>
@@ -44,7 +44,7 @@ namespace fiction::sidb
  * The Bestagon library is intended for hexagonal, pointy-top layouts that are clocked with a row-based clocking scheme,
  * i.e., where the information flow direction is north to south.
  */
-class bestagon_library : public fcn::gate_library<sidb::sidb_technology, 60, 46>  // width and height of a hexagon
+class bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>  // width and height of a hexagon
 {
   public:
     explicit bestagon_library() = delete;

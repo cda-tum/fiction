@@ -14,11 +14,11 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::inml::io::write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params ps = {})
+```{doxygenfunction} fiction::inml::io::write_qcc_layout(const inml::layout& lyt, std::ostream& os, write_qcc_layout_params ps = {})
 
 ```
 
-```{doxygenfunction} fiction::inml::io::write_qcc_layout(const Lyt& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
+```{doxygenfunction} fiction::inml::io::write_qcc_layout(const inml::layout& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
 
 ```
 
@@ -28,6 +28,9 @@
 :sync: python
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.write_qcc_layout_params
+   :members:
+
 .. autofunction:: mnt.pyfiction.write_qcc_layout
 ```
 

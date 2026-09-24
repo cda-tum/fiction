@@ -20,7 +20,7 @@
 
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
-#include "fiction/technology/qca/technology.hpp"
+#include "fiction/technology/qca/layout.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
@@ -41,7 +41,7 @@ namespace fiction::qca
  * in the same tile. Furthermore, it can be used for a range of clocking schemes. Tiles in QCA ONE are \f$5 \times 5\f$
  * QCA cells.
  */
-class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
+class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
 {
   public:
     explicit qca_one_library() = delete;
@@ -123,13 +123,12 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         throw fcn::unsupported_gate_type_exception(t);
     }
     /**
-     * Post-layout optimization that assigns via cell mode to wire crossings.
+     * Post-layout optimization that turns the ends of crossing wires into vias: a crossing-layer cell with at most one
+     * neighbor gets the via mode, and a via cell is added below it on the ground layer.
      *
-     * @tparam CellLyt Cell-level layout type.
-     * @param lyt The cell-level layout that has been created via application of `set_up_gate`.
+     * @param lyt The QCA layout that has been created via application of `set_up_gate`.
      */
-    template <typename CellLyt>
-    static void post_layout_optimization(CellLyt& lyt) noexcept
+    static void post_layout_optimization(qca::layout& lyt)
     {
         lyt.foreach_cell_position(
             [&lyt](const auto& c)
@@ -146,11 +145,11 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
                         if (std::ranges::distance(adjacent_cells) <= 1)
                         {
                             // change cell mode to via
-                            lyt.assign_cell_mode(c, qca::qca_technology::cell_mode::VERTICAL);
+                            lyt.assign_cell_mode(c, qca::cell_mode::VERTICAL);
                             // create a corresponding via ground cell
-                            const cell<CellLyt> ground_via_cell{c.x, c.y, 0};
-                            lyt.assign_cell_type(ground_via_cell, qca::qca_technology::cell_type::NORMAL);
-                            lyt.assign_cell_mode(ground_via_cell, qca::qca_technology::cell_mode::VERTICAL);
+                            const qca::layout::cell ground_via_cell{c.x, c.y, 0};
+                            lyt.assign_cell_type(ground_via_cell, qca::cell_type::NORMAL);
+                            lyt.assign_cell_mode(ground_via_cell, qca::cell_mode::VERTICAL);
                         }
                     }
                 }

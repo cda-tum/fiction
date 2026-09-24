@@ -26,7 +26,6 @@
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/progress.hpp"
 

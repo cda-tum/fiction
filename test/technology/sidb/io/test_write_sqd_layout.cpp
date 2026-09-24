@@ -24,14 +24,11 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 
 #include <tinyxml2.h>
 
@@ -127,8 +124,7 @@ TEST_CASE("Write Bestagon SQD layout", "[sqd]")
     auto g_layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
     g_layout.set_layout_name("Bestagon");
 
-    const auto c_layout = apply_gate_library<sidb_cell_clk_lyt, bestagon_library>(g_layout);
-    const auto lyt      = to_sidb_layout(c_layout);
+    const auto lyt = apply_gate_library<bestagon_library>(g_layout);
 
     std::stringstream layout_stream{};
 
@@ -137,9 +133,9 @@ TEST_CASE("Write Bestagon SQD layout", "[sqd]")
     const auto read_layout = read_sqd_layout(layout_stream, "Bestagon");
 
     CHECK(read_layout == lyt);
-    CHECK(read_layout.num_dots() == c_layout.num_cells());
-    CHECK(read_layout.num_pis() == c_layout.num_pis());
-    CHECK(read_layout.num_pos() == c_layout.num_pos());
+    CHECK(read_layout.num_dots() == lyt.num_dots());
+    CHECK(read_layout.num_pis() == lyt.num_pis());
+    CHECK(read_layout.num_pos() == lyt.num_pos());
 }
 
 TEST_CASE("Write defective surface SQD layout", "[sqd]")

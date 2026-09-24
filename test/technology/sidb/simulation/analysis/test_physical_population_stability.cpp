@@ -23,7 +23,6 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 
 #include <cmath>

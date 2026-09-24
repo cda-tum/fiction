@@ -32,7 +32,6 @@
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
@@ -70,7 +69,9 @@ TEST_CASE("QuickExact rejects incomplete simulations after the caller deadline",
         params.deadline    = std::chrono::steady_clock::now() + std::chrono::milliseconds{20};
         params.on_progress = [&](auto, auto done, auto total)
         {
-            if (done > 0 && done < total)
+            // the reporter emits `done == 0` right before enumerating and throttles later reports to 100 ms, so
+            // waiting on the first report expires the deadline however fast the enumeration runs
+            if (done < total)
             {
                 std::this_thread::sleep_until(params.deadline);
             }

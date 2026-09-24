@@ -94,16 +94,9 @@ class bounding_box_2d
                 });
         }
 
-        if constexpr (is_cell_level_layout_v<Lyt>)
+        else if constexpr (is_cell_grid_v<Lyt>)
         {
-            layout.foreach_cell(
-                [&](const auto& c)
-                {
-                    if (!layout.is_empty_cell(c))
-                    {
-                        update_min_max(min, max, c);
-                    }
-                });
+            layout.foreach_cell([&](const auto& c) { update_min_max(min, max, c); });
         }
 
         // Final bounding box dimensions
@@ -182,7 +175,7 @@ class bounding_box_2d
      */
     [[nodiscard]] bool is_empty_coordinate(const coordinate<Lyt>& c) const noexcept
     {
-        static_assert(is_gate_level_layout_v<Lyt> || is_cell_level_layout_v<Lyt>,
+        static_assert(is_gate_level_layout_v<Lyt> || is_cell_grid_v<Lyt>,
                       "Lyt is neither a gate-level nor a cell-level layout");
 
         if constexpr (is_gate_level_layout_v<Lyt>)

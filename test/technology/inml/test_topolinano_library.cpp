@@ -19,9 +19,13 @@
 #include "fiction/layouts/io/print_layout.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+
+#include <iostream>
+#include <type_traits>
 
 using namespace fiction;
 using namespace fiction::inml;
@@ -29,10 +33,7 @@ using namespace fiction::layouts::io;
 
 TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
 {
-    CHECK(!has_post_layout_optimization_v<topolinano_library, qca_cell_clk_lyt>);
-    CHECK(has_post_layout_optimization_v<topolinano_library, inml_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<topolinano_library, sidb_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<topolinano_library, cart_gate_clk_lyt>);
+    CHECK(std::is_same_v<topolinano_library::layout, inml::layout>);
     CHECK(!has_get_functional_implementations_v<topolinano_library>);
     CHECK(!has_get_gate_ports_v<topolinano_library>);
 }

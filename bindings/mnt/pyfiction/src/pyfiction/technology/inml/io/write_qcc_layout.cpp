@@ -15,9 +15,9 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/inml/io/write_qcc_layout.hpp>
+#include <fiction/technology/inml/layout.hpp>
 
 #include <string_view>
 
@@ -49,7 +49,7 @@ void write_qcc_layout(nanobind::module_& m)
 
     m.def(
         "write_qcc_layout",
-        [](const py_inml_layout& lyt, const std::string_view& filename,
+        [](const fiction::inml::layout& lyt, const std::string_view& filename,
            const fiction::inml::io::write_qcc_layout_params& params)
         { fiction::inml::io::write_qcc_layout(lyt, filename, params); },
         py::arg("layout"), py::arg("filename"), py::arg("params") = fiction::inml::io::write_qcc_layout_params{},

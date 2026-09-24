@@ -25,7 +25,7 @@ from mnt.fiction.cli.registry import REGISTRY
 from mnt.fiction.cli.render import table_rows
 from mnt.fiction.cli.stores import CellEntry, element_name
 from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
-from mnt.pyfiction import inml_layout, mol_qca_layout, mol_qca_technology
+from mnt.pyfiction import inml_layout, mol_qca_cell_type, mol_qca_layout
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -184,11 +184,13 @@ def test_show_sidb_svg(shell: Shell, resource: Callable[[str], str], tmp_path: P
 
 
 def test_show_molecular_qca_svg(shell: Shell, tmp_path: Path) -> None:
-    layout = mol_qca_layout((2, 0), "OPEN", "wire")
-    layout.assign_cell_type((0, 0), mol_qca_technology.cell_type.INPUT)
-    layout.assign_cell_type((1, 0), mol_qca_technology.cell_type.NORMAL1)
-    layout.assign_cell_type((2, 0), mol_qca_technology.cell_type.OUTPUT)
+    layout = mol_qca_layout((2, 0), "wire")
+    layout.assign_cell_type((0, 0), mol_qca_cell_type.INPUT)
+    layout.assign_cell_type((1, 0), mol_qca_cell_type.NORMAL1)
+    layout.assign_cell_type((2, 0), mol_qca_cell_type.OUTPUT)
     shell.session.cell_layouts.add(CellEntry(layout))
+    # molQCA cells name their own clock phase, so the layout has no clock zones
+    assert "clock zone" not in shell.ok("ps -c")
     path = tmp_path / "molecular.svg"
     shell.ok(f'show -c --silent -o "{path}"')
     assert "<svg" in path.read_text(encoding="utf-8")

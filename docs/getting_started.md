@@ -169,8 +169,8 @@ The command `target_link_libraries` must be called after the respective `add_exe
 Then include what you need:
 
 ```c++
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/...>
@@ -334,8 +334,8 @@ automatically linked against `libfiction` and compiled as a stand-alone binary. 
 include the desired header files to get started:
 
 ```c++
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/...>

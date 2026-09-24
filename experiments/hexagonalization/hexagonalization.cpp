@@ -26,7 +26,7 @@
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
 #include <fiction/technology/sidb/bestagon_library.hpp>      // a pre-defined SiDB gate library
-#include <fiction/technology/sidb/technology.hpp>            // cell implementations
+#include <fiction/technology/sidb/layout.hpp>                // SiDB layouts
 #include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
@@ -62,7 +62,6 @@ int main()  // NOLINT
 {
     using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     using hex_lyt  = hex_even_row_gate_clk_lyt;
-    using cell_lyt = sidb_cell_clk_lyt;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
@@ -174,12 +173,12 @@ int main()  // NOLINT
         }
 
         // apply gate library
-        const auto cell_level_layout = apply_gate_library<cell_lyt, bestagon_library>(hex_layout);
+        const auto cell_level_layout = apply_gate_library<bestagon_library>(hex_layout);
 
-        // compute area
-        area_stats                         area_stats{};
-        const area_params<sidb_technology> area_ps{};
-        area(cell_level_layout, area_ps, &area_stats);
+        // the area of the Cartesian cell grid that the Bestagon tiles span
+        area_stats area_stats{};
+        area(cartesian_layout<coords::offset>{cell_grid_extent<bestagon_library>(hex_layout)}, area_params<layout>{},
+             &area_stats);
 
         // log results
         hexagonalization_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
@@ -190,7 +189,7 @@ int main()  // NOLINT
                              gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length,
                              cp_tp.throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
                              mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result,
-                             cell_level_layout.num_cells(), area_stats.area);
+                             cell_level_layout.num_dots(), area_stats.area);
 
         hexagonalization_exp.save();
         hexagonalization_exp.table();

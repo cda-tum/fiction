@@ -22,7 +22,6 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
@@ -31,7 +30,6 @@
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
-#include <fiction/technology/qca/technology.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -149,7 +147,6 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 TEST_CASE("Gate library application", "[orthogonal]")
 {
     using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
-    using cell_layout = cell_level_layout<qca_technology, cartesian_layout<coords::offset>>;
 
     const auto check = [](const auto& ntk)
     {
@@ -157,7 +154,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
 
         auto layout = orthogonal<gate_layout>(ntk, {}, &stats);
 
-        CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout));
+        CHECK_NOTHROW(apply_gate_library<qca_one_library>(layout));
     };
 
     check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());

@@ -23,7 +23,6 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <cstdint>
 #include <iterator>

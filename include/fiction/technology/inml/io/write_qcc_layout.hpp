@@ -17,10 +17,9 @@
 #pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/technology/inml/io/magcad_components.hpp"
+#include "fiction/technology/inml/layout.hpp"
 #include "fiction/technology/inml/magcad_magnet_count.hpp"
-#include "fiction/technology/inml/technology.hpp"
-#include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/progress.hpp"
 #include "fiction/utils/version_info.hpp"
@@ -28,8 +27,6 @@
 #include <fmt/format.h>
 
 #include <algorithm>
-#include <array>
-#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <functional>
@@ -79,6 +76,10 @@ inline constexpr const char* OPEN_QCA_COMPONENT =
 inline constexpr const char* CLOSE_QCA_COMPONENT = "</qcacomponent>\n";
 
 inline constexpr const char* LIBRARY_NAME = "components_fiction";
+/**
+ * Technology name that MagCAD expects for iNML components.
+ */
+inline constexpr const char* TECHNOLOGY = "iNML";
 
 inline constexpr const char* OPEN_ENTITY      = "\t<entity>\n";
 inline constexpr const char* CLOSE_ENTITY     = "\t</entity>\n";
@@ -97,23 +98,8 @@ inline constexpr const char* LAYOUT_ITEM_PROPERTY = "\t\t\t<property name=\"{}\"
 inline constexpr const char* PROPERTY_PHASE       = "phase";
 inline constexpr const char* PROPERTY_LENGTH      = "length";
 
-inline constexpr const std::array<const char*, 6> COMPONENTS{"Magnet", "Coupler",  "Cross Wire",
-                                                             "And",    "Inverter", "Or"};
-
-inline const std::unordered_map<inml::inml_technology::cell_type, uint8_t> COMPONENT_SELECTOR{
-    {inml::inml_technology::cell_type::NORMAL, 0},
-    {inml::inml_technology::cell_type::INPUT, 0},
-    {inml::inml_technology::cell_type::OUTPUT, 0},
-    {inml::inml_technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
-    {inml::inml_technology::cell_type::CROSSWIRE_MAGNET, 2},
-    {inml::inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
-    {inml::inml_technology::cell_type::INVERTER_MAGNET, 4},
-    {inml::inml_technology::cell_type::SLANTED_EDGE_UP_MAGNET, 5},
-};
-
 }  // namespace qcc
 
-template <typename Lyt>
 class write_qcc_layout_impl
 {
   public:
@@ -123,7 +109,7 @@ class write_qcc_layout_impl
      * @param s Output stream.
      * @param p Serialization parameters.
      */
-    write_qcc_layout_impl(const Lyt& src, std::ostream& s, write_qcc_layout_params p) :
+    write_qcc_layout_impl(const inml::layout& src, std::ostream& s, write_qcc_layout_params p) :
             lyt{src},
             bb{lyt},
             sorted_pi_list{sorted_pis()},
@@ -152,11 +138,11 @@ class write_qcc_layout_impl
     }
 
   private:
-    const Lyt& lyt;
+    const inml::layout& lyt;
 
-    const layouts::bounding_box_2d<Lyt> bb;
+    const layouts::bounding_box_2d<inml::layout> bb;
 
-    std::vector<cell<Lyt>> sorted_pi_list, sorted_po_list;
+    std::vector<inml::layout::cell> sorted_pi_list, sorted_po_list;
 
     const uint64_t num_magnets;
 
@@ -164,30 +150,32 @@ class write_qcc_layout_impl
 
     const write_qcc_layout_params ps;
 
-    [[nodiscard]] std::vector<cell<Lyt>> sorted_pis() const noexcept
+    [[nodiscard]] std::vector<inml::layout::cell> sorted_pis() const noexcept
     {
-        std::vector<cell<Lyt>> pi_list{};
+        std::vector<inml::layout::cell> pi_list{};
         lyt.foreach_pi([&pi_list](const auto& pi) { pi_list.push_back(pi); });
-        std::ranges::sort(pi_list, [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
+        std::ranges::sort(pi_list,
+                          [](const auto& c1, const auto& c2) { return c1.y < c2.y || (c1.y == c2.y && c1.x < c2.x); });
 
         return pi_list;
     }
 
-    [[nodiscard]] std::vector<cell<Lyt>> sorted_pos() const noexcept
+    [[nodiscard]] std::vector<inml::layout::cell> sorted_pos() const noexcept
     {
-        std::vector<cell<Lyt>> po_list{};
+        std::vector<inml::layout::cell> po_list{};
         lyt.foreach_po([&po_list](const auto& po) { po_list.push_back(po); });
-        std::ranges::sort(po_list, [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
+        std::ranges::sort(po_list,
+                          [](const auto& c1, const auto& c2) { return c1.y < c2.y || (c1.y == c2.y && c1.x < c2.x); });
 
         return po_list;
     }
 
-    [[nodiscard]] auto bb_x(const cell<Lyt>& c) const noexcept
+    [[nodiscard]] auto bb_x(const inml::layout::cell& c) const noexcept
     {
         return static_cast<decltype(c.x)>(c.x - bb.get_min().x);
     }
 
-    [[nodiscard]] auto bb_y(const cell<Lyt>& c) const noexcept
+    [[nodiscard]] auto bb_y(const inml::layout::cell& c) const noexcept
     {
         return static_cast<decltype(c.y)>(c.y - bb.get_min().y);
     }
@@ -246,8 +234,8 @@ class write_qcc_layout_impl
     {
         std::stringstream ss{};
 
-        ss << lyt.get_layout_name() << qcc::LIBRARY_NAME << tech_impl_name<fiction::technology<Lyt>> << num_magnets
-           << bb.get_x_size() << bb.get_y_size();
+        ss << lyt.get_layout_name() << qcc::LIBRARY_NAME << qcc::TECHNOLOGY << num_magnets << bb.get_x_size()
+           << bb.get_y_size();
 
         const auto pin_data = get_pin_data();
         std::ranges::for_each(pin_data, [&ss](auto&& pdata) { ss << std::forward<decltype(pdata)>(pdata); });
@@ -260,7 +248,7 @@ class write_qcc_layout_impl
     void write_header()
     {
         os << fmt::format(qcc::VERSION_HEADER, FICTION_VERSION, FICTION_REPO);
-        os << fmt::format(qcc::OPEN_QCA_COMPONENT, tech_impl_name<fiction::technology<Lyt>>, qcc::LIBRARY_NAME,
+        os << fmt::format(qcc::OPEN_QCA_COMPONENT, qcc::TECHNOLOGY, qcc::LIBRARY_NAME,
                           ps.use_filename_as_component_name ? std::filesystem::path{ps.filename}.stem().string() :
                                                               lyt.get_layout_name(),
                           generate_layout_id_hash(), bb.get_x_size(), bb.get_y_size(), num_magnets);
@@ -272,13 +260,11 @@ class write_qcc_layout_impl
 
         for (const auto& pi : sorted_pi_list)
         {
-            os << fmt::format(qcc::PIN, tech_impl_name<fiction::technology<Lyt>>, lyt.get_cell_name(pi), 0, bb_x(pi),
-                              bb_y(pi));
+            os << fmt::format(qcc::PIN, qcc::TECHNOLOGY, lyt.get_cell_name(pi), 0, bb_x(pi), bb_y(pi));
         }
         for (const auto& po : sorted_po_list)
         {
-            os << fmt::format(qcc::PIN, tech_impl_name<fiction::technology<Lyt>>, lyt.get_cell_name(po), 1, bb_x(po),
-                              bb_y(po));
+            os << fmt::format(qcc::PIN, qcc::TECHNOLOGY, lyt.get_cell_name(po), 1, bb_x(po), bb_y(po));
         }
         os << qcc::CLOSE_ENTITY;
     }
@@ -286,17 +272,17 @@ class write_qcc_layout_impl
     void write_components()
     {
         os << qcc::OPEN_COMPONENTS;
-        for (const auto& comp : qcc::COMPONENTS)
+        for (const auto& comp : COMPONENTS)
         {
-            os << fmt::format(qcc::COMPONENT_ITEM, tech_impl_name<fiction::technology<Lyt>>, comp);
+            os << fmt::format(qcc::COMPONENT_ITEM, qcc::TECHNOLOGY, comp);
         }
         os << qcc::CLOSE_COMPONENTS;
     }
 
     void write_layout()
     {
-        utils::progress_reporter      progress{ps.on_progress, "writing rows", (static_cast<std::size_t>(lyt.y()) + 1)};
-        std::unordered_set<cell<Lyt>> skip{};
+        utils::progress_reporter               progress{ps.on_progress, "writing rows", (lyt.y() + 1)};
+        std::unordered_set<inml::layout::cell> skip{};
 
         os << qcc::OPEN_LAYOUT;
 
@@ -304,60 +290,29 @@ class write_qcc_layout_impl
         {
             for (decltype(lyt.x()) col = 0; col <= lyt.x(); ++col)
             {
-                const auto c    = cell<Lyt>{col, row};
+                const auto c    = inml::layout::cell{col, row};
                 const auto type = lyt.get_cell_type(c);
 
                 // skip empty cells and cells marked as to be skipped as well (duh...)
-                if (lyt.is_empty_cell(c) || skip.count(c) > 0u)
+                if (lyt.is_empty_cell(c) || skip.contains(c))
                 {
                     continue;
                 }
 
-                // if an AND or an OR structure is encountered, the next two magnets in southern direction need to
-                // be skipped
-                if (type == inml::inml_technology::cell_type::SLANTED_EDGE_UP_MAGNET ||
-                    type == inml::inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET)
-                {
-                    skip.insert({c.x, c.y + 1});
-                    skip.insert({c.x, c.y + 2});
-                }
-                // if a coupler is encountered, skip all magnets relating to the fan-out structure
-                else if (type == inml::inml_technology::cell_type::FANOUT_COUPLER_MAGNET)
-                {
-                    skip.insert({c.x, c.y + 1});
-                    skip.insert({c.x, c.y + 2});
-                    skip.insert({c.x + 1, c.y});
-                    skip.insert({c.x + 1, c.y + 2});
-                }
-                // if a cross wire is encountered, skip all magnets relating to the crossing structure
-                else if (type == inml::inml_technology::cell_type::CROSSWIRE_MAGNET)
-                {
-                    skip.insert({c.x + 2, c.y});
-                    skip.insert({c.x, c.y + 2});
-                    skip.insert({c.x + 1, c.y + 1});
-                    skip.insert({c.x + 2, c.y + 2});
-                }
-                // inverters are single structures taking up 4 magnets in the library, so skip the next 3 if
-                // encountered one
-                else if (type == inml::inml_technology::cell_type::INVERTER_MAGNET)
-                {
-                    skip.insert({c.x + 1, c.y});
-                    skip.insert({c.x + 2, c.y});
-                    skip.insert({c.x + 3, c.y});
-                }
+                skip_component_magnets(type, c, skip);
 
-                if (const auto it = qcc::COMPONENT_SELECTOR.find(type); it != qcc::COMPONENT_SELECTOR.end())
+                if (const auto it = COMPONENT_SELECTOR.find(type); it != COMPONENT_SELECTOR.end())
                 {
                     os << fmt::format(qcc::OPEN_LAYOUT_ITEM, it->second, bb_x(c), bb_y(c));
                 }
                 else
                 {
-                    std::cout << fmt::format("[w] cell at position {} has an unsupported type", c) << std::endl;
+                    std::cout << fmt::format("[w] cell at position {} has an unsupported type", c) << '\n';
                 }
 
                 os << fmt::format(qcc::LAYOUT_ITEM_PROPERTY, qcc::PROPERTY_PHASE, lyt.get_clock_number(c));
 
-                if (type == inml::inml_technology::cell_type::INVERTER_MAGNET)
+                if (type == inml::magnet_type::INVERTER_MAGNET)
                 {
                     os << fmt::format(qcc::LAYOUT_ITEM_PROPERTY, qcc::PROPERTY_LENGTH, 4);
                 }
@@ -378,18 +333,14 @@ class write_qcc_layout_impl
  *
  * This overload uses an output stream to write into.
  *
- * @tparam Lyt Cell-level iNML layout type.
  * @param lyt The layout to be written.
  * @param os The output stream to write into.
  * @param ps Parameters.
  */
-template <typename Lyt>
-void write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params ps = {})
+inline void write_qcc_layout(const inml::layout& lyt, std::ostream& os, write_qcc_layout_params ps = {})
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_inml_technology_v<Lyt>, "Lyt must be an iNML layout");
 
-    detail::write_qcc_layout_impl p{lyt, os, ps};
+    detail::write_qcc_layout_impl p{lyt, os, std::move(ps)};
 
     p.run();
 }
@@ -399,13 +350,11 @@ void write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params 
  *
  * This overload uses a file name to create and write into.
  *
- * @tparam Lyt Cell-level iNML layout type.
  * @param lyt The layout to be written.
  * @param filename The file name to create and write into. Should preferably use the `.qcc` extension.
  * @param ps Parameters.
  */
-template <typename Lyt>
-void write_qcc_layout(const Lyt& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
+inline void write_qcc_layout(const inml::layout& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
 {
     fiction::detail::atomic_write(filename,
                                   [&](std::ostream& os)

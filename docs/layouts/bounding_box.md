@@ -27,6 +27,9 @@
 .. autofunction:: mnt.pyfiction.qca_layout.bounding_box_2d
    :no-index:
 
+.. autofunction:: mnt.pyfiction.mol_qca_layout.bounding_box_2d
+   :no-index:
+
 .. autofunction:: mnt.pyfiction.inml_layout.bounding_box_2d
    :no-index:
 

@@ -18,7 +18,6 @@
 
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
-#include "fiction/technology/sidb/technology.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -37,6 +36,33 @@ namespace fiction::sidb
 {
 
 /**
+ * Tags describing the role of a silicon dangling bond. EMPTY denotes an unoccupied site.
+ */
+enum class dot_tag : uint8_t
+{
+    /**
+     * Unoccupied lattice site.
+     */
+    EMPTY = ' ',
+    /**
+     * Untagged dot.
+     */
+    NORMAL = 'x',
+    /**
+     * Primary input dot.
+     */
+    INPUT = 'i',
+    /**
+     * Primary output dot.
+     */
+    OUTPUT = 'o',
+    /**
+     * Logic dot (e.g., a canvas SiDB).
+     */
+    LOGIC = 'l'
+};
+
+/**
  * An SiDB layout: tagged SiDBs and surface defects placed on lattice sites of one H-Si lattice. The
  * layout has value semantics; copies are independent.
  *
@@ -50,6 +76,27 @@ class layout
      * SiDB dot tags.
      */
     using dot_tag = sidb::dot_tag;
+    /**
+     * Element type of the gates of SiDB gate libraries.
+     */
+    using cell_type = dot_tag;
+    /**
+     * Width of an SiDB in nm. Dots are 0-dimensional entities for simulation purposes.
+     */
+    static constexpr double CELL_WIDTH = 0.0;
+    /**
+     * Height of an SiDB in nm. Dots are 0-dimensional entities for simulation purposes.
+     */
+    static constexpr double CELL_HEIGHT = 0.0;
+    /**
+     * Horizontal spacing between two SiDBs in nm, as in SiQAD.
+     */
+    static constexpr double CELL_HSPACE = 0.384;
+    /**
+     * Average vertical spacing between two SiDB rows in nm, as in SiQAD. SiDBs on the same dimer row sit closer
+     * together, SiDBs on different dimer rows further apart.
+     */
+    static constexpr double CELL_VSPACE = 0.384;
     /**
      * Creates an empty layout on the H-Si(100)-2x1 lattice.
      */

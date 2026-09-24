@@ -19,11 +19,9 @@
 #pragma once
 
 #include "fiction/physical_design/apply_gate_library.hpp"
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/on_the_fly_gate_library.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/execution_timeout.hpp"
 
 #include <algorithm>
@@ -286,7 +284,7 @@ template <typename Ntk, typename GateLyt>
  * @return Layout representing the designed SiDB circuit.
  * @throws unsuccessful_gate_design_error if a gate cannot be designed.
  * @throws utils::timeout_error if the shared circuit budget or an individual gate budget expires. No partial circuit
- * is returned. Deadline checks are cooperative and do not interrupt allocation or layout conversion.
+ * is returned. Deadline checks are cooperative and do not interrupt allocation or cell placement.
  */
 template <typename GateLyt>
 [[nodiscard]] layout on_the_fly_circuit_design(const GateLyt&                          gate_lyt,
@@ -300,9 +298,8 @@ template <typename GateLyt>
     utils::check_deadline(deadline);
     try
     {
-        return to_sidb_layout(
-            physical_design::apply_parameterized_gate_library<sidb_cell_clk_lyt_cube, sidb::on_the_fly_gate_library>(
-                gate_lyt, library_params));
+        return physical_design::apply_parameterized_gate_library<sidb::on_the_fly_gate_library>(gate_lyt,
+                                                                                                library_params);
     }
 
     // Report an unsuccessful gate design to the circuit-design caller.

@@ -28,7 +28,6 @@
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
