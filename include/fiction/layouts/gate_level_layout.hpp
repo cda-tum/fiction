@@ -1179,7 +1179,7 @@ class gate_level_layout : public CoordinateLayout
     [[nodiscard]] auto incoming_data_flow(const tile& t) const noexcept
     {
         std::vector<tile> data_flow{};
-        data_flow.reserve(get_clocking_scheme().max_in_degree);  // reserve memory
+        data_flow.reserve(CoordinateLayout::max_fanin_size);
 
         auto fanin_collector = [&data_flow](const auto& fin) { data_flow.push_back(static_cast<tile>(fin)); };
 
@@ -1269,8 +1269,7 @@ class gate_level_layout : public CoordinateLayout
     [[nodiscard]] auto outgoing_data_flow(const tile& t) const noexcept
     {
         std::vector<tile> data_flow{};
-        data_flow.reserve(RespectClocking ? get_clocking_scheme().max_out_degree :
-                                            CoordinateLayout::max_fanin_size);  // reserve memory
+        data_flow.reserve(CoordinateLayout::max_fanin_size);
 
         const auto fanout_collector = [this, &data_flow](const auto& fout) { data_flow.push_back(get_tile(fout)); };
 
