@@ -22,10 +22,11 @@
 #include <fiction/synthesis/fanout_substitution.hpp>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/function.h>  // NOLINT(misc-include-cleaner): enables callback conversion
-#include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>      // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): enables callback conversion
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {

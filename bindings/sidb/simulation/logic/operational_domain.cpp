@@ -40,6 +40,7 @@
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/tuple.h>          // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)

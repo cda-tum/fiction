@@ -25,10 +25,11 @@
 #include <utility>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>     // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/function.h>  // NOLINT(misc-include-cleaner): enables callback conversion
-#include <nanobind/stl/pair.h>      // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): enables callback conversion
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
 
 namespace pyfiction
 {

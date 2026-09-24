@@ -20,6 +20,7 @@
 #include <fiction/technology/sidb/model/charge_state.hpp>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
