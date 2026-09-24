@@ -21,13 +21,6 @@ namespace pyfiction
 
 void version_info(nanobind::module_& m);
 
-/**
- * @brief Registers the Python translator for execution timeouts.
- *
- * @param m Python module.
- */
-void execution_timeout(nanobind::module_& m);
-
 }  // namespace pyfiction
 
 #pragma GCC diagnostic push
@@ -37,7 +30,6 @@ NB_MODULE(utils, m)
 {
     m.doc() = "Version information and shared utilities.";
 
-    pyfiction::execution_timeout(m);
     pyfiction::version_info(m);
 }
 

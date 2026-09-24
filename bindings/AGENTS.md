@@ -32,6 +32,11 @@ A new binding:
    `nanobind::module_::import_("mnt.pyfiction.<module>")`. Keep the imports acyclic: the
    modules form the chain in the list of `bindings/CMakeLists.txt`, and a module imports
    only modules before it.
+5. Translates the C++ exceptions its own code throws in its own module. A translator catches
+   an exception only when it shares the module that threw it: each extension carries its own
+   copy of the exception's type information, and macOS does not match the copies. An
+   exception whose Python class lives in another module is raised through that class, as
+   `physical_design` does for `high_degree_fanin_exception`.
 
 Never:
 

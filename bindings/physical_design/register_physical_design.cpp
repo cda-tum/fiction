@@ -16,7 +16,12 @@
 
 #include "pyfiction/submodule.hpp"
 
+#include <fiction/networks/network_utils.hpp>
+
+#include <exception>
+
 #include <nanobind/nanobind.h>
+#include <pyerrors.h>
 
 namespace pyfiction
 {
@@ -48,15 +53,31 @@ NB_MODULE(physical_design, m)
 {
     m.doc() = "Placement and routing of logic networks into gate-level layouts.";
 
-    // Registers the types this module names in signatures and default arguments. `utils` registers
-    // the translator that raises `TimeoutError` for `fiction::utils::timeout_error`.
-    nanobind::module_::import_("mnt.pyfiction.utils");
+    // Registers the types this module names in signatures and default arguments.
     nanobind::module_::import_("mnt.pyfiction.layouts");
     nanobind::module_::import_("mnt.pyfiction.networks");
     nanobind::module_::import_("mnt.pyfiction.qca");
     nanobind::module_::import_("mnt.pyfiction.mol_qca");
     nanobind::module_::import_("mnt.pyfiction.inml");
     nanobind::module_::import_("mnt.pyfiction.sidb");
+
+    // `networks` owns the Python class of `high_degree_fanin_exception`, but the placement algorithms of
+    // this module throw it. A translator catches the exception only in the module whose code threw it,
+    // because macOS does not match exception types across modules.
+    nanobind::register_exception_translator(
+        [](const std::exception_ptr& exception, void* /* unused */)
+        {
+            try
+            {
+                std::rethrow_exception(exception);
+            }
+            catch (const fiction::networks::high_degree_fanin_exception& error)
+            {
+                const auto python_class =
+                    nanobind::module_::import_("mnt.pyfiction.networks").attr("high_degree_fanin_exception");
+                PyErr_SetString(python_class.ptr(), error.what());
+            }
+        });
 
     pyfiction::exact(m);
     pyfiction::orthogonal(m);

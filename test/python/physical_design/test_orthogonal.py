@@ -8,6 +8,10 @@
 
 from __future__ import annotations
 
+import pytest
+
+from mnt.pyfiction.networks import high_degree_fanin_exception
+from mnt.pyfiction.networks.io import read_technology_network
 from mnt.pyfiction.physical_design import orthogonal, orthogonal_params, orthogonal_stats
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
@@ -49,3 +53,14 @@ def test_orthogonal_reports_progress(mux21):
     assert placements[0][0] == 0
     assert placements == sorted(placements)
     assert placements[-1][0] == placements[-1][1] > 0
+
+
+def test_orthogonal_rejects_high_degree_fanin(tmp_path):
+    path = tmp_path / "maj.v"
+    path.write_text(
+        "module top(a, b, c, o);\ninput a, b, c;\noutput o;\nassign o = (a & b) | (a & c) | (b & c);\nendmodule\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(high_degree_fanin_exception):
+        orthogonal(read_technology_network(str(path)))

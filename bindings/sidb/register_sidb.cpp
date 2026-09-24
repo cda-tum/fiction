@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "pyfiction/execution_timeout.hpp"
 #include "pyfiction/submodule.hpp"
 
 #include <nanobind/nanobind.h>
@@ -104,9 +105,9 @@ NB_MODULE(sidb, m)
 {
     m.doc() = "Silicon Dangling Bond (SiDB) lattices, layouts, charge distributions, and simulation.";
 
-    // Registers the types this module names in signatures and default arguments. `utils` registers
-    // the translator that raises `TimeoutError` for `fiction::utils::timeout_error`.
-    nanobind::module_::import_("mnt.pyfiction.utils");
+    pyfiction::register_execution_timeout();
+
+    // Registers the types this module names in signatures and default arguments.
     nanobind::module_::import_("mnt.pyfiction.layouts");
     nanobind::module_::import_("mnt.pyfiction.synthesis");
 

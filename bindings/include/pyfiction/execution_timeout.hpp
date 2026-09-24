@@ -12,7 +12,10 @@
  * @file
  * @brief Maps execution timeouts to Python's built-in TimeoutError.
  * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
  */
+
+#pragma once
 
 #include <fiction/utils/execution_timeout.hpp>
 
@@ -27,9 +30,11 @@ namespace pyfiction
 /**
  * @brief Registers the Python translator for execution timeouts.
  *
- * @param m Python module.
+ * Every extension module that can throw `fiction::utils::timeout_error` calls this function. A
+ * translator catches the exception only in the module whose code threw it: the type information of
+ * the exception is local to each module, and macOS does not match it across modules.
  */
-void execution_timeout(nanobind::module_& /* m */)
+inline void register_execution_timeout()
 {
     nanobind::register_exception_translator(
         [](const std::exception_ptr& exception, void* /* unused */)
