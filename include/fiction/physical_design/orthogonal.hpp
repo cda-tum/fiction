@@ -450,7 +450,11 @@ class orthogonal_impl
             ps{std::move(p)},
             pst{st}
     {}
-
+    /**
+     * Places and routes the source network with the orthogonal algorithm.
+     *
+     * @return A gate-level layout that implements the source network.
+     */
     Lyt run()
     {
         // measure run time

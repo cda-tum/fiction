@@ -35,6 +35,13 @@
 namespace blueprints
 {
 
+/**
+ * Creates a gate-level layout of 3 x 3 tiles with a straight wire, clocked by the 2DDWave scheme, with 1 primary input
+ * and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt straight_wire_gate_layout()
 {
@@ -47,6 +54,13 @@ GateLyt straight_wire_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 5 x 5 tiles with three parallel wire paths, clocked by the USE scheme, with 3 primary
+ * inputs and 3 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt three_wire_paths_gate_layout()
 {
@@ -67,6 +81,13 @@ GateLyt three_wire_paths_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with an XOR and a majority gate, clocked by the open scheme, with 3 primary inputs and 2
+ * primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt xor_maj_gate_layout()
 {
@@ -101,6 +122,13 @@ GateLyt xor_maj_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with an AND and an OR gate, clocked by the open scheme, with 2 primary inputs and 2
+ * primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt and_or_gate_layout()
 {
@@ -124,6 +152,13 @@ GateLyt and_or_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with an AND gate and an inverter, clocked by the open scheme, with 2 primary inputs and 2
+ * primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt and_not_gate_layout()
 {
@@ -147,6 +182,13 @@ GateLyt and_not_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with an OR gate and an inverter, clocked by the 2DDWave scheme, with 2 primary inputs and
+ * 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt or_not_gate_layout()
 {
@@ -161,6 +203,13 @@ GateLyt or_not_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with AND, OR, and inverter gates, clocked by the 2DDWave scheme, with 3 primary inputs
+ * and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt and_or_inv_gate_layout()
 {
@@ -186,6 +235,12 @@ GateLyt and_or_inv_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with an AND gate, clocked by the USE scheme, with 2 primary inputs and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt use_and_gate_layout()
 {
@@ -212,6 +267,13 @@ GateLyt use_and_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a majority gate, clocked by the RES scheme, with 3 primary inputs and 1 primary
+ * output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt res_maj_gate_layout()
 {
@@ -229,6 +291,13 @@ GateLyt res_maj_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a single-input tautology, clocked by the 2DDWave scheme, with 1 primary input and 1
+ * primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt single_input_tautology_gate_layout()
 {
@@ -248,6 +317,13 @@ GateLyt single_input_tautology_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a two-input tautology, clocked by the 2DDWave scheme, with 2 primary inputs and 1
+ * primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt tautology_gate_layout()
 {
@@ -268,6 +344,13 @@ GateLyt tautology_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a three-input tautology, clocked by the RES scheme, with 3 primary inputs and 1
+ * primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt res_tautology_gate_layout()
 {
@@ -289,6 +372,13 @@ GateLyt res_tautology_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a four-input tautology, clocked by the open scheme, with 4 primary inputs and 1
+ * primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt open_tautology_gate_layout()
 {
@@ -318,6 +408,13 @@ GateLyt open_tautology_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with two signals that cross, clocked by the 2DDWave scheme, with 4 primary inputs and 2
+ * primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt crossing_layout()
 {
@@ -399,6 +496,13 @@ GateLyt unbalanced_and_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with AND, OR, XOR, and majority gates, clocked by the open scheme, with 3 primary inputs
+ * and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt non_structural_all_function_gate_layout()
 {
@@ -446,6 +550,13 @@ GateLyt non_structural_all_function_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a synchronization element, clocked by the 2DDWave scheme, with 2 primary inputs and
+ * 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt se_gate_layout()
 {
@@ -465,6 +576,13 @@ GateLyt se_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with AND, OR, and inverter gates on a shifted Cartesian grid, clocked by the three-phase
+ * columnar scheme, with 3 primary inputs and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt shifted_cart_and_or_inv_gate_layout()
 {
@@ -488,6 +606,13 @@ GateLyt shifted_cart_and_or_inv_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with an AND and an XOR gate, clocked by the row scheme, with 3 primary inputs and 1
+ * primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt row_clocked_and_xor_gate_layout()
 {
@@ -508,6 +633,13 @@ GateLyt row_clocked_and_xor_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a wire path that no clock-number assignment can realize, clocked by the open scheme,
+ * with 1 primary input and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt unclockable_gate_layout()
 {
@@ -523,6 +655,13 @@ GateLyt unclockable_gate_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 4 x 2 tiles with a post-layout optimization test case, clocked by the 2DDWave
+ * scheme, with 2 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt optimization_layout()
 {
@@ -544,6 +683,13 @@ GateLyt optimization_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 4 x 2 tiles with a post-layout optimization corner case for primary outputs,
+ * clocked by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt optimization_layout_corner_case_outputs_1()
 {
@@ -563,6 +709,13 @@ GateLyt optimization_layout_corner_case_outputs_1()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 4 x 3 x 2 tiles with a post-layout optimization corner case for primary outputs,
+ * clocked by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt optimization_layout_corner_case_outputs_2()
 {
@@ -582,6 +735,13 @@ GateLyt optimization_layout_corner_case_outputs_2()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 5 x 2 tiles with a post-layout optimization corner case for primary outputs, clocked
+ * by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt optimization_layout_corner_case_outputs_3()
 {
@@ -601,6 +761,13 @@ GateLyt optimization_layout_corner_case_outputs_3()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 3 tiles with a post-layout optimization corner case for primary outputs, clocked
+ * by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt optimization_layout_corner_case_outputs_4()
 {
@@ -618,6 +785,13 @@ GateLyt optimization_layout_corner_case_outputs_4()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 5 x 2 tiles with a post-layout optimization corner case for primary outputs,
+ * clocked by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt optimization_layout_corner_case_outputs_5()
 {
@@ -637,6 +811,13 @@ GateLyt optimization_layout_corner_case_outputs_5()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 4 x 3 tiles with a post-layout optimization corner case for primary inputs, clocked by
+ * the 2DDWave scheme, with 2 primary inputs and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt optimization_layout_corner_case_inputs()
 {
@@ -651,6 +832,13 @@ GateLyt optimization_layout_corner_case_inputs()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 5 x 5 tiles with a planar layout that post-layout optimization can compact, clocked by
+ * the 2DDWave scheme, with 2 primary inputs and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt planar_unoptimized_layout()
 {
@@ -671,6 +859,13 @@ GateLyt planar_unoptimized_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 3 x 2 tiles with a planar post-layout optimization test case, clocked by the
+ * 2DDWave scheme, with 4 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt planar_optimization_layout()
 {
@@ -692,6 +887,13 @@ GateLyt planar_optimization_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 2 tiles with a primary input placed away from the layout border, clocked by the
+ * 2DDWave scheme, with 1 primary input and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt pi_not_in_border_optimization_layout()
 {
@@ -703,6 +905,13 @@ GateLyt pi_not_in_border_optimization_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 2 x 3 tiles with a primary output placed away from the layout border, clocked by the
+ * 2DDWave scheme, with 1 primary input and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt po_not_in_border_optimization_layout()
 {
@@ -714,6 +923,13 @@ GateLyt po_not_in_border_optimization_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 4 tiles with primary outputs that post-layout optimization has to move to the
+ * border, clocked by the 2DDWave scheme, with 3 primary inputs and 4 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt po_have_to_be_moved_to_border_optimization_layout()
 {
@@ -735,6 +951,13 @@ GateLyt po_have_to_be_moved_to_border_optimization_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 7 x 3 x 2 tiles with greater-or-equal, greater-than, less-or-equal, and less-than
+ * gates, clocked by the 2DDWave scheme, with 6 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt ge_gt_le_lt_layout()
 {
@@ -761,6 +984,13 @@ GateLyt ge_gt_le_lt_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 5 x 4 x 2 tiles with a corner case for extending primary outputs to the border,
+ * clocked by the 2DDWave scheme, with 4 primary inputs and 4 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
 GateLyt po_extension_corner_case_layout()
 {

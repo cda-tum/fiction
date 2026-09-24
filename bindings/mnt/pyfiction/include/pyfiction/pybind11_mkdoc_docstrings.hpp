@@ -10252,7 +10252,13 @@ static const char *mkd_doc_fiction_physical_design_detail_orthogonal_impl_ps = R
 
 static const char *mkd_doc_fiction_physical_design_detail_orthogonal_impl_pst = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_orthogonal_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_orthogonal_impl_run =
+R"doc(Places and routes the source network with the orthogonal algorithm.
+
+Returns:
+    A gate-level layout that implements the source network.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_pi_locations = R"doc(This enum class indicates the allowed positions for PIs.)doc";
 
