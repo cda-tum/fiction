@@ -31,9 +31,16 @@
 .. autoclass:: mnt.pyfiction.write_operational_domain_params
    :members:
 
+.. autoclass:: mnt.pyfiction.sample_writing_mode
+   :members:
+
 .. autofunction:: mnt.pyfiction.write_operational_domain
 
+.. autofunction:: mnt.pyfiction.write_operational_domain_to_string
+
 .. autofunction:: mnt.pyfiction.write_critical_temperature_domain
+
+.. autofunction:: mnt.pyfiction.write_critical_temperature_domain_to_string
 ```
 
 :::

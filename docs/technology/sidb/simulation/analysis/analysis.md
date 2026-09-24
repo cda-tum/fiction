@@ -38,6 +38,12 @@
 :sync: python
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.energy_state
+   :members:
+
+.. autoclass:: mnt.pyfiction.energy_distribution
+   :members:
+
 .. autofunction:: mnt.pyfiction.calculate_energy_distribution
 
 .. autofunction:: mnt.pyfiction.minimum_energy
@@ -210,6 +216,7 @@
    :members:
 
 .. autoclass:: mnt.pyfiction.physically_valid_parameters
+   :members:
 ```
 
 :::
