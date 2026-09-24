@@ -210,13 +210,13 @@ class exact_impl
      * @param sbl Gate orientations forbidden at each tile.
      */
     exact_impl(mockturtle::names_view<networks::technology_network>& src, exact_physical_design_params p,
-               exact_physical_design_stats& st, layouts::clocking::scheme clocking_scheme,
+               exact_physical_design_stats& st, const layouts::clocking::scheme& clocking_scheme,
                const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
             progress{ps.on_progress, "aspect ratios"},
             worker_progress{ps.on_worker_progress, std::max(std::size_t{1}, ps.num_threads)},
-            scheme{std::move(clocking_scheme)},
+            scheme{clocking_scheme},
             black_list{sbl}
     {
         // create PO nodes in the network
