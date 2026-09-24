@@ -37,7 +37,6 @@
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 

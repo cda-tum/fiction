@@ -18,7 +18,6 @@
 
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
-#include "fiction/technology/sidb/technology.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -35,6 +34,33 @@
 
 namespace fiction::sidb
 {
+
+/**
+ * Tags describing the role of a silicon dangling bond. EMPTY denotes an unoccupied site.
+ */
+enum class dot_tag : uint8_t
+{
+    /**
+     * Unoccupied lattice site.
+     */
+    EMPTY = ' ',
+    /**
+     * Untagged dot.
+     */
+    NORMAL = 'x',
+    /**
+     * Primary input dot.
+     */
+    INPUT = 'i',
+    /**
+     * Primary output dot.
+     */
+    OUTPUT = 'o',
+    /**
+     * Logic dot (e.g., a canvas SiDB).
+     */
+    LOGIC = 'l'
+};
 
 /**
  * An SiDB layout: tagged SiDBs and surface defects placed on lattice sites of one H-Si lattice. The

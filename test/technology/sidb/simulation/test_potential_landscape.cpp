@@ -25,7 +25,6 @@
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <cstddef>
 #include <limits>

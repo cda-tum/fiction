@@ -22,7 +22,6 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/io/write_location_and_ground_state.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <cctype>
 #include <sstream>

@@ -25,7 +25,6 @@
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/simulation/analysis/minimum_energy.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <cmath>
 #include <vector>

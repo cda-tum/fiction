@@ -25,7 +25,6 @@
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <cstdint>
 #include <limits>

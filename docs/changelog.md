@@ -403,6 +403,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `qca_cell_clk_lyt`, `mol_qca_cell_clk_lyt`, `inml_cell_clk_lyt`, `sidb_cell_clk_lyt`, `sidb_cell_clk_lyt_cube`,
     and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts and
     `is_cell_grid_v`.
+  - **Breaking:** The header `sidb/technology.hpp`. `sidb::dot_tag` is defined in `sidb/layout.hpp`, like the cell
+    types of the other technologies.
 - I/O:
 
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.

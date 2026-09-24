@@ -29,7 +29,6 @@
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 

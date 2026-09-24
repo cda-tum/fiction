@@ -26,7 +26,6 @@
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>

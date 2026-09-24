@@ -24,7 +24,6 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/detail/simulation_state.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <cstddef>
 #include <cstdint>

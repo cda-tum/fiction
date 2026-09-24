@@ -26,7 +26,6 @@
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 
 #include <cstdint>

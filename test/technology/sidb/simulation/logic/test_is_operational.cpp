@@ -33,7 +33,6 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 

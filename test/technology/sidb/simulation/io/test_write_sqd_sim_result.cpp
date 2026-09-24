@@ -24,7 +24,6 @@
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/io/write_sqd_sim_result.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/utils/stl/stl_utils.hpp>
 #include <fiction/utils/version_info.hpp>
 
