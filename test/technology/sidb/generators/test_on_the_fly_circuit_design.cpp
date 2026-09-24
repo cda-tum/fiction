@@ -55,7 +55,7 @@ TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-de
 
 TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-circuit-design]")
 {
-    hex_even_row_gate_clk_lyt gate_layout{{2, 2}, clocking::row<hex_even_row_gate_clk_lyt>()};
+    hex_even_row_gate_clk_lyt gate_layout{{2, 2}, clocking::row()};
     const auto                first  = gate_layout.create_pi("a", {0, 0});
     const auto                second = gate_layout.create_pi("b", {1, 0});
     const auto                gate   = gate_layout.create_and(first, second, {1, 1});
@@ -97,7 +97,7 @@ TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-cir
     const auto              second = network.create_pi();
     network.create_po(network.create_and(first, second));
 
-    const hex_even_row_gate_clk_lyt tiling{{2, 2}, clocking::row<hex_even_row_gate_clk_lyt>()};
+    const hex_even_row_gate_clk_lyt tiling{{2, 2}, clocking::row()};
     const sidb::layout              surface{};
 
     on_the_fly_circuit_design_on_defective_surface_params params{};

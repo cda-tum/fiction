@@ -368,7 +368,7 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     CHECK(sim7_mol_library::set_up_gate(southern_input_layout, {1, 1}) == sim7_mol_library::rotate_180(fanout_1_3));
     CHECK(sim7_mol_library::set_up_gate(western_input_layout, {1, 1}) == sim7_mol_library::rotate_270(fanout_1_3));
 
-    auto       clocked_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave<gate_layout>()};
+    auto       clocked_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave()};
     const auto clocked_pi     = clocked_layout.create_pi("x", {1, 0});
     const auto clocked_fanout = clocked_layout.create_buf(clocked_pi, {1, 1});
     clocked_layout.create_po(clocked_fanout, "e", {2, 1});
@@ -381,8 +381,8 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     CHECK(clocked_layout.template fanout_size<false>(clocked_fanout_node) == 3u);
     CHECK(sim7_mol_library::set_up_gate(clocked_layout, {1, 1}) == fanout_1_3);
 
-    auto missing_input_layout  = gate_layout{gate_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave<gate_layout>()};
-    const auto non_adjacent_pi = missing_input_layout.create_pi("x", {0, 0});
+    auto       missing_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave()};
+    const auto non_adjacent_pi      = missing_input_layout.create_pi("x", {0, 0});
     const auto missing_input_fanout = missing_input_layout.create_buf(non_adjacent_pi, {1, 1});
     missing_input_layout.create_po(missing_input_fanout, "e", {2, 1});
     missing_input_layout.create_po(missing_input_fanout, "s", {1, 2});

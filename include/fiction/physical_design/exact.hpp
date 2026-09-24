@@ -210,7 +210,7 @@ class exact_impl
      * @param sbl Gate orientations forbidden at each tile.
      */
     exact_impl(mockturtle::names_view<networks::technology_network>& src, exact_physical_design_params p,
-               exact_physical_design_stats& st, layouts::clocking::scheme<tile<Lyt>> clocking_scheme,
+               exact_physical_design_stats& st, layouts::clocking::scheme clocking_scheme,
                const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
@@ -271,7 +271,7 @@ class exact_impl
     /**
      * The utilized clocking scheme.
      */
-    layouts::clocking::scheme<tile<Lyt>> scheme;
+    layouts::clocking::scheme scheme;
     /**
      * Maps tiles to blacklisted gate types via their truth tables and port information.
      */
@@ -1470,7 +1470,7 @@ class exact_impl
                     });
             };
 
-            if (!(params.border_io && layouts::clocking::is_linear<Lyt>(layout.get_clocking_scheme())))
+            if (!(params.border_io && layouts::clocking::is_linear(layout.get_clocking_scheme())))
             {
                 // ensure that exactly one ncl variable is set for each node
                 network.foreach_node(
@@ -2615,8 +2615,7 @@ class exact_impl
             }
 
             // path/cycle constraints
-            if (!layouts::clocking::is_linear<Lyt>(
-                    layout.get_clocking_scheme()))  // linear schemes; no cycles by definition
+            if (!layouts::clocking::is_linear(layout.get_clocking_scheme()))  // linear schemes; no cycles by definition
             {
                 establish_sub_paths();
                 establish_transitive_paths();
@@ -3254,16 +3253,18 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
     {
         throw layouts::clocking::unsupported_scheme_exception();
     }
+    // the layout topology bounds the degrees of schemes that impose no bound of their own
+    const auto max_in_degree  = std::min<uint32_t>(clocking_scheme->max_in_degree(), Lyt::max_fanin_size);
+    const auto max_out_degree = std::min<uint32_t>(clocking_scheme->max_out_degree(), Lyt::max_fanin_size);
     // check for input degree
-    if (networks::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    if (networks::has_high_degree_fanin_nodes(ntk, max_in_degree))
     {
         throw networks::high_degree_fanin_exception();
     }
 
     mockturtle::names_view<networks::technology_network> intermediate_ntk{
         synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(
-            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
-                  clocking_scheme->max_out_degree, 1ul})};
+            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
 
@@ -3309,16 +3310,18 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
     {
         throw layouts::clocking::unsupported_scheme_exception();
     }
+    // the layout topology bounds the degrees of schemes that impose no bound of their own
+    const auto max_in_degree  = std::min<uint32_t>(clocking_scheme->max_in_degree(), Lyt::max_fanin_size);
+    const auto max_out_degree = std::min<uint32_t>(clocking_scheme->max_out_degree(), Lyt::max_fanin_size);
     // check for input degree
-    if (networks::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    if (networks::has_high_degree_fanin_nodes(ntk, max_in_degree))
     {
         throw networks::high_degree_fanin_exception();
     }
 
     mockturtle::names_view<networks::technology_network> intermediate_ntk{
         synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(
-            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
-                  clocking_scheme->max_out_degree, 1ul})};
+            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
 

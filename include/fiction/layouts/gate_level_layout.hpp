@@ -114,7 +114,7 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Coordinate identifying a clock zone. */
     using clock_zone = typename CoordinateLayout::coordinate;
     /** @brief Clocking scheme for this layout. */
-    using clocking_scheme_t = clocking::scheme<clock_zone>;
+    using clocking_scheme_t = clocking::scheme;
     /** @brief Clock phase index. */
     using clock_number_t = typename clocking_scheme_t::clock_number;
     /** @brief Number of clocked neighbors. */
@@ -130,7 +130,7 @@ class gate_level_layout : public CoordinateLayout
     {
 
         /** @brief Scheme, clock overrides, and synchronization delays. */
-        clocking::state<clock_zone> clocking{clocking::open<gate_level_layout>()};
+        clocking::state<clock_zone> clocking{clocking::open()};
         /** @brief Persistent manually assigned obstructions. */
         layouts::obstructions<clock_zone>                         obstructions{};
         mockturtle::truth_table_cache<kitty::dynamic_truth_table> fn_cache;
@@ -213,7 +213,7 @@ class gate_level_layout : public CoordinateLayout
      * @param scheme Clocking scheme to apply to this layout.
      * @param name Layout name.
      */
-    gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking::scheme<tile>& scheme,
+    gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking::scheme& scheme,
                       const std::string& name = {}) :
             CoordinateLayout(ar),
             strg{std::make_shared<gate_level_layout_storage>()},
@@ -1775,7 +1775,7 @@ class gate_level_layout : public CoordinateLayout
     }
     /**
      * Returns the number of clock phases in the layout. Each clock cycle is divided into n phases. In QCA, the number
-     * of phases is usually 4. In iNML it is 3. However, theoretically, any number >= 3 can be utilized.
+     * of phases is usually 4. In iNML it is 3. Clocking schemes support 3 or 4 phases.
      *
      * @return The number of different clock signals in the layout.
      */

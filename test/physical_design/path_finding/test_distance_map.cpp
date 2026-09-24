@@ -36,7 +36,7 @@ TEST_CASE("Distance map", "[distance-map]")
 
     SECTION("2DDWave clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::twoddwave<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::twoddwave()};
 
         const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
         const auto dist_map_func = distance_map_functor<clk_lyt, dist>{dist_map};
@@ -54,7 +54,7 @@ TEST_CASE("Distance map", "[distance-map]")
     }
     SECTION("USE clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::use<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::use()};
 
         const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
         const auto dist_map_func = distance_map_functor<clk_lyt, dist>{dist_map};
@@ -72,7 +72,7 @@ TEST_CASE("Distance map", "[distance-map]")
     }
     SECTION("RES clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::res<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::res()};
 
         const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
         const auto dist_map_func = distance_map_functor<clk_lyt, dist>{dist_map};
@@ -90,7 +90,7 @@ TEST_CASE("Distance map", "[distance-map]")
     }
     SECTION("CFE clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::cfe<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::cfe()};
 
         const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
         const auto dist_map_func = distance_map_functor<clk_lyt, dist>{dist_map};
@@ -115,7 +115,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
 
     SECTION("2DDWave clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::twoddwave<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::twoddwave()};
 
         const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
         const auto dist_map_func = sparse_distance_map_functor<clk_lyt, dist>{dist_map};
@@ -133,7 +133,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
     }
     SECTION("USE clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::use<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::use()};
 
         const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
         const auto dist_map_func = sparse_distance_map_functor<clk_lyt, dist>{dist_map};
@@ -151,7 +151,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
     }
     SECTION("RES clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::res<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::res()};
 
         const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
         const auto dist_map_func = sparse_distance_map_functor<clk_lyt, dist>{dist_map};
@@ -169,7 +169,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
     }
     SECTION("CFE clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::cfe<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::cfe()};
 
         const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
         const auto dist_map_func = sparse_distance_map_functor<clk_lyt, dist>{dist_map};
@@ -194,7 +194,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
 
     SECTION("2DDWave clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::twoddwave<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::twoddwave()};
 
         const auto dist_map_func =
             smart_distance_cache_functor<clk_lyt, dist>{layout, a_star_distance_functor<clk_lyt, dist>{}};
@@ -216,7 +216,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
     }
     SECTION("USE clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::use<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::use()};
 
         const auto dist_map_func =
             smart_distance_cache_functor<clk_lyt, dist>{layout, a_star_distance_functor<clk_lyt, dist>{}};
@@ -238,7 +238,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
     }
     SECTION("RES clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::res<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::res()};
 
         const auto dist_map_func =
             smart_distance_cache_functor<clk_lyt, dist>{layout, a_star_distance_functor<clk_lyt, dist>{}};
@@ -260,7 +260,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
     }
     SECTION("CFE clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::cfe<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, clocking::cfe()};
 
         const auto dist_map_func =
             smart_distance_cache_functor<clk_lyt, dist>{layout, a_star_distance_functor<clk_lyt, dist>{}};

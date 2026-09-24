@@ -8,11 +8,19 @@ Clocking is one of the most important differences between conventional CMOS tech
 directs information flow and provides a notion of timing for both combinational and sequential circuits alike. Usually,
 clocking information is assigned to the coordinates of a layout by the means of a clocking scheme.
 
-This header provides the `clocking_scheme` class that defines general floor plans of clock numbers for
-gate-level and cell-level layouts as well as pre-defined schemes from the literature.
+This header provides the `clocking::scheme` value type, which assigns a clock number to every tile position
+$(x, y)$ of a gate-level or tile-clocked cell-level layout by repeating a rectangular cutout in all directions, as well
+as pre-defined schemes from the literature. Schemes can be copied, assigned, and compared, and individual clock numbers
+can be overridden.
 
 ```{doxygenclass} fiction::layouts::clocking::scheme
 :members:
+```
+
+```{doxygenenum} fiction::layouts::clocking::num_clks
+```
+
+```{doxygenenum} fiction::layouts::clocking::hex_arrangement
 ```
 
 ## Pre-defined schemes
@@ -139,10 +147,14 @@ gate-level and cell-level layouts as well as pre-defined schemes from the litera
 
 ## Utility functions
 
-```{doxygenfunction} fiction::layouts::clocking::is_linear(const scheme<clock_zone<Lyt>>& scm) noexcept
+```{doxygenfunction} fiction::layouts::clocking::is_linear
 
 ```
 
-```{doxygenfunction} fiction::layouts::clocking::get_scheme(const std::string_view& scheme_name) noexcept
+```{doxygenfunction} fiction::layouts::clocking::get_scheme(const std::string_view scheme_name, const std::optional<hex_arrangement> hex)
+
+```
+
+```{doxygenfunction} fiction::layouts::clocking::get_scheme(const std::string_view scheme_name)
 
 ```

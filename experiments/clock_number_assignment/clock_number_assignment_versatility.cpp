@@ -104,7 +104,7 @@ int main()  // NOLINT
                 const auto eq_result = equivalence_checking(original_layout, newly_clocked_layout) != eq_type::NO;
 
                 // log results
-                clock_number_assignment_exp(std::string{original_layout.get_clocking_scheme().name}, benchmark,
+                clock_number_assignment_exp(original_layout.get_clocking_scheme().name(), benchmark,
                                             original_layout.num_pis(), original_layout.num_pos(), width, height, area,
                                             mockturtle::to_seconds(stats.time_total), eq_result);
 

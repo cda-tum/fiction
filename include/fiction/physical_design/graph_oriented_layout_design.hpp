@@ -845,7 +845,7 @@ class graph_oriented_layout_design_impl
         utils::worker_progress_reporter worker_progress{ps.on_worker_progress, ssg_vec.size()};
 
         // initialize layout to keep track of current best solution
-        Lyt best_lyt{{}, layouts::clocking::twoddwave<Lyt>()};
+        Lyt best_lyt{{}, layouts::clocking::twoddwave()};
 
         // initialize search space graphs
         initialize();
@@ -1870,7 +1870,7 @@ class graph_oriented_layout_design_impl
     Lyt initialize_layout(uint64_t min_layout_width)
     {
         const auto layout_depth = ps.planar ? 0 : 1;
-        Lyt        lyt{{min_layout_width - 1, 0, layout_depth}, layouts::clocking::twoddwave<Lyt>()};
+        Lyt        lyt{{min_layout_width - 1, 0, layout_depth}, layouts::clocking::twoddwave()};
         return lyt;
     }
     /**

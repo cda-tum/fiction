@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/networks/name_utils.hpp"
@@ -187,18 +186,8 @@ class apply_gate_library_impl
                 lyt.set_tile_size_x(GateLibrary::gate_x_size());
                 lyt.set_tile_size_y(GateLibrary::gate_y_size());
 
-                // if GateLyt and the produced layout share the coordinate type, copy the clocking scheme over
-                if constexpr (std::is_same_v<coordinate<cell_lyt_t>, coordinate<GateLyt>>)
-                {
-                    lyt.replace_clocking_scheme(src.get_clocking_scheme());
-                }
-                // otherwise, try to find a matching clocking scheme (this discards overwritten clock numbers)
-                else if (const auto clk_scheme =
-                             layouts::clocking::get_scheme<cell_lyt_t>(src.get_clocking_scheme().name);
-                         clk_scheme.has_value())
-                {
-                    lyt.replace_clocking_scheme(clk_scheme.value());
-                }
+                // the library's tiles are the clock zones, so the gate-level clocking carries over verbatim
+                lyt.replace_clocking_scheme(src.get_clocking_scheme());
             }
 
             return lyt;

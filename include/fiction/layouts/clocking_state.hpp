@@ -36,8 +36,8 @@ class state
   public:
     /** @brief Coordinate identifying a clock zone. */
     using clock_zone = Coordinate;
-    /** @brief Clocking scheme for these coordinates. */
-    using clocking_scheme_t = scheme<Coordinate>;
+    /** @brief Clocking scheme over tile positions. */
+    using clocking_scheme_t = scheme;
     /** @brief Clock phase index. */
     using clock_number_t = typename clocking_scheme_t::clock_number;
     /** @brief Hold-phase extension in full clock cycles. */
@@ -82,7 +82,7 @@ class state
      */
     void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
     {
-        clocking->override_clock_number(clock_zone{cz.x, cz.y}, cn);
+        clocking->override_clock_number(static_cast<int64_t>(cz.x), static_cast<int64_t>(cz.y), cn);
     }
     /**
      * Returns the clock number of a clock zone. A clock zone spans every layer, so the lookup ignores the z-coordinate
@@ -93,17 +93,17 @@ class state
      */
     [[nodiscard]] clock_number_t get_clock_number(const clock_zone& cz) const noexcept
     {
-        return (*clocking)(clock_zone{cz.x, cz.y});
+        return (*clocking)(static_cast<int64_t>(cz.x), static_cast<int64_t>(cz.y));
     }
     /**
      * Returns the number of clock phases in the layout. Each clock cycle is divided into n phases. In QCA, the number
-     * of phases is usually 4. In iNML it is 3. However, theoretically, any number >= 3 can be utilized.
+     * of phases is usually 4. In iNML it is 3. Clocking schemes support 3 or 4 phases.
      *
      * @return The number of different clock signals in the layout.
      */
     [[nodiscard]] clock_number_t num_clocks() const noexcept
     {
-        return clocking->num_clocks;
+        return clocking->num_clocks();
     }
     /**
      * Returns whether the layout is clocked by a regular clocking scheme with no overwritten zones.
@@ -123,7 +123,7 @@ class state
      */
     [[nodiscard]] bool is_clocking_scheme(const std::string_view& name) const noexcept
     {
-        return clocking->name == name;
+        return clocking->name() == name;
     }
     /**
      * Returns a copy of the stored clocking scheme object.

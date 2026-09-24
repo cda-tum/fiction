@@ -45,6 +45,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `sidb::simulation::result` stores one layout plus its physically valid configurations
   - `sidb::simulation::potential_landscape` stores static electrostatics for reuse across
     charge configurations and simulation worker threads
+  - `clocking::get_scheme(name, hex_arrangement)` looks up a clocking scheme without a layout type and accepts a `3`
+    or `4` suffix on every scheme that supports that phase count.
 
 - Dependencies:
 
@@ -193,6 +195,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     clock number. `get_clock_zone` returns the clock zone of a cell.
   - Gate-level `assign_clock_number` now clocks every layer of a tile and ignores the `z` coordinate;
     `get_clock_number` returns the same clock number on all layers.
+  - **Breaking:** `clocking::scheme` is now a non-template value type over signed `(x, y)` tile positions that can be
+    copied, assigned, and compared. Factories drop their layout argument, e.g., `clocking::twoddwave()`, and
+    `twoddwave_hex` takes a `clocking::hex_arrangement`.
+  - **Breaking:** `clocking::scheme` exposes `name()`, `num_clocks()`, `max_in_degree()`, and `max_out_degree()` as
+    accessors and no longer compares equal to a name string; `clocking::is_linear` drops its layout argument.
   - **Breaking:** molQCA lives in `technology/mol_qca/` and `namespace fiction::mol_qca`, together with
     `sim7_mol_library` and `write_mol_qca_layout_svg`. iNML names its element type `inml::magnet_type`.
   - Population-stability results expose the critical dot as `critical_dot` in C++ and Python.

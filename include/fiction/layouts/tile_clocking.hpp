@@ -47,7 +47,7 @@ class tile_clocking
     /**
      * Clocking scheme over clock zones.
      */
-    using clocking_scheme_t = clocking::scheme<clock_zone>;
+    using clocking_scheme_t = clocking::scheme;
     /**
      * Clock phase index.
      */
@@ -73,7 +73,7 @@ class tile_clocking
     [[nodiscard]] bool operator==(const tile_clocking& other) const noexcept
     {
         return tile_x == other.tile_x && tile_y == other.tile_y &&
-               clocking.get_clocking_scheme().name == other.clocking.get_clocking_scheme().name;
+               clocking.get_clocking_scheme().name() == other.clocking.get_clocking_scheme().name();
     }
     /**
      * Tile width in cells.
@@ -194,23 +194,9 @@ class tile_clocking
     /**
      * Scheme, overridden clock numbers, and synchronization delays per clock zone.
      */
-    clocking::state<clock_zone> clocking{clocking::open<zone_geometry>()};
+    clocking::state<clock_zone> clocking{clocking::open()};
 
   private:
-    /**
-     * The geometry `clocking::open` needs: clock-zone type and maximum fan-in of a Cartesian cell.
-     */
-    struct zone_geometry
-    {
-        /**
-         * Clock-zone coordinate.
-         */
-        using clock_zone = coords::offset;
-        /**
-         * Maximum fan-in of a Cartesian cell.
-         */
-        static constexpr auto max_fanin_size = 3u;  // NOLINT(readability-identifier-naming): scheme requirement
-    };
     /**
      * Tile width in cells.
      */

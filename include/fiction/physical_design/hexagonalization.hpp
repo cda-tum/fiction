@@ -455,7 +455,7 @@ class hexagonalization_impl
         }
 
         // create the initial hexagonal layout
-        HexLyt hex_layout{{hex_width, hex_height, hex_depth}, layouts::clocking::row<HexLyt>()};
+        HexLyt hex_layout{{hex_width, hex_height, hex_depth}, layouts::clocking::row()};
 
         // initialize statistics for hexagonalization
         hexagonalization_stats stats{};

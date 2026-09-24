@@ -43,7 +43,7 @@ TEST_CASE("Clock zones have positive dimensions", "[tile-clocking]")
 TEST_CASE("Clock zones are tiles on every layer", "[tile-clocking]")
 {
     // a layout provides the geometry that clocking::twoddwave needs
-    const inml::layout lyt{{4, 4}, clocking::twoddwave<inml::layout>(), "", 2, 2};
+    const inml::layout lyt{{4, 4}, clocking::twoddwave(), "", 2, 2};
 
     CHECK(lyt.get_clock_zone({3, 2}) == coords::offset{1, 1});
     CHECK(lyt.get_clock_zone({3, 2, 1}) == coords::offset{1, 1});

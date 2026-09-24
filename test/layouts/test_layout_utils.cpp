@@ -131,7 +131,7 @@ TEST_CASE("Generate random coords::cube coordinate", "[layout-utils]")
 
 TEST_CASE("Normalize QCA layout coordinates", "[layout-utils]")
 {
-    qca::layout lyt{{6, 5, 1}, clocking::use<qca::layout>(), "crossing", 2, 2};
+    qca::layout lyt{{6, 5, 1}, clocking::use(), "crossing", 2, 2};
 
     lyt.assign_cell_type({3, 2}, qca::cell_type::INPUT);
     lyt.assign_cell_name({3, 2}, "a");

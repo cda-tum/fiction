@@ -50,7 +50,7 @@ TEST_CASE("Benchmark distance maps", "[benchmark]")
     using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     using dist    = uint64_t;
 
-    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, clocking::use<clk_lyt>()};
+    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, clocking::use()};
 
     BENCHMARK("without distance maps")
     {
@@ -79,7 +79,7 @@ TEST_CASE("Benchmark smart distance cache", "[benchmark]")
     using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
     using dist    = uint64_t;
 
-    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, clocking::use<clk_lyt>()};
+    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, clocking::use()};
 
     BENCHMARK("smart_distance_cache (cold start)")
     {

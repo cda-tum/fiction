@@ -152,7 +152,7 @@ void bind_tile_clocking(nanobind::class_<Lyt, py_cartesian_layout>& cls)
         .def("is_clocking_scheme", &Lyt::is_clocking_scheme, py::arg("name"),
              DOC(fiction_layouts_tile_clocking_is_clocking_scheme))
         .def(
-            "get_clocking_scheme_name", [](const Lyt& lyt) { return std::string{lyt.get_clocking_scheme().name}; },
+            "get_clocking_scheme_name", [](const Lyt& lyt) { return lyt.get_clocking_scheme().name(); },
             "Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.")
         .def(
             "replace_clocking_scheme",

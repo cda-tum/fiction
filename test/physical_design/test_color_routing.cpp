@@ -206,7 +206,7 @@ TEST_CASE("Routing with crossings", "[color-routing]")
 
 TEST_CASE("Routing failure", "[color-routing]")
 {
-    cart_gate_clk_lyt layout{{3, 4, 1}, clocking::twoddwave<cart_gate_clk_lyt>()};
+    cart_gate_clk_lyt layout{{3, 4, 1}, clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -235,7 +235,7 @@ TEST_CASE("Routing failure", "[color-routing]")
 
 TEST_CASE("Routing failure 2", "[color-routing]")
 {
-    cart_gate_clk_lyt layout{{3, 4, 1}, clocking::twoddwave<cart_gate_clk_lyt>()};
+    cart_gate_clk_lyt layout{{3, 4, 1}, clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -264,7 +264,7 @@ TEST_CASE("Routing failure 2", "[color-routing]")
 
 TEST_CASE("Routing failure 3", "[color-routing]")
 {
-    cart_gate_clk_lyt layout{{2, 4, 1}, clocking::twoddwave<cart_gate_clk_lyt>()};
+    cart_gate_clk_lyt layout{{2, 4, 1}, clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto w1 = layout.create_buf(x1, {0, 1});

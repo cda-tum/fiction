@@ -95,7 +95,7 @@ TEST_CASE("Gate-library application assigns synchronization to clock zones", "[a
 
     SECTION("Wire")
     {
-        cart_gate_clk_lyt layout{{2, 0}, clocking::twoddwave<cart_gate_clk_lyt>()};
+        cart_gate_clk_lyt layout{{2, 0}, clocking::twoddwave()};
         const auto        input = layout.create_pi("x", {0, 0});
         const auto        wire  = layout.create_buf(input, {1, 0});
         layout.create_po(wire, "f", {2, 0});
@@ -129,7 +129,7 @@ TEST_CASE("Gate-library application assigns synchronization to clock zones", "[a
 
 TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 {
-    hex_even_row_gate_clk_lyt layout{{2, 2}, clocking::row<hex_even_row_gate_clk_lyt>()};
+    hex_even_row_gate_clk_lyt layout{{2, 2}, clocking::row()};
 
     layout.create_and(0, 1, {1, 2});
 
@@ -213,7 +213,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 
 TEST_CASE("Gate-level layout with two input wires, one double wire, and two output wires", "[apply-gate-library]")
 {
-    hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row<hex_even_row_gate_clk_lyt>()};
+    hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row()};
 
     const auto x1   = layout.create_pi("x1", {0, 0});
     const auto buf1 = layout.create_buf(x1, {1, 1, 0});
@@ -298,7 +298,7 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
 
 TEST_CASE("On-the-fly SiDB fanout gate", "[apply-gate-library]")
 {
-    hex_even_row_gate_clk_lyt layout{{2, 2}, clocking::row<hex_even_row_gate_clk_lyt>()};
+    hex_even_row_gate_clk_lyt layout{{2, 2}, clocking::row()};
 
     const auto input  = layout.create_pi("input", {0, 0});
     const auto fanout = layout.create_buf(input, {1, 1});
@@ -328,7 +328,7 @@ TEST_CASE("On-the-fly SiDB fanout gate", "[apply-gate-library]")
 
 TEST_CASE("On-the-fly SiDB crossing gate", "[apply-gate-library]")
 {
-    hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row<hex_even_row_gate_clk_lyt>()};
+    hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row()};
 
     const auto input1 = layout.create_pi("input1", {0, 0});
     const auto wire1  = layout.create_buf(input1, {1, 1, 0});
@@ -359,7 +359,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 {
     SECTION("INV with input and output wire tile")
     {
-        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row<hex_even_row_gate_clk_lyt>()};
+        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row()};
 
         const auto x1   = layout.create_pi("x1", {0, 0});
         const auto buf1 = layout.create_not(x1, {1, 1, 0});
@@ -415,7 +415,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("OR with input and output wire tile")
     {
-        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row<hex_even_row_gate_clk_lyt>()};
+        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row()};
 
         const auto x1      = layout.create_pi("x1", {0, 0});
         const auto x2      = layout.create_pi("x2", {1, 0});
@@ -472,7 +472,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("NAND with input and output wire tile")
     {
-        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row<hex_even_row_gate_clk_lyt>()};
+        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row()};
 
         const auto x1        = layout.create_pi("x1", {0, 0});
         const auto x2        = layout.create_pi("x2", {1, 0});
@@ -534,7 +534,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("NOR with input and output wire tile")
     {
-        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row<hex_even_row_gate_clk_lyt>()};
+        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row()};
 
         const auto x1       = layout.create_pi("x1", {0, 0});
         const auto x2       = layout.create_pi("x2", {1, 0});
@@ -571,7 +571,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("XOR with input and output wire tile")
     {
-        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row<hex_even_row_gate_clk_lyt>()};
+        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row()};
 
         const auto x1       = layout.create_pi("x1", {0, 0});
         const auto x2       = layout.create_pi("x2", {1, 0});
@@ -631,7 +631,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("XNOR with input and output wire tile")
     {
-        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row<hex_even_row_gate_clk_lyt>()};
+        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, clocking::row()};
 
         const auto x1        = layout.create_pi("x1", {0, 0});
         const auto x2        = layout.create_pi("x2", {1, 0});
