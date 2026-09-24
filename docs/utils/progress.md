@@ -33,7 +33,7 @@ params.on_progress = [](const std::string_view task, const std::size_t done, con
 :sync: python
 
 ```python
-from mnt.pyfiction import orthogonal_params
+from mnt.pyfiction.physical_design import orthogonal_params
 
 params = orthogonal_params()
 params.on_progress = lambda task, done, total: print(f"{task}: {done}/{total}")
@@ -58,7 +58,7 @@ Descriptions can change without changing the worker ID. `gold` uses search-space
 fraction of the search completed.
 
 ```python
-from mnt.pyfiction import exact_params
+from mnt.pyfiction.physical_design import exact_params
 
 params = exact_params()
 params.on_worker_progress = lambda worker, count, description, done, total, active: print(

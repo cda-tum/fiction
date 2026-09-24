@@ -1,53 +1,43 @@
-# AGENTS.md — `pyfiction`
+# AGENTS.md — `pyfiction` bindings
 
 The Python bindings use **nanobind**, with one translation unit per binding to keep
-compile time and memory usage manageable. `docs/getting_started.rst` §"Bindings
+compile time and memory usage manageable. `docs/getting_started.md` §"Bindings
 Architecture" describes the layout in full; read it before adding a binding.
 
-The short version: a new Python-exposed feature gets its own `.cpp` file under
-`src/pyfiction/<module>/<submodule>/` defining a single
-`void xxx(nanobind::module_& m)`, named after the file. Forward-declare that function in
-the directory's `register_<path>.cpp` and call it from `register_<path>(m)`, which the
-`NB_MODULE(pyfiction, m)` block in `pyfiction.cpp` calls in turn.
+Three trees make up `mnt.pyfiction`:
 
-**The tree mirrors `include/fiction/`,** so a binding lives beside the header it wraps:
-`quickexact.cpp` under `technology/sidb/simulation/engines/`, `write_qca_layout.cpp` under
-`technology/qca/io/`. Every directory that holds binding sources has exactly one registry,
-named after the directory (`register_sidb_simulation_engines.cpp`), that declares and calls
-the registration functions of that directory and nothing else. `pyfiction.cpp` calls every
-registry; none is nested inside another. That call order is load-bearing: a type has to be
-registered before anything names it in a signature or a default argument, which is why the
-block runs the type-defining directories first, then readers and writers, then the
-algorithms built on them.
+- `bindings/` holds the C++ sources. Each top-level C++ namespace (`layouts`, `sidb`, …)
+  is one extension module, built from `bindings/<namespace>/`.
+- `python/mnt/` holds the Python package: the lazy `mnt/pyfiction/__init__.py` and the
+  pure-Python CLI in `mnt/fiction/cli/`.
+- `test/python/` holds the Python tests, laid out like the Python module tree.
+
+**The Python module tree mirrors the C++ namespaces.** `fiction::sidb::simulation::engines`
+is `mnt.pyfiction.sidb.simulation.engines`, built from `bindings/sidb/simulation/engines/`.
+The `technology` directory level of `include/fiction/` has no namespace, so it has no
+module either.
+
+A new binding:
+
+1. Gets its own `.cpp` file in the directory of its namespace, defining a single
+   `void xxx(nanobind::module_& m)` named after the file.
+2. Is forward-declared and called in that directory's `register_<path>.cpp`. Every
+   directory that holds binding sources has exactly one registry, named after the
+   directory (`register_sidb_simulation_engines.cpp`).
+3. Needs nothing else if its directory already exists. A new nested namespace also gets a
+   `pyfiction::def_submodule` call in the `NB_MODULE` block of its top-level
+   `register_<namespace>.cpp`. A new top-level namespace also goes into the module list
+   of `bindings/CMakeLists.txt` and `python/mnt/pyfiction/__init__.py`.
+4. Names types of other modules only if its `NB_MODULE` block imports them with
+   `nanobind::module_::import_("mnt.pyfiction.<module>")`. Keep the imports acyclic: the
+   modules form the chain in the list of `bindings/CMakeLists.txt`, and a module imports
+   only modules before it.
 
 Never:
 
-- Add bindings through a monolithic header included into `pyfiction.cpp`. That is the old
-  pattern and it is gone.
-- Introduce new Python-level submodules for bound symbols. Every binding registers into the
-  flat `mnt.pyfiction` namespace, and that shape must stay unchanged. The pure-Python CLI lives in
-  the sibling `mnt.fiction.cli` package and only calls the bindings.
 - Add source files to a manual list in `CMakeLists.txt`. `file(GLOB_RECURSE ...)` picks
-  them up; just wire the new function into its `register_<name>.cpp`.
+  them up.
 - Edit `include/pyfiction/pybind11_mkdoc_docstrings.hpp` by hand. It is generated from the
   Doxygen comments in `include/fiction/`, and keeps its historical name. CI's
   `🐍 Docstrings` job regenerates it and fails when the committed file differs; take the
   replacement from that job's `pyfiction-docstrings` artifact.
-
-## The test suite belongs outside the package
-
-`test/` sits inside `mnt.pyfiction`, and `test/__init__.py` makes it a subpackage of the
-package it tests. pytest therefore prepends `bindings/` to `sys.path`, and the source
-directory shadows any non-editable install of `mnt.pyfiction`: the tests only run because
-`nox -s tests` installs the project editable. A wheel install fails with
-`ModuleNotFoundError: No module named 'mnt.pyfiction.pyfiction'`.
-
-`[tool.cibuildwheel] test-sources` already works around it by copying the suite alone,
-without the two `__init__.py` files above it.
-
-Move the suite to `test/python/` when the project structure is next reworked. That is what
-`mqt-core` does, and it removes the workaround rather than reproducing it. The move is
-mechanical — `git mv` of 104 tracked files plus seven references in `pyproject.toml` — and
-`test/CMakeLists.txt` globs `*/*.cpp`, so a
-Python subdirectory there is inert. `sdist.exclude` and `check-sdist`'s `git-only` both
-already list `/test`, so their `/bindings/mnt/pyfiction/test` entries go away with it.

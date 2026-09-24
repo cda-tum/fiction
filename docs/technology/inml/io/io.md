@@ -28,10 +28,10 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.write_qcc_layout_params
+.. autoclass:: mnt.pyfiction.inml.io.write_qcc_layout_params
    :members:
 
-.. autofunction:: mnt.pyfiction.write_qcc_layout
+.. autofunction:: mnt.pyfiction.inml.io.write_qcc_layout
 ```
 
 :::

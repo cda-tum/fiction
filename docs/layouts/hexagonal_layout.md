@@ -51,7 +51,7 @@ The hexagonal layout supports all of them via template parameters.
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.hexagonal_layout
+.. autoclass:: mnt.pyfiction.layouts.hexagonal_layout
    :members:
 ```
 

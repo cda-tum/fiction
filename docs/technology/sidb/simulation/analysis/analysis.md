@@ -38,15 +38,15 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.energy_state
+.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.energy_state
    :members:
 
-.. autoclass:: mnt.pyfiction.energy_distribution
+.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.energy_distribution
    :members:
 
-.. autofunction:: mnt.pyfiction.calculate_energy_distribution
+.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.calculate_energy_distribution
 
-.. autofunction:: mnt.pyfiction.minimum_energy
+.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.minimum_energy
 ```
 
 :::
@@ -119,26 +119,26 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.critical_temperature_stats
+.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.critical_temperature_stats
    :members:
 
-.. autoclass:: mnt.pyfiction.critical_temperature_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.critical_temperature_params
    :members:
 
-.. autofunction:: mnt.pyfiction.critical_temperature_gate_based
+.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.critical_temperature_gate_based
 
-.. autofunction:: mnt.pyfiction.critical_temperature_non_gate_based
+.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.critical_temperature_non_gate_based
 
-.. autofunction:: mnt.pyfiction.occupation_probability_gate_based
+.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.occupation_probability_gate_based
 
-.. autofunction:: mnt.pyfiction.occupation_probability_non_gate_based
+.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.occupation_probability_non_gate_based
 
-.. autoclass:: mnt.pyfiction.state_type
+.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.state_type
    :members:
 
-.. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_accepted
+.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.calculate_energy_and_state_type_with_kinks_accepted
 
-.. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_rejected
+.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.calculate_energy_and_state_type_with_kinks_rejected
 ```
 
 :::
@@ -177,15 +177,15 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.time_to_solution_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.time_to_solution_params
    :members:
 
-.. autoclass:: mnt.pyfiction.time_to_solution_stats
+.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.time_to_solution_stats
    :members:
 
-.. autofunction:: mnt.pyfiction.time_to_solution
+.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.time_to_solution
 
-.. autofunction:: mnt.pyfiction.time_to_solution_for_given_simulation_results
+.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.time_to_solution_for_given_simulation_results
 ```
 
 :::
@@ -212,10 +212,10 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physically_valid_parameters_domain
+.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.physically_valid_parameters_domain
    :members:
 
-.. autoclass:: mnt.pyfiction.physically_valid_parameters
+.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.physically_valid_parameters
    :members:
 ```
 
@@ -247,7 +247,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.can_positive_charges_occur
+.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.can_positive_charges_occur
 ```
 
 :::
@@ -286,16 +286,16 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.transition_type
+.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.transition_type
    :members:
 
-.. autoclass:: mnt.pyfiction.population_stability_information
+.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.population_stability_information
    :members:
 
-.. autoclass:: mnt.pyfiction.physical_population_stability_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.physical_population_stability_params
    :members:
 
-.. autofunction:: mnt.pyfiction.physical_population_stability
+.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.physical_population_stability
 ```
 
 :::

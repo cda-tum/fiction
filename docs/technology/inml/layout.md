@@ -26,10 +26,10 @@ with other technologies.
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.inml_magnet_type
+.. autoclass:: mnt.pyfiction.inml.inml_magnet_type
    :members:
 
-.. autoclass:: mnt.pyfiction.inml_layout
+.. autoclass:: mnt.pyfiction.inml.inml_layout
    :members:
 ```
 

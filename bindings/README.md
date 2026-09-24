@@ -115,18 +115,19 @@ _fiction_ supports.
 
 ## Usage
 
-The bindings are available as a Python module named `pyfiction` in the namespace `mnt`. To use the bindings, simply
-import the module in your Python script:
+The bindings are available as the Python package `mnt.pyfiction`, with one submodule per C++ namespace:
+`fiction::layouts` is `mnt.pyfiction.layouts`, `fiction::sidb::simulation::engines` is
+`mnt.pyfiction.sidb.simulation.engines`. Import what you need from its submodule:
 
 ```python
-from mnt import pyfiction
+from mnt.pyfiction.layouts import cartesian_layout
 ```
 
 The bindings are documented using [pybind11's mkdoc utility tool](https://github.com/pybind/pybind11_mkdoc). To see
 the documentation for a function, simply call `help` on it:
 
 ```python
-help(pyfiction.cartesian_layout)
+help(cartesian_layout)
 ```
 
 ## Extending the bindings
@@ -142,9 +143,8 @@ C++ docstrings.
 A few things must be noted when adding new bindings:
 
 - Do not use `""_a` literals in the bindings. Instead, use `py::arg` to specify the argument names.
-- Add new symbols to the `__init__.py` file's `import` and `__all__` statements.
-- Do not use `from mnt.pyfiction import *` in the Python code. Instead, use explicit imports like
-  `from mnt.pyfiction import cartesian_layout`. This speeds up the import process and helps narrow down the origin of a
+- Do not use `from mnt.pyfiction.<submodule> import *` in the Python code. Instead, use explicit imports like
+  `from mnt.pyfiction.layouts import cartesian_layout`. This speeds up the import process and helps narrow down the origin of a
   failing test.
 
 ### Docstrings
@@ -164,7 +164,7 @@ for you: it would have to push to your pull request head with a token that start
 commit without the `🚦 Check` its merge waits for.
 
 So when the check fails, download the `pyfiction-docstrings` artifact from that run, put it in place of
-`bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp`, and commit it. The job summary repeats
+`bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp`, and commit it. The job summary repeats
 these instructions and shows what changed.
 
 You can also regenerate the file locally, which is what CI does. `pybind11_mkdoc` parses with libclang, so it needs
@@ -187,7 +187,7 @@ _fiction_'s base directory:
   mkdoc_flags="$(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction)"
   mkdoc_headers="$(find include/fiction -name "*.hpp" -print | LC_ALL=C sort)"
   python3 -m pybind11_mkdoc \
-    -o bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp \
+    -o bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp \
     -std=c++20 \
     "-resource-dir=$(llvm-config-18 --libdir)/clang/18" \
     ${mkdoc_flags} \

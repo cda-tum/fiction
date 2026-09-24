@@ -58,11 +58,11 @@ const auto domain = fiction::sidb::simulation::logic::operational_domain_grid_se
 :sync: python
 
 ```python
-from mnt import pyfiction as pf
+from mnt.pyfiction.sidb.simulation.logic import operational_domain_grid_search, operational_domain_params
 
-params = pf.operational_domain_params()
+params = operational_domain_params()
 params.operational_params.timeout = 5_000
-domain = pf.operational_domain_grid_search(layout, spec, params)
+domain = operational_domain_grid_search(layout, spec, params)
 ```
 
 :::
@@ -92,7 +92,7 @@ configuration, together with the algorithm name, runtime, and physical parameter
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb_simulation_result
+.. autoclass:: mnt.pyfiction.sidb.simulation.sidb_simulation_result
    :members:
 ```
 
@@ -128,10 +128,10 @@ landscape across worker threads; it evaluates local potentials, energy, and phys
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.charge_transition_threshold_bounds
+.. autoclass:: mnt.pyfiction.sidb.simulation.charge_transition_threshold_bounds
    :members:
 
-.. autoclass:: mnt.pyfiction.potential_landscape
+.. autoclass:: mnt.pyfiction.sidb.simulation.potential_landscape
    :members:
 ```
 
@@ -171,16 +171,16 @@ landscape across worker threads; it evaluates local potentials, energy, and phys
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb_simulation_engine
+.. autoclass:: mnt.pyfiction.sidb.simulation.sidb_simulation_engine
    :members:
 
-.. autoclass:: mnt.pyfiction.exact_sidb_simulation_engine
+.. autoclass:: mnt.pyfiction.sidb.simulation.exact_sidb_simulation_engine
    :members:
 
-.. autoclass:: mnt.pyfiction.heuristic_sidb_simulation_engine
+.. autoclass:: mnt.pyfiction.sidb.simulation.heuristic_sidb_simulation_engine
    :members:
 
-.. autofunction:: mnt.pyfiction.sidb_simulation_engine_name
+.. autofunction:: mnt.pyfiction.sidb.simulation.sidb_simulation_engine_name
 ```
 
 :::
@@ -207,7 +207,7 @@ landscape across worker threads; it evaluates local potentials, energy, and phys
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.check_simulation_results_for_equivalence
+.. autofunction:: mnt.pyfiction.sidb.simulation.check_simulation_results_for_equivalence
 ```
 
 :::
@@ -234,7 +234,7 @@ landscape across worker threads; it evaluates local potentials, energy, and phys
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.is_ground_state
+.. autofunction:: mnt.pyfiction.sidb.simulation.is_ground_state
 ```
 
 :::

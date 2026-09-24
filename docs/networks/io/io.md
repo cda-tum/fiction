@@ -20,7 +20,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.read_technology_network
+.. autofunction:: mnt.pyfiction.networks.io.read_technology_network
 ```
 
 :::
@@ -63,7 +63,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.write_dot_network
+.. autofunction:: mnt.pyfiction.networks.io.write_dot_network
 ```
 
 :::

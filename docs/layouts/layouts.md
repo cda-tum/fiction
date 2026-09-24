@@ -52,11 +52,11 @@ io/io
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.num_adjacent_coordinates
+.. autofunction:: mnt.pyfiction.layouts.num_adjacent_coordinates
 
-.. autofunction:: mnt.pyfiction.normalize_layout_coordinates
+.. autofunction:: mnt.pyfiction.layouts.normalize_layout_coordinates
 
-.. autofunction:: mnt.pyfiction.random_coordinate
+.. autofunction:: mnt.pyfiction.layouts.random_coordinate
 ```
 
 :::

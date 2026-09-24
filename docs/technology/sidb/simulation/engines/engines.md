@@ -26,10 +26,10 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.quicksim_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.engines.quicksim_params
    :members:
 
-.. autofunction:: mnt.pyfiction.quicksim
+.. autofunction:: mnt.pyfiction.sidb.simulation.engines.quicksim
 ```
 
 :::
@@ -80,23 +80,23 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.quickexact_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.engines.quickexact_params
    :members:
 
-.. autoclass:: mnt.pyfiction.automatic_base_number_detection
+.. autoclass:: mnt.pyfiction.sidb.simulation.engines.automatic_base_number_detection
    :members:
 
-.. autofunction:: mnt.pyfiction.quickexact
+.. autofunction:: mnt.pyfiction.sidb.simulation.engines.quickexact
 
-.. autoclass:: mnt.pyfiction.clustercomplete_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.engines.clustercomplete_params
    :members:
 
-.. autoclass:: mnt.pyfiction.ground_state_space_reporting
+.. autoclass:: mnt.pyfiction.sidb.simulation.engines.ground_state_space_reporting
    :members:
 
-.. autofunction:: mnt.pyfiction.clustercomplete
+.. autofunction:: mnt.pyfiction.sidb.simulation.engines.clustercomplete
 
-.. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation
+.. autofunction:: mnt.pyfiction.sidb.simulation.engines.exhaustive_ground_state_simulation
 ```
 
 :::

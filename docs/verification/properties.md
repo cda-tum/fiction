@@ -18,7 +18,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.critical_path_length_and_throughput
+.. autofunction:: mnt.pyfiction.verification.critical_path_length_and_throughput
 ```
 
 :::

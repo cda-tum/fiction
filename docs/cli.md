@@ -492,7 +492,7 @@ A log-write failure reports an error, returns a failing exit status, and still c
 
 ## Adding a command
 
-Each command has one Python module under `bindings/mnt/fiction/cli/commands/`, in its help category's
+Each command has one Python module under `python/mnt/fiction/cli/commands/`, in its help category's
 package. The module defines an argument function and a handler decorated with `@command`. The decorator
 sets the name, category, inputs, example, and any unavailable capability; the handler's docstring supplies
 the help description. Declare numeric constraints with the converters in `cli/parsing.py` at each argument.

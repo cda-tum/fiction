@@ -46,13 +46,13 @@ Choose the gate-search algorithm through `design_gate_params.design_mode`, as sh
 The `PRUNING_ONLY` mode skips operational simulation, so it does not verify the designed gates' functionality.
 
 ```python
-from mnt.pyfiction import (
+from mnt.pyfiction.layouts import hexagonal_gate_layout
+from mnt.pyfiction.sidb.generators import (
     design_sidb_gates_mode,
-    hexagonal_gate_layout,
     on_the_fly_sidb_circuit_design,
     on_the_fly_sidb_circuit_design_params,
-    write_sqd_layout,
 )
+from mnt.pyfiction.sidb.io import write_sqd_layout
 
 layout = hexagonal_gate_layout((2, 2, 0), "ROW", "AND")
 a = layout.create_pi("a", (0, 0, 0))
@@ -70,16 +70,16 @@ write_sqd_layout(circuit, "and.sqd")
 ```
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb_complex_gate_design_policy
+.. autoclass:: mnt.pyfiction.sidb.generators.sidb_complex_gate_design_policy
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb_on_the_fly_gate_library_params
+.. autoclass:: mnt.pyfiction.sidb.generators.sidb_on_the_fly_gate_library_params
    :members:
 
-.. autoclass:: mnt.pyfiction.on_the_fly_sidb_circuit_design_params
+.. autoclass:: mnt.pyfiction.sidb.generators.on_the_fly_sidb_circuit_design_params
    :members:
 
-.. autofunction:: mnt.pyfiction.on_the_fly_sidb_circuit_design
+.. autofunction:: mnt.pyfiction.sidb.generators.on_the_fly_sidb_circuit_design
 ```
 
 :::

@@ -337,10 +337,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Breaking:** Test files are renamed to `test_<header>.cpp` and the `test/` tree mirrors
   `include/fiction/`. CTest case names gain the `test_` prefix accordingly
 
-- The `pyfiction` binding sources and their test suite mirror the new tree as well: each
-  binding sits in the directory of the header it wraps under the header's name, and every
-  directory that holds binding sources has exactly one registry. The Python API is unchanged,
-  except for the two attributes listed under _Python bindings_
+- The `pyfiction` binding sources under `bindings/` mirror the C++ namespaces: each binding sits
+  in the directory of its namespace under the name of the header it wraps, and every directory
+  that holds binding sources has exactly one registry. The Python package lives under `python/`,
+  and its tests under `test/python/`
 
 - Code quality:
 
@@ -369,6 +369,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     it that carries the toctree
 
 - Python bindings:
+
+  - **Breaking:** `mnt.pyfiction` has one submodule per C++ namespace, such as `mnt.pyfiction.layouts` and
+    `mnt.pyfiction.sidb.simulation.engines`; import each name from its submodule. The package root
+    loads the submodules on first access and re-exports no bound names.
 
   - **Breaking:** Use clocking and obstruction methods directly on gate-level layouts. `obstructions` holds
     additional path-search constraints. `qca_layout` and `inml_layout` expose `get_clock_zone` and tile-size
@@ -609,7 +613,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added ordered `simulate_outputs`, exposed mapper statistics, and validated truth-table sizes and expressions before native operations. Gate-library errors identify unsupported gates and their coordinates.
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
   - `design_sidb_gates_stats.__repr__` now converts the statistics string to Python.
-  - Exposed the defect-matrix reader exceptions at the package root.
+  - Exposed the defect-matrix reader exceptions.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector
   - The Python bindings compile when Z3 support is disabled
@@ -618,7 +622,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and `runtime` members of the statistics classes are readable; the casters were missing
   - `write_dot_layout` draws shifted-Cartesian layouts instead of writing nothing
   - The readers raise `RuntimeError` with the parser's diagnostics instead of printing them
-  - `energy_state` and `sidb_lattice_mode` are importable from `mnt.pyfiction`
+  - `energy_state` and `sidb_lattice_mode` are importable
+  - `sidb_defect` accepts a call without `electric_charge`, whose default was a float for an integer parameter
   - `create_from_binary_string` and `create_from_hex_string` raise `ValueError` for a character outside
     their alphabet; `kitty` read such a character as a bit pattern and built a wrong truth table
   - `write_verilog`, `write_blif`, and `write_aiger` raise `RuntimeError` when the file cannot be opened

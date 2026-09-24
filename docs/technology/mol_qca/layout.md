@@ -36,12 +36,12 @@ layer. See {doc}`../../layouts/cell_grid` for the cell storage that molQCA share
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.mol_qca_cell_type
+.. autoclass:: mnt.pyfiction.mol_qca.mol_qca_cell_type
    :members:
 
-.. autofunction:: mnt.pyfiction.mol_qca_clock_number
+.. autofunction:: mnt.pyfiction.mol_qca.mol_qca_clock_number
 
-.. autoclass:: mnt.pyfiction.mol_qca_layout
+.. autoclass:: mnt.pyfiction.mol_qca.mol_qca_layout
    :members:
 ```
 

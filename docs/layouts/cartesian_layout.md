@@ -20,7 +20,7 @@ Coordinate system that represents a Cartesian grid of compile-time coordinate ty
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.cartesian_layout
+.. autoclass:: mnt.pyfiction.layouts.cartesian_layout
    :members:
 ```
 

@@ -194,10 +194,10 @@ Install the library from PyPI:
 $ pip install mnt.pyfiction
 ```
 
-Import it in your script:
+Import what you need from the submodule that mirrors its C++ namespace:
 
 ```python
-from mnt import pyfiction
+from mnt.pyfiction.layouts import cartesian_layout
 ```
 
 The Python synopsis is modeled after the C++ API to make it feel as familiar as possible. However, all available Python
@@ -232,48 +232,45 @@ $ venv\Scripts\activate.bat
 
 ### Bindings Architecture
 
-If you want to add or extend Python bindings, the code under `bindings/mnt/pyfiction/` follows a source-based
-layout, one translation unit per binding, chosen to keep compile time and memory usage manageable as the number of
-bindings grows:
+If you want to add or extend Python bindings, the C++ side lives under `bindings/`, the Python package under
+`python/mnt/`, and the Python tests under `test/python/`. The bindings use one translation unit per binding, which
+keeps compile time and memory usage manageable as the number of bindings grows:
 
 ```text
-bindings/mnt/pyfiction/
-├── CMakeLists.txt
-├── pyfiction.cpp                                  # top-level NB_MODULE entry point
-└── src/pyfiction/
-    ├── physical_design/
-    │   ├── register_physical_design.cpp           # calls exact(m), orthogonal(m), ...
-    │   └── path_finding/
-    │       ├── a_star.cpp                         # defines a_star(nanobind::module_&)
-    │       └── register_path_finding.cpp          # calls a_star(m), distance(m), ...
-    ├── technology/sidb/simulation/engines/
-    │   ├── quickexact.cpp                         # defines quickexact(nanobind::module_&)
-    │   └── register_sidb_simulation_engines.cpp   # calls quickexact(m), quicksim(m), ...
-    └── ...
+bindings/
+├── CMakeLists.txt                                 # one extension module per top-level namespace
+├── include/pyfiction/                             # shared type aliases, docstrings, helpers
+├── physical_design/
+│   ├── register_physical_design.cpp               # NB_MODULE(physical_design, m): exact(m), ...
+│   └── path_finding/
+│       ├── a_star.cpp                             # defines a_star(nanobind::module_&)
+│       └── register_path_finding.cpp              # calls a_star(m), distance(m), ...
+├── sidb/
+│   ├── register_sidb.cpp                          # NB_MODULE(sidb, m): lattice(m), ...
+│   └── simulation/engines/
+│       ├── quickexact.cpp                         # defines quickexact(nanobind::module_&)
+│       └── register_sidb_simulation_engines.cpp   # calls quickexact(m), quicksim(m), ...
+└── ...
+python/mnt/pyfiction/
+└── __init__.py                                    # loads the submodules lazily
 ```
 
-The tree mirrors `include/fiction/`: a binding sits in the directory of the header it wraps, so
-`a_star.cpp` is under `physical_design/path_finding/` because `a_star.hpp` is. Each leaf `.cpp` file defines
-exactly one binding function named after the file (e.g. `void a_star(nanobind::module_& m)`) that binds a
-single class, function, or closely related group thereof. Each directory that holds binding sources has exactly one
-`register_<path>.cpp`, named after the directory, that forward-declares and calls the binding functions beside it
-and nothing else.
+The Python module tree mirrors the C++ namespaces: `fiction::sidb::simulation::engines::quickexact` is
+`mnt.pyfiction.sidb.simulation.engines.quickexact`. Each top-level namespace (`layouts`, `networks`, `synthesis`,
+`physical_design`, `verification`, `utils`, `qca`, `mol_qca`, `inml`, `sidb`, `fcn`) is its own extension module.
+Each nested namespace is a submodule of it. The directories under `bindings/` follow the same tree, so a binding sits
+in the directory of the namespace it wraps: `a_star.cpp` is under `physical_design/path_finding/`.
 
-The registries are flat: `pyfiction.cpp` calls every one of them from its `NB_MODULE` block, and none is nested
-inside another. That order is load-bearing — a type has to be registered before anything names it in a signature or
-a default argument — so the block runs the type-defining directories first, then the readers and writers, then the
-algorithms built on all of them. New source files do not need to be added anywhere manually: `CMakeLists.txt`
-collects them automatically via `file(GLOB_RECURSE FICTION_PYFICTION_SOURCES CONFIGURE_DEPENDS "src/*.cpp")`, so
-re-running `cmake` picks up new files on its own — you only need to wire the new function into the directory's
-`register_<path>.cpp` and forward-declare it there.
+Each leaf `.cpp` file defines exactly one binding function named after the file (e.g.
+`void a_star(nanobind::module_& m)`) that binds a single class, function, or closely related group thereof. Each
+directory that holds binding sources has exactly one `register_<path>.cpp`, named after the directory, that
+forward-declares and calls the binding functions beside it. In a top-level directory, that file holds the
+`NB_MODULE` block. The block imports the modules whose types it names in signatures or default arguments, calls the
+binding functions of its directory, and creates each nested submodule with `pyfiction::def_submodule` before calling
+the submodule's registry.
 
-:::{note}
-The Python-facing `mnt.pyfiction` namespace must not change shape when adding new bindings. In particular, do
-not introduce new Python-level submodules for bound symbols (e.g. `mnt.pyfiction.algorithms`) — all registration
-functions attach their bindings to the single top-level module object that is threaded through the call chain,
-matching the existing flat API that user scripts depend on. The one pure-Python subpackage is `mnt.fiction.cli`,
-the {ref}`command-line interface <cli>`, which only calls the bindings.
-:::
+New source files do not need to be added anywhere manually: `bindings/CMakeLists.txt` collects each module's
+sources with `file(GLOB_RECURSE ...)`. Wire the new function into the directory's `register_<path>.cpp`.
 
 :::{note}
 The bindings are built with [nanobind](https://github.com/wjakob/nanobind), which (unlike the previous
