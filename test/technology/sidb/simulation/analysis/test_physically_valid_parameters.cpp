@@ -28,7 +28,6 @@
 #include <fiction/technology/sidb/simulation/analysis/physically_valid_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <limits>
 #include <stdexcept>

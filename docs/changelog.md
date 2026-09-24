@@ -220,6 +220,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
+  - QCA, molQCA, and iNML each document their layout on a page of its own, like SiDB, and the Python tabs list every
+    bound symbol of their sections.
 
 - Experiments:
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
@@ -412,6 +414,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `qca_cell_clk_lyt`, `mol_qca_cell_clk_lyt`, `inml_cell_clk_lyt`, `sidb_cell_clk_lyt`, `sidb_cell_clk_lyt_cube`,
     and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts and
     `is_cell_grid_v`.
+  - **Breaking:** The header `sidb/technology.hpp`. `sidb::dot_tag` is defined in `sidb/layout.hpp`, like the cell
+    types of the other technologies.
 - I/O:
 
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
@@ -504,6 +508,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.
   - QuickSim and ClusterComplete compile with Apple libc++ without experimental library features.
   - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
+  - `pyfiction` built against such a Z3 finds `libz3` at import time, so Read the Docs renders the Python API again.
   - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
   - CMake now verifies the `fmt` 12.2.0 archive with its matching SHA-256 checksum.
   - Installed CMake packages include the `fmt` headers and their header-only compile definition.

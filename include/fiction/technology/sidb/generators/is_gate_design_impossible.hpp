@@ -26,7 +26,6 @@
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
-#include "fiction/technology/sidb/technology.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 

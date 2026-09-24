@@ -25,7 +25,6 @@
 #include <fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <cstddef>
 #include <cstdint>

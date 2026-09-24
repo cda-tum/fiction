@@ -28,6 +28,9 @@
 :sync: python
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.write_qcc_layout_params
+   :members:
+
 .. autofunction:: mnt.pyfiction.write_qcc_layout
 ```
 
