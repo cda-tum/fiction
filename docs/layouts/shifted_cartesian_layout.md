@@ -51,7 +51,7 @@ The shifted Cartesian layout supports all of them via template parameters. It sh
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.shifted_cartesian_layout
+.. autoclass:: mnt.pyfiction.layouts.shifted_cartesian_layout
    :members:
 ```
 

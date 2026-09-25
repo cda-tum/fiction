@@ -28,19 +28,19 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.write_operational_domain_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.io.write_operational_domain_params
    :members:
 
-.. autoclass:: mnt.pyfiction.sample_writing_mode
+.. autoclass:: mnt.pyfiction.sidb.simulation.io.sample_writing_mode
    :members:
 
-.. autofunction:: mnt.pyfiction.write_operational_domain
+.. autofunction:: mnt.pyfiction.sidb.simulation.io.write_operational_domain
 
-.. autofunction:: mnt.pyfiction.write_operational_domain_to_string
+.. autofunction:: mnt.pyfiction.sidb.simulation.io.write_operational_domain_to_string
 
-.. autofunction:: mnt.pyfiction.write_critical_temperature_domain
+.. autofunction:: mnt.pyfiction.sidb.simulation.io.write_critical_temperature_domain
 
-.. autofunction:: mnt.pyfiction.write_critical_temperature_domain_to_string
+.. autofunction:: mnt.pyfiction.sidb.simulation.io.write_critical_temperature_domain_to_string
 ```
 
 :::
@@ -81,9 +81,9 @@
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.write_sqd_sim_result
+.. autofunction:: mnt.pyfiction.sidb.simulation.io.write_sqd_sim_result
 
-.. autofunction:: mnt.pyfiction.write_location_and_ground_state
+.. autofunction:: mnt.pyfiction.sidb.simulation.io.write_location_and_ground_state
 ```
 
 :::

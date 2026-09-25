@@ -36,13 +36,13 @@ always optimal.
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.graph_oriented_layout_design_params
+.. autoclass:: mnt.pyfiction.physical_design.graph_oriented_layout_design_params
    :members:
 
-.. autoclass:: mnt.pyfiction.graph_oriented_layout_design_stats
+.. autoclass:: mnt.pyfiction.physical_design.graph_oriented_layout_design_stats
    :members:
 
-.. autofunction:: mnt.pyfiction.graph_oriented_layout_design
+.. autofunction:: mnt.pyfiction.physical_design.graph_oriented_layout_design
 ```
 
 :::

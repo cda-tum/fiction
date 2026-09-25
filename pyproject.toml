@@ -153,28 +153,16 @@ version = ">=1.10"
 # The sdist has to build the extension, so it keeps `include/`, `bindings/`, `vendors/`, and
 # `cmake/`. Two rules keep it readable: name directories, never a source glob, and anchor every
 # pattern to the repository root. The published sdist shipped no C++ sources at all because
-# `**/include` also matched `bindings/mnt/pyfiction/include/` and `**.hpp` matched the library
+# `**/include` also matched `bindings/include/` and `**.hpp` matched the library
 # itself. `[tool.check-sdist]` below now fails on a pattern that drops a tracked source, so the
 # two rules are style rather than the only defense.
-exclude = [
-    "/.github",
-    "/benchmarks",
-    "/bib",
-    "/docs",
-    "/experiments",
-    "/test",
-    # the wheel does not ship the Python suite either; `[tool.cibuildwheel] test-sources` copies
-    # it in from the source tree
-    "/bindings/mnt/pyfiction/test",
-    "**/cmake-build-*",
-    "**/__pycache__"
-]
+exclude = [ "/.github", "/benchmarks", "/bib", "/docs", "/experiments", "/test", "**/cmake-build-*", "**/__pycache__" ]
 
 [tool.scikit-build.wheel]
 # Set the wheel install directory
 install-dir = "mnt/pyfiction"
 # Explicitly set the package directory
-packages = [ "bindings/mnt" ]
+packages = [ "python/mnt" ]
 # One Stable ABI wheel per platform serves every supported CPython. The 3.10 floor is what
 # nanobind's split mode buys: a linked stable-ABI build cannot go below 3.12
 py-api = "cp310"
@@ -221,7 +209,7 @@ test-command = "pytest"
 # gives pytest its configuration file, so the wheel runs the same suite under the same
 # settings as `nox -s tests` without repeating any of them here.
 test-groups = [ "test" ]
-test-sources = [ "bindings/mnt/pyfiction/test", "pyproject.toml" ]
+test-sources = [ "test/python", "pyproject.toml" ]
 manylinux-x86_64-image = "manylinux_2_28"
 # every `z3-solver` aarch64 wheel on PyPI is tagged `manylinux_2_34` or newer, so the default
 # `manylinux_2_28` image finds none of them, falls back to the sdist, and spends ~19 minutes
@@ -260,7 +248,7 @@ inherit.repair-wheel-command = "append"
 [tool.ruff]
 line-length = 120
 namespace-packages = [ "mnt" ]
-src = [ "bindings" ]
+src = [ "python" ]
 # `rule-codes-in-selectors` requires preview mode to allow rule names in selectors.
 preview = true
 fix = true
@@ -273,21 +261,22 @@ docstring-code-format = true
 [tool.ruff.lint.per-file-ignores]
 # a command's docstring is the help text `fiction` shows for it, so it describes the command for a
 # user; every command returns the log entry and raises `CommandError`, which `registry.py` documents
-"bindings/mnt/fiction/cli/commands/*.py" = [ "docstring-missing-exception", "docstring-missing-returns" ]
+"python/mnt/fiction/cli/commands/*.py" = [ "docstring-missing-exception", "docstring-missing-returns" ]
 # E501: the expected SVG output is compared verbatim, so its lines cannot be wrapped
-"bindings/mnt/pyfiction/test/technology/sidb/io/test_write_sidb_layout_svg.py" = [ "line-too-long" ]
+"test/python/sidb/io/test_write_sidb_layout_svg.py" = [ "line-too-long" ]
 # RUF069: a test that stores a float through a binding and reads it back asserts that it
 # comes back unchanged, which is exact; pytest.approx there would hide a broken setter
 # PLR6201: a set literal tests membership by hash, a list literal by `__eq__`. The coordinate
 # bindings compare equal to the tuples these tests write but do not hash equal to them, so the
 # rule's rewrite turns a passing assertion into a failing one
-"bindings/mnt/pyfiction/test/**" = [
+"test/python/**" = [
     "ANN",
-    "assert",                    # a test suite asserts
+    "assert",                     # a test suite asserts
     "D",
     "float-equality-comparison",
+    "implicit-namespace-package", # an `__init__.py` would let the suite shadow the installed package
     "literal-membership",
-    "magic-value-comparison",    # a test suite compares against the numbers it expects
+    "magic-value-comparison",     # a test suite compares against the numbers it expects
     "T20",
 ]
 # `docs/conf.py` is run by path, not imported as a module, so an `__init__.py` would be wrong
@@ -295,12 +284,10 @@ docstring-code-format = true
 "noxfile.py" = [ "banned-api", "T20" ]
 "scripts/**" = [ "T20" ]  # maintenance scripts report progress on stdout
 "*.pyi" = [ "docstring-in-stub", "overload-with-docstring" ]  # pydocstyle
-# these three run real initialization: the two binding packages register the Windows DLL search
-# path before the extension is imported, and the test package does the same before the tests are
-# collected. A re-export-only `__init__` cannot do that
-"bindings/mnt/__init__.py" = [ "non-empty-init-module" ]
-"bindings/mnt/pyfiction/__init__.py" = [ "non-empty-init-module" ]
-"bindings/mnt/pyfiction/test/__init__.py" = [ "non-empty-init-module" ]
+# `mnt/__init__.py` registers the Windows DLL search path before any extension is imported, and
+# `mnt/pyfiction/__init__.py` loads the submodules lazily. A re-export-only `__init__` cannot do either
+"python/mnt/__init__.py" = [ "non-empty-init-module" ]
+"python/mnt/pyfiction/__init__.py" = [ "non-empty-init-module" ]
 # standalone scripts run by path, not modules anything imports, so an `__init__.py` would be wrong
 ".github/scripts/**" = [ "implicit-namespace-package" ]
 "experiments/**" = [
@@ -356,7 +343,6 @@ git-only = [
     "/docs",
     "/experiments",
     "/test",
-    "/bindings/mnt/pyfiction/test",
 ]
 
 [tool.pyproject-fmt]
@@ -368,16 +354,21 @@ table_format = "long"
 sub_table_spacing = "\n"
 
 [tool.mypy]
-mypy_path = [ "$MYPY_CONFIG_FILE_DIR/bindings" ]
+mypy_path = [ "$MYPY_CONFIG_FILE_DIR/python" ]
 # Every Python file the repository owns, so a new one is checked without anyone remembering to
 # add it here
-files = [ "bindings/mnt", "docs", "experiments", "noxfile.py", "scripts" ]
+files = [ "docs", "experiments", "noxfile.py", "python/mnt", "scripts", "test/python" ]
 explicit_package_bases = true
 disallow_untyped_defs = false
 warn_unreachable = true
 enable_error_code = [ "ignore-without-code", "redundant-expr", "truthy-bool" ]
 strict = true
 warn_unused_configs = true
+
+# The extension modules ship no stubs, so the bindings are `Any` to the type checker
+[[tool.mypy.overrides]]
+module = [ "mnt.pyfiction.*" ]
+ignore_missing_imports = true
 
 [tool.pytest]
 addopts = [
@@ -403,7 +394,7 @@ markers = [
 ]
 minversion = "9.0"
 strict = true
-testpaths = [ "bindings/mnt/pyfiction/test" ]
+testpaths = [ "test/python" ]
 
 [tool.coverage.run]
 source = [ "mnt.fiction", "mnt.pyfiction" ]

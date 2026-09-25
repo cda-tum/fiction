@@ -156,10 +156,10 @@ Install the library from PyPI:
 pip install mnt.pyfiction
 ```
 
-Import it in your script:
+Import what you need from the submodule that mirrors its C++ namespace:
 
 ```python
-from mnt import pyfiction
+from mnt.pyfiction.layouts import cartesian_layout
 ```
 
 ---

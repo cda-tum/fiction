@@ -24,7 +24,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.write_qll_layout
+.. autofunction:: mnt.pyfiction.fcn.io.write_qll_layout
 ```
 
 :::

@@ -30,10 +30,10 @@ Check design rules, compare circuit behavior, and construct virtual miters.
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.gate_level_drv_params
+.. autoclass:: mnt.pyfiction.verification.gate_level_drv_params
    :members:
 
-.. autofunction:: mnt.pyfiction.gate_level_drvs
+.. autofunction:: mnt.pyfiction.verification.gate_level_drvs
 ```
 
 :::
@@ -70,10 +70,10 @@ Check design rules, compare circuit behavior, and construct virtual miters.
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.eq_type
+.. autoclass:: mnt.pyfiction.verification.eq_type
    :members:
 
-.. autofunction:: mnt.pyfiction.equivalence_checking
+.. autofunction:: mnt.pyfiction.verification.equivalence_checking
 ```
 
 :::

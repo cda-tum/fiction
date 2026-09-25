@@ -29,7 +29,7 @@ env:
   # LLVM_VERSION and the clang PyPI pin below must move together -- the PyPI package only supplies
   # the cindex bindings, and they have to match the shared library that does the parsing.
   LLVM_VERSION: "18"
-  DOCSTRINGS: bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+  DOCSTRINGS: bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp
 
 jobs:
   docstrings:

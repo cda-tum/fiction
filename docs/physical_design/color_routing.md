@@ -35,10 +35,10 @@ to the layout.
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.color_routing_params
+.. autoclass:: mnt.pyfiction.physical_design.color_routing_params
    :members:
 
-.. autofunction:: mnt.pyfiction.color_routing
+.. autofunction:: mnt.pyfiction.physical_design.color_routing
 ```
 
 :::

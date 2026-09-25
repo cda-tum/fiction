@@ -1,0 +1,206 @@
+# Python bindings for the _fiction_ library
+
+This directory contains Python bindings for the _fiction_ library built
+with [nanobind](https://github.com/wjakob/nanobind).
+
+## Installation
+
+The bindings can either be built and installed automatically with `pip` or built with `CMake` and installed manually.
+
+### Set up a virtual environment
+
+In order to set up a virtual environment on UNIX-like systems, you can use the following commands:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+If you are using Windows, you can use the following commands instead:
+
+```batch
+python3 -m venv venv
+venv\Scripts\activate.bat
+```
+
+### Set up `nox`
+
+[`nox`](https://nox.thea.codes/en/stable/index.html) can be used to conveniently run many development tasks like
+testing the bindings on multiple Python installations.
+
+```bash
+(venv) $ pipx install nox
+```
+
+If you use macOS, then `nox` is in `brew`, use `brew install nox`.
+
+> [!NOTE]
+> If you do not have [`pipx`](https://pypa.github.io/pipx/) (pip for applications) installed, you can install it with:
+>
+> ```bash
+> (venv) $ pip install pipx
+> (venv) $ pipx ensurepath
+> ```
+
+If you use macOS, then `pipx` is in `brew`, use `brew install pipx`.
+
+### Install `pre-commit`
+
+Install [`pre-commit`](https://pre-commit.com/) to automatically run a set of checks before each commit.
+
+```bash
+(venv) $ pipx install pre-commit
+(venv) $ pre-commit install
+```
+
+If you use macOS, then `pre-commit` is in `brew`, use `brew install pre-commit`.
+
+You can also run the checks manually:
+
+```bash
+(venv) $ pre-commit run --all-files
+```
+
+### Install Z3
+
+Make sure to have the SMT Solver [`Z3 >= 4.8.5`](https://github.com/Z3Prover/z3) installed. This can be accomplished in
+a multitude of ways:
+
+- Under Ubuntu 20.04 and newer: `sudo apt-get install libz3-dev`.
+- Under macOS: `brew install z3`.
+- Alternatively: `pip install z3-solver` in the virtual environment.
+- Download pre-built binaries from https://github.com/Z3Prover/z3/releases and copy the files to the respective system
+  directories.
+- Build Z3 from source and install it to the system.
+
+### Building the bindings with `pip`
+
+```bash
+(venv) $ pip install .
+```
+
+### Building the bindings with `uv` (faster)
+
+```bash
+(venv) $ pipx install uv
+(venv) $ uv pip install .
+```
+
+### Building the bindings with CMake
+
+```bash
+cmake . -B build -DFICTION_PYTHON_BINDINGS=ON
+cd build
+cmake --build . -j4
+```
+
+### Running Python tests
+
+A `nox` session is provided to conveniently run the Python tests.
+
+```bash
+(venv) $ nox -s tests
+```
+
+This installs all dependencies for running the tests in an isolated environment, builds the Python package, and then
+runs the tests.
+
+The `minimums` session runs the same tests against the lowest declared direct dependencies instead of the newest
+compatible ones, which exercises the lower bounds in `pyproject.toml`. It requires Python 3.10, the oldest version
+_fiction_ supports.
+
+```bash
+(venv) $ nox -s minimums
+```
+
+## Usage
+
+The bindings are available as the Python package `mnt.pyfiction`, with one submodule per C++ namespace:
+`fiction::layouts` is `mnt.pyfiction.layouts`, `fiction::sidb::simulation::engines` is
+`mnt.pyfiction.sidb.simulation.engines`. Import what you need from its submodule:
+
+```python
+from mnt.pyfiction.layouts import cartesian_layout
+```
+
+The bindings are documented using [pybind11's mkdoc utility tool](https://github.com/pybind/pybind11_mkdoc). To see
+the documentation for a function, simply call `help` on it:
+
+```python
+help(cartesian_layout)
+```
+
+## Extending the bindings
+
+We try to keep the bindings as close to the C++ API as possible. However, due to language differences, some
+functionality might not be available in Python or differ slightly in its syntax compared to its C++ counterpart.
+
+Our goal is to expose as much of _fiction_'s library features in some way in `pyfiction` as well. Therefore, whenever a
+new feature is added to the C++ library, please also add the respective bindings here. To not duplicate
+docstrings and run out of sync, we use the `pybind11_mkdoc` tool to automatically generate the documentation from the
+C++ docstrings.
+
+A few things must be noted when adding new bindings:
+
+- Do not use `""_a` literals in the bindings. Instead, use `py::arg` to specify the argument names.
+- Do not use `from mnt.pyfiction.<submodule> import *` in the Python code. Instead, use explicit imports like
+  `from mnt.pyfiction.layouts import cartesian_layout`. This speeds up the import process and helps narrow down the origin of a
+  failing test.
+
+### Docstrings
+
+The auto-generated file `include/pybind11_mkdoc_docstrings.hpp` contains all docstrings extracted from the C++ code.
+Since it does not contain include guards, we offer the (manually created)
+file `include/documentation.hpp`, which acts as a wrapper around the aforementioned docstrings. Should it be necessary
+to adjust certain docstrings for Python bindings, this can be done here.
+
+> ⚠️ **Do not directly include the auto-generated file!** Due to the lack of header guards, it leads to compilation
+> errors. Instead, only include `documentation.hpp`.
+
+`pybind11_mkdoc_docstrings.hpp` is committed, and a Doxygen comment you add in `include/fiction/` only reaches
+Python once the regenerated file is committed with it. CI's `🐍 Docstrings` job regenerates the header on every
+pull request that can affect it and fails when the committed file differs. The job cannot commit the regeneration
+for you: it would have to push to your pull request head with a token that starts no workflow run, leaving that
+commit without the `🚦 Check` its merge waits for.
+
+So when the check fails, download the `pyfiction-docstrings` artifact from that run, put it in place of
+`bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp`, and commit it. The job summary repeats
+these instructions and shows what changed.
+
+You can also regenerate the file locally, which is what CI does. `pybind11_mkdoc` parses with libclang, so it needs
+the same include paths, defines, and language standard as the real build. Without them it parses this C++20 code
+base as C++11 and silently drops the docstrings that follow anything it cannot parse, such as a `requires` clause.
+
+Install the tool and the libclang bindings, which must match the `libclang-18` shared library that does the parsing:
+
+```bash
+pip install "pybind11_mkdoc==3.0.0" "clang==18.1.8" nanobind
+```
+
+Configure a build to produce the compile database the flags are read from, then generate the docstrings from
+_fiction_'s base directory:
+
+```bash
+(
+  set -euo pipefail
+  cmake --preset pyfiction
+  mkdoc_flags="$(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction)"
+  mkdoc_headers="$(find include/fiction -name "*.hpp" -print | LC_ALL=C sort)"
+  python3 -m pybind11_mkdoc \
+    -o bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp \
+    -std=c++20 \
+    "-resource-dir=$(llvm-config-18 --libdir)/clang/18" \
+    ${mkdoc_flags} \
+    ${mkdoc_headers}
+)
+```
+
+Resolve the flags and the header list before the generator runs, as the subshell above does and as CI does. Passing
+them inline as `$(...)` hides a failure of either: the generator still runs, just without include paths or without
+inputs, and writes a header that is truncated rather than absent. The subshell keeps `set -euo pipefail` from
+reaching your interactive shell.
+
+Expect zero parse errors. A drop in the number of generated symbols means the flags did not take effect.
+
+Keep the `sort`. The generator numbers repeated symbol names in the order it meets them, so an unsorted header list
+produces a file that disagrees with CI's for no reason other than the order your filesystem reports.

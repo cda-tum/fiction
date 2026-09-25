@@ -38,7 +38,8 @@ auto paths = fiction::physical_design::path_finding::yen_k_shortest_paths<path>(
 :sync: python
 
 ```python
-from mnt.pyfiction import cartesian_layout, obstructions, yen_k_shortest_paths
+from mnt.pyfiction.layouts import cartesian_layout, obstructions
+from mnt.pyfiction.physical_design.path_finding import yen_k_shortest_paths
 
 lyt = cartesian_layout((3, 3))
 blocked = obstructions()
@@ -47,7 +48,7 @@ paths = yen_k_shortest_paths(lyt, (0, 0), (3, 3), 3, obstructions=blocked)
 ```
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.obstructions
+.. autoclass:: mnt.pyfiction.layouts.obstructions
    :members:
 ```
 

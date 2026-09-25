@@ -1,5 +1,10 @@
 # AGENTS.md — tests
 
+`test/python/` holds the `pytest` suite of `mnt.pyfiction`. It mirrors the Python module
+tree, not `include/fiction/`: the tests of `mnt.pyfiction.sidb.simulation.engines` live in
+`test/python/sidb/simulation/engines/`. The directories carry no `__init__.py`, so the suite
+never shadows an installed `mnt.pyfiction`. Everything else below is about the C++ tests.
+
 Catch2 tests. The tree mirrors `include/fiction/` exactly: `layouts/`, `networks/`,
 `synthesis/`, `physical_design/`, `verification/`, `technology/` (with `fcn/`, `qca/`,
 `inml/`, and the `sidb/` subtree), and `utils/`, plus `benchmark/`, shared `resources/`,

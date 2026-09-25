@@ -313,9 +313,9 @@ void route_path(Lyt& lyt, const Path& path) noexcept
  * starting at each PI. Whenever the next regular node (non-IO, non-constant, non-wire) is encountered, this connection
  * is added to the list of all objectives.
  *
- * Example: Let a layout have connections from `(0,0)` to `(2,3)` via a cascade of wires and a direct connection from
- * `(2,2)` to `(2,3)`. The list of routing objectives extracted from that layout would contain `{(0,0), (2,3)}` and
- * `{(2,2), (2,3)}`.
+ * For example, let a layout have connections from `(0,0)` to `(2,3)` via a cascade of wires and a direct connection
+ * from `(2,2)` to `(2,3)`. The list of routing objectives extracted from that layout would contain `{(0,0), (2,3)}`
+ * and `{(2,2), (2,3)}`.
  *
  * In other words, if all wires were removed from the layout and all connections ripped-up, an equivalent layout could
  * be recreated from the list of routing objectives.

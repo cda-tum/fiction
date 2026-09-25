@@ -30,8 +30,8 @@ flag_management:
     - name: python
       paths:
         # A directory prefix includes package-root modules as well as nested modules.
-        - bindings/mnt/pyfiction/
-        - bindings/mnt/fiction/
+        - python/mnt/pyfiction/
+        - python/mnt/fiction/
       statuses:
         - type: project
           target: auto

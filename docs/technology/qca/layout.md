@@ -34,13 +34,13 @@ A QCA layout can be obtained from a gate-level layout by applying the {ref}`QCA 
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.qca_cell_type
+.. autoclass:: mnt.pyfiction.qca.qca_cell_type
    :members:
 
-.. autoclass:: mnt.pyfiction.qca_cell_mode
+.. autoclass:: mnt.pyfiction.qca.qca_cell_mode
    :members:
 
-.. autoclass:: mnt.pyfiction.qca_layout
+.. autoclass:: mnt.pyfiction.qca.qca_layout
    :members:
 ```
 

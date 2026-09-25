@@ -73,9 +73,9 @@ endif()
 # Note: nanobind (used for the Python bindings) is *not* declared here. Unlike
 # the other dependencies in this file, it is resolved as an installed Python
 # build dependency rather than via FetchContent, and is only needed when
-# FICTION_PYTHON_BINDINGS is enabled -- see
-# bindings/mnt/pyfiction/CMakeLists.txt, which is the first place in the
-# configure run where that option is guaranteed to be known.
+# FICTION_PYTHON_BINDINGS is enabled -- see bindings/CMakeLists.txt, which is
+# the first place in the configure run where that option is guaranteed to be
+# known.
 
 # parallel-hashmap
 set(PARALLEL_HASHMAP_VERSION

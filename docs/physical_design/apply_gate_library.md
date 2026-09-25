@@ -42,13 +42,13 @@ surface take the surface as a `sidb::layout` and return one, carrying the surfac
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.apply_qca_one_library
+.. autofunction:: mnt.pyfiction.physical_design.apply_qca_one_library
 
-.. autofunction:: mnt.pyfiction.apply_topolinano_library
+.. autofunction:: mnt.pyfiction.physical_design.apply_topolinano_library
 
-.. autofunction:: mnt.pyfiction.apply_bestagon_library
+.. autofunction:: mnt.pyfiction.physical_design.apply_bestagon_library
 
-.. autofunction:: mnt.pyfiction.apply_sim7_mol_library
+.. autofunction:: mnt.pyfiction.physical_design.apply_sim7_mol_library
 ```
 
 :::

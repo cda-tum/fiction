@@ -16,7 +16,7 @@ reviews:
     - "!vendors/**"
     - "!benchmarks/**"
     - "!docs/_build/**"
-    - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
+    - "!bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 
   path_instructions:
     - path: "**/*.{hpp,cpp}"
@@ -36,16 +36,26 @@ reviews:
         them on every pull request; do not comment on them. Do review contracts, template
         constraints, compile-time cost, and Doxygen coverage: every public symbol needs a
         Doxygen block.
-    - path: "bindings/mnt/pyfiction/**"
+    - path: "bindings/**"
       instructions: >-
         Python bindings built with nanobind, not pybind11. One translation unit per
         binding, wired into the enclosing register_<name>.cpp. Sources are collected by
-        file(GLOB_RECURSE ...); do not suggest adding them to a manual CMake list. Do not
-        suggest new Python-level submodules for bound symbols; the flat mnt.pyfiction
-        namespace shape is fixed. The pure-Python CLI lives in the sibling mnt.fiction.cli package.
+        file(GLOB_RECURSE ...); do not suggest adding them to a manual CMake list. Each
+        top-level C++ namespace is one extension module, and each nested namespace a
+        submodule of it; flag bindings registered into a module that does not match their
+        namespace.
+    - path: "python/**"
+      instructions: >-
+        The mnt.pyfiction package root loads its submodules lazily; do not suggest
+        re-exporting bound names at the root. The pure-Python CLI lives in mnt.fiction.cli.
+    - path: "test/python/**"
+      instructions: >-
+        pytest suite of mnt.pyfiction, laid out like the Python module tree. Flag tests
+        that assert on iteration order or tie-breaking that the documentation does not
+        promise.
     - path: "test/**"
       instructions: >-
-        Catch2. Test file base names must be unique across the whole test tree because
+        Catch2 outside test/python. Test file base names must be unique across the whole test tree because
         CMake derives target names from them. Flag tests that assert on iteration order or
         tie-breaking that the documentation does not promise. Do not suggest merging or
         parameterizing existing test cases.
