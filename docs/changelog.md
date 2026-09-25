@@ -103,12 +103,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - The parameters of the algorithms that report progress accept a Python callable as
     `on_progress`, and `exhaustive_ground_state_simulation` takes it as an argument. These
     algorithms release the GIL while they run.
+  - `mnt.pyfiction` ships `.pyi` stubs and a `py.typed` marker, so type checkers and IDEs see the
+    signatures of the bindings.
 
 - Tooling:
 
   - Added EditorConfig settings that match the repository's formatters.
   - Prek formats `pyproject.toml` with `pyproject-fmt`.
   - Added `nox -s cpp_lint` for local Clang-Tidy checks. Nox uses `cmake` as the sole CMake executable.
+  - Added `nox -s stubs`, which regenerates the `mnt.pyfiction` stubs; CI fails when they are out of date.
 
 ### Changed
 

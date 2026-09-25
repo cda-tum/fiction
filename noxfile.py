@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -248,6 +249,95 @@ def cpp_lint(session: nox.Session) -> None:
             linter_args.append(f"--diff-base={args.diff_base}")
 
         session.run("cpp-linter", *linter_args)
+
+
+def _widen_stub(stub: Path) -> None:
+    """Widen the types of a stub to what the bindings accept and return but stubgen cannot express.
+
+    The bindings declare ``tuple`` implicitly convertible to ``offset_coordinate`` and
+    ``cube_coordinate``, so coordinate parameters also accept tuples. An empty ``std::function``
+    member reads as ``None``, so callback property getters may return ``None``.
+
+    Args:
+        stub: Stub file to rewrite in place.
+    """
+    text = stub.read_text(encoding="utf-8")
+    text = re.sub(r"(@property\n\s*def \w+\(self\) -> )(Callable\[.*\]):$", r"\1\2 | None:", text, flags=re.MULTILINE)
+    coordinate = re.compile(r"\b((?:mnt\.pyfiction\.layouts\.coords\.)?(?:offset|cube)_coordinate)\b(?! \|)")
+    pieces, position = [], 0
+    for match in re.finditer(r"\bdef \w+\(", text):
+        if match.start() < position:
+            continue
+        depth, end = 1, match.end()
+        while depth:
+            depth += {"(": 1, ")": -1}.get(text[end], 0)
+            end += 1
+        parameters = coordinate.sub(r"\1 | tuple[int, int] | tuple[int, int, int]", text[match.end() : end])
+        pieces += [text[position : match.end()], parameters]
+        position = end
+    stub.write_text("".join([*pieces, text[position:]]), encoding="utf-8")
+
+
+@nox.session(reuse_venv=True)
+def stubs(session: nox.Session) -> None:
+    """Generate the type stubs of the `mnt.pyfiction` extension modules with nanobind.
+
+    The stubs cover the optional bindings only when the build finds Z3 and ALGLIB, which is what
+    `pyproject.toml` requests.
+    """
+    env = {"UV_PROJECT_ENVIRONMENT": session.virtualenv.location}
+    _install_build_tools(session)
+    session.run("uv", "sync", "--inexact", "--only-group", "build", env=env)
+    session.run("uv", "sync", "--inexact", "--no-dev", "--no-build-isolation-package", "mnt-pyfiction", env=env)
+
+    package_root = Path(__file__).parent / "python" / "mnt" / "pyfiction"
+    modules = [
+        "fcn",
+        "inml",
+        "layouts",
+        "mol_qca",
+        "networks",
+        "physical_design",
+        "qca",
+        "sidb",
+        "synthesis",
+        "utils",
+        "verification",
+    ]
+    session.run(
+        "uv",
+        "run",
+        "--no-sync",
+        "python",
+        "-m",
+        "nanobind.stubgen",
+        "--recursive",
+        "--include-private",
+        "--output-dir",
+        str(package_root),
+        "--pattern-file",
+        str(package_root / "stubgen.pattern"),
+        *(argument for module in modules for argument in ("--module", f"mnt.pyfiction.{module}")),
+        env=env,
+    )
+
+    # nanobind names a stub after the extension's file, which carries the `.abi3` tag of the
+    # Stable ABI build
+    for abi3_stub in package_root.glob("*.abi3.pyi"):
+        abi3_stub.replace(package_root / abi3_stub.name.replace(".abi3.pyi", ".pyi"))
+
+    for stub in package_root.glob("**/*.pyi"):
+        _widen_stub(stub)
+
+    pyi_files = [str(path) for path in package_root.glob("**/*.pyi")]
+    if shutil.which("prek") is None:
+        session.install("prek")
+
+    # the first passes fix what they can and exit with 1 when they changed a file
+    success_codes = [0, 1]
+    for hook in ("license-tools", "ruff-check", "ruff-format"):
+        session.run("prek", "run", hook, "--files", *pyi_files, external=True, success_codes=success_codes)
+    session.run("prek", "run", "ruff-check", "--files", *pyi_files, external=True)
 
 
 @nox.session(python="3.12", reuse_venv=True)

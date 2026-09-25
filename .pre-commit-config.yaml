@@ -55,6 +55,8 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-added-large-files
+        # the generated stubs are text and grow with the bindings
+        exclude: ^python/mnt/pyfiction/.*\.pyi$
         priority: 0
       - id: check-case-conflict
         priority: 0

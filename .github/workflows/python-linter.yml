@@ -13,23 +13,43 @@ defaults:
   run:
     shell: bash
 
+env:
+  Z3_VERSION: 5.1.0
+
 jobs:
-  mypy:
-    name: 🐍 Type check
-    runs-on: ubuntu-26.04
-    timeout-minutes: 15
+  python-linter:
+    name: 🐍 Type check and stubs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
     permissions:
       contents: read # required to check out the repository
 
-    # `mypy` is the one hook `.pre-commit-config.yaml` lists under `ci: skip`. Its environment
-    # needs `numpy`, `matplotlib`, and `sphinx` to resolve the imports of the files it checks,
-    # which puts it over the 250 MiB pre-commit.ci allows a hook. It runs here instead, so the
-    # dependencies it needs cost nothing and `prek run -a` stays complete locally.
+    # The two checks that `.pre-commit-config.yaml` cannot carry. `mypy` is the one hook it lists
+    # under `ci: skip`: its environment needs `numpy`, `matplotlib`, and `sphinx` to resolve the
+    # imports of the files it checks, which puts it over the 250 MiB pre-commit.ci allows a hook.
+    # The stub comparison needs the compiled extension, because it regenerates the `.pyi` files
+    # from it.
     steps:
       - name: Clone repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0 # `vcs-versioning` derives the version from the tag history
           persist-credentials: false
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
+        with:
+          # A key of this job's own: two workflows sharing one while producing disjoint objects
+          # overwrite caches neither can use.
+          key: "ubuntu-24.04-python-linter"
+          save: true
+          max-size: 10G
+
+      # The stubs cover the Z3-only bindings, so the build needs Z3.
+      - name: Install Z3
+        uses: cda-tum/setup-z3@0401375ea1e34d77ef35bbeb634f6203f3bcde60 # v1.7.3
+        with:
+          version: ${{ env.Z3_VERSION }}
 
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
@@ -39,3 +59,15 @@ jobs:
 
       - name: Run mypy
         run: uvx prek run mypy --all-files
+
+      # The `.pyi` files are generated, never hand-written, so the only thing that can go wrong
+      # is a binding change landing without a regeneration. Rebuilding them here and diffing
+      # catches exactly that.
+      - name: Check if stub files are up to date
+        run: |
+          uvx nox -s stubs
+          if [[ -n "$(git status --porcelain python)" ]]; then
+            echo "Stub files are not up to date. Please run 'nox -s stubs' and commit the changes."
+            git --no-pager diff python
+            exit 1
+          fi

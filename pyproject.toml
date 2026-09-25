@@ -283,7 +283,20 @@ docstring-code-format = true
 "docs/**" = [ "A", "implicit-namespace-package", "T20" ]
 "noxfile.py" = [ "banned-api", "T20" ]
 "scripts/**" = [ "T20" ]  # maintenance scripts report progress on stdout
-"*.pyi" = [ "docstring-in-stub", "overload-with-docstring" ]  # pydocstyle
+# `nox -s stubs` generates the stubs: their docstrings come from the Doxygen comments in
+# `include/fiction/`, and their names and signatures from the C++ API
+"*.pyi" = [
+    "ambiguous-unicode-character-docstring",
+    "builtin-argument-shadowing",
+    "builtin-attribute-shadowing",
+    "D",
+    "docstring-in-stub",
+    "error-suffix-on-exception-name",
+    "forward-annotation-syntax-error",       # C++ type names of types without a binding
+    "invalid-class-name",
+    "line-too-long",
+    "overload-with-docstring",
+]
 # `mnt/__init__.py` registers the Windows DLL search path before any extension is imported, and
 # `mnt/pyfiction/__init__.py` loads the submodules lazily. A re-export-only `__init__` cannot do either
 "python/mnt/__init__.py" = [ "non-empty-init-module" ]
@@ -365,10 +378,12 @@ enable_error_code = [ "ignore-without-code", "redundant-expr", "truthy-bool" ]
 strict = true
 warn_unused_configs = true
 
-# The extension modules ship no stubs, so the bindings are `Any` to the type checker
+# `nox -s stubs` generates these stubs from the bindings. nanobind types comparison operands as the
+# class itself and leaves the parameters of bare `list`, `dict`, and `Iterator` open, and types
+# without a binding keep their C++ names
 [[tool.mypy.overrides]]
 module = [ "mnt.pyfiction.*" ]
-ignore_missing_imports = true
+disable_error_code = [ "assignment", "overload-cannot-match", "override", "type-arg", "valid-type" ]
 
 [tool.pytest]
 addopts = [
