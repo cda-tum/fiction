@@ -11,7 +11,6 @@
 /**
  * @file
  * @brief Registers the bindings of the `mnt.pyfiction.layouts.coords` submodule.
- * @author OpenAI Codex
  */
 
 #include <nanobind/nanobind.h>

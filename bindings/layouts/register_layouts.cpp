@@ -12,7 +12,6 @@
  * @file
  * @brief Entry point of the `mnt.pyfiction.layouts` extension module.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #include "pyfiction/submodule.hpp"
