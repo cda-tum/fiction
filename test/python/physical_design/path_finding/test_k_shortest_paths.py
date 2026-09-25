@@ -15,10 +15,10 @@ from mnt.pyfiction.layouts import (
     cartesian_layout,
     hexagonal_gate_layout,
     hexagonal_layout,
-    offset_coordinate,
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
 )
+from mnt.pyfiction.layouts.coords import offset_coordinate
 from mnt.pyfiction.physical_design.path_finding import yen_k_shortest_paths
 
 

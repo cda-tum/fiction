@@ -10,12 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.layouts import (
-    cartesian_gate_layout,
-    hexagonal_gate_layout,
-    offset_coordinate,
-    shifted_cartesian_gate_layout,
-)
+from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts.coords import offset_coordinate
 from mnt.pyfiction.verification import critical_path_length_and_throughput, gate_level_drv_params, gate_level_drvs
 
 

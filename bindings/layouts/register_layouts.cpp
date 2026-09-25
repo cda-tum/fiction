@@ -12,6 +12,7 @@
  * @file
  * @brief Entry point of the `mnt.pyfiction.layouts` extension module.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #include "pyfiction/submodule.hpp"
@@ -21,9 +22,11 @@
 namespace pyfiction
 {
 
-void offset_coordinate(nanobind::module_& m);
-void cube_coordinate(nanobind::module_& m);
-void coordinate_utility(nanobind::module_& m);
+/**
+ * @brief Registers the bindings of the `mnt.pyfiction.layouts.coords` submodule.
+ * @param m Python coordinate submodule.
+ */
+void register_layouts_coords(nanobind::module_& m);
 void cartesian_layout(nanobind::module_& m);
 void shifted_cartesian_layout(nanobind::module_& m);
 void hexagonal_layout(nanobind::module_& m);
@@ -50,9 +53,8 @@ NB_MODULE(layouts, m)
     // Overloads on the cell-level layouts of `qca`, `mol_qca`, `inml`, and `sidb` import nothing: those
     // modules come later in the import chain, and an argument of their type implies that they are loaded.
 
-    pyfiction::offset_coordinate(m);
-    pyfiction::cube_coordinate(m);
-    pyfiction::coordinate_utility(m);
+    auto coords = pyfiction::def_submodule(m, "coords", "Layout coordinates and their area and volume functions.");
+    pyfiction::register_layouts_coords(coords);
     pyfiction::cartesian_layout(m);
     pyfiction::shifted_cartesian_layout(m);
     pyfiction::hexagonal_layout(m);

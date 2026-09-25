@@ -35,6 +35,7 @@ SUBMODULES = [
 NESTED_SUBMODULES = [
     "fcn.io",
     "inml.io",
+    "layouts.coords",
     "layouts.io",
     "mol_qca.io",
     "networks.io",
@@ -82,5 +83,24 @@ def test_submodules_load_lazily() -> None:
         "assert 'mnt.pyfiction.sidb' not in sys.modules\n"
         "assert pf.sidb.simulation.engines.quickexact\n"
         "assert 'mnt.pyfiction.sidb' in sys.modules\n"
+    )
+    subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
+
+
+def test_coordinate_namespace_in_fresh_interpreter() -> None:
+    """Coordinate imports expose types and utilities that layout APIs accept."""
+    script = (
+        "from mnt.pyfiction.layouts import cartesian_layout\n"
+        "from mnt.pyfiction.layouts.coords import (\n"
+        "    offset_coordinate, cube_coordinate, offset_area, cube_area, offset_volume, cube_volume\n"
+        ")\n"
+        "for coordinate, area, volume in (\n"
+        "    (offset_coordinate, offset_area, offset_volume),\n"
+        "    (cube_coordinate, cube_area, cube_volume),\n"
+        "):\n"
+        "    assert coordinate.__module__ == 'mnt.pyfiction.layouts.coords'\n"
+        "    assert area(coordinate(2, 3, 1)) == 12\n"
+        "    assert volume(coordinate(2, 3, 1)) == 24\n"
+        "assert cartesian_layout(offset_coordinate(2, 3)).x() == 2\n"
     )
     subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script

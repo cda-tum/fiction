@@ -12,7 +12,7 @@ import operator
 
 import pytest
 
-from mnt.pyfiction.layouts import cube_coordinate, offset_coordinate
+from mnt.pyfiction.layouts.coords import cube_coordinate, offset_coordinate
 
 COORDINATE_TYPES = [
     pytest.param(offset_coordinate, id="offset"),

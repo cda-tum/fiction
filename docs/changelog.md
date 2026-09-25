@@ -370,6 +370,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Coordinate types and area/volume functions now live in `mnt.pyfiction.layouts.coords`.
+
   - **Breaking:** `mnt.pyfiction` has one submodule per C++ namespace, such as `mnt.pyfiction.layouts` and
     `mnt.pyfiction.sidb.simulation.engines`; import each name from its submodule. The package root
     loads the submodules on first access and re-exports no bound names.

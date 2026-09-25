@@ -24,7 +24,7 @@ An offset coordinate is a coordinate that defines a location via an offset from 
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.layouts.offset_coordinate
+.. autoclass:: mnt.pyfiction.layouts.coords.offset_coordinate
    :members:
 ```
 
@@ -53,7 +53,7 @@ At the same time, they can be used to address 3-dimensional grids.
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.layouts.cube_coordinate
+.. autoclass:: mnt.pyfiction.layouts.coords.cube_coordinate
    :members:
 ```
 
@@ -91,13 +91,13 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.layouts.offset_area
+.. autofunction:: mnt.pyfiction.layouts.coords.offset_area
 
-.. autofunction:: mnt.pyfiction.layouts.cube_area
+.. autofunction:: mnt.pyfiction.layouts.coords.cube_area
 
-.. autofunction:: mnt.pyfiction.layouts.offset_volume
+.. autofunction:: mnt.pyfiction.layouts.coords.offset_volume
 
-.. autofunction:: mnt.pyfiction.layouts.cube_volume
+.. autofunction:: mnt.pyfiction.layouts.coords.cube_volume
 ```
 
 :::

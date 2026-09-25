@@ -16,10 +16,10 @@ from mnt.pyfiction.layouts import (
     hexagonal_gate_layout,
     hexagonal_layout,
     obstructions,
-    offset_coordinate,
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
 )
+from mnt.pyfiction.layouts.coords import offset_coordinate
 from mnt.pyfiction.physical_design.path_finding import (
     a_star,
     a_star_distance,

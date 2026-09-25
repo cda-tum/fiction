@@ -258,8 +258,9 @@ python/mnt/pyfiction/
 The Python module tree mirrors the C++ namespaces: `fiction::sidb::simulation::engines::quickexact` is
 `mnt.pyfiction.sidb.simulation.engines.quickexact`. Each top-level namespace (`layouts`, `networks`, `synthesis`,
 `physical_design`, `verification`, `utils`, `qca`, `mol_qca`, `inml`, `sidb`, `fcn`) is its own extension module.
-Each nested namespace is a submodule of it. The directories under `bindings/` follow the same tree, so a binding sits
-in the directory of the namespace it wraps: `a_star.cpp` is under `physical_design/path_finding/`.
+Each nested namespace is a submodule of it. For example, import coordinate types with
+`from mnt.pyfiction.layouts.coords import offset_coordinate, cube_coordinate`. The directories under `bindings/`
+follow the same tree, so a binding sits in the directory of the namespace it wraps: `a_star.cpp` is under `physical_design/path_finding/`.
 
 Each leaf `.cpp` file defines exactly one binding function named after the file (e.g.
 `void a_star(nanobind::module_& m)`) that binds a single class, function, or closely related group thereof. Each

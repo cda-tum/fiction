@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/layouts/coordinates.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #include "pyfiction/documentation.hpp"
@@ -36,7 +37,8 @@ namespace pyfiction
 {
 
 /**
- * Unsigned offset coordinates.
+ * @brief Registers offset coordinates.
+ * @param m Python coordinate submodule.
  */
 void offset_coordinate(nanobind::module_& m)
 {
@@ -104,7 +106,8 @@ void offset_coordinate(nanobind::module_& m)
 }
 
 /**
- * Signed cube coordinates.
+ * @brief Registers cube coordinates.
+ * @param m Python coordinate submodule.
  */
 void cube_coordinate(nanobind::module_& m)
 {
@@ -170,6 +173,10 @@ void cube_coordinate(nanobind::module_& m)
     py::implicitly_convertible<py::tuple, py_cube_coordinate>();
 }
 
+/**
+ * @brief Registers coordinate area and volume functions.
+ * @param m Python coordinate submodule.
+ */
 void coordinate_utility(nanobind::module_& m)
 {
     namespace py = nanobind;

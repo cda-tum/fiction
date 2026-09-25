@@ -10,7 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, offset_coordinate
+from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout
+from mnt.pyfiction.layouts.coords import offset_coordinate
 from mnt.pyfiction.physical_design import color_routing, color_routing_params
 
 
