@@ -22,6 +22,7 @@ def test_area_with_one_sidb_100_lattice() -> None:
     params.number_of_sidbs = 1
     params.coordinate_pair = (lattice_site(10, 5, 0), lattice_site(10, 5, 0))
     result_lyt = generate_random_sidb_layout(params, sidb_layout())
+    assert result_lyt is not None
     assert result_lyt.num_dots() == 1
     assert result_lyt.sidbs() == [lattice_site(10, 5, 0)]
 
@@ -32,6 +33,7 @@ def test_area_with_five_sidb_100_lattice() -> None:
     params.number_of_sidbs = 5
     params.coordinate_pair = (lattice_site(0, 0, 0), lattice_site(10, 5, 0))
     result_lyt = generate_random_sidb_layout(params, sidb_layout())
+    assert result_lyt is not None
     assert result_lyt.num_dots() == 5
 
 
@@ -41,6 +43,7 @@ def test_area_with_one_coordinate_111_lattice() -> None:
     params.number_of_sidbs = 1
     params.coordinate_pair = (lattice_site(10, 5, 0), lattice_site(10, 5, 0))
     result_lyt = generate_random_sidb_layout(params, sidb_layout(lattice.si_111_1x1()))
+    assert result_lyt is not None
     assert result_lyt.num_dots() == 1
     assert result_lyt.sidbs() == [lattice_site(10, 5, 0)]
 

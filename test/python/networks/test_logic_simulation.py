@@ -31,6 +31,7 @@ def test_logic_simulation(resources_dir):
     params = exact_params()
     params.crossings = True
     xor_lyt = exact_cartesian(xor2_net, params)
+    assert xor_lyt is not None
     xor_lyt_sim = simulate(xor_lyt)
     assert xor_lyt_sim["out"] == [False, True, True, False]
 

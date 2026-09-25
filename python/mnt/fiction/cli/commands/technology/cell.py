@@ -26,13 +26,15 @@ from mnt.pyfiction.physical_design import (
 
 if TYPE_CHECKING:
     import argparse
+    from collections.abc import Callable
 
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
+    from mnt.fiction.cli.stores import CellLayout, GateLayout
 
 
-GATE_LIBRARIES = {
+GATE_LIBRARIES: dict[str, tuple[type[GateLayout], Callable[..., CellLayout]]] = {
     "qca-one": (cartesian_gate_layout, apply_qca_one_library),
     "sim7-mol": (cartesian_gate_layout, apply_sim7_mol_library),
     "topolinano": (shifted_cartesian_gate_layout, apply_topolinano_library),

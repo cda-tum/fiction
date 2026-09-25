@@ -68,7 +68,7 @@ def test_timeout_parameter(
     assert params.timeout == 2**64 - 1
     for invalid in [-1, 2**64, 1.5]:
         with pytest.raises((TypeError, ValueError, OverflowError)):
-            params.timeout = invalid
+            params.timeout = invalid  # type: ignore[assignment]  # deliberately invalid
 
 
 def test_zero_budgets(resources_dir: Path) -> None:

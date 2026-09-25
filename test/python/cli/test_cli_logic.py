@@ -104,6 +104,7 @@ def test_aig_passes_preserve_the_function(shell: Shell, resource: Callable[[str]
     original = shell.session.networks.current()
     shell.ok("aig rewrite resub refactor balance cleanup")
     optimized = shell.session.networks.current()
+    assert isinstance(original, aig_network)
     assert isinstance(optimized, aig_network)
     assert aig_equivalent(to_aigverse(shell.session, original), to_aigverse(shell.session, optimized))
     assert shell.session.log[-1]["result"]["passes"] == ["rewrite", "resub", "refactor", "balance", "cleanup"]  # type: ignore[index]
@@ -138,6 +139,7 @@ def test_aig_needs_an_aig(mux21_shell: Shell) -> None:
 def test_bridge_round_trip(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
     mux21_shell.ok(f'read "{resource("mux21.v")}" --type aig')
     aig = mux21_shell.session.networks.current()
+    assert isinstance(aig, aig_network)
     back = from_aigverse(mux21_shell.session, to_aigverse(mux21_shell.session, aig), "back", like=aig)
     assert back.num_gates() == aig.num_gates()
     assert back.num_pis() == aig.num_pis()

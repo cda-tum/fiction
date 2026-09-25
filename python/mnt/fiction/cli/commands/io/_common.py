@@ -25,13 +25,15 @@ from mnt.pyfiction.sidb.io import read_sqd_layout
 from mnt.pyfiction.synthesis import convert_network, network_target
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
     from mnt.fiction.cli.stores import Network
 
 
-NETWORK_READERS = {
+NETWORK_READERS: dict[str, Callable[..., Network]] = {
     "aig": read_aig_network,
     "xag": read_xag_network,
     "mig": read_mig_network,

@@ -68,7 +68,7 @@ def _seconds_to_ms(seconds: float | None) -> int | None:
     return math.ceil(seconds * MILLISECONDS)
 
 
-def _cartesian_2ddwave(session: Session) -> GateLayout:
+def _cartesian_2ddwave(session: Session) -> cartesian_gate_layout:
     """Require an active Cartesian layout with 2DDWave clocking."""
     layout = session.gate_layouts.current()
     if not isinstance(layout, cartesian_gate_layout):

@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.stores import element_name
@@ -21,6 +21,8 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
     from mnt.fiction.cli.stores import CellLayout
+
+T = TypeVar("T")
 
 
 def output_argument(parser: Parser) -> None:
@@ -63,13 +65,16 @@ def output_path(element: object, file: Path | None, suffix: str) -> Path:
     return file
 
 
-def require_cell_type(layout: CellLayout, types: tuple[type, ...], suffix: str) -> None:
+def require_cell_type(layout: CellLayout, types: tuple[type[T], ...], suffix: str) -> T:
     """Require a cell layout supported by the format.
 
     Args:
         layout: The layout to write.
         types: Supported layout types.
         suffix: The output format.
+
+    Returns:
+        The layout, narrowed to the supported types.
 
     Raises:
         CommandError: The layout type is unsupported.
@@ -78,6 +83,7 @@ def require_cell_type(layout: CellLayout, types: tuple[type, ...], suffix: str) 
         names = " or ".join(t.__name__ for t in types)
         msg = f"'{suffix}' files take a {names}, not a {type(layout).__name__}"
         raise CommandError(msg)
+    return layout
 
 
 def written(session: Session, path: Path) -> Result:

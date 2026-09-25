@@ -13,7 +13,7 @@ from __future__ import annotations
 import re
 import sys
 import threading
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -102,6 +102,7 @@ def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> N
     reports: list[tuple[int, int, str, int, int, bool]] = []
     params.on_worker_progress = lambda *report: reports.append(report)
     layout = exact_cartesian(mux21, params)
+    assert layout is not None
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert reports
     active = {}
@@ -127,6 +128,7 @@ def test_gold_graph_expansions(mux21: technology_network, *, parallel: bool) -> 
     params.on_worker_progress = lambda *report: reports.append(report)
     params.on_progress = lambda *report: counts.append(report)
     layout = graph_oriented_layout_design(mux21, params)
+    assert layout is not None
     assert equivalence_checking(mux21, layout) != eq_type.NO
     assert any("; best " in description for _, _, description, _, _, _ in reports)
     previous: dict[int, int] = {}
@@ -153,19 +155,19 @@ def test_counted_native_phases(mux21: technology_network, command: str) -> None:
         return reports.append(report)
 
     if command == "balance":
-        params = network_balancing_params()
-        params.on_progress = callback
-        result = network_balancing(mux21, params)
+        balancing_params = network_balancing_params()
+        balancing_params.on_progress = callback
+        result = network_balancing(mux21, balancing_params)
         assert equivalence_checking(mux21, result) != eq_type.NO
     elif command == "fanouts":
-        params = fanout_substitution_params()
-        params.on_progress = callback
-        result = fanout_substitution(mux21, params)
+        substitution_params = fanout_substitution_params()
+        substitution_params.on_progress = callback
+        result = fanout_substitution(mux21, substitution_params)
         assert equivalence_checking(mux21, result) != eq_type.NO
     else:
-        params = gate_level_drv_params()
-        params.on_progress = callback
-        gate_level_drvs(orthogonal(mux21), params)
+        drv_params = gate_level_drv_params()
+        drv_params.on_progress = callback
+        gate_level_drvs(orthogonal(mux21), drv_params)
     final = {task: (done, total) for task, done, total in reports}
     assert final
     assert all(done == total for done, total in final.values())
@@ -179,7 +181,7 @@ def test_writer_counts_and_output(mux21: technology_network, tmp_path: Path, kin
     paths = [tmp_path / f"{index}.{kind}" for index in range(2)]
     for index, path in enumerate(paths):
         callback = (lambda *report: reports.append(report)) if index else None
-        kwargs = {"on_progress": callback} if callback else {}
+        kwargs: dict[str, Any] = {"on_progress": callback} if callback else {}
         if kind == "fgl":
             write_fgl_layout(gate_layout, str(path), **kwargs)
         elif kind == "dot":
@@ -198,12 +200,12 @@ def test_writer_counts_and_output(mux21: technology_network, tmp_path: Path, kin
                     params.on_progress = callback
                 write_sidb_layout_svg(layout, str(path), params)
         else:
-            layout = apply_qca_one_library(gate_layout)
+            qca_layout = apply_qca_one_library(gate_layout)
             params = getattr(qca_io, f"write_{'qca_layout_svg' if kind == 'svg' else kind + '_layout'}_params")()
             if callback:
                 params.on_progress = callback
             getattr(qca_io, f"write_{'qca_layout_svg' if kind == 'svg' else kind + '_layout'}")(
-                layout, str(path), params
+                qca_layout, str(path), params
             )
     if kind == "sqd":
         assert read_sqd_layout(str(paths[0])) == read_sqd_layout(str(paths[1]))
@@ -315,7 +317,9 @@ def test_qcc_writer_counts_and_output(mux21: technology_network, tmp_path: Path)
     placement.crossings = True
     placement.border_io = True
     placement.technology_specifics = technology_constraints.TOPOLINANO
-    layout = apply_topolinano_library(exact_shifted_cartesian(mux21, placement))
+    gate_layout = exact_shifted_cartesian(mux21, placement)
+    assert gate_layout is not None
+    layout = apply_topolinano_library(gate_layout)
     before = tmp_path / "before.qcc"
     after = tmp_path / "after.qcc"
     write_qcc_layout(layout, str(before))
