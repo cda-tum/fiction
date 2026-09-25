@@ -2464,10 +2464,10 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_state_get_clocking_scheme =
-R"doc(Returns a copy of the stored clocking scheme object.
+R"doc(Returns a read-only reference to the stored clocking scheme object.
 
 Returns:
-    A copy of the stored clocking scheme object.
+    A reference valid for the lifetime of this state.
 
 )doc";
 
