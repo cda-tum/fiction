@@ -7,7 +7,8 @@ It has no layout base or geometry parameter. Copying the state copies its conten
 Layouts provide the public clocking methods and perform geometry traversal. A clock zone
 is a tile: in a gate-level layout, a tile usually holds one gate or wire; in a cell-level
 layout, a tile is a region of `get_tile_size_x()` by `get_tile_size_y()` cells that one
-clock signal governs on every layer.
+clock signal governs on every layer. Clock-number lookups and overrides therefore ignore the
+z-coordinate of a clock zone.
 
 Synchronization elements (SEs) {cite:p}`nano2018_1` use the external clock generator to
 produce additional asymmetric clock signals with extended Hold phases. A nonzero

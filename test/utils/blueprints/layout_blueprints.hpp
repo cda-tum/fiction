@@ -34,10 +34,17 @@
 namespace blueprints
 {
 
+/**
+ * Creates a gate-level layout of 3 x 3 tiles with a straight wire, clocked by the 2DDWave scheme, with 1 primary input
+ * and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt straight_wire_gate_layout() noexcept
+GateLyt straight_wire_gate_layout()
 {
-    GateLyt layout{{2, 2}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{2, 2}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto w1 = layout.create_buf(x1, {1, 1});
@@ -46,10 +53,17 @@ GateLyt straight_wire_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 5 x 5 tiles with three parallel wire paths, clocked by the USE scheme, with 3 primary
+ * inputs and 3 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt three_wire_paths_gate_layout() noexcept
+GateLyt three_wire_paths_gate_layout()
 {
-    GateLyt layout{{4, 4}, fiction::layouts::clocking::use<GateLyt>()};
+    GateLyt layout{{4, 4}, fiction::layouts::clocking::use()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 2});
@@ -66,12 +80,19 @@ GateLyt three_wire_paths_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with an XOR and a majority gate, clocked by the open scheme, with 3 primary inputs and 2
+ * primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt xor_maj_gate_layout() noexcept
+GateLyt xor_maj_gate_layout()
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 0}, fiction::layouts::clocking::open<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 0}, fiction::layouts::clocking::open()};
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 1}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -100,10 +121,17 @@ GateLyt xor_maj_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with an AND and an OR gate, clocked by the open scheme, with 2 primary inputs and 2
+ * primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt and_or_gate_layout() noexcept
+GateLyt and_or_gate_layout()
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::layouts::clocking::open<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::layouts::clocking::open()};
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(1));
@@ -123,10 +151,17 @@ GateLyt and_or_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with an AND gate and an inverter, clocked by the open scheme, with 2 primary inputs and 2
+ * primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt and_not_gate_layout() noexcept
+GateLyt and_not_gate_layout()
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::layouts::clocking::open<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::layouts::clocking::open()};
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(1));
@@ -146,10 +181,17 @@ GateLyt and_not_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with an OR gate and an inverter, clocked by the 2DDWave scheme, with 2 primary inputs and
+ * 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt or_not_gate_layout() noexcept
+GateLyt or_not_gate_layout()
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {1, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -160,10 +202,17 @@ GateLyt or_not_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with AND, OR, and inverter gates, clocked by the 2DDWave scheme, with 3 primary inputs
+ * and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt and_or_inv_gate_layout() noexcept
+GateLyt and_or_inv_gate_layout()
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{4, 2, 0}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{4, 2, 0}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 2});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -185,10 +234,16 @@ GateLyt and_or_inv_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with an AND gate, clocked by the USE scheme, with 2 primary inputs and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt use_and_gate_layout() noexcept
+GateLyt use_and_gate_layout()
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 3, 0}, fiction::layouts::clocking::use<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 3, 0}, fiction::layouts::clocking::use()};
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {3, 3});
@@ -211,10 +266,17 @@ GateLyt use_and_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a majority gate, clocked by the RES scheme, with 3 primary inputs and 1 primary
+ * output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt res_maj_gate_layout() noexcept
+GateLyt res_maj_gate_layout()
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::res<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::res()};
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
 
     const auto x1 = layout.create_pi("x1", {0, 1});
@@ -228,12 +290,19 @@ GateLyt res_maj_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a single-input tautology, clocked by the 2DDWave scheme, with 1 primary input and 1
+ * primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt single_input_tautology_gate_layout() noexcept
+GateLyt single_input_tautology_gate_layout()
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 0, 0}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 0, 0}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
 
@@ -247,12 +316,19 @@ GateLyt single_input_tautology_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a two-input tautology, clocked by the 2DDWave scheme, with 2 primary inputs and 1
+ * primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt tautology_gate_layout() noexcept
+GateLyt tautology_gate_layout()
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 1}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 1}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {1, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -267,12 +343,19 @@ GateLyt tautology_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a three-input tautology, clocked by the RES scheme, with 3 primary inputs and 1
+ * primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt res_tautology_gate_layout() noexcept
+GateLyt res_tautology_gate_layout()
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::res<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::res()};
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -288,12 +371,19 @@ GateLyt res_tautology_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a four-input tautology, clocked by the open scheme, with 4 primary inputs and 1
+ * primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt open_tautology_gate_layout() noexcept
+GateLyt open_tautology_gate_layout()
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::open<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::open()};
 
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -317,10 +407,17 @@ GateLyt open_tautology_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with two signals that cross, clocked by the 2DDWave scheme, with 4 primary inputs and 2
+ * primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt crossing_layout() noexcept
+GateLyt crossing_layout()
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 1}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 1}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {1, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -398,10 +495,17 @@ GateLyt unbalanced_and_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with AND, OR, XOR, and majority gates, clocked by the open scheme, with 3 primary inputs
+ * and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt non_structural_all_function_gate_layout() noexcept
+GateLyt non_structural_all_function_gate_layout()
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 5, 0}, fiction::layouts::clocking::open<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 5, 0}, fiction::layouts::clocking::open()};
 
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -445,10 +549,17 @@ GateLyt non_structural_all_function_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a synchronization element, clocked by the 2DDWave scheme, with 2 primary inputs and
+ * 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt se_gate_layout() noexcept
+GateLyt se_gate_layout()
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 1, 0}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 1, 0}, fiction::layouts::clocking::twoddwave()};
 
     layout.assign_synchronization_element({1, 0}, 1);
 
@@ -464,11 +575,18 @@ GateLyt se_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with AND, OR, and inverter gates on a shifted Cartesian grid, clocked by the three-phase
+ * columnar scheme, with 3 primary inputs and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt shifted_cart_and_or_inv_gate_layout() noexcept
+GateLyt shifted_cart_and_or_inv_gate_layout()
 {
     GateLyt layout{typename GateLyt::aspect_ratio{4, 2, 0},
-                   fiction::layouts::clocking::columnar<GateLyt>(fiction::layouts::clocking::num_clks::THREE)};
+                   fiction::layouts::clocking::columnar(fiction::layouts::clocking::num_clks::THREE)};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -487,10 +605,17 @@ GateLyt shifted_cart_and_or_inv_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with an AND and an XOR gate, clocked by the row scheme, with 3 primary inputs and 1
+ * primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt row_clocked_and_xor_gate_layout() noexcept
+GateLyt row_clocked_and_xor_gate_layout()
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 3, 0}, fiction::layouts::clocking::row<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 3, 0}, fiction::layouts::clocking::row()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -507,10 +632,17 @@ GateLyt row_clocked_and_xor_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout with a wire path that no clock-number assignment can realize, clocked by the open scheme,
+ * with 1 primary input and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt unclockable_gate_layout() noexcept
+GateLyt unclockable_gate_layout()
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::open<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::open()};
 
     const auto x0  = layout.create_pi("x0", {0, 0});
     const auto fo  = layout.create_buf(x0, {0, 1});
@@ -522,10 +654,17 @@ GateLyt unclockable_gate_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 4 x 2 tiles with a post-layout optimization test case, clocked by the 2DDWave
+ * scheme, with 2 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt optimization_layout() noexcept
+GateLyt optimization_layout()
 {
-    GateLyt layout{{2, 3, 1}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{2, 3, 1}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {2, 0});
@@ -543,10 +682,17 @@ GateLyt optimization_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 4 x 2 tiles with a post-layout optimization corner case for primary outputs,
+ * clocked by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_1() noexcept
+GateLyt optimization_layout_corner_case_outputs_1()
 {
-    GateLyt layout{{2, 3, 1}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{2, 3, 1}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -562,10 +708,17 @@ GateLyt optimization_layout_corner_case_outputs_1() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 4 x 3 x 2 tiles with a post-layout optimization corner case for primary outputs,
+ * clocked by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_2() noexcept
+GateLyt optimization_layout_corner_case_outputs_2()
 {
-    GateLyt layout{{3, 2, 1}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{3, 2, 1}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -581,10 +734,17 @@ GateLyt optimization_layout_corner_case_outputs_2() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 5 x 2 tiles with a post-layout optimization corner case for primary outputs, clocked
+ * by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_3() noexcept
+GateLyt optimization_layout_corner_case_outputs_3()
 {
-    GateLyt layout{{4, 1, 0}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{4, 1, 0}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -600,10 +760,17 @@ GateLyt optimization_layout_corner_case_outputs_3() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 3 tiles with a post-layout optimization corner case for primary outputs, clocked
+ * by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_4() noexcept
+GateLyt optimization_layout_corner_case_outputs_4()
 {
-    GateLyt layout{{2, 2, 0}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{2, 2, 0}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -617,10 +784,17 @@ GateLyt optimization_layout_corner_case_outputs_4() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 5 x 2 tiles with a post-layout optimization corner case for primary outputs,
+ * clocked by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_5() noexcept
+GateLyt optimization_layout_corner_case_outputs_5()
 {
-    GateLyt layout{{2, 4, 1}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{2, 4, 1}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 2});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -636,10 +810,17 @@ GateLyt optimization_layout_corner_case_outputs_5() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 4 x 3 tiles with a post-layout optimization corner case for primary inputs, clocked by
+ * the 2DDWave scheme, with 2 primary inputs and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_inputs() noexcept
+GateLyt optimization_layout_corner_case_inputs()
 {
-    GateLyt layout{{3, 2, 0}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{3, 2, 0}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {2, 1});
     const auto x2 = layout.create_pi("x2", {1, 2});
@@ -650,10 +831,17 @@ GateLyt optimization_layout_corner_case_inputs() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 5 x 5 tiles with a planar layout that post-layout optimization can compact, clocked by
+ * the 2DDWave scheme, with 2 primary inputs and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt planar_unoptimized_layout() noexcept
+GateLyt planar_unoptimized_layout()
 {
-    GateLyt layout{{4, 4, 0}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{4, 4, 0}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {0, 2});
@@ -670,10 +858,17 @@ GateLyt planar_unoptimized_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 3 x 2 tiles with a planar post-layout optimization test case, clocked by the
+ * 2DDWave scheme, with 4 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt planar_optimization_layout() noexcept
+GateLyt planar_optimization_layout()
 {
-    GateLyt layout{{2, 2, 1}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{2, 2, 1}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -691,10 +886,17 @@ GateLyt planar_optimization_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 2 tiles with a primary input placed away from the layout border, clocked by the
+ * 2DDWave scheme, with 1 primary input and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt pi_not_in_border_optimization_layout() noexcept
+GateLyt pi_not_in_border_optimization_layout()
 {
-    GateLyt layout{{2, 1, 0}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{2, 1, 0}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {1, 1});
     layout.create_po(x1, "f1", {2, 1});
@@ -702,10 +904,17 @@ GateLyt pi_not_in_border_optimization_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 2 x 3 tiles with a primary output placed away from the layout border, clocked by the
+ * 2DDWave scheme, with 1 primary input and 1 primary output.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt po_not_in_border_optimization_layout() noexcept
+GateLyt po_not_in_border_optimization_layout()
 {
-    GateLyt layout{{1, 2, 0}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{1, 2, 0}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     layout.create_po(x1, "f1", {0, 1});
@@ -713,10 +922,17 @@ GateLyt po_not_in_border_optimization_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 3 x 4 tiles with primary outputs that post-layout optimization has to move to the
+ * border, clocked by the 2DDWave scheme, with 3 primary inputs and 4 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt po_have_to_be_moved_to_border_optimization_layout() noexcept
+GateLyt po_have_to_be_moved_to_border_optimization_layout()
 {
-    GateLyt layout{{2, 3, 0}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{2, 3, 0}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -734,10 +950,17 @@ GateLyt po_have_to_be_moved_to_border_optimization_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 7 x 3 x 2 tiles with greater-or-equal, greater-than, less-or-equal, and less-than
+ * gates, clocked by the 2DDWave scheme, with 6 primary inputs and 2 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt ge_gt_le_lt_layout() noexcept
+GateLyt ge_gt_le_lt_layout()
 {
-    GateLyt layout{{6, 2, 1}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{6, 2, 1}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {0, 0});
@@ -760,10 +983,17 @@ GateLyt ge_gt_le_lt_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout of 5 x 4 x 2 tiles with a corner case for extending primary outputs to the border,
+ * clocked by the 2DDWave scheme, with 4 primary inputs and 4 primary outputs.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt po_extension_corner_case_layout() noexcept
+GateLyt po_extension_corner_case_layout()
 {
-    GateLyt layout{{4, 3, 1}, fiction::layouts::clocking::twoddwave<GateLyt>()};
+    GateLyt layout{{4, 3, 1}, fiction::layouts::clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto w1 = layout.create_buf(x1, {1, 1});

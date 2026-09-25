@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
@@ -186,8 +187,10 @@ class write_fgl_layout_impl
 
         os << fgl::OPEN_CLOCKING;
         const auto clocking_scheme = lyt.get_clocking_scheme();
-        // Three-phase factories share their base name with the four-phase variant.
-        os << fmt::format(fgl::CLOCKING_SCHEME_NAME, clocking_scheme.name, clocking_scheme.num_clocks == 3u ? "3" : "");
+        // three-phase variants of four-phase schemes share their base name; BANCS has three phases only
+        os << fmt::format(
+            fgl::CLOCKING_SCHEME_NAME, clocking_scheme.name(),
+            clocking_scheme.num_clocks() == 3u && clocking_scheme.name() != layouts::clocking::BANCS_NAME ? "3" : "");
 
         // if clocking scheme is irregular, overwrite clock zones
         if (!clocking_scheme.is_regular())
@@ -199,7 +202,7 @@ class write_fgl_layout_impl
             {
                 for (uint64_t y = 0; y <= lyt.y(); ++y)
                 {
-                    const int clock{clocking_scheme({x, y})};
+                    const int clock{clocking_scheme(static_cast<int64_t>(x), static_cast<int64_t>(y))};
                     os << fmt::format(fgl::CLOCK_ZONE, x, y, clock);
                 }
                 clocks.advance();

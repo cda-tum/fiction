@@ -45,6 +45,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `sidb::simulation::result` stores one layout plus its physically valid configurations
   - `sidb::simulation::potential_landscape` stores static electrostatics for reuse across
     charge configurations and simulation worker threads
+  - `clocking::get_scheme(name, hex_arrangement)` looks up a clocking scheme without a layout type and accepts a `3`
+    or `4` suffix on every scheme that supports that phase count.
 
 - Dependencies:
 
@@ -191,6 +193,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     molQCA cells name their own clock phase, so molQCA layouts have no clock zones.
   - **Breaking:** QCA and iNML layouts address clock zones by tile: all cells of a tile, on every layer, share its
     clock number. `get_clock_zone` returns the clock zone of a cell.
+  - Hexagonal clocking factories now reuse immutable cutouts, and tile-clock comparisons avoid copying schemes.
+  - `clocking::state::get_clocking_scheme` now returns a const reference; layout getters still return copies.
+  - Gate-level `assign_clock_number` now clocks every layer of a tile and ignores the `z` coordinate;
+    `get_clock_number` returns the same clock number on all layers.
+  - **Breaking:** `clocking::scheme` is now a non-template value type over signed `(x, y)` tile positions that can be
+    copied, assigned, and compared. Factories drop their layout argument, e.g., `clocking::twoddwave()`, and
+    `twoddwave_hex` takes a `clocking::hex_arrangement`.
+  - **Breaking:** `clocking::scheme` exposes `name()`, `num_clocks()`, `max_in_degree()`, and `max_out_degree()` as
+    accessors and no longer compares equal to a name string; `clocking::is_linear` drops its layout argument.
   - **Breaking:** molQCA lives in `technology/mol_qca/` and `namespace fiction::mol_qca`, together with
     `sim7_mol_library` and `write_mol_qca_layout_svg`. iNML names its element type `inml::magnet_type`.
   - Population-stability results expose the critical dot as `critical_dot` in C++ and Python.
@@ -535,6 +546,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Clocked degree counts each eligible neighbor once, including neighbors enabled by synchronization.
   - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.
   - Gate- and cell-level layout clones preserve clock overrides without sharing later clock-number edits.
+  - `clocking::get_scheme` now keeps the phase count of `2DDWAVEHEX3` on non-hexagonal layouts.
   - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
     Potential landscapes validate basis indices even for isolated SiDBs and defects.
   - SiDB cell conversion now rejects coordinates outside the target coordinate range.
@@ -575,6 +587,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - QCA SVG output now includes synchronized cells in tiled layouts and wraps latch clock labels within the clock cycle.
   - QCA SVG output now preserves synchronized cell positions, draws mixed tiles once, and includes partial boundary tiles.
   - FGL round trips now preserve three-phase clocking across all supported topologies.
+  - `read_fgl_layout` now restores irregular clock numbers on crossing layers.
+  - `read_fgl_layout` now reads BANCS layouts whose clocking scheme is named `BANCS3`.
   - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
   - Transactional writers now report filesystem setup and replacement errors as stream failures. They preserve output permissions and symbolic links to existing files, and reject dangling links and non-regular output files.
   - Network DOT export uses transactional replacement, including intermediate drawings produced by `show`.

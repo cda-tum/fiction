@@ -210,7 +210,7 @@ class exact_impl
      * @param sbl Gate orientations forbidden at each tile.
      */
     exact_impl(mockturtle::names_view<networks::technology_network>& src, exact_physical_design_params p,
-               exact_physical_design_stats& st, layouts::clocking::scheme<tile<Lyt>> clocking_scheme,
+               exact_physical_design_stats& st, layouts::clocking::scheme clocking_scheme,
                const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
@@ -271,7 +271,7 @@ class exact_impl
     /**
      * The utilized clocking scheme.
      */
-    layouts::clocking::scheme<tile<Lyt>> scheme;
+    layouts::clocking::scheme scheme;
     /**
      * Maps tiles to blacklisted gate types via their truth tables and port information.
      */
@@ -1470,7 +1470,7 @@ class exact_impl
                     });
             };
 
-            if (!(params.border_io && layouts::clocking::is_linear<Lyt>(layout.get_clocking_scheme())))
+            if (!(params.border_io && layouts::clocking::is_linear(layout.get_clocking_scheme())))
             {
                 // ensure that exactly one ncl variable is set for each node
                 network.foreach_node(
@@ -2615,8 +2615,7 @@ class exact_impl
             }
 
             // path/cycle constraints
-            if (!layouts::clocking::is_linear<Lyt>(
-                    layout.get_clocking_scheme()))  // linear schemes; no cycles by definition
+            if (!layouts::clocking::is_linear(layout.get_clocking_scheme()))  // linear schemes; no cycles by definition
             {
                 establish_sub_paths();
                 establish_transitive_paths();
@@ -2730,14 +2729,8 @@ class exact_impl
                         {
                             if (model.eval(get_tcl(t, i), true).bool_value() == Z3_L_TRUE)
                             {
-                                // assign clock number to tile t
+                                // the clock number applies to every layer of tile t
                                 layout.assign_clock_number(t, static_cast<typename Lyt::clock_number_t>(i));
-                                // and to the tile above
-                                layout.assign_clock_number(layout.above(t),
-                                                           static_cast<typename Lyt::clock_number_t>(i));
-                                // NOTE if this algorithm is ever to be extended for stacked FCN, this function needs to
-                                // assign the clock zone to all tiles in the z direction or the clocking lookup must
-                                // only consider the ground tile
                             }
                         }
                     });
@@ -3254,26 +3247,28 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
 
-    const auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
+    auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
 
     if (!clocking_scheme.has_value())
     {
         throw layouts::clocking::unsupported_scheme_exception();
     }
+    // the layout topology bounds the degrees of schemes that impose no bound of their own
+    const auto max_in_degree  = std::min<uint32_t>(clocking_scheme->max_in_degree(), Lyt::max_fanin_size);
+    const auto max_out_degree = std::min<uint32_t>(clocking_scheme->max_out_degree(), Lyt::max_fanin_size);
     // check for input degree
-    if (networks::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    if (networks::has_high_degree_fanin_nodes(ntk, max_in_degree))
     {
         throw networks::high_degree_fanin_exception();
     }
 
     mockturtle::names_view<networks::technology_network> intermediate_ntk{
         synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(
-            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
-                  clocking_scheme->max_out_degree, 1ul})};
+            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, *clocking_scheme};
+    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, std::move(*clocking_scheme)};
 
     auto result = p.run();
 
@@ -3309,26 +3304,28 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
 
-    const auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
+    auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
 
     if (!clocking_scheme.has_value())
     {
         throw layouts::clocking::unsupported_scheme_exception();
     }
+    // the layout topology bounds the degrees of schemes that impose no bound of their own
+    const auto max_in_degree  = std::min<uint32_t>(clocking_scheme->max_in_degree(), Lyt::max_fanin_size);
+    const auto max_out_degree = std::min<uint32_t>(clocking_scheme->max_out_degree(), Lyt::max_fanin_size);
     // check for input degree
-    if (networks::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    if (networks::has_high_degree_fanin_nodes(ntk, max_in_degree))
     {
         throw networks::high_degree_fanin_exception();
     }
 
     mockturtle::names_view<networks::technology_network> intermediate_ntk{
         synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(
-            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
-                  clocking_scheme->max_out_degree, 1ul})};
+            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, *clocking_scheme, black_list};
+    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, std::move(*clocking_scheme), black_list};
 
     auto result = p.run();
 

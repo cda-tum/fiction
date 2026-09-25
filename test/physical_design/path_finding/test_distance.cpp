@@ -523,7 +523,7 @@ TEST_CASE("A* distance", "[distance]")
 
             SECTION("2DDWave")
             {
-                const clk_lyt layout{{9, 4, 1}, clocking::twoddwave<clk_lyt>()};
+                const clk_lyt layout{{9, 4, 1}, clocking::twoddwave()};
 
                 SECTION("Default distance type (uint64_t)")
                 {
@@ -594,7 +594,7 @@ TEST_CASE("A* distance functor", "[distance]")
 
             SECTION("2DDWave")
             {
-                const clk_lyt layout{{9, 4, 1}, clocking::twoddwave<clk_lyt>()};
+                const clk_lyt layout{{9, 4, 1}, clocking::twoddwave()};
 
                 SECTION("Default distance type (uint64_t)")
                 {

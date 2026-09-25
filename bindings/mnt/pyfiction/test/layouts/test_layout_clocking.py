@@ -84,6 +84,16 @@ def test_clocking_scheme_name() -> None:
 
 
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
+def test_clock_number_applies_to_every_layer(make_layout: Callable[[], Any]) -> None:
+    layout = make_layout()
+    layout.assign_clock_number((1, 1, 0), 3)
+    assert layout.get_clock_number((1, 1, 1)) == 3
+
+    layout.assign_clock_number((0, 1, 1), 2)
+    assert layout.get_clock_number((0, 1, 0)) == 2
+
+
+@pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
 def test_replace_clocking_scheme_keeps_synchronization_elements(make_layout: Callable[[], Any]) -> None:
     layout = make_layout()
     layout.assign_clock_number((1, 1), 3)

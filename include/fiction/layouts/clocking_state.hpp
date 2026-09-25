@@ -19,9 +19,9 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 
 #include <cstdint>
-#include <memory>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
 
 namespace fiction::layouts::clocking
 {
@@ -36,34 +36,14 @@ class state
   public:
     /** @brief Coordinate identifying a clock zone. */
     using clock_zone = Coordinate;
-    /** @brief Clocking scheme for these coordinates. */
-    using clocking_scheme_t = scheme<Coordinate>;
+    /** @brief Clocking scheme over tile positions. */
+    using clocking_scheme_t = scheme;
     /** @brief Clock phase index. */
     using clock_number_t = typename clocking_scheme_t::clock_number;
     /** @brief Hold-phase extension in full clock cycles. */
     using sync_elem_t = uint8_t;
     /** @brief Creates state with the given scheme. @param s Initial scheme. */
-    explicit state(const clocking_scheme_t& s) : clocking{std::make_unique<clocking_scheme_t>(s)} {}
-    /** @brief Copies clocking and synchronization independently. @param other Source state. */
-    state(const state& other) :
-            clocking{std::make_unique<clocking_scheme_t>(*other.clocking)},
-            synchronization{other.synchronization}
-    {}
-    /** @brief Moves clocking state. @param other Source state. */
-    state(state&& other) noexcept = default;
-    /** @brief Copies independent state. @param other Source state. @return This state. */
-    state& operator=(const state& other)
-    {
-        if (this != &other)
-        {
-            *this = state{other};
-        }
-        return *this;
-    }
-    /** @brief Moves clocking state. @param other Source state. @return This state. */
-    state& operator=(state&& other) noexcept = default;
-    /** @brief Releases the owned scheme and synchronization map. */
-    ~state() = default;
+    explicit state(clocking_scheme_t s) : clocking{std::move(s)} {}
     /**
      * Replaces the stored clocking scheme with the provided one.
      *
@@ -71,37 +51,39 @@ class state
      */
     void replace_clocking_scheme(const clocking_scheme_t& scheme) noexcept
     {
-        clocking = std::make_unique<clocking_scheme_t>(scheme);
+        clocking = scheme;
     }
     /**
-     * Overrides a clock number in the stored scheme with the provided one.
+     * Overrides the clock number of a clock zone in the stored scheme. A clock zone spans every layer, so the override
+     * ignores the z-coordinate of `cz`.
      *
      * @param cz Clock zone to override.
      * @param cn New clock number for `cz`.
      */
     void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
     {
-        clocking->override_clock_number(cz, cn);
+        clocking.override_clock_number(static_cast<int64_t>(cz.x), static_cast<int64_t>(cz.y), cn);
     }
     /**
-     * Returns the clock number for the given clock zone.
+     * Returns the clock number of a clock zone. A clock zone spans every layer, so the lookup ignores the z-coordinate
+     * of `cz`.
      *
      * @param cz Clock zone.
      * @return Clock number of `cz`.
      */
     [[nodiscard]] clock_number_t get_clock_number(const clock_zone& cz) const noexcept
     {
-        return (*clocking)(cz);
+        return clocking(static_cast<int64_t>(cz.x), static_cast<int64_t>(cz.y));
     }
     /**
      * Returns the number of clock phases in the layout. Each clock cycle is divided into n phases. In QCA, the number
-     * of phases is usually 4. In iNML it is 3. However, theoretically, any number >= 3 can be utilized.
+     * of phases is usually 4. In iNML it is 3. Clocking schemes support 3 or 4 phases.
      *
      * @return The number of different clock signals in the layout.
      */
     [[nodiscard]] clock_number_t num_clocks() const noexcept
     {
-        return clocking->num_clocks;
+        return clocking.num_clocks();
     }
     /**
      * Returns whether the layout is clocked by a regular clocking scheme with no overwritten zones.
@@ -110,7 +92,7 @@ class state
      */
     [[nodiscard]] bool is_regularly_clocked() const noexcept
     {
-        return clocking->is_regular();
+        return clocking.is_regular();
     }
     /**
      * Compares the stored clocking scheme against the provided name. Predefined names are constants in
@@ -121,16 +103,16 @@ class state
      */
     [[nodiscard]] bool is_clocking_scheme(const std::string_view& name) const noexcept
     {
-        return clocking->name == name;
+        return clocking.name() == name;
     }
     /**
-     * Returns a copy of the stored clocking scheme object.
+     * Returns a read-only reference to the stored clocking scheme object.
      *
-     * @return A copy of the stored clocking scheme object.
+     * @return A reference valid for the lifetime of this state.
      */
-    [[nodiscard]] clocking_scheme_t get_clocking_scheme() const noexcept
+    [[nodiscard]] const clocking_scheme_t& get_clocking_scheme() const noexcept
     {
-        return *clocking;
+        return clocking;
     }
     /**
      * Evaluates whether clock zone `cz2` feeds information to clock zone `cz1`, i.e., whether `cz2` is clocked with a
@@ -223,10 +205,9 @@ class state
 
   private:
     /**
-     * @brief Scheme and manually overridden clock numbers. `scheme` has `const` members and is not assignable, so the
-     * state holds it through a pointer to support `replace_clocking_scheme` and copy assignment.
+     * @brief Scheme and manually overridden clock numbers.
      */
-    std::unique_ptr<clocking_scheme_t> clocking;
+    clocking_scheme_t clocking;
     /** @brief Nonzero synchronization delays indexed by coordinate. */
     std::unordered_map<Coordinate, sync_elem_t> synchronization{};
 };

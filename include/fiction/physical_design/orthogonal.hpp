@@ -450,7 +450,11 @@ class orthogonal_impl
             ps{std::move(p)},
             pst{st}
     {}
-
+    /**
+     * Places and routes the source network with the orthogonal algorithm.
+     *
+     * @return A gate-level layout that implements the source network.
+     */
     Lyt run()
     {
         // measure run time
@@ -479,7 +483,7 @@ class orthogonal_impl
 
         // instantiate the layout
         Lyt layout{determine_layout_size<Lyt>(ctn, num_multi_output_nodes),
-                   layouts::clocking::twoddwave<Lyt>(ps.number_of_clock_phases)};
+                   layouts::clocking::twoddwave(ps.number_of_clock_phases)};
 
         // reserve PI nodes without positions
         auto pi2node = reserve_input_nodes(layout, ctn.color_ntk);

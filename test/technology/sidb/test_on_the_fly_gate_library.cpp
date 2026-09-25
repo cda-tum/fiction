@@ -53,7 +53,7 @@ TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeou
     for (const bool crossing : std::array{false, true})
     {
         CAPTURE(crossing);
-        hex_even_row_gate_clk_lyt gate_layout{{2, 2, 1}, clocking::row<hex_even_row_gate_clk_lyt>()};
+        hex_even_row_gate_clk_lyt gate_layout{{2, 2, 1}, clocking::row()};
         const auto                input1 = gate_layout.create_pi("input1", {0, 0});
         const auto                input2 = gate_layout.create_pi("input2", {1, 0});
         const auto                wire1  = gate_layout.create_buf(input1, {1, 1, 0});
@@ -92,7 +92,7 @@ TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports
     {
         for (const bool with_defects : std::array{false, true})
         {
-            hex_even_row_gate_clk_lyt gate_layout{{2, 2}, clocking::row<hex_even_row_gate_clk_lyt>()};
+            hex_even_row_gate_clk_lyt gate_layout{{2, 2}, clocking::row()};
             const auto                input1 = gate_layout.create_pi("input1", {0, 0});
             const auto                input2 = gate_layout.create_pi("input2", {1, 0});
             const auto                gate   = gate_layout.create_node({input1, input2}, function, {1, 1});

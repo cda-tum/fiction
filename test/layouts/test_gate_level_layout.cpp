@@ -50,7 +50,7 @@ TEST_CASE("Gate-level layout traits", "[gate-level-layout]")
 TEST_CASE("Owned gate capabilities share copies and isolate clones", "[gate-level-layout]")
 {
     using layout = gate_level_layout<cartesian_layout<coords::offset>>;
-    layout original{{3, 3}, clocking::twoddwave<layout>()};
+    layout original{{3, 3}, clocking::twoddwave()};
     original.assign_clock_number({1, 1}, 3);
     original.assign_synchronization_element({1, 1}, 2);
     original.obstruct_coordinate({2, 2});
@@ -76,7 +76,7 @@ TEST_CASE("Owned gate capabilities share copies and isolate clones", "[gate-leve
     CHECK(original.is_obstructed_coordinate({2, 2}));
     CHECK(original.is_obstructed_connection({0, 0}, {1, 0}));
 
-    original.replace_clocking_scheme(clocking::use<layout>());
+    original.replace_clocking_scheme(clocking::use());
     CHECK(original.get_synchronization_element({1, 1}) == 4);
     CHECK_FALSE(original.is_incoming_clocked({1, 1}, {1, 1}));
     CHECK_FALSE(original.is_outgoing_clocked({1, 1}, {1, 1}));
@@ -99,14 +99,14 @@ TEST_CASE("Deep copy gate-level layout", "[gate-level-layout]")
 {
     using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    gate_layout original{gate_layout::aspect_ratio{5, 5, 0}, clocking::twoddwave<gate_layout>(), "Original"};
+    gate_layout original{gate_layout::aspect_ratio{5, 5, 0}, clocking::twoddwave(), "Original"};
     original.create_pi("x1", {0, 2});
     original.create_pi("x2", {2, 4});
 
     auto copy = original.clone();
 
     copy.resize({10, 10, 1});
-    copy.replace_clocking_scheme(clocking::use<gate_layout>());
+    copy.replace_clocking_scheme(clocking::use());
     copy.set_layout_name("Copy");
     copy.move_node(copy.get_node({0, 2}), {0, 0});
     copy.move_node(copy.get_node({2, 4}), {2, 0});
@@ -579,7 +579,7 @@ TEST_CASE("compute functions from AND and NOT gates", "[gate-level-layout]")
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
-    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, clocking::open<gate_layout>(clocking::num_clks::FOUR)};
+    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, clocking::open(clocking::num_clks::FOUR)};
 
     layout.assign_clock_number({2, 0}, static_cast<typename gate_layout::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename gate_layout::clock_number_t>(1));
@@ -1427,7 +1427,7 @@ TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
 {
     using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    clk_lyt original{{5, 5, 0}, clocking::twoddwave<clk_lyt>()};
+    clk_lyt original{{5, 5, 0}, clocking::twoddwave()};
     original.assign_clock_number({0, 0}, 3);
 
     auto copy = original.clone();
@@ -1439,7 +1439,7 @@ TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
     CHECK(original.get_clock_number({0, 0}) == 1);
 
     copy.resize({10, 10, 1});
-    copy.replace_clocking_scheme(clocking::use<clk_lyt>());
+    copy.replace_clocking_scheme(clocking::use());
 
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);
@@ -1456,7 +1456,7 @@ TEST_CASE("Clock zone assignment", "[clocked-layout]")
 {
     using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    clk_lyt layout{clk_lyt::aspect_ratio{1, 1, 0}, clocking::twoddwave<clk_lyt>()};
+    clk_lyt layout{clk_lyt::aspect_ratio{1, 1, 0}, clocking::twoddwave()};
 
     SECTION("2DDWave Clocking")
     {
@@ -1495,6 +1495,12 @@ TEST_CASE("Clock zone assignment", "[clocked-layout]")
         CHECK(layout.get_clock_number({0, 1}) == 2);
         CHECK(layout.get_clock_number({1, 1}) == 3);
 
+        // a clock zone spans every layer of its tile
+        CHECK(layout.get_clock_number({1, 1, 1}) == 3);
+        layout.assign_clock_number({0, 1, 1}, 3);
+        CHECK(layout.get_clock_number({0, 1, 0}) == 3);
+        layout.assign_clock_number({0, 1}, 2);
+
         CHECK(layout.is_incoming_clocked({1, 1}, {1, 0}));
         CHECK(layout.is_incoming_clocked({1, 1}, {0, 1}));
         CHECK(!layout.is_incoming_clocked({1, 0}, {0, 0}));
@@ -1508,7 +1514,7 @@ TEST_CASE("Clock zone assignment", "[clocked-layout]")
 
     SECTION("Replace with USE")
     {
-        layout.replace_clocking_scheme(clocking::use<clk_lyt>());
+        layout.replace_clocking_scheme(clocking::use());
 
         CHECK(!layout.is_clocking_scheme(clocking::TWODDWAVE_NAME));
         CHECK(layout.is_clocking_scheme(clocking::USE_NAME));
@@ -1549,7 +1555,7 @@ TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
 {
     using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, clocking::twoddwave<clk_lyt>()};
+    const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, clocking::twoddwave()};
 
     CHECK(layout.incoming_clocked_zones({0, 0}).empty());
     CHECK(layout.outgoing_clocked_zones({2, 2}).empty());
@@ -1579,7 +1585,7 @@ TEST_CASE("Clocked layout properties", "[clocked-layout]")
 
     SECTION("2DDWave Clocking")
     {
-        const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, clocking::twoddwave<clk_lyt>()};
+        const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, clocking::twoddwave()};
 
         CHECK(layout.in_degree({0, 0}) == static_cast<clk_lyt::degree_t>(0));
         CHECK(layout.in_degree({1, 0}) == static_cast<clk_lyt::degree_t>(1));
@@ -1601,7 +1607,7 @@ TEST_CASE("Clocked layout properties", "[clocked-layout]")
     }
     SECTION("USE Clocking")
     {
-        const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, clocking::use<clk_lyt>()};
+        const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, clocking::use()};
 
         CHECK(layout.in_degree({0, 0}) == static_cast<clk_lyt::degree_t>(1));
         CHECK(layout.in_degree({1, 0}) == static_cast<clk_lyt::degree_t>(1));
@@ -1634,14 +1640,14 @@ TEST_CASE("Deep copy synchronization element layout", "[synchronization-element-
 {
     using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    se_layout original{{5, 5, 0}, clocking::twoddwave<se_layout>()};
+    se_layout original{{5, 5, 0}, clocking::twoddwave()};
     original.assign_synchronization_element({0, 0}, 1);
     original.assign_synchronization_element({1, 0}, 2);
 
     auto copy = original.clone();
 
     copy.resize({10, 10, 1});
-    copy.replace_clocking_scheme(clocking::use<se_layout>());
+    copy.replace_clocking_scheme(clocking::use());
     copy.assign_synchronization_element({0, 0}, 2);
     copy.assign_synchronization_element({1, 0}, 3);
 
@@ -1664,7 +1670,7 @@ TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-el
 {
     using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave<se_layout>()};
+    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave()};
 
     layout.assign_synchronization_element({1, 1}, 1);
 
@@ -1699,7 +1705,7 @@ TEST_CASE("Iteration over synchronization elements", "[synchronization-element-l
 {
     using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave<se_layout>()};
+    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave()};
 
     layout.assign_synchronization_element({0, 1}, 1);
     layout.assign_synchronization_element({1, 0}, 1);
@@ -1726,7 +1732,7 @@ TEST_CASE("Synchronization element layout properties", "[synchronization-element
 {
     using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave<se_layout>()};
+    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave()};
 
     CHECK(layout.num_se() == 0);
     layout.assign_synchronization_element({0, 0}, 0);

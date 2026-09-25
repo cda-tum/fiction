@@ -25,7 +25,7 @@ using namespace fiction::inml;
 
 TEST_CASE("iNML layouts hold planar, clocked magnets", "[inml-layout]")
 {
-    layout lyt{{7, 7, 1}, clocking::twoddwave<layout>(clocking::num_clks::THREE), "inverter", 4, 4};
+    layout lyt{{7, 7, 1}, clocking::twoddwave(clocking::num_clks::THREE), "inverter", 4, 4};
 
     CHECK(lyt.z() == 0);
     CHECK(lyt.num_clocks() == 3);

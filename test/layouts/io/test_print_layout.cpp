@@ -40,7 +40,7 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    const gate_layout layout{gate_layout::aspect_ratio{2, 2}, clocking::open<gate_layout>(clocking::num_clks::FOUR)};
+    const gate_layout layout{gate_layout::aspect_ratio{2, 2}, clocking::open(clocking::num_clks::FOUR)};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -61,7 +61,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
-    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, clocking::open<gate_layout>(clocking::num_clks::FOUR)};
+    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, clocking::open(clocking::num_clks::FOUR)};
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {1, 1});

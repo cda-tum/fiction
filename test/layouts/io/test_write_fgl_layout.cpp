@@ -180,7 +180,7 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
                    hex_odd_col_gate_clk_lyt, hex_even_col_gate_clk_lyt)
 {
     for (const auto* const name : {"OPEN3", "OPEN4", "COLUMNAR3", "COLUMNAR4", "ROW3", "ROW4", "2DDWAVE3", "2DDWAVE4",
-                                   "2DDWAVEHEX3", "2DDWAVEHEX4"})
+                                   "2DDWAVEHEX3", "2DDWAVEHEX4", "BANCS"})
     {
         if constexpr (!is_hexagonal_layout_v<TestType>)
         {
@@ -206,10 +206,25 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
         write_fgl_layout(original, stream);
         const auto restored = read_fgl_layout<TestType>(stream);
         CHECK(restored.num_clocks() == original.num_clocks());
-        CHECK(restored.get_clocking_scheme().name == original.get_clocking_scheme().name);
+        CHECK(restored.get_clocking_scheme().name() == original.get_clocking_scheme().name());
         original.foreach_coordinate(
             [&](const auto& coordinate)
             { CHECK(restored.get_clock_number(coordinate) == original.get_clock_number(coordinate)); });
         compare_written_and_read_layout(original, restored);
     }
+}
+
+TEST_CASE("FGL preserves clock numbers on crossing layers", "[write-fgl-layout]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+
+    gate_layout original{{2, 2, 1}, clocking::open(), "crossing clocks"};
+    original.assign_clock_number({1, 1, 1}, 2);
+
+    std::stringstream stream{};
+    write_fgl_layout(original, stream);
+    const auto restored = read_fgl_layout<gate_layout>(stream);
+
+    CHECK(restored.get_clock_number({1, 1, 0}) == 2);
+    CHECK(restored.get_clock_number({1, 1, 1}) == 2);
 }

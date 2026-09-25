@@ -40,10 +40,34 @@ TEST_CASE("Clock zones have positive dimensions", "[tile-clocking]")
     CHECK(clk.num_clocks() == 4);
 }
 
+TEST_CASE("Tile clocking equality compares dimensions and scheme names", "[tile-clocking]")
+{
+    tile_clocking original{2, 3};
+    original.replace_clocking_scheme(clocking::twoddwave());
+    auto copy = original;
+    copy.assign_clock_number({1, 1}, 3);
+    CHECK(copy == original);
+
+    auto detached_scheme = original.get_clocking_scheme();
+    detached_scheme.override_clock_number(0, 0, 3);
+    CHECK(original.get_clock_number({0, 0}) == 0);
+
+    copy.replace_clocking_scheme(clocking::twoddwave(clocking::num_clks::THREE));
+    CHECK(copy == original);
+    copy.replace_clocking_scheme(clocking::use());
+    CHECK(copy != original);
+    copy = original;
+    copy.set_tile_size_x(3);
+    CHECK(copy != original);
+    copy = original;
+    copy.set_tile_size_y(4);
+    CHECK(copy != original);
+}
+
 TEST_CASE("Clock zones are tiles on every layer", "[tile-clocking]")
 {
     // a layout provides the geometry that clocking::twoddwave needs
-    const inml::layout lyt{{4, 4}, clocking::twoddwave<inml::layout>(), "", 2, 2};
+    const inml::layout lyt{{4, 4}, clocking::twoddwave(), "", 2, 2};
 
     CHECK(lyt.get_clock_zone({3, 2}) == coords::offset{1, 1});
     CHECK(lyt.get_clock_zone({3, 2, 1}) == coords::offset{1, 1});

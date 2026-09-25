@@ -36,7 +36,7 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{1, 1}, clocking::twoddwave<gate_lyt>()};
+        const gate_lyt layout{{1, 1}, clocking::twoddwave()};
 
         SECTION("Disjoint paths")
         {
@@ -86,7 +86,7 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        gate_lyt layout{{1, 1}, clocking::use<gate_lyt>()};
+        gate_lyt layout{{1, 1}, clocking::use()};
 
         SECTION("Disjoint paths")
         {
@@ -144,7 +144,7 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{2, 2}, clocking::twoddwave<gate_lyt>()};
+        const gate_lyt layout{{2, 2}, clocking::twoddwave()};
 
         SECTION("(0,1) to (2,1) and (1,0) to (1,2)")
         {
@@ -190,7 +190,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{3, 3}, clocking::twoddwave<gate_lyt>()};
+        const gate_lyt layout{{3, 3}, clocking::twoddwave()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
@@ -208,7 +208,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        const gate_lyt layout{{3, 3}, clocking::use<gate_lyt>()};
+        const gate_lyt layout{{3, 3}, clocking::use()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
@@ -233,7 +233,7 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
 
     SECTION("2DDWave")
     {
-        gate_lyt layout{{3, 3}, clocking::twoddwave<gate_lyt>()};
+        gate_lyt layout{{3, 3}, clocking::twoddwave()};
 
         SECTION("(0,0) to (3,3) with obstruction")  // 19 valid paths
         {
@@ -254,7 +254,7 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
     }
     SECTION("USE")
     {
-        gate_lyt layout{{3, 3}, clocking::use<gate_lyt>()};
+        gate_lyt layout{{3, 3}, clocking::use()};
 
         SECTION("(0,0) to (3,3) with obstruction")  // 1 valid path
         {

@@ -2081,9 +2081,6 @@ Alternating Nanomagnetic Clocking Scheme\" by Ruan Evangelista
 Formigoni, Omar P. Vilela Neto, and Jose Augusto M. Nacif in SBCCI
 2018.
 
-Template Args:
-    Lyt: Clocked layout type.
-
 Returns:
     BANCS clocking scheme.
 
@@ -2094,9 +2091,6 @@ R"doc(Returns the CFE clocking as defined in \"CFE: a convenient, flexible,
 and efficient clocking scheme for quantum-dot cellular automata\" by
 Feifei Deng, Guang-Jun Xie, Xin Cheng, Zhang Zhang, and Yongqiang
 Zhang in IET Circuits, Devices & Systems 2020.
-
-Template Args:
-    Lyt: Clocked layout type.
 
 Returns:
     CFE clocking scheme.
@@ -2111,11 +2105,30 @@ Tougaw in the Proceedings of the IEEE 1997.
 Args:
     n: Number of clocks.
 
-Template Args:
-    Lyt: Clocked layout type.
-
 Returns:
     Columnar clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_detail_count =
+R"doc(Converts a phase count to the number of clocks.
+
+Args:
+    n: Phase count.
+
+Returns:
+    3 or 4.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_detail_transpose =
+R"doc(Transposes a rectangular cutout.
+
+Args:
+    cutout: Rectangular cutout.
+
+Returns:
+    The cutout with rows and columns swapped.
 
 )doc";
 
@@ -2126,16 +2139,34 @@ Jayanta Pal, Amit Kumar Pramanik, Jyotirmoy Sil Sharma, Apu Kumar
 Saha, and Bibhash Sen in Analog Integrated Circuits and Signal
 Processing 2021.
 
-Template Args:
-    Lyt: Clocked layout type.
-
 Returns:
     ESR clocking scheme.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_get_scheme =
-R"doc(Returns a clocking scheme by name.
+R"doc(Returns a clocking scheme by name. The lookup ignores case and accepts
+a trailing `3` or `4` that selects the phase count of a scheme that
+supports it. Without a suffix, a scheme has its default phase count: 3
+for BANCS and 4 for all others. `2DDWAVEHEX` requires a hexagonal
+arrangement and falls back to `2DDWAVE` without one.
+
+Args:
+    scheme_name: Name of the desired clocking scheme.
+    hex: Arrangement of the hexagonal layout the scheme is for, or
+         `std::nullopt` for a non-hexagonal layout.
+
+Returns:
+    Clocking scheme that matches `scheme_name`, or `std::nullopt` if
+    no clocking scheme by that name exists or the scheme does not
+    support the requested phase count.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_get_scheme_2 =
+R"doc(Returns a clocking scheme by name for layouts of type `Lyt`.
+`2DDWAVEHEX` takes the hexagonal arrangement of `Lyt`. See the non-
+template overload for the accepted names.
 
 Args:
     scheme_name: Name of the desired clocking scheme.
@@ -2144,10 +2175,20 @@ Template Args:
     Lyt: Layout type.
 
 Returns:
-    Clocking scheme object that matches the given `scheme_name`, or
-    `std::nullopt` if no clocking scheme by the `name` exists.
+    Clocking scheme that matches `scheme_name`, or `std::nullopt` if
+    no clocking scheme by that name exists.
 
 )doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_hex_arrangement = R"doc(Arrangement of the shifted rows or columns of a hexagonal layout.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_hex_arrangement_EVEN_COLUMN = R"doc(Even columns are shifted.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_hex_arrangement_EVEN_ROW = R"doc(Even rows are shifted.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_hex_arrangement_ODD_COLUMN = R"doc(Odd columns are shifted.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_hex_arrangement_ODD_ROW = R"doc(Odd rows are shifted.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_is_linear =
 R"doc(Checks whether a given clocking scheme is registered as a cycle-free
@@ -2158,29 +2199,24 @@ one. These currently are
 Args:
     scm: Clocking scheme to check.
 
-Template Args:
-    Lyt: Layout type.
-
 Returns:
     `true` iff `scm` is listed as one of the linear clocking schemes.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_num_clks = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_clocking_num_clks = R"doc(Number of clock phases of a clocking scheme.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_num_clks_FOUR = R"doc(Four clocks.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_num_clks_THREE = R"doc(Three clocks.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_open =
-R"doc(Returns an irregular clocking that maps every coordinate to the
-standard clock. It is intended to be overridden.
+R"doc(Returns an irregular clocking that maps every tile to clock number 0.
+It is intended to be overridden. Its degrees are `scheme::UNBOUNDED`,
+i.e., only the layout topology bounds them.
 
 Args:
     n: Number of clocks.
-
-Template Args:
-    Lyt: Clocked layout type.
 
 Returns:
     Irregular clocking scheme.
@@ -2193,9 +2229,6 @@ for quantum-dot cellular automata\" by Mrinal Goswami, Anindan Mondal,
 Mahabub Hasan Mahalat, Bibhash Sen, and Biplab K. Sikdar in
 International Journal of Electronics Letters 2019.
 
-Template Args:
-    Lyt: Clocked layout type.
-
 Returns:
     RES clocking scheme.
 
@@ -2205,9 +2238,6 @@ static const char *mkd_doc_fiction_layouts_clocking_ripple =
 R"doc(Returns the Ripple clocking as defined in \"Ripple Clock Schemes for
 Quantum-dot Cellular Automata Circuits\" by Prafull Purohit, Master
 Thesis, Rochester Institute of Technology, 2012.
-
-Template Args:
-    Lyt: Clocked layout type.
 
 Returns:
     Ripple clocking scheme.
@@ -2223,112 +2253,166 @@ dots\" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE
 Args:
     n: Number of clocks.
 
-Template Args:
-    Lyt: Clocked layout type.
-
 Returns:
     Row-based clocking scheme.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme =
-R"doc(Clocking scheme type that assigns a clock number to each element of
-the provided type `ClockZone`. Clocking scheme objects are owned by
-gate and cell layouts.
+R"doc(Clocking scheme that assigns a clock number to every tile position
+:math:`(x, y)`. Clocking schemes are owned by gate and tile-clocked
+cell layouts. A clock zone spans every layer, so a scheme has no
+z-coordinate.
 
-Usually, a clocking scheme is defined by the means of a cutout that
-can be seamlessly extended in all directions to provide repeating
-clock numbers.
+A clocking scheme is defined by a rectangular cutout that repeats
+seamlessly in all directions, including negative coordinates. Clock
+numbers can be overridden per tile. Many regular clocking schemes have
+been proposed in the literature; the factories below construct them.
 
-Many regular clocking schemes have been proposed in the literature.
-Some are pre-defined below.
+Schemes are values: they can be copied, assigned, and compared. Two
+schemes are equal iff their names, phase counts, degrees, cutouts,
+regularity, and overridden clock numbers are equal.)doc";
 
-Clocking schemes are uniquely identified via their name.
+static const char *mkd_doc_fiction_layouts_clocking_scheme_cells = R"doc(Cutout entries in row-major order.)doc";
 
-Template Args:
-    ClockZone: Clock zone type. Usually, a coordinate type in a
-               layout.)doc";
+static const char *mkd_doc_fiction_layouts_clocking_scheme_floor_mod =
+R"doc(Modulo that rounds toward negative infinity, so that a cutout repeats
+seamlessly at negative coordinates.
 
-static const char *mkd_doc_fiction_layouts_clocking_scheme_fn = R"doc(A function that determines clock numbers for given zones.)doc";
+Args:
+    a: Dividend.
+    m: Positive divisor.
+
+Returns:
+    :math:`a \bmod m \in [0, m)`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_height = R"doc(Cutout height.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_in_degree = R"doc(Maximum in-degree.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_is_regular =
 R"doc(Checks for the clocking scheme's regularity.
 
 Returns:
-    `true` iff the clocking scheme is regular.
+    `true` iff the scheme is regular and no clock number is
+    overridden.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_scheme_max_in_degree = R"doc(Maximum number of inputs the clocking scheme supports per clock zone.)doc";
-
-static const char *mkd_doc_fiction_layouts_clocking_scheme_max_out_degree = R"doc(Maximum number of outputs the clocking scheme supports per clock zone.)doc";
-
-static const char *mkd_doc_fiction_layouts_clocking_scheme_name = R"doc(Name of the clocking scheme.)doc";
-
-static const char *mkd_doc_fiction_layouts_clocking_scheme_num_clocks = R"doc(Number of different clocks in this scheme.)doc";
-
-static const char *mkd_doc_fiction_layouts_clocking_scheme_operator_call =
-R"doc(Accesses the clock function to determine the clock number of the given
-clock zone if the scheme is regular. Otherwise, the stored clock map
-is accessed to look for a manually specified/overwritten clock number.
-If none is found, the default one, usually 0, is returned.
-
-Args:
-    cz: Clock zone whose clock number is desired.
+static const char *mkd_doc_fiction_layouts_clocking_scheme_max_in_degree =
+R"doc(Maximum number of inputs the scheme supports per clock zone.
 
 Returns:
-    Clock number of cz.
+    Maximum in-degree, or `UNBOUNDED`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_max_out_degree =
+R"doc(Maximum number of outputs the scheme supports per clock zone.
+
+Returns:
+    Maximum out-degree, or `UNBOUNDED`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_name =
+R"doc(Name of the clocking scheme.
+
+Returns:
+    The canonical name, e.g., `"2DDWAVE"`, without a phase-count
+    suffix.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_num_clocks =
+R"doc(Number of clock phases in this scheme.
+
+Returns:
+    3 or 4.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_operator_call =
+R"doc(Returns the clock number of the tile at :math:`(x, y)`: its overridden
+clock number if one exists, and the repeated cutout entry otherwise.
+
+Args:
+    x: x-coordinate of the tile.
+    y: y-coordinate of the tile.
+
+Returns:
+    Clock number of :math:`(x, y)`.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_operator_eq =
-R"doc(Compares the stored name against a given one.
+R"doc(Compares all properties of two schemes, overridden clock numbers
+included.
 
 Args:
-    n: Name to compare.
+    other: Scheme to compare against.
 
 Returns:
-    `true` iff the stored name is equal to n.
+    `true` iff both schemes are equal.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_scheme_override = R"doc(Stores mappings clock_zone -> clock_number to override clock zones.)doc";
+static const char *mkd_doc_fiction_layouts_clocking_scheme_out_degree = R"doc(Maximum out-degree.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_override_clock_number =
-R"doc(Overrides a clock zone's clock number. The usage of this function
-immediately labels the clocking scheme as irregular.
+R"doc(Overrides the clock number of the tile at :math:`(x, y)`. An
+overridden scheme is irregular.
 
 Args:
-    cz: Clock zone to override.
-    cn: Clock number to assign to cz.
+    x: x-coordinate of the tile.
+    y: y-coordinate of the tile.
+    cn: Clock number to assign. The scheme stores `cn % num_clocks()`.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_scheme_regular = R"doc(Defines the clocking as regular and well-defined by the scheme.)doc";
+static const char *mkd_doc_fiction_layouts_clocking_scheme_overrides = R"doc(Overridden clock numbers by tile position.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_phases = R"doc(Number of clock phases.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_regular_flag = R"doc(Defines the clocking as regular and well-defined by the cutout.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme =
 R"doc(Standard constructor.
 
 Args:
-    n: The clocking scheme's name. The name is utilized as the key to
-       uniquely identify a scheme.
-    f: A function that assigns a clock number to each clock zone.
-    in_deg: Maximum possible in-degree in the provided scheme.
-    out_deg: Maximum possible out-degree in the provided scheme.
-    cn: Number of clock phases that make up one clock cycle, i.e., the
-        number of different clock numbers.
-    r: Flag to identify the scheme as regular.
+    n: The clocking scheme's name. The name is the key under which
+       `get_scheme` finds the scheme.
+    cutout: Rows of clock numbers. Row `y`, column `x` holds the clock
+            number of every tile :math:`(x + i \cdot w, y + j \cdot
+            h)` for all integers :math:`i, j`, where :math:`w` and
+            :math:`h` are the width and height of `cutout`.
+    num_clocks: Number of clock phases that make up one clock cycle.
+                Must be 3 or 4.
+    max_in_degree: Maximum number of inputs the scheme supports per
+                   clock zone.
+    max_out_degree: Maximum number of outputs the scheme supports per
+                    clock zone.
+    regular: Flag to identify the scheme as regular.
+
+Raises:
+    std::invalid_argument: if `cutout` is empty or not rectangular, if
+                           `num_clocks` is neither 3 nor 4, or if an
+                           entry of `cutout` is not below
+                           `num_clocks`.
 
 )doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_name = R"doc(Canonical name.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_width = R"doc(Cutout width.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_srs =
 R"doc(Returns the SRS clocking as defined in \"Simple, robust and systematic
 QCA clocking scheme for area-efficient nanocircuits\" by Mrinal
 Goswami, Tonmoy Jyoti Sharma, and Arpita Nath Boruah in International
 Journal of Electronics Letters 2025.
-
-Template Args:
-    Lyt: Clocked layout type.
 
 Returns:
     SRS clocking scheme.
@@ -2345,7 +2429,9 @@ Template Args:
     Coordinate: Coordinate identifying a clock zone.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_state_assign_clock_number =
-R"doc(Overrides a clock number in the stored scheme with the provided one.
+R"doc(Overrides the clock number of a clock zone in the stored scheme. A
+clock zone spans every layer, so the override ignores the z-coordinate
+of `cz`.
 
 Args:
     cz: Clock zone to override.
@@ -2363,13 +2449,11 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_state_clocking =
-R"doc(Scheme and manually overridden clock numbers. `scheme` has `const`
-members and is not assignable, so the state holds it through a pointer
-to support `replace_clocking_scheme` and copy assignment.)doc";
+static const char *mkd_doc_fiction_layouts_clocking_state_clocking = R"doc(Scheme and manually overridden clock numbers.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_state_get_clock_number =
-R"doc(Returns the clock number for the given clock zone.
+R"doc(Returns the clock number of a clock zone. A clock zone spans every
+layer, so the lookup ignores the z-coordinate of `cz`.
 
 Args:
     cz: Clock zone.
@@ -2380,10 +2464,10 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_state_get_clocking_scheme =
-R"doc(Returns a copy of the stored clocking scheme object.
+R"doc(Returns a read-only reference to the stored clocking scheme object.
 
 Returns:
-    A copy of the stored clocking scheme object.
+    A reference valid for the lifetime of this state.
 
 )doc";
 
@@ -2466,7 +2550,7 @@ Returns:
 static const char *mkd_doc_fiction_layouts_clocking_state_num_clocks =
 R"doc(Returns the number of clock phases in the layout. Each clock cycle is
 divided into n phases. In QCA, the number of phases is usually 4. In
-iNML it is 3. However, theoretically, any number >= 3 can be utilized.
+iNML it is 3. Clocking schemes support 3 or 4 phases.
 
 Returns:
     The number of different clock signals in the layout.
@@ -2479,14 +2563,6 @@ Synchronization element count.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_state_operator_assign =
-R"doc(Copies independent state. @param other Source state. @return This
-state.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocking_state_operator_assign_2 = R"doc(Moves clocking state. @param other Source state. @return This state.)doc";
-
 static const char *mkd_doc_fiction_layouts_clocking_state_replace_clocking_scheme =
 R"doc(Replaces the stored clocking scheme with the provided one.
 
@@ -2497,14 +2573,6 @@ Args:
 
 static const char *mkd_doc_fiction_layouts_clocking_state_state = R"doc(Creates state with the given scheme. @param s Initial scheme.)doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_state_state_2 =
-R"doc(Copies clocking and synchronization independently. @param other Source
-state.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocking_state_state_3 = R"doc(Moves clocking state. @param other Source state.)doc";
-
 static const char *mkd_doc_fiction_layouts_clocking_state_synchronization = R"doc(Nonzero synchronization delays indexed by coordinate.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_twoddwave =
@@ -2514,9 +2582,6 @@ IEEE Conference on Nanotechnology 2006.
 
 Args:
     n: Number of clocks.
-
-Template Args:
-    Lyt: Clocked layout type.
 
 Returns:
     2DDWave clocking scheme.
@@ -2529,10 +2594,8 @@ defined in \"Clocking and Cell Placement for QCA\" by V. Vankamamidi,
 M. Ottavi, and F. Lombardi in IEEE Conference on Nanotechnology 2006.
 
 Args:
+    a: Arrangement of the hexagonal layout's shifted rows or columns.
     n: Number of clocks.
-
-Template Args:
-    Lyt: Clocked layout type.
 
 Returns:
     Hexagonal 2DDWave clocking scheme.
@@ -2558,9 +2621,6 @@ R"doc(Returns the USE clocking as defined in \"USE: A Universal, Scalable,
 and Efficient Clocking Scheme for QCA\" by Caio Araujo T. Campos,
 Abner L. Marciano, Omar P. Vilela Neto, and Frank Sill Torres in TCAD
 2015.
-
-Template Args:
-    Lyt: Clocked layout type.
 
 Returns:
     USE clocking scheme.
@@ -3227,7 +3287,9 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_assign_clock_number =
-R"doc(Overrides a clock number in the stored scheme with the provided one.
+R"doc(Overrides the clock number of a tile in the stored scheme. The clock
+number applies to every layer of the tile, so the z-coordinate of `cz`
+is ignored.
 
 Args:
     cz: Clock zone to override.
@@ -3704,7 +3766,8 @@ Visited flags)doc";
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_node_operator_eq = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_clock_number =
-R"doc(Returns the clock number for the given clock zone.
+R"doc(Returns the clock number of a tile. Every layer of a tile has the same
+clock number, so the z-coordinate of `cz` is ignored.
 
 Args:
     cz: Clock zone.
@@ -4552,7 +4615,7 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_num_cis = R"doc()do
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_clocks =
 R"doc(Returns the number of clock phases in the layout. Each clock cycle is
 divided into n phases. In QCA, the number of phases is usually 4. In
-iNML it is 3. However, theoretically, any number >= 3 can be utilized.
+iNML it is 3. Clocking schemes support 3 or 4 phases.
 
 Returns:
     The number of different clock signals in the layout.
@@ -6419,10 +6482,6 @@ Raises:
 static const char *mkd_doc_fiction_layouts_tile_clocking_tile_x = R"doc(Tile width in cells.)doc";
 
 static const char *mkd_doc_fiction_layouts_tile_clocking_tile_y = R"doc(Tile height in cells.)doc";
-
-static const char *mkd_doc_fiction_layouts_tile_clocking_zone_geometry =
-R"doc(The geometry `clocking::open` needs: clock-zone type and maximum fan-
-in of a Cartesian cell.)doc";
 
 static const char *mkd_doc_fiction_layouts_vertical_shift_cartesian =
 R"doc( 
@@ -10193,7 +10252,13 @@ static const char *mkd_doc_fiction_physical_design_detail_orthogonal_impl_ps = R
 
 static const char *mkd_doc_fiction_physical_design_detail_orthogonal_impl_pst = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_orthogonal_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_orthogonal_impl_run =
+R"doc(Places and routes the source network with the orthogonal algorithm.
+
+Returns:
+    A gate-level layout that implements the source network.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_pi_locations = R"doc(This enum class indicates the allowed positions for PIs.)doc";
 

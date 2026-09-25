@@ -114,7 +114,7 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Coordinate identifying a clock zone. */
     using clock_zone = typename CoordinateLayout::coordinate;
     /** @brief Clocking scheme for this layout. */
-    using clocking_scheme_t = clocking::scheme<clock_zone>;
+    using clocking_scheme_t = clocking::scheme;
     /** @brief Clock phase index. */
     using clock_number_t = typename clocking_scheme_t::clock_number;
     /** @brief Number of clocked neighbors. */
@@ -130,7 +130,7 @@ class gate_level_layout : public CoordinateLayout
     {
 
         /** @brief Scheme, clock overrides, and synchronization delays. */
-        clocking::state<clock_zone> clocking{clocking::open<gate_level_layout>()};
+        clocking::state<clock_zone> clocking{clocking::open()};
         /** @brief Persistent manually assigned obstructions. */
         layouts::obstructions<clock_zone>                         obstructions{};
         mockturtle::truth_table_cache<kitty::dynamic_truth_table> fn_cache;
@@ -213,7 +213,7 @@ class gate_level_layout : public CoordinateLayout
      * @param scheme Clocking scheme to apply to this layout.
      * @param name Layout name.
      */
-    gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking::scheme<tile>& scheme,
+    gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking::scheme& scheme,
                       const std::string& name = {}) :
             CoordinateLayout(ar),
             strg{std::make_shared<gate_level_layout_storage>()},
@@ -1179,7 +1179,7 @@ class gate_level_layout : public CoordinateLayout
     [[nodiscard]] auto incoming_data_flow(const tile& t) const noexcept
     {
         std::vector<tile> data_flow{};
-        data_flow.reserve(get_clocking_scheme().max_in_degree);  // reserve memory
+        data_flow.reserve(CoordinateLayout::max_fanin_size);
 
         auto fanin_collector = [&data_flow](const auto& fin) { data_flow.push_back(static_cast<tile>(fin)); };
 
@@ -1269,8 +1269,7 @@ class gate_level_layout : public CoordinateLayout
     [[nodiscard]] auto outgoing_data_flow(const tile& t) const noexcept
     {
         std::vector<tile> data_flow{};
-        data_flow.reserve(RespectClocking ? get_clocking_scheme().max_out_degree :
-                                            CoordinateLayout::max_fanin_size);  // reserve memory
+        data_flow.reserve(CoordinateLayout::max_fanin_size);
 
         const auto fanout_collector = [this, &data_flow](const auto& fout) { data_flow.push_back(get_tile(fout)); };
 
@@ -1753,7 +1752,8 @@ class gate_level_layout : public CoordinateLayout
         strg->data.clocking.replace_clocking_scheme(scheme);
     }
     /**
-     * Overrides a clock number in the stored scheme with the provided one.
+     * Overrides the clock number of a tile in the stored scheme. The clock number applies to every layer of the tile,
+     * so the z-coordinate of `cz` is ignored.
      *
      * @param cz Clock zone to override.
      * @param cn New clock number for `cz`.
@@ -1763,7 +1763,8 @@ class gate_level_layout : public CoordinateLayout
         strg->data.clocking.assign_clock_number(cz, cn);
     }
     /**
-     * Returns the clock number for the given clock zone.
+     * Returns the clock number of a tile. Every layer of a tile has the same clock number, so the z-coordinate of `cz`
+     * is ignored.
      *
      * @param cz Clock zone.
      * @return Clock number of `cz`.
@@ -1774,7 +1775,7 @@ class gate_level_layout : public CoordinateLayout
     }
     /**
      * Returns the number of clock phases in the layout. Each clock cycle is divided into n phases. In QCA, the number
-     * of phases is usually 4. In iNML it is 3. However, theoretically, any number >= 3 can be utilized.
+     * of phases is usually 4. In iNML it is 3. Clocking schemes support 3 or 4 phases.
      *
      * @return The number of different clock signals in the layout.
      */

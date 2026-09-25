@@ -94,7 +94,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
              DOC(fiction_layouts_gate_level_layout_is_clocking_scheme))
         .def(
             "get_clocking_scheme_name",
-            [](const GateLyt& lyt) { return std::string{lyt.get_clocking_scheme().name}; },
+            [](const GateLyt& lyt) { return lyt.get_clocking_scheme().name(); },
             "Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.")
 
         .def("is_incoming_clocked", &GateLyt::is_incoming_clocked, py::arg("cz1"), py::arg("cz2"),
