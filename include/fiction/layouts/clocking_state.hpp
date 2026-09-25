@@ -106,11 +106,11 @@ class state
         return clocking.name() == name;
     }
     /**
-     * Returns a copy of the stored clocking scheme object.
+     * Returns a read-only reference to the stored clocking scheme object.
      *
-     * @return A copy of the stored clocking scheme object.
+     * @return A reference valid for the lifetime of this state.
      */
-    [[nodiscard]] clocking_scheme_t get_clocking_scheme() const noexcept
+    [[nodiscard]] const clocking_scheme_t& get_clocking_scheme() const noexcept
     {
         return clocking;
     }

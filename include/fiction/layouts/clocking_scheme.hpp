@@ -415,21 +415,21 @@ transpose(const std::vector<std::vector<scheme::clock_number>>& cutout)
 
     // clang-format off
 
-    const cutout odd_3{{0, 1, 2},
+    static const cutout odd_3{{0, 1, 2},
                        {1, 2, 0},
                        {1, 2, 0},
                        {2, 0, 1},
                        {2, 0, 1},
                        {0, 1, 2}};
 
-    const cutout even_3{{0, 1, 2},
+    static const cutout even_3{{0, 1, 2},
                         {0, 1, 2},
                         {1, 2, 0},
                         {1, 2, 0},
                         {2, 0, 1},
                         {2, 0, 1}};
 
-    const cutout odd_4{{0, 1, 2, 3},
+    static const cutout odd_4{{0, 1, 2, 3},
                        {1, 2, 3, 0},
                        {1, 2, 3, 0},
                        {2, 3, 0, 1},
@@ -438,7 +438,7 @@ transpose(const std::vector<std::vector<scheme::clock_number>>& cutout)
                        {3, 0, 1, 2},
                        {0, 1, 2, 3}};
 
-    const cutout even_4{{0, 1, 2, 3},
+    static const cutout even_4{{0, 1, 2, 3},
                         {0, 1, 2, 3},
                         {1, 2, 3, 0},
                         {1, 2, 3, 0},
@@ -462,7 +462,8 @@ transpose(const std::vector<std::vector<scheme::clock_number>>& cutout)
     // column arrangements shift columns instead of rows, so their cutouts are the transposed row cutouts
     const bool columns = a == hex_arrangement::ODD_COLUMN || a == hex_arrangement::EVEN_COLUMN;
 
-    return scheme{TWODDWAVE_HEX_NAME, columns ? detail::transpose(rows) : rows, detail::count(n), 2u, 2u};
+    return columns ? scheme{TWODDWAVE_HEX_NAME, detail::transpose(rows), detail::count(n), 2u, 2u} :
+                     scheme{TWODDWAVE_HEX_NAME, rows, detail::count(n), 2u, 2u};
 }
 /**
  * Returns the USE clocking as defined in \"USE: A Universal, Scalable, and Efficient Clocking Scheme for

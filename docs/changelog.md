@@ -193,6 +193,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     molQCA cells name their own clock phase, so molQCA layouts have no clock zones.
   - **Breaking:** QCA and iNML layouts address clock zones by tile: all cells of a tile, on every layer, share its
     clock number. `get_clock_zone` returns the clock zone of a cell.
+  - Hexagonal clocking factories now reuse immutable cutouts, and tile-clock comparisons avoid copying schemes.
+  - `clocking::state::get_clocking_scheme` now returns a const reference; layout getters still return copies.
   - Gate-level `assign_clock_number` now clocks every layer of a tile and ignores the `z` coordinate;
     `get_clock_number` returns the same clock number on all layers.
   - **Breaking:** `clocking::scheme` is now a non-template value type over signed `(x, y)` tile positions that can be
