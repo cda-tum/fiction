@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import hexagonal_layout
+from mnt.pyfiction.layouts import hexagonal_layout
 
 
 def test_coordinate_iteration():

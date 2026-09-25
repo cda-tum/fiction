@@ -12,16 +12,9 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
-    charge_distribution,
-    check_simulation_results_for_equivalence,
-    lattice,
-    lattice_site,
-    sidb_charge_state,
-    sidb_dot_tag,
-    sidb_layout,
-    sidb_simulation_result,
-)
+from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.model import sidb_charge_state
+from mnt.pyfiction.sidb.simulation import check_simulation_results_for_equivalence, sidb_simulation_result
 
 
 @pytest.mark.parametrize(

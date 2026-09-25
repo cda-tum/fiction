@@ -15,10 +15,7 @@ import sys
 
 import pytest
 
-from mnt.pyfiction import (
-    create_maj_tt,
-    dynamic_truth_table,
-)
+from mnt.pyfiction.synthesis import create_maj_tt, dynamic_truth_table
 
 
 def test_binary_and_hex_strings() -> None:
@@ -87,7 +84,7 @@ def test_invalid_truth_tables_fail_without_native_crash(code: str) -> None:
         [
             sys.executable,
             "-c",
-            "from mnt import pyfiction as f\ntry:\n "
+            "from mnt.pyfiction import synthesis as f\ntry:\n "
             + code
             + "\nexcept ValueError:\n pass\nelse:\n raise AssertionError('accepted unsafe input')",
         ],

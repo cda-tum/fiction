@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
+from mnt.pyfiction.sidb.simulation import (
     exact_sidb_simulation_engine,
     heuristic_sidb_simulation_engine,
     sidb_simulation_engine,

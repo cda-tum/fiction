@@ -8,17 +8,20 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
-from mnt.pyfiction import (
-    eq_type,
-    equivalence_checking,
+from mnt.pyfiction.physical_design import (
     orthogonal,
     post_layout_optimization,
     post_layout_optimization_params,
     post_layout_optimization_stats,
-    technology_network,
 )
+from mnt.pyfiction.verification import eq_type, equivalence_checking
+
+if TYPE_CHECKING:
+    from mnt.pyfiction.networks import technology_network
 
 
 def test_post_layout_optimization_default(mux21):

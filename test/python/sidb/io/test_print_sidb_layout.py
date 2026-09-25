@@ -12,14 +12,9 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
-    charge_distribution,
-    lattice_site,
-    print_sidb_layout,
-    sidb_charge_state,
-    sidb_dot_tag,
-    sidb_layout,
-)
+from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.io import print_sidb_layout
+from mnt.pyfiction.sidb.model import sidb_charge_state
 
 CHARGED = "●"
 """What a charged SiDB looks like; only the color tells a negative one from a positive one."""

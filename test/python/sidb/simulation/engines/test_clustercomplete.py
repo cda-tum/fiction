@@ -10,16 +10,9 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
-    clustercomplete,
-    clustercomplete_params,
-    ground_state_space_reporting,
-    lattice,
-    lattice_site,
-    sidb_charge_state,
-    sidb_dot_tag,
-    sidb_layout,
-)
+from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.model import sidb_charge_state
+from mnt.pyfiction.sidb.simulation.engines import clustercomplete, clustercomplete_params, ground_state_space_reporting
 
 
 def test_three_sidbs() -> None:

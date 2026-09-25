@@ -14,7 +14,8 @@ import argparse
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import qca_layout, write_qca_layout, write_qca_layout_params
+from mnt.pyfiction.qca import qca_layout
+from mnt.pyfiction.qca.io import write_qca_layout, write_qca_layout_params
 
 from ._write import output_argument, output_path, require_cell_type, written
 

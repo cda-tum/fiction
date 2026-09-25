@@ -15,7 +15,8 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command, one_store, store_flags
 from mnt.fiction.cli.stores import ground_state
-from mnt.pyfiction import print_sidb_layout, sidb_layout
+from mnt.pyfiction.sidb import sidb_layout
+from mnt.pyfiction.sidb.io import print_sidb_layout
 
 if TYPE_CHECKING:
     import argparse

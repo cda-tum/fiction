@@ -17,12 +17,11 @@ from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.render import table as render_table
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import describe
-from mnt.pyfiction import (
+from mnt.pyfiction.networks import get_name, set_name
+from mnt.pyfiction.synthesis import (
     all_standard_2_input_functions,
     all_standard_3_input_functions,
     all_supported_standard_functions,
-    get_name,
-    set_name,
     technology_mapping,
     technology_mapping_params,
     technology_mapping_stats,

@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.parsing import integer, positive_float
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import (
+from mnt.pyfiction.physical_design import (
     post_layout_optimization,
     post_layout_optimization_params,
     post_layout_optimization_stats,

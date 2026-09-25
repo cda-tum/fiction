@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import positive_float, probability
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import (
+from mnt.pyfiction.sidb.simulation.analysis import (
     critical_temperature_gate_based,
     critical_temperature_non_gate_based,
     critical_temperature_params,

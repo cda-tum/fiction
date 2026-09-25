@@ -19,9 +19,7 @@ from rich.console import Console
 
 from mnt.fiction.cli.session import Session
 from mnt.fiction.cli.statistics import json_value
-from mnt.pyfiction import (
-    area,
-)
+from mnt.pyfiction.fcn import area
 
 if TYPE_CHECKING:
     from collections.abc import Callable

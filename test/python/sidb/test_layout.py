@@ -8,7 +8,8 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import lattice, lattice_site, sidb_defect, sidb_defect_type, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.model import sidb_defect, sidb_defect_type
 
 
 def test_empty_layout() -> None:

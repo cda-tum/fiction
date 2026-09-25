@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.parsing import integer, seed
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe
-from mnt.pyfiction import fanout_substitution, fanout_substitution_params, substitution_strategy
+from mnt.pyfiction.synthesis import fanout_substitution, fanout_substitution_params, substitution_strategy
 
 if TYPE_CHECKING:
     import argparse

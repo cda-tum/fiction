@@ -14,7 +14,8 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import aig_network, write_aiger
+from mnt.pyfiction.networks import aig_network
+from mnt.pyfiction.networks.io import write_aiger
 
 from ._write import output_argument, output_path, written
 

@@ -14,23 +14,17 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from mnt.pyfiction import (
-    aig_network,
-    convert_network,
-    get_name,
-    mig_network,
-    network_target,
+from mnt.pyfiction.networks import aig_network, get_name, mig_network, simulate_outputs, technology_network, xag_network
+from mnt.pyfiction.networks.io import (
     read_aig_network,
     read_mig_network,
     read_technology_network,
     read_xag_network,
-    simulate_outputs,
-    technology_network,
     write_aiger,
     write_blif,
     write_verilog,
-    xag_network,
 )
+from mnt.pyfiction.synthesis import convert_network, network_target
 
 if TYPE_CHECKING:
     from collections.abc import Callable

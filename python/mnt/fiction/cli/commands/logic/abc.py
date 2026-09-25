@@ -15,11 +15,12 @@ from typing import TYPE_CHECKING
 
 from aigverse import abc
 
-from mnt import pyfiction
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe, size_and_depth
-from mnt.pyfiction import aig_network, convert_network, get_name, network_target, set_name
+from mnt.pyfiction.networks import aig_network, get_name, set_name, xag_network
+from mnt.pyfiction.networks.io import read_aig_network, write_aiger
+from mnt.pyfiction.synthesis import convert_network, network_target
 
 if TYPE_CHECKING:
     import argparse
@@ -61,16 +62,16 @@ def abc_command(session: Session, args: argparse.Namespace) -> Result:
         msg = "ABC was not found; install it on PATH or point AIGVERSE_ABC at the binary"
         raise CommandError(msg)
     network = None if args.no_read else session.networks.current()
-    if network is not None and not isinstance(network, (aig_network, pyfiction.xag_network)):
+    if network is not None and not isinstance(network, (aig_network, xag_network)):
         msg_0 = "ABC requires an AIG or XAG; use read --type aig or --type xag"
         raise CommandError(msg_0)
-    aig = convert_network(network, network_target.AIG) if isinstance(network, pyfiction.xag_network) else network
+    aig = convert_network(network, network_target.AIG) if isinstance(network, xag_network) else network
     input_path = session.temp_file(".aig")
     output_path = session.temp_file(".aig")
     flow: list[str] = []
     try:
         if aig is not None:
-            pyfiction.write_aiger(aig, str(input_path))
+            write_aiger(aig, str(input_path))
             flow.append(f'read_aiger "{input_path.as_posix()}"')
         if not args.no_strash:
             flow.append("strash")
@@ -84,7 +85,7 @@ def abc_command(session: Session, args: argparse.Namespace) -> Result:
         if not output_path.is_file() or not output_path.stat().st_size:
             msg_0 = "ABC produced no output network; the store is unchanged"
             raise CommandError(msg_0)
-        result = pyfiction.read_aig_network(str(output_path))
+        result = read_aig_network(str(output_path))
         if aig is not None:
             set_name(result, get_name(aig))
         session.networks.add(result)

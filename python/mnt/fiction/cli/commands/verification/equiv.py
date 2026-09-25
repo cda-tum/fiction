@@ -15,7 +15,8 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command, store_flags
 from mnt.fiction.cli.statistics import stats_to_dict
-from mnt.pyfiction import eq_type, equivalence_checking, equivalence_checking_stats, get_name
+from mnt.pyfiction.networks import get_name
+from mnt.pyfiction.verification import eq_type, equivalence_checking, equivalence_checking_stats
 
 if TYPE_CHECKING:
     import argparse

@@ -10,15 +10,9 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
-    exhaustive_ground_state_simulation,
-    lattice,
-    lattice_site,
-    sidb_charge_state,
-    sidb_dot_tag,
-    sidb_layout,
-    sidb_simulation_parameters,
-)
+from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_simulation_parameters
+from mnt.pyfiction.sidb.simulation.engines import exhaustive_ground_state_simulation
 
 
 def test_perturber_and_sidb_pair() -> None:

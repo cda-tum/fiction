@@ -24,7 +24,8 @@ from mnt.fiction.cli.drawing import (
 )
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command, one_store, store_flags
-from mnt.pyfiction import mol_qca_layout, qca_layout
+from mnt.pyfiction.mol_qca import mol_qca_layout
+from mnt.pyfiction.qca import qca_layout
 
 if TYPE_CHECKING:
     import argparse

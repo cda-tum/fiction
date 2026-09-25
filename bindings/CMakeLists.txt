@@ -37,109 +37,38 @@ if(NOT nanobind_exec_result EQUAL 0)
 endif()
 find_package(nanobind CONFIG REQUIRED PATHS "${nanobind_ROOT}" NO_DEFAULT_PATH)
 
-# Split mode: the extension links no nanobind library code and resolves it at
-# import time from the `nanobind-backend` wheel, so one abi3 binary covers
-# Python 3.10 up. It implies STABLE_ABI. Free-threaded interpreters need the
-# `abi3t` of Python 3.15 (PEP 803); below that, nanobind stops the configure
-# with a message naming the version.
-#
-# The domain keeps pyfiction's type registry apart from every other nanobind
-# extension in the process. `aigverse` binds `kitty::dynamic_truth_table` and
-# `mockturtle::names_view<mockturtle::aig_network>` as well, and in a shared
-# registry the module imported second does not get its class at all.
-nanobind_add_module(
-  pyfiction
-  BACKEND_MODULE
-  nanobind_backend
-  FREE_THREADED
-  LTO
-  NB_SUPPRESS_WARNINGS
-  NB_DOMAIN
-  pyfiction
-  pyfiction.cpp)
-target_link_libraries(pyfiction PRIVATE libfiction)
+include(${PROJECT_SOURCE_DIR}/cmake/AddPyfictionPythonBinding.cmake)
 
-# `CMAKE_INSTALL_RPATH_USE_LINK_PATH` skips link directories inside the source
-# or build tree. A `z3-solver` wheel installed into a virtual environment in the
-# checkout, as `nox -s docs` does on Read the Docs, is such a directory, and the
-# module then fails to load `libz3`. Wheel builds link a Z3 outside the tree.
-foreach(z3_library IN LISTS Z3_LIBRARIES)
-  get_filename_component(z3_library_dir "${z3_library}" DIRECTORY)
-  cmake_path(IS_PREFIX CMAKE_SOURCE_DIR "${z3_library_dir}" NORMALIZE
-             z3_in_source_tree)
-  cmake_path(IS_PREFIX CMAKE_BINARY_DIR "${z3_library_dir}" NORMALIZE
-             z3_in_binary_tree)
-  if(z3_in_source_tree OR z3_in_binary_tree)
-    set_property(
-      TARGET pyfiction
-      APPEND
-      PROPERTY INSTALL_RPATH "${z3_library_dir}")
-  endif()
+# Builds every extension module of the wheel.
+add_custom_target(pyfiction)
+
+# One extension module per top-level namespace. A nested namespace, such as
+# `sidb::simulation::engines`, is a submodule of its top-level module.
+foreach(
+  module
+  utils
+  layouts
+  networks
+  synthesis
+  qca
+  mol_qca
+  inml
+  sidb
+  fcn
+  verification
+  physical_design)
+  file(GLOB_RECURSE module_sources CONFIGURE_DEPENDS
+       ${CMAKE_CURRENT_SOURCE_DIR}/${module}/*.cpp)
+  add_pyfiction_python_binding(pyfiction-${module} ${module_sources}
+                               MODULE_NAME ${module})
 endforeach()
-target_include_directories(pyfiction
-                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set_property(TARGET pyfiction PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-# Keep the embedded static libraries' symbols local. `fiction_options` adds
-# `-fvisibility=hidden` to everything that links `libfiction`, and nanobind adds
-# `CXX_VISIBILITY_PRESET hidden` on the module's own objects; the vendored
-# archives -- `tinyxml2`, `graph-coloring`, ALGLIB -- consume neither and keep
-# default visibility, so the extension re-exports them. Ported from
-# marcelwa/aigverse#490.
-if(APPLE)
-  target_link_options(pyfiction PRIVATE
-                      "LINKER:-exported_symbol,_PyInit_pyfiction")
-elseif(UNIX)
-  target_link_options(pyfiction PRIVATE "LINKER:--exclude-libs,ALL")
-
-  # `--gc-sections` collects nothing that was not compiled per-function and
-  # per-data, and nanobind's own size tuning stops at `-Os`. These cover the
-  # bindings; `vendors/CMakeLists.txt` covers the static archives, which is
-  # where most of the collectable code turns out to be. A linked build inherited
-  # both flags from `nanobind-static`; split mode links no nanobind target.
-  target_compile_options(
-    pyfiction
-    PRIVATE
-      "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>,$<CONFIG:RelWithDebInfo>>:-ffunction-sections;-fdata-sections>"
-  )
-  target_link_options(
-    pyfiction
-    PRIVATE
-    "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>,$<CONFIG:RelWithDebInfo>>:LINKER:--gc-sections>"
-  )
-endif()
-
-# Collect pyfiction headers under bindings/mnt/pyfiction/
-file(
-  GLOB_RECURSE FICTION_PYFICTION_HEADERS CONFIGURE_DEPENDS
-  RELATIVE ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/
-  ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/include/*.hpp)
-
-# Collect pyfiction sources under bindings/mnt/pyfiction/src
-file(GLOB_RECURSE FICTION_PYFICTION_SOURCES CONFIGURE_DEPENDS
-     ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/src/*.cpp)
-
-# Register header file set for IDE integration and installation metadata
-# Multiple BASE_DIRS so CMake knows how to layout the installed tree
-#
-# Using a FILE_SET ensures proper exposure in CMake package exports later if
-# export() logic is added.
-#
-# (GLOB with CONFIGURE_DEPENDS keeps IDE view in sync when adding headers.)
+# Verify that every binding header compiles on its own. The header set hangs off
+# one module, which carries the same include directories as all others.
+file(GLOB_RECURSE FICTION_PYFICTION_HEADERS CONFIGURE_DEPENDS
+     ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
 target_sources(
-  pyfiction
-  PRIVATE ${FICTION_PYFICTION_SOURCES}
-  PRIVATE FILE_SET HEADERS BASE_DIRS
-          ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/ FILES
+  pyfiction-utils
+  PRIVATE FILE_SET HEADERS BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include FILES
           ${FICTION_PYFICTION_HEADERS})
-# Ensure header verification is enabled for this target
-set_property(TARGET pyfiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
-
-# Enforce project-wide C++ standard feature requirement (redundant but explicit)
-target_compile_features(pyfiction PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
-
-# Install directive for scikit-build-core
-install(
-  TARGETS pyfiction
-  DESTINATION .
-  COMPONENT fiction_Python)
+set_property(TARGET pyfiction-utils PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)

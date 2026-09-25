@@ -12,18 +12,16 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction import (
-    create_and_tt,
-    create_id_tt,
-    create_or_tt,
-    create_xor_tt,
+from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation.logic import (
     critical_temperature_domain,
     critical_temperature_domain_contour_tracing,
     critical_temperature_domain_flood_fill,
     critical_temperature_domain_grid_search,
     critical_temperature_domain_random_sampling,
     input_bdl_configuration,
-    lattice_site,
     operational_analysis_strategy,
     operational_condition,
     operational_domain,
@@ -36,12 +34,9 @@ from mnt.pyfiction import (
     operational_domain_value_range,
     operational_status,
     parameter_point,
-    read_sqd_layout,
-    sidb_dot_tag,
-    sidb_layout,
-    sidb_simulation_engine,
     sweep_parameter,
 )
+from mnt.pyfiction.synthesis import create_and_tt, create_id_tt, create_or_tt, create_xor_tt
 
 if TYPE_CHECKING:
     from pathlib import Path

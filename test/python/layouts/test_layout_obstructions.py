@@ -10,15 +10,13 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
+from mnt.pyfiction.layouts import (
     cartesian_gate_layout,
-    critical_path_length_and_throughput,
-    gate_level_drv_params,
-    gate_level_drvs,
     hexagonal_gate_layout,
     offset_coordinate,
     shifted_cartesian_gate_layout,
 )
+from mnt.pyfiction.verification import critical_path_length_and_throughput, gate_level_drv_params, gate_level_drvs
 
 OBSTRUCTION_LAYOUTS = [
     pytest.param(

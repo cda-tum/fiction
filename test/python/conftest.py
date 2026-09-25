@@ -12,10 +12,16 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction import cartesian_gate_layout, orthogonal, read_technology_network, technology_network
+from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.physical_design import orthogonal
+
+if TYPE_CHECKING:
+    from mnt.pyfiction.layouts import cartesian_gate_layout
+    from mnt.pyfiction.networks import technology_network
 
 RESOURCES_DIR = Path(__file__).resolve().parent / "resources"
 pytest_plugins = ["pytester"]

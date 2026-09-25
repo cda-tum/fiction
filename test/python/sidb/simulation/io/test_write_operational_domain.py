@@ -8,16 +8,18 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
+from mnt.pyfiction.sidb.simulation.io import (
+    sample_writing_mode,
+    write_critical_temperature_domain_to_string,
+    write_operational_domain_params,
+    write_operational_domain_to_string,
+)
+from mnt.pyfiction.sidb.simulation.logic import (
     critical_temperature_domain,
     operational_domain,
     operational_status,
     parameter_point,
-    sample_writing_mode,
     sweep_parameter,
-    write_critical_temperature_domain_to_string,
-    write_operational_domain_params,
-    write_operational_domain_to_string,
 )
 
 

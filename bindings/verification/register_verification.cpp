@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the `verification` bindings with the `mnt.pyfiction` module.
+ * @brief Entry point of the `mnt.pyfiction.verification` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -24,12 +24,23 @@ void critical_path_length_and_throughput(nanobind::module_& m);
 void design_rule_violations(nanobind::module_& m);
 void equivalence_checking(nanobind::module_& m);
 
-void register_verification(nanobind::module_& m)
+}  // namespace pyfiction
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+
+NB_MODULE(verification, m)
 {
-    count_gate_types(m);
-    critical_path_length_and_throughput(m);
-    design_rule_violations(m);
-    equivalence_checking(m);
+    m.doc() = "Design rule, equivalence, and performance checks of gate-level layouts.";
+
+    // Registers the types this module names in signatures and default arguments.
+    nanobind::module_::import_("mnt.pyfiction.layouts");
+    nanobind::module_::import_("mnt.pyfiction.networks");
+
+    pyfiction::count_gate_types(m);
+    pyfiction::critical_path_length_and_throughput(m);
+    pyfiction::design_rule_violations(m);
+    pyfiction::equivalence_checking(m);
 }
 
-}  // namespace pyfiction
+#pragma GCC diagnostic pop

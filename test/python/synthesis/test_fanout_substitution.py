@@ -8,13 +8,17 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
+from typing import TYPE_CHECKING
+
+from mnt.pyfiction.synthesis import (
     fanout_substitution,
     fanout_substitution_params,
     is_fanout_substituted,
     substitution_strategy,
-    technology_network,
 )
+
+if TYPE_CHECKING:
+    from mnt.pyfiction.networks import technology_network
 
 
 def test_substitution(mux21: technology_network) -> None:

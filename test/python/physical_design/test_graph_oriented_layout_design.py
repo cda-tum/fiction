@@ -8,15 +8,14 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
-    eq_type,
-    equivalence_checking,
+from mnt.pyfiction.physical_design import (
     gold_cost_objective,
     gold_effort_mode,
     graph_oriented_layout_design,
     graph_oriented_layout_design_params,
     graph_oriented_layout_design_stats,
 )
+from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 
 def test_graph_oriented_layout_design(mux21):

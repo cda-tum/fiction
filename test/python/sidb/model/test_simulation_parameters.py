@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import sidb_simulation_parameters
+from mnt.pyfiction.sidb.model import sidb_simulation_parameters
 
 
 def test_initialization():

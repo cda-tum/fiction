@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the `layouts/io` bindings with the `mnt.pyfiction` module.
+ * @brief Registers the bindings of the `mnt.pyfiction.layouts.io` submodule.
  * @author Marcel Walter (marcelwa)
  */
 

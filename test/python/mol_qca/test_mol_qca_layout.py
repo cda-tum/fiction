@@ -11,7 +11,7 @@ from __future__ import annotations
 import copy
 import re
 
-from mnt.pyfiction import mol_qca_cell_type, mol_qca_clock_number, mol_qca_layout
+from mnt.pyfiction.mol_qca import mol_qca_cell_type, mol_qca_clock_number, mol_qca_layout
 
 
 def test_cell_types_carry_clock_phases() -> None:

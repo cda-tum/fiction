@@ -12,12 +12,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt import pyfiction
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import integer, positive_float, positive_int, seed
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.statistics import stats_to_dict
-from mnt.pyfiction import (
+from mnt.pyfiction.networks import get_name
+from mnt.pyfiction.physical_design import (
     gold_cost_objective,
     gold_effort_mode,
     graph_oriented_layout_design,
@@ -106,7 +106,7 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
     stats = graph_oriented_layout_design_stats()
     layout = graph_oriented_layout_design(network, params, stats)
     if layout is None:
-        msg = f"no layout found for '{pyfiction.get_name(network)}' within the search bounds or timeout"
+        msg = f"no layout found for '{get_name(network)}' within the search bounds or timeout"
         error = CommandError(msg)
         error.stats = stats_to_dict(stats)
         raise error

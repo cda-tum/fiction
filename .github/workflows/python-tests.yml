@@ -86,7 +86,7 @@ jobs:
         uses: rui314/setup-mold@7e4f20ad28a2e8ca6fd0892ccf72e2abb706b9c3 # v1
 
       # `[tool.scikit-build.cmake.define]` sets `FICTION_Z3 = "ON"`, so every platform needs it.
-      # On Windows `Z3_ROOT` is also what `bindings/mnt/__init__.py` reads to register the DLL
+      # On Windows `Z3_ROOT` is also what `python/mnt/__init__.py` reads to register the DLL
       # search path.
       - name: Install Z3
         uses: cda-tum/setup-z3@0401375ea1e34d77ef35bbeb634f6203f3bcde60 # v1.7.3

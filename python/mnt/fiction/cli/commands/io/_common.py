@@ -19,16 +19,10 @@ from mnt.fiction.cli.aigverse_bridge import from_aigverse
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.stores import CellEntry, describe
 from mnt.fiction.cli.topologies import FGL_READERS
-from mnt.pyfiction import (
-    convert_network,
-    network_target,
-    read_aig_network,
-    read_mig_network,
-    read_sqd_layout,
-    read_technology_network,
-    read_xag_network,
-    set_name,
-)
+from mnt.pyfiction.networks import set_name
+from mnt.pyfiction.networks.io import read_aig_network, read_mig_network, read_technology_network, read_xag_network
+from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.synthesis import convert_network, network_target
 
 if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser

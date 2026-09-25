@@ -18,7 +18,7 @@ from mnt.fiction.cli.aigverse_bridge import from_aigverse, to_aigverse
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe, size_and_depth
-from mnt.pyfiction import aig_network, get_name, technology_network
+from mnt.pyfiction.networks import aig_network, get_name, technology_network
 
 if TYPE_CHECKING:
     import argparse

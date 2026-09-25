@@ -12,14 +12,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    lattice_site,
-    quickexact,
-    quickexact_params,
-    sidb_dot_tag,
-    sidb_layout,
-    write_sqd_sim_result,
-)
+from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.simulation.engines import quickexact, quickexact_params
+from mnt.pyfiction.sidb.simulation.io import write_sqd_sim_result
 
 if TYPE_CHECKING:
     from pathlib import Path

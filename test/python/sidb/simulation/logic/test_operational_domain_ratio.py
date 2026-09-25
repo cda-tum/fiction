@@ -15,17 +15,17 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction import (
-    create_and_tt,
+from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation.logic import (
     operational_domain_params,
     operational_domain_ratio,
     operational_domain_ratio_params,
     operational_domain_value_range,
     parameter_point,
-    read_sqd_layout,
-    sidb_simulation_engine,
     sweep_parameter,
 )
+from mnt.pyfiction.synthesis import create_and_tt
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -68,16 +68,26 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
                 import sys
                 import threading
                 import time
-                from mnt import pyfiction as pf
+                from mnt.pyfiction.sidb.io import read_sqd_layout
+                from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
+                from mnt.pyfiction.sidb.simulation.logic import (
+                    operational_domain_params,
+                    operational_domain_ratio,
+                    operational_domain_ratio_params,
+                    operational_domain_value_range,
+                    parameter_point,
+                    sweep_parameter,
+                )
+                from mnt.pyfiction.synthesis import create_and_tt
 
-                layout = pf.read_sqd_layout(sys.argv[1])
-                params = pf.operational_domain_params()
+                layout = read_sqd_layout(sys.argv[1])
+                params = operational_domain_params()
                 params.number_of_threads = 2
-                params.operational_params.sim_engine = pf.sidb_simulation_engine.QUICKEXACT
+                params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
                 params.operational_params.simulation_parameters.base = 2
                 params.sweep_dimensions = [
-                    pf.operational_domain_value_range(pf.sweep_parameter.EPSILON_R, 5.5, 5.7, 0.02),
-                    pf.operational_domain_value_range(pf.sweep_parameter.LAMBDA_TF, 5, 5.2, 0.02),
+                    operational_domain_value_range(sweep_parameter.EPSILON_R, 5.5, 5.7, 0.02),
+                    operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5, 5.2, 0.02),
                 ]
                 reports = []
                 threads = set()
@@ -90,10 +100,10 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
                         time.sleep(0.2)
 
                 params.on_progress = report
-                ratio_params = pf.operational_domain_ratio_params()
+                ratio_params = operational_domain_ratio_params()
                 ratio_params.op_domain_params = params
-                ratio = pf.operational_domain_ratio(
-                    layout, [pf.create_and_tt()], pf.parameter_point([5.6, 5]), ratio_params
+                ratio = operational_domain_ratio(
+                    layout, [create_and_tt()], parameter_point([5.6, 5]), ratio_params
                 )
                 assert 0 <= ratio <= 1, ratio
                 assert reports[-1][1] > 0, reports

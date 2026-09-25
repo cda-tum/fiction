@@ -18,7 +18,7 @@ from mnt.fiction.cli.render import table as render_table
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import describe
 from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
-from mnt.pyfiction import cartesian_gate_layout
+from mnt.pyfiction.layouts import cartesian_gate_layout
 
 if TYPE_CHECKING:
     from mnt.fiction.cli.registry import Result

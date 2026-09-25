@@ -8,7 +8,9 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import a_star, cartesian_gate_layout, route_path
+from mnt.pyfiction.layouts import cartesian_gate_layout
+from mnt.pyfiction.physical_design import route_path
+from mnt.pyfiction.physical_design.path_finding import a_star
 
 
 def test_empty_layout():

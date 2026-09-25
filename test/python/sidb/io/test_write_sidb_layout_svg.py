@@ -10,18 +10,10 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
-    __repo__,
-    __version__,
-    charge_distribution,
-    color_mode,
-    lattice_site,
-    sidb_charge_state,
-    sidb_dot_tag,
-    sidb_layout,
-    write_sidb_layout_svg_params,
-    write_sidb_layout_svg_to_string,
-)
+from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.io import color_mode, write_sidb_layout_svg_params, write_sidb_layout_svg_to_string
+from mnt.pyfiction.sidb.model import sidb_charge_state
+from mnt.pyfiction.utils import __repo__, __version__
 
 
 @pytest.fixture

@@ -10,13 +10,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    lattice,
-    lattice_site,
-    read_sqd_layout,
-    sidb_dot_tag,
-    write_sqd_layout,
-)
+from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag
+from mnt.pyfiction.sidb.io import read_sqd_layout, write_sqd_layout
 
 if TYPE_CHECKING:
     from pathlib import Path

@@ -8,13 +8,11 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
+from mnt.pyfiction.sidb import lattice, lattice_site, sidb_layout
+from mnt.pyfiction.sidb.generators import (
     generate_multiple_random_sidb_layouts,
     generate_random_sidb_layout,
     generate_random_sidb_layout_params,
-    lattice,
-    lattice_site,
-    sidb_layout,
 )
 
 

@@ -10,13 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
-    cartesian_gate_layout,
-    color_routing,
-    color_routing_params,
-    hexagonal_gate_layout,
-    offset_coordinate,
-)
+from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, offset_coordinate
+from mnt.pyfiction.physical_design import color_routing, color_routing_params
 
 
 @pytest.mark.parametrize(

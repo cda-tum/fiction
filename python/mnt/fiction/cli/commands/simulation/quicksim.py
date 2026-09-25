@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.parsing import positive_int, probability
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import quicksim, quicksim_params
+from mnt.pyfiction.sidb.simulation.engines import quicksim, quicksim_params
 
 if TYPE_CHECKING:
     import argparse

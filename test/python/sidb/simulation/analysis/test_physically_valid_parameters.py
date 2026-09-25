@@ -14,15 +14,9 @@ import textwrap
 
 import pytest
 
-from mnt.pyfiction import (
-    charge_distribution,
-    lattice,
-    lattice_site,
-    parameter_point,
-    physically_valid_parameters,
-    sidb_dot_tag,
-    sidb_layout,
-)
+from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.simulation.analysis import physically_valid_parameters
+from mnt.pyfiction.sidb.simulation.logic import parameter_point
 
 
 def test_one_sidb_100_lattice() -> None:
@@ -65,14 +59,20 @@ def test_progress_callback_completes() -> None:
             "-c",
             textwrap.dedent("""
                 import time
-                from mnt import pyfiction as pf
+                from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
+                from mnt.pyfiction.sidb.simulation.analysis import physically_valid_parameters
+                from mnt.pyfiction.sidb.simulation.logic import (
+                    operational_domain_params,
+                    operational_domain_value_range,
+                    sweep_parameter,
+                )
 
-                layout = pf.sidb_layout()
-                layout.assign_sidb(pf.lattice_site(0, 0), pf.sidb_dot_tag.NORMAL)
-                params = pf.operational_domain_params()
+                layout = sidb_layout()
+                layout.assign_sidb(lattice_site(0, 0), sidb_dot_tag.NORMAL)
+                params = operational_domain_params()
                 params.number_of_threads = 2
                 params.sweep_dimensions = [
-                    pf.operational_domain_value_range(pf.sweep_parameter.EPSILON_R, 5, 6, 0.5)
+                    operational_domain_value_range(sweep_parameter.EPSILON_R, 5, 6, 0.5)
                 ]
                 reports = []
 
@@ -83,7 +83,7 @@ def test_progress_callback_completes() -> None:
                         time.sleep(0.2)
 
                 params.on_progress = report
-                pf.physically_valid_parameters(layout, pf.charge_distribution(layout), params)
+                physically_valid_parameters(layout, charge_distribution(layout), params)
                 assert reports[-1] == ("parameter points", 3, 3), reports
             """),
         ],

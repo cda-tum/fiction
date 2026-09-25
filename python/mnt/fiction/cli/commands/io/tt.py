@@ -16,7 +16,7 @@ from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import integer
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe
-from mnt.pyfiction import dynamic_truth_table
+from mnt.pyfiction.synthesis import dynamic_truth_table
 
 if TYPE_CHECKING:
     import argparse

@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import sidb_defect, sidb_defect_type
+from mnt.pyfiction.sidb.model import sidb_defect, sidb_defect_type
 
 
 def test_default_arguments():

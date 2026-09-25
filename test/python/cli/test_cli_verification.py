@@ -12,9 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    cartesian_gate_layout,
-)
+from mnt.pyfiction.layouts import cartesian_gate_layout
 
 if TYPE_CHECKING:
     from collections.abc import Callable

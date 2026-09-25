@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
+from mnt.pyfiction.layouts import (
     cartesian_gate_layout,
     cartesian_layout,
     hexagonal_gate_layout,
@@ -18,8 +18,8 @@ from mnt.pyfiction import (
     offset_coordinate,
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
-    yen_k_shortest_paths,
 )
+from mnt.pyfiction.physical_design.path_finding import yen_k_shortest_paths
 
 
 @pytest.mark.parametrize(

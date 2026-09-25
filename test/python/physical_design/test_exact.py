@@ -8,14 +8,8 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
-    eq_type,
-    equivalence_checking,
-    exact_cartesian,
-    exact_hexagonal,
-    exact_params,
-    exact_stats,
-)
+from mnt.pyfiction.physical_design import exact_cartesian, exact_hexagonal, exact_params, exact_stats
+from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 
 def test_exact_cartesian_default(mux21):

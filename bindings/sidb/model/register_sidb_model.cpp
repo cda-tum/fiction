@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the `technology/sidb/model` bindings with the `mnt.pyfiction` module.
+ * @brief Registers the bindings of the `mnt.pyfiction.sidb.model` submodule.
  * @author Marcel Walter (marcelwa)
  */
 

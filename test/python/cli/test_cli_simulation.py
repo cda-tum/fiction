@@ -14,9 +14,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt import pyfiction
 from mnt.fiction.cli.registry import REGISTRY
 from mnt.fiction.cli.stores import CellEntry
+from mnt.pyfiction.sidb import sidb_layout
+from mnt.pyfiction.sidb.simulation import engines
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -49,7 +50,7 @@ def xor_gate(shell: Shell, resource: Callable[[str], str]) -> Shell:
 
 @pytest.mark.parametrize("engine", ["quickexact", "quicksim", "clustercomplete"])
 def test_ground_state_engines(or_gate: Shell, engine: str) -> None:
-    if engine == "clustercomplete" and not hasattr(pyfiction, "clustercomplete"):
+    if engine == "clustercomplete" and not hasattr(engines, "clustercomplete"):
         pytest.skip("pyfiction was built without ALGLIB")
     or_gate.ok(f"{engine} -e 5.6 -l 5 -m -0.28")
     entry = or_gate.session.cell_layouts.current()
@@ -86,7 +87,7 @@ def test_simulation_rejects_invalid_physical_parameters(or_gate: Shell, command:
 
 
 def test_simulation_reports_an_empty_result(shell: Shell) -> None:
-    shell.session.cell_layouts.add(CellEntry(pyfiction.sidb_layout()))
+    shell.session.cell_layouts.add(CellEntry(sidb_layout()))
     assert "no physically valid charge distribution" in shell.ok("quickexact")
     simulation = shell.session.log[-1]["result"]["cell_layout"]["simulation"]  # type: ignore[index]
     assert simulation["stable_states"] == 0
@@ -94,7 +95,7 @@ def test_simulation_reports_an_empty_result(shell: Shell) -> None:
 
 
 def test_temp_rejects_missing_gate_ports_and_invalid_temperature(shell: Shell) -> None:
-    shell.session.cell_layouts.add(CellEntry(pyfiction.sidb_layout()))
+    shell.session.cell_layouts.add(CellEntry(sidb_layout()))
     assert "must be positive" in shell.fails("temp -t 0")
     assert "input and output dots" in shell.fails("temp -g")
 

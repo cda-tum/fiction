@@ -13,18 +13,17 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction import (
-    bdl_input_iterator,
+from mnt.pyfiction.sidb import sidb_dot_tag
+from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.sidb.simulation.analysis import (
     calculate_energy_and_state_type_with_kinks_accepted,
     calculate_energy_distribution,
-    create_and_tt,
-    detect_bdl_pairs,
     occupation_probability_gate_based,
-    quickexact,
-    read_sqd_layout,
-    sidb_dot_tag,
     state_type,
 )
+from mnt.pyfiction.sidb.simulation.engines import quickexact
+from mnt.pyfiction.sidb.simulation.logic import bdl_input_iterator, detect_bdl_pairs
+from mnt.pyfiction.synthesis import create_and_tt
 
 if TYPE_CHECKING:
     from pathlib import Path

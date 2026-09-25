@@ -10,14 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
-    detect_bdl_pairs,
-    detect_bdl_pairs_params,
-    lattice,
-    lattice_site,
-    sidb_dot_tag,
-    sidb_layout,
-)
+from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.simulation.logic import detect_bdl_pairs, detect_bdl_pairs_params
 
 
 @pytest.mark.parametrize(

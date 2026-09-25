@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the `technology/sidb/generators` bindings with the `mnt.pyfiction` module.
+ * @brief Registers the bindings of the `mnt.pyfiction.sidb.generators` submodule.
  * @author Marcel Walter (marcelwa)
  */
 

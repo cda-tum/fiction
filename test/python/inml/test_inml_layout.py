@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import inml_layout, inml_magnet_type
+from mnt.pyfiction.inml import inml_layout, inml_magnet_type
 
 
 def test_magnet_types() -> None:

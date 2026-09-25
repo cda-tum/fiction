@@ -10,10 +10,12 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
+from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.sidb.model import sidb_simulation_parameters
+from mnt.pyfiction.sidb.simulation.logic import (
     bdl_input_iterator_params,
     bdl_wire_selection,
-    create_and_tt,
     detect_bdl_wires,
     detect_bdl_wires_params,
     generate_bdl_input_pattern_layouts,
@@ -21,16 +23,12 @@ from mnt.pyfiction import (
     is_operational,
     is_operational_params,
     kink_induced_non_operational_input_patterns,
-    lattice_site,
     operational_analysis_strategy,
     operational_condition,
     operational_input_patterns,
     operational_status,
-    read_sqd_layout,
-    sidb_dot_tag,
-    sidb_layout,
-    sidb_simulation_parameters,
 )
+from mnt.pyfiction.synthesis import create_and_tt
 
 
 def test_is_operational():

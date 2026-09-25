@@ -8,14 +8,8 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
-    bdl_wire_selection,
-    detect_bdl_wires,
-    detect_bdl_wires_params,
-    lattice_site,
-    sidb_dot_tag,
-    sidb_layout,
-)
+from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.simulation.logic import bdl_wire_selection, detect_bdl_wires, detect_bdl_wires_params
 
 
 def test_detect_bdl_wires_100_lattice():

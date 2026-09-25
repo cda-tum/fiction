@@ -8,21 +8,24 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
-from mnt.pyfiction import (
+from mnt.pyfiction.synthesis import (
     all_standard_2_input_functions,
     all_standard_3_input_functions,
     all_supported_standard_functions,
     and_or_not,
     and_or_not_maj,
-    eq_type,
-    equivalence_checking,
     missing_required_gates_exception,
     technology_mapping,
     technology_mapping_stats,
-    technology_network,
 )
+from mnt.pyfiction.verification import eq_type, equivalence_checking
+
+if TYPE_CHECKING:
+    from mnt.pyfiction.networks import technology_network
 
 GATE_LIBRARIES = [
     pytest.param(and_or_not, id="and_or_not"),

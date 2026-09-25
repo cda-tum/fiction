@@ -12,7 +12,7 @@ import copy
 
 import pytest
 
-from mnt.pyfiction import qca_cell_mode, qca_cell_type, qca_layout
+from mnt.pyfiction.qca import qca_cell_mode, qca_cell_type, qca_layout
 
 
 def test_cell_types_and_modes() -> None:

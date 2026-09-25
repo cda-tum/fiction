@@ -8,14 +8,8 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
-    lattice,
-    lattice_site,
-    physical_population_stability,
-    physical_population_stability_params,
-    sidb_dot_tag,
-    sidb_layout,
-)
+from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.simulation.analysis import physical_population_stability, physical_population_stability_params
 
 
 def test_three_sidbs_100_lattice() -> None:

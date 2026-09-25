@@ -25,7 +25,8 @@ from mnt.fiction.cli.registry import REGISTRY
 from mnt.fiction.cli.render import table_rows
 from mnt.fiction.cli.stores import CellEntry, element_name
 from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
-from mnt.pyfiction import inml_layout, mol_qca_cell_type, mol_qca_layout
+from mnt.pyfiction.inml import inml_layout
+from mnt.pyfiction.mol_qca import mol_qca_cell_type, mol_qca_layout
 
 if TYPE_CHECKING:
     from collections.abc import Callable

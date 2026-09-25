@@ -35,8 +35,8 @@ def test_directory_markers(
     pytester.makeconftest((test_dir / "conftest.py").read_text(encoding="utf-8"))
     pytester.makeini("[pytest]\nmarkers =\n" + "\n".join(f"    {m}" for m in pytestconfig.getini("markers")))
     for name in (
-        "technology/sidb/simulation/new_category/test_nested.py",
-        "technology/sidb/io/test_sidb_io.py",
+        "sidb/simulation/new_category/test_nested.py",
+        "sidb/io/test_sidb_io.py",
         "layouts/io/test_layout_io.py",
         "test_unmarked.py",
     ):

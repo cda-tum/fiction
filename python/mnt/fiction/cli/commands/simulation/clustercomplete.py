@@ -12,9 +12,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt import pyfiction
 from mnt.fiction.cli.parsing import integer
 from mnt.fiction.cli.registry import Category, command
+from mnt.pyfiction.sidb.simulation import engines
 
 if TYPE_CHECKING:
     import argparse
@@ -41,7 +41,7 @@ def _clustercomplete_arguments(parser: Parser) -> None:
     inputs="Active cell-level layout.",
     example="read layout.sqd; clustercomplete",
     unavailable=None
-    if hasattr(pyfiction, "clustercomplete")
+    if hasattr(engines, "clustercomplete")
     else "this build of pyfiction has no ALGLIB, which 'clustercomplete' needs",
     progress=True,
 )
@@ -51,7 +51,7 @@ def clustercomplete_command(session: Session, args: argparse.Namespace) -> Resul
     The witness limits tune the first pruning stage; -r prints its statistics.
     """
     layout = _active_sidb_layout(session)
-    params = pyfiction.clustercomplete_params()
+    params = engines.clustercomplete_params()
     params.on_progress = session.report_progress
     params.on_worker_progress = session.report_worker_progress
     parameters = _apply_physical(params.simulation_parameters, args)
@@ -59,10 +59,10 @@ def clustercomplete_command(session: Session, args: argparse.Namespace) -> Resul
     params.validity_witness_partitioning_max_cluster_size_gss = args.witness_limit
     params.num_overlapping_witnesses_limit_gss = args.overlap_limit
     if args.report_stats:
-        params.report_gss_stats = pyfiction.ground_state_space_reporting.ON
+        params.report_gss_stats = engines.ground_state_space_reporting.ON
     parameters.update(
         global_potential=args.global_potential,
         witness_partitioning_limit=args.witness_limit,
         overlapping_witnesses_limit=args.overlap_limit,
     )
-    return _store_result(session, layout, pyfiction.clustercomplete(layout, params), parameters)
+    return _store_result(session, layout, engines.clustercomplete(layout, params), parameters)

@@ -10,13 +10,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import (
-    exact_cartesian,
-    exact_params,
-    read_technology_network,
-    simulate,
-    simulate_outputs,
-)
+from mnt.pyfiction.networks import simulate, simulate_outputs
+from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.physical_design import exact_cartesian, exact_params
 
 if TYPE_CHECKING:
     from pathlib import Path

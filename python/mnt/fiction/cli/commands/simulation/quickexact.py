@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import quickexact, quickexact_params
+from mnt.pyfiction.sidb.simulation.engines import quickexact, quickexact_params
 
 if TYPE_CHECKING:
     import argparse

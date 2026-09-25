@@ -8,18 +8,16 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
-    create_and_tt,
+from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.model import sidb_simulation_parameters
+from mnt.pyfiction.sidb.simulation.defects import (
     determine_displacement_robustness_domain,
     dimer_displacement_policy,
     displacement_analysis_mode,
     displacement_robustness_domain_params,
     displacement_robustness_domain_stats,
-    lattice_site,
-    sidb_dot_tag,
-    sidb_layout,
-    sidb_simulation_parameters,
 )
+from mnt.pyfiction.synthesis import create_and_tt
 
 
 def test_siqad_and_gate_100_lattice():

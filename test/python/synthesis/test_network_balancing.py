@@ -8,7 +8,12 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import is_balanced, network_balancing, network_balancing_params, technology_network
+from typing import TYPE_CHECKING
+
+from mnt.pyfiction.synthesis import is_balanced, network_balancing, network_balancing_params
+
+if TYPE_CHECKING:
+    from mnt.pyfiction.networks import technology_network
 
 
 def test_balancing(mux21: technology_network) -> None:

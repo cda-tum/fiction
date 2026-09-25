@@ -29,7 +29,9 @@ from mnt.fiction.cli.registry import REGISTRY, STORE_FLAGS, Category
 from mnt.fiction.cli.session import Session, ignore_progress, ignore_worker_progress
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import Store
-from mnt.pyfiction import orthogonal, orthogonal_stats, read_technology_network, set_name
+from mnt.pyfiction.networks import set_name
+from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.physical_design import orthogonal, orthogonal_stats
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -38,7 +40,7 @@ if TYPE_CHECKING:
     from rich.console import RenderableType
     from rich.progress import Task, TaskID
 
-    from mnt.pyfiction import technology_network
+    from mnt.pyfiction.networks import technology_network
 
     from .conftest import Shell
 

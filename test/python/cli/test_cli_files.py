@@ -15,22 +15,14 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt import pyfiction
 from mnt.fiction.cli.stores import CellEntry, describe
 from mnt.fiction.cli.topologies import FGL_READERS
-from mnt.pyfiction import (
-    aig_network,
-    inml_layout,
-    inml_magnet_type,
-    mig_network,
-    read_sqd_layout,
-    set_name,
-    shifted_cartesian_gate_layout,
-    simulate_outputs,
-    technology_network,
-    write_fgl_layout,
-    xag_network,
-)
+from mnt.pyfiction import layouts, physical_design
+from mnt.pyfiction.inml import inml_layout, inml_magnet_type
+from mnt.pyfiction.layouts import shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts.io import write_fgl_layout
+from mnt.pyfiction.networks import aig_network, mig_network, set_name, simulate_outputs, technology_network, xag_network
+from mnt.pyfiction.sidb.io import read_sqd_layout
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -381,7 +373,7 @@ def test_all_topologies_round_trip_small_fixture(shell: Shell, tmp_path: Path, t
         "odd_column_cartesian": "shifted_cartesian",
         "even_row_hex": "hexagonal",
     }.get(topology, topology)
-    layout = getattr(pyfiction, f"{native}_gate_layout")((2, 1), f"2DDWave{phases}", topology)
+    layout = getattr(layouts, f"{native}_gate_layout")((2, 1), f"2DDWave{phases}", topology)
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (1, 0))
     path = tmp_path / f"{topology}.fgl"
@@ -411,7 +403,7 @@ def test_named_extensionless_bridges(shell: Shell, tmp_path: Path, format_name: 
 
 @pytest.mark.parametrize("library", ["qca-one", "sim7-mol", "bestagon", "topolinano"])
 def test_complete_design_and_export_workflows(shell: Shell, tmp_path: Path, library: str) -> None:
-    if library == "topolinano" and not hasattr(pyfiction, "exact_cartesian"):
+    if library == "topolinano" and not hasattr(physical_design, "exact_cartesian"):
         pytest.skip("pyfiction was built without Z3")
     source = tmp_path / "inverter.v"
     source.write_text("module top(a, f);\ninput a;\noutput f;\nassign f = ~a;\nendmodule\n", encoding="utf-8")

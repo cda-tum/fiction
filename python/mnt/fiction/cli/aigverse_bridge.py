@@ -22,12 +22,13 @@ from aigverse.io import read_aiger_into_aig
 from aigverse.io import write_verilog as aigverse_write_verilog
 from aigverse.networks import NamedAig
 
-from mnt.pyfiction import read_aig_network, set_name, write_aiger
+from mnt.pyfiction.networks import set_name
+from mnt.pyfiction.networks.io import read_aig_network, write_aiger
 
 if TYPE_CHECKING:
     from aigverse.networks import Aig
 
-    from mnt.pyfiction import aig_network
+    from mnt.pyfiction.networks import aig_network
 
     from .session import Session
 

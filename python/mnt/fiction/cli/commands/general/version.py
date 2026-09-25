@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import __compiled_date__, __compiled_time__, __repo__, __version__
+from mnt.pyfiction.utils import __compiled_date__, __compiled_time__, __repo__, __version__
 
 if TYPE_CHECKING:
     import argparse

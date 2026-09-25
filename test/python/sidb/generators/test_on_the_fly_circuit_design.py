@@ -14,21 +14,17 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction import (
-    cartesian_gate_layout,
+from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout
+from mnt.pyfiction.sidb import sidb_layout, site_at_row
+from mnt.pyfiction.sidb.generators import (
     design_sidb_gates_mode,
-    hexagonal_gate_layout,
     on_the_fly_sidb_circuit_design,
     on_the_fly_sidb_circuit_design_params,
-    read_sqd_layout,
     sidb_complex_gate_design_policy,
-    sidb_layout,
     sidb_on_the_fly_gate_library_params,
-    site_at_row,
     termination_condition,
-    write_sidb_layout_svg_to_string,
-    write_sqd_layout,
 )
+from mnt.pyfiction.sidb.io import read_sqd_layout, write_sidb_layout_svg_to_string, write_sqd_layout
 
 if TYPE_CHECKING:
     from pathlib import Path

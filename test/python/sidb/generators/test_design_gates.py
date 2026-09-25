@@ -10,21 +10,17 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
-    create_and_tt,
-    create_nor_tt,
+from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.generators import (
     design_sidb_gates,
     design_sidb_gates_mode,
     design_sidb_gates_params,
     design_sidb_gates_stats,
-    lattice,
-    lattice_site,
-    operational_condition,
-    sidb_dot_tag,
-    sidb_layout,
-    sidb_simulation_engine,
     termination_condition,
 )
+from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation.logic import operational_condition
+from mnt.pyfiction.synthesis import create_and_tt, create_nor_tt
 
 
 @pytest.fixture

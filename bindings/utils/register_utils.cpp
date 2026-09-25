@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the `utils` bindings with the `mnt.pyfiction` module.
+ * @brief Entry point of the `mnt.pyfiction.utils` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -28,15 +28,17 @@ void version_info(nanobind::module_& m);
  */
 void execution_timeout(nanobind::module_& m);
 
-/**
- * @brief Registers utility bindings.
- *
- * @param m Python module.
- */
-void register_utils(nanobind::module_& m)
+}  // namespace pyfiction
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+
+NB_MODULE(utils, m)
 {
-    execution_timeout(m);
-    version_info(m);
+    m.doc() = "Version information and shared utilities.";
+
+    pyfiction::execution_timeout(m);
+    pyfiction::version_info(m);
 }
 
-}  // namespace pyfiction
+#pragma GCC diagnostic pop

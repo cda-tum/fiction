@@ -10,9 +10,11 @@
 
 /**
  * @file
- * @brief Registers the `physical_design` bindings with the `mnt.pyfiction` module.
+ * @brief Entry point of the `mnt.pyfiction.physical_design` extension module.
  * @author Marcel Walter (marcelwa)
  */
+
+#include "pyfiction/submodule.hpp"
 
 #include <nanobind/nanobind.h>
 
@@ -30,18 +32,44 @@ void wiring_reduction(nanobind::module_& m);
 void routing_utils(nanobind::module_& m);
 void placement_utils(nanobind::module_& m);
 
-void register_physical_design(nanobind::module_& m)
-{
-    exact(m);
-    orthogonal(m);
-    graph_oriented_layout_design(m);
-    apply_gate_library(m);
-    color_routing(m);
-    hexagonalization(m);
-    post_layout_optimization(m);
-    wiring_reduction(m);
-    routing_utils(m);
-    placement_utils(m);
-}
+/**
+ * @brief Registers the bindings of the `mnt.pyfiction.physical_design.path_finding` submodule.
+ *
+ * @param m Python submodule.
+ */
+void register_path_finding(nanobind::module_& m);
 
 }  // namespace pyfiction
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+
+NB_MODULE(physical_design, m)
+{
+    m.doc() = "Placement and routing of logic networks into gate-level layouts.";
+
+    // Registers the types this module names in signatures and default arguments. `utils` registers
+    // the translator that raises `TimeoutError` for `fiction::utils::timeout_error`.
+    nanobind::module_::import_("mnt.pyfiction.utils");
+    nanobind::module_::import_("mnt.pyfiction.layouts");
+    nanobind::module_::import_("mnt.pyfiction.networks");
+    nanobind::module_::import_("mnt.pyfiction.qca");
+    nanobind::module_::import_("mnt.pyfiction.mol_qca");
+    nanobind::module_::import_("mnt.pyfiction.inml");
+    nanobind::module_::import_("mnt.pyfiction.sidb");
+
+    pyfiction::exact(m);
+    pyfiction::orthogonal(m);
+    pyfiction::graph_oriented_layout_design(m);
+    pyfiction::apply_gate_library(m);
+    pyfiction::color_routing(m);
+    pyfiction::hexagonalization(m);
+    pyfiction::post_layout_optimization(m);
+    pyfiction::wiring_reduction(m);
+    pyfiction::routing_utils(m);
+    pyfiction::placement_utils(m);
+    auto path_finding = pyfiction::def_submodule(m, "path_finding", "Path finding and distance functions on layouts.");
+    pyfiction::register_path_finding(path_finding);
+}
+
+#pragma GCC diagnostic pop

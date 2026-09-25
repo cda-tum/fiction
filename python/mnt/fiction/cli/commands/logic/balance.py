@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe
-from mnt.pyfiction import network_balancing, network_balancing_params
+from mnt.pyfiction.synthesis import network_balancing, network_balancing_params
 
 if TYPE_CHECKING:
     import argparse

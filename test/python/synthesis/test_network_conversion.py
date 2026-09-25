@@ -14,20 +14,15 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from mnt.pyfiction import (
+from mnt.pyfiction.networks import simulate_outputs, technology_network
+from mnt.pyfiction.networks.io import read_aig_network, read_mig_network, read_technology_network, read_xag_network
+from mnt.pyfiction.synthesis import (
     all_supported_standard_functions,
     convert_network,
-    eq_type,
-    equivalence_checking,
     network_target,
-    read_aig_network,
-    read_mig_network,
-    read_technology_network,
-    read_xag_network,
-    simulate_outputs,
     technology_mapping,
-    technology_network,
 )
+from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 if TYPE_CHECKING:
     from collections.abc import Callable

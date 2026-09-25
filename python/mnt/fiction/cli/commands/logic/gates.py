@@ -16,7 +16,7 @@ from rich.table import Table
 
 from mnt.fiction.cli.registry import Category, command, one_store, store_flags
 from mnt.fiction.cli.statistics import stats_to_dict
-from mnt.pyfiction import count_gate_types
+from mnt.pyfiction.verification import count_gate_types
 
 if TYPE_CHECKING:
     import argparse

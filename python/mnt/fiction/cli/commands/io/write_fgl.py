@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import write_fgl_layout
+from mnt.pyfiction.layouts.io import write_fgl_layout
 
 from ._write import output_argument, output_path, written
 

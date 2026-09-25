@@ -8,17 +8,15 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
-from mnt.pyfiction import (
-    eq_type,
-    equivalence_checking,
-    orthogonal,
-    technology_network,
-    wiring_reduction,
-    wiring_reduction_params,
-    wiring_reduction_stats,
-)
+from mnt.pyfiction.physical_design import orthogonal, wiring_reduction, wiring_reduction_params, wiring_reduction_stats
+from mnt.pyfiction.verification import eq_type, equivalence_checking
+
+if TYPE_CHECKING:
+    from mnt.pyfiction.networks import technology_network
 
 
 def test_wiring_reduction_default(mux21):

@@ -18,37 +18,32 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Generic, TypeAlias, TypeVar
 
 from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
-from mnt.pyfiction import (
-    aig_network,
-    area,
+from mnt.pyfiction.fcn import area
+from mnt.pyfiction.inml import inml_layout
+from mnt.pyfiction.layouts import (
     cartesian_gate_layout,
-    charge_distribution,
-    critical_path_length_and_throughput,
-    dynamic_truth_table,
     even_column_cartesian_gate_layout,
     even_column_hex_gate_layout,
     even_row_cartesian_gate_layout,
-    get_name,
     hexagonal_gate_layout,
-    inml_layout,
-    mig_network,
-    mol_qca_layout,
     odd_column_hex_gate_layout,
     odd_row_cartesian_gate_layout,
     odd_row_hex_gate_layout,
-    qca_layout,
-    row_of,
     shifted_cartesian_gate_layout,
-    sidb_layout,
-    sidb_simulation_result,
-    technology_network,
-    xag_network,
 )
+from mnt.pyfiction.mol_qca import mol_qca_layout
+from mnt.pyfiction.networks import aig_network, get_name, mig_network, technology_network, xag_network
+from mnt.pyfiction.qca import qca_layout
+from mnt.pyfiction.sidb import charge_distribution, row_of, sidb_layout
+from mnt.pyfiction.synthesis import dynamic_truth_table
+from mnt.pyfiction.verification import critical_path_length_and_throughput
 
 from .errors import CommandError
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+
+    from mnt.pyfiction.sidb.simulation import sidb_simulation_result
 
 Network: TypeAlias = aig_network | xag_network | mig_network | technology_network
 """Logic network types held by the shell."""

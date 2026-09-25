@@ -14,17 +14,10 @@ from itertools import pairwise
 
 import pytest
 
-from mnt.pyfiction import (
-    calculate_energy_distribution,
-    charge_distribution,
-    lattice,
-    lattice_site,
-    potential_landscape,
-    sidb_charge_state,
-    sidb_dot_tag,
-    sidb_layout,
-    sidb_simulation_parameters,
-)
+from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_simulation_parameters
+from mnt.pyfiction.sidb.simulation import potential_landscape
+from mnt.pyfiction.sidb.simulation.analysis import calculate_energy_distribution
 
 
 @pytest.mark.parametrize(

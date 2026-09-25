@@ -17,7 +17,12 @@ from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import finite_float, positive_int
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.statistics import stats_to_dict
-from mnt.pyfiction import (
+from mnt.pyfiction.sidb.simulation.io import (
+    sample_writing_mode,
+    write_operational_domain,
+    write_operational_domain_params,
+)
+from mnt.pyfiction.sidb.simulation.logic import (
     operational_analysis_strategy,
     operational_condition,
     operational_domain_contour_tracing,
@@ -27,10 +32,7 @@ from mnt.pyfiction import (
     operational_domain_random_sampling,
     operational_domain_stats,
     operational_domain_value_range,
-    sample_writing_mode,
     sweep_parameter,
-    write_operational_domain,
-    write_operational_domain_params,
 )
 
 if TYPE_CHECKING:

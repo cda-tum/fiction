@@ -23,7 +23,7 @@ from prompt_toolkit.document import Document
 from prompt_toolkit.history import FileHistory, History
 from prompt_toolkit.styles import Style
 
-from mnt.pyfiction import __version__
+from mnt.pyfiction.utils import __version__
 
 from .errors import CommandError
 from .parsing import tokenize

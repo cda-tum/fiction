@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the `synthesis` bindings with the `mnt.pyfiction` module.
+ * @brief Entry point of the `mnt.pyfiction.synthesis` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -31,14 +31,24 @@ void network_balancing(nanobind::module_& m);
 void technology_mapping(nanobind::module_& m);
 void network_conversion(nanobind::module_& m);
 
-void register_synthesis(nanobind::module_& m)
+}  // namespace pyfiction
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+
+NB_MODULE(synthesis, m)
 {
-    dynamic_truth_table(m);
-    truth_tables(m);
-    fanout_substitution(m);
-    network_balancing(m);
-    technology_mapping(m);
-    network_conversion(m);
+    m.doc() = "Truth tables and logic network transformations.";
+
+    // Registers the types this module names in signatures and default arguments.
+    nanobind::module_::import_("mnt.pyfiction.networks");
+
+    pyfiction::dynamic_truth_table(m);
+    pyfiction::truth_tables(m);
+    pyfiction::fanout_substitution(m);
+    pyfiction::network_balancing(m);
+    pyfiction::technology_mapping(m);
+    pyfiction::network_conversion(m);
 }
 
-}  // namespace pyfiction
+#pragma GCC diagnostic pop

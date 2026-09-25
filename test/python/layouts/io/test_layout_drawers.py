@@ -14,12 +14,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction import (
-    cartesian_gate_layout,
-    hexagonal_gate_layout,
-    shifted_cartesian_gate_layout,
-    write_dot_layout,
-)
+from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts.io import write_dot_layout
 
 if TYPE_CHECKING:
     from pathlib import Path

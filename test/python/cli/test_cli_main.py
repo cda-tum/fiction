@@ -29,7 +29,7 @@ from prompt_toolkit.output import DummyOutput
 from mnt.fiction.cli import Session, main
 from mnt.fiction.cli import app as cli_app
 from mnt.fiction.cli.app import CommandCompleter
-from mnt.pyfiction import __version__
+from mnt.pyfiction.utils import __version__
 
 
 def test_commands_succeed() -> None:

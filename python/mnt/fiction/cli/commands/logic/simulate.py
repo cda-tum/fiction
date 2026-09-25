@@ -14,7 +14,8 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command, one_store, store_flags
 from mnt.fiction.cli.stores import describe
-from mnt.pyfiction import dynamic_truth_table, simulate_outputs
+from mnt.pyfiction.networks import simulate_outputs
+from mnt.pyfiction.synthesis import dynamic_truth_table
 
 if TYPE_CHECKING:
     import argparse

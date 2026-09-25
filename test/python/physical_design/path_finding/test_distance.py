@@ -10,17 +10,19 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
+from mnt.pyfiction.layouts import (
     cartesian_gate_layout,
     cartesian_layout,
-    chebyshev_distance,
-    euclidean_distance,
     hexagonal_gate_layout,
     hexagonal_layout,
-    manhattan_distance,
     offset_coordinate,
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
+)
+from mnt.pyfiction.physical_design.path_finding import (
+    chebyshev_distance,
+    euclidean_distance,
+    manhattan_distance,
     squared_euclidean_distance,
     twoddwave_distance,
 )

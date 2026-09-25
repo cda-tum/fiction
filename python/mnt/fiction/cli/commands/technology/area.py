@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.parsing import nonnegative_float
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import area
+from mnt.pyfiction.fcn import area
 
 if TYPE_CHECKING:
     import argparse

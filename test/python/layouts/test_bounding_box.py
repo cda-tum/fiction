@@ -12,16 +12,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction import (
-    cartesian_gate_layout,
-    hexagonal_gate_layout,
-    inml_layout,
-    orthogonal,
-    orthogonal_params,
-    qca_layout,
-    read_technology_network,
-    shifted_cartesian_gate_layout,
-)
+from mnt.pyfiction.inml import inml_layout
+from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.physical_design import orthogonal, orthogonal_params
+from mnt.pyfiction.qca import qca_layout
 
 if TYPE_CHECKING:
     from pathlib import Path

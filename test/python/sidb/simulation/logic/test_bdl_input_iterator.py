@@ -10,13 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
-    bdl_input_iterator,
-    lattice,
-    lattice_site,
-    sidb_dot_tag,
-    sidb_layout,
-)
+from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.simulation.logic import bdl_input_iterator
 
 
 @pytest.fixture

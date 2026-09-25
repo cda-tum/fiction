@@ -14,12 +14,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction import (
-    mol_qca_layout,
-    qca_layout,
-    shifted_cartesian_gate_layout,
-    sidb_layout,
-)
+from mnt.pyfiction.layouts import shifted_cartesian_gate_layout
+from mnt.pyfiction.mol_qca import mol_qca_layout
+from mnt.pyfiction.qca import qca_layout
+from mnt.pyfiction.sidb import sidb_layout
 
 if TYPE_CHECKING:
     from collections.abc import Callable

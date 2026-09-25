@@ -12,22 +12,21 @@ import math
 
 import pytest
 
-from mnt.pyfiction import (
-    automatic_base_number_detection,
-    exact_sidb_simulation_engine,
-    lattice,
-    lattice_site,
-    quickexact,
-    quickexact_params,
-    quicksim,
-    quicksim_params,
-    sidb_dot_tag,
-    sidb_layout,
-    sidb_simulation_parameters,
+from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.model import sidb_simulation_parameters
+from mnt.pyfiction.sidb.simulation import exact_sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation.analysis import (
     time_to_solution,
     time_to_solution_for_given_simulation_results,
     time_to_solution_params,
     time_to_solution_stats,
+)
+from mnt.pyfiction.sidb.simulation.engines import (
+    automatic_base_number_detection,
+    quickexact,
+    quickexact_params,
+    quicksim,
+    quicksim_params,
 )
 
 

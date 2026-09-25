@@ -8,7 +8,9 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import cartesian_gate_layout, color_routing, gate_level_drvs
+from mnt.pyfiction.layouts import cartesian_gate_layout
+from mnt.pyfiction.physical_design import color_routing
+from mnt.pyfiction.verification import gate_level_drvs
 
 
 def test_drvs():

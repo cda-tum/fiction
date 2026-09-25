@@ -86,6 +86,7 @@ jobs:
           filter: |
             include/fiction/**
             test/**
+            !test/python/**
             experiments/**
             cmake/**
             CMakeLists.txt
@@ -98,7 +99,7 @@ jobs:
             .github/workflows/cpp-tests-windows.yml
             .github/workflows/cpp-experiments.yml
             .github/workflows/cpp-coverage.yml
-            !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+            !bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp
       - name: Set a flag for running the C++ tests
         if: >-
           github.event_name != 'pull_request'
@@ -116,6 +117,7 @@ jobs:
           filter: |
             include/fiction/**
             test/**
+            !test/python/**
             bindings/**/*.cpp
             bindings/**/*.hpp
             bindings/**/CMakeLists.txt
@@ -127,8 +129,8 @@ jobs:
             .github/workflows/ci.yml
             .github/workflows/change-detection.yml
             .github/workflows/cpp-linter.yml
-            !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
-            !bindings/mnt/pyfiction/include/pyfiction/documentation.hpp
+            !bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+            !bindings/include/pyfiction/documentation.hpp
       - name: Set a flag for running Clang-Tidy
         if: >-
           github.event_name != 'pull_request'
@@ -154,7 +156,7 @@ jobs:
             .github/workflows/ci.yml
             .github/workflows/change-detection.yml
             .github/workflows/codeql.yml
-            !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+            !bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp
       - name: Set a flag for running CodeQL
         if: >-
           github.event_name != 'pull_request'
@@ -194,7 +196,7 @@ jobs:
         with:
           filter: |
             include/fiction/**
-            bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+            bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp
             cmake/**
             CMakeLists.txt
             CMakePresets.json
@@ -218,6 +220,8 @@ jobs:
         with:
           filter: |
             bindings/**
+            python/**
+            test/python/**
             include/fiction/**
             cmake/**
             CMakeLists.txt
@@ -230,7 +234,7 @@ jobs:
             .github/workflows/python-tests.yml
             .github/workflows/python-coverage.yml
             .codecov.yml
-            !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+            !bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp
       - name: Set a flag for running the Python tests
         if: >-
           github.event_name != 'pull_request'
@@ -247,6 +251,8 @@ jobs:
         with:
           filter: |
             bindings/**
+            python/**
+            test/python/**
             include/fiction/**
             cmake/**
             CMakeLists.txt
@@ -260,7 +266,7 @@ jobs:
             .github/workflows/change-detection.yml
             .github/workflows/packaging-sdist.yml
             .github/workflows/packaging-wheels.yml
-            !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+            !bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp
       - name: Set a flag for running the packaging and Python test jobs
         if: >-
           github.event_name != 'pull_request'
@@ -278,6 +284,7 @@ jobs:
             .dockerignore
             include/fiction/**
             bindings/**
+            python/**
             pyproject.toml
             cmake/**
             CMakeLists.txt
@@ -286,7 +293,7 @@ jobs:
             .github/workflows/cd.yml
             .github/workflows/change-detection.yml
             .github/workflows/docker.yml
-            !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+            !bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp
       - name: Set a flag for building the Docker image
         if: >-
           github.event_name != 'pull_request'

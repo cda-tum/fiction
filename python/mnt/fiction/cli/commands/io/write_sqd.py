@@ -13,7 +13,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import sidb_layout, write_sqd_layout
+from mnt.pyfiction.sidb import sidb_layout
+from mnt.pyfiction.sidb.io import write_sqd_layout
 
 from ._write import output_argument, output_path, require_cell_type, written
 

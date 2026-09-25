@@ -19,14 +19,10 @@ import pytest
 from aigverse import abc
 from aigverse.algorithms import equivalence_checking as aig_equivalent
 
-from mnt import pyfiction
 from mnt.fiction.cli.aigverse_bridge import from_aigverse, to_aigverse
 from mnt.fiction.cli.stores import size_and_depth
-from mnt.pyfiction import (
-    aig_network,
-    simulate_outputs,
-    technology_network,
-)
+from mnt.pyfiction import networks
+from mnt.pyfiction.networks import aig_network, simulate_outputs, technology_network
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -220,6 +216,6 @@ def test_seeded_random_networks(shell: Shell, kind: str) -> None:
     shell.ok(f"random --type {kind} -n 4 -g 30 --seed 17")
     network = shell.session.networks.current()
     assert network.num_pis() == 4
-    assert isinstance(network, getattr(pyfiction, "technology_network" if kind == "tec" else f"{kind}_network"))
+    assert isinstance(network, getattr(networks, "technology_network" if kind == "tec" else f"{kind}_network"))
     shell.ok(f"random --type {kind} -n 4 -g 30 --seed 17")
     assert simulate_outputs(network) == simulate_outputs(shell.session.networks.current())

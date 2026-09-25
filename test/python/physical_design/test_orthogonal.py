@@ -8,13 +8,8 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
-    eq_type,
-    equivalence_checking,
-    orthogonal,
-    orthogonal_params,
-    orthogonal_stats,
-)
+from mnt.pyfiction.physical_design import orthogonal, orthogonal_params, orthogonal_stats
+from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 
 def test_orthogonal_default(mux21):

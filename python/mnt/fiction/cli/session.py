@@ -38,7 +38,8 @@ from rich.progress import (
 from rich.table import Column
 from rich.text import Text
 
-from mnt.pyfiction import convert_network, technology_network
+from mnt.pyfiction.networks import technology_network
+from mnt.pyfiction.synthesis import convert_network
 
 from .errors import CommandError, HelpRequested
 from .parsing import tokenize
@@ -49,7 +50,7 @@ from .stores import CellEntry, GateLayout, Network, Store, describe, element_nam
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from mnt.pyfiction import dynamic_truth_table
+    from mnt.pyfiction.synthesis import dynamic_truth_table
 
     from .registry import Result
 

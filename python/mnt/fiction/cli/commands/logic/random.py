@@ -13,10 +13,10 @@ from __future__ import annotations
 import secrets
 from typing import TYPE_CHECKING
 
-from mnt import pyfiction
 from mnt.fiction.cli.parsing import integer, positive_int, seed
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe
+from mnt.pyfiction import networks
 
 if TYPE_CHECKING:
     import argparse
@@ -51,6 +51,6 @@ def random_command(session: Session, args: argparse.Namespace) -> Result:
     Each type uses its native gate distribution; technology networks use the mixed generator.
     """
     seed = args.seed if args.seed is not None else secrets.randbelow(2**32)
-    network = getattr(pyfiction, f"random_{args.type}_network")(args.inputs, args.gates, seed)
+    network = getattr(networks, f"random_{args.type}_network")(args.inputs, args.gates, seed)
     session.networks.add(network)
     return {"network": describe(network), "seed": seed}

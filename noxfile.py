@@ -48,8 +48,8 @@ CPP_LINT_IGNORED_PATHS = (
     "docs/*",
     "benchmarks/*",
     "bib/*",
-    "bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp",
-    "bindings/mnt/pyfiction/include/pyfiction/documentation.hpp",
+    "bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp",
+    "bindings/include/pyfiction/documentation.hpp",
 )
 
 

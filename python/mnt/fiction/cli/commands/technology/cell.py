@@ -16,14 +16,12 @@ from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import CellEntry, describe
 from mnt.fiction.cli.topologies import TOPOLOGIES
-from mnt.pyfiction import (
+from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.physical_design import (
     apply_bestagon_library,
     apply_qca_one_library,
     apply_sim7_mol_library,
     apply_topolinano_library,
-    cartesian_gate_layout,
-    hexagonal_gate_layout,
-    shifted_cartesian_gate_layout,
 )
 
 if TYPE_CHECKING:

@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from mnt.pyfiction import read_technology_network
+from mnt.pyfiction.networks.io import read_technology_network
 
 DIR_PATH = Path(__file__).resolve().parent
 

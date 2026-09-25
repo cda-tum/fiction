@@ -8,7 +8,8 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import eq_type, equivalence_checking, equivalence_checking_stats, read_technology_network
+from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.verification import eq_type, equivalence_checking, equivalence_checking_stats
 
 
 def test_non_eq(resources_dir):

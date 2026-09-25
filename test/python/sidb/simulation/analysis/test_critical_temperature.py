@@ -12,29 +12,26 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction import (
-    bdl_input_iterator_params,
-    bdl_wire_selection,
-    create_and_tt,
-    create_not_tt,
-    create_xor_tt,
+from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.sidb.model import sidb_simulation_parameters
+from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation.analysis import (
     critical_temperature_gate_based,
     critical_temperature_non_gate_based,
     critical_temperature_params,
     critical_temperature_stats,
+)
+from mnt.pyfiction.sidb.simulation.logic import (
+    bdl_input_iterator_params,
+    bdl_wire_selection,
     detect_bdl_pairs,
     detect_bdl_pairs_params,
     detect_bdl_wires,
     detect_bdl_wires_params,
     generate_bdl_input_pattern_layouts,
-    lattice,
-    lattice_site,
-    read_sqd_layout,
-    sidb_dot_tag,
-    sidb_layout,
-    sidb_simulation_engine,
-    sidb_simulation_parameters,
 )
+from mnt.pyfiction.synthesis import create_and_tt, create_not_tt, create_xor_tt
 
 if TYPE_CHECKING:
     from pathlib import Path

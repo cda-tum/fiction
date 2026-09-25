@@ -10,16 +10,16 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
+from mnt.pyfiction.layouts import (
     cartesian_gate_layout,
     cartesian_layout,
-    enumerate_all_paths,
     hexagonal_gate_layout,
     hexagonal_layout,
     offset_coordinate,
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
 )
+from mnt.pyfiction.physical_design.path_finding import enumerate_all_paths
 
 
 @pytest.mark.parametrize(

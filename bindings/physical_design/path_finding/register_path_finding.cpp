@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the `physical_design/path_finding` bindings with the `mnt.pyfiction` module.
+ * @brief Registers the bindings of the `mnt.pyfiction.physical_design.path_finding` submodule.
  * @author Marcel Walter (marcelwa)
  */
 

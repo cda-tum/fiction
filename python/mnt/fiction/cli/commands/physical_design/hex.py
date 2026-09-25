@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction import (
+from mnt.pyfiction.physical_design import (
     hexagonalization,
     hexagonalization_io_pin_extension_mode,
     hexagonalization_params,

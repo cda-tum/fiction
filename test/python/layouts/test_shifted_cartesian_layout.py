@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import shifted_cartesian_layout
+from mnt.pyfiction.layouts import shifted_cartesian_layout
 
 
 def test_coordinate_iteration():

@@ -8,7 +8,9 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
+from typing import TYPE_CHECKING
+
+from mnt.pyfiction.physical_design import (
     apply_bestagon_library,
     apply_qca_one_library,
     apply_sim7_mol_library,
@@ -18,8 +20,10 @@ from mnt.pyfiction import (
     exact_shifted_cartesian,
     orthogonal,
     technology_constraints,
-    technology_network,
 )
+
+if TYPE_CHECKING:
+    from mnt.pyfiction.networks import technology_network
 
 
 def test_apply_qca_one_library(mux21: technology_network) -> None:

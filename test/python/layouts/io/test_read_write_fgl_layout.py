@@ -12,21 +12,17 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction import (
-    cartesian_gate_layout,
-    eq_type,
-    equivalence_checking,
+from mnt.pyfiction.layouts import cartesian_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts.io import (
     fgl_parsing_error,
-    get_name,
-    hexagonalization,
-    orthogonal,
     read_cartesian_fgl_layout,
     read_hexagonal_fgl_layout,
     read_shifted_cartesian_fgl_layout,
-    shifted_cartesian_gate_layout,
-    simulate_outputs,
     write_fgl_layout,
 )
+from mnt.pyfiction.networks import get_name, simulate_outputs
+from mnt.pyfiction.physical_design import hexagonalization, orthogonal
+from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 if TYPE_CHECKING:
     from pathlib import Path

@@ -12,12 +12,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction import count_gate_types, orthogonal, read_aig_network
+from mnt.pyfiction.networks.io import read_aig_network
+from mnt.pyfiction.physical_design import orthogonal
+from mnt.pyfiction.verification import count_gate_types
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from mnt.pyfiction import technology_network
+    from mnt.pyfiction.networks import technology_network
 
 
 def _total(stats: object) -> int:

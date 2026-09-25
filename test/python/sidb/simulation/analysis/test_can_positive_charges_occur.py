@@ -8,14 +8,9 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
-    can_positive_charges_occur,
-    lattice,
-    lattice_site,
-    sidb_dot_tag,
-    sidb_layout,
-    sidb_simulation_parameters,
-)
+from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.model import sidb_simulation_parameters
+from mnt.pyfiction.sidb.simulation.analysis import can_positive_charges_occur
 
 
 def test_three_sidbs_100_lattice() -> None:

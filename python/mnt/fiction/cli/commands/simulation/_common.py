@@ -15,7 +15,8 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import finite_float, integer, positive_float
 from mnt.fiction.cli.stores import TECHNOLOGIES, CellEntry, describe
-from mnt.pyfiction import sidb_layout, sidb_simulation_engine, sidb_simulation_parameters, sidb_simulation_result
+from mnt.pyfiction.sidb import sidb_layout
+from mnt.pyfiction.sidb.simulation import sidb_simulation_engine, sidb_simulation_result
 
 if TYPE_CHECKING:
     import argparse
@@ -23,6 +24,7 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
+    from mnt.pyfiction.sidb.model import sidb_simulation_parameters
 
 
 ENGINES = {name.lower(): member for name, member in sidb_simulation_engine.__members__.items()}

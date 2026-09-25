@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from mnt import pyfiction
+from mnt.pyfiction import layouts
 
 NATIVE_NAMES = {
     "cartesian": "cartesian",
@@ -38,14 +38,14 @@ DISPLAY_NAMES = {
 }
 """Human-readable topology names; command options and JSON retain canonical names."""
 
-TOPOLOGIES = {getattr(pyfiction, f"{native}_gate_layout"): name for name, native in NATIVE_NAMES.items()}
+TOPOLOGIES = {getattr(layouts, f"{native}_gate_layout"): name for name, native in NATIVE_NAMES.items()}
 """Gate-level layout classes mapped to canonical names for descriptions."""
 
 NAMES = {**NATIVE_NAMES, "shifted_cartesian": "shifted_cartesian", "hexagonal": "hexagonal"}
 """Accepted topology names, including the two established aliases."""
 
-FGL_READERS = {name: getattr(pyfiction, f"read_{native}_fgl_layout") for name, native in NAMES.items()}
+FGL_READERS = {name: getattr(layouts.io, f"read_{native}_fgl_layout") for name, native in NAMES.items()}
 """The reader for each accepted FGL topology."""
 
-GATE_LAYOUTS = {name: getattr(pyfiction, f"{native}_gate_layout") for name, native in NAMES.items()}
+GATE_LAYOUTS = {name: getattr(layouts, f"{native}_gate_layout") for name, native in NAMES.items()}
 """Gate constructors used to validate a topology's clocking schemes."""

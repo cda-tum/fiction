@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import lattice, lattice_site, row_of, site_at_row, sites_in_area
+from mnt.pyfiction.sidb import lattice, lattice_site, row_of, site_at_row, sites_in_area
 
 
 def test_lattice_site() -> None:

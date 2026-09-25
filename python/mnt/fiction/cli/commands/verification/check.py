@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.render import table as render_table
-from mnt.pyfiction import gate_level_drv_params, gate_level_drv_stats, gate_level_drvs
+from mnt.pyfiction.verification import gate_level_drv_params, gate_level_drv_stats, gate_level_drvs
 
 if TYPE_CHECKING:
     import argparse

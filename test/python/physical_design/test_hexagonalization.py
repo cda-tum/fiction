@@ -8,15 +8,14 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import (
-    eq_type,
-    equivalence_checking,
+from mnt.pyfiction.physical_design import (
     hexagonalization,
     hexagonalization_io_pin_extension_mode,
     hexagonalization_params,
     hexagonalization_stats,
     orthogonal,
 )
+from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 
 def test_hexagonalization_default(mux21):

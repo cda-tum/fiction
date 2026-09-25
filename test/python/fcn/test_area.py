@@ -10,7 +10,10 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import area, inml_layout, lattice_site, qca_layout, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.fcn import area
+from mnt.pyfiction.inml import inml_layout
+from mnt.pyfiction.qca import qca_layout
+from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
 
 
 def test_qca_area() -> None:

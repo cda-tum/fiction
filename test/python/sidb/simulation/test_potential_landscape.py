@@ -12,18 +12,9 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import (
-    charge_distribution,
-    charge_transition_threshold_bounds,
-    lattice_site,
-    potential_landscape,
-    sidb_charge_state,
-    sidb_defect,
-    sidb_defect_type,
-    sidb_dot_tag,
-    sidb_layout,
-    sidb_simulation_parameters,
-)
+from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_defect, sidb_defect_type, sidb_simulation_parameters
+from mnt.pyfiction.sidb.simulation import charge_transition_threshold_bounds, potential_landscape
 
 
 def three_sidbs() -> sidb_layout:

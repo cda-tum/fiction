@@ -86,8 +86,8 @@ def main() -> int:
         sys.stderr.write(f"{database} contains no translation units\n")
         return 1
 
-    # any translation unit that links against libfiction carries the full include set
-    fiction = [entry for entry in entries if "pyfiction" in str(entry["file"])] or entries
+    # any binding translation unit links against libfiction and carries the full include set
+    fiction = [entry for entry in entries if "/bindings/" in Path(entry["file"]).as_posix()] or entries
     sys.stdout.write(" ".join(extract_flags(fiction[0])) + "\n")
     return 0
 
