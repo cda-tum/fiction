@@ -378,12 +378,20 @@ enable_error_code = [ "ignore-without-code", "redundant-expr", "truthy-bool" ]
 strict = true
 warn_unused_configs = true
 
-# `nox -s stubs` generates these stubs from the bindings. nanobind types comparison operands as the
-# class itself and leaves the deepcopy memo dictionary open. The unhashable charge
-# distribution explicitly sets __hash__ to None.
+# nanobind generates comparison operands narrower than object.__eq__/__ne__.
 [[tool.mypy.overrides]]
-module = [ "mnt.pyfiction.*" ]
-disable_error_code = [ "assignment", "override", "type-arg" ]
+module = [ "mnt.pyfiction.layouts.coords", "mnt.pyfiction.sidb.simulation.logic" ]
+disable_error_code = [ "override" ]
+
+# These stubs also contain unparameterized deepcopy memo dictionaries or state lists.
+[[tool.mypy.overrides]]
+module = [ "mnt.pyfiction.inml", "mnt.pyfiction.mol_qca", "mnt.pyfiction.qca", "mnt.pyfiction.sidb.model" ]
+disable_error_code = [ "override", "type-arg" ]
+
+# Comparisons have narrow operands; the unhashable charge_distribution sets __hash__ = None.
+[[tool.mypy.overrides]]
+module = [ "mnt.pyfiction.sidb" ]
+disable_error_code = [ "assignment", "override" ]
 
 [tool.pytest]
 addopts = [
