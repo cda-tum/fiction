@@ -261,6 +261,8 @@ void operational_domain(nanobind::module_& m)
                 const py::object py_keys = py::cast(keys);
                 return py::iter(py_keys);
             },
+            py::sig(
+                "def __iter__(self) -> collections.abc.Iterator[mnt.pyfiction.sidb.simulation.logic.parameter_point]"),
             "Returns an iterator over the parameter points stored in the domain.")
         .def("keys",
              [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
@@ -345,6 +347,8 @@ void operational_domain(nanobind::module_& m)
                 const py::object py_keys = py::cast(keys);
                 return py::iter(py_keys);
             },
+            py::sig(
+                "def __iter__(self) -> collections.abc.Iterator[mnt.pyfiction.sidb.simulation.logic.parameter_point]"),
             "Returns an iterator over the parameter points stored in the domain.")
         .def("keys",
              [](const fiction::sidb::simulation::logic::operational_domain& self)

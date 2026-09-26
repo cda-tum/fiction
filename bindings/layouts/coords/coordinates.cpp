@@ -49,7 +49,8 @@ void offset_coordinate(nanobind::module_& m)
         .def(py::init<const decltype(py_offset_coordinate().x), const decltype(py_offset_coordinate().y),
                       const decltype(py_offset_coordinate().z)>(),
              py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_layouts_coords_offset_offset_2))
-        .def(py::init<const py_offset_coordinate>(), py::arg("c"))
+        .def(py::init<const py_offset_coordinate>(), py::arg("c"),
+             py::sig("def __init__(self, c: mnt.pyfiction.layouts.coords.offset_coordinate) -> None"))
         .def(
             "__init__",
             [](py::pointer_and_handle<py_offset_coordinate> self, const py::tuple& t)
@@ -70,7 +71,8 @@ void offset_coordinate(nanobind::module_& m)
 
                 throw std::runtime_error("Wrong number of dimensions provided for coordinate");
             },
-            py::arg("tuple_repr"))
+            py::arg("tuple_repr"),
+            py::sig("def __init__(self, tuple_repr: tuple[int, int] | tuple[int, int, int]) -> None"))
 
         .def_prop_rw(
             "x", [](py_offset_coordinate& self) -> decltype(self.x) { return self.x; },
@@ -117,7 +119,8 @@ void cube_coordinate(nanobind::module_& m)
         .def(py::init<const decltype(py_cube_coordinate().x), const decltype(py_cube_coordinate().y),
                       const decltype(py_cube_coordinate().z)>(),
              py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_layouts_coords_cube_cube_2))
-        .def(py::init<const py_cube_coordinate>(), py::arg("c"))
+        .def(py::init<const py_cube_coordinate>(), py::arg("c"),
+             py::sig("def __init__(self, c: mnt.pyfiction.layouts.coords.cube_coordinate) -> None"))
         .def(
             "__init__",
             [](py::pointer_and_handle<py_cube_coordinate> self, const py::tuple& t)
@@ -138,7 +141,8 @@ void cube_coordinate(nanobind::module_& m)
 
                 throw std::runtime_error("Wrong number of dimensions provided for coordinate");
             },
-            py::arg("tuple_repr"))
+            py::arg("tuple_repr"),
+            py::sig("def __init__(self, tuple_repr: tuple[int, int] | tuple[int, int, int]) -> None"))
 
         .def_prop_rw(
             "x", [](py_cube_coordinate& self) -> decltype(self.x) { return self.x; },

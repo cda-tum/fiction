@@ -134,6 +134,7 @@ void result(nanobind::module_& m)
         .def_prop_ro(
             "additional_simulation_parameters",
             [](const result& self) { return detail::convert_map_to_py(self.additional_simulation_parameters); },
+            py::sig("def additional_simulation_parameters(self) -> dict[str, int | float | bool | str]"),
             DOC(fiction_sidb_simulation_result_additional_simulation_parameters))
         .def("charge_state", &result::charge_state, py::arg("distribution"), py::arg("site"),
              DOC(fiction_sidb_simulation_result_charge_state))

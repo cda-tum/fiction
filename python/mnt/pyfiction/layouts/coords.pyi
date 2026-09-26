@@ -56,7 +56,7 @@ class offset_coordinate:
     @overload
     def __init__(self, c: offset_coordinate) -> None: ...
     @overload
-    def __init__(self, tuple_repr: tuple) -> None: ...
+    def __init__(self, tuple_repr: tuple[int, int] | tuple[int, int, int]) -> None: ...
     @property
     def x(self) -> int:
         """31 bit for the x coordinate."""
@@ -75,7 +75,7 @@ class offset_coordinate:
 
     @z.setter
     def z(self, arg: int, /) -> None: ...
-    def __eq__(self, other: offset_coordinate) -> bool:
+    def __eq__(self, other: offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Compares against another coordinate for equality. Respects the dead
         indicator.
@@ -87,7 +87,7 @@ class offset_coordinate:
             `true` iff both coordinates are identical.
         """
 
-    def __ne__(self, other: offset_coordinate) -> bool:
+    def __ne__(self, other: offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Compares against another coordinate for inequality. Respects the dead
         indicator.
@@ -99,7 +99,7 @@ class offset_coordinate:
             `true` iff both coordinates are not identical.
         """
 
-    def __lt__(self, other: offset_coordinate) -> bool:
+    def __lt__(self, other: offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Determine whether this coordinate is "less than" another one. This is
         the case if z is smaller, or if z is equal but y is smaller, or if z
@@ -112,7 +112,7 @@ class offset_coordinate:
             `true` iff this coordinate is "less than" the other coordinate.
         """
 
-    def __gt__(self, other: offset_coordinate) -> bool:
+    def __gt__(self, other: offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Determine whether this coordinate is "greater than" another one. This
         is the case if the other one is "less than".
@@ -124,7 +124,7 @@ class offset_coordinate:
             `true` iff this coordinate is "greater than" the other coordinate.
         """
 
-    def __le__(self, other: offset_coordinate) -> bool:
+    def __le__(self, other: offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Determine whether this coordinate is "less than or equal to" another
         one. This is the case if this one is not "greater than" the other.
@@ -137,7 +137,7 @@ class offset_coordinate:
             coordinate.
         """
 
-    def __ge__(self, other: offset_coordinate) -> bool:
+    def __ge__(self, other: offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Determine whether this coordinate is "greater than or equal to"
         another one. This is the case if this one is not "less than" the
@@ -188,7 +188,7 @@ class cube_coordinate:
     @overload
     def __init__(self, c: cube_coordinate) -> None: ...
     @overload
-    def __init__(self, tuple_repr: tuple) -> None: ...
+    def __init__(self, tuple_repr: tuple[int, int] | tuple[int, int, int]) -> None: ...
     @property
     def x(self) -> int:
         """x coordinate."""
@@ -207,7 +207,7 @@ class cube_coordinate:
 
     @z.setter
     def z(self, arg: int, /) -> None: ...
-    def __eq__(self, other: cube_coordinate) -> bool:
+    def __eq__(self, other: cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Compares against another coordinate for equality. Respects the dead
         indicator.
@@ -219,7 +219,7 @@ class cube_coordinate:
             `true` iff both coordinates are identical.
         """
 
-    def __ne__(self, other: cube_coordinate) -> bool:
+    def __ne__(self, other: cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Compares against another coordinate for inequality. Respects the dead
         indicator.
@@ -231,7 +231,7 @@ class cube_coordinate:
             `true` iff both coordinates are not identical.
         """
 
-    def __lt__(self, other: cube_coordinate) -> bool:
+    def __lt__(self, other: cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Determine whether this coordinate is "less than" another one. This is
         the case if z is smaller, or if z is equal but y is smaller, or if z
@@ -244,7 +244,7 @@ class cube_coordinate:
             `true` iff this coordinate is "less than" the other coordinate.
         """
 
-    def __gt__(self, other: cube_coordinate) -> bool:
+    def __gt__(self, other: cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Determine whether this coordinate is "greater than" another one. This
         is the case if the other one is "less than".
@@ -256,7 +256,7 @@ class cube_coordinate:
             `true` iff this coordinate is "greater than" the other coordinate.
         """
 
-    def __le__(self, other: cube_coordinate) -> bool:
+    def __le__(self, other: cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Determine whether this coordinate is "less than or equal to" another
         one. This is the case if this one is not "greater than" the other.
@@ -269,7 +269,7 @@ class cube_coordinate:
             coordinate.
         """
 
-    def __ge__(self, other: cube_coordinate) -> bool:
+    def __ge__(self, other: cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Determine whether this coordinate is "greater than or equal to"
         another one. This is the case if this one is not "less than" the
@@ -286,7 +286,7 @@ class cube_coordinate:
     def __hash__(self) -> int:
         """Returns a hash value of the coordinate."""
 
-def offset_area(coord: offset_coordinate) -> int:
+def offset_area(coord: offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
     """
     Computes the area of a given coordinate assuming its origin is (0, 0,
     0). Calculates :math:`(|x| + 1) \\cdot (|y| + 1)`.
@@ -301,7 +301,7 @@ def offset_area(coord: offset_coordinate) -> int:
         Area of coord.
     """
 
-def cube_area(coord: cube_coordinate) -> int:
+def cube_area(coord: cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
     """
     Computes the area of a given coordinate assuming its origin is (0, 0,
     0). Calculates :math:`(|x| + 1) \\cdot (|y| + 1)`.
@@ -316,7 +316,7 @@ def cube_area(coord: cube_coordinate) -> int:
         Area of coord.
     """
 
-def offset_volume(coord: offset_coordinate) -> int:
+def offset_volume(coord: offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
     """
     Computes the volume of a given coordinate assuming its origin is (0,
     0, 0). Calculates :math:`(|x| + 1) \\cdot (|y| + 1) \\cdot (|z| + 1)`.
@@ -331,7 +331,7 @@ def offset_volume(coord: offset_coordinate) -> int:
         Volume of coord.
     """
 
-def cube_volume(coord: cube_coordinate) -> int:
+def cube_volume(coord: cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
     """
     Computes the volume of a given coordinate assuming its origin is (0,
     0, 0). Calculates :math:`(|x| + 1) \\cdot (|y| + 1) \\cdot (|z| + 1)`.

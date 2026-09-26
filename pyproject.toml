@@ -379,11 +379,11 @@ strict = true
 warn_unused_configs = true
 
 # `nox -s stubs` generates these stubs from the bindings. nanobind types comparison operands as the
-# class itself and leaves the parameters of bare `list`, `dict`, and `Iterator` open, and types
-# without a binding keep their C++ names
+# class itself and leaves the deepcopy memo dictionary open. The unhashable charge
+# distribution explicitly sets __hash__ to None.
 [[tool.mypy.overrides]]
 module = [ "mnt.pyfiction.*" ]
-disable_error_code = [ "assignment", "overload-cannot-match", "override", "type-arg", "valid-type" ]
+disable_error_code = [ "assignment", "override", "type-arg" ]
 
 [tool.pytest]
 addopts = [

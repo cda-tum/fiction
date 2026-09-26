@@ -42,7 +42,7 @@ class cartesian_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. The given aspect ratio points to the highest
         possible coordinate in the layout. That means in the ASCII layout
@@ -111,7 +111,7 @@ class cartesian_layout:
             Area of layout.
         """
 
-    def resize(self, dimension: coords.offset_coordinate) -> None:
+    def resize(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Updates the layout's dimensions, effectively resizing it.
 
@@ -119,7 +119,7 @@ class cartesian_layout:
             ar: New aspect ratio.
         """
 
-    def north(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in northern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is lower
@@ -133,7 +133,9 @@ class cartesian_layout:
             Coordinate adjacent and north of `c`.
         """
 
-    def north_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-eastern direction of a
         given coordinate `c`, i.e., the face whose x-dimension is higher by 1
@@ -148,7 +150,7 @@ class cartesian_layout:
             Coordinate directly north-eastern of `c`.
         """
 
-    def east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def east(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in eastern direction
         of a given coordinate `c`, i.e., the face whose x-dimension is higher
@@ -162,7 +164,9 @@ class cartesian_layout:
             Coordinate adjacent and east of `c`.
         """
 
-    def south_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-eastern direction of a
         given coordinate `c`, i.e., the face whose x-dimension and y-dimension
@@ -176,7 +180,7 @@ class cartesian_layout:
             Coordinate directly south-eastern of `c`.
         """
 
-    def south(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in southern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is higher
@@ -190,7 +194,9 @@ class cartesian_layout:
             Coordinate adjacent and south of `c`.
         """
 
-    def south_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-western direction of a
         given coordinate `c`, i.e., the face whose x-dimension is lower by 1
@@ -205,7 +211,7 @@ class cartesian_layout:
             Coordinate directly south-western of `c`.
         """
 
-    def west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def west(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in western direction
         of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -219,7 +225,9 @@ class cartesian_layout:
             Coordinate adjacent and west of `c`.
         """
 
-    def north_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-western direction of a
         given coordinate `c`, i.e., the face whose x-dimension and y-dimension
@@ -233,7 +241,7 @@ class cartesian_layout:
             Coordinate directly north-western of `c`.
         """
 
-    def above(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def above(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly above a given coordinate `c`,
         i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
@@ -246,7 +254,7 @@ class cartesian_layout:
             Coordinate directly above `c`.
         """
 
-    def below(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def below(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly below a given coordinate `c`,
         i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
@@ -259,7 +267,11 @@ class cartesian_layout:
             Coordinate directly below `c`.
         """
 
-    def is_north_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_north_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly north of coordinate
         `c1`.
@@ -272,7 +284,11 @@ class cartesian_layout:
             `true` iff `c2` is directly north of `c1`.
         """
 
-    def is_east_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_east_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly east of coordinate
         `c1`.
@@ -285,7 +301,11 @@ class cartesian_layout:
             `true` iff `c2` is directly east of `c1`.
         """
 
-    def is_south_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_south_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly south of coordinate
         `c1`.
@@ -298,7 +318,11 @@ class cartesian_layout:
             `true` iff `c2` is directly south of `c1`.
         """
 
-    def is_west_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_west_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly west of coordinate
         `c1`.
@@ -311,7 +335,11 @@ class cartesian_layout:
             `true` iff `c2` is directly west of `c1`.
         """
 
-    def is_adjacent_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is either directly north, east,
         south, or west of coordinate `c1`.
@@ -325,7 +353,11 @@ class cartesian_layout:
             `c1`.
         """
 
-    def is_adjacent_elevation_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_elevation_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Similar to `is_adjacent_of` but also considers `c1`'s elevation, i.e.,
         if `c2` is adjacent to `above(c1)` or `below(c1)`.
@@ -339,7 +371,11 @@ class cartesian_layout:
             `c1` or `c1`'s elevations.
         """
 
-    def is_above(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_above(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
@@ -351,7 +387,11 @@ class cartesian_layout:
             `true` iff `c2` is directly above `c1`.
         """
 
-    def is_below(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_below(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
 
@@ -363,7 +403,11 @@ class cartesian_layout:
             `true` iff `c2` is directly below `c1`.
         """
 
-    def is_northwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_northwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere north of coordinate
         `c1`.
@@ -376,7 +420,11 @@ class cartesian_layout:
             `true` iff `c2` is somewhere north of `c1`.
         """
 
-    def is_eastwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_eastwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere east of coordinate
         `c1`.
@@ -389,7 +437,11 @@ class cartesian_layout:
             `true` iff `c2` is somewhere east of `c1`.
         """
 
-    def is_southwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_southwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere south of coordinate
         `c1`.
@@ -402,7 +454,11 @@ class cartesian_layout:
             `true` iff `c2` is somewhere south of `c1`.
         """
 
-    def is_westwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_westwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere west of coordinate
         `c1`.
@@ -415,7 +471,7 @@ class cartesian_layout:
             `true` iff `c2` is somewhere west of `c1`.
         """
 
-    def is_at_northern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_northern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         northern border where y is minimal.
@@ -427,7 +483,7 @@ class cartesian_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_eastern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_eastern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         eastern border where x is maximal.
@@ -439,7 +495,7 @@ class cartesian_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_southern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_southern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         southern border where y is maximal.
@@ -451,7 +507,7 @@ class cartesian_layout:
             `true` iff `c` is located at the layout's southern border.
         """
 
-    def is_at_western_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_western_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         western border where x is minimal.
@@ -463,7 +519,7 @@ class cartesian_layout:
             `true` iff `c` is located at the layout's western border.
         """
 
-    def is_at_any_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_any_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at any of the layout's
         borders where x or y are either minimal or maximal.
@@ -475,7 +531,9 @@ class cartesian_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def northern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's northern border.
@@ -487,7 +545,9 @@ class cartesian_layout:
             The northern border equivalent of `c`.
         """
 
-    def eastern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def eastern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's eastern border.
@@ -499,7 +559,9 @@ class cartesian_layout:
             The eastern border equivalent of `c`.
         """
 
-    def southern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def southern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's southern border.
@@ -511,7 +573,9 @@ class cartesian_layout:
             The southern border equivalent of `c`.
         """
 
-    def western_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def western_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's western border.
@@ -523,7 +587,7 @@ class cartesian_layout:
             The western border equivalent of `c`.
         """
 
-    def is_ground_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_ground_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in the ground layer
         where z is minimal.
@@ -535,7 +599,7 @@ class cartesian_layout:
             `true` iff `c` is in ground layer.
         """
 
-    def is_crossing_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_crossing_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in a crossing layer
         where z is not minimal.
@@ -547,7 +611,7 @@ class cartesian_layout:
             `true` iff `c` is in a crossing layer.
         """
 
-    def is_within_bounds(self, c: coords.offset_coordinate) -> bool:
+    def is_within_bounds(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located within the layout
         bounds.
@@ -599,7 +663,9 @@ class cartesian_layout:
             a default.
         """
 
-    def adjacent_coordinates(self, c: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def adjacent_coordinates(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container that contains all coordinates that are adjacent to
         a given one. Thereby, only cardinal directions are being considered,
@@ -617,7 +683,7 @@ class cartesian_layout:
         """
 
     def adjacent_opposite_coordinates(
-        self, c: coords.offset_coordinate
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> list[tuple[coords.offset_coordinate, coords.offset_coordinate]]:
         """
         Returns a container that contains all coordinates pairs of opposing
@@ -662,7 +728,7 @@ class stacked_cartesian_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.cube_coordinate) -> None:
+    def __init__(self, dimension: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. The given aspect ratio points to the highest
         possible coordinate in the layout. That means in the ASCII layout
@@ -731,7 +797,7 @@ class stacked_cartesian_layout:
             Area of layout.
         """
 
-    def resize(self, dimension: coords.cube_coordinate) -> None:
+    def resize(self, dimension: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Updates the layout's dimensions, effectively resizing it.
 
@@ -739,7 +805,7 @@ class stacked_cartesian_layout:
             ar: New aspect ratio.
         """
 
-    def north(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def north(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.cube_coordinate:
         """
         Returns the coordinate that is directly adjacent in northern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is lower
@@ -753,7 +819,7 @@ class stacked_cartesian_layout:
             Coordinate adjacent and north of `c`.
         """
 
-    def north_east(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def north_east(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.cube_coordinate:
         """
         Returns the coordinate that is located in north-eastern direction of a
         given coordinate `c`, i.e., the face whose x-dimension is higher by 1
@@ -768,7 +834,7 @@ class stacked_cartesian_layout:
             Coordinate directly north-eastern of `c`.
         """
 
-    def east(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def east(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.cube_coordinate:
         """
         Returns the coordinate that is directly adjacent in eastern direction
         of a given coordinate `c`, i.e., the face whose x-dimension is higher
@@ -782,7 +848,7 @@ class stacked_cartesian_layout:
             Coordinate adjacent and east of `c`.
         """
 
-    def south_east(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def south_east(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.cube_coordinate:
         """
         Returns the coordinate that is located in south-eastern direction of a
         given coordinate `c`, i.e., the face whose x-dimension and y-dimension
@@ -796,7 +862,7 @@ class stacked_cartesian_layout:
             Coordinate directly south-eastern of `c`.
         """
 
-    def south(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def south(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.cube_coordinate:
         """
         Returns the coordinate that is directly adjacent in southern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is higher
@@ -810,7 +876,7 @@ class stacked_cartesian_layout:
             Coordinate adjacent and south of `c`.
         """
 
-    def south_west(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def south_west(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.cube_coordinate:
         """
         Returns the coordinate that is located in south-western direction of a
         given coordinate `c`, i.e., the face whose x-dimension is lower by 1
@@ -825,7 +891,7 @@ class stacked_cartesian_layout:
             Coordinate directly south-western of `c`.
         """
 
-    def west(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def west(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.cube_coordinate:
         """
         Returns the coordinate that is directly adjacent in western direction
         of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -839,7 +905,7 @@ class stacked_cartesian_layout:
             Coordinate adjacent and west of `c`.
         """
 
-    def north_west(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def north_west(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.cube_coordinate:
         """
         Returns the coordinate that is located in north-western direction of a
         given coordinate `c`, i.e., the face whose x-dimension and y-dimension
@@ -853,7 +919,7 @@ class stacked_cartesian_layout:
             Coordinate directly north-western of `c`.
         """
 
-    def above(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def above(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.cube_coordinate:
         """
         Returns the coordinate that is directly above a given coordinate `c`,
         i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
@@ -866,7 +932,7 @@ class stacked_cartesian_layout:
             Coordinate directly above `c`.
         """
 
-    def below(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def below(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.cube_coordinate:
         """
         Returns the coordinate that is directly below a given coordinate `c`,
         i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
@@ -879,7 +945,11 @@ class stacked_cartesian_layout:
             Coordinate directly below `c`.
         """
 
-    def is_north_of(self, c1: coords.cube_coordinate, c2: coords.cube_coordinate) -> bool:
+    def is_north_of(
+        self,
+        c1: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly north of coordinate
         `c1`.
@@ -892,7 +962,11 @@ class stacked_cartesian_layout:
             `true` iff `c2` is directly north of `c1`.
         """
 
-    def is_east_of(self, c1: coords.cube_coordinate, c2: coords.cube_coordinate) -> bool:
+    def is_east_of(
+        self,
+        c1: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly east of coordinate
         `c1`.
@@ -905,7 +979,11 @@ class stacked_cartesian_layout:
             `true` iff `c2` is directly east of `c1`.
         """
 
-    def is_south_of(self, c1: coords.cube_coordinate, c2: coords.cube_coordinate) -> bool:
+    def is_south_of(
+        self,
+        c1: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly south of coordinate
         `c1`.
@@ -918,7 +996,11 @@ class stacked_cartesian_layout:
             `true` iff `c2` is directly south of `c1`.
         """
 
-    def is_west_of(self, c1: coords.cube_coordinate, c2: coords.cube_coordinate) -> bool:
+    def is_west_of(
+        self,
+        c1: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly west of coordinate
         `c1`.
@@ -931,7 +1013,11 @@ class stacked_cartesian_layout:
             `true` iff `c2` is directly west of `c1`.
         """
 
-    def is_adjacent_of(self, c1: coords.cube_coordinate, c2: coords.cube_coordinate) -> bool:
+    def is_adjacent_of(
+        self,
+        c1: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is either directly north, east,
         south, or west of coordinate `c1`.
@@ -945,7 +1031,11 @@ class stacked_cartesian_layout:
             `c1`.
         """
 
-    def is_adjacent_elevation_of(self, c1: coords.cube_coordinate, c2: coords.cube_coordinate) -> bool:
+    def is_adjacent_elevation_of(
+        self,
+        c1: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Similar to `is_adjacent_of` but also considers `c1`'s elevation, i.e.,
         if `c2` is adjacent to `above(c1)` or `below(c1)`.
@@ -959,7 +1049,11 @@ class stacked_cartesian_layout:
             `c1` or `c1`'s elevations.
         """
 
-    def is_above(self, c1: coords.cube_coordinate, c2: coords.cube_coordinate) -> bool:
+    def is_above(
+        self,
+        c1: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
@@ -971,7 +1065,11 @@ class stacked_cartesian_layout:
             `true` iff `c2` is directly above `c1`.
         """
 
-    def is_below(self, c1: coords.cube_coordinate, c2: coords.cube_coordinate) -> bool:
+    def is_below(
+        self,
+        c1: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
 
@@ -983,7 +1081,11 @@ class stacked_cartesian_layout:
             `true` iff `c2` is directly below `c1`.
         """
 
-    def is_northwards_of(self, c1: coords.cube_coordinate, c2: coords.cube_coordinate) -> bool:
+    def is_northwards_of(
+        self,
+        c1: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere north of coordinate
         `c1`.
@@ -996,7 +1098,11 @@ class stacked_cartesian_layout:
             `true` iff `c2` is somewhere north of `c1`.
         """
 
-    def is_eastwards_of(self, c1: coords.cube_coordinate, c2: coords.cube_coordinate) -> bool:
+    def is_eastwards_of(
+        self,
+        c1: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere east of coordinate
         `c1`.
@@ -1009,7 +1115,11 @@ class stacked_cartesian_layout:
             `true` iff `c2` is somewhere east of `c1`.
         """
 
-    def is_southwards_of(self, c1: coords.cube_coordinate, c2: coords.cube_coordinate) -> bool:
+    def is_southwards_of(
+        self,
+        c1: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere south of coordinate
         `c1`.
@@ -1022,7 +1132,11 @@ class stacked_cartesian_layout:
             `true` iff `c2` is somewhere south of `c1`.
         """
 
-    def is_westwards_of(self, c1: coords.cube_coordinate, c2: coords.cube_coordinate) -> bool:
+    def is_westwards_of(
+        self,
+        c1: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere west of coordinate
         `c1`.
@@ -1035,7 +1149,7 @@ class stacked_cartesian_layout:
             `true` iff `c2` is somewhere west of `c1`.
         """
 
-    def is_at_northern_border(self, c: coords.cube_coordinate) -> bool:
+    def is_at_northern_border(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         northern border where y is minimal.
@@ -1047,7 +1161,7 @@ class stacked_cartesian_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_eastern_border(self, c: coords.cube_coordinate) -> bool:
+    def is_at_eastern_border(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         eastern border where x is maximal.
@@ -1059,7 +1173,7 @@ class stacked_cartesian_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_southern_border(self, c: coords.cube_coordinate) -> bool:
+    def is_at_southern_border(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         southern border where y is maximal.
@@ -1071,7 +1185,7 @@ class stacked_cartesian_layout:
             `true` iff `c` is located at the layout's southern border.
         """
 
-    def is_at_western_border(self, c: coords.cube_coordinate) -> bool:
+    def is_at_western_border(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         western border where x is minimal.
@@ -1083,7 +1197,7 @@ class stacked_cartesian_layout:
             `true` iff `c` is located at the layout's western border.
         """
 
-    def is_at_any_border(self, c: coords.cube_coordinate) -> bool:
+    def is_at_any_border(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at any of the layout's
         borders where x or y are either minimal or maximal.
@@ -1095,7 +1209,9 @@ class stacked_cartesian_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def northern_border_of(
+        self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.cube_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's northern border.
@@ -1107,7 +1223,9 @@ class stacked_cartesian_layout:
             The northern border equivalent of `c`.
         """
 
-    def eastern_border_of(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def eastern_border_of(
+        self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.cube_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's eastern border.
@@ -1119,7 +1237,9 @@ class stacked_cartesian_layout:
             The eastern border equivalent of `c`.
         """
 
-    def southern_border_of(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def southern_border_of(
+        self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.cube_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's southern border.
@@ -1131,7 +1251,9 @@ class stacked_cartesian_layout:
             The southern border equivalent of `c`.
         """
 
-    def western_border_of(self, c: coords.cube_coordinate) -> coords.cube_coordinate:
+    def western_border_of(
+        self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.cube_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's western border.
@@ -1143,7 +1265,7 @@ class stacked_cartesian_layout:
             The western border equivalent of `c`.
         """
 
-    def is_ground_layer(self, c: coords.cube_coordinate) -> bool:
+    def is_ground_layer(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in the ground layer
         where z is minimal.
@@ -1155,7 +1277,7 @@ class stacked_cartesian_layout:
             `true` iff `c` is in ground layer.
         """
 
-    def is_crossing_layer(self, c: coords.cube_coordinate) -> bool:
+    def is_crossing_layer(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in a crossing layer
         where z is not minimal.
@@ -1167,7 +1289,7 @@ class stacked_cartesian_layout:
             `true` iff `c` is in a crossing layer.
         """
 
-    def is_within_bounds(self, c: coords.cube_coordinate) -> bool:
+    def is_within_bounds(self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located within the layout
         bounds.
@@ -1219,7 +1341,9 @@ class stacked_cartesian_layout:
             a default.
         """
 
-    def adjacent_coordinates(self, c: coords.cube_coordinate) -> list[coords.cube_coordinate]:
+    def adjacent_coordinates(
+        self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.cube_coordinate]:
         """
         Returns a container that contains all coordinates that are adjacent to
         a given one. Thereby, only cardinal directions are being considered,
@@ -1237,7 +1361,7 @@ class stacked_cartesian_layout:
         """
 
     def adjacent_opposite_coordinates(
-        self, c: coords.cube_coordinate
+        self, c: coords.cube_coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> list[tuple[coords.cube_coordinate, coords.cube_coordinate]]:
         """
         Returns a container that contains all coordinates pairs of opposing
@@ -1284,7 +1408,7 @@ class shifted_cartesian_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. The given aspect ratio points to the highest
         possible coordinate in the layout. That means in the
@@ -1354,7 +1478,7 @@ class shifted_cartesian_layout:
             Area of layout.
         """
 
-    def resize(self, dimension: coords.offset_coordinate) -> None:
+    def resize(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Updates the layout's dimensions, effectively resizing it.
 
@@ -1362,7 +1486,7 @@ class shifted_cartesian_layout:
             ar: New aspect ratio.
         """
 
-    def north(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in northern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is lower
@@ -1376,7 +1500,9 @@ class shifted_cartesian_layout:
             Coordinate adjacent and north of `c`.
         """
 
-    def north_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-eastern direction of a
         given coordinate `c`, i.e., the face whose x-dimension is higher by 1
@@ -1391,7 +1517,7 @@ class shifted_cartesian_layout:
             Coordinate directly north-eastern of `c`.
         """
 
-    def east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def east(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in eastern direction
         of a given coordinate `c`, i.e., the face whose x-dimension is higher
@@ -1405,7 +1531,9 @@ class shifted_cartesian_layout:
             Coordinate adjacent and east of `c`.
         """
 
-    def south_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-eastern direction of a
         given coordinate `c`, i.e., the face whose x-dimension and y-dimension
@@ -1419,7 +1547,7 @@ class shifted_cartesian_layout:
             Coordinate directly south-eastern of `c`.
         """
 
-    def south(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in southern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is higher
@@ -1433,7 +1561,9 @@ class shifted_cartesian_layout:
             Coordinate adjacent and south of `c`.
         """
 
-    def south_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-western direction of a
         given coordinate `c`, i.e., the face whose x-dimension is lower by 1
@@ -1448,7 +1578,7 @@ class shifted_cartesian_layout:
             Coordinate directly south-western of `c`.
         """
 
-    def west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def west(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in western direction
         of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -1462,7 +1592,9 @@ class shifted_cartesian_layout:
             Coordinate adjacent and west of `c`.
         """
 
-    def north_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-western direction of a
         given coordinate `c`, i.e., the face whose x-dimension and y-dimension
@@ -1476,7 +1608,7 @@ class shifted_cartesian_layout:
             Coordinate directly north-western of `c`.
         """
 
-    def above(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def above(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly above a given coordinate `c`,
         i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
@@ -1489,7 +1621,7 @@ class shifted_cartesian_layout:
             Coordinate directly above `c`.
         """
 
-    def below(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def below(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly below a given coordinate `c`,
         i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
@@ -1502,7 +1634,11 @@ class shifted_cartesian_layout:
             Coordinate directly below `c`.
         """
 
-    def is_north_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_north_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly north of coordinate
         `c1`.
@@ -1515,7 +1651,11 @@ class shifted_cartesian_layout:
             `true` iff `c2` is directly north of `c1`.
         """
 
-    def is_east_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_east_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly east of coordinate
         `c1`.
@@ -1528,7 +1668,11 @@ class shifted_cartesian_layout:
             `true` iff `c2` is directly east of `c1`.
         """
 
-    def is_south_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_south_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly south of coordinate
         `c1`.
@@ -1541,7 +1685,11 @@ class shifted_cartesian_layout:
             `true` iff `c2` is directly south of `c1`.
         """
 
-    def is_west_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_west_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly west of coordinate
         `c1`.
@@ -1554,7 +1702,11 @@ class shifted_cartesian_layout:
             `true` iff `c2` is directly west of `c1`.
         """
 
-    def is_adjacent_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is either directly north, east,
         south, or west of coordinate `c1`.
@@ -1568,7 +1720,11 @@ class shifted_cartesian_layout:
             `c1`.
         """
 
-    def is_adjacent_elevation_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_elevation_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Similar to `is_adjacent_of` but also considers `c1`'s elevation, i.e.,
         if `c2` is adjacent to `above(c1)` or `below(c1)`.
@@ -1582,7 +1738,11 @@ class shifted_cartesian_layout:
             `c1` or `c1`'s elevations.
         """
 
-    def is_above(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_above(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
@@ -1594,7 +1754,11 @@ class shifted_cartesian_layout:
             `true` iff `c2` is directly above `c1`.
         """
 
-    def is_below(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_below(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
 
@@ -1606,7 +1770,11 @@ class shifted_cartesian_layout:
             `true` iff `c2` is directly below `c1`.
         """
 
-    def is_northwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_northwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere north of coordinate
         `c1`.
@@ -1619,7 +1787,11 @@ class shifted_cartesian_layout:
             `true` iff `c2` is somewhere north of `c1`.
         """
 
-    def is_eastwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_eastwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere east of coordinate
         `c1`.
@@ -1632,7 +1804,11 @@ class shifted_cartesian_layout:
             `true` iff `c2` is somewhere east of `c1`.
         """
 
-    def is_southwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_southwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere south of coordinate
         `c1`.
@@ -1645,7 +1821,11 @@ class shifted_cartesian_layout:
             `true` iff `c2` is somewhere south of `c1`.
         """
 
-    def is_westwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_westwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere west of coordinate
         `c1`.
@@ -1658,7 +1838,7 @@ class shifted_cartesian_layout:
             `true` iff `c2` is somewhere west of `c1`.
         """
 
-    def is_at_northern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_northern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         northern border where y is minimal.
@@ -1670,7 +1850,7 @@ class shifted_cartesian_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_eastern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_eastern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         eastern border where x is maximal.
@@ -1682,7 +1862,7 @@ class shifted_cartesian_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_southern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_southern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         southern border where y is maximal.
@@ -1694,7 +1874,7 @@ class shifted_cartesian_layout:
             `true` iff `c` is located at the layout's southern border.
         """
 
-    def is_at_western_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_western_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         western border where x is minimal.
@@ -1706,7 +1886,7 @@ class shifted_cartesian_layout:
             `true` iff `c` is located at the layout's western border.
         """
 
-    def is_at_any_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_any_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at any of the layout's
         borders where x or y are either minimal or maximal.
@@ -1718,7 +1898,9 @@ class shifted_cartesian_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def northern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's northern border.
@@ -1730,7 +1912,9 @@ class shifted_cartesian_layout:
             The northern border equivalent of `c`.
         """
 
-    def eastern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def eastern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's eastern border.
@@ -1742,7 +1926,9 @@ class shifted_cartesian_layout:
             The eastern border equivalent of `c`.
         """
 
-    def southern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def southern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's southern border.
@@ -1754,7 +1940,9 @@ class shifted_cartesian_layout:
             The southern border equivalent of `c`.
         """
 
-    def western_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def western_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's western border.
@@ -1766,7 +1954,7 @@ class shifted_cartesian_layout:
             The western border equivalent of `c`.
         """
 
-    def is_ground_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_ground_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in the ground layer
         where z is minimal.
@@ -1778,7 +1966,7 @@ class shifted_cartesian_layout:
             `true` iff `c` is in ground layer.
         """
 
-    def is_crossing_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_crossing_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in a crossing layer
         where z is not minimal.
@@ -1790,7 +1978,7 @@ class shifted_cartesian_layout:
             `true` iff `c` is in a crossing layer.
         """
 
-    def is_within_bounds(self, c: coords.offset_coordinate) -> bool:
+    def is_within_bounds(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located within the layout
         bounds.
@@ -1842,7 +2030,9 @@ class shifted_cartesian_layout:
             a default.
         """
 
-    def adjacent_coordinates(self, c: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def adjacent_coordinates(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container that contains all coordinates that are adjacent to
         a given one. Thereby, only cardinal directions are being considered,
@@ -1860,7 +2050,7 @@ class shifted_cartesian_layout:
         """
 
     def adjacent_opposite_coordinates(
-        self, c: coords.offset_coordinate
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> list[tuple[coords.offset_coordinate, coords.offset_coordinate]]:
         """
         Returns a container that contains all coordinates pairs of opposing
@@ -1907,7 +2097,7 @@ class odd_row_cartesian_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. The given aspect ratio points to the highest
         possible coordinate in the layout. That means in the
@@ -1977,7 +2167,7 @@ class odd_row_cartesian_layout:
             Area of layout.
         """
 
-    def resize(self, dimension: coords.offset_coordinate) -> None:
+    def resize(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Updates the layout's dimensions, effectively resizing it.
 
@@ -1985,7 +2175,7 @@ class odd_row_cartesian_layout:
             ar: New aspect ratio.
         """
 
-    def north(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in northern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is lower
@@ -1999,7 +2189,9 @@ class odd_row_cartesian_layout:
             Coordinate adjacent and north of `c`.
         """
 
-    def north_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-eastern direction of a
         given coordinate `c`, i.e., the face whose x-dimension is higher by 1
@@ -2014,7 +2206,7 @@ class odd_row_cartesian_layout:
             Coordinate directly north-eastern of `c`.
         """
 
-    def east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def east(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in eastern direction
         of a given coordinate `c`, i.e., the face whose x-dimension is higher
@@ -2028,7 +2220,9 @@ class odd_row_cartesian_layout:
             Coordinate adjacent and east of `c`.
         """
 
-    def south_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-eastern direction of a
         given coordinate `c`, i.e., the face whose x-dimension and y-dimension
@@ -2042,7 +2236,7 @@ class odd_row_cartesian_layout:
             Coordinate directly south-eastern of `c`.
         """
 
-    def south(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in southern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is higher
@@ -2056,7 +2250,9 @@ class odd_row_cartesian_layout:
             Coordinate adjacent and south of `c`.
         """
 
-    def south_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-western direction of a
         given coordinate `c`, i.e., the face whose x-dimension is lower by 1
@@ -2071,7 +2267,7 @@ class odd_row_cartesian_layout:
             Coordinate directly south-western of `c`.
         """
 
-    def west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def west(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in western direction
         of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -2085,7 +2281,9 @@ class odd_row_cartesian_layout:
             Coordinate adjacent and west of `c`.
         """
 
-    def north_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-western direction of a
         given coordinate `c`, i.e., the face whose x-dimension and y-dimension
@@ -2099,7 +2297,7 @@ class odd_row_cartesian_layout:
             Coordinate directly north-western of `c`.
         """
 
-    def above(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def above(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly above a given coordinate `c`,
         i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
@@ -2112,7 +2310,7 @@ class odd_row_cartesian_layout:
             Coordinate directly above `c`.
         """
 
-    def below(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def below(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly below a given coordinate `c`,
         i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
@@ -2125,7 +2323,11 @@ class odd_row_cartesian_layout:
             Coordinate directly below `c`.
         """
 
-    def is_north_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_north_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly north of coordinate
         `c1`.
@@ -2138,7 +2340,11 @@ class odd_row_cartesian_layout:
             `true` iff `c2` is directly north of `c1`.
         """
 
-    def is_east_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_east_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly east of coordinate
         `c1`.
@@ -2151,7 +2357,11 @@ class odd_row_cartesian_layout:
             `true` iff `c2` is directly east of `c1`.
         """
 
-    def is_south_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_south_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly south of coordinate
         `c1`.
@@ -2164,7 +2374,11 @@ class odd_row_cartesian_layout:
             `true` iff `c2` is directly south of `c1`.
         """
 
-    def is_west_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_west_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly west of coordinate
         `c1`.
@@ -2177,7 +2391,11 @@ class odd_row_cartesian_layout:
             `true` iff `c2` is directly west of `c1`.
         """
 
-    def is_adjacent_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is either directly north, east,
         south, or west of coordinate `c1`.
@@ -2191,7 +2409,11 @@ class odd_row_cartesian_layout:
             `c1`.
         """
 
-    def is_adjacent_elevation_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_elevation_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Similar to `is_adjacent_of` but also considers `c1`'s elevation, i.e.,
         if `c2` is adjacent to `above(c1)` or `below(c1)`.
@@ -2205,7 +2427,11 @@ class odd_row_cartesian_layout:
             `c1` or `c1`'s elevations.
         """
 
-    def is_above(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_above(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
@@ -2217,7 +2443,11 @@ class odd_row_cartesian_layout:
             `true` iff `c2` is directly above `c1`.
         """
 
-    def is_below(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_below(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
 
@@ -2229,7 +2459,11 @@ class odd_row_cartesian_layout:
             `true` iff `c2` is directly below `c1`.
         """
 
-    def is_northwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_northwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere north of coordinate
         `c1`.
@@ -2242,7 +2476,11 @@ class odd_row_cartesian_layout:
             `true` iff `c2` is somewhere north of `c1`.
         """
 
-    def is_eastwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_eastwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere east of coordinate
         `c1`.
@@ -2255,7 +2493,11 @@ class odd_row_cartesian_layout:
             `true` iff `c2` is somewhere east of `c1`.
         """
 
-    def is_southwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_southwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere south of coordinate
         `c1`.
@@ -2268,7 +2510,11 @@ class odd_row_cartesian_layout:
             `true` iff `c2` is somewhere south of `c1`.
         """
 
-    def is_westwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_westwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere west of coordinate
         `c1`.
@@ -2281,7 +2527,7 @@ class odd_row_cartesian_layout:
             `true` iff `c2` is somewhere west of `c1`.
         """
 
-    def is_at_northern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_northern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         northern border where y is minimal.
@@ -2293,7 +2539,7 @@ class odd_row_cartesian_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_eastern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_eastern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         eastern border where x is maximal.
@@ -2305,7 +2551,7 @@ class odd_row_cartesian_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_southern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_southern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         southern border where y is maximal.
@@ -2317,7 +2563,7 @@ class odd_row_cartesian_layout:
             `true` iff `c` is located at the layout's southern border.
         """
 
-    def is_at_western_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_western_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         western border where x is minimal.
@@ -2329,7 +2575,7 @@ class odd_row_cartesian_layout:
             `true` iff `c` is located at the layout's western border.
         """
 
-    def is_at_any_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_any_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at any of the layout's
         borders where x or y are either minimal or maximal.
@@ -2341,7 +2587,9 @@ class odd_row_cartesian_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def northern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's northern border.
@@ -2353,7 +2601,9 @@ class odd_row_cartesian_layout:
             The northern border equivalent of `c`.
         """
 
-    def eastern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def eastern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's eastern border.
@@ -2365,7 +2615,9 @@ class odd_row_cartesian_layout:
             The eastern border equivalent of `c`.
         """
 
-    def southern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def southern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's southern border.
@@ -2377,7 +2629,9 @@ class odd_row_cartesian_layout:
             The southern border equivalent of `c`.
         """
 
-    def western_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def western_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's western border.
@@ -2389,7 +2643,7 @@ class odd_row_cartesian_layout:
             The western border equivalent of `c`.
         """
 
-    def is_ground_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_ground_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in the ground layer
         where z is minimal.
@@ -2401,7 +2655,7 @@ class odd_row_cartesian_layout:
             `true` iff `c` is in ground layer.
         """
 
-    def is_crossing_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_crossing_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in a crossing layer
         where z is not minimal.
@@ -2413,7 +2667,7 @@ class odd_row_cartesian_layout:
             `true` iff `c` is in a crossing layer.
         """
 
-    def is_within_bounds(self, c: coords.offset_coordinate) -> bool:
+    def is_within_bounds(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located within the layout
         bounds.
@@ -2465,7 +2719,9 @@ class odd_row_cartesian_layout:
             a default.
         """
 
-    def adjacent_coordinates(self, c: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def adjacent_coordinates(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container that contains all coordinates that are adjacent to
         a given one. Thereby, only cardinal directions are being considered,
@@ -2483,7 +2739,7 @@ class odd_row_cartesian_layout:
         """
 
     def adjacent_opposite_coordinates(
-        self, c: coords.offset_coordinate
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> list[tuple[coords.offset_coordinate, coords.offset_coordinate]]:
         """
         Returns a container that contains all coordinates pairs of opposing
@@ -2530,7 +2786,7 @@ class even_row_cartesian_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. The given aspect ratio points to the highest
         possible coordinate in the layout. That means in the
@@ -2600,7 +2856,7 @@ class even_row_cartesian_layout:
             Area of layout.
         """
 
-    def resize(self, dimension: coords.offset_coordinate) -> None:
+    def resize(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Updates the layout's dimensions, effectively resizing it.
 
@@ -2608,7 +2864,7 @@ class even_row_cartesian_layout:
             ar: New aspect ratio.
         """
 
-    def north(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in northern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is lower
@@ -2622,7 +2878,9 @@ class even_row_cartesian_layout:
             Coordinate adjacent and north of `c`.
         """
 
-    def north_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-eastern direction of a
         given coordinate `c`, i.e., the face whose x-dimension is higher by 1
@@ -2637,7 +2895,7 @@ class even_row_cartesian_layout:
             Coordinate directly north-eastern of `c`.
         """
 
-    def east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def east(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in eastern direction
         of a given coordinate `c`, i.e., the face whose x-dimension is higher
@@ -2651,7 +2909,9 @@ class even_row_cartesian_layout:
             Coordinate adjacent and east of `c`.
         """
 
-    def south_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-eastern direction of a
         given coordinate `c`, i.e., the face whose x-dimension and y-dimension
@@ -2665,7 +2925,7 @@ class even_row_cartesian_layout:
             Coordinate directly south-eastern of `c`.
         """
 
-    def south(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in southern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is higher
@@ -2679,7 +2939,9 @@ class even_row_cartesian_layout:
             Coordinate adjacent and south of `c`.
         """
 
-    def south_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-western direction of a
         given coordinate `c`, i.e., the face whose x-dimension is lower by 1
@@ -2694,7 +2956,7 @@ class even_row_cartesian_layout:
             Coordinate directly south-western of `c`.
         """
 
-    def west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def west(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in western direction
         of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -2708,7 +2970,9 @@ class even_row_cartesian_layout:
             Coordinate adjacent and west of `c`.
         """
 
-    def north_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-western direction of a
         given coordinate `c`, i.e., the face whose x-dimension and y-dimension
@@ -2722,7 +2986,7 @@ class even_row_cartesian_layout:
             Coordinate directly north-western of `c`.
         """
 
-    def above(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def above(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly above a given coordinate `c`,
         i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
@@ -2735,7 +2999,7 @@ class even_row_cartesian_layout:
             Coordinate directly above `c`.
         """
 
-    def below(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def below(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly below a given coordinate `c`,
         i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
@@ -2748,7 +3012,11 @@ class even_row_cartesian_layout:
             Coordinate directly below `c`.
         """
 
-    def is_north_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_north_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly north of coordinate
         `c1`.
@@ -2761,7 +3029,11 @@ class even_row_cartesian_layout:
             `true` iff `c2` is directly north of `c1`.
         """
 
-    def is_east_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_east_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly east of coordinate
         `c1`.
@@ -2774,7 +3046,11 @@ class even_row_cartesian_layout:
             `true` iff `c2` is directly east of `c1`.
         """
 
-    def is_south_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_south_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly south of coordinate
         `c1`.
@@ -2787,7 +3063,11 @@ class even_row_cartesian_layout:
             `true` iff `c2` is directly south of `c1`.
         """
 
-    def is_west_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_west_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly west of coordinate
         `c1`.
@@ -2800,7 +3080,11 @@ class even_row_cartesian_layout:
             `true` iff `c2` is directly west of `c1`.
         """
 
-    def is_adjacent_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is either directly north, east,
         south, or west of coordinate `c1`.
@@ -2814,7 +3098,11 @@ class even_row_cartesian_layout:
             `c1`.
         """
 
-    def is_adjacent_elevation_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_elevation_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Similar to `is_adjacent_of` but also considers `c1`'s elevation, i.e.,
         if `c2` is adjacent to `above(c1)` or `below(c1)`.
@@ -2828,7 +3116,11 @@ class even_row_cartesian_layout:
             `c1` or `c1`'s elevations.
         """
 
-    def is_above(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_above(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
@@ -2840,7 +3132,11 @@ class even_row_cartesian_layout:
             `true` iff `c2` is directly above `c1`.
         """
 
-    def is_below(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_below(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
 
@@ -2852,7 +3148,11 @@ class even_row_cartesian_layout:
             `true` iff `c2` is directly below `c1`.
         """
 
-    def is_northwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_northwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere north of coordinate
         `c1`.
@@ -2865,7 +3165,11 @@ class even_row_cartesian_layout:
             `true` iff `c2` is somewhere north of `c1`.
         """
 
-    def is_eastwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_eastwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere east of coordinate
         `c1`.
@@ -2878,7 +3182,11 @@ class even_row_cartesian_layout:
             `true` iff `c2` is somewhere east of `c1`.
         """
 
-    def is_southwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_southwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere south of coordinate
         `c1`.
@@ -2891,7 +3199,11 @@ class even_row_cartesian_layout:
             `true` iff `c2` is somewhere south of `c1`.
         """
 
-    def is_westwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_westwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere west of coordinate
         `c1`.
@@ -2904,7 +3216,7 @@ class even_row_cartesian_layout:
             `true` iff `c2` is somewhere west of `c1`.
         """
 
-    def is_at_northern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_northern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         northern border where y is minimal.
@@ -2916,7 +3228,7 @@ class even_row_cartesian_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_eastern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_eastern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         eastern border where x is maximal.
@@ -2928,7 +3240,7 @@ class even_row_cartesian_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_southern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_southern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         southern border where y is maximal.
@@ -2940,7 +3252,7 @@ class even_row_cartesian_layout:
             `true` iff `c` is located at the layout's southern border.
         """
 
-    def is_at_western_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_western_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         western border where x is minimal.
@@ -2952,7 +3264,7 @@ class even_row_cartesian_layout:
             `true` iff `c` is located at the layout's western border.
         """
 
-    def is_at_any_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_any_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at any of the layout's
         borders where x or y are either minimal or maximal.
@@ -2964,7 +3276,9 @@ class even_row_cartesian_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def northern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's northern border.
@@ -2976,7 +3290,9 @@ class even_row_cartesian_layout:
             The northern border equivalent of `c`.
         """
 
-    def eastern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def eastern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's eastern border.
@@ -2988,7 +3304,9 @@ class even_row_cartesian_layout:
             The eastern border equivalent of `c`.
         """
 
-    def southern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def southern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's southern border.
@@ -3000,7 +3318,9 @@ class even_row_cartesian_layout:
             The southern border equivalent of `c`.
         """
 
-    def western_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def western_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's western border.
@@ -3012,7 +3332,7 @@ class even_row_cartesian_layout:
             The western border equivalent of `c`.
         """
 
-    def is_ground_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_ground_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in the ground layer
         where z is minimal.
@@ -3024,7 +3344,7 @@ class even_row_cartesian_layout:
             `true` iff `c` is in ground layer.
         """
 
-    def is_crossing_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_crossing_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in a crossing layer
         where z is not minimal.
@@ -3036,7 +3356,7 @@ class even_row_cartesian_layout:
             `true` iff `c` is in a crossing layer.
         """
 
-    def is_within_bounds(self, c: coords.offset_coordinate) -> bool:
+    def is_within_bounds(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located within the layout
         bounds.
@@ -3088,7 +3408,9 @@ class even_row_cartesian_layout:
             a default.
         """
 
-    def adjacent_coordinates(self, c: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def adjacent_coordinates(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container that contains all coordinates that are adjacent to
         a given one. Thereby, only cardinal directions are being considered,
@@ -3106,7 +3428,7 @@ class even_row_cartesian_layout:
         """
 
     def adjacent_opposite_coordinates(
-        self, c: coords.offset_coordinate
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> list[tuple[coords.offset_coordinate, coords.offset_coordinate]]:
         """
         Returns a container that contains all coordinates pairs of opposing
@@ -3153,7 +3475,7 @@ class even_column_cartesian_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. The given aspect ratio points to the highest
         possible coordinate in the layout. That means in the
@@ -3223,7 +3545,7 @@ class even_column_cartesian_layout:
             Area of layout.
         """
 
-    def resize(self, dimension: coords.offset_coordinate) -> None:
+    def resize(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Updates the layout's dimensions, effectively resizing it.
 
@@ -3231,7 +3553,7 @@ class even_column_cartesian_layout:
             ar: New aspect ratio.
         """
 
-    def north(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in northern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is lower
@@ -3245,7 +3567,9 @@ class even_column_cartesian_layout:
             Coordinate adjacent and north of `c`.
         """
 
-    def north_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-eastern direction of a
         given coordinate `c`, i.e., the face whose x-dimension is higher by 1
@@ -3260,7 +3584,7 @@ class even_column_cartesian_layout:
             Coordinate directly north-eastern of `c`.
         """
 
-    def east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def east(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in eastern direction
         of a given coordinate `c`, i.e., the face whose x-dimension is higher
@@ -3274,7 +3598,9 @@ class even_column_cartesian_layout:
             Coordinate adjacent and east of `c`.
         """
 
-    def south_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-eastern direction of a
         given coordinate `c`, i.e., the face whose x-dimension and y-dimension
@@ -3288,7 +3614,7 @@ class even_column_cartesian_layout:
             Coordinate directly south-eastern of `c`.
         """
 
-    def south(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in southern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is higher
@@ -3302,7 +3628,9 @@ class even_column_cartesian_layout:
             Coordinate adjacent and south of `c`.
         """
 
-    def south_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-western direction of a
         given coordinate `c`, i.e., the face whose x-dimension is lower by 1
@@ -3317,7 +3645,7 @@ class even_column_cartesian_layout:
             Coordinate directly south-western of `c`.
         """
 
-    def west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def west(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in western direction
         of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -3331,7 +3659,9 @@ class even_column_cartesian_layout:
             Coordinate adjacent and west of `c`.
         """
 
-    def north_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-western direction of a
         given coordinate `c`, i.e., the face whose x-dimension and y-dimension
@@ -3345,7 +3675,7 @@ class even_column_cartesian_layout:
             Coordinate directly north-western of `c`.
         """
 
-    def above(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def above(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly above a given coordinate `c`,
         i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
@@ -3358,7 +3688,7 @@ class even_column_cartesian_layout:
             Coordinate directly above `c`.
         """
 
-    def below(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def below(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly below a given coordinate `c`,
         i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
@@ -3371,7 +3701,11 @@ class even_column_cartesian_layout:
             Coordinate directly below `c`.
         """
 
-    def is_north_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_north_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly north of coordinate
         `c1`.
@@ -3384,7 +3718,11 @@ class even_column_cartesian_layout:
             `true` iff `c2` is directly north of `c1`.
         """
 
-    def is_east_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_east_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly east of coordinate
         `c1`.
@@ -3397,7 +3735,11 @@ class even_column_cartesian_layout:
             `true` iff `c2` is directly east of `c1`.
         """
 
-    def is_south_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_south_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly south of coordinate
         `c1`.
@@ -3410,7 +3752,11 @@ class even_column_cartesian_layout:
             `true` iff `c2` is directly south of `c1`.
         """
 
-    def is_west_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_west_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly west of coordinate
         `c1`.
@@ -3423,7 +3769,11 @@ class even_column_cartesian_layout:
             `true` iff `c2` is directly west of `c1`.
         """
 
-    def is_adjacent_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is either directly north, east,
         south, or west of coordinate `c1`.
@@ -3437,7 +3787,11 @@ class even_column_cartesian_layout:
             `c1`.
         """
 
-    def is_adjacent_elevation_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_elevation_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Similar to `is_adjacent_of` but also considers `c1`'s elevation, i.e.,
         if `c2` is adjacent to `above(c1)` or `below(c1)`.
@@ -3451,7 +3805,11 @@ class even_column_cartesian_layout:
             `c1` or `c1`'s elevations.
         """
 
-    def is_above(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_above(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
@@ -3463,7 +3821,11 @@ class even_column_cartesian_layout:
             `true` iff `c2` is directly above `c1`.
         """
 
-    def is_below(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_below(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
 
@@ -3475,7 +3837,11 @@ class even_column_cartesian_layout:
             `true` iff `c2` is directly below `c1`.
         """
 
-    def is_northwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_northwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere north of coordinate
         `c1`.
@@ -3488,7 +3854,11 @@ class even_column_cartesian_layout:
             `true` iff `c2` is somewhere north of `c1`.
         """
 
-    def is_eastwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_eastwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere east of coordinate
         `c1`.
@@ -3501,7 +3871,11 @@ class even_column_cartesian_layout:
             `true` iff `c2` is somewhere east of `c1`.
         """
 
-    def is_southwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_southwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere south of coordinate
         `c1`.
@@ -3514,7 +3888,11 @@ class even_column_cartesian_layout:
             `true` iff `c2` is somewhere south of `c1`.
         """
 
-    def is_westwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_westwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere west of coordinate
         `c1`.
@@ -3527,7 +3905,7 @@ class even_column_cartesian_layout:
             `true` iff `c2` is somewhere west of `c1`.
         """
 
-    def is_at_northern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_northern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         northern border where y is minimal.
@@ -3539,7 +3917,7 @@ class even_column_cartesian_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_eastern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_eastern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         eastern border where x is maximal.
@@ -3551,7 +3929,7 @@ class even_column_cartesian_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_southern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_southern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         southern border where y is maximal.
@@ -3563,7 +3941,7 @@ class even_column_cartesian_layout:
             `true` iff `c` is located at the layout's southern border.
         """
 
-    def is_at_western_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_western_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         western border where x is minimal.
@@ -3575,7 +3953,7 @@ class even_column_cartesian_layout:
             `true` iff `c` is located at the layout's western border.
         """
 
-    def is_at_any_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_any_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at any of the layout's
         borders where x or y are either minimal or maximal.
@@ -3587,7 +3965,9 @@ class even_column_cartesian_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def northern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's northern border.
@@ -3599,7 +3979,9 @@ class even_column_cartesian_layout:
             The northern border equivalent of `c`.
         """
 
-    def eastern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def eastern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's eastern border.
@@ -3611,7 +3993,9 @@ class even_column_cartesian_layout:
             The eastern border equivalent of `c`.
         """
 
-    def southern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def southern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's southern border.
@@ -3623,7 +4007,9 @@ class even_column_cartesian_layout:
             The southern border equivalent of `c`.
         """
 
-    def western_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def western_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's western border.
@@ -3635,7 +4021,7 @@ class even_column_cartesian_layout:
             The western border equivalent of `c`.
         """
 
-    def is_ground_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_ground_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in the ground layer
         where z is minimal.
@@ -3647,7 +4033,7 @@ class even_column_cartesian_layout:
             `true` iff `c` is in ground layer.
         """
 
-    def is_crossing_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_crossing_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in a crossing layer
         where z is not minimal.
@@ -3659,7 +4045,7 @@ class even_column_cartesian_layout:
             `true` iff `c` is in a crossing layer.
         """
 
-    def is_within_bounds(self, c: coords.offset_coordinate) -> bool:
+    def is_within_bounds(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located within the layout
         bounds.
@@ -3711,7 +4097,9 @@ class even_column_cartesian_layout:
             a default.
         """
 
-    def adjacent_coordinates(self, c: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def adjacent_coordinates(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container that contains all coordinates that are adjacent to
         a given one. Thereby, only cardinal directions are being considered,
@@ -3729,7 +4117,7 @@ class even_column_cartesian_layout:
         """
 
     def adjacent_opposite_coordinates(
-        self, c: coords.offset_coordinate
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> list[tuple[coords.offset_coordinate, coords.offset_coordinate]]:
         """
         Returns a container that contains all coordinates pairs of opposing
@@ -3784,7 +4172,7 @@ class hexagonal_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. The given aspect ratio points to the highest
         possible coordinate in the layout. That means in the even_column_hex
@@ -3853,7 +4241,7 @@ class hexagonal_layout:
             Area of layout.
         """
 
-    def resize(self, dimension: coords.offset_coordinate) -> None:
+    def resize(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Updates the layout's dimensions, effectively resizing it.
 
@@ -3861,7 +4249,7 @@ class hexagonal_layout:
             ar: New aspect ratio.
         """
 
-    def north(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in northern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is lower
@@ -3875,7 +4263,9 @@ class hexagonal_layout:
             Coordinate adjacent and north of `c`.
         """
 
-    def north_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-eastern direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -3888,7 +4278,7 @@ class hexagonal_layout:
             Coordinate directly north-eastern of `c`.
         """
 
-    def east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def east(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in eastern direction
         of a given coordinate `c`, i.e., the face whose x-dimension is higher
@@ -3902,7 +4292,9 @@ class hexagonal_layout:
             Coordinate adjacent and east of `c`.
         """
 
-    def south_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-eastern direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -3915,7 +4307,7 @@ class hexagonal_layout:
             Coordinate directly south-eastern of `c`.
         """
 
-    def south(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in southern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is higher
@@ -3929,7 +4321,9 @@ class hexagonal_layout:
             Coordinate adjacent and south of `c`.
         """
 
-    def south_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-western direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -3942,7 +4336,7 @@ class hexagonal_layout:
             Coordinate directly south-western of `c`.
         """
 
-    def west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def west(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in western direction
         of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -3956,7 +4350,9 @@ class hexagonal_layout:
             Coordinate adjacent and west of `c`.
         """
 
-    def north_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-western direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -3969,7 +4365,7 @@ class hexagonal_layout:
             Coordinate directly north-western of `c`.
         """
 
-    def above(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def above(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly above a given coordinate `c`,
         i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
@@ -3982,7 +4378,7 @@ class hexagonal_layout:
             Coordinate directly above `c`.
         """
 
-    def below(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def below(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly below a given coordinate `c`,
         i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
@@ -3995,7 +4391,11 @@ class hexagonal_layout:
             Coordinate directly below `c`.
         """
 
-    def is_north_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_north_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly north of coordinate
         `c1`.
@@ -4008,7 +4408,11 @@ class hexagonal_layout:
             `true` iff `c2` is directly north of `c1`.
         """
 
-    def is_east_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_east_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly east of coordinate
         `c1`.
@@ -4021,7 +4425,11 @@ class hexagonal_layout:
             `true` iff `c2` is directly east of `c1`.
         """
 
-    def is_south_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_south_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly south of coordinate
         `c1`.
@@ -4034,7 +4442,11 @@ class hexagonal_layout:
             `true` iff `c2` is directly south of `c1`.
         """
 
-    def is_west_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_west_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly west of coordinate
         `c1`.
@@ -4047,7 +4459,11 @@ class hexagonal_layout:
             `true` iff `c2` is directly west of `c1`.
         """
 
-    def is_adjacent_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is either north, north-east, east,
         south-east, south, south-west, west, or north-west of coordinate `c1`.
@@ -4062,7 +4478,11 @@ class hexagonal_layout:
             orientation.
         """
 
-    def is_adjacent_elevation_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_elevation_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Similar to is_adjacent_of but also considers `c1`'s elevation, i.e.,
         if `c2` is adjacent to `above(c1)` or `below(c1)`.
@@ -4075,7 +4495,11 @@ class hexagonal_layout:
             `true` iff `c2` is either adjacent of `c1` or `c1`'s elevations.
         """
 
-    def is_above(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_above(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
@@ -4087,7 +4511,11 @@ class hexagonal_layout:
             `true` iff `c2` is directly above `c1`.
         """
 
-    def is_below(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_below(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
 
@@ -4099,7 +4527,11 @@ class hexagonal_layout:
             `true` iff `c2` is directly below `c1`.
         """
 
-    def is_northwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_northwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere north of coordinate
         `c1`.
@@ -4112,7 +4544,11 @@ class hexagonal_layout:
             `true` iff `c2` is somewhere north of `c1`.
         """
 
-    def is_eastwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_eastwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere east of coordinate
         `c1`.
@@ -4125,7 +4561,11 @@ class hexagonal_layout:
             `true` iff `c2` is somewhere east of `c1`.
         """
 
-    def is_southwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_southwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere south of coordinate
         `c1`.
@@ -4138,7 +4578,11 @@ class hexagonal_layout:
             `true` iff `c2` is somewhere south of `c1`.
         """
 
-    def is_westwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_westwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere west of coordinate
         `c1`.
@@ -4151,7 +4595,7 @@ class hexagonal_layout:
             `true` iff `c2` is somewhere west of `c1`.
         """
 
-    def is_at_northern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_northern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         northern border where y is minimal.
@@ -4163,7 +4607,7 @@ class hexagonal_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_eastern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_eastern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         eastern border where x is maximal.
@@ -4175,7 +4619,7 @@ class hexagonal_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_southern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_southern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         southern border where y is maximal.
@@ -4187,7 +4631,7 @@ class hexagonal_layout:
             `true` iff `c` is located at the layout's southern border.
         """
 
-    def is_at_western_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_western_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         western border where x is minimal.
@@ -4199,7 +4643,7 @@ class hexagonal_layout:
             `true` iff `c` is located at the layout's western border.
         """
 
-    def is_at_any_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_any_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at any of the layout's
         borders where x or y are either minimal or maximal.
@@ -4211,7 +4655,9 @@ class hexagonal_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def northern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's northern border.
@@ -4223,7 +4669,9 @@ class hexagonal_layout:
             The northern border equivalent of `c`.
         """
 
-    def eastern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def eastern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's eastern border.
@@ -4235,7 +4683,9 @@ class hexagonal_layout:
             The eastern border equivalent of `c`.
         """
 
-    def southern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def southern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's southern border.
@@ -4247,7 +4697,9 @@ class hexagonal_layout:
             The southern border equivalent of `c`.
         """
 
-    def western_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def western_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's western border.
@@ -4259,7 +4711,7 @@ class hexagonal_layout:
             The western border equivalent of `c`.
         """
 
-    def is_ground_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_ground_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in the ground layer
         where z is minimal.
@@ -4271,7 +4723,7 @@ class hexagonal_layout:
             `true` iff `c` is in ground layer.
         """
 
-    def is_crossing_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_crossing_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in a crossing layer
         where z is not minimal.
@@ -4283,7 +4735,7 @@ class hexagonal_layout:
             `true` iff `c` is in a crossing layer.
         """
 
-    def is_within_bounds(self, c: coords.offset_coordinate) -> bool:
+    def is_within_bounds(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located within the layout
         bounds.
@@ -4335,7 +4787,9 @@ class hexagonal_layout:
             a default.
         """
 
-    def adjacent_coordinates(self, c: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def adjacent_coordinates(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container that contains all coordinates that are adjacent to
         a given one. Thereby, cardinal and ordinal directions are being
@@ -4353,7 +4807,7 @@ class hexagonal_layout:
         """
 
     def adjacent_opposite_coordinates(
-        self, c: coords.offset_coordinate
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> list[tuple[coords.offset_coordinate, coords.offset_coordinate]]:
         """
         Returns a container that contains all coordinates pairs of opposing
@@ -4414,7 +4868,7 @@ class odd_row_hex_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. The given aspect ratio points to the highest
         possible coordinate in the layout. That means in the even_column_hex
@@ -4483,7 +4937,7 @@ class odd_row_hex_layout:
             Area of layout.
         """
 
-    def resize(self, dimension: coords.offset_coordinate) -> None:
+    def resize(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Updates the layout's dimensions, effectively resizing it.
 
@@ -4491,7 +4945,7 @@ class odd_row_hex_layout:
             ar: New aspect ratio.
         """
 
-    def north(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in northern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is lower
@@ -4505,7 +4959,9 @@ class odd_row_hex_layout:
             Coordinate adjacent and north of `c`.
         """
 
-    def north_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-eastern direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -4518,7 +4974,7 @@ class odd_row_hex_layout:
             Coordinate directly north-eastern of `c`.
         """
 
-    def east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def east(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in eastern direction
         of a given coordinate `c`, i.e., the face whose x-dimension is higher
@@ -4532,7 +4988,9 @@ class odd_row_hex_layout:
             Coordinate adjacent and east of `c`.
         """
 
-    def south_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-eastern direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -4545,7 +5003,7 @@ class odd_row_hex_layout:
             Coordinate directly south-eastern of `c`.
         """
 
-    def south(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in southern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is higher
@@ -4559,7 +5017,9 @@ class odd_row_hex_layout:
             Coordinate adjacent and south of `c`.
         """
 
-    def south_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-western direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -4572,7 +5032,7 @@ class odd_row_hex_layout:
             Coordinate directly south-western of `c`.
         """
 
-    def west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def west(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in western direction
         of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -4586,7 +5046,9 @@ class odd_row_hex_layout:
             Coordinate adjacent and west of `c`.
         """
 
-    def north_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-western direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -4599,7 +5061,7 @@ class odd_row_hex_layout:
             Coordinate directly north-western of `c`.
         """
 
-    def above(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def above(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly above a given coordinate `c`,
         i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
@@ -4612,7 +5074,7 @@ class odd_row_hex_layout:
             Coordinate directly above `c`.
         """
 
-    def below(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def below(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly below a given coordinate `c`,
         i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
@@ -4625,7 +5087,11 @@ class odd_row_hex_layout:
             Coordinate directly below `c`.
         """
 
-    def is_north_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_north_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly north of coordinate
         `c1`.
@@ -4638,7 +5104,11 @@ class odd_row_hex_layout:
             `true` iff `c2` is directly north of `c1`.
         """
 
-    def is_east_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_east_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly east of coordinate
         `c1`.
@@ -4651,7 +5121,11 @@ class odd_row_hex_layout:
             `true` iff `c2` is directly east of `c1`.
         """
 
-    def is_south_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_south_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly south of coordinate
         `c1`.
@@ -4664,7 +5138,11 @@ class odd_row_hex_layout:
             `true` iff `c2` is directly south of `c1`.
         """
 
-    def is_west_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_west_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly west of coordinate
         `c1`.
@@ -4677,7 +5155,11 @@ class odd_row_hex_layout:
             `true` iff `c2` is directly west of `c1`.
         """
 
-    def is_adjacent_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is either north, north-east, east,
         south-east, south, south-west, west, or north-west of coordinate `c1`.
@@ -4692,7 +5174,11 @@ class odd_row_hex_layout:
             orientation.
         """
 
-    def is_adjacent_elevation_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_elevation_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Similar to is_adjacent_of but also considers `c1`'s elevation, i.e.,
         if `c2` is adjacent to `above(c1)` or `below(c1)`.
@@ -4705,7 +5191,11 @@ class odd_row_hex_layout:
             `true` iff `c2` is either adjacent of `c1` or `c1`'s elevations.
         """
 
-    def is_above(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_above(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
@@ -4717,7 +5207,11 @@ class odd_row_hex_layout:
             `true` iff `c2` is directly above `c1`.
         """
 
-    def is_below(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_below(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
 
@@ -4729,7 +5223,11 @@ class odd_row_hex_layout:
             `true` iff `c2` is directly below `c1`.
         """
 
-    def is_northwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_northwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere north of coordinate
         `c1`.
@@ -4742,7 +5240,11 @@ class odd_row_hex_layout:
             `true` iff `c2` is somewhere north of `c1`.
         """
 
-    def is_eastwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_eastwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere east of coordinate
         `c1`.
@@ -4755,7 +5257,11 @@ class odd_row_hex_layout:
             `true` iff `c2` is somewhere east of `c1`.
         """
 
-    def is_southwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_southwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere south of coordinate
         `c1`.
@@ -4768,7 +5274,11 @@ class odd_row_hex_layout:
             `true` iff `c2` is somewhere south of `c1`.
         """
 
-    def is_westwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_westwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere west of coordinate
         `c1`.
@@ -4781,7 +5291,7 @@ class odd_row_hex_layout:
             `true` iff `c2` is somewhere west of `c1`.
         """
 
-    def is_at_northern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_northern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         northern border where y is minimal.
@@ -4793,7 +5303,7 @@ class odd_row_hex_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_eastern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_eastern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         eastern border where x is maximal.
@@ -4805,7 +5315,7 @@ class odd_row_hex_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_southern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_southern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         southern border where y is maximal.
@@ -4817,7 +5327,7 @@ class odd_row_hex_layout:
             `true` iff `c` is located at the layout's southern border.
         """
 
-    def is_at_western_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_western_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         western border where x is minimal.
@@ -4829,7 +5339,7 @@ class odd_row_hex_layout:
             `true` iff `c` is located at the layout's western border.
         """
 
-    def is_at_any_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_any_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at any of the layout's
         borders where x or y are either minimal or maximal.
@@ -4841,7 +5351,9 @@ class odd_row_hex_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def northern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's northern border.
@@ -4853,7 +5365,9 @@ class odd_row_hex_layout:
             The northern border equivalent of `c`.
         """
 
-    def eastern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def eastern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's eastern border.
@@ -4865,7 +5379,9 @@ class odd_row_hex_layout:
             The eastern border equivalent of `c`.
         """
 
-    def southern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def southern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's southern border.
@@ -4877,7 +5393,9 @@ class odd_row_hex_layout:
             The southern border equivalent of `c`.
         """
 
-    def western_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def western_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's western border.
@@ -4889,7 +5407,7 @@ class odd_row_hex_layout:
             The western border equivalent of `c`.
         """
 
-    def is_ground_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_ground_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in the ground layer
         where z is minimal.
@@ -4901,7 +5419,7 @@ class odd_row_hex_layout:
             `true` iff `c` is in ground layer.
         """
 
-    def is_crossing_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_crossing_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in a crossing layer
         where z is not minimal.
@@ -4913,7 +5431,7 @@ class odd_row_hex_layout:
             `true` iff `c` is in a crossing layer.
         """
 
-    def is_within_bounds(self, c: coords.offset_coordinate) -> bool:
+    def is_within_bounds(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located within the layout
         bounds.
@@ -4965,7 +5483,9 @@ class odd_row_hex_layout:
             a default.
         """
 
-    def adjacent_coordinates(self, c: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def adjacent_coordinates(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container that contains all coordinates that are adjacent to
         a given one. Thereby, cardinal and ordinal directions are being
@@ -4983,7 +5503,7 @@ class odd_row_hex_layout:
         """
 
     def adjacent_opposite_coordinates(
-        self, c: coords.offset_coordinate
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> list[tuple[coords.offset_coordinate, coords.offset_coordinate]]:
         """
         Returns a container that contains all coordinates pairs of opposing
@@ -5044,7 +5564,7 @@ class odd_column_hex_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. The given aspect ratio points to the highest
         possible coordinate in the layout. That means in the even_column_hex
@@ -5113,7 +5633,7 @@ class odd_column_hex_layout:
             Area of layout.
         """
 
-    def resize(self, dimension: coords.offset_coordinate) -> None:
+    def resize(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Updates the layout's dimensions, effectively resizing it.
 
@@ -5121,7 +5641,7 @@ class odd_column_hex_layout:
             ar: New aspect ratio.
         """
 
-    def north(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in northern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is lower
@@ -5135,7 +5655,9 @@ class odd_column_hex_layout:
             Coordinate adjacent and north of `c`.
         """
 
-    def north_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-eastern direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -5148,7 +5670,7 @@ class odd_column_hex_layout:
             Coordinate directly north-eastern of `c`.
         """
 
-    def east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def east(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in eastern direction
         of a given coordinate `c`, i.e., the face whose x-dimension is higher
@@ -5162,7 +5684,9 @@ class odd_column_hex_layout:
             Coordinate adjacent and east of `c`.
         """
 
-    def south_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-eastern direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -5175,7 +5699,7 @@ class odd_column_hex_layout:
             Coordinate directly south-eastern of `c`.
         """
 
-    def south(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in southern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is higher
@@ -5189,7 +5713,9 @@ class odd_column_hex_layout:
             Coordinate adjacent and south of `c`.
         """
 
-    def south_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-western direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -5202,7 +5728,7 @@ class odd_column_hex_layout:
             Coordinate directly south-western of `c`.
         """
 
-    def west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def west(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in western direction
         of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -5216,7 +5742,9 @@ class odd_column_hex_layout:
             Coordinate adjacent and west of `c`.
         """
 
-    def north_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-western direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -5229,7 +5757,7 @@ class odd_column_hex_layout:
             Coordinate directly north-western of `c`.
         """
 
-    def above(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def above(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly above a given coordinate `c`,
         i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
@@ -5242,7 +5770,7 @@ class odd_column_hex_layout:
             Coordinate directly above `c`.
         """
 
-    def below(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def below(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly below a given coordinate `c`,
         i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
@@ -5255,7 +5783,11 @@ class odd_column_hex_layout:
             Coordinate directly below `c`.
         """
 
-    def is_north_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_north_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly north of coordinate
         `c1`.
@@ -5268,7 +5800,11 @@ class odd_column_hex_layout:
             `true` iff `c2` is directly north of `c1`.
         """
 
-    def is_east_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_east_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly east of coordinate
         `c1`.
@@ -5281,7 +5817,11 @@ class odd_column_hex_layout:
             `true` iff `c2` is directly east of `c1`.
         """
 
-    def is_south_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_south_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly south of coordinate
         `c1`.
@@ -5294,7 +5834,11 @@ class odd_column_hex_layout:
             `true` iff `c2` is directly south of `c1`.
         """
 
-    def is_west_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_west_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly west of coordinate
         `c1`.
@@ -5307,7 +5851,11 @@ class odd_column_hex_layout:
             `true` iff `c2` is directly west of `c1`.
         """
 
-    def is_adjacent_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is either north, north-east, east,
         south-east, south, south-west, west, or north-west of coordinate `c1`.
@@ -5322,7 +5870,11 @@ class odd_column_hex_layout:
             orientation.
         """
 
-    def is_adjacent_elevation_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_elevation_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Similar to is_adjacent_of but also considers `c1`'s elevation, i.e.,
         if `c2` is adjacent to `above(c1)` or `below(c1)`.
@@ -5335,7 +5887,11 @@ class odd_column_hex_layout:
             `true` iff `c2` is either adjacent of `c1` or `c1`'s elevations.
         """
 
-    def is_above(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_above(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
@@ -5347,7 +5903,11 @@ class odd_column_hex_layout:
             `true` iff `c2` is directly above `c1`.
         """
 
-    def is_below(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_below(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
 
@@ -5359,7 +5919,11 @@ class odd_column_hex_layout:
             `true` iff `c2` is directly below `c1`.
         """
 
-    def is_northwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_northwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere north of coordinate
         `c1`.
@@ -5372,7 +5936,11 @@ class odd_column_hex_layout:
             `true` iff `c2` is somewhere north of `c1`.
         """
 
-    def is_eastwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_eastwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere east of coordinate
         `c1`.
@@ -5385,7 +5953,11 @@ class odd_column_hex_layout:
             `true` iff `c2` is somewhere east of `c1`.
         """
 
-    def is_southwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_southwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere south of coordinate
         `c1`.
@@ -5398,7 +5970,11 @@ class odd_column_hex_layout:
             `true` iff `c2` is somewhere south of `c1`.
         """
 
-    def is_westwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_westwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere west of coordinate
         `c1`.
@@ -5411,7 +5987,7 @@ class odd_column_hex_layout:
             `true` iff `c2` is somewhere west of `c1`.
         """
 
-    def is_at_northern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_northern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         northern border where y is minimal.
@@ -5423,7 +5999,7 @@ class odd_column_hex_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_eastern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_eastern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         eastern border where x is maximal.
@@ -5435,7 +6011,7 @@ class odd_column_hex_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_southern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_southern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         southern border where y is maximal.
@@ -5447,7 +6023,7 @@ class odd_column_hex_layout:
             `true` iff `c` is located at the layout's southern border.
         """
 
-    def is_at_western_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_western_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         western border where x is minimal.
@@ -5459,7 +6035,7 @@ class odd_column_hex_layout:
             `true` iff `c` is located at the layout's western border.
         """
 
-    def is_at_any_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_any_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at any of the layout's
         borders where x or y are either minimal or maximal.
@@ -5471,7 +6047,9 @@ class odd_column_hex_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def northern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's northern border.
@@ -5483,7 +6061,9 @@ class odd_column_hex_layout:
             The northern border equivalent of `c`.
         """
 
-    def eastern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def eastern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's eastern border.
@@ -5495,7 +6075,9 @@ class odd_column_hex_layout:
             The eastern border equivalent of `c`.
         """
 
-    def southern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def southern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's southern border.
@@ -5507,7 +6089,9 @@ class odd_column_hex_layout:
             The southern border equivalent of `c`.
         """
 
-    def western_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def western_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's western border.
@@ -5519,7 +6103,7 @@ class odd_column_hex_layout:
             The western border equivalent of `c`.
         """
 
-    def is_ground_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_ground_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in the ground layer
         where z is minimal.
@@ -5531,7 +6115,7 @@ class odd_column_hex_layout:
             `true` iff `c` is in ground layer.
         """
 
-    def is_crossing_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_crossing_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in a crossing layer
         where z is not minimal.
@@ -5543,7 +6127,7 @@ class odd_column_hex_layout:
             `true` iff `c` is in a crossing layer.
         """
 
-    def is_within_bounds(self, c: coords.offset_coordinate) -> bool:
+    def is_within_bounds(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located within the layout
         bounds.
@@ -5595,7 +6179,9 @@ class odd_column_hex_layout:
             a default.
         """
 
-    def adjacent_coordinates(self, c: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def adjacent_coordinates(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container that contains all coordinates that are adjacent to
         a given one. Thereby, cardinal and ordinal directions are being
@@ -5613,7 +6199,7 @@ class odd_column_hex_layout:
         """
 
     def adjacent_opposite_coordinates(
-        self, c: coords.offset_coordinate
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> list[tuple[coords.offset_coordinate, coords.offset_coordinate]]:
         """
         Returns a container that contains all coordinates pairs of opposing
@@ -5674,7 +6260,7 @@ class even_column_hex_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. The given aspect ratio points to the highest
         possible coordinate in the layout. That means in the even_column_hex
@@ -5743,7 +6329,7 @@ class even_column_hex_layout:
             Area of layout.
         """
 
-    def resize(self, dimension: coords.offset_coordinate) -> None:
+    def resize(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Updates the layout's dimensions, effectively resizing it.
 
@@ -5751,7 +6337,7 @@ class even_column_hex_layout:
             ar: New aspect ratio.
         """
 
-    def north(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in northern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is lower
@@ -5765,7 +6351,9 @@ class even_column_hex_layout:
             Coordinate adjacent and north of `c`.
         """
 
-    def north_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-eastern direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -5778,7 +6366,7 @@ class even_column_hex_layout:
             Coordinate directly north-eastern of `c`.
         """
 
-    def east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def east(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in eastern direction
         of a given coordinate `c`, i.e., the face whose x-dimension is higher
@@ -5792,7 +6380,9 @@ class even_column_hex_layout:
             Coordinate adjacent and east of `c`.
         """
 
-    def south_east(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_east(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-eastern direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -5805,7 +6395,7 @@ class even_column_hex_layout:
             Coordinate directly south-eastern of `c`.
         """
 
-    def south(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in southern direction
         of a given coordinate `c`, i.e., the face whose y-dimension is higher
@@ -5819,7 +6409,9 @@ class even_column_hex_layout:
             Coordinate adjacent and south of `c`.
         """
 
-    def south_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def south_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in south-western direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -5832,7 +6424,7 @@ class even_column_hex_layout:
             Coordinate directly south-western of `c`.
         """
 
-    def west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def west(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly adjacent in western direction
         of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -5846,7 +6438,9 @@ class even_column_hex_layout:
             Coordinate adjacent and west of `c`.
         """
 
-    def north_west(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def north_west(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate that is located in north-western direction of a
         given coordinate `c`. Depending on the hexagonal orientation of the
@@ -5859,7 +6453,7 @@ class even_column_hex_layout:
             Coordinate directly north-western of `c`.
         """
 
-    def above(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def above(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly above a given coordinate `c`,
         i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
@@ -5872,7 +6466,7 @@ class even_column_hex_layout:
             Coordinate directly above `c`.
         """
 
-    def below(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def below(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> coords.offset_coordinate:
         """
         Returns the coordinate that is directly below a given coordinate `c`,
         i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
@@ -5885,7 +6479,11 @@ class even_column_hex_layout:
             Coordinate directly below `c`.
         """
 
-    def is_north_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_north_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly north of coordinate
         `c1`.
@@ -5898,7 +6496,11 @@ class even_column_hex_layout:
             `true` iff `c2` is directly north of `c1`.
         """
 
-    def is_east_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_east_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly east of coordinate
         `c1`.
@@ -5911,7 +6513,11 @@ class even_column_hex_layout:
             `true` iff `c2` is directly east of `c1`.
         """
 
-    def is_south_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_south_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly south of coordinate
         `c1`.
@@ -5924,7 +6530,11 @@ class even_column_hex_layout:
             `true` iff `c2` is directly south of `c1`.
         """
 
-    def is_west_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_west_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly west of coordinate
         `c1`.
@@ -5937,7 +6547,11 @@ class even_column_hex_layout:
             `true` iff `c2` is directly west of `c1`.
         """
 
-    def is_adjacent_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is either north, north-east, east,
         south-east, south, south-west, west, or north-west of coordinate `c1`.
@@ -5952,7 +6566,11 @@ class even_column_hex_layout:
             orientation.
         """
 
-    def is_adjacent_elevation_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_adjacent_elevation_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Similar to is_adjacent_of but also considers `c1`'s elevation, i.e.,
         if `c2` is adjacent to `above(c1)` or `below(c1)`.
@@ -5965,7 +6583,11 @@ class even_column_hex_layout:
             `true` iff `c2` is either adjacent of `c1` or `c1`'s elevations.
         """
 
-    def is_above(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_above(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
@@ -5977,7 +6599,11 @@ class even_column_hex_layout:
             `true` iff `c2` is directly above `c1`.
         """
 
-    def is_below(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_below(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
 
@@ -5989,7 +6615,11 @@ class even_column_hex_layout:
             `true` iff `c2` is directly below `c1`.
         """
 
-    def is_northwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_northwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere north of coordinate
         `c1`.
@@ -6002,7 +6632,11 @@ class even_column_hex_layout:
             `true` iff `c2` is somewhere north of `c1`.
         """
 
-    def is_eastwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_eastwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere east of coordinate
         `c1`.
@@ -6015,7 +6649,11 @@ class even_column_hex_layout:
             `true` iff `c2` is somewhere east of `c1`.
         """
 
-    def is_southwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_southwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere south of coordinate
         `c1`.
@@ -6028,7 +6666,11 @@ class even_column_hex_layout:
             `true` iff `c2` is somewhere south of `c1`.
         """
 
-    def is_westwards_of(self, c1: coords.offset_coordinate, c2: coords.offset_coordinate) -> bool:
+    def is_westwards_of(
+        self,
+        c1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        c2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Returns `true` iff coordinate `c2` is somewhere west of coordinate
         `c1`.
@@ -6041,7 +6683,7 @@ class even_column_hex_layout:
             `true` iff `c2` is somewhere west of `c1`.
         """
 
-    def is_at_northern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_northern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         northern border where y is minimal.
@@ -6053,7 +6695,7 @@ class even_column_hex_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_eastern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_eastern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         eastern border where x is maximal.
@@ -6065,7 +6707,7 @@ class even_column_hex_layout:
             `true` iff `c` is located at the layout's northern border.
         """
 
-    def is_at_southern_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_southern_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         southern border where y is maximal.
@@ -6077,7 +6719,7 @@ class even_column_hex_layout:
             `true` iff `c` is located at the layout's southern border.
         """
 
-    def is_at_western_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_western_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at the layout's
         western border where x is minimal.
@@ -6089,7 +6731,7 @@ class even_column_hex_layout:
             `true` iff `c` is located at the layout's western border.
         """
 
-    def is_at_any_border(self, c: coords.offset_coordinate) -> bool:
+    def is_at_any_border(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located at any of the layout's
         borders where x or y are either minimal or maximal.
@@ -6101,7 +6743,9 @@ class even_column_hex_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def northern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's northern border.
@@ -6113,7 +6757,9 @@ class even_column_hex_layout:
             The northern border equivalent of `c`.
         """
 
-    def eastern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def eastern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's eastern border.
@@ -6125,7 +6771,9 @@ class even_column_hex_layout:
             The eastern border equivalent of `c`.
         """
 
-    def southern_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def southern_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same x and z values as a given
         coordinate but that is located at the layout's southern border.
@@ -6137,7 +6785,9 @@ class even_column_hex_layout:
             The southern border equivalent of `c`.
         """
 
-    def western_border_of(self, c: coords.offset_coordinate) -> coords.offset_coordinate:
+    def western_border_of(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> coords.offset_coordinate:
         """
         Returns the coordinate with the same y and z values as a given
         coordinate but that is located at the layout's western border.
@@ -6149,7 +6799,7 @@ class even_column_hex_layout:
             The western border equivalent of `c`.
         """
 
-    def is_ground_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_ground_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in the ground layer
         where z is minimal.
@@ -6161,7 +6811,7 @@ class even_column_hex_layout:
             `true` iff `c` is in ground layer.
         """
 
-    def is_crossing_layer(self, c: coords.offset_coordinate) -> bool:
+    def is_crossing_layer(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located in a crossing layer
         where z is not minimal.
@@ -6173,7 +6823,7 @@ class even_column_hex_layout:
             `true` iff `c` is in a crossing layer.
         """
 
-    def is_within_bounds(self, c: coords.offset_coordinate) -> bool:
+    def is_within_bounds(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the given coordinate is located within the layout
         bounds.
@@ -6225,7 +6875,9 @@ class even_column_hex_layout:
             a default.
         """
 
-    def adjacent_coordinates(self, c: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def adjacent_coordinates(
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container that contains all coordinates that are adjacent to
         a given one. Thereby, cardinal and ordinal directions are being
@@ -6243,7 +6895,7 @@ class even_column_hex_layout:
         """
 
     def adjacent_opposite_coordinates(
-        self, c: coords.offset_coordinate
+        self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> list[tuple[coords.offset_coordinate, coords.offset_coordinate]]:
         """
         Returns a container that contains all coordinates pairs of opposing
@@ -6340,7 +6992,7 @@ class cartesian_gate_layout(cartesian_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. Creates a named gate-level layout of the given
         aspect ratio. To this end, it calls `CoordinateLayout`'s standard
@@ -6353,7 +7005,10 @@ class cartesian_gate_layout(cartesian_layout):
 
     @overload
     def __init__(
-        self, dimension: coords.offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self,
+        dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        clocking_scheme: str = "2DDWave",
+        layout_name: str = "",
     ) -> None:
         """
         Standard constructor. Creates a gate-level layout of the given aspect
@@ -6366,7 +7021,9 @@ class cartesian_gate_layout(cartesian_layout):
             name: Layout name.
         """
 
-    def assign_clock_number(self, cz: coords.offset_coordinate, cn: int) -> None:
+    def assign_clock_number(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], cn: int
+    ) -> None:
         """
         Overrides the clock number of a tile in the stored scheme. The clock
         number applies to every layer of the tile, so the z-coordinate of `cz`
@@ -6377,7 +7034,7 @@ class cartesian_gate_layout(cartesian_layout):
             cn: New clock number for `cz`.
         """
 
-    def get_clock_number(self, cz: coords.offset_coordinate) -> int:
+    def get_clock_number(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the clock number of a tile. Every layer of a tile has the same
         clock number, so the z-coordinate of `cz` is ignored.
@@ -6427,7 +7084,11 @@ class cartesian_gate_layout(cartesian_layout):
         Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.
         """
 
-    def is_incoming_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_incoming_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` feeds information to clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -6442,7 +7103,11 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `cz2` can feed information to `cz1`.
         """
 
-    def is_outgoing_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_outgoing_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` accepts information from clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -6457,7 +7122,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `cz2` can accept information from `cz1`.
         """
 
-    def incoming_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def incoming_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are incoming to the
         given one.
@@ -6469,7 +7136,9 @@ class cartesian_gate_layout(cartesian_layout):
             A container with all clock zones that are incoming to `cz`.
         """
 
-    def outgoing_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def outgoing_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are outgoing from the
         given one.
@@ -6481,7 +7150,7 @@ class cartesian_gate_layout(cartesian_layout):
             A container with all clock zones that are outgoing from `cz`.
         """
 
-    def in_degree(self, cz: coords.offset_coordinate) -> int:
+    def in_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of incoming clock zones to the given one.
 
@@ -6492,7 +7161,7 @@ class cartesian_gate_layout(cartesian_layout):
             Number of `cz`'s incoming clock zones.
         """
 
-    def out_degree(self, cz: coords.offset_coordinate) -> int:
+    def out_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of outgoing clock zones from the given one.
 
@@ -6503,7 +7172,7 @@ class cartesian_gate_layout(cartesian_layout):
             Number of `cz`'s outgoing clock zones.
         """
 
-    def degree(self, cz: coords.offset_coordinate) -> int:
+    def degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of distinct incoming or outgoing neighboring clock
         zones.
@@ -6520,7 +7189,7 @@ class cartesian_gate_layout(cartesian_layout):
         Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are discarded; synchronization elements are kept. Raises ValueError for an unknown name.
         """
 
-    def obstruct_coordinate(self, c: coords.offset_coordinate) -> None:
+    def obstruct_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Marks the given coordinate as obstructed.
 
@@ -6528,7 +7197,11 @@ class cartesian_gate_layout(cartesian_layout):
             c: clock_zone to obstruct.
         """
 
-    def obstruct_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def obstruct_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Marks the connection from coordinate `src` to coordinate `tgt` as
         obstructed.
@@ -6542,7 +7215,7 @@ class cartesian_gate_layout(cartesian_layout):
             finding algorithms.
         """
 
-    def clear_obstructed_coordinate(self, c: coords.offset_coordinate) -> None:
+    def clear_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Clears the obstruction status of the given coordinate `c` if the
         obstruction was manually marked via `obstruct_coordinate`.
@@ -6551,7 +7224,11 @@ class cartesian_gate_layout(cartesian_layout):
             c: clock_zone to clear.
         """
 
-    def clear_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def clear_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Clears the obstruction status of the connection from coordinate `src`
         to coordinate `tgt` if the obstruction was manually marked via
@@ -6574,7 +7251,7 @@ class cartesian_gate_layout(cartesian_layout):
         `obstruct_connection`.
         """
 
-    def is_obstructed_coordinate(self, c: coords.offset_coordinate) -> bool:
+    def is_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
 
@@ -6585,7 +7262,11 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `c` is obstructed.
         """
 
-    def is_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> bool:
+    def is_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Checks if the given coordinate-coordinate connection is obstructed of
         some sort.
@@ -6598,8 +7279,12 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
-    def create_po(self, s: int, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
+    def create_pi(
+        self, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_po(
+        self, s: int, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def is_pi(self, n: int) -> bool:
         """
         Check whether `n` is a primary input.
@@ -6622,7 +7307,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `n` is a PO.
         """
 
-    def is_pi_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_pi_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary input.
 
@@ -6633,7 +7318,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff the node located at tile `t` is a PI.
         """
 
-    def is_po_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_po_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary output.
 
@@ -6697,19 +7382,41 @@ class cartesian_gate_layout(cartesian_layout):
     def set_output_name(self, index: int, name: str) -> None: ...
     def get_output_name(self, index: int) -> str: ...
     def get_name(self, s: int) -> str: ...
-    def create_buf(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_not(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_and(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nand(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_or(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xnor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_lt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_le(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_gt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_ge(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_maj(self, a: int, b: int, c: int, t: coords.offset_coordinate = ...) -> int: ...
+    def create_buf(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_not(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_and(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nand(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_or(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xnor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_lt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_le(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_gt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_ge(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_maj(
+        self, a: int, b: int, c: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def num_pis(self) -> int: ...
     def num_pos(self) -> int: ...
     def num_gates(self) -> int:
@@ -6780,7 +7487,7 @@ class cartesian_gate_layout(cartesian_layout):
             Number of fanouts to `n`.
         """
 
-    def get_node(self, t: coords.offset_coordinate) -> int:
+    def get_node(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Fetches the node that is placed onto a tile pointed to by a given
         signal. If no node is placed there, the `const0` node is returned.
@@ -6820,7 +7527,12 @@ class cartesian_gate_layout(cartesian_layout):
             Signal that points to `n`.
         """
 
-    def move_node(self, n: int, t: coords.offset_coordinate, new_children: Sequence[int] = []) -> int:
+    def move_node(
+        self,
+        n: int,
+        t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        new_children: Sequence[int] = [],
+    ) -> int:
         """
         Moves a given node to a new position and also updates its children,
         i.e., incoming signals.
@@ -6834,7 +7546,7 @@ class cartesian_gate_layout(cartesian_layout):
             Signal pointing to `n`'s new tile.
         """
 
-    def clear_tile(self, t: coords.offset_coordinate) -> None:
+    def clear_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Removes all assigned nodes from the given tile and marks them as dead.
 
@@ -6851,7 +7563,7 @@ class cartesian_gate_layout(cartesian_layout):
             outputs.
         """
 
-    def is_gate_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_gate_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_gate` (in
         accordance with `mockturtle`'s definition of gates).
@@ -6863,7 +7575,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `t` hosts a node that is a neither a constant nor a PI.
         """
 
-    def is_wire_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_wire_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_wire`.
 
@@ -6874,7 +7586,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `t` hosts a node that computes the identity.
         """
 
-    def is_empty_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_empty_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether `t` does not have a node assigned to it.
 
@@ -6889,9 +7601,13 @@ class cartesian_gate_layout(cartesian_layout):
     def pos(self) -> list[coords.offset_coordinate]: ...
     def gates(self) -> list[coords.offset_coordinate]: ...
     def wires(self) -> list[coords.offset_coordinate]: ...
-    def fanins(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def fanouts(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def is_incoming_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def fanins(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def fanouts(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def is_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is incoming to tile `t`. That is, whether
         tile `t` hosts a node that has a fanin assigned to the tile that
@@ -6909,7 +7625,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `s` is incoming to `t`.
         """
 
-    def has_no_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no incoming tiles.
 
@@ -6924,7 +7640,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `t` does not have incoming tiles.
         """
 
-    def has_northern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in northern
         direction.
@@ -6940,7 +7658,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `north(t)` is incoming to `t`.
         """
 
-    def has_north_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-eastern
         direction.
@@ -6956,7 +7676,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `north_east(t)` is incoming to `t`.
         """
 
-    def has_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in eastern
         direction.
@@ -6972,7 +7692,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `east(t)` is incoming to `t`.
         """
 
-    def has_south_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-eastern
         direction.
@@ -6988,7 +7710,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `south_east(t)` is incoming to `t`.
         """
 
-    def has_southern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in southern
         direction.
@@ -7004,7 +7728,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `south(t)` is incoming to `t`.
         """
 
-    def has_south_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-western
         direction.
@@ -7020,7 +7746,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `south_west(t)` is incoming to `t`.
         """
 
-    def has_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in western
         direction.
@@ -7036,7 +7762,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `west(t)` is incoming to `t`.
         """
 
-    def has_north_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-western
         direction.
@@ -7052,7 +7780,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `north_west(t)` is incoming to `t`.
         """
 
-    def is_outgoing_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def is_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is outgoing from tile `t`. That is, whether
         tile `t` hosts a node that has a fanout assigned to the tile that
@@ -7070,7 +7798,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `s` is outgoing from `t`.
         """
 
-    def has_no_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no outgoing tiles.
 
@@ -7085,7 +7813,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `t` does not have outgoing tiles.
         """
 
-    def has_northern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in northern
         direction.
@@ -7101,7 +7831,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `north(t)` is outgoing from `t`.
         """
 
-    def has_north_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-eastern
         direction.
@@ -7117,7 +7849,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `north_east(t)` is outgoing from `t`.
         """
 
-    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in eastern
         direction.
@@ -7133,7 +7865,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `east(t)` is outgoing from `t`.
         """
 
-    def has_south_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-eastern
         direction.
@@ -7149,7 +7883,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `south_east(t)` is outgoing from `t`.
         """
 
-    def has_southern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in southern
         direction.
@@ -7165,7 +7901,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `south(t)` is outgoing from `t`.
         """
 
-    def has_south_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-western
         direction.
@@ -7181,7 +7919,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `south_west(t)` is outgoing from `t`.
         """
 
-    def has_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in western
         direction.
@@ -7197,7 +7935,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `west(t)` is outgoing from `t`.
         """
 
-    def has_north_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-western
         direction.
@@ -7243,7 +7983,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `n` is dead.
         """
 
-    def assign_synchronization_element(self, coordinate: coords.offset_coordinate, delay: int) -> None:
+    def assign_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], delay: int
+    ) -> None:
         """
         Assigns a synchronization element to the provided clock zone.
 
@@ -7253,7 +7995,9 @@ class cartesian_gate_layout(cartesian_layout):
                 this value is 0, `cz` is turned back into a normal clock zone.
         """
 
-    def is_synchronization_element(self, coordinate: coords.offset_coordinate) -> bool:
+    def is_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Check whether the provided clock zone is a synchronization element.
 
@@ -7264,7 +8008,9 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `cz` is a synchronization element.
         """
 
-    def get_synchronization_element(self, coordinate: coords.offset_coordinate) -> int:
+    def get_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> int:
         """
         Returns the Hold phase extension in clock cycles of clock zone `cz`.
 
@@ -7353,7 +8099,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. Creates a named gate-level layout of the given
         aspect ratio. To this end, it calls `CoordinateLayout`'s standard
@@ -7366,7 +8112,10 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
     @overload
     def __init__(
-        self, dimension: coords.offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self,
+        dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        clocking_scheme: str = "2DDWave",
+        layout_name: str = "",
     ) -> None:
         """
         Standard constructor. Creates a gate-level layout of the given aspect
@@ -7379,7 +8128,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             name: Layout name.
         """
 
-    def assign_clock_number(self, cz: coords.offset_coordinate, cn: int) -> None:
+    def assign_clock_number(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], cn: int
+    ) -> None:
         """
         Overrides the clock number of a tile in the stored scheme. The clock
         number applies to every layer of the tile, so the z-coordinate of `cz`
@@ -7390,7 +8141,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             cn: New clock number for `cz`.
         """
 
-    def get_clock_number(self, cz: coords.offset_coordinate) -> int:
+    def get_clock_number(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the clock number of a tile. Every layer of a tile has the same
         clock number, so the z-coordinate of `cz` is ignored.
@@ -7440,7 +8191,11 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.
         """
 
-    def is_incoming_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_incoming_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` feeds information to clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -7455,7 +8210,11 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `cz2` can feed information to `cz1`.
         """
 
-    def is_outgoing_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_outgoing_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` accepts information from clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -7470,7 +8229,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `cz2` can accept information from `cz1`.
         """
 
-    def incoming_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def incoming_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are incoming to the
         given one.
@@ -7482,7 +8243,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             A container with all clock zones that are incoming to `cz`.
         """
 
-    def outgoing_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def outgoing_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are outgoing from the
         given one.
@@ -7494,7 +8257,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             A container with all clock zones that are outgoing from `cz`.
         """
 
-    def in_degree(self, cz: coords.offset_coordinate) -> int:
+    def in_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of incoming clock zones to the given one.
 
@@ -7505,7 +8268,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             Number of `cz`'s incoming clock zones.
         """
 
-    def out_degree(self, cz: coords.offset_coordinate) -> int:
+    def out_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of outgoing clock zones from the given one.
 
@@ -7516,7 +8279,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             Number of `cz`'s outgoing clock zones.
         """
 
-    def degree(self, cz: coords.offset_coordinate) -> int:
+    def degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of distinct incoming or outgoing neighboring clock
         zones.
@@ -7533,7 +8296,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are discarded; synchronization elements are kept. Raises ValueError for an unknown name.
         """
 
-    def obstruct_coordinate(self, c: coords.offset_coordinate) -> None:
+    def obstruct_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Marks the given coordinate as obstructed.
 
@@ -7541,7 +8304,11 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             c: clock_zone to obstruct.
         """
 
-    def obstruct_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def obstruct_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Marks the connection from coordinate `src` to coordinate `tgt` as
         obstructed.
@@ -7555,7 +8322,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             finding algorithms.
         """
 
-    def clear_obstructed_coordinate(self, c: coords.offset_coordinate) -> None:
+    def clear_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Clears the obstruction status of the given coordinate `c` if the
         obstruction was manually marked via `obstruct_coordinate`.
@@ -7564,7 +8331,11 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             c: clock_zone to clear.
         """
 
-    def clear_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def clear_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Clears the obstruction status of the connection from coordinate `src`
         to coordinate `tgt` if the obstruction was manually marked via
@@ -7587,7 +8358,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         `obstruct_connection`.
         """
 
-    def is_obstructed_coordinate(self, c: coords.offset_coordinate) -> bool:
+    def is_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
 
@@ -7598,7 +8369,11 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `c` is obstructed.
         """
 
-    def is_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> bool:
+    def is_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Checks if the given coordinate-coordinate connection is obstructed of
         some sort.
@@ -7611,8 +8386,12 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
-    def create_po(self, s: int, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
+    def create_pi(
+        self, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_po(
+        self, s: int, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def is_pi(self, n: int) -> bool:
         """
         Check whether `n` is a primary input.
@@ -7635,7 +8414,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `n` is a PO.
         """
 
-    def is_pi_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_pi_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary input.
 
@@ -7646,7 +8425,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff the node located at tile `t` is a PI.
         """
 
-    def is_po_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_po_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary output.
 
@@ -7710,19 +8489,41 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def set_output_name(self, index: int, name: str) -> None: ...
     def get_output_name(self, index: int) -> str: ...
     def get_name(self, s: int) -> str: ...
-    def create_buf(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_not(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_and(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nand(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_or(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xnor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_lt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_le(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_gt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_ge(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_maj(self, a: int, b: int, c: int, t: coords.offset_coordinate = ...) -> int: ...
+    def create_buf(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_not(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_and(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nand(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_or(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xnor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_lt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_le(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_gt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_ge(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_maj(
+        self, a: int, b: int, c: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def num_pis(self) -> int: ...
     def num_pos(self) -> int: ...
     def num_gates(self) -> int:
@@ -7793,7 +8594,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             Number of fanouts to `n`.
         """
 
-    def get_node(self, t: coords.offset_coordinate) -> int:
+    def get_node(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Fetches the node that is placed onto a tile pointed to by a given
         signal. If no node is placed there, the `const0` node is returned.
@@ -7833,7 +8634,12 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             Signal that points to `n`.
         """
 
-    def move_node(self, n: int, t: coords.offset_coordinate, new_children: Sequence[int] = []) -> int:
+    def move_node(
+        self,
+        n: int,
+        t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        new_children: Sequence[int] = [],
+    ) -> int:
         """
         Moves a given node to a new position and also updates its children,
         i.e., incoming signals.
@@ -7847,7 +8653,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             Signal pointing to `n`'s new tile.
         """
 
-    def clear_tile(self, t: coords.offset_coordinate) -> None:
+    def clear_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Removes all assigned nodes from the given tile and marks them as dead.
 
@@ -7864,7 +8670,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             outputs.
         """
 
-    def is_gate_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_gate_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_gate` (in
         accordance with `mockturtle`'s definition of gates).
@@ -7876,7 +8682,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `t` hosts a node that is a neither a constant nor a PI.
         """
 
-    def is_wire_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_wire_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_wire`.
 
@@ -7887,7 +8693,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `t` hosts a node that computes the identity.
         """
 
-    def is_empty_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_empty_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether `t` does not have a node assigned to it.
 
@@ -7902,9 +8708,13 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def pos(self) -> list[coords.offset_coordinate]: ...
     def gates(self) -> list[coords.offset_coordinate]: ...
     def wires(self) -> list[coords.offset_coordinate]: ...
-    def fanins(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def fanouts(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def is_incoming_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def fanins(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def fanouts(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def is_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is incoming to tile `t`. That is, whether
         tile `t` hosts a node that has a fanin assigned to the tile that
@@ -7922,7 +8732,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `s` is incoming to `t`.
         """
 
-    def has_no_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no incoming tiles.
 
@@ -7937,7 +8747,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `t` does not have incoming tiles.
         """
 
-    def has_northern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in northern
         direction.
@@ -7953,7 +8765,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `north(t)` is incoming to `t`.
         """
 
-    def has_north_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-eastern
         direction.
@@ -7969,7 +8783,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `north_east(t)` is incoming to `t`.
         """
 
-    def has_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in eastern
         direction.
@@ -7985,7 +8799,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `east(t)` is incoming to `t`.
         """
 
-    def has_south_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-eastern
         direction.
@@ -8001,7 +8817,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `south_east(t)` is incoming to `t`.
         """
 
-    def has_southern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in southern
         direction.
@@ -8017,7 +8835,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `south(t)` is incoming to `t`.
         """
 
-    def has_south_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-western
         direction.
@@ -8033,7 +8853,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `south_west(t)` is incoming to `t`.
         """
 
-    def has_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in western
         direction.
@@ -8049,7 +8869,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `west(t)` is incoming to `t`.
         """
 
-    def has_north_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-western
         direction.
@@ -8065,7 +8887,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `north_west(t)` is incoming to `t`.
         """
 
-    def is_outgoing_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def is_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is outgoing from tile `t`. That is, whether
         tile `t` hosts a node that has a fanout assigned to the tile that
@@ -8083,7 +8905,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `s` is outgoing from `t`.
         """
 
-    def has_no_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no outgoing tiles.
 
@@ -8098,7 +8920,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `t` does not have outgoing tiles.
         """
 
-    def has_northern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in northern
         direction.
@@ -8114,7 +8938,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `north(t)` is outgoing from `t`.
         """
 
-    def has_north_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-eastern
         direction.
@@ -8130,7 +8956,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `north_east(t)` is outgoing from `t`.
         """
 
-    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in eastern
         direction.
@@ -8146,7 +8972,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `east(t)` is outgoing from `t`.
         """
 
-    def has_south_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-eastern
         direction.
@@ -8162,7 +8990,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `south_east(t)` is outgoing from `t`.
         """
 
-    def has_southern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in southern
         direction.
@@ -8178,7 +9008,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `south(t)` is outgoing from `t`.
         """
 
-    def has_south_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-western
         direction.
@@ -8194,7 +9026,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `south_west(t)` is outgoing from `t`.
         """
 
-    def has_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in western
         direction.
@@ -8210,7 +9042,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `west(t)` is outgoing from `t`.
         """
 
-    def has_north_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-western
         direction.
@@ -8256,7 +9090,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `n` is dead.
         """
 
-    def assign_synchronization_element(self, coordinate: coords.offset_coordinate, delay: int) -> None:
+    def assign_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], delay: int
+    ) -> None:
         """
         Assigns a synchronization element to the provided clock zone.
 
@@ -8266,7 +9102,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
                 this value is 0, `cz` is turned back into a normal clock zone.
         """
 
-    def is_synchronization_element(self, coordinate: coords.offset_coordinate) -> bool:
+    def is_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Check whether the provided clock zone is a synchronization element.
 
@@ -8277,7 +9115,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `cz` is a synchronization element.
         """
 
-    def get_synchronization_element(self, coordinate: coords.offset_coordinate) -> int:
+    def get_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> int:
         """
         Returns the Hold phase extension in clock cycles of clock zone `cz`.
 
@@ -8366,7 +9206,7 @@ class hexagonal_gate_layout(hexagonal_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. Creates a named gate-level layout of the given
         aspect ratio. To this end, it calls `CoordinateLayout`'s standard
@@ -8379,7 +9219,10 @@ class hexagonal_gate_layout(hexagonal_layout):
 
     @overload
     def __init__(
-        self, dimension: coords.offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self,
+        dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        clocking_scheme: str = "2DDWave",
+        layout_name: str = "",
     ) -> None:
         """
         Standard constructor. Creates a gate-level layout of the given aspect
@@ -8392,7 +9235,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             name: Layout name.
         """
 
-    def assign_clock_number(self, cz: coords.offset_coordinate, cn: int) -> None:
+    def assign_clock_number(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], cn: int
+    ) -> None:
         """
         Overrides the clock number of a tile in the stored scheme. The clock
         number applies to every layer of the tile, so the z-coordinate of `cz`
@@ -8403,7 +9248,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             cn: New clock number for `cz`.
         """
 
-    def get_clock_number(self, cz: coords.offset_coordinate) -> int:
+    def get_clock_number(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the clock number of a tile. Every layer of a tile has the same
         clock number, so the z-coordinate of `cz` is ignored.
@@ -8453,7 +9298,11 @@ class hexagonal_gate_layout(hexagonal_layout):
         Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.
         """
 
-    def is_incoming_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_incoming_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` feeds information to clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -8468,7 +9317,11 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `cz2` can feed information to `cz1`.
         """
 
-    def is_outgoing_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_outgoing_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` accepts information from clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -8483,7 +9336,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `cz2` can accept information from `cz1`.
         """
 
-    def incoming_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def incoming_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are incoming to the
         given one.
@@ -8495,7 +9350,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             A container with all clock zones that are incoming to `cz`.
         """
 
-    def outgoing_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def outgoing_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are outgoing from the
         given one.
@@ -8507,7 +9364,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             A container with all clock zones that are outgoing from `cz`.
         """
 
-    def in_degree(self, cz: coords.offset_coordinate) -> int:
+    def in_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of incoming clock zones to the given one.
 
@@ -8518,7 +9375,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             Number of `cz`'s incoming clock zones.
         """
 
-    def out_degree(self, cz: coords.offset_coordinate) -> int:
+    def out_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of outgoing clock zones from the given one.
 
@@ -8529,7 +9386,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             Number of `cz`'s outgoing clock zones.
         """
 
-    def degree(self, cz: coords.offset_coordinate) -> int:
+    def degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of distinct incoming or outgoing neighboring clock
         zones.
@@ -8546,7 +9403,7 @@ class hexagonal_gate_layout(hexagonal_layout):
         Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are discarded; synchronization elements are kept. Raises ValueError for an unknown name.
         """
 
-    def obstruct_coordinate(self, c: coords.offset_coordinate) -> None:
+    def obstruct_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Marks the given coordinate as obstructed.
 
@@ -8554,7 +9411,11 @@ class hexagonal_gate_layout(hexagonal_layout):
             c: clock_zone to obstruct.
         """
 
-    def obstruct_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def obstruct_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Marks the connection from coordinate `src` to coordinate `tgt` as
         obstructed.
@@ -8568,7 +9429,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             finding algorithms.
         """
 
-    def clear_obstructed_coordinate(self, c: coords.offset_coordinate) -> None:
+    def clear_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Clears the obstruction status of the given coordinate `c` if the
         obstruction was manually marked via `obstruct_coordinate`.
@@ -8577,7 +9438,11 @@ class hexagonal_gate_layout(hexagonal_layout):
             c: clock_zone to clear.
         """
 
-    def clear_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def clear_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Clears the obstruction status of the connection from coordinate `src`
         to coordinate `tgt` if the obstruction was manually marked via
@@ -8600,7 +9465,7 @@ class hexagonal_gate_layout(hexagonal_layout):
         `obstruct_connection`.
         """
 
-    def is_obstructed_coordinate(self, c: coords.offset_coordinate) -> bool:
+    def is_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
 
@@ -8611,7 +9476,11 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `c` is obstructed.
         """
 
-    def is_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> bool:
+    def is_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Checks if the given coordinate-coordinate connection is obstructed of
         some sort.
@@ -8624,8 +9493,12 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
-    def create_po(self, s: int, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
+    def create_pi(
+        self, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_po(
+        self, s: int, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def is_pi(self, n: int) -> bool:
         """
         Check whether `n` is a primary input.
@@ -8648,7 +9521,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `n` is a PO.
         """
 
-    def is_pi_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_pi_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary input.
 
@@ -8659,7 +9532,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff the node located at tile `t` is a PI.
         """
 
-    def is_po_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_po_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary output.
 
@@ -8723,19 +9596,41 @@ class hexagonal_gate_layout(hexagonal_layout):
     def set_output_name(self, index: int, name: str) -> None: ...
     def get_output_name(self, index: int) -> str: ...
     def get_name(self, s: int) -> str: ...
-    def create_buf(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_not(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_and(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nand(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_or(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xnor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_lt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_le(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_gt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_ge(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_maj(self, a: int, b: int, c: int, t: coords.offset_coordinate = ...) -> int: ...
+    def create_buf(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_not(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_and(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nand(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_or(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xnor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_lt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_le(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_gt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_ge(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_maj(
+        self, a: int, b: int, c: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def num_pis(self) -> int: ...
     def num_pos(self) -> int: ...
     def num_gates(self) -> int:
@@ -8806,7 +9701,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             Number of fanouts to `n`.
         """
 
-    def get_node(self, t: coords.offset_coordinate) -> int:
+    def get_node(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Fetches the node that is placed onto a tile pointed to by a given
         signal. If no node is placed there, the `const0` node is returned.
@@ -8846,7 +9741,12 @@ class hexagonal_gate_layout(hexagonal_layout):
             Signal that points to `n`.
         """
 
-    def move_node(self, n: int, t: coords.offset_coordinate, new_children: Sequence[int] = []) -> int:
+    def move_node(
+        self,
+        n: int,
+        t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        new_children: Sequence[int] = [],
+    ) -> int:
         """
         Moves a given node to a new position and also updates its children,
         i.e., incoming signals.
@@ -8860,7 +9760,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             Signal pointing to `n`'s new tile.
         """
 
-    def clear_tile(self, t: coords.offset_coordinate) -> None:
+    def clear_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Removes all assigned nodes from the given tile and marks them as dead.
 
@@ -8877,7 +9777,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             outputs.
         """
 
-    def is_gate_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_gate_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_gate` (in
         accordance with `mockturtle`'s definition of gates).
@@ -8889,7 +9789,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `t` hosts a node that is a neither a constant nor a PI.
         """
 
-    def is_wire_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_wire_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_wire`.
 
@@ -8900,7 +9800,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `t` hosts a node that computes the identity.
         """
 
-    def is_empty_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_empty_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether `t` does not have a node assigned to it.
 
@@ -8915,9 +9815,13 @@ class hexagonal_gate_layout(hexagonal_layout):
     def pos(self) -> list[coords.offset_coordinate]: ...
     def gates(self) -> list[coords.offset_coordinate]: ...
     def wires(self) -> list[coords.offset_coordinate]: ...
-    def fanins(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def fanouts(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def is_incoming_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def fanins(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def fanouts(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def is_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is incoming to tile `t`. That is, whether
         tile `t` hosts a node that has a fanin assigned to the tile that
@@ -8935,7 +9839,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `s` is incoming to `t`.
         """
 
-    def has_no_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no incoming tiles.
 
@@ -8950,7 +9854,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `t` does not have incoming tiles.
         """
 
-    def has_northern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in northern
         direction.
@@ -8966,7 +9872,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `north(t)` is incoming to `t`.
         """
 
-    def has_north_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-eastern
         direction.
@@ -8982,7 +9890,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `north_east(t)` is incoming to `t`.
         """
 
-    def has_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in eastern
         direction.
@@ -8998,7 +9906,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `east(t)` is incoming to `t`.
         """
 
-    def has_south_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-eastern
         direction.
@@ -9014,7 +9924,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `south_east(t)` is incoming to `t`.
         """
 
-    def has_southern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in southern
         direction.
@@ -9030,7 +9942,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `south(t)` is incoming to `t`.
         """
 
-    def has_south_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-western
         direction.
@@ -9046,7 +9960,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `south_west(t)` is incoming to `t`.
         """
 
-    def has_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in western
         direction.
@@ -9062,7 +9976,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `west(t)` is incoming to `t`.
         """
 
-    def has_north_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-western
         direction.
@@ -9078,7 +9994,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `north_west(t)` is incoming to `t`.
         """
 
-    def is_outgoing_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def is_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is outgoing from tile `t`. That is, whether
         tile `t` hosts a node that has a fanout assigned to the tile that
@@ -9096,7 +10012,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `s` is outgoing from `t`.
         """
 
-    def has_no_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no outgoing tiles.
 
@@ -9111,7 +10027,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `t` does not have outgoing tiles.
         """
 
-    def has_northern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in northern
         direction.
@@ -9127,7 +10045,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `north(t)` is outgoing from `t`.
         """
 
-    def has_north_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-eastern
         direction.
@@ -9143,7 +10063,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `north_east(t)` is outgoing from `t`.
         """
 
-    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in eastern
         direction.
@@ -9159,7 +10079,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `east(t)` is outgoing from `t`.
         """
 
-    def has_south_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-eastern
         direction.
@@ -9175,7 +10097,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `south_east(t)` is outgoing from `t`.
         """
 
-    def has_southern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in southern
         direction.
@@ -9191,7 +10115,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `south(t)` is outgoing from `t`.
         """
 
-    def has_south_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-western
         direction.
@@ -9207,7 +10133,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `south_west(t)` is outgoing from `t`.
         """
 
-    def has_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in western
         direction.
@@ -9223,7 +10149,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `west(t)` is outgoing from `t`.
         """
 
-    def has_north_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-western
         direction.
@@ -9269,7 +10197,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `n` is dead.
         """
 
-    def assign_synchronization_element(self, coordinate: coords.offset_coordinate, delay: int) -> None:
+    def assign_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], delay: int
+    ) -> None:
         """
         Assigns a synchronization element to the provided clock zone.
 
@@ -9279,7 +10209,9 @@ class hexagonal_gate_layout(hexagonal_layout):
                 this value is 0, `cz` is turned back into a normal clock zone.
         """
 
-    def is_synchronization_element(self, coordinate: coords.offset_coordinate) -> bool:
+    def is_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Check whether the provided clock zone is a synchronization element.
 
@@ -9290,7 +10222,9 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `cz` is a synchronization element.
         """
 
-    def get_synchronization_element(self, coordinate: coords.offset_coordinate) -> int:
+    def get_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> int:
         """
         Returns the Hold phase extension in clock cycles of clock zone `cz`.
 
@@ -9379,7 +10313,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. Creates a named gate-level layout of the given
         aspect ratio. To this end, it calls `CoordinateLayout`'s standard
@@ -9392,7 +10326,10 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
 
     @overload
     def __init__(
-        self, dimension: coords.offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self,
+        dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        clocking_scheme: str = "2DDWave",
+        layout_name: str = "",
     ) -> None:
         """
         Standard constructor. Creates a gate-level layout of the given aspect
@@ -9405,7 +10342,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             name: Layout name.
         """
 
-    def assign_clock_number(self, cz: coords.offset_coordinate, cn: int) -> None:
+    def assign_clock_number(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], cn: int
+    ) -> None:
         """
         Overrides the clock number of a tile in the stored scheme. The clock
         number applies to every layer of the tile, so the z-coordinate of `cz`
@@ -9416,7 +10355,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             cn: New clock number for `cz`.
         """
 
-    def get_clock_number(self, cz: coords.offset_coordinate) -> int:
+    def get_clock_number(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the clock number of a tile. Every layer of a tile has the same
         clock number, so the z-coordinate of `cz` is ignored.
@@ -9466,7 +10405,11 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
         Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.
         """
 
-    def is_incoming_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_incoming_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` feeds information to clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -9481,7 +10424,11 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `cz2` can feed information to `cz1`.
         """
 
-    def is_outgoing_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_outgoing_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` accepts information from clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -9496,7 +10443,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `cz2` can accept information from `cz1`.
         """
 
-    def incoming_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def incoming_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are incoming to the
         given one.
@@ -9508,7 +10457,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             A container with all clock zones that are incoming to `cz`.
         """
 
-    def outgoing_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def outgoing_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are outgoing from the
         given one.
@@ -9520,7 +10471,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             A container with all clock zones that are outgoing from `cz`.
         """
 
-    def in_degree(self, cz: coords.offset_coordinate) -> int:
+    def in_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of incoming clock zones to the given one.
 
@@ -9531,7 +10482,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             Number of `cz`'s incoming clock zones.
         """
 
-    def out_degree(self, cz: coords.offset_coordinate) -> int:
+    def out_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of outgoing clock zones from the given one.
 
@@ -9542,7 +10493,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             Number of `cz`'s outgoing clock zones.
         """
 
-    def degree(self, cz: coords.offset_coordinate) -> int:
+    def degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of distinct incoming or outgoing neighboring clock
         zones.
@@ -9559,7 +10510,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
         Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are discarded; synchronization elements are kept. Raises ValueError for an unknown name.
         """
 
-    def obstruct_coordinate(self, c: coords.offset_coordinate) -> None:
+    def obstruct_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Marks the given coordinate as obstructed.
 
@@ -9567,7 +10518,11 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             c: clock_zone to obstruct.
         """
 
-    def obstruct_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def obstruct_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Marks the connection from coordinate `src` to coordinate `tgt` as
         obstructed.
@@ -9581,7 +10536,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             finding algorithms.
         """
 
-    def clear_obstructed_coordinate(self, c: coords.offset_coordinate) -> None:
+    def clear_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Clears the obstruction status of the given coordinate `c` if the
         obstruction was manually marked via `obstruct_coordinate`.
@@ -9590,7 +10545,11 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             c: clock_zone to clear.
         """
 
-    def clear_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def clear_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Clears the obstruction status of the connection from coordinate `src`
         to coordinate `tgt` if the obstruction was manually marked via
@@ -9613,7 +10572,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
         `obstruct_connection`.
         """
 
-    def is_obstructed_coordinate(self, c: coords.offset_coordinate) -> bool:
+    def is_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
 
@@ -9624,7 +10583,11 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `c` is obstructed.
         """
 
-    def is_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> bool:
+    def is_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Checks if the given coordinate-coordinate connection is obstructed of
         some sort.
@@ -9637,8 +10600,12 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
-    def create_po(self, s: int, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
+    def create_pi(
+        self, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_po(
+        self, s: int, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def is_pi(self, n: int) -> bool:
         """
         Check whether `n` is a primary input.
@@ -9661,7 +10628,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `n` is a PO.
         """
 
-    def is_pi_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_pi_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary input.
 
@@ -9672,7 +10639,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff the node located at tile `t` is a PI.
         """
 
-    def is_po_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_po_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary output.
 
@@ -9736,19 +10703,41 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
     def set_output_name(self, index: int, name: str) -> None: ...
     def get_output_name(self, index: int) -> str: ...
     def get_name(self, s: int) -> str: ...
-    def create_buf(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_not(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_and(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nand(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_or(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xnor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_lt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_le(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_gt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_ge(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_maj(self, a: int, b: int, c: int, t: coords.offset_coordinate = ...) -> int: ...
+    def create_buf(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_not(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_and(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nand(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_or(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xnor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_lt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_le(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_gt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_ge(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_maj(
+        self, a: int, b: int, c: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def num_pis(self) -> int: ...
     def num_pos(self) -> int: ...
     def num_gates(self) -> int:
@@ -9819,7 +10808,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             Number of fanouts to `n`.
         """
 
-    def get_node(self, t: coords.offset_coordinate) -> int:
+    def get_node(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Fetches the node that is placed onto a tile pointed to by a given
         signal. If no node is placed there, the `const0` node is returned.
@@ -9859,7 +10848,12 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             Signal that points to `n`.
         """
 
-    def move_node(self, n: int, t: coords.offset_coordinate, new_children: Sequence[int] = []) -> int:
+    def move_node(
+        self,
+        n: int,
+        t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        new_children: Sequence[int] = [],
+    ) -> int:
         """
         Moves a given node to a new position and also updates its children,
         i.e., incoming signals.
@@ -9873,7 +10867,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             Signal pointing to `n`'s new tile.
         """
 
-    def clear_tile(self, t: coords.offset_coordinate) -> None:
+    def clear_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Removes all assigned nodes from the given tile and marks them as dead.
 
@@ -9890,7 +10884,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             outputs.
         """
 
-    def is_gate_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_gate_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_gate` (in
         accordance with `mockturtle`'s definition of gates).
@@ -9902,7 +10896,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `t` hosts a node that is a neither a constant nor a PI.
         """
 
-    def is_wire_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_wire_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_wire`.
 
@@ -9913,7 +10907,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `t` hosts a node that computes the identity.
         """
 
-    def is_empty_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_empty_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether `t` does not have a node assigned to it.
 
@@ -9928,9 +10922,13 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
     def pos(self) -> list[coords.offset_coordinate]: ...
     def gates(self) -> list[coords.offset_coordinate]: ...
     def wires(self) -> list[coords.offset_coordinate]: ...
-    def fanins(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def fanouts(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def is_incoming_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def fanins(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def fanouts(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def is_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is incoming to tile `t`. That is, whether
         tile `t` hosts a node that has a fanin assigned to the tile that
@@ -9948,7 +10946,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `s` is incoming to `t`.
         """
 
-    def has_no_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no incoming tiles.
 
@@ -9963,7 +10961,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `t` does not have incoming tiles.
         """
 
-    def has_northern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in northern
         direction.
@@ -9979,7 +10979,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `north(t)` is incoming to `t`.
         """
 
-    def has_north_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-eastern
         direction.
@@ -9995,7 +10997,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `north_east(t)` is incoming to `t`.
         """
 
-    def has_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in eastern
         direction.
@@ -10011,7 +11013,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `east(t)` is incoming to `t`.
         """
 
-    def has_south_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-eastern
         direction.
@@ -10027,7 +11031,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `south_east(t)` is incoming to `t`.
         """
 
-    def has_southern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in southern
         direction.
@@ -10043,7 +11049,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `south(t)` is incoming to `t`.
         """
 
-    def has_south_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-western
         direction.
@@ -10059,7 +11067,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `south_west(t)` is incoming to `t`.
         """
 
-    def has_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in western
         direction.
@@ -10075,7 +11083,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `west(t)` is incoming to `t`.
         """
 
-    def has_north_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-western
         direction.
@@ -10091,7 +11101,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `north_west(t)` is incoming to `t`.
         """
 
-    def is_outgoing_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def is_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is outgoing from tile `t`. That is, whether
         tile `t` hosts a node that has a fanout assigned to the tile that
@@ -10109,7 +11119,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `s` is outgoing from `t`.
         """
 
-    def has_no_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no outgoing tiles.
 
@@ -10124,7 +11134,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `t` does not have outgoing tiles.
         """
 
-    def has_northern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in northern
         direction.
@@ -10140,7 +11152,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `north(t)` is outgoing from `t`.
         """
 
-    def has_north_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-eastern
         direction.
@@ -10156,7 +11170,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `north_east(t)` is outgoing from `t`.
         """
 
-    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in eastern
         direction.
@@ -10172,7 +11186,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `east(t)` is outgoing from `t`.
         """
 
-    def has_south_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-eastern
         direction.
@@ -10188,7 +11204,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `south_east(t)` is outgoing from `t`.
         """
 
-    def has_southern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in southern
         direction.
@@ -10204,7 +11222,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `south(t)` is outgoing from `t`.
         """
 
-    def has_south_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-western
         direction.
@@ -10220,7 +11240,7 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `south_west(t)` is outgoing from `t`.
         """
 
-    def has_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in western
         direction.
@@ -10236,7 +11256,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `west(t)` is outgoing from `t`.
         """
 
-    def has_north_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-western
         direction.
@@ -10282,7 +11304,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `n` is dead.
         """
 
-    def assign_synchronization_element(self, coordinate: coords.offset_coordinate, delay: int) -> None:
+    def assign_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], delay: int
+    ) -> None:
         """
         Assigns a synchronization element to the provided clock zone.
 
@@ -10292,7 +11316,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
                 this value is 0, `cz` is turned back into a normal clock zone.
         """
 
-    def is_synchronization_element(self, coordinate: coords.offset_coordinate) -> bool:
+    def is_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Check whether the provided clock zone is a synchronization element.
 
@@ -10303,7 +11329,9 @@ class odd_row_cartesian_gate_layout(odd_row_cartesian_layout):
             `true` iff `cz` is a synchronization element.
         """
 
-    def get_synchronization_element(self, coordinate: coords.offset_coordinate) -> int:
+    def get_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> int:
         """
         Returns the Hold phase extension in clock cycles of clock zone `cz`.
 
@@ -10392,7 +11420,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. Creates a named gate-level layout of the given
         aspect ratio. To this end, it calls `CoordinateLayout`'s standard
@@ -10405,7 +11433,10 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
 
     @overload
     def __init__(
-        self, dimension: coords.offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self,
+        dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        clocking_scheme: str = "2DDWave",
+        layout_name: str = "",
     ) -> None:
         """
         Standard constructor. Creates a gate-level layout of the given aspect
@@ -10418,7 +11449,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             name: Layout name.
         """
 
-    def assign_clock_number(self, cz: coords.offset_coordinate, cn: int) -> None:
+    def assign_clock_number(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], cn: int
+    ) -> None:
         """
         Overrides the clock number of a tile in the stored scheme. The clock
         number applies to every layer of the tile, so the z-coordinate of `cz`
@@ -10429,7 +11462,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             cn: New clock number for `cz`.
         """
 
-    def get_clock_number(self, cz: coords.offset_coordinate) -> int:
+    def get_clock_number(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the clock number of a tile. Every layer of a tile has the same
         clock number, so the z-coordinate of `cz` is ignored.
@@ -10479,7 +11512,11 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
         Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.
         """
 
-    def is_incoming_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_incoming_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` feeds information to clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -10494,7 +11531,11 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `cz2` can feed information to `cz1`.
         """
 
-    def is_outgoing_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_outgoing_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` accepts information from clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -10509,7 +11550,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `cz2` can accept information from `cz1`.
         """
 
-    def incoming_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def incoming_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are incoming to the
         given one.
@@ -10521,7 +11564,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             A container with all clock zones that are incoming to `cz`.
         """
 
-    def outgoing_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def outgoing_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are outgoing from the
         given one.
@@ -10533,7 +11578,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             A container with all clock zones that are outgoing from `cz`.
         """
 
-    def in_degree(self, cz: coords.offset_coordinate) -> int:
+    def in_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of incoming clock zones to the given one.
 
@@ -10544,7 +11589,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             Number of `cz`'s incoming clock zones.
         """
 
-    def out_degree(self, cz: coords.offset_coordinate) -> int:
+    def out_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of outgoing clock zones from the given one.
 
@@ -10555,7 +11600,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             Number of `cz`'s outgoing clock zones.
         """
 
-    def degree(self, cz: coords.offset_coordinate) -> int:
+    def degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of distinct incoming or outgoing neighboring clock
         zones.
@@ -10572,7 +11617,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
         Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are discarded; synchronization elements are kept. Raises ValueError for an unknown name.
         """
 
-    def obstruct_coordinate(self, c: coords.offset_coordinate) -> None:
+    def obstruct_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Marks the given coordinate as obstructed.
 
@@ -10580,7 +11625,11 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             c: clock_zone to obstruct.
         """
 
-    def obstruct_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def obstruct_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Marks the connection from coordinate `src` to coordinate `tgt` as
         obstructed.
@@ -10594,7 +11643,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             finding algorithms.
         """
 
-    def clear_obstructed_coordinate(self, c: coords.offset_coordinate) -> None:
+    def clear_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Clears the obstruction status of the given coordinate `c` if the
         obstruction was manually marked via `obstruct_coordinate`.
@@ -10603,7 +11652,11 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             c: clock_zone to clear.
         """
 
-    def clear_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def clear_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Clears the obstruction status of the connection from coordinate `src`
         to coordinate `tgt` if the obstruction was manually marked via
@@ -10626,7 +11679,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
         `obstruct_connection`.
         """
 
-    def is_obstructed_coordinate(self, c: coords.offset_coordinate) -> bool:
+    def is_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
 
@@ -10637,7 +11690,11 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `c` is obstructed.
         """
 
-    def is_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> bool:
+    def is_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Checks if the given coordinate-coordinate connection is obstructed of
         some sort.
@@ -10650,8 +11707,12 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
-    def create_po(self, s: int, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
+    def create_pi(
+        self, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_po(
+        self, s: int, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def is_pi(self, n: int) -> bool:
         """
         Check whether `n` is a primary input.
@@ -10674,7 +11735,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `n` is a PO.
         """
 
-    def is_pi_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_pi_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary input.
 
@@ -10685,7 +11746,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff the node located at tile `t` is a PI.
         """
 
-    def is_po_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_po_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary output.
 
@@ -10749,19 +11810,41 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
     def set_output_name(self, index: int, name: str) -> None: ...
     def get_output_name(self, index: int) -> str: ...
     def get_name(self, s: int) -> str: ...
-    def create_buf(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_not(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_and(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nand(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_or(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xnor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_lt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_le(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_gt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_ge(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_maj(self, a: int, b: int, c: int, t: coords.offset_coordinate = ...) -> int: ...
+    def create_buf(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_not(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_and(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nand(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_or(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xnor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_lt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_le(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_gt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_ge(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_maj(
+        self, a: int, b: int, c: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def num_pis(self) -> int: ...
     def num_pos(self) -> int: ...
     def num_gates(self) -> int:
@@ -10832,7 +11915,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             Number of fanouts to `n`.
         """
 
-    def get_node(self, t: coords.offset_coordinate) -> int:
+    def get_node(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Fetches the node that is placed onto a tile pointed to by a given
         signal. If no node is placed there, the `const0` node is returned.
@@ -10872,7 +11955,12 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             Signal that points to `n`.
         """
 
-    def move_node(self, n: int, t: coords.offset_coordinate, new_children: Sequence[int] = []) -> int:
+    def move_node(
+        self,
+        n: int,
+        t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        new_children: Sequence[int] = [],
+    ) -> int:
         """
         Moves a given node to a new position and also updates its children,
         i.e., incoming signals.
@@ -10886,7 +11974,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             Signal pointing to `n`'s new tile.
         """
 
-    def clear_tile(self, t: coords.offset_coordinate) -> None:
+    def clear_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Removes all assigned nodes from the given tile and marks them as dead.
 
@@ -10903,7 +11991,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             outputs.
         """
 
-    def is_gate_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_gate_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_gate` (in
         accordance with `mockturtle`'s definition of gates).
@@ -10915,7 +12003,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `t` hosts a node that is a neither a constant nor a PI.
         """
 
-    def is_wire_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_wire_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_wire`.
 
@@ -10926,7 +12014,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `t` hosts a node that computes the identity.
         """
 
-    def is_empty_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_empty_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether `t` does not have a node assigned to it.
 
@@ -10941,9 +12029,13 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
     def pos(self) -> list[coords.offset_coordinate]: ...
     def gates(self) -> list[coords.offset_coordinate]: ...
     def wires(self) -> list[coords.offset_coordinate]: ...
-    def fanins(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def fanouts(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def is_incoming_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def fanins(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def fanouts(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def is_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is incoming to tile `t`. That is, whether
         tile `t` hosts a node that has a fanin assigned to the tile that
@@ -10961,7 +12053,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `s` is incoming to `t`.
         """
 
-    def has_no_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no incoming tiles.
 
@@ -10976,7 +12068,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `t` does not have incoming tiles.
         """
 
-    def has_northern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in northern
         direction.
@@ -10992,7 +12086,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `north(t)` is incoming to `t`.
         """
 
-    def has_north_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-eastern
         direction.
@@ -11008,7 +12104,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `north_east(t)` is incoming to `t`.
         """
 
-    def has_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in eastern
         direction.
@@ -11024,7 +12120,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `east(t)` is incoming to `t`.
         """
 
-    def has_south_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-eastern
         direction.
@@ -11040,7 +12138,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `south_east(t)` is incoming to `t`.
         """
 
-    def has_southern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in southern
         direction.
@@ -11056,7 +12156,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `south(t)` is incoming to `t`.
         """
 
-    def has_south_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-western
         direction.
@@ -11072,7 +12174,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `south_west(t)` is incoming to `t`.
         """
 
-    def has_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in western
         direction.
@@ -11088,7 +12190,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `west(t)` is incoming to `t`.
         """
 
-    def has_north_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-western
         direction.
@@ -11104,7 +12208,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `north_west(t)` is incoming to `t`.
         """
 
-    def is_outgoing_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def is_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is outgoing from tile `t`. That is, whether
         tile `t` hosts a node that has a fanout assigned to the tile that
@@ -11122,7 +12226,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `s` is outgoing from `t`.
         """
 
-    def has_no_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no outgoing tiles.
 
@@ -11137,7 +12241,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `t` does not have outgoing tiles.
         """
 
-    def has_northern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in northern
         direction.
@@ -11153,7 +12259,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `north(t)` is outgoing from `t`.
         """
 
-    def has_north_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-eastern
         direction.
@@ -11169,7 +12277,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `north_east(t)` is outgoing from `t`.
         """
 
-    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in eastern
         direction.
@@ -11185,7 +12293,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `east(t)` is outgoing from `t`.
         """
 
-    def has_south_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-eastern
         direction.
@@ -11201,7 +12311,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `south_east(t)` is outgoing from `t`.
         """
 
-    def has_southern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in southern
         direction.
@@ -11217,7 +12329,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `south(t)` is outgoing from `t`.
         """
 
-    def has_south_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-western
         direction.
@@ -11233,7 +12347,7 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `south_west(t)` is outgoing from `t`.
         """
 
-    def has_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in western
         direction.
@@ -11249,7 +12363,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `west(t)` is outgoing from `t`.
         """
 
-    def has_north_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-western
         direction.
@@ -11295,7 +12411,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `n` is dead.
         """
 
-    def assign_synchronization_element(self, coordinate: coords.offset_coordinate, delay: int) -> None:
+    def assign_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], delay: int
+    ) -> None:
         """
         Assigns a synchronization element to the provided clock zone.
 
@@ -11305,7 +12423,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
                 this value is 0, `cz` is turned back into a normal clock zone.
         """
 
-    def is_synchronization_element(self, coordinate: coords.offset_coordinate) -> bool:
+    def is_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Check whether the provided clock zone is a synchronization element.
 
@@ -11316,7 +12436,9 @@ class even_row_cartesian_gate_layout(even_row_cartesian_layout):
             `true` iff `cz` is a synchronization element.
         """
 
-    def get_synchronization_element(self, coordinate: coords.offset_coordinate) -> int:
+    def get_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> int:
         """
         Returns the Hold phase extension in clock cycles of clock zone `cz`.
 
@@ -11405,7 +12527,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. Creates a named gate-level layout of the given
         aspect ratio. To this end, it calls `CoordinateLayout`'s standard
@@ -11418,7 +12540,10 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
 
     @overload
     def __init__(
-        self, dimension: coords.offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self,
+        dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        clocking_scheme: str = "2DDWave",
+        layout_name: str = "",
     ) -> None:
         """
         Standard constructor. Creates a gate-level layout of the given aspect
@@ -11431,7 +12556,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             name: Layout name.
         """
 
-    def assign_clock_number(self, cz: coords.offset_coordinate, cn: int) -> None:
+    def assign_clock_number(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], cn: int
+    ) -> None:
         """
         Overrides the clock number of a tile in the stored scheme. The clock
         number applies to every layer of the tile, so the z-coordinate of `cz`
@@ -11442,7 +12569,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             cn: New clock number for `cz`.
         """
 
-    def get_clock_number(self, cz: coords.offset_coordinate) -> int:
+    def get_clock_number(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the clock number of a tile. Every layer of a tile has the same
         clock number, so the z-coordinate of `cz` is ignored.
@@ -11492,7 +12619,11 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
         Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.
         """
 
-    def is_incoming_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_incoming_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` feeds information to clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -11507,7 +12638,11 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `cz2` can feed information to `cz1`.
         """
 
-    def is_outgoing_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_outgoing_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` accepts information from clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -11522,7 +12657,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `cz2` can accept information from `cz1`.
         """
 
-    def incoming_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def incoming_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are incoming to the
         given one.
@@ -11534,7 +12671,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             A container with all clock zones that are incoming to `cz`.
         """
 
-    def outgoing_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def outgoing_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are outgoing from the
         given one.
@@ -11546,7 +12685,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             A container with all clock zones that are outgoing from `cz`.
         """
 
-    def in_degree(self, cz: coords.offset_coordinate) -> int:
+    def in_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of incoming clock zones to the given one.
 
@@ -11557,7 +12696,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             Number of `cz`'s incoming clock zones.
         """
 
-    def out_degree(self, cz: coords.offset_coordinate) -> int:
+    def out_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of outgoing clock zones from the given one.
 
@@ -11568,7 +12707,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             Number of `cz`'s outgoing clock zones.
         """
 
-    def degree(self, cz: coords.offset_coordinate) -> int:
+    def degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of distinct incoming or outgoing neighboring clock
         zones.
@@ -11585,7 +12724,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
         Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are discarded; synchronization elements are kept. Raises ValueError for an unknown name.
         """
 
-    def obstruct_coordinate(self, c: coords.offset_coordinate) -> None:
+    def obstruct_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Marks the given coordinate as obstructed.
 
@@ -11593,7 +12732,11 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             c: clock_zone to obstruct.
         """
 
-    def obstruct_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def obstruct_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Marks the connection from coordinate `src` to coordinate `tgt` as
         obstructed.
@@ -11607,7 +12750,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             finding algorithms.
         """
 
-    def clear_obstructed_coordinate(self, c: coords.offset_coordinate) -> None:
+    def clear_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Clears the obstruction status of the given coordinate `c` if the
         obstruction was manually marked via `obstruct_coordinate`.
@@ -11616,7 +12759,11 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             c: clock_zone to clear.
         """
 
-    def clear_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def clear_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Clears the obstruction status of the connection from coordinate `src`
         to coordinate `tgt` if the obstruction was manually marked via
@@ -11639,7 +12786,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
         `obstruct_connection`.
         """
 
-    def is_obstructed_coordinate(self, c: coords.offset_coordinate) -> bool:
+    def is_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
 
@@ -11650,7 +12797,11 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `c` is obstructed.
         """
 
-    def is_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> bool:
+    def is_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Checks if the given coordinate-coordinate connection is obstructed of
         some sort.
@@ -11663,8 +12814,12 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
-    def create_po(self, s: int, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
+    def create_pi(
+        self, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_po(
+        self, s: int, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def is_pi(self, n: int) -> bool:
         """
         Check whether `n` is a primary input.
@@ -11687,7 +12842,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `n` is a PO.
         """
 
-    def is_pi_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_pi_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary input.
 
@@ -11698,7 +12853,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff the node located at tile `t` is a PI.
         """
 
-    def is_po_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_po_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary output.
 
@@ -11762,19 +12917,41 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
     def set_output_name(self, index: int, name: str) -> None: ...
     def get_output_name(self, index: int) -> str: ...
     def get_name(self, s: int) -> str: ...
-    def create_buf(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_not(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_and(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nand(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_or(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xnor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_lt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_le(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_gt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_ge(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_maj(self, a: int, b: int, c: int, t: coords.offset_coordinate = ...) -> int: ...
+    def create_buf(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_not(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_and(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nand(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_or(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xnor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_lt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_le(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_gt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_ge(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_maj(
+        self, a: int, b: int, c: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def num_pis(self) -> int: ...
     def num_pos(self) -> int: ...
     def num_gates(self) -> int:
@@ -11845,7 +13022,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             Number of fanouts to `n`.
         """
 
-    def get_node(self, t: coords.offset_coordinate) -> int:
+    def get_node(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Fetches the node that is placed onto a tile pointed to by a given
         signal. If no node is placed there, the `const0` node is returned.
@@ -11885,7 +13062,12 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             Signal that points to `n`.
         """
 
-    def move_node(self, n: int, t: coords.offset_coordinate, new_children: Sequence[int] = []) -> int:
+    def move_node(
+        self,
+        n: int,
+        t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        new_children: Sequence[int] = [],
+    ) -> int:
         """
         Moves a given node to a new position and also updates its children,
         i.e., incoming signals.
@@ -11899,7 +13081,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             Signal pointing to `n`'s new tile.
         """
 
-    def clear_tile(self, t: coords.offset_coordinate) -> None:
+    def clear_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Removes all assigned nodes from the given tile and marks them as dead.
 
@@ -11916,7 +13098,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             outputs.
         """
 
-    def is_gate_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_gate_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_gate` (in
         accordance with `mockturtle`'s definition of gates).
@@ -11928,7 +13110,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `t` hosts a node that is a neither a constant nor a PI.
         """
 
-    def is_wire_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_wire_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_wire`.
 
@@ -11939,7 +13121,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `t` hosts a node that computes the identity.
         """
 
-    def is_empty_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_empty_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether `t` does not have a node assigned to it.
 
@@ -11954,9 +13136,13 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
     def pos(self) -> list[coords.offset_coordinate]: ...
     def gates(self) -> list[coords.offset_coordinate]: ...
     def wires(self) -> list[coords.offset_coordinate]: ...
-    def fanins(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def fanouts(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def is_incoming_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def fanins(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def fanouts(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def is_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is incoming to tile `t`. That is, whether
         tile `t` hosts a node that has a fanin assigned to the tile that
@@ -11974,7 +13160,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `s` is incoming to `t`.
         """
 
-    def has_no_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no incoming tiles.
 
@@ -11989,7 +13175,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `t` does not have incoming tiles.
         """
 
-    def has_northern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in northern
         direction.
@@ -12005,7 +13193,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `north(t)` is incoming to `t`.
         """
 
-    def has_north_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-eastern
         direction.
@@ -12021,7 +13211,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `north_east(t)` is incoming to `t`.
         """
 
-    def has_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in eastern
         direction.
@@ -12037,7 +13227,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `east(t)` is incoming to `t`.
         """
 
-    def has_south_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-eastern
         direction.
@@ -12053,7 +13245,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `south_east(t)` is incoming to `t`.
         """
 
-    def has_southern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in southern
         direction.
@@ -12069,7 +13263,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `south(t)` is incoming to `t`.
         """
 
-    def has_south_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-western
         direction.
@@ -12085,7 +13281,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `south_west(t)` is incoming to `t`.
         """
 
-    def has_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in western
         direction.
@@ -12101,7 +13297,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `west(t)` is incoming to `t`.
         """
 
-    def has_north_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-western
         direction.
@@ -12117,7 +13315,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `north_west(t)` is incoming to `t`.
         """
 
-    def is_outgoing_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def is_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is outgoing from tile `t`. That is, whether
         tile `t` hosts a node that has a fanout assigned to the tile that
@@ -12135,7 +13333,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `s` is outgoing from `t`.
         """
 
-    def has_no_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no outgoing tiles.
 
@@ -12150,7 +13348,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `t` does not have outgoing tiles.
         """
 
-    def has_northern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in northern
         direction.
@@ -12166,7 +13366,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `north(t)` is outgoing from `t`.
         """
 
-    def has_north_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-eastern
         direction.
@@ -12182,7 +13384,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `north_east(t)` is outgoing from `t`.
         """
 
-    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in eastern
         direction.
@@ -12198,7 +13400,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `east(t)` is outgoing from `t`.
         """
 
-    def has_south_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-eastern
         direction.
@@ -12214,7 +13418,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `south_east(t)` is outgoing from `t`.
         """
 
-    def has_southern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in southern
         direction.
@@ -12230,7 +13436,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `south(t)` is outgoing from `t`.
         """
 
-    def has_south_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-western
         direction.
@@ -12246,7 +13454,7 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `south_west(t)` is outgoing from `t`.
         """
 
-    def has_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in western
         direction.
@@ -12262,7 +13470,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `west(t)` is outgoing from `t`.
         """
 
-    def has_north_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-western
         direction.
@@ -12308,7 +13518,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `n` is dead.
         """
 
-    def assign_synchronization_element(self, coordinate: coords.offset_coordinate, delay: int) -> None:
+    def assign_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], delay: int
+    ) -> None:
         """
         Assigns a synchronization element to the provided clock zone.
 
@@ -12318,7 +13530,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
                 this value is 0, `cz` is turned back into a normal clock zone.
         """
 
-    def is_synchronization_element(self, coordinate: coords.offset_coordinate) -> bool:
+    def is_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Check whether the provided clock zone is a synchronization element.
 
@@ -12329,7 +13543,9 @@ class even_column_cartesian_gate_layout(even_column_cartesian_layout):
             `true` iff `cz` is a synchronization element.
         """
 
-    def get_synchronization_element(self, coordinate: coords.offset_coordinate) -> int:
+    def get_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> int:
         """
         Returns the Hold phase extension in clock cycles of clock zone `cz`.
 
@@ -12418,7 +13634,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. Creates a named gate-level layout of the given
         aspect ratio. To this end, it calls `CoordinateLayout`'s standard
@@ -12431,7 +13647,10 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
 
     @overload
     def __init__(
-        self, dimension: coords.offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self,
+        dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        clocking_scheme: str = "2DDWave",
+        layout_name: str = "",
     ) -> None:
         """
         Standard constructor. Creates a gate-level layout of the given aspect
@@ -12444,7 +13663,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             name: Layout name.
         """
 
-    def assign_clock_number(self, cz: coords.offset_coordinate, cn: int) -> None:
+    def assign_clock_number(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], cn: int
+    ) -> None:
         """
         Overrides the clock number of a tile in the stored scheme. The clock
         number applies to every layer of the tile, so the z-coordinate of `cz`
@@ -12455,7 +13676,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             cn: New clock number for `cz`.
         """
 
-    def get_clock_number(self, cz: coords.offset_coordinate) -> int:
+    def get_clock_number(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the clock number of a tile. Every layer of a tile has the same
         clock number, so the z-coordinate of `cz` is ignored.
@@ -12505,7 +13726,11 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
         Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.
         """
 
-    def is_incoming_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_incoming_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` feeds information to clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -12520,7 +13745,11 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `cz2` can feed information to `cz1`.
         """
 
-    def is_outgoing_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_outgoing_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` accepts information from clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -12535,7 +13764,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `cz2` can accept information from `cz1`.
         """
 
-    def incoming_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def incoming_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are incoming to the
         given one.
@@ -12547,7 +13778,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             A container with all clock zones that are incoming to `cz`.
         """
 
-    def outgoing_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def outgoing_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are outgoing from the
         given one.
@@ -12559,7 +13792,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             A container with all clock zones that are outgoing from `cz`.
         """
 
-    def in_degree(self, cz: coords.offset_coordinate) -> int:
+    def in_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of incoming clock zones to the given one.
 
@@ -12570,7 +13803,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             Number of `cz`'s incoming clock zones.
         """
 
-    def out_degree(self, cz: coords.offset_coordinate) -> int:
+    def out_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of outgoing clock zones from the given one.
 
@@ -12581,7 +13814,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             Number of `cz`'s outgoing clock zones.
         """
 
-    def degree(self, cz: coords.offset_coordinate) -> int:
+    def degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of distinct incoming or outgoing neighboring clock
         zones.
@@ -12598,7 +13831,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
         Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are discarded; synchronization elements are kept. Raises ValueError for an unknown name.
         """
 
-    def obstruct_coordinate(self, c: coords.offset_coordinate) -> None:
+    def obstruct_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Marks the given coordinate as obstructed.
 
@@ -12606,7 +13839,11 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             c: clock_zone to obstruct.
         """
 
-    def obstruct_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def obstruct_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Marks the connection from coordinate `src` to coordinate `tgt` as
         obstructed.
@@ -12620,7 +13857,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             finding algorithms.
         """
 
-    def clear_obstructed_coordinate(self, c: coords.offset_coordinate) -> None:
+    def clear_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Clears the obstruction status of the given coordinate `c` if the
         obstruction was manually marked via `obstruct_coordinate`.
@@ -12629,7 +13866,11 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             c: clock_zone to clear.
         """
 
-    def clear_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def clear_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Clears the obstruction status of the connection from coordinate `src`
         to coordinate `tgt` if the obstruction was manually marked via
@@ -12652,7 +13893,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
         `obstruct_connection`.
         """
 
-    def is_obstructed_coordinate(self, c: coords.offset_coordinate) -> bool:
+    def is_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
 
@@ -12663,7 +13904,11 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `c` is obstructed.
         """
 
-    def is_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> bool:
+    def is_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Checks if the given coordinate-coordinate connection is obstructed of
         some sort.
@@ -12676,8 +13921,12 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
-    def create_po(self, s: int, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
+    def create_pi(
+        self, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_po(
+        self, s: int, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def is_pi(self, n: int) -> bool:
         """
         Check whether `n` is a primary input.
@@ -12700,7 +13949,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `n` is a PO.
         """
 
-    def is_pi_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_pi_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary input.
 
@@ -12711,7 +13960,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff the node located at tile `t` is a PI.
         """
 
-    def is_po_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_po_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary output.
 
@@ -12775,19 +14024,41 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
     def set_output_name(self, index: int, name: str) -> None: ...
     def get_output_name(self, index: int) -> str: ...
     def get_name(self, s: int) -> str: ...
-    def create_buf(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_not(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_and(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nand(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_or(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xnor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_lt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_le(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_gt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_ge(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_maj(self, a: int, b: int, c: int, t: coords.offset_coordinate = ...) -> int: ...
+    def create_buf(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_not(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_and(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nand(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_or(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xnor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_lt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_le(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_gt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_ge(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_maj(
+        self, a: int, b: int, c: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def num_pis(self) -> int: ...
     def num_pos(self) -> int: ...
     def num_gates(self) -> int:
@@ -12858,7 +14129,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             Number of fanouts to `n`.
         """
 
-    def get_node(self, t: coords.offset_coordinate) -> int:
+    def get_node(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Fetches the node that is placed onto a tile pointed to by a given
         signal. If no node is placed there, the `const0` node is returned.
@@ -12898,7 +14169,12 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             Signal that points to `n`.
         """
 
-    def move_node(self, n: int, t: coords.offset_coordinate, new_children: Sequence[int] = []) -> int:
+    def move_node(
+        self,
+        n: int,
+        t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        new_children: Sequence[int] = [],
+    ) -> int:
         """
         Moves a given node to a new position and also updates its children,
         i.e., incoming signals.
@@ -12912,7 +14188,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             Signal pointing to `n`'s new tile.
         """
 
-    def clear_tile(self, t: coords.offset_coordinate) -> None:
+    def clear_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Removes all assigned nodes from the given tile and marks them as dead.
 
@@ -12929,7 +14205,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             outputs.
         """
 
-    def is_gate_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_gate_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_gate` (in
         accordance with `mockturtle`'s definition of gates).
@@ -12941,7 +14217,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `t` hosts a node that is a neither a constant nor a PI.
         """
 
-    def is_wire_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_wire_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_wire`.
 
@@ -12952,7 +14228,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `t` hosts a node that computes the identity.
         """
 
-    def is_empty_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_empty_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether `t` does not have a node assigned to it.
 
@@ -12967,9 +14243,13 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
     def pos(self) -> list[coords.offset_coordinate]: ...
     def gates(self) -> list[coords.offset_coordinate]: ...
     def wires(self) -> list[coords.offset_coordinate]: ...
-    def fanins(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def fanouts(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def is_incoming_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def fanins(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def fanouts(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def is_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is incoming to tile `t`. That is, whether
         tile `t` hosts a node that has a fanin assigned to the tile that
@@ -12987,7 +14267,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `s` is incoming to `t`.
         """
 
-    def has_no_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no incoming tiles.
 
@@ -13002,7 +14282,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `t` does not have incoming tiles.
         """
 
-    def has_northern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in northern
         direction.
@@ -13018,7 +14300,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `north(t)` is incoming to `t`.
         """
 
-    def has_north_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-eastern
         direction.
@@ -13034,7 +14318,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `north_east(t)` is incoming to `t`.
         """
 
-    def has_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in eastern
         direction.
@@ -13050,7 +14334,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `east(t)` is incoming to `t`.
         """
 
-    def has_south_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-eastern
         direction.
@@ -13066,7 +14352,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `south_east(t)` is incoming to `t`.
         """
 
-    def has_southern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in southern
         direction.
@@ -13082,7 +14370,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `south(t)` is incoming to `t`.
         """
 
-    def has_south_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-western
         direction.
@@ -13098,7 +14388,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `south_west(t)` is incoming to `t`.
         """
 
-    def has_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in western
         direction.
@@ -13114,7 +14404,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `west(t)` is incoming to `t`.
         """
 
-    def has_north_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-western
         direction.
@@ -13130,7 +14422,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `north_west(t)` is incoming to `t`.
         """
 
-    def is_outgoing_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def is_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is outgoing from tile `t`. That is, whether
         tile `t` hosts a node that has a fanout assigned to the tile that
@@ -13148,7 +14440,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `s` is outgoing from `t`.
         """
 
-    def has_no_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no outgoing tiles.
 
@@ -13163,7 +14455,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `t` does not have outgoing tiles.
         """
 
-    def has_northern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in northern
         direction.
@@ -13179,7 +14473,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `north(t)` is outgoing from `t`.
         """
 
-    def has_north_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-eastern
         direction.
@@ -13195,7 +14491,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `north_east(t)` is outgoing from `t`.
         """
 
-    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in eastern
         direction.
@@ -13211,7 +14507,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `east(t)` is outgoing from `t`.
         """
 
-    def has_south_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-eastern
         direction.
@@ -13227,7 +14525,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `south_east(t)` is outgoing from `t`.
         """
 
-    def has_southern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in southern
         direction.
@@ -13243,7 +14543,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `south(t)` is outgoing from `t`.
         """
 
-    def has_south_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-western
         direction.
@@ -13259,7 +14561,7 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `south_west(t)` is outgoing from `t`.
         """
 
-    def has_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in western
         direction.
@@ -13275,7 +14577,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `west(t)` is outgoing from `t`.
         """
 
-    def has_north_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-western
         direction.
@@ -13321,7 +14625,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `n` is dead.
         """
 
-    def assign_synchronization_element(self, coordinate: coords.offset_coordinate, delay: int) -> None:
+    def assign_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], delay: int
+    ) -> None:
         """
         Assigns a synchronization element to the provided clock zone.
 
@@ -13331,7 +14637,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
                 this value is 0, `cz` is turned back into a normal clock zone.
         """
 
-    def is_synchronization_element(self, coordinate: coords.offset_coordinate) -> bool:
+    def is_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Check whether the provided clock zone is a synchronization element.
 
@@ -13342,7 +14650,9 @@ class odd_row_hex_gate_layout(odd_row_hex_layout):
             `true` iff `cz` is a synchronization element.
         """
 
-    def get_synchronization_element(self, coordinate: coords.offset_coordinate) -> int:
+    def get_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> int:
         """
         Returns the Hold phase extension in clock cycles of clock zone `cz`.
 
@@ -13431,7 +14741,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. Creates a named gate-level layout of the given
         aspect ratio. To this end, it calls `CoordinateLayout`'s standard
@@ -13444,7 +14754,10 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
 
     @overload
     def __init__(
-        self, dimension: coords.offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self,
+        dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        clocking_scheme: str = "2DDWave",
+        layout_name: str = "",
     ) -> None:
         """
         Standard constructor. Creates a gate-level layout of the given aspect
@@ -13457,7 +14770,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             name: Layout name.
         """
 
-    def assign_clock_number(self, cz: coords.offset_coordinate, cn: int) -> None:
+    def assign_clock_number(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], cn: int
+    ) -> None:
         """
         Overrides the clock number of a tile in the stored scheme. The clock
         number applies to every layer of the tile, so the z-coordinate of `cz`
@@ -13468,7 +14783,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             cn: New clock number for `cz`.
         """
 
-    def get_clock_number(self, cz: coords.offset_coordinate) -> int:
+    def get_clock_number(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the clock number of a tile. Every layer of a tile has the same
         clock number, so the z-coordinate of `cz` is ignored.
@@ -13518,7 +14833,11 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
         Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.
         """
 
-    def is_incoming_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_incoming_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` feeds information to clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -13533,7 +14852,11 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `cz2` can feed information to `cz1`.
         """
 
-    def is_outgoing_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_outgoing_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` accepts information from clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -13548,7 +14871,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `cz2` can accept information from `cz1`.
         """
 
-    def incoming_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def incoming_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are incoming to the
         given one.
@@ -13560,7 +14885,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             A container with all clock zones that are incoming to `cz`.
         """
 
-    def outgoing_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def outgoing_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are outgoing from the
         given one.
@@ -13572,7 +14899,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             A container with all clock zones that are outgoing from `cz`.
         """
 
-    def in_degree(self, cz: coords.offset_coordinate) -> int:
+    def in_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of incoming clock zones to the given one.
 
@@ -13583,7 +14910,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             Number of `cz`'s incoming clock zones.
         """
 
-    def out_degree(self, cz: coords.offset_coordinate) -> int:
+    def out_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of outgoing clock zones from the given one.
 
@@ -13594,7 +14921,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             Number of `cz`'s outgoing clock zones.
         """
 
-    def degree(self, cz: coords.offset_coordinate) -> int:
+    def degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of distinct incoming or outgoing neighboring clock
         zones.
@@ -13611,7 +14938,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
         Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are discarded; synchronization elements are kept. Raises ValueError for an unknown name.
         """
 
-    def obstruct_coordinate(self, c: coords.offset_coordinate) -> None:
+    def obstruct_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Marks the given coordinate as obstructed.
 
@@ -13619,7 +14946,11 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             c: clock_zone to obstruct.
         """
 
-    def obstruct_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def obstruct_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Marks the connection from coordinate `src` to coordinate `tgt` as
         obstructed.
@@ -13633,7 +14964,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             finding algorithms.
         """
 
-    def clear_obstructed_coordinate(self, c: coords.offset_coordinate) -> None:
+    def clear_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Clears the obstruction status of the given coordinate `c` if the
         obstruction was manually marked via `obstruct_coordinate`.
@@ -13642,7 +14973,11 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             c: clock_zone to clear.
         """
 
-    def clear_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def clear_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Clears the obstruction status of the connection from coordinate `src`
         to coordinate `tgt` if the obstruction was manually marked via
@@ -13665,7 +15000,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
         `obstruct_connection`.
         """
 
-    def is_obstructed_coordinate(self, c: coords.offset_coordinate) -> bool:
+    def is_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
 
@@ -13676,7 +15011,11 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `c` is obstructed.
         """
 
-    def is_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> bool:
+    def is_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Checks if the given coordinate-coordinate connection is obstructed of
         some sort.
@@ -13689,8 +15028,12 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
-    def create_po(self, s: int, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
+    def create_pi(
+        self, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_po(
+        self, s: int, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def is_pi(self, n: int) -> bool:
         """
         Check whether `n` is a primary input.
@@ -13713,7 +15056,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `n` is a PO.
         """
 
-    def is_pi_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_pi_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary input.
 
@@ -13724,7 +15067,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff the node located at tile `t` is a PI.
         """
 
-    def is_po_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_po_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary output.
 
@@ -13788,19 +15131,41 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
     def set_output_name(self, index: int, name: str) -> None: ...
     def get_output_name(self, index: int) -> str: ...
     def get_name(self, s: int) -> str: ...
-    def create_buf(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_not(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_and(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nand(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_or(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xnor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_lt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_le(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_gt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_ge(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_maj(self, a: int, b: int, c: int, t: coords.offset_coordinate = ...) -> int: ...
+    def create_buf(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_not(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_and(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nand(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_or(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xnor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_lt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_le(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_gt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_ge(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_maj(
+        self, a: int, b: int, c: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def num_pis(self) -> int: ...
     def num_pos(self) -> int: ...
     def num_gates(self) -> int:
@@ -13871,7 +15236,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             Number of fanouts to `n`.
         """
 
-    def get_node(self, t: coords.offset_coordinate) -> int:
+    def get_node(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Fetches the node that is placed onto a tile pointed to by a given
         signal. If no node is placed there, the `const0` node is returned.
@@ -13911,7 +15276,12 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             Signal that points to `n`.
         """
 
-    def move_node(self, n: int, t: coords.offset_coordinate, new_children: Sequence[int] = []) -> int:
+    def move_node(
+        self,
+        n: int,
+        t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        new_children: Sequence[int] = [],
+    ) -> int:
         """
         Moves a given node to a new position and also updates its children,
         i.e., incoming signals.
@@ -13925,7 +15295,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             Signal pointing to `n`'s new tile.
         """
 
-    def clear_tile(self, t: coords.offset_coordinate) -> None:
+    def clear_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Removes all assigned nodes from the given tile and marks them as dead.
 
@@ -13942,7 +15312,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             outputs.
         """
 
-    def is_gate_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_gate_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_gate` (in
         accordance with `mockturtle`'s definition of gates).
@@ -13954,7 +15324,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `t` hosts a node that is a neither a constant nor a PI.
         """
 
-    def is_wire_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_wire_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_wire`.
 
@@ -13965,7 +15335,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `t` hosts a node that computes the identity.
         """
 
-    def is_empty_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_empty_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether `t` does not have a node assigned to it.
 
@@ -13980,9 +15350,13 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
     def pos(self) -> list[coords.offset_coordinate]: ...
     def gates(self) -> list[coords.offset_coordinate]: ...
     def wires(self) -> list[coords.offset_coordinate]: ...
-    def fanins(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def fanouts(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def is_incoming_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def fanins(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def fanouts(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def is_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is incoming to tile `t`. That is, whether
         tile `t` hosts a node that has a fanin assigned to the tile that
@@ -14000,7 +15374,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `s` is incoming to `t`.
         """
 
-    def has_no_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no incoming tiles.
 
@@ -14015,7 +15389,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `t` does not have incoming tiles.
         """
 
-    def has_northern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in northern
         direction.
@@ -14031,7 +15407,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `north(t)` is incoming to `t`.
         """
 
-    def has_north_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-eastern
         direction.
@@ -14047,7 +15425,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `north_east(t)` is incoming to `t`.
         """
 
-    def has_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in eastern
         direction.
@@ -14063,7 +15441,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `east(t)` is incoming to `t`.
         """
 
-    def has_south_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-eastern
         direction.
@@ -14079,7 +15459,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `south_east(t)` is incoming to `t`.
         """
 
-    def has_southern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in southern
         direction.
@@ -14095,7 +15477,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `south(t)` is incoming to `t`.
         """
 
-    def has_south_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-western
         direction.
@@ -14111,7 +15495,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `south_west(t)` is incoming to `t`.
         """
 
-    def has_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in western
         direction.
@@ -14127,7 +15511,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `west(t)` is incoming to `t`.
         """
 
-    def has_north_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-western
         direction.
@@ -14143,7 +15529,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `north_west(t)` is incoming to `t`.
         """
 
-    def is_outgoing_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def is_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is outgoing from tile `t`. That is, whether
         tile `t` hosts a node that has a fanout assigned to the tile that
@@ -14161,7 +15547,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `s` is outgoing from `t`.
         """
 
-    def has_no_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no outgoing tiles.
 
@@ -14176,7 +15562,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `t` does not have outgoing tiles.
         """
 
-    def has_northern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in northern
         direction.
@@ -14192,7 +15580,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `north(t)` is outgoing from `t`.
         """
 
-    def has_north_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-eastern
         direction.
@@ -14208,7 +15598,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `north_east(t)` is outgoing from `t`.
         """
 
-    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in eastern
         direction.
@@ -14224,7 +15614,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `east(t)` is outgoing from `t`.
         """
 
-    def has_south_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-eastern
         direction.
@@ -14240,7 +15632,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `south_east(t)` is outgoing from `t`.
         """
 
-    def has_southern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in southern
         direction.
@@ -14256,7 +15650,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `south(t)` is outgoing from `t`.
         """
 
-    def has_south_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-western
         direction.
@@ -14272,7 +15668,7 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `south_west(t)` is outgoing from `t`.
         """
 
-    def has_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in western
         direction.
@@ -14288,7 +15684,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `west(t)` is outgoing from `t`.
         """
 
-    def has_north_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-western
         direction.
@@ -14334,7 +15732,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `n` is dead.
         """
 
-    def assign_synchronization_element(self, coordinate: coords.offset_coordinate, delay: int) -> None:
+    def assign_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], delay: int
+    ) -> None:
         """
         Assigns a synchronization element to the provided clock zone.
 
@@ -14344,7 +15744,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
                 this value is 0, `cz` is turned back into a normal clock zone.
         """
 
-    def is_synchronization_element(self, coordinate: coords.offset_coordinate) -> bool:
+    def is_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Check whether the provided clock zone is a synchronization element.
 
@@ -14355,7 +15757,9 @@ class odd_column_hex_gate_layout(odd_column_hex_layout):
             `true` iff `cz` is a synchronization element.
         """
 
-    def get_synchronization_element(self, coordinate: coords.offset_coordinate) -> int:
+    def get_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> int:
         """
         Returns the Hold phase extension in clock cycles of clock zone `cz`.
 
@@ -14444,7 +15848,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coords.offset_coordinate) -> None:
+    def __init__(self, dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Standard constructor. Creates a named gate-level layout of the given
         aspect ratio. To this end, it calls `CoordinateLayout`'s standard
@@ -14457,7 +15861,10 @@ class even_column_hex_gate_layout(even_column_hex_layout):
 
     @overload
     def __init__(
-        self, dimension: coords.offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self,
+        dimension: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        clocking_scheme: str = "2DDWave",
+        layout_name: str = "",
     ) -> None:
         """
         Standard constructor. Creates a gate-level layout of the given aspect
@@ -14470,7 +15877,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             name: Layout name.
         """
 
-    def assign_clock_number(self, cz: coords.offset_coordinate, cn: int) -> None:
+    def assign_clock_number(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], cn: int
+    ) -> None:
         """
         Overrides the clock number of a tile in the stored scheme. The clock
         number applies to every layer of the tile, so the z-coordinate of `cz`
@@ -14481,7 +15890,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             cn: New clock number for `cz`.
         """
 
-    def get_clock_number(self, cz: coords.offset_coordinate) -> int:
+    def get_clock_number(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the clock number of a tile. Every layer of a tile has the same
         clock number, so the z-coordinate of `cz` is ignored.
@@ -14531,7 +15940,11 @@ class even_column_hex_gate_layout(even_column_hex_layout):
         Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.
         """
 
-    def is_incoming_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_incoming_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` feeds information to clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -14546,7 +15959,11 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `cz2` can feed information to `cz1`.
         """
 
-    def is_outgoing_clocked(self, cz1: coords.offset_coordinate, cz2: coords.offset_coordinate) -> bool:
+    def is_outgoing_clocked(
+        self,
+        cz1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        cz2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Evaluates whether clock zone `cz2` accepts information from clock zone
         `cz1`, i.e., whether `cz2` is clocked with a clock number that is
@@ -14561,7 +15978,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `cz2` can accept information from `cz1`.
         """
 
-    def incoming_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def incoming_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are incoming to the
         given one.
@@ -14573,7 +15992,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             A container with all clock zones that are incoming to `cz`.
         """
 
-    def outgoing_clocked_zones(self, cz: coords.offset_coordinate) -> list[coords.offset_coordinate]:
+    def outgoing_clocked_zones(
+        self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]:
         """
         Returns a container with all clock zones that are outgoing from the
         given one.
@@ -14585,7 +16006,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             A container with all clock zones that are outgoing from `cz`.
         """
 
-    def in_degree(self, cz: coords.offset_coordinate) -> int:
+    def in_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of incoming clock zones to the given one.
 
@@ -14596,7 +16017,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             Number of `cz`'s incoming clock zones.
         """
 
-    def out_degree(self, cz: coords.offset_coordinate) -> int:
+    def out_degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of outgoing clock zones from the given one.
 
@@ -14607,7 +16028,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             Number of `cz`'s outgoing clock zones.
         """
 
-    def degree(self, cz: coords.offset_coordinate) -> int:
+    def degree(self, cz: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Returns the number of distinct incoming or outgoing neighboring clock
         zones.
@@ -14624,7 +16045,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
         Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are discarded; synchronization elements are kept. Raises ValueError for an unknown name.
         """
 
-    def obstruct_coordinate(self, c: coords.offset_coordinate) -> None:
+    def obstruct_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Marks the given coordinate as obstructed.
 
@@ -14632,7 +16053,11 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             c: clock_zone to obstruct.
         """
 
-    def obstruct_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def obstruct_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Marks the connection from coordinate `src` to coordinate `tgt` as
         obstructed.
@@ -14646,7 +16071,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             finding algorithms.
         """
 
-    def clear_obstructed_coordinate(self, c: coords.offset_coordinate) -> None:
+    def clear_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Clears the obstruction status of the given coordinate `c` if the
         obstruction was manually marked via `obstruct_coordinate`.
@@ -14655,7 +16080,11 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             c: clock_zone to clear.
         """
 
-    def clear_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def clear_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Clears the obstruction status of the connection from coordinate `src`
         to coordinate `tgt` if the obstruction was manually marked via
@@ -14678,7 +16107,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
         `obstruct_connection`.
         """
 
-    def is_obstructed_coordinate(self, c: coords.offset_coordinate) -> bool:
+    def is_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
 
@@ -14689,7 +16118,11 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `c` is obstructed.
         """
 
-    def is_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> bool:
+    def is_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Checks if the given coordinate-coordinate connection is obstructed of
         some sort.
@@ -14702,8 +16135,12 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
-    def create_po(self, s: int, name: str = "", t: coords.offset_coordinate = ...) -> int: ...
+    def create_pi(
+        self, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_po(
+        self, s: int, name: str = "", t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def is_pi(self, n: int) -> bool:
         """
         Check whether `n` is a primary input.
@@ -14726,7 +16163,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `n` is a PO.
         """
 
-    def is_pi_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_pi_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary input.
 
@@ -14737,7 +16174,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff the node located at tile `t` is a PI.
         """
 
-    def is_po_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_po_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Check whether tile `t` hosts a primary output.
 
@@ -14801,19 +16238,41 @@ class even_column_hex_gate_layout(even_column_hex_layout):
     def set_output_name(self, index: int, name: str) -> None: ...
     def get_output_name(self, index: int) -> str: ...
     def get_name(self, s: int) -> str: ...
-    def create_buf(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_not(self, a: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_and(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nand(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_or(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_nor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_xnor(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_lt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_le(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_gt(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_ge(self, a: int, b: int, t: coords.offset_coordinate = ...) -> int: ...
-    def create_maj(self, a: int, b: int, c: int, t: coords.offset_coordinate = ...) -> int: ...
+    def create_buf(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_not(self, a: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def create_and(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nand(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_or(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_nor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_xnor(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_lt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_le(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_gt(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_ge(
+        self, a: int, b: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
+    def create_maj(
+        self, a: int, b: int, c: int, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int] = ...
+    ) -> int: ...
     def num_pis(self) -> int: ...
     def num_pos(self) -> int: ...
     def num_gates(self) -> int:
@@ -14884,7 +16343,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             Number of fanouts to `n`.
         """
 
-    def get_node(self, t: coords.offset_coordinate) -> int:
+    def get_node(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         Fetches the node that is placed onto a tile pointed to by a given
         signal. If no node is placed there, the `const0` node is returned.
@@ -14924,7 +16383,12 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             Signal that points to `n`.
         """
 
-    def move_node(self, n: int, t: coords.offset_coordinate, new_children: Sequence[int] = []) -> int:
+    def move_node(
+        self,
+        n: int,
+        t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        new_children: Sequence[int] = [],
+    ) -> int:
         """
         Moves a given node to a new position and also updates its children,
         i.e., incoming signals.
@@ -14938,7 +16402,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             Signal pointing to `n`'s new tile.
         """
 
-    def clear_tile(self, t: coords.offset_coordinate) -> None:
+    def clear_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Removes all assigned nodes from the given tile and marks them as dead.
 
@@ -14955,7 +16419,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             outputs.
         """
 
-    def is_gate_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_gate_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_gate` (in
         accordance with `mockturtle`'s definition of gates).
@@ -14967,7 +16431,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `t` hosts a node that is a neither a constant nor a PI.
         """
 
-    def is_wire_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_wire_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether the node assigned to `t` fulfills `is_wire`.
 
@@ -14978,7 +16442,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `t` hosts a node that computes the identity.
         """
 
-    def is_empty_tile(self, t: coords.offset_coordinate) -> bool:
+    def is_empty_tile(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Returns whether `t` does not have a node assigned to it.
 
@@ -14993,9 +16457,13 @@ class even_column_hex_gate_layout(even_column_hex_layout):
     def pos(self) -> list[coords.offset_coordinate]: ...
     def gates(self) -> list[coords.offset_coordinate]: ...
     def wires(self) -> list[coords.offset_coordinate]: ...
-    def fanins(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def fanouts(self, t: coords.offset_coordinate) -> list[coords.offset_coordinate]: ...
-    def is_incoming_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def fanins(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def fanouts(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> list[coords.offset_coordinate]: ...
+    def is_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is incoming to tile `t`. That is, whether
         tile `t` hosts a node that has a fanin assigned to the tile that
@@ -15013,7 +16481,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `s` is incoming to `t`.
         """
 
-    def has_no_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no incoming tiles.
 
@@ -15028,7 +16496,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `t` does not have incoming tiles.
         """
 
-    def has_northern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in northern
         direction.
@@ -15044,7 +16514,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `north(t)` is incoming to `t`.
         """
 
-    def has_north_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-eastern
         direction.
@@ -15060,7 +16532,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `north_east(t)` is incoming to `t`.
         """
 
-    def has_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in eastern
         direction.
@@ -15076,7 +16548,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `east(t)` is incoming to `t`.
         """
 
-    def has_south_eastern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-eastern
         direction.
@@ -15092,7 +16566,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `south_east(t)` is incoming to `t`.
         """
 
-    def has_southern_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in southern
         direction.
@@ -15108,7 +16584,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `south(t)` is incoming to `t`.
         """
 
-    def has_south_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in south-western
         direction.
@@ -15124,7 +16602,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `south_west(t)` is incoming to `t`.
         """
 
-    def has_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_incoming_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an incoming one in western
         direction.
@@ -15140,7 +16618,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `west(t)` is incoming to `t`.
         """
 
-    def has_north_western_incoming_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_incoming_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an incoming one in north-western
         direction.
@@ -15156,7 +16636,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `north_west(t)` is incoming to `t`.
         """
 
-    def is_outgoing_signal(self, t: coords.offset_coordinate, s: int) -> bool:
+    def is_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
         """
         Checks whether signal `s` is outgoing from tile `t`. That is, whether
         tile `t` hosts a node that has a fanout assigned to the tile that
@@ -15174,7 +16654,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `s` is outgoing from `t`.
         """
 
-    def has_no_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_no_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has no outgoing tiles.
 
@@ -15189,7 +16669,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `t` does not have outgoing tiles.
         """
 
-    def has_northern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_northern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in northern
         direction.
@@ -15205,7 +16687,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `north(t)` is outgoing from `t`.
         """
 
-    def has_north_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-eastern
         direction.
@@ -15221,7 +16705,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `north_east(t)` is outgoing from `t`.
         """
 
-    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_eastern_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in eastern
         direction.
@@ -15237,7 +16721,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `east(t)` is outgoing from `t`.
         """
 
-    def has_south_eastern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_eastern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-eastern
         direction.
@@ -15253,7 +16739,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `south_east(t)` is outgoing from `t`.
         """
 
-    def has_southern_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_southern_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in southern
         direction.
@@ -15269,7 +16757,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `south(t)` is outgoing from `t`.
         """
 
-    def has_south_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_south_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in south-western
         direction.
@@ -15285,7 +16775,7 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `south_west(t)` is outgoing from `t`.
         """
 
-    def has_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_western_outgoing_signal(self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks whether the given tile has an outgoing one in western
         direction.
@@ -15301,7 +16791,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `west(t)` is outgoing from `t`.
         """
 
-    def has_north_western_outgoing_signal(self, t: coords.offset_coordinate) -> bool:
+    def has_north_western_outgoing_signal(
+        self, t: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Checks whether the given tile has an outgoing one in north-western
         direction.
@@ -15347,7 +16839,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `n` is dead.
         """
 
-    def assign_synchronization_element(self, coordinate: coords.offset_coordinate, delay: int) -> None:
+    def assign_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], delay: int
+    ) -> None:
         """
         Assigns a synchronization element to the provided clock zone.
 
@@ -15357,7 +16851,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
                 this value is 0, `cz` is turned back into a normal clock zone.
         """
 
-    def is_synchronization_element(self, coordinate: coords.offset_coordinate) -> bool:
+    def is_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> bool:
         """
         Check whether the provided clock zone is a synchronization element.
 
@@ -15368,7 +16864,9 @@ class even_column_hex_gate_layout(even_column_hex_layout):
             `true` iff `cz` is a synchronization element.
         """
 
-    def get_synchronization_element(self, coordinate: coords.offset_coordinate) -> int:
+    def get_synchronization_element(
+        self, coordinate: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> int:
         """
         Returns the Hold phase extension in clock cycles of clock zone `cz`.
 
@@ -15401,7 +16899,7 @@ class obstructions:
     def __init__(self) -> None:
         """Creates empty routing constraints."""
 
-    def obstruct_coordinate(self, c: coords.offset_coordinate) -> None:
+    def obstruct_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Marks the given coordinate as obstructed.
 
@@ -15409,7 +16907,11 @@ class obstructions:
             c: Coordinate to obstruct.
         """
 
-    def obstruct_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def obstruct_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Marks the connection from coordinate `src` to coordinate `tgt` as
         obstructed.
@@ -15423,7 +16925,7 @@ class obstructions:
             finding algorithms.
         """
 
-    def clear_obstructed_coordinate(self, c: coords.offset_coordinate) -> None:
+    def clear_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Clears the obstruction status of the given coordinate `c` if the
         obstruction was manually marked via `obstruct_coordinate`.
@@ -15432,7 +16934,11 @@ class obstructions:
             c: Coordinate to clear.
         """
 
-    def clear_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> None:
+    def clear_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> None:
         """
         Clears the obstruction status of the connection from coordinate `src`
         to coordinate `tgt` if the obstruction was manually marked via
@@ -15455,7 +16961,7 @@ class obstructions:
         `obstruct_connection`.
         """
 
-    def is_obstructed_coordinate(self, c: coords.offset_coordinate) -> bool:
+    def is_obstructed_coordinate(self, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
 
@@ -15466,7 +16972,11 @@ class obstructions:
             `true` iff `c` is obstructed.
         """
 
-    def is_obstructed_connection(self, src: coords.offset_coordinate, tgt: coords.offset_coordinate) -> bool:
+    def is_obstructed_connection(
+        self,
+        src: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        tgt: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> bool:
         """
         Checks if the given coordinate-coordinate connection is obstructed of
         some sort.
@@ -15480,11 +16990,17 @@ class obstructions:
         """
 
 @overload
-def num_adjacent_coordinates(lyt: cartesian_gate_layout, c: coords.offset_coordinate) -> int: ...
+def num_adjacent_coordinates(
+    lyt: cartesian_gate_layout, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+) -> int: ...
 @overload
-def num_adjacent_coordinates(lyt: shifted_cartesian_gate_layout, c: coords.offset_coordinate) -> int: ...
+def num_adjacent_coordinates(
+    lyt: shifted_cartesian_gate_layout, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+) -> int: ...
 @overload
-def num_adjacent_coordinates(lyt: hexagonal_gate_layout, c: coords.offset_coordinate) -> int:
+def num_adjacent_coordinates(
+    lyt: hexagonal_gate_layout, c: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+) -> int:
     """
     Returns the number of adjacent coordinates of a given one. This is not
     a constant value because `c` could be located at a layout border.
@@ -15524,17 +17040,9 @@ def normalize_layout_coordinates(lyt: mnt.pyfiction.inml.inml_layout) -> mnt.pyf
         Normalized copy of `lyt`.
     """
 
-@overload
 def random_coordinate(
-    coordinate1: coords.offset_coordinate, coordinate_2: coords.offset_coordinate
-) -> coords.offset_coordinate: ...
-@overload
-def random_coordinate(
-    coordinate1: coords.offset_coordinate, coordinate_2: coords.offset_coordinate
-) -> coords.offset_coordinate: ...
-@overload
-def random_coordinate(
-    coordinate1: coords.offset_coordinate, coordinate_2: coords.offset_coordinate
+    coordinate1: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    coordinate_2: coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> coords.offset_coordinate:
     """
     Generates a random coordinate within the region spanned by two given

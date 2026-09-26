@@ -106,6 +106,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     algorithms release the GIL while they run.
   - `mnt.pyfiction` ships `.pyi` stubs and a `py.typed` marker, so type checkers and IDEs see the
     signatures of the bindings.
+  - Coordinate stubs accept two- and three-element tuples. Domain iterators and simulation
+    parameter dictionaries preserve their element types.
+  - `bdl_wire.port_direction` exposes wire directions and I/O flags; `reserve_input_nodes`
+    returns a Python dictionary of source nodes and reserved layout nodes.
 
 - Tooling:
 

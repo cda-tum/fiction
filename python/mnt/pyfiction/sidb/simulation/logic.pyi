@@ -420,6 +420,54 @@ class bdl_wire:
             p: The BDL pairs of the wire.
         """
 
+    class port_direction:
+        """Direction and I/O flags of a BDL wire port."""
+
+        def __init__(
+            self, direction: bdl_wire.port_direction.cardinal = ..., pi: bool = False, po: bool = False
+        ) -> None:
+            """Constructs a port with a cardinal direction and input/output flags."""
+
+        class cardinal(enum.Enum):
+            """Cardinal port direction."""
+
+            NORTH = 0
+
+            NORTH_EAST = 1
+
+            EAST = 2
+
+            SOUTH_EAST = 3
+
+            SOUTH = 4
+
+            SOUTH_WEST = 5
+
+            WEST = 6
+
+            NORTH_WEST = 7
+
+            NONE = 8
+
+        @property
+        def dir(self) -> int:
+            """Cardinal direction as an integer."""
+
+        @dir.setter
+        def dir(self, arg: int, /) -> None: ...
+        @property
+        def pi(self) -> bool:
+            """Whether the port is a primary input."""
+
+        @pi.setter
+        def pi(self, arg: bool, /) -> None: ...
+        @property
+        def po(self) -> bool:
+            """Whether the port is a primary output."""
+
+        @po.setter
+        def po(self, arg: bool, /) -> None: ...
+
     @property
     def pairs(self) -> list[bdl_pair]:
         """The BDL pairs of the wire."""
@@ -427,11 +475,11 @@ class bdl_wire:
     @pairs.setter
     def pairs(self, arg: Sequence[bdl_pair], /) -> None: ...
     @property
-    def direction(self) -> "fiction::fcn::port_direction":
+    def direction(self) -> bdl_wire.port_direction:
         """Port direction of the wire."""
 
     @direction.setter
-    def direction(self, arg: "fiction::fcn::port_direction", /) -> None: ...
+    def direction(self, arg: bdl_wire.port_direction, /) -> None: ...
     @property
     def first_bdl_pair(self) -> bdl_pair | None:
         """First BDL pair of the wire."""
@@ -1004,7 +1052,7 @@ class critical_temperature_domain:
     def __len__(self) -> int:
         """Returns the number of parameter points stored in the domain."""
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[parameter_point]:
         """Returns an iterator over the parameter points stored in the domain."""
 
     def keys(self) -> list[parameter_point]: ...
@@ -1090,7 +1138,7 @@ class operational_domain:
     def __len__(self) -> int:
         """Returns the number of parameter points stored in the domain."""
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[parameter_point]:
         """Returns an iterator over the parameter points stored in the domain."""
 
     def keys(self) -> list[parameter_point]: ...

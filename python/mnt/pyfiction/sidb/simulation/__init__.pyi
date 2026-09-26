@@ -418,7 +418,7 @@ class sidb_simulation_result:
     @simulation_parameters.setter
     def simulation_parameters(self, arg: mnt.pyfiction.sidb.model.sidb_simulation_parameters, /) -> None: ...
     @property
-    def additional_simulation_parameters(self) -> dict:
+    def additional_simulation_parameters(self) -> dict[str, int | float | bool | str]:
         """
         Additional named simulation parameters. This is used to store
         algorithm-dependent parameters that are not part of the

@@ -60,9 +60,8 @@ jobs:
       - name: Run mypy
         run: uvx prek run mypy --all-files
 
-      # The `.pyi` files are generated, never hand-written, so the only thing that can go wrong
-      # is a binding change landing without a regeneration. Rebuilding them here and diffing
-      # catches exactly that.
+      # Regeneration detects stale stubs after binding changes. The mypy check above
+      # validates the annotations and the static contracts in the Python tests.
       - name: Check if stub files are up to date
         run: |
           uvx nox -s stubs
