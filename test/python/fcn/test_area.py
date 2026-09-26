@@ -12,19 +12,20 @@ import pytest
 
 from mnt.pyfiction.fcn import area
 from mnt.pyfiction.inml import inml_layout
+from mnt.pyfiction.layouts.coords import offset_coordinate
 from mnt.pyfiction.qca import qca_layout
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
 
 
 def test_qca_area() -> None:
     """QCA layout dimensions determine physical area."""
-    lyt = qca_layout((4, 4))
+    lyt = qca_layout(offset_coordinate(4, 4))
     assert area(lyt) == pytest.approx(9604.0, abs=1e-7)
 
 
 def test_inml_area() -> None:
     """iNML layout dimensions determine physical area."""
-    lyt = inml_layout((4, 4))
+    lyt = inml_layout(offset_coordinate(4, 4))
     assert area(lyt) == pytest.approx(174000.0, abs=1e-7)
 
 

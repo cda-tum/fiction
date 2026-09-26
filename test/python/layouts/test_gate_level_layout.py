@@ -18,33 +18,43 @@ from mnt.pyfiction.verification import critical_path_length_and_throughput, gate
 @pytest.mark.parametrize(
     "make_layout",
     [
-        pytest.param(lambda: cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="cartesian_gate_layout"),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
+            lambda: cartesian_gate_layout(offset_coordinate(2, 2, 0), "2DDWave", "Layout"), id="cartesian_gate_layout"
         ),
-        pytest.param(lambda: hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+        pytest.param(
+            lambda: shifted_cartesian_gate_layout(offset_coordinate(2, 2, 0), "2DDWave", "Layout"),
+            id="shifted_cartesian_gate_layout",
+        ),
+        pytest.param(
+            lambda: hexagonal_gate_layout(offset_coordinate(2, 2, 0), "2DDWave", "Layout"), id="hexagonal_gate_layout"
+        ),
     ],
 )
 def test_gate_level_layout_inheritance(make_layout):
     layout = make_layout()
-    assert layout.incoming_clocked_zones((0, 0)) == []
-    assert layout.outgoing_clocked_zones((2, 2)) == []
+    assert layout.incoming_clocked_zones(offset_coordinate(0, 0)) == []
+    assert layout.outgoing_clocked_zones(offset_coordinate(2, 2)) == []
 
-    for icz in layout.incoming_clocked_zones((1, 1)):
+    for icz in layout.incoming_clocked_zones(offset_coordinate(1, 1)):
         assert icz in [layout.coord(1, 0), layout.coord(0, 1)]
 
-    for icz in layout.outgoing_clocked_zones((1, 1)):
+    for icz in layout.outgoing_clocked_zones(offset_coordinate(1, 1)):
         assert icz in [layout.coord(1, 2), layout.coord(2, 1)]
 
 
 @pytest.mark.parametrize(
     "make_layout",
     [
-        pytest.param(lambda: cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"), id="cartesian_gate_layout"),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
+            lambda: cartesian_gate_layout(offset_coordinate(3, 3, 1), "2DDWave", "Layout"), id="cartesian_gate_layout"
         ),
-        pytest.param(lambda: hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+        pytest.param(
+            lambda: shifted_cartesian_gate_layout(offset_coordinate(3, 3, 1), "2DDWave", "Layout"),
+            id="shifted_cartesian_gate_layout",
+        ),
+        pytest.param(
+            lambda: hexagonal_gate_layout(offset_coordinate(3, 3, 1), "2DDWave", "Layout"), id="hexagonal_gate_layout"
+        ),
     ],
 )
 def test_gate_level_layout_iteration(make_layout):
@@ -52,22 +62,22 @@ def test_gate_level_layout_iteration(make_layout):
     assert layout.is_empty()
 
     # layout creation
-    x1 = layout.create_pi("x1", (1, 0))
-    x2 = layout.create_pi("x2", (0, 1))
-    x3 = layout.create_pi("x3", (2, 0))
-    x4 = layout.create_pi("x4", (0, 2))
+    x1 = layout.create_pi("x1", offset_coordinate(1, 0))
+    x2 = layout.create_pi("x2", offset_coordinate(0, 1))
+    x3 = layout.create_pi("x3", offset_coordinate(2, 0))
+    x4 = layout.create_pi("x4", offset_coordinate(0, 2))
 
-    a1 = layout.create_and(x1, x2, (1, 1))
+    a1 = layout.create_and(x1, x2, offset_coordinate(1, 1))
 
-    b1 = layout.create_buf(x3, (2, 1))
-    b2 = layout.create_buf(x4, (1, 2))
+    b1 = layout.create_buf(x3, offset_coordinate(2, 1))
+    b2 = layout.create_buf(x4, offset_coordinate(1, 2))
 
-    a2 = layout.create_and(b1, b2, (2, 2))
+    a2 = layout.create_and(b1, b2, offset_coordinate(2, 2))
 
-    c = layout.create_buf(a1, (2, 1, 1))
+    c = layout.create_buf(a1, offset_coordinate(2, 1, 1))
 
-    f1 = layout.create_po(c, "f1", (3, 1))
-    f2 = layout.create_po(a2, "f2", (3, 2))
+    f1 = layout.create_po(c, "f1", offset_coordinate(3, 1))
+    f2 = layout.create_po(a2, "f2", offset_coordinate(3, 2))
 
     assert not layout.is_empty()
 
@@ -183,90 +193,90 @@ def test_gate_level_layout_iteration(make_layout):
 
 def test_gate_level_layout_gate_types():
     layouts: list[cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout] = [
-        cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
-        shifted_cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
-        hexagonal_gate_layout((2, 8, 0), "2DDWave", "Layout"),
+        cartesian_gate_layout(offset_coordinate(2, 8, 0), "2DDWave", "Layout"),
+        shifted_cartesian_gate_layout(offset_coordinate(2, 8, 0), "2DDWave", "Layout"),
+        hexagonal_gate_layout(offset_coordinate(2, 8, 0), "2DDWave", "Layout"),
     ]
     for layout in layouts:
         assert layout.is_empty()
 
         # layout creation
         # pis
-        x1 = layout.create_pi("x1", (0, 0))
-        x2 = layout.create_pi("x2", (0, 1))
-        x3 = layout.create_pi("x3", (0, 2))
-        x4 = layout.create_pi("x4", (0, 3))
-        x5 = layout.create_pi("x5", (0, 4))
-        x6 = layout.create_pi("x6", (0, 5))
-        x7 = layout.create_pi("x7", (0, 6))
+        x1 = layout.create_pi("x1", offset_coordinate(0, 0))
+        x2 = layout.create_pi("x2", offset_coordinate(0, 1))
+        x3 = layout.create_pi("x3", offset_coordinate(0, 2))
+        x4 = layout.create_pi("x4", offset_coordinate(0, 3))
+        x5 = layout.create_pi("x5", offset_coordinate(0, 4))
+        x6 = layout.create_pi("x6", offset_coordinate(0, 5))
+        x7 = layout.create_pi("x7", offset_coordinate(0, 6))
 
         # gates
-        inv = layout.create_not(x1, (1, 0))
-        and_gate = layout.create_and(x2, inv, (1, 1))
-        nand_gate = layout.create_nand(x3, and_gate, (1, 2))
-        or_gate = layout.create_or(x4, nand_gate, (1, 3))
-        nor_gate = layout.create_nor(x5, or_gate, (1, 4))
-        xor_gate = layout.create_xor(x6, nor_gate, (1, 5))
-        xnor_gate = layout.create_xnor(x7, xor_gate, (1, 6))
-        fanout = layout.create_buf(xnor_gate, (1, 7))
-        buf = layout.create_buf(fanout, (2, 7))
+        inv = layout.create_not(x1, offset_coordinate(1, 0))
+        and_gate = layout.create_and(x2, inv, offset_coordinate(1, 1))
+        nand_gate = layout.create_nand(x3, and_gate, offset_coordinate(1, 2))
+        or_gate = layout.create_or(x4, nand_gate, offset_coordinate(1, 3))
+        nor_gate = layout.create_nor(x5, or_gate, offset_coordinate(1, 4))
+        xor_gate = layout.create_xor(x6, nor_gate, offset_coordinate(1, 5))
+        xnor_gate = layout.create_xnor(x7, xor_gate, offset_coordinate(1, 6))
+        fanout = layout.create_buf(xnor_gate, offset_coordinate(1, 7))
+        buf = layout.create_buf(fanout, offset_coordinate(2, 7))
 
         # pos
-        layout.create_po(fanout, "f1", (1, 8))
-        layout.create_po(buf, "f2", (2, 8))
+        layout.create_po(fanout, "f1", offset_coordinate(1, 8))
+        layout.create_po(buf, "f2", offset_coordinate(2, 8))
 
         # check gate type
         # pis
-        assert layout.is_pi(layout.get_node((0, 0)))
-        assert layout.is_pi(layout.get_node((0, 1)))
-        assert layout.is_pi(layout.get_node((0, 2)))
-        assert layout.is_pi(layout.get_node((0, 3)))
-        assert layout.is_pi(layout.get_node((0, 4)))
-        assert layout.is_pi(layout.get_node((0, 5)))
-        assert layout.is_pi(layout.get_node((0, 6)))
+        assert layout.is_pi(layout.get_node(offset_coordinate(0, 0)))
+        assert layout.is_pi(layout.get_node(offset_coordinate(0, 1)))
+        assert layout.is_pi(layout.get_node(offset_coordinate(0, 2)))
+        assert layout.is_pi(layout.get_node(offset_coordinate(0, 3)))
+        assert layout.is_pi(layout.get_node(offset_coordinate(0, 4)))
+        assert layout.is_pi(layout.get_node(offset_coordinate(0, 5)))
+        assert layout.is_pi(layout.get_node(offset_coordinate(0, 6)))
 
         # gates
-        assert layout.is_inv(layout.get_node((1, 0)))
-        assert layout.is_and(layout.get_node((1, 1)))
-        assert layout.is_nand(layout.get_node((1, 2)))
-        assert layout.is_or(layout.get_node((1, 3)))
-        assert layout.is_nor(layout.get_node((1, 4)))
-        assert layout.is_xor(layout.get_node((1, 5)))
-        assert layout.is_xnor(layout.get_node((1, 6)))
-        assert layout.is_fanout(layout.get_node((1, 7)))
-        assert layout.is_wire(layout.get_node((2, 7)))
+        assert layout.is_inv(layout.get_node(offset_coordinate(1, 0)))
+        assert layout.is_and(layout.get_node(offset_coordinate(1, 1)))
+        assert layout.is_nand(layout.get_node(offset_coordinate(1, 2)))
+        assert layout.is_or(layout.get_node(offset_coordinate(1, 3)))
+        assert layout.is_nor(layout.get_node(offset_coordinate(1, 4)))
+        assert layout.is_xor(layout.get_node(offset_coordinate(1, 5)))
+        assert layout.is_xnor(layout.get_node(offset_coordinate(1, 6)))
+        assert layout.is_fanout(layout.get_node(offset_coordinate(1, 7)))
+        assert layout.is_wire(layout.get_node(offset_coordinate(2, 7)))
 
         # pos
-        assert layout.is_po(layout.get_node((1, 8)))
-        assert layout.is_po(layout.get_node((2, 8)))
+        assert layout.is_po(layout.get_node(offset_coordinate(1, 8)))
+        assert layout.is_po(layout.get_node(offset_coordinate(2, 8)))
 
     layouts = [
-        cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
-        shifted_cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
-        hexagonal_gate_layout((2, 2, 0), "RES", "Layout"),
+        cartesian_gate_layout(offset_coordinate(2, 2, 0), "RES", "Layout"),
+        shifted_cartesian_gate_layout(offset_coordinate(2, 2, 0), "RES", "Layout"),
+        hexagonal_gate_layout(offset_coordinate(2, 2, 0), "RES", "Layout"),
     ]
     for layout in layouts:
         assert layout.is_empty()
 
         # pis
-        x1 = layout.create_pi("x1", (0, 1))
-        x2 = layout.create_pi("x2", (1, 0))
-        x3 = layout.create_pi("x3", (2, 1))
+        x1 = layout.create_pi("x1", offset_coordinate(0, 1))
+        x2 = layout.create_pi("x2", offset_coordinate(1, 0))
+        x3 = layout.create_pi("x3", offset_coordinate(2, 1))
 
         # maj
-        maj = layout.create_maj(x1, x2, x3, (1, 1))
+        maj = layout.create_maj(x1, x2, x3, offset_coordinate(1, 1))
 
         # po
-        layout.create_po(maj, "f1", (1, 2))
+        layout.create_po(maj, "f1", offset_coordinate(1, 2))
 
         # check gate type
         # pis
-        assert layout.is_pi(layout.get_node((0, 1)))
-        assert layout.is_pi(layout.get_node((1, 0)))
-        assert layout.is_pi(layout.get_node((2, 1)))
+        assert layout.is_pi(layout.get_node(offset_coordinate(0, 1)))
+        assert layout.is_pi(layout.get_node(offset_coordinate(1, 0)))
+        assert layout.is_pi(layout.get_node(offset_coordinate(2, 1)))
 
         # maj
-        assert layout.is_maj(layout.get_node((1, 1)))
+        assert layout.is_maj(layout.get_node(offset_coordinate(1, 1)))
 
         # po
-        assert layout.is_po(layout.get_node((1, 2)))
+        assert layout.is_po(layout.get_node(offset_coordinate(1, 2)))

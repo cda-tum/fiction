@@ -19,7 +19,6 @@ from __future__ import annotations
 import argparse
 import contextlib
 import os
-import re
 import shutil
 import sys
 import tempfile
@@ -251,33 +250,6 @@ def cpp_lint(session: nox.Session) -> None:
         session.run("cpp-linter", *linter_args)
 
 
-def _widen_stub(stub: Path) -> None:
-    """Widen the types of a stub to what the bindings accept and return but stubgen cannot express.
-
-    The bindings declare ``tuple`` implicitly convertible to ``offset_coordinate`` and
-    ``cube_coordinate``, so coordinate parameters also accept tuples. An empty ``std::function``
-    member reads as ``None``, so callback property getters may return ``None``.
-
-    Args:
-        stub: Stub file to rewrite in place.
-    """
-    text = stub.read_text(encoding="utf-8")
-    text = re.sub(r"(@property\n\s*def \w+\(self\) -> )(Callable\[.*\]):$", r"\1\2 | None:", text, flags=re.MULTILINE)
-    coordinate = re.compile(r"\b((?:mnt\.pyfiction\.layouts\.coords\.)?(?:offset|cube)_coordinate)\b(?! \|)")
-    pieces, position = [], 0
-    for match in re.finditer(r"\bdef \w+\(", text):
-        if match.start() < position:
-            continue
-        depth, end = 1, match.end()
-        while depth:
-            depth += {"(": 1, ")": -1}.get(text[end], 0)
-            end += 1
-        parameters = coordinate.sub(r"\1 | tuple[int, int] | tuple[int, int, int]", text[match.end() : end])
-        pieces += [text[position : match.end()], parameters]
-        position = end
-    stub.write_text("".join([*pieces, text[position:]]), encoding="utf-8")
-
-
 @nox.session(reuse_venv=True)
 def stubs(session: nox.Session) -> None:
     """Generate the type stubs of the `mnt.pyfiction` extension modules with nanobind.
@@ -291,6 +263,9 @@ def stubs(session: nox.Session) -> None:
     session.run("uv", "sync", "--inexact", "--no-dev", "--no-build-isolation-package", "mnt-pyfiction", env=env)
 
     package_root = Path(__file__).parent / "python" / "mnt" / "pyfiction"
+    # every `.pyi` file in the package is generated; removing them first drops the stubs of removed modules
+    for stub in package_root.glob("**/*.pyi"):
+        stub.unlink()
     modules = [
         "fcn",
         "inml",
@@ -325,9 +300,6 @@ def stubs(session: nox.Session) -> None:
     # Stable ABI build
     for abi3_stub in package_root.glob("*.abi3.pyi"):
         abi3_stub.replace(package_root / abi3_stub.name.replace(".abi3.pyi", ".pyi"))
-
-    for stub in package_root.glob("**/*.pyi"):
-        _widen_stub(stub)
 
     pyi_files = [str(path) for path in package_root.glob("**/*.pyi")]
     if shutil.which("prek") is None:

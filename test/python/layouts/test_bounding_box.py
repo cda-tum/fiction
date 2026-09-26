@@ -14,6 +14,7 @@ import pytest
 
 from mnt.pyfiction.inml import inml_layout
 from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts.coords import offset_coordinate
 from mnt.pyfiction.networks.io import read_technology_network
 from mnt.pyfiction.physical_design import orthogonal, orthogonal_params
 from mnt.pyfiction.qca import qca_layout
@@ -25,11 +26,16 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize(
     "make_layout",
     [
-        pytest.param(lambda: cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="cartesian_gate_layout"),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
+            lambda: cartesian_gate_layout(offset_coordinate(2, 2, 0), "2DDWave", "Layout"), id="cartesian_gate_layout"
         ),
-        pytest.param(lambda: hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+        pytest.param(
+            lambda: shifted_cartesian_gate_layout(offset_coordinate(2, 2, 0), "2DDWave", "Layout"),
+            id="shifted_cartesian_gate_layout",
+        ),
+        pytest.param(
+            lambda: hexagonal_gate_layout(offset_coordinate(2, 2, 0), "2DDWave", "Layout"), id="hexagonal_gate_layout"
+        ),
     ],
 )
 def test_bounding_box_around_an_empty_gate_level_layout(make_layout):
@@ -54,22 +60,22 @@ def test_initialize_gate_level_with_ortho_bounding_box(resources_dir: Path, veri
 
 def test_update_gate_level_bounding_box() -> None:
     """Clearing and moving occupied boundary tiles updates both bounding-box axes."""
-    layout = cartesian_gate_layout((8, 8), "2DDWave")
-    source = layout.create_pi("a", (0, 0))
-    wire = layout.create_buf(source, (4, 6))
-    edge = layout.create_buf(wire, (4, 7))
-    layout.create_po(edge, "out", (5, 7))
+    layout = cartesian_gate_layout(offset_coordinate(8, 8), "2DDWave")
+    source = layout.create_pi("a", offset_coordinate(0, 0))
+    wire = layout.create_buf(source, offset_coordinate(4, 6))
+    edge = layout.create_buf(wire, offset_coordinate(4, 7))
+    layout.create_po(edge, "out", offset_coordinate(5, 7))
     min_coord, max_coord = layout.bounding_box_2d()
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(5, 7)
 
-    layout.clear_tile((4, 7))
-    layout.move_node(layout.get_node((5, 7)), (5, 6), [wire])
+    layout.clear_tile(offset_coordinate(4, 7))
+    layout.move_node(layout.get_node(offset_coordinate(5, 7)), offset_coordinate(5, 6), [wire])
     min_coord, max_coord = layout.bounding_box_2d()
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(5, 6)
 
-    layout.move_node(layout.get_node((5, 6)), (4, 7), [wire])
+    layout.move_node(layout.get_node(offset_coordinate(5, 6)), offset_coordinate(4, 7), [wire])
     min_coord, max_coord = layout.bounding_box_2d()
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(4, 7)
@@ -78,8 +84,8 @@ def test_update_gate_level_bounding_box() -> None:
 @pytest.mark.parametrize(
     "make_layout",
     [
-        pytest.param(lambda: qca_layout((2, 2, 0), "2DDWave", "Layout"), id="qca_layout"),
-        pytest.param(lambda: inml_layout((2, 2, 0), "2DDWave", "Layout"), id="inml_layout"),
+        pytest.param(lambda: qca_layout(offset_coordinate(2, 2, 0), "2DDWave", "Layout"), id="qca_layout"),
+        pytest.param(lambda: inml_layout(offset_coordinate(2, 2, 0), "2DDWave", "Layout"), id="inml_layout"),
     ],
 )
 def test_bounding_box_around_cell_level_layout(make_layout):

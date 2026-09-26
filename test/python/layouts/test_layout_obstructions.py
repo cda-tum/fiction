@@ -16,15 +16,15 @@ from mnt.pyfiction.verification import critical_path_length_and_throughput, gate
 
 OBSTRUCTION_LAYOUTS = [
     pytest.param(
-        lambda: cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"),
+        lambda: cartesian_gate_layout(offset_coordinate(3, 3, 1), "2DDWave", "Layout"),
         id="cartesian_gate_layout",
     ),
     pytest.param(
-        lambda: shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"),
+        lambda: shifted_cartesian_gate_layout(offset_coordinate(3, 3, 1), "2DDWave", "Layout"),
         id="shifted_cartesian_gate_layout",
     ),
     pytest.param(
-        lambda: hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"),
+        lambda: hexagonal_gate_layout(offset_coordinate(3, 3, 1), "2DDWave", "Layout"),
         id="hexagonal_gate_layout",
     ),
 ]
@@ -34,15 +34,15 @@ OBSTRUCTION_LAYOUTS = [
     "make_layout",
     [
         pytest.param(
-            lambda: cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
+            lambda: cartesian_gate_layout(offset_coordinate(2, 2, 0), "2DDWave", "Layout"),
             id="cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
+            lambda: shifted_cartesian_gate_layout(offset_coordinate(2, 2, 0), "2DDWave", "Layout"),
             id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"),
+            lambda: hexagonal_gate_layout(offset_coordinate(2, 2, 0), "2DDWave", "Layout"),
             id="hexagonal_gate_layout",
         ),
     ],
@@ -113,27 +113,27 @@ def test_obstruction_via_gates(make_layout):
 
 
 def test_cartesian_gate_layout_gate_level_inheritance():
-    layout = cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")
+    layout = cartesian_gate_layout(offset_coordinate(3, 3, 1), "2DDWave", "Layout")
 
     assert layout.is_empty()
 
     # layout creation
-    x1 = layout.create_pi("x1", (1, 0))
-    x2 = layout.create_pi("x2", (0, 1))
-    x3 = layout.create_pi("x3", (2, 0))
-    x4 = layout.create_pi("x4", (0, 2))
+    x1 = layout.create_pi("x1", offset_coordinate(1, 0))
+    x2 = layout.create_pi("x2", offset_coordinate(0, 1))
+    x3 = layout.create_pi("x3", offset_coordinate(2, 0))
+    x4 = layout.create_pi("x4", offset_coordinate(0, 2))
 
-    a1 = layout.create_and(x1, x2, (1, 1))
+    a1 = layout.create_and(x1, x2, offset_coordinate(1, 1))
 
-    b1 = layout.create_buf(x3, (2, 1))
-    b2 = layout.create_buf(x4, (1, 2))
+    b1 = layout.create_buf(x3, offset_coordinate(2, 1))
+    b2 = layout.create_buf(x4, offset_coordinate(1, 2))
 
-    a2 = layout.create_and(b1, b2, (2, 2))
+    a2 = layout.create_and(b1, b2, offset_coordinate(2, 2))
 
-    c = layout.create_buf(a1, (2, 1, 1))
+    c = layout.create_buf(a1, offset_coordinate(2, 1, 1))
 
-    f1 = layout.create_po(c, "f1", (3, 1))
-    f2 = layout.create_po(a2, "f2", (3, 2))
+    f1 = layout.create_po(c, "f1", offset_coordinate(3, 1))
+    f2 = layout.create_po(a2, "f2", offset_coordinate(3, 2))
 
     assert not layout.is_empty()
 
@@ -242,27 +242,27 @@ def test_cartesian_gate_layout_gate_level_inheritance():
 
 
 def test_hexagonal_gate_layout_gate_level_inheritance():
-    layout = hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")
+    layout = hexagonal_gate_layout(offset_coordinate(3, 3, 1), "2DDWave", "Layout")
 
     assert layout.is_empty()
 
     # layout creation
-    x1 = layout.create_pi("x1", (1, 0))
-    x2 = layout.create_pi("x2", (0, 1))
-    x3 = layout.create_pi("x3", (2, 0))
-    x4 = layout.create_pi("x4", (0, 2))
+    x1 = layout.create_pi("x1", offset_coordinate(1, 0))
+    x2 = layout.create_pi("x2", offset_coordinate(0, 1))
+    x3 = layout.create_pi("x3", offset_coordinate(2, 0))
+    x4 = layout.create_pi("x4", offset_coordinate(0, 2))
 
-    a1 = layout.create_and(x1, x2, (1, 1))
+    a1 = layout.create_and(x1, x2, offset_coordinate(1, 1))
 
-    b1 = layout.create_buf(x3, (2, 1))
-    b2 = layout.create_buf(x4, (1, 2))
+    b1 = layout.create_buf(x3, offset_coordinate(2, 1))
+    b2 = layout.create_buf(x4, offset_coordinate(1, 2))
 
-    a2 = layout.create_and(b1, b2, (2, 2))
+    a2 = layout.create_and(b1, b2, offset_coordinate(2, 2))
 
-    c = layout.create_buf(a1, (2, 1, 1))
+    c = layout.create_buf(a1, offset_coordinate(2, 1, 1))
 
-    f1 = layout.create_po(c, "f1", (3, 1))
-    f2 = layout.create_po(a2, "f2", (3, 2))
+    f1 = layout.create_po(c, "f1", offset_coordinate(3, 1))
+    f2 = layout.create_po(a2, "f2", offset_coordinate(3, 2))
 
     assert not layout.is_empty()
 
