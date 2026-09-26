@@ -34,9 +34,7 @@ function(add_pyfiction_python_binding target_name)
     ${target_name} PROPERTIES OUTPUT_NAME ${ARG_MODULE_NAME}
                               INTERPROCEDURAL_OPTIMIZATION OFF)
 
-  target_link_libraries(${target_name} PRIVATE libfiction)
-  target_include_directories(${target_name}
-                             PRIVATE ${PROJECT_SOURCE_DIR}/bindings/include)
+  target_link_libraries(${target_name} PRIVATE pyfiction_headers)
   target_compile_features(${target_name} PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
 
   # `CMAKE_INSTALL_RPATH_USE_LINK_PATH` skips link directories inside the source

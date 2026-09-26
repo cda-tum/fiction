@@ -39,6 +39,25 @@ find_package(nanobind CONFIG REQUIRED PATHS "${nanobind_ROOT}" NO_DEFAULT_PATH)
 
 include(${PROJECT_SOURCE_DIR}/cmake/AddPyfictionPythonBinding.cmake)
 
+# The headers shared by all modules. The verified header set compiles each
+# header on its own, which also gives it an entry in the compilation database
+# that Clang-Tidy reads. The generated docstring header has no include guard and
+# is only included through `documentation.hpp`.
+add_library(pyfiction_headers INTERFACE)
+target_include_directories(pyfiction_headers
+                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(pyfiction_headers SYSTEM INTERFACE ${NB_DIR}/include)
+target_link_libraries(pyfiction_headers INTERFACE libfiction Python::Module)
+file(GLOB_RECURSE FICTION_PYFICTION_HEADERS CONFIGURE_DEPENDS
+     ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
+list(FILTER FICTION_PYFICTION_HEADERS EXCLUDE REGEX
+     "pybind11_mkdoc_docstrings\\.hpp$")
+target_sources(
+  pyfiction_headers
+  INTERFACE FILE_SET HEADERS BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
+            FILES ${FICTION_PYFICTION_HEADERS})
+set_property(TARGET pyfiction_headers PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
+
 # Builds every extension module of the wheel.
 add_custom_target(pyfiction)
 
@@ -62,13 +81,3 @@ foreach(
   add_pyfiction_python_binding(pyfiction-${module} ${module_sources}
                                MODULE_NAME ${module})
 endforeach()
-
-# Verify that every binding header compiles on its own. The header set hangs off
-# one module, which carries the same include directories as all others.
-file(GLOB_RECURSE FICTION_PYFICTION_HEADERS CONFIGURE_DEPENDS
-     ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
-target_sources(
-  pyfiction-utils
-  PRIVATE FILE_SET HEADERS BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include FILES
-          ${FICTION_PYFICTION_HEADERS})
-set_property(TARGET pyfiction-utils PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
