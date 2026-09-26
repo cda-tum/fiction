@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/post_layout_optimization.hpp>
@@ -75,6 +76,7 @@ void post_layout_optimization(nanobind::module_& m)
         .def_rw("timeout", &fiction::physical_design::post_layout_optimization_params::timeout,
                 DOC(fiction_physical_design_post_layout_optimization_params_timeout))
         .def_rw("on_progress", &fiction::physical_design::post_layout_optimization_params::on_progress,
+                pyfiction::on_progress_getter, pyfiction::callback_setter,
                 DOC(fiction_physical_design_post_layout_optimization_params_on_progress));
 
     py::class_<fiction::physical_design::post_layout_optimization_stats>(
@@ -89,8 +91,6 @@ void post_layout_optimization(nanobind::module_& m)
                 return stream.str();
             },
             "Returns a string representation of the statistics.")
-        .def("report", &fiction::physical_design::post_layout_optimization_stats::report,
-             DOC(fiction_physical_design_post_layout_optimization_stats_report))
         .def_ro("time_total", &fiction::physical_design::post_layout_optimization_stats::time_total,
                 DOC(fiction_physical_design_post_layout_optimization_stats_time_total))
         .def_ro("x_size_before", &fiction::physical_design::post_layout_optimization_stats::x_size_before,

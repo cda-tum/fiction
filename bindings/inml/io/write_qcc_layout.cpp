@@ -15,6 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 
 #include <fiction/technology/inml/io/write_qcc_layout.hpp>
 #include <fiction/technology/inml/layout.hpp>
@@ -41,8 +42,8 @@ void write_qcc_layout(nanobind::module_& m)
     py::class_<fiction::inml::io::write_qcc_layout_params>(m, "write_qcc_layout_params",
                                                            DOC(fiction_inml_io_write_qcc_layout_params))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("on_progress", &fiction::inml::io::write_qcc_layout_params::on_progress,
-                "Receives serialization progress.")
+        .def_rw("on_progress", &fiction::inml::io::write_qcc_layout_params::on_progress, pyfiction::on_progress_getter,
+                pyfiction::callback_setter, "Receives serialization progress.")
         .def_rw("use_filename_as_component_name",
                 &fiction::inml::io::write_qcc_layout_params::use_filename_as_component_name,
                 DOC(fiction_inml_io_write_qcc_layout_params_use_filename_as_component_name));

@@ -15,6 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/time_to_solution.hpp>
@@ -56,6 +57,7 @@ void time_to_solution(nanobind::module_& m)
         .def_rw("confidence_level", &fiction::sidb::simulation::analysis::time_to_solution_params::confidence_level,
                 DOC(fiction_sidb_simulation_analysis_time_to_solution_params_confidence_level))
         .def_rw("on_progress", &fiction::sidb::simulation::analysis::time_to_solution_params::on_progress,
+                pyfiction::on_progress_getter, pyfiction::callback_setter,
                 DOC(fiction_sidb_simulation_analysis_time_to_solution_params_on_progress));
     /**
      * Statistics.
@@ -72,8 +74,6 @@ void time_to_solution(nanobind::module_& m)
                 return stream.str();
             },
             "Returns a string representation of the statistics.")
-        .def("report", &fiction::sidb::simulation::analysis::time_to_solution_stats::report,
-             DOC(fiction_sidb_simulation_analysis_time_to_solution_stats_report))
         .def_ro("time_to_solution", &fiction::sidb::simulation::analysis::time_to_solution_stats::time_to_solution,
                 DOC(fiction_sidb_simulation_analysis_time_to_solution_stats_time_to_solution))
         .def_ro("acc", &fiction::sidb::simulation::analysis::time_to_solution_stats::acc,

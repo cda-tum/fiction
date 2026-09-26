@@ -15,6 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/io/write_sidb_layout_svg.hpp>
@@ -64,7 +65,7 @@ void write_sidb_layout_svg(nanobind::module_& m)
                                                                 DOC(fiction_sidb_io_write_sidb_layout_svg_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::sidb::io::write_sidb_layout_svg_params::on_progress,
-                "Receives serialization progress.")
+                pyfiction::on_progress_getter, pyfiction::callback_setter, "Receives serialization progress.")
         .def_rw("lattice_point_size", &fiction::sidb::io::write_sidb_layout_svg_params::lattice_point_size,
                 DOC(fiction_sidb_io_write_sidb_layout_svg_params_lattice_point_size))
         .def_rw("sidb_size", &fiction::sidb::io::write_sidb_layout_svg_params::sidb_size,

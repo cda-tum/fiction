@@ -44,6 +44,8 @@ namespace pyfiction::detail
 /**
  * @brief Binds the cell types, cell names, inputs and outputs, and layout name of a cell grid layout.
  *
+ * Each technology binds `assign_cell_type` itself, because a QCA layout also clears the cell mode.
+ *
  * @tparam Lyt Cell grid layout type.
  * @param cls Python class of `Lyt`.
  */
@@ -54,9 +56,7 @@ void bind_cell_grid(nanobind::class_<Lyt, py_cartesian_layout>& cls)
 
     using cell = typename Lyt::cell;
 
-    cls.def("assign_cell_type", &Lyt::assign_cell_type, py::arg("c"), py::arg("ct"),
-            DOC(fiction_layouts_cell_grid_assign_cell_type))
-        .def("get_cell_type", &Lyt::get_cell_type, py::arg("c"), DOC(fiction_layouts_cell_grid_get_cell_type))
+    cls.def("get_cell_type", &Lyt::get_cell_type, py::arg("c"), DOC(fiction_layouts_cell_grid_get_cell_type))
         .def("is_empty_cell", &Lyt::is_empty_cell, py::arg("c"), DOC(fiction_layouts_cell_grid_is_empty_cell))
         .def("assign_cell_name", &Lyt::assign_cell_name, py::arg("c"), py::arg("n"),
              DOC(fiction_layouts_cell_grid_assign_cell_name))

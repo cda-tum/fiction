@@ -56,6 +56,9 @@ void inml_layout(nanobind::module_& m)
     detail::bind_clocked_constructors(cls);
     detail::bind_cell_grid(cls);
     detail::bind_tile_clocking(cls);
+
+    cls.def("assign_cell_type", &layout::assign_cell_type, py::arg("c"), py::arg("ct"),
+            DOC(fiction_layouts_cell_grid_assign_cell_type));
 }
 
 }  // namespace pyfiction

@@ -66,6 +66,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - The callback members of parameter classes accept `None`, which clears the callback.
   - Shared SiDB deadlines raise `TimeoutError`; gate design releases the GIL.
   - Added directory-based test markers, including `pytest -m simulation`.
   - Marked the SiDB circuit-design integration test as `slow`; `pytest -m 'not slow'` skips it.
@@ -432,6 +433,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
 - Python bindings:
 
+  - The `report` methods of the statistics classes that took a C++ output stream, which no Python
+    call could satisfy; `repr()` returns the same text.
   - **Breaking:** The classes `clocked_cartesian_layout`, `clocked_shifted_cartesian_layout`,
     `clocked_hexagonal_layout`, their row and column variants, `clocked_stacked_cartesian_layout`, and
     `cartesian_obstruction_layout`, `shifted_cartesian_obstruction_layout`, and `hexagonal_obstruction_layout`. Use

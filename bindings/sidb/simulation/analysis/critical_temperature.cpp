@@ -17,6 +17,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -112,8 +113,6 @@ void critical_temperature(nanobind::module_& m)
                 return stream.str();
             },
             "Returns a string representation of the statistics.")
-        .def("report", &fiction::sidb::simulation::analysis::critical_temperature_stats::report,
-             DOC(fiction_sidb_simulation_analysis_critical_temperature_stats_report))
         .def_ro("algorithm_name", &fiction::sidb::simulation::analysis::critical_temperature_stats::algorithm_name,
                 DOC(fiction_sidb_simulation_analysis_critical_temperature_stats_algorithm_name))
         .def_ro("num_valid_lyt", &fiction::sidb::simulation::analysis::critical_temperature_stats::num_valid_lyt,
@@ -140,9 +139,11 @@ void critical_temperature(nanobind::module_& m)
         .def_rw("max_temperature", &fiction::sidb::simulation::analysis::critical_temperature_params::max_temperature,
                 DOC(fiction_sidb_simulation_analysis_critical_temperature_params_max_temperature))
         .def_rw("on_progress", &fiction::sidb::simulation::analysis::critical_temperature_params::on_progress,
+                pyfiction::on_progress_getter, pyfiction::callback_setter,
                 DOC(fiction_sidb_simulation_analysis_critical_temperature_params_on_progress))
         .def_rw("on_worker_progress",
                 &fiction::sidb::simulation::analysis::critical_temperature_params::on_worker_progress,
+                pyfiction::on_worker_progress_getter, pyfiction::callback_setter,
                 DOC(fiction_sidb_simulation_analysis_critical_temperature_params_on_worker_progress));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
