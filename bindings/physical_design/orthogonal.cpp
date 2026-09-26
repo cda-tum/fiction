@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -53,6 +54,7 @@ void orthogonal(nanobind::module_& m)
                 &fiction::physical_design::orthogonal_physical_design_params::number_of_clock_phases,
                 DOC(fiction_physical_design_orthogonal_physical_design_params_number_of_clock_phases))
         .def_rw("on_progress", &fiction::physical_design::orthogonal_physical_design_params::on_progress,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_orthogonal_physical_design_params_on_progress));
 
     py::class_<fiction::physical_design::orthogonal_physical_design_stats>(
@@ -67,8 +69,6 @@ void orthogonal(nanobind::module_& m)
                 return stream.str();
             },
             "Returns a string representation of the statistics.")
-        .def("report", &fiction::physical_design::orthogonal_physical_design_stats::report,
-             DOC(fiction_physical_design_orthogonal_physical_design_stats_report))
         .def_ro("time_total", &fiction::physical_design::orthogonal_physical_design_stats::time_total,
                 DOC(fiction_physical_design_orthogonal_physical_design_stats_time_total))
         .def_ro("x_size", &fiction::physical_design::orthogonal_physical_design_stats::x_size,

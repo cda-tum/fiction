@@ -164,6 +164,7 @@ jobs:
         id: codeql-changes
         run: echo "run-codeql=true" >> "${GITHUB_OUTPUT}"
 
+      # The stub check rebuilds the extension, so the filter covers everything it is compiled from.
       - name: Get the changed files relevant for the Python linter
         if: github.event_name == 'pull_request'
         id: changed-python-linter-files
@@ -172,6 +173,11 @@ jobs:
           filter: |
             **/*.py
             **/*.pyi
+            python/**
+            bindings/**
+            include/fiction/**
+            cmake/**
+            CMakeLists.txt
             pyproject.toml
             uv.lock
             .pre-commit-config.yaml

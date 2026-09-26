@@ -18,6 +18,7 @@
 #if (FICTION_Z3_SOLVER)
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/exact.hpp>
@@ -86,8 +87,10 @@ void exact(nanobind::module_& m)
         .def_rw("technology_specifics", &fiction::physical_design::exact_physical_design_params::technology_specifics,
                 DOC(fiction_physical_design_exact_physical_design_params_technology_specifics))
         .def_rw("on_progress", &fiction::physical_design::exact_physical_design_params::on_progress,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_exact_physical_design_params_on_progress))
         .def_rw("on_worker_progress", &fiction::physical_design::exact_physical_design_params::on_worker_progress,
+                pyfiction::ON_WORKER_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_exact_physical_design_params_on_worker_progress));
 
     py::class_<fiction::physical_design::exact_physical_design_stats>(
@@ -102,8 +105,6 @@ void exact(nanobind::module_& m)
                 return stream.str();
             },
             "Returns a string representation of the statistics.")
-        .def("report", &fiction::physical_design::exact_physical_design_stats::report,
-             DOC(fiction_physical_design_exact_physical_design_stats_report))
         .def_ro("time_total", &fiction::physical_design::exact_physical_design_stats::time_total,
                 DOC(fiction_physical_design_exact_physical_design_stats_time_total))
         .def_ro("x_size", &fiction::physical_design::exact_physical_design_stats::x_size,

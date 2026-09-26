@@ -56,7 +56,6 @@ def write_dot_command(session: Session, args: argparse.Namespace) -> Result:
     write_dot(
         element,
         path,
-        network=args.network,
         indexes=args.indexes,
         clock_colors=args.clock_colors,
         on_progress=session.report_progress,

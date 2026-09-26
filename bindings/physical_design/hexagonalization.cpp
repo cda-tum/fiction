@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/hexagonalization.hpp>
@@ -66,6 +67,7 @@ void hexagonalization(nanobind::module_& m)
         .def_rw("output_pin_extension", &fiction::physical_design::hexagonalization_params::output_pin_extension,
                 DOC(fiction_physical_design_hexagonalization_params_output_pin_extension))
         .def_rw("on_progress", &fiction::physical_design::hexagonalization_params::on_progress,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_hexagonalization_params_on_progress));
 
     py::class_<fiction::physical_design::hexagonalization_stats>(m, "hexagonalization_stats",

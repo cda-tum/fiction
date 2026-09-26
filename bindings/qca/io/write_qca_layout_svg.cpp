@@ -15,6 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 
 #include <fiction/technology/qca/io/write_qca_layout_svg.hpp>
 #include <fiction/technology/qca/layout.hpp>
@@ -62,7 +63,7 @@ void write_qca_layout_svg(nanobind::module_& m)
                                                               DOC(fiction_qca_io_write_qca_layout_svg_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::qca::io::write_qca_layout_svg_params::on_progress,
-                "Receives serialization progress.")
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER, "Receives serialization progress.")
         .def_rw("simple", &fiction::qca::io::write_qca_layout_svg_params::simple,
                 DOC(fiction_qca_io_write_qca_layout_svg_params_simple));
 

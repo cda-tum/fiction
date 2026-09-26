@@ -126,11 +126,11 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
 
     stats = operational_domain_stats()
     if args.random_sampling is not None:
-        domain = operational_domain_random_sampling(layout, spec, samples, params, stats)
+        domain = operational_domain_random_sampling(layout, spec, args.random_sampling, params, stats)
     elif args.flood_fill is not None:
-        domain = operational_domain_flood_fill(layout, spec, samples, params, stats)
+        domain = operational_domain_flood_fill(layout, spec, args.flood_fill, params, stats)
     elif args.contour_tracing is not None:
-        domain = operational_domain_contour_tracing(layout, spec, samples, params, stats)
+        domain = operational_domain_contour_tracing(layout, spec, args.contour_tracing, params, stats)
     else:
         domain = operational_domain_grid_search(layout, spec, params, stats)
 

@@ -97,9 +97,9 @@ def test_invalid_timeout(timeout: float) -> None:
     """The Python API accepts only unsigned 64-bit millisecond budgets."""
     params = on_the_fly_sidb_circuit_design_params()
     with pytest.raises(TypeError):
-        params.timeout = timeout
+        params.timeout = timeout  # type: ignore[assignment]  # deliberately invalid
     with pytest.raises(TypeError):
-        params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.timeout = timeout
+        params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.timeout = timeout  # type: ignore[assignment]  # deliberately invalid
 
 
 @pytest.mark.slow
@@ -144,4 +144,4 @@ def test_unsupported_gate() -> None:
 def test_wrong_topology() -> None:
     """Cartesian layouts require hexagonalization before circuit design."""
     with pytest.raises(TypeError):
-        on_the_fly_sidb_circuit_design(cartesian_gate_layout())
+        on_the_fly_sidb_circuit_design(cartesian_gate_layout())  # type: ignore[arg-type]  # deliberately wrong topology

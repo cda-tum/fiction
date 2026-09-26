@@ -17,6 +17,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/synthesis/fanout_substitution.hpp>
@@ -69,6 +70,7 @@ void fanout_substitution(nanobind::module_& m)
                                                                DOC(fiction_synthesis_fanout_substitution_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::synthesis::fanout_substitution_params::on_progress,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 "Receives completed work and the phase total.")
         .def_rw("strategy", &fiction::synthesis::fanout_substitution_params::strategy,
                 DOC(fiction_synthesis_fanout_substitution_params_strategy))

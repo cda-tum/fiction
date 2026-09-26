@@ -1,0 +1,8 @@
+^mnt\.pyfiction\.utils\.__compiled_date__$:
+    __compiled_date__: str
+
+^mnt\.pyfiction\.utils\.__compiled_time__$:
+    __compiled_time__: str
+
+^mnt\.pyfiction\.utils\.__suffix__$:
+    __version__: str

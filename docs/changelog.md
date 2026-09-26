@@ -66,6 +66,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - The callback members of parameter classes accept `None`, which clears the callback.
   - Shared SiDB deadlines raise `TimeoutError`; gate design releases the GIL.
   - Added directory-based test markers, including `pytest -m simulation`.
   - Marked the SiDB circuit-design integration test as `slow`; `pytest -m 'not slow'` skips it.
@@ -103,12 +104,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - The parameters of the algorithms that report progress accept a Python callable as
     `on_progress`, and `exhaustive_ground_state_simulation` takes it as an argument. These
     algorithms release the GIL while they run.
+  - `mnt.pyfiction` ships `.pyi` stubs and a `py.typed` marker, so type checkers and IDEs see the
+    signatures of the bindings.
+  - Coordinate stubs accept two- and three-element tuples. Domain iterators and simulation
+    parameter dictionaries preserve their element types.
+  - `bdl_wire.port_direction` exposes wire directions and I/O flags; `reserve_input_nodes`
+    returns a Python dictionary of source nodes and reserved layout nodes.
 
 - Tooling:
 
   - Added EditorConfig settings that match the repository's formatters.
   - Prek formats `pyproject.toml` with `pyproject-fmt`.
   - Added `nox -s cpp_lint` for local Clang-Tidy checks. Nox uses `cmake` as the sole CMake executable.
+  - Added `nox -s stubs`, which regenerates the `mnt.pyfiction` stubs; CI fails when they are out of date.
 
 ### Changed
 
@@ -429,6 +437,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
 - Python bindings:
 
+  - The `report` methods of the statistics classes that took a C++ output stream, which no Python
+    call could satisfy; `repr()` returns the same text.
   - **Breaking:** The classes `clocked_cartesian_layout`, `clocked_shifted_cartesian_layout`,
     `clocked_hexagonal_layout`, their row and column variants, `clocked_stacked_cartesian_layout`, and
     `cartesian_obstruction_layout`, `shifted_cartesian_obstruction_layout`, and `hexagonal_obstruction_layout`. Use

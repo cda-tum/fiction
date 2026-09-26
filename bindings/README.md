@@ -143,6 +143,7 @@ C++ docstrings.
 A few things must be noted when adding new bindings:
 
 - Do not use `""_a` literals in the bindings. Instead, use `py::arg` to specify the argument names.
+- Regenerate the type stubs with `nox -s stubs` and commit them.
 - Do not use `from mnt.pyfiction.<submodule> import *` in the Python code. Instead, use explicit imports like
   `from mnt.pyfiction.layouts import cartesian_layout`. This speeds up the import process and helps narrow down the origin of a
   failing test.

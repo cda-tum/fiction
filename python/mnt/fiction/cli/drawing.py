@@ -35,13 +35,13 @@ from mnt.pyfiction.sidb.io import write_sidb_layout_svg, write_sidb_layout_svg_p
 from .errors import CommandError
 from .parsing import tokenize
 from .session import ProgressCallback, ignore_progress
-from .stores import ground_state
+from .stores import Network, ground_state
 
 if TYPE_CHECKING:
     import argparse
 
     from .parsing import Parser
-    from .stores import CellEntry, GateLayout, Network
+    from .stores import CellEntry, GateLayout
 
 
 def drawing_flags(parser: Parser) -> None:
@@ -84,7 +84,6 @@ def write_dot(
     element: Network | GateLayout,
     path: Path,
     *,
-    network: bool,
     indexes: bool,
     clock_colors: bool,
     on_progress: ProgressCallback = ignore_progress,
@@ -94,12 +93,11 @@ def write_dot(
     Args:
         element: The network or the gate-level layout.
         path: The output file.
-        network: Whether ``element`` is a network rather than a gate-level layout.
         indexes: Label the nodes with their indices.
         on_progress: Receives completed tile rendering.
         clock_colors: Color the tiles by clock number instead of by gate type; layouts only.
     """
-    if network:
+    if isinstance(element, Network):
         write_dot_network(element, str(path), indexes=indexes)
     else:
         write_dot_layout(element, str(path), clock_colors=clock_colors, indexes=indexes, on_progress=on_progress)

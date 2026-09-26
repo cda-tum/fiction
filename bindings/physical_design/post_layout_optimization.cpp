@@ -16,12 +16,11 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/post_layout_optimization.hpp>
 
-#include <cstdint>
-#include <optional>
 #include <sstream>
 
 #include <nanobind/nanobind.h>
@@ -46,28 +45,9 @@ void post_layout_optimization(nanobind::module_& m)
     py::class_<fiction::physical_design::post_layout_optimization_params>(
         m, "post_layout_optimization_params", DOC(fiction_physical_design_post_layout_optimization_params))
         .def(py::init<>(), "Default constructor.")
-        .def_prop_rw(
-            "max_gate_relocations",
-            [](const fiction::physical_design::post_layout_optimization_params& p) -> py::object
-            {
-                if (p.max_gate_relocations.has_value())
-                {
-                    return py::cast(p.max_gate_relocations.value());
-                }
-                return py::none();
-            },
-            [](fiction::physical_design::post_layout_optimization_params& p, const py::object& value)
-            {
-                if (value.is_none())
-                {
-                    p.max_gate_relocations = std::nullopt;
-                }
-                else
-                {
-                    p.max_gate_relocations = py::cast<uint64_t>(value);
-                }
-            },
-            DOC(fiction_physical_design_post_layout_optimization_params_max_gate_relocations))
+        .def_rw("max_gate_relocations",
+                &fiction::physical_design::post_layout_optimization_params::max_gate_relocations,
+                DOC(fiction_physical_design_post_layout_optimization_params_max_gate_relocations))
         .def_rw("optimize_pos_only", &fiction::physical_design::post_layout_optimization_params::optimize_pos_only,
                 DOC(fiction_physical_design_post_layout_optimization_params_optimize_pos_only))
         .def_rw("planar_optimization", &fiction::physical_design::post_layout_optimization_params::planar_optimization,
@@ -75,6 +55,7 @@ void post_layout_optimization(nanobind::module_& m)
         .def_rw("timeout", &fiction::physical_design::post_layout_optimization_params::timeout,
                 DOC(fiction_physical_design_post_layout_optimization_params_timeout))
         .def_rw("on_progress", &fiction::physical_design::post_layout_optimization_params::on_progress,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_post_layout_optimization_params_on_progress));
 
     py::class_<fiction::physical_design::post_layout_optimization_stats>(
@@ -89,8 +70,6 @@ void post_layout_optimization(nanobind::module_& m)
                 return stream.str();
             },
             "Returns a string representation of the statistics.")
-        .def("report", &fiction::physical_design::post_layout_optimization_stats::report,
-             DOC(fiction_physical_design_post_layout_optimization_stats_report))
         .def_ro("time_total", &fiction::physical_design::post_layout_optimization_stats::time_total,
                 DOC(fiction_physical_design_post_layout_optimization_stats_time_total))
         .def_ro("x_size_before", &fiction::physical_design::post_layout_optimization_stats::x_size_before,

@@ -38,9 +38,9 @@ def test_orthogonal_with_stats(mux21):
 
 
 def test_orthogonal_reports_progress(mux21):
-    params = orthogonal_params()
-    assert params.on_progress is None
+    assert orthogonal_params().on_progress is None
 
+    params = orthogonal_params()
     reports = []
     params.on_progress = lambda task, done, total: reports.append((task, done, total))
 
@@ -53,6 +53,9 @@ def test_orthogonal_reports_progress(mux21):
     assert placements[0][0] == 0
     assert placements == sorted(placements)
     assert placements[-1][0] == placements[-1][1] > 0
+
+    params.on_progress = None
+    assert params.on_progress is None
 
 
 def test_orthogonal_rejects_high_degree_fanin(tmp_path):
