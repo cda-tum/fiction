@@ -13,7 +13,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from typing_extensions import assert_type
 
 from mnt.pyfiction.layouts import cartesian_gate_layout, cartesian_layout, stacked_cartesian_layout
 from mnt.pyfiction.layouts.coords import cube_coordinate, offset_coordinate
@@ -28,6 +27,8 @@ from mnt.pyfiction.sidb.simulation.logic import (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import assert_type
+
     from mnt.pyfiction.networks import technology_network
 
 
@@ -39,15 +40,21 @@ def test_coordinate_input_and_output_types() -> None:
     assert cube_coordinate(c=cube) == cube
     layout = cartesian_layout((2, 2))
     layout.resize((3, 3, 1))
-    assert assert_type(layout.east((0, 0)), offset_coordinate) == offset_coordinate(1, 0)
+    east = layout.east((0, 0))
+    assert east == offset_coordinate(1, 0)
     stacked = stacked_cartesian_layout((2, 2, 3))
-    assert assert_type(stacked.above((0, 0, 0)), cube_coordinate) == cube_coordinate(0, 0, 1)
+    above = stacked.above((0, 0, 0))
+    assert above == cube_coordinate(0, 0, 1)
+    if TYPE_CHECKING:
+        assert_type(east, offset_coordinate)
+        assert_type(above, cube_coordinate)
 
 
 def test_optional_relocation_limit() -> None:
     """The relocation limit accepts an integer and can be cleared."""
     params = post_layout_optimization_params()
-    assert_type(params.max_gate_relocations, int | None)
+    if TYPE_CHECKING:
+        assert_type(params.max_gate_relocations, int | None)
     params.max_gate_relocations = 7
     assert params.max_gate_relocations == 7
     params.max_gate_relocations = None
@@ -60,7 +67,9 @@ def test_reserved_input_node_mapping(mux21: technology_network) -> None:
     """Each primary input maps to a reserved layout node."""
     network = mux21
     layout = cartesian_gate_layout()
-    mapping = assert_type(reserve_input_nodes(layout, network), dict[int, int])
+    mapping = reserve_input_nodes(layout, network)
+    if TYPE_CHECKING:
+        assert_type(mapping, dict[int, int])
     assert set(mapping) == set(network.pis())
     assert len(set(mapping.values())) == network.num_pis()
     assert layout.num_pis() == network.num_pis()
@@ -71,7 +80,9 @@ def test_wire_port_direction() -> None:
     wire = bdl_wire()
     port = bdl_wire.port_direction(bdl_wire.port_direction.cardinal.SOUTH, pi=True)
     wire.direction = port
-    actual = assert_type(wire.direction, bdl_wire.port_direction)
+    actual = wire.direction
+    if TYPE_CHECKING:
+        assert_type(actual, bdl_wire.port_direction)
     assert actual.dir == bdl_wire.port_direction.cardinal.SOUTH.value
     assert actual.pi
     assert not actual.po
@@ -82,13 +93,20 @@ def test_domain_iterator_types() -> None:
     point = parameter_point([1.0, 2.0])
     domain = operational_domain()
     domain[point] = operational_status.OPERATIONAL
-    assert assert_type(next(iter(domain)), parameter_point) == point
+    actual = next(iter(domain))
+    assert actual == point
     temperatures = critical_temperature_domain()
     temperatures[point] = (operational_status.OPERATIONAL, 10.0)
-    assert assert_type(next(iter(temperatures)), parameter_point) == point
+    temperature_point = next(iter(temperatures))
+    assert temperature_point == point
+    if TYPE_CHECKING:
+        assert_type(actual, parameter_point)
+        assert_type(temperature_point, parameter_point)
 
 
 def test_additional_simulation_parameter_types() -> None:
     """Additional parameters expose string keys and supported scalar values."""
     result = sidb_simulation_result()
-    assert assert_type(result.additional_simulation_parameters, dict[str, int | float | bool | str]) == {}
+    assert result.additional_simulation_parameters == {}
+    if TYPE_CHECKING:
+        assert_type(result.additional_simulation_parameters, dict[str, int | float | bool | str])
