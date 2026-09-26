@@ -519,30 +519,10 @@ class sidb_layout:
         """
 
     def pis(self) -> list[lattice_site]:
-        """
-        Applies a function to every input SiDB site in raster order. Same
-        callable contract as `foreach_dot`.
-
-        Args:
-            fn: Function to apply.
-
-        Template Args:
-            Fn: Callable on `(const lattice_site&)` or `(const lattice_site&,
-                std::size_t)`.
-        """
+        """Returns the sites of all input SiDBs."""
 
     def pos(self) -> list[lattice_site]:
-        """
-        Applies a function to every output SiDB site in raster order. Same
-        callable contract as `foreach_dot`.
-
-        Args:
-            fn: Function to apply.
-
-        Template Args:
-            Fn: Callable on `(const lattice_site&)` or `(const lattice_site&,
-                std::size_t)`.
-        """
+        """Returns the sites of all output SiDBs."""
 
     def assign_defect(self, site: lattice_site, defect: model.sidb_defect) -> None:
         """

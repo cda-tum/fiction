@@ -72,11 +72,11 @@ class quickexact_params:
     @global_potential.setter
     def global_potential(self, arg: float, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Callback that receives the number of enumerated charge configurations."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 def quickexact(
     lyt: mnt.pyfiction.sidb.sidb_layout, params: quickexact_params = ...
@@ -153,23 +153,23 @@ class quicksim_params:
     @timeout.setter
     def timeout(self, arg: int, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """
         Callback that receives the number of completed iterations across all
         threads.
         """
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
-    def on_worker_progress(self) -> Callable[[int, int, str, int, int, bool], None] | None:
+    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
         """
         Reports logical worker activity with a fixed worker count for each
         invocation.
         """
 
     @on_worker_progress.setter
-    def on_worker_progress(self, arg: Callable[[int, int, str, int, int, bool], None], /) -> None: ...
+    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
 
 def quicksim(
     lyt: mnt.pyfiction.sidb.sidb_layout, params: quicksim_params = ...
@@ -335,23 +335,23 @@ class clustercomplete_params:
     @report_gss_stats.setter
     def report_gss_stats(self, arg: ground_state_space_reporting, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """
         Callback that receives the number of unfolded charge space
         compositions.
         """
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
-    def on_worker_progress(self) -> Callable[[int, int, str, int, int, bool], None] | None:
+    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
         """
         Reports logical worker activity with a fixed worker count for each
         invocation.
         """
 
     @on_worker_progress.setter
-    def on_worker_progress(self, arg: Callable[[int, int, str, int, int, bool], None], /) -> None: ...
+    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
 
 def clustercomplete(
     lyt: mnt.pyfiction.sidb.sidb_layout, params: clustercomplete_params = ...

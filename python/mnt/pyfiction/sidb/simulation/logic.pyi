@@ -1180,23 +1180,23 @@ class operational_domain_params:
     @number_of_threads.setter
     def number_of_threads(self, arg: int, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """
         Callback that receives the number of evaluated parameter points. The
         total is known for grid search and random sampling only.
         """
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
-    def on_worker_progress(self) -> Callable[[int, int, str, int, int, bool], None] | None:
+    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
         """
         Reports logical worker activity with a fixed worker count for each
         invocation.
         """
 
     @on_worker_progress.setter
-    def on_worker_progress(self, arg: Callable[[int, int, str, int, int, bool], None], /) -> None: ...
+    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
 
 class operational_domain_stats:
     """

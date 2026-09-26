@@ -10,7 +10,6 @@
 
 import enum
 from collections.abc import Sequence
-from typing import overload
 
 class sidb_defect_type(enum.Enum):
     """
@@ -294,16 +293,13 @@ class sidb_simulation_parameters:
     commonly used.
     """
 
-    @overload
     def __init__(
         self,
         base_number: int = 3,
         mu_minus: float = -0.32,
         relative_permittivity: float = 5.6,
         screening_distance: float = 5.0,
-    ) -> None: ...
-    @overload
-    def __init__(self) -> None:
+    ) -> None:
         """
         Default constructor.
 

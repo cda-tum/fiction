@@ -19,11 +19,11 @@ class write_qcc_layout_params:
         """Default constructor."""
 
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Receives serialization progress."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
     def use_filename_as_component_name(self) -> bool:
         """Use the given filename as the component name inside the QCC file."""

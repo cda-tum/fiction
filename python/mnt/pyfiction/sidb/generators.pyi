@@ -89,14 +89,14 @@ class generate_random_sidb_layout_params:
     @maximal_attempts_for_multiple_layouts.setter
     def maximal_attempts_for_multiple_layouts(self, arg: int, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """
         Callback that receives the number of placed SiDBs and, for multiple
         layouts, the number of generated layouts.
         """
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 def generate_random_sidb_layout(
     params: generate_random_sidb_layout_params, lyt_skeleton: mnt.pyfiction.sidb.sidb_layout | None = None
@@ -219,11 +219,11 @@ class design_sidb_gates_params:
     @termination_cond.setter
     def termination_cond(self, arg: termination_condition, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Callback that receives the progress of the design mode's main loop."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 def design_sidb_gates(
     skeleton: mnt.pyfiction.sidb.sidb_layout,

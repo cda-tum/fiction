@@ -11,16 +11,9 @@
 import datetime
 import enum
 from collections.abc import Callable
-from typing import Literal, TypeAlias, overload
+from typing import Literal, overload
 
 import mnt.pyfiction.networks
-
-_Network: TypeAlias = (
-    mnt.pyfiction.networks.technology_network
-    | mnt.pyfiction.networks.aig_network
-    | mnt.pyfiction.networks.xag_network
-    | mnt.pyfiction.networks.mig_network
-)
 
 class dynamic_truth_table:
     @overload
@@ -337,11 +330,11 @@ class fanout_substitution_params:
         """Default constructor."""
 
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Receives completed work and the phase total."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
     def strategy(self) -> substitution_strategy:
         """
@@ -442,11 +435,11 @@ class network_balancing_params:
         """Default constructor."""
 
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Receives completed work and the phase total."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
     def unify_outputs(self) -> bool:
         """Flag to indicate that all output nodes should be in the same rank."""
@@ -789,7 +782,11 @@ class network_target(enum.Enum):
 
 @overload
 def convert_network(
-    network: _Network, target: Literal[network_target.TEC] = ...
+    network: mnt.pyfiction.networks.technology_network
+    | mnt.pyfiction.networks.aig_network
+    | mnt.pyfiction.networks.xag_network
+    | mnt.pyfiction.networks.mig_network,
+    target: Literal[network_target.TEC] = ...,
 ) -> mnt.pyfiction.networks.technology_network:
     """
     Converts a logic network into an equivalent one of another type.
@@ -814,10 +811,39 @@ def convert_network(
     """
 
 @overload
-def convert_network(network: _Network, target: Literal[network_target.AIG]) -> mnt.pyfiction.networks.aig_network: ...
+def convert_network(
+    network: mnt.pyfiction.networks.technology_network
+    | mnt.pyfiction.networks.aig_network
+    | mnt.pyfiction.networks.xag_network
+    | mnt.pyfiction.networks.mig_network,
+    target: Literal[network_target.AIG],
+) -> mnt.pyfiction.networks.aig_network: ...
 @overload
-def convert_network(network: _Network, target: Literal[network_target.XAG]) -> mnt.pyfiction.networks.xag_network: ...
+def convert_network(
+    network: mnt.pyfiction.networks.technology_network
+    | mnt.pyfiction.networks.aig_network
+    | mnt.pyfiction.networks.xag_network
+    | mnt.pyfiction.networks.mig_network,
+    target: Literal[network_target.XAG],
+) -> mnt.pyfiction.networks.xag_network: ...
 @overload
-def convert_network(network: _Network, target: Literal[network_target.MIG]) -> mnt.pyfiction.networks.mig_network: ...
+def convert_network(
+    network: mnt.pyfiction.networks.technology_network
+    | mnt.pyfiction.networks.aig_network
+    | mnt.pyfiction.networks.xag_network
+    | mnt.pyfiction.networks.mig_network,
+    target: Literal[network_target.MIG],
+) -> mnt.pyfiction.networks.mig_network: ...
 @overload
-def convert_network(network: _Network, target: network_target) -> _Network: ...
+def convert_network(
+    network: mnt.pyfiction.networks.technology_network
+    | mnt.pyfiction.networks.aig_network
+    | mnt.pyfiction.networks.xag_network
+    | mnt.pyfiction.networks.mig_network,
+    target: network_target,
+) -> (
+    mnt.pyfiction.networks.technology_network
+    | mnt.pyfiction.networks.aig_network
+    | mnt.pyfiction.networks.xag_network
+    | mnt.pyfiction.networks.mig_network
+): ...

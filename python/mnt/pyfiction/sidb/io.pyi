@@ -97,11 +97,11 @@ class write_sidb_layout_svg_params:
         """Default constructor."""
 
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Receives serialization progress."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
     def lattice_point_size(self) -> float:
         """Size of the H-Si lattice points in SVG units."""

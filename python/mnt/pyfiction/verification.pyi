@@ -192,11 +192,11 @@ class gate_level_drv_params:
         """Default constructor."""
 
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Receives completed work and the phase total."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
     def unplaced_nodes(self) -> bool:
         """Check for nodes without locations."""

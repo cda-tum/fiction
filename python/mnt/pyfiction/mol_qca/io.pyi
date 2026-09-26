@@ -19,11 +19,11 @@ class write_mol_qca_layout_svg_params:
         """Default constructor."""
 
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Receives serialization progress."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
     def simple(self) -> bool:
         """Limit details to create smaller file sizes."""

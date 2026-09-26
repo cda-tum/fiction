@@ -16,20 +16,20 @@ import mnt.pyfiction.layouts.coords
 @overload
 def manhattan_distance(
     layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> int: ...
 @overload
 def manhattan_distance(
     layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> int: ...
 @overload
 def manhattan_distance(
     layout: mnt.pyfiction.layouts.hexagonal_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> int:
     """
     The Manhattan distance :math:`D` between two layout coordinates
@@ -53,20 +53,20 @@ def manhattan_distance(
 @overload
 def euclidean_distance(
     layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> float: ...
 @overload
 def euclidean_distance(
     layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> float: ...
 @overload
 def euclidean_distance(
     layout: mnt.pyfiction.layouts.hexagonal_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> float:
     """
     The Euclidean distance :math:`D` between two layout coordinates
@@ -90,20 +90,20 @@ def euclidean_distance(
 @overload
 def squared_euclidean_distance(
     layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> int: ...
 @overload
 def squared_euclidean_distance(
     layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> int: ...
 @overload
 def squared_euclidean_distance(
     layout: mnt.pyfiction.layouts.hexagonal_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> int:
     """
     The squared Euclidean distance :math:`D` between two layout
@@ -133,20 +133,20 @@ def squared_euclidean_distance(
 @overload
 def twoddwave_distance(
     layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> int: ...
 @overload
 def twoddwave_distance(
     layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> int: ...
 @overload
 def twoddwave_distance(
     layout: mnt.pyfiction.layouts.hexagonal_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> int:
     """
     The 2DDWave distance :math:`D` between two layout coordinates :math:`s
@@ -180,20 +180,20 @@ def twoddwave_distance(
 @overload
 def chebyshev_distance(
     layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> int: ...
 @overload
 def chebyshev_distance(
     layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> int: ...
 @overload
 def chebyshev_distance(
     layout: mnt.pyfiction.layouts.hexagonal_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> int:
     """
     The Chebyshev distance :math:`D` between two layout coordinates
@@ -236,48 +236,48 @@ class a_star_params:
 @overload
 def a_star(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     params: a_star_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> list[mnt.pyfiction.layouts.coords.offset_coordinate]: ...
 @overload
 def a_star(
     layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     params: a_star_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> list[mnt.pyfiction.layouts.coords.offset_coordinate]: ...
 @overload
 def a_star(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     params: a_star_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> list[mnt.pyfiction.layouts.coords.offset_coordinate]: ...
 @overload
 def a_star(
     layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     params: a_star_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> list[mnt.pyfiction.layouts.coords.offset_coordinate]: ...
 @overload
 def a_star(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     params: a_star_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> list[mnt.pyfiction.layouts.coords.offset_coordinate]: ...
 @overload
 def a_star(
     layout: mnt.pyfiction.layouts.hexagonal_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     params: a_star_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> list[mnt.pyfiction.layouts.coords.offset_coordinate]:
@@ -361,43 +361,43 @@ def a_star(
 @overload
 def a_star_distance(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> float: ...
 @overload
 def a_star_distance(
     layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> float: ...
 @overload
 def a_star_distance(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> float: ...
 @overload
 def a_star_distance(
     layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> float: ...
 @overload
 def a_star_distance(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> float: ...
 @overload
 def a_star_distance(
     layout: mnt.pyfiction.layouts.hexagonal_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> float:
     """
@@ -443,8 +443,8 @@ class yen_k_shortest_paths_params:
 @overload
 def yen_k_shortest_paths(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     k: int,
     params: yen_k_shortest_paths_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
@@ -452,8 +452,8 @@ def yen_k_shortest_paths(
 @overload
 def yen_k_shortest_paths(
     layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     k: int,
     params: yen_k_shortest_paths_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
@@ -461,8 +461,8 @@ def yen_k_shortest_paths(
 @overload
 def yen_k_shortest_paths(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     k: int,
     params: yen_k_shortest_paths_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
@@ -470,8 +470,8 @@ def yen_k_shortest_paths(
 @overload
 def yen_k_shortest_paths(
     layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     k: int,
     params: yen_k_shortest_paths_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
@@ -479,8 +479,8 @@ def yen_k_shortest_paths(
 @overload
 def yen_k_shortest_paths(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     k: int,
     params: yen_k_shortest_paths_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
@@ -488,8 +488,8 @@ def yen_k_shortest_paths(
 @overload
 def yen_k_shortest_paths(
     layout: mnt.pyfiction.layouts.hexagonal_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     k: int,
     params: yen_k_shortest_paths_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
@@ -582,48 +582,48 @@ class enumerate_all_paths_params:
 @overload
 def enumerate_all_paths(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     params: enumerate_all_paths_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> list[list[mnt.pyfiction.layouts.coords.offset_coordinate]]: ...
 @overload
 def enumerate_all_paths(
     layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     params: enumerate_all_paths_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> list[list[mnt.pyfiction.layouts.coords.offset_coordinate]]: ...
 @overload
 def enumerate_all_paths(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     params: enumerate_all_paths_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> list[list[mnt.pyfiction.layouts.coords.offset_coordinate]]: ...
 @overload
 def enumerate_all_paths(
     layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     params: enumerate_all_paths_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> list[list[mnt.pyfiction.layouts.coords.offset_coordinate]]: ...
 @overload
 def enumerate_all_paths(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     params: enumerate_all_paths_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> list[list[mnt.pyfiction.layouts.coords.offset_coordinate]]: ...
 @overload
 def enumerate_all_paths(
     layout: mnt.pyfiction.layouts.hexagonal_layout,
-    source: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    source: mnt.pyfiction.layouts.coords.offset_coordinate,
+    target: mnt.pyfiction.layouts.coords.offset_coordinate,
     params: enumerate_all_paths_params = ...,
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
 ) -> list[list[mnt.pyfiction.layouts.coords.offset_coordinate]]:

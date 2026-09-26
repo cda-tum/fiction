@@ -66,13 +66,11 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(
-        self, dimension: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> None: ...
+    def __init__(self, dimension: mnt.pyfiction.layouts.coords.offset_coordinate) -> None: ...
     @overload
     def __init__(
         self,
-        dimension: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        dimension: mnt.pyfiction.layouts.coords.offset_coordinate,
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
         tile_size_x: int = 1,
@@ -82,39 +80,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
         Creates an empty layout of the given dimension, clocked by the predefined scheme of the given name, with clock zones of the given tile size. Raises ValueError for an unknown scheme or a zero tile size.
         """
 
-    @overload
-    def assign_cell_type(
-        self,
-        c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-        ct: qca_cell_type,
-    ) -> None:
-        """
-        Assigns a cell type to a position. Assigning `EMPTY` removes the cell
-        and its name.
-
-        Args:
-            c: Cell position.
-            ct: Cell type.
-        """
-
-    @overload
-    def assign_cell_type(
-        self,
-        c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-        ct: qca_cell_type,
-    ) -> None:
-        """
-        Assigns a cell type to a position. Assigning `EMPTY` removes the cell
-        with its name and mode.
-
-        Args:
-            c: Cell position.
-            ct: Cell type.
-        """
-
-    def get_cell_type(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> qca_cell_type:
+    def get_cell_type(self, c: mnt.pyfiction.layouts.coords.offset_coordinate) -> qca_cell_type:
         """
         The cell type at a position.
 
@@ -125,9 +91,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             Cell type at `c`, `EMPTY` if no cell is there.
         """
 
-    def is_empty_cell(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> bool:
+    def is_empty_cell(self, c: mnt.pyfiction.layouts.coords.offset_coordinate) -> bool:
         """
         Whether no cell sits at a position.
 
@@ -138,9 +102,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             `true` iff `c` holds no cell.
         """
 
-    def assign_cell_name(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], n: str
-    ) -> None:
+    def assign_cell_name(self, c: mnt.pyfiction.layouts.coords.offset_coordinate, n: str) -> None:
         """
         Assigns a name to a cell. The empty string removes the name.
 
@@ -149,9 +111,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             n: Cell name.
         """
 
-    def get_cell_name(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> str:
+    def get_cell_name(self, c: mnt.pyfiction.layouts.coords.offset_coordinate) -> str:
         """
         The name of a cell.
 
@@ -210,7 +170,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             Number of output cells.
         """
 
-    def is_pi(self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
+    def is_pi(self, c: mnt.pyfiction.layouts.coords.offset_coordinate) -> bool:
         """
         Whether a cell is a primary input, i.e., of type `INPUT`.
 
@@ -221,7 +181,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             `true` iff `c` holds an input cell.
         """
 
-    def is_po(self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
+    def is_po(self, c: mnt.pyfiction.layouts.coords.offset_coordinate) -> bool:
         """
         Whether a cell is a primary output, i.e., of type `OUTPUT`.
 
@@ -305,7 +265,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
         """
 
     def get_clock_zone(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+        self, c: mnt.pyfiction.layouts.coords.offset_coordinate
     ) -> mnt.pyfiction.layouts.coords.offset_coordinate:
         """
         The clock zone that contains a cell: its tile on layer 0.
@@ -317,9 +277,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             Clock zone of `c`.
         """
 
-    def assign_clock_number(
-        self, cz: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], cn: int
-    ) -> None:
+    def assign_clock_number(self, cz: mnt.pyfiction.layouts.coords.offset_coordinate, cn: int) -> None:
         """
         Overrides the clock number of a clock zone.
 
@@ -328,9 +286,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             cn: Clock number.
         """
 
-    def get_clock_number(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> int:
+    def get_clock_number(self, c: mnt.pyfiction.layouts.coords.offset_coordinate) -> int:
         """
         The clock number of the clock zone that contains a cell.
 
@@ -379,11 +335,17 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
         Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are discarded. Raises ValueError for an unknown name.
         """
 
-    def assign_cell_mode(
-        self,
-        c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-        m: qca_cell_mode,
-    ) -> None:
+    def assign_cell_type(self, c: mnt.pyfiction.layouts.coords.offset_coordinate, ct: qca_cell_type) -> None:
+        """
+        Assigns a cell type to a position. Assigning `EMPTY` removes the cell
+        with its name and mode.
+
+        Args:
+            c: Cell position.
+            ct: Cell type.
+        """
+
+    def assign_cell_mode(self, c: mnt.pyfiction.layouts.coords.offset_coordinate, m: qca_cell_mode) -> None:
         """
         Assigns a mode to a cell. `cell_mode::NORMAL` removes a stored mode.
 
@@ -392,9 +354,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             m: Cell mode.
         """
 
-    def get_cell_mode(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> qca_cell_mode:
+    def get_cell_mode(self, c: mnt.pyfiction.layouts.coords.offset_coordinate) -> qca_cell_mode:
         """
         The mode of a cell.
 
@@ -405,9 +365,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             Mode of the cell at `c`, `cell_mode::NORMAL` if none is stored.
         """
 
-    def assign_synchronization_element(
-        self, cz: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], se: int
-    ) -> None:
+    def assign_synchronization_element(self, cz: mnt.pyfiction.layouts.coords.offset_coordinate, se: int) -> None:
         """
         Turns a clock zone into a synchronization element.
 
@@ -417,9 +375,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
                 by; 0 turns `cz` back into a normal clock zone.
         """
 
-    def is_synchronization_element(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> bool:
+    def is_synchronization_element(self, c: mnt.pyfiction.layouts.coords.offset_coordinate) -> bool:
         """
         Whether the clock zone that contains a cell is a synchronization
         element.
@@ -431,9 +387,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             `true` iff `get_clock_zone(c)` is a synchronization element.
         """
 
-    def get_synchronization_element(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> int:
+    def get_synchronization_element(self, c: mnt.pyfiction.layouts.coords.offset_coordinate) -> int:
         """
         The Hold-phase extension of the clock zone that contains a cell.
 

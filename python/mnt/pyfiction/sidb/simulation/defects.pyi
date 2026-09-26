@@ -94,11 +94,11 @@ class displacement_robustness_domain_params:
     @number_of_threads.setter
     def number_of_threads(self, arg: int, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Callback that receives the number of analyzed displaced layouts."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 class displacement_robustness_domain_stats:
     """Statistics of the displacement robustness analysis."""

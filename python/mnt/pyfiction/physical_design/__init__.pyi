@@ -158,20 +158,20 @@ class exact_params:
     @technology_specifics.setter
     def technology_specifics(self, arg: technology_constraints, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Callback that receives the number of examined aspect ratios."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
-    def on_worker_progress(self) -> Callable[[int, int, str, int, int, bool], None] | None:
+    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
         """
         Reports logical worker activity with a fixed worker count for each
         invocation.
         """
 
     @on_worker_progress.setter
-    def on_worker_progress(self, arg: Callable[[int, int, str, int, int, bool], None], /) -> None: ...
+    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
 
 class exact_stats:
     """Statistics."""
@@ -179,7 +179,6 @@ class exact_stats:
     def __init__(self) -> None:
         """Default constructor."""
 
-    def report(self, arg: "std::ostream", /) -> None: ...
     @property
     def time_total(self) -> datetime.timedelta: ...
     @property
@@ -928,17 +927,16 @@ class orthogonal_params:
     @number_of_clock_phases.setter
     def number_of_clock_phases(self, arg: num_clks, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Callback that receives the progress of the gate placement."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 class orthogonal_stats:
     def __init__(self) -> None:
         """Default constructor."""
 
-    def report(self, arg: "std::ostream", /) -> None: ...
     @property
     def time_total(self) -> datetime.timedelta: ...
     @property
@@ -1461,23 +1459,23 @@ class graph_oriented_layout_design_params:
     @randomize_tiles_to_skip_between_pis.setter
     def randomize_tiles_to_skip_between_pis(self, arg: bool, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """
         Callback that receives the number of search space graph expansions
         performed so far.
         """
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
-    def on_worker_progress(self) -> Callable[[int, int, str, int, int, bool], None] | None:
+    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
         """
         Reports logical worker activity with a fixed worker count for each
         invocation.
         """
 
     @on_worker_progress.setter
-    def on_worker_progress(self, arg: Callable[[int, int, str, int, int, bool], None], /) -> None: ...
+    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
 
 class graph_oriented_layout_design_stats:
     """
@@ -1806,10 +1804,7 @@ class color_routing_params:
 def color_routing(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
     objectives: Sequence[
-        tuple[
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-        ]
+        tuple[mnt.pyfiction.layouts.coords.offset_coordinate, mnt.pyfiction.layouts.coords.offset_coordinate]
     ],
     params: color_routing_params = ...,
 ) -> bool: ...
@@ -1817,10 +1812,7 @@ def color_routing(
 def color_routing(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     objectives: Sequence[
-        tuple[
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-        ]
+        tuple[mnt.pyfiction.layouts.coords.offset_coordinate, mnt.pyfiction.layouts.coords.offset_coordinate]
     ],
     params: color_routing_params = ...,
 ) -> bool: ...
@@ -1828,10 +1820,7 @@ def color_routing(
 def color_routing(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
     objectives: Sequence[
-        tuple[
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-        ]
+        tuple[mnt.pyfiction.layouts.coords.offset_coordinate, mnt.pyfiction.layouts.coords.offset_coordinate]
     ],
     params: color_routing_params = ...,
 ) -> bool:
@@ -1934,14 +1923,14 @@ class hexagonalization_params:
     @output_pin_extension.setter
     def output_pin_extension(self, arg: hexagonalization_io_pin_extension_mode, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """
         Callback that receives the progress of the gate mapping and the pin
         extension.
         """
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 class hexagonalization_stats:
     """This struct stores statistics about the hexagonalization process."""
@@ -2044,14 +2033,14 @@ class post_layout_optimization_params:
     @timeout.setter
     def timeout(self, arg: int, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """
         Callback that receives the progress of the gate relocations and of the
         nested wiring reduction.
         """
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 class post_layout_optimization_stats:
     """
@@ -2061,14 +2050,6 @@ class post_layout_optimization_stats:
 
     def __init__(self) -> None:
         """Default constructor."""
-
-    def report(self, arg: "std::ostream", /) -> None:
-        """
-        Reports the statistics to the given output stream.
-
-        Args:
-            out: Output stream.
-        """
 
     @property
     def time_total(self) -> datetime.timedelta:
@@ -2175,25 +2156,17 @@ class wiring_reduction_params:
     @timeout.setter
     def timeout(self, arg: int, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Callback that receives the number of wire paths processed so far."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 class wiring_reduction_stats:
     """This struct stores statistics about the wiring reduction process."""
 
     def __init__(self) -> None:
         """Default constructor."""
-
-    def report(self, arg: "std::ostream", /) -> None:
-        """
-        Reports the statistics to the given output stream.
-
-        Args:
-            out: Output stream.
-        """
 
     @property
     def time_total(self) -> datetime.timedelta:
@@ -2270,20 +2243,20 @@ def wiring_reduction(
 @overload
 def is_crossable_wire(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    src: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    successor: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    src: mnt.pyfiction.layouts.coords.offset_coordinate,
+    successor: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> bool: ...
 @overload
 def is_crossable_wire(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    src: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    successor: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    src: mnt.pyfiction.layouts.coords.offset_coordinate,
+    successor: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> bool: ...
 @overload
 def is_crossable_wire(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    src: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    successor: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    src: mnt.pyfiction.layouts.coords.offset_coordinate,
+    successor: mnt.pyfiction.layouts.coords.offset_coordinate,
 ) -> bool:
     """
     Checks whether a given coordinate `successor` hosts a crossable wire
@@ -2315,18 +2288,16 @@ def is_crossable_wire(
 
 @overload
 def route_path(
-    layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-    path: Sequence[mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]],
+    layout: mnt.pyfiction.layouts.cartesian_gate_layout, path: Sequence[mnt.pyfiction.layouts.coords.offset_coordinate]
 ) -> None: ...
 @overload
 def route_path(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    path: Sequence[mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]],
+    path: Sequence[mnt.pyfiction.layouts.coords.offset_coordinate],
 ) -> None: ...
 @overload
 def route_path(
-    layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    path: Sequence[mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]],
+    layout: mnt.pyfiction.layouts.hexagonal_gate_layout, path: Sequence[mnt.pyfiction.layouts.coords.offset_coordinate]
 ) -> None:
     """
     Establishes a wire routing along the given path in the given layout.
@@ -2417,14 +2388,14 @@ def reserve_input_nodes(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coords.offset_coordinate,
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
 ) -> int: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coords.offset_coordinate,
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2432,7 +2403,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coords.offset_coordinate,
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2442,7 +2413,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coords.offset_coordinate,
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2452,14 +2423,14 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coords.offset_coordinate,
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
 ) -> int: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coords.offset_coordinate,
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2467,7 +2438,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coords.offset_coordinate,
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2477,7 +2448,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coords.offset_coordinate,
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2487,14 +2458,14 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coords.offset_coordinate,
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
 ) -> int: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coords.offset_coordinate,
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2502,7 +2473,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coords.offset_coordinate,
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2512,7 +2483,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coords.offset_coordinate,
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,

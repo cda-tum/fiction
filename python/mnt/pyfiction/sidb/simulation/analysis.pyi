@@ -122,14 +122,6 @@ class critical_temperature_stats:
     def __init__(self) -> None:
         """Default constructor."""
 
-    def report(self, arg: "std::ostream", /) -> None:
-        """
-        Prints the simulation results to the given output stream.
-
-        Args:
-            out: Output stream.
-        """
-
     @property
     def algorithm_name(self) -> str:
         """
@@ -188,23 +180,23 @@ class critical_temperature_params:
     @max_temperature.setter
     def max_temperature(self, arg: float, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """
         Callback that receives the number of simulated input patterns (gate-
         based) or the progress of the physical simulation (non-gate-based).
         """
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
-    def on_worker_progress(self) -> Callable[[int, int, str, int, int, bool], None] | None:
+    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
         """
         Reports logical worker activity with a fixed worker count for each
         invocation.
         """
 
     @on_worker_progress.setter
-    def on_worker_progress(self, arg: Callable[[int, int, str, int, int, bool], None], /) -> None: ...
+    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
 
 @overload
 def critical_temperature_gate_based(
@@ -663,11 +655,11 @@ class time_to_solution_params:
     @confidence_level.setter
     def confidence_level(self, arg: float, /) -> None: ...
     @property
-    def on_progress(self) -> Callable[[str, int, int], None] | None:
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Callback that receives the number of completed heuristic repetitions."""
 
     @on_progress.setter
-    def on_progress(self, arg: Callable[[str, int, int], None], /) -> None: ...
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 class time_to_solution_stats:
     """
@@ -679,14 +671,6 @@ class time_to_solution_stats:
 
     def __init__(self) -> None:
         """Default constructor."""
-
-    def report(self, arg: "std::ostream", /) -> None:
-        """
-        Print the results to the given output stream.
-
-        Args:
-            out: Output stream.
-        """
 
     @property
     def time_to_solution(self) -> float:
