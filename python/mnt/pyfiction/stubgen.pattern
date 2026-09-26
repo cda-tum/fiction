@@ -6,34 +6,3 @@
 
 ^mnt\.pyfiction\.utils\.__suffix__$:
     __version__: str
-
-^mnt\.pyfiction\.synthesis\.__prefix__$:
-    from typing import Literal, TypeAlias
-
-    _Network: TypeAlias = (
-        mnt.pyfiction.networks.technology_network
-        | mnt.pyfiction.networks.aig_network
-        | mnt.pyfiction.networks.xag_network
-        | mnt.pyfiction.networks.mig_network
-    )
-
-^mnt\.pyfiction\.synthesis\.convert_network$:
-    @overload
-    def convert_network(
-        network: _Network, target: Literal[network_target.TEC] = ...
-    ) -> mnt.pyfiction.networks.technology_network:
-        \doc
-    @overload
-    def convert_network(
-        network: _Network, target: Literal[network_target.AIG]
-    ) -> mnt.pyfiction.networks.aig_network: ...
-    @overload
-    def convert_network(
-        network: _Network, target: Literal[network_target.XAG]
-    ) -> mnt.pyfiction.networks.xag_network: ...
-    @overload
-    def convert_network(
-        network: _Network, target: Literal[network_target.MIG]
-    ) -> mnt.pyfiction.networks.mig_network: ...
-    @overload
-    def convert_network(network: _Network, target: network_target) -> _Network: ...
