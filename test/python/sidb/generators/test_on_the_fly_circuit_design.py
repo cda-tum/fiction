@@ -15,7 +15,6 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout
-from mnt.pyfiction.layouts.coords import offset_coordinate
 from mnt.pyfiction.sidb import sidb_layout, site_at_row
 from mnt.pyfiction.sidb.generators import (
     design_sidb_gates_mode,
@@ -34,11 +33,11 @@ if TYPE_CHECKING:
 @pytest.fixture
 def and_circuit() -> hexagonal_gate_layout:
     """Return a placed AND circuit with two inputs and one output."""
-    layout = hexagonal_gate_layout(offset_coordinate(2, 2, 0), "ROW", "AND")
-    first = layout.create_pi("a", offset_coordinate(0, 0, 0))
-    second = layout.create_pi("b", offset_coordinate(1, 0, 0))
-    gate = layout.create_and(first, second, offset_coordinate(1, 1, 0))
-    layout.create_po(gate, "f", offset_coordinate(0, 2, 0))
+    layout = hexagonal_gate_layout((2, 2, 0), "ROW", "AND")
+    first = layout.create_pi("a", (0, 0, 0))
+    second = layout.create_pi("b", (1, 0, 0))
+    gate = layout.create_and(first, second, (1, 1, 0))
+    layout.create_po(gate, "f", (0, 2, 0))
     return layout
 
 
@@ -89,7 +88,7 @@ def test_circuit_timeout(and_circuit: hexagonal_gate_layout, *, per_gate: bool) 
 
     assert and_circuit.num_pis() == 2
     assert and_circuit.num_pos() == 1
-    assert and_circuit.is_and(and_circuit.get_node(offset_coordinate(1, 1, 0)))
+    assert and_circuit.is_and(and_circuit.get_node((1, 1, 0)))
     assert (gates.operational_params.timeout if per_gate else params.timeout) == 0
 
 
@@ -121,7 +120,7 @@ def test_design_and_export(and_circuit: hexagonal_gate_layout, tmp_path: Path) -
     assert read_sqd_layout(str(output)).num_dots() == result.num_dots()
     assert and_circuit.num_pis() == 2
     assert and_circuit.num_pos() == 1
-    assert and_circuit.is_and(and_circuit.get_node(offset_coordinate(1, 1, 0)))
+    assert and_circuit.is_and(and_circuit.get_node((1, 1, 0)))
 
 
 def test_unsuccessful_design(and_circuit: hexagonal_gate_layout) -> None:
@@ -136,8 +135,8 @@ def test_unsuccessful_design(and_circuit: hexagonal_gate_layout) -> None:
 
 def test_unsupported_gate() -> None:
     """A majority gate reports its unsupported type and tile."""
-    layout = hexagonal_gate_layout(offset_coordinate(1, 1, 0), "ROW")
-    layout.create_maj(0, 0, 0, offset_coordinate(1, 1, 0))
+    layout = hexagonal_gate_layout((1, 1, 0), "ROW")
+    layout.create_maj(0, 0, 0, (1, 1, 0))
     with pytest.raises(ValueError, match="Unsupported gate type at tile"):
         on_the_fly_sidb_circuit_design(layout)
 

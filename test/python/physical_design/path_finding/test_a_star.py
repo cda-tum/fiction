@@ -31,50 +31,41 @@ from mnt.pyfiction.physical_design.path_finding import (
 
 def test_search_constraints_are_local() -> None:
     """Searches combine persistent constraints with independent routing data."""
-    layout = cartesian_gate_layout(offset_coordinate(2, 2), "2DDWave")
-    layout.obstruct_coordinate(offset_coordinate(1, 0))
+    layout = cartesian_gate_layout((2, 2), "2DDWave")
+    layout.obstruct_coordinate((1, 0))
     blocked = obstructions()
-    blocked.obstruct_connection(offset_coordinate(0, 1), offset_coordinate(1, 1))
+    blocked.obstruct_connection((0, 1), (1, 1))
     expected = [(0, 0), (0, 1), (0, 2), (1, 2), (2, 2)]
     for _ in range(2):
-        assert a_star(layout, offset_coordinate(0, 0), offset_coordinate(2, 2), obstructions=blocked) == expected
-        assert a_star_distance(layout, offset_coordinate(0, 0), offset_coordinate(2, 2), obstructions=blocked) == 4
-        assert enumerate_all_paths(layout, offset_coordinate(0, 0), offset_coordinate(2, 2), obstructions=blocked) == [
-            expected
-        ]
-        assert yen_k_shortest_paths(
-            layout, offset_coordinate(0, 0), offset_coordinate(2, 2), 4, obstructions=blocked
-        ) == [expected]
-        assert layout.is_obstructed_coordinate(offset_coordinate(1, 0))
-        assert not layout.is_obstructed_connection(offset_coordinate(0, 1), offset_coordinate(1, 1))
-        assert blocked.is_obstructed_connection(offset_coordinate(0, 1), offset_coordinate(1, 1))
-        assert not blocked.is_obstructed_coordinate(offset_coordinate(1, 0))
+        assert a_star(layout, (0, 0), (2, 2), obstructions=blocked) == expected
+        assert a_star_distance(layout, (0, 0), (2, 2), obstructions=blocked) == 4
+        assert enumerate_all_paths(layout, (0, 0), (2, 2), obstructions=blocked) == [expected]
+        assert yen_k_shortest_paths(layout, (0, 0), (2, 2), 4, obstructions=blocked) == [expected]
+        assert layout.is_obstructed_coordinate((1, 0))
+        assert not layout.is_obstructed_connection((0, 1), (1, 1))
+        assert blocked.is_obstructed_connection((0, 1), (1, 1))
+        assert not blocked.is_obstructed_coordinate((1, 0))
 
-    grid = cartesian_layout(offset_coordinate(1, 1))
-    blocked.obstruct_coordinate(offset_coordinate(1, 0))
-    assert a_star(grid, offset_coordinate(0, 0), offset_coordinate(1, 1), obstructions=blocked) == []
+    grid = cartesian_layout((1, 1))
+    blocked.obstruct_coordinate((1, 0))
+    assert a_star(grid, (0, 0), (1, 1), obstructions=blocked) == []
 
 
 CLOCKED_LAYOUTS = [
+    pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
     pytest.param(
-        lambda: cartesian_gate_layout(offset_coordinate(4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"
+        lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
     ),
-    pytest.param(
-        lambda: shifted_cartesian_gate_layout(offset_coordinate(4, 4), "2DDWave", "Layout"),
-        id="shifted_cartesian_gate_layout",
-    ),
-    pytest.param(
-        lambda: hexagonal_gate_layout(offset_coordinate(4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"
-    ),
+    pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
 ]
 
 
 @pytest.mark.parametrize(
     "make_lyt",
     [
-        pytest.param(lambda: cartesian_layout(offset_coordinate(4, 4)), id="cartesian_layout"),
-        pytest.param(lambda: shifted_cartesian_layout(offset_coordinate(4, 4)), id="shifted_cartesian_layout"),
-        pytest.param(lambda: hexagonal_layout(offset_coordinate(4, 4)), id="hexagonal_layout"),
+        pytest.param(lambda: cartesian_layout((4, 4)), id="cartesian_layout"),
+        pytest.param(lambda: shifted_cartesian_layout((4, 4)), id="shifted_cartesian_layout"),
+        pytest.param(lambda: hexagonal_layout((4, 4)), id="hexagonal_layout"),
     ],
 )
 def test_non_clocked_path_finding(make_lyt):
@@ -98,15 +89,15 @@ def test_clocked_path_finding(make_lyt):
     "make_lyt",
     [
         pytest.param(
-            lambda: cartesian_gate_layout(offset_coordinate(4, 4), "2DDWave", "Layout"),
+            lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
             id="cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout(offset_coordinate(4, 4), "2DDWave", "Layout"),
+            lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
             id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_gate_layout(offset_coordinate(4, 4), "2DDWave", "Layout"),
+            lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"),
             id="hexagonal_gate_layout",
         ),
     ],
@@ -138,15 +129,15 @@ def test_path_finding_with_obstructions(make_lyt):
     "make_lyt",
     [
         pytest.param(
-            lambda: cartesian_gate_layout(offset_coordinate(2, 1, 1), "2DDWave", "Layout"),
+            lambda: cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout"),
             id="cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout(offset_coordinate(2, 1, 1), "2DDWave", "Layout"),
+            lambda: shifted_cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout"),
             id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_gate_layout(offset_coordinate(2, 1, 1), "2DDWave", "Layout"),
+            lambda: hexagonal_gate_layout((2, 1, 1), "2DDWave", "Layout"),
             id="hexagonal_gate_layout",
         ),
     ],

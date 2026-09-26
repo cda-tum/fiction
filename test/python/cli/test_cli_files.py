@@ -20,7 +20,6 @@ from mnt.fiction.cli.topologies import FGL_READERS
 from mnt.pyfiction import layouts, physical_design
 from mnt.pyfiction.inml import inml_layout, inml_magnet_type
 from mnt.pyfiction.layouts import shifted_cartesian_gate_layout
-from mnt.pyfiction.layouts.coords import offset_coordinate
 from mnt.pyfiction.layouts.io import write_fgl_layout
 from mnt.pyfiction.networks import aig_network, mig_network, set_name, simulate_outputs, technology_network, xag_network
 from mnt.pyfiction.qca import qca_layout
@@ -152,9 +151,9 @@ def test_fgl_round_trip(shell: Shell, resource: Callable[[str], str], tmp_path: 
     if topology == "hexagonal":
         shell.ok("hex")
     if topology == "shifted_cartesian":
-        layout = shifted_cartesian_gate_layout(offset_coordinate(1, 0), "2DDWave", "wire")
-        source = layout.create_pi("a", offset_coordinate(0, 0))
-        layout.create_po(source, "f", offset_coordinate(1, 0))
+        layout = shifted_cartesian_gate_layout((1, 0), "2DDWave", "wire")
+        source = layout.create_pi("a", (0, 0))
+        layout.create_po(source, "f", (1, 0))
         shell.session.gate_layouts.add(layout)
     gates = shell.session.gate_layouts.current().num_gates()
     shell.ok(f'write_fgl "{fgl}"; clear -g; read "{fgl}" --topology {topology}')
@@ -279,13 +278,13 @@ def test_write_more_cell_formats(shell: Shell, resource: Callable[[str], str], t
 
 def test_write_qcc_component_name(shell: Shell, tmp_path: Path) -> None:
     """--component-name names the QCC component after the file, as the C++ `qcc -c` did."""
-    layout = inml_layout(offset_coordinate(3, 0))
+    layout = inml_layout((3, 0))
     layout.set_layout_name("mygate")
     cell = inml_magnet_type
-    layout.assign_cell_type(offset_coordinate(0, 0), cell.INPUT)
-    layout.assign_cell_type(offset_coordinate(1, 0), cell.NORMAL)
-    layout.assign_cell_type(offset_coordinate(2, 0), cell.NORMAL)
-    layout.assign_cell_type(offset_coordinate(3, 0), cell.OUTPUT)
+    layout.assign_cell_type((0, 0), cell.INPUT)
+    layout.assign_cell_type((1, 0), cell.NORMAL)
+    layout.assign_cell_type((2, 0), cell.NORMAL)
+    layout.assign_cell_type((3, 0), cell.OUTPUT)
     shell.session.cell_layouts.add(CellEntry(layout))
 
     named_after_the_layout = tmp_path / "wire.qcc"

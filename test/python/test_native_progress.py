@@ -21,7 +21,6 @@ from mnt.pyfiction import layouts, physical_design
 from mnt.pyfiction.fcn.io import write_qll_layout
 from mnt.pyfiction.inml.io import write_qcc_layout, write_qcc_layout_params
 from mnt.pyfiction.layouts import cartesian_gate_layout, shifted_cartesian_gate_layout
-from mnt.pyfiction.layouts.coords import offset_coordinate
 from mnt.pyfiction.layouts.io import write_dot_layout, write_fgl_layout
 from mnt.pyfiction.physical_design import (
     apply_qca_one_library,
@@ -65,11 +64,11 @@ if TYPE_CHECKING:
 def test_long_route_statistics_release_the_gil() -> None:
     """Deep layout summaries finish while Python display threads can run."""
     length = 200_000
-    layout = cartesian_gate_layout(offset_coordinate(length, 0), "2DDWave")
-    signal = layout.create_pi("in", offset_coordinate(0, 0))
+    layout = cartesian_gate_layout((length, 0), "2DDWave")
+    signal = layout.create_pi("in", (0, 0))
     for x in range(1, length):
-        signal = layout.create_buf(signal, offset_coordinate(x, 0))
-    layout.create_po(signal, "out", offset_coordinate(length, 0))
+        signal = layout.create_buf(signal, (x, 0))
+    layout.create_po(signal, "out", (length, 0))
     start = threading.Event()
     refreshed = threading.Event()
 
@@ -301,9 +300,9 @@ def test_empty_mapping_has_no_completed_gates(library: str, topology: str) -> No
 
 def test_failed_mapping_retains_completed_count() -> None:
     """Unsupported routing leaves the last completed count below the mapping total."""
-    layout = shifted_cartesian_gate_layout(offset_coordinate(1, 1), "2DDWave", "unsupported routing")
-    source = layout.create_pi("a", offset_coordinate(0, 0))
-    layout.create_po(source, "f", offset_coordinate(0, 1))
+    layout = shifted_cartesian_gate_layout((1, 1), "2DDWave", "unsupported routing")
+    source = layout.create_pi("a", (0, 0))
+    layout.create_po(source, "f", (0, 1))
     reports: list[tuple[str, int, int]] = []
     with pytest.raises(ValueError, match="unsupported gate orientation"):
         apply_topolinano_library(layout, lambda task, done, total: reports.append((task, done, total)))

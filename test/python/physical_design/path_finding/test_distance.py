@@ -28,19 +28,14 @@ from mnt.pyfiction.physical_design.path_finding import (
 )
 
 ALL_LAYOUTS = [
-    pytest.param(lambda: cartesian_layout(offset_coordinate(4, 4)), id="cartesian_layout"),
+    pytest.param(lambda: cartesian_layout((4, 4)), id="cartesian_layout"),
+    pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
+    pytest.param(lambda: shifted_cartesian_layout((4, 4)), id="shifted_cartesian_layout"),
     pytest.param(
-        lambda: cartesian_gate_layout(offset_coordinate(4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"
+        lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
     ),
-    pytest.param(lambda: shifted_cartesian_layout(offset_coordinate(4, 4)), id="shifted_cartesian_layout"),
-    pytest.param(
-        lambda: shifted_cartesian_gate_layout(offset_coordinate(4, 4), "2DDWave", "Layout"),
-        id="shifted_cartesian_gate_layout",
-    ),
-    pytest.param(lambda: hexagonal_layout(offset_coordinate(4, 4)), id="hexagonal_layout"),
-    pytest.param(
-        lambda: hexagonal_gate_layout(offset_coordinate(4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"
-    ),
+    pytest.param(lambda: hexagonal_layout((4, 4)), id="hexagonal_layout"),
+    pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
 ]
 
 

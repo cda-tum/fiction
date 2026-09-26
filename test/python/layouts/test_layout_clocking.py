@@ -13,17 +13,14 @@ from typing import TYPE_CHECKING, Any
 import pytest
 
 from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
-from mnt.pyfiction.layouts.coords import offset_coordinate
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
 CLOCKED_LAYOUTS = [
-    pytest.param(lambda: cartesian_gate_layout(offset_coordinate(2, 2, 0), "2DDWave"), id="cartesian_gate_layout"),
-    pytest.param(
-        lambda: shifted_cartesian_gate_layout(offset_coordinate(2, 2, 0), "2DDWave"), id="shifted_cartesian_gate_layout"
-    ),
-    pytest.param(lambda: hexagonal_gate_layout(offset_coordinate(2, 2, 0), "2DDWave"), id="hexagonal_gate_layout"),
+    pytest.param(lambda: cartesian_gate_layout((2, 2, 0), "2DDWave"), id="cartesian_gate_layout"),
+    pytest.param(lambda: shifted_cartesian_gate_layout((2, 2, 0), "2DDWave"), id="shifted_cartesian_gate_layout"),
+    pytest.param(lambda: hexagonal_gate_layout((2, 2, 0), "2DDWave"), id="hexagonal_gate_layout"),
 ]
 
 
@@ -80,7 +77,7 @@ def test_fetch_clocking_scheme(layout):
 
 
 def test_clocking_scheme_name() -> None:
-    layout = cartesian_gate_layout(offset_coordinate(2, 2), "2DDWave")
+    layout = cartesian_gate_layout((2, 2), "2DDWave")
     assert layout.get_clocking_scheme_name() == "2DDWAVE"
     assert layout.is_clocking_scheme("2DDWAVE")
     assert not layout.is_clocking_scheme("USE")
