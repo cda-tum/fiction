@@ -92,7 +92,7 @@ nanobind::object convert_to(const any_network& network)
  * @param target Target network type.
  * @return The converted network as a Python object.
  */
-inline nanobind::object convert_to(const any_network& network, const network_target target)
+inline nanobind::object convert_to_target(const any_network& network, const network_target target)
 {
     switch (target)
     {
@@ -127,7 +127,7 @@ void convert_network_to(nanobind::module_& m, const char* signature)
                 throw py::next_overload();
             }
 
-            return convert_to(network, target);
+            return convert_to_target(network, target);
         },
         py::arg("network"), py::arg("target"), py::sig(signature));
 }
@@ -157,7 +157,7 @@ void network_conversion(nanobind::module_& m)
                 throw py::next_overload();
             }
 
-            return detail::convert_to(network, target);
+            return detail::convert_to_target(network, target);
         },
         py::arg("network"), py::arg("target") = detail::network_target::TEC,
         py::sig(
@@ -183,8 +183,7 @@ void network_conversion(nanobind::module_& m)
            "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.MIG]) "
            "-> mnt.pyfiction.networks.mig_network");
     // a target that is not a literal
-    m.def("convert_network", py::overload_cast<const detail::any_network&, detail::network_target>(&detail::convert_to),
-          py::arg("network"), py::arg("target"),
+    m.def("convert_network", &detail::convert_to_target, py::arg("network"), py::arg("target"),
           py::sig("def convert_network(network: mnt.pyfiction.networks.technology_network | "
                   "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
                   "mnt.pyfiction.networks.mig_network, target: mnt.pyfiction.synthesis.network_target) -> "
