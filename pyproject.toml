@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "scikit_build_core.build"
-requires = [ "nanobind~=3.0.0", "scikit-build-core~=1.0.3", "vcs-versioning~=2.4.0" ]
+requires = [ "nanobind~=3.1.0", "scikit-build-core~=1.0.3", "vcs-versioning~=2.4.0" ]
 
 [project]
 name = "mnt-pyfiction"
@@ -115,7 +115,7 @@ docs = [
     "sphinxext-opengraph>=0.13.0",
 ]
 build = [
-    "nanobind~=3.0.0",
+    "nanobind~=3.1.0",
     "scikit-build-core~=1.0.3",
     "vcs-versioning~=2.4.0",
 ]
