@@ -50,10 +50,10 @@ void quicksim(nanobind::module_& m)
         .def_rw("number_threads", &quicksim_params::number_threads,
                 DOC(fiction_sidb_simulation_engines_quicksim_params_number_threads))
         .def_rw("timeout", &quicksim_params::timeout, DOC(fiction_sidb_simulation_engines_quicksim_params_timeout))
-        .def_rw("on_progress", &quicksim_params::on_progress, pyfiction::on_progress_getter, pyfiction::callback_setter,
+        .def_rw("on_progress", &quicksim_params::on_progress, pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_sidb_simulation_engines_quicksim_params_on_progress))
-        .def_rw("on_worker_progress", &quicksim_params::on_worker_progress, pyfiction::on_worker_progress_getter,
-                pyfiction::callback_setter, DOC(fiction_sidb_simulation_engines_quicksim_params_on_worker_progress));
+        .def_rw("on_worker_progress", &quicksim_params::on_worker_progress, pyfiction::ON_WORKER_PROGRESS_GETTER,
+                pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_simulation_engines_quicksim_params_on_worker_progress));
 
     // NOLINTNEXTLINE(misc-const-correctness)
     std::optional<fiction::sidb::simulation::result> (*const quicksim_pointer)(

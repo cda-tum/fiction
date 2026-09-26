@@ -54,7 +54,7 @@ void orthogonal(nanobind::module_& m)
                 &fiction::physical_design::orthogonal_physical_design_params::number_of_clock_phases,
                 DOC(fiction_physical_design_orthogonal_physical_design_params_number_of_clock_phases))
         .def_rw("on_progress", &fiction::physical_design::orthogonal_physical_design_params::on_progress,
-                pyfiction::on_progress_getter, pyfiction::callback_setter,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_orthogonal_physical_design_params_on_progress));
 
     py::class_<fiction::physical_design::orthogonal_physical_design_stats>(

@@ -139,11 +139,11 @@ void critical_temperature(nanobind::module_& m)
         .def_rw("max_temperature", &fiction::sidb::simulation::analysis::critical_temperature_params::max_temperature,
                 DOC(fiction_sidb_simulation_analysis_critical_temperature_params_max_temperature))
         .def_rw("on_progress", &fiction::sidb::simulation::analysis::critical_temperature_params::on_progress,
-                pyfiction::on_progress_getter, pyfiction::callback_setter,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_sidb_simulation_analysis_critical_temperature_params_on_progress))
         .def_rw("on_worker_progress",
                 &fiction::sidb::simulation::analysis::critical_temperature_params::on_worker_progress,
-                pyfiction::on_worker_progress_getter, pyfiction::callback_setter,
+                pyfiction::ON_WORKER_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_sidb_simulation_analysis_critical_temperature_params_on_worker_progress));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!

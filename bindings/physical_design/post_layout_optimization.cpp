@@ -76,7 +76,7 @@ void post_layout_optimization(nanobind::module_& m)
         .def_rw("timeout", &fiction::physical_design::post_layout_optimization_params::timeout,
                 DOC(fiction_physical_design_post_layout_optimization_params_timeout))
         .def_rw("on_progress", &fiction::physical_design::post_layout_optimization_params::on_progress,
-                pyfiction::on_progress_getter, pyfiction::callback_setter,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_post_layout_optimization_params_on_progress));
 
     py::class_<fiction::physical_design::post_layout_optimization_stats>(

@@ -57,7 +57,7 @@ void time_to_solution(nanobind::module_& m)
         .def_rw("confidence_level", &fiction::sidb::simulation::analysis::time_to_solution_params::confidence_level,
                 DOC(fiction_sidb_simulation_analysis_time_to_solution_params_confidence_level))
         .def_rw("on_progress", &fiction::sidb::simulation::analysis::time_to_solution_params::on_progress,
-                pyfiction::on_progress_getter, pyfiction::callback_setter,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_sidb_simulation_analysis_time_to_solution_params_on_progress));
     /**
      * Statistics.

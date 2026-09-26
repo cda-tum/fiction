@@ -85,8 +85,8 @@ void displacement_robustness_domain(nanobind::module_& m)
                 DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_dimer_policy))
         .def_rw("number_of_threads", &displacement_robustness_domain_params::number_of_threads,
                 DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_number_of_threads))
-        .def_rw("on_progress", &displacement_robustness_domain_params::on_progress, pyfiction::on_progress_getter,
-                pyfiction::callback_setter,
+        .def_rw("on_progress", &displacement_robustness_domain_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
+                pyfiction::CALLBACK_SETTER,
                 DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_on_progress));
 
     py::class_<displacement_robustness_domain_stats>(

@@ -48,7 +48,7 @@ void wiring_reduction(nanobind::module_& m)
         .def_rw("timeout", &fiction::physical_design::wiring_reduction_params::timeout,
                 DOC(fiction_physical_design_wiring_reduction_params_timeout))
         .def_rw("on_progress", &fiction::physical_design::wiring_reduction_params::on_progress,
-                pyfiction::on_progress_getter, pyfiction::callback_setter,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_wiring_reduction_params_on_progress));
 
     py::class_<fiction::physical_design::wiring_reduction_stats>(m, "wiring_reduction_stats",

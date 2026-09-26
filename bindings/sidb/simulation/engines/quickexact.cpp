@@ -57,8 +57,8 @@ void quickexact(nanobind::module_& m)
                 DOC(fiction_sidb_simulation_engines_quickexact_params_local_external_potential))
         .def_rw("global_potential", &quickexact_params::global_potential,
                 DOC(fiction_sidb_simulation_engines_quickexact_params_global_potential))
-        .def_rw("on_progress", &quickexact_params::on_progress, pyfiction::on_progress_getter,
-                pyfiction::callback_setter, DOC(fiction_sidb_simulation_engines_quickexact_params_on_progress));
+        .def_rw("on_progress", &quickexact_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
+                pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_simulation_engines_quickexact_params_on_progress));
 
     // NOLINTNEXTLINE(misc-const-correctness)
     fiction::sidb::simulation::result (*const quickexact_pointer)(

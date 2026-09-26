@@ -84,7 +84,7 @@ void design_rule_violations(nanobind::module_& m)
                                                              DOC(fiction_verification_gate_level_drv_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::verification::gate_level_drv_params::on_progress,
-                pyfiction::on_progress_getter, pyfiction::callback_setter,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 "Receives completed work and the phase total.")
         .def_rw("unplaced_nodes", &fiction::verification::gate_level_drv_params::unplaced_nodes,
                 DOC(fiction_verification_gate_level_drv_params_unplaced_nodes))
