@@ -314,10 +314,7 @@ class BdlWire:
         """Direction and I/O flags of a BDL wire port."""
 
         def __init__(
-            self,
-            direction: BdlWire.port_direction.cardinal = ...,
-            pi: bool = False,
-            po: bool = False,
+            self, direction: BdlWire.port_direction.cardinal = ..., pi: bool = False, po: bool = False
         ) -> None:
             """Constructs a port with a cardinal direction and input/output flags."""
 
