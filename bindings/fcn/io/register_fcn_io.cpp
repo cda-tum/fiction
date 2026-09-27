@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the bindings of the `mnt.pyfiction.fcn.io` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.fcn.io` submodule.
  * @author Marcel Walter (marcelwa)
  */
 

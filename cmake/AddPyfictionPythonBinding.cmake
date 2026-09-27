@@ -1,5 +1,5 @@
 # Adds one `mnt.pyfiction` extension module. Every top-level submodule is its
-# own shared object, installed flat into the package directory.
+# own shared object, installed into the private _native package.
 #
 # add_pyfiction_python_binding(<target> <sources...> MODULE_NAME <name>)
 function(add_pyfiction_python_binding target_name)
@@ -86,24 +86,24 @@ function(add_pyfiction_python_binding target_name)
 
   install(
     TARGETS ${target_name}
-    DESTINATION .
+    DESTINATION _native
     COMPONENT fiction_Python)
 
   # Install the committed stubs next to the extension in editable mode, so IDEs
   # and type checkers find them. A module with submodules has a stub package.
   if(SKBUILD_STATE STREQUAL "editable")
-    set(stub_root ${PROJECT_SOURCE_DIR}/python/mnt/pyfiction)
+    set(stub_root ${PROJECT_SOURCE_DIR}/python/mnt/pyfiction/_native)
     if(IS_DIRECTORY ${stub_root}/${ARG_MODULE_NAME})
       install(
         DIRECTORY ${stub_root}/${ARG_MODULE_NAME}
-        DESTINATION .
+        DESTINATION _native
         COMPONENT fiction_Python
         FILES_MATCHING
         PATTERN "*.pyi")
     elseif(EXISTS ${stub_root}/${ARG_MODULE_NAME}.pyi)
       install(
         FILES ${stub_root}/${ARG_MODULE_NAME}.pyi
-        DESTINATION .
+        DESTINATION _native
         COMPONENT fiction_Python)
     endif()
   endif()

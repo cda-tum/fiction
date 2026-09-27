@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Entry point of the `mnt.pyfiction.layouts` extension module.
+ * @brief Entry point of the `mnt.pyfiction._native.layouts` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -22,7 +22,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.layouts.coords` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.layouts.coords` submodule.
  * @param m Python coordinate submodule.
  */
 void register_layouts_coords(nanobind::module_& m);
@@ -34,7 +34,7 @@ void obstructions(nanobind::module_& m);
 void layout_utils(nanobind::module_& m);
 
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.layouts.io` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.layouts.io` submodule.
  *
  * @param m Python submodule.
  */

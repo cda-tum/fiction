@@ -50,7 +50,7 @@ void offset_coordinate(nanobind::module_& m)
                       const decltype(py_offset_coordinate().z)>(),
              py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_layouts_coords_offset_offset_2))
         .def(py::init<const py_offset_coordinate>(), py::arg("c"),
-             py::sig("def __init__(self, c: mnt.pyfiction.layouts.coords.offset_coordinate) -> None"))
+             py::sig("def __init__(self, c: mnt.pyfiction._native.layouts.coords.offset_coordinate) -> None"))
         .def(
             "__init__",
             [](py::pointer_and_handle<py_offset_coordinate> self, const py::tuple& t)
@@ -120,7 +120,7 @@ void cube_coordinate(nanobind::module_& m)
                       const decltype(py_cube_coordinate().z)>(),
              py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_layouts_coords_cube_cube_2))
         .def(py::init<const py_cube_coordinate>(), py::arg("c"),
-             py::sig("def __init__(self, c: mnt.pyfiction.layouts.coords.cube_coordinate) -> None"))
+             py::sig("def __init__(self, c: mnt.pyfiction._native.layouts.coords.cube_coordinate) -> None"))
         .def(
             "__init__",
             [](py::pointer_and_handle<py_cube_coordinate> self, const py::tuple& t)

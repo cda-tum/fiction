@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Entry point of the `mnt.pyfiction.networks` extension module.
+ * @brief Entry point of the `mnt.pyfiction._native.networks` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -27,7 +27,7 @@ void network_utils(nanobind::module_& m);
 void logic_simulation(nanobind::module_& m);
 
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.networks.io` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.networks.io` submodule.
  *
  * @param m Python submodule.
  */
@@ -43,7 +43,7 @@ NB_MODULE(networks, m)
     m.doc() = "Logic networks and their simulation.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.layouts");
+    nanobind::module_::import_("mnt.pyfiction._native.layouts");
 
     // Overloads on the cell-level layouts of `qca`, `mol_qca`, `inml`, and `sidb` import nothing: those
     // modules come later in the import chain, and an argument of their type implies that they are loaded.

@@ -160,35 +160,39 @@ void network_conversion(nanobind::module_& m)
             return detail::convert_to_target(network, target);
         },
         py::arg("network"), py::arg("target") = detail::network_target::TEC,
-        py::sig(
-            "def convert_network(network: mnt.pyfiction.networks.technology_network | "
-            "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
-            "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.TEC] = "
-            "mnt.pyfiction.synthesis.network_target.TEC) "
-            "-> mnt.pyfiction.networks.technology_network"),
+        py::sig("def convert_network(network: mnt.pyfiction._native.networks.technology_network | "
+                "mnt.pyfiction._native.networks.aig_network | mnt.pyfiction._native.networks.xag_network | "
+                "mnt.pyfiction._native.networks.mig_network, target: "
+                "typing.Literal[mnt.pyfiction._native.synthesis.network_target.TEC] = "
+                "mnt.pyfiction._native.synthesis.network_target.TEC) "
+                "-> mnt.pyfiction._native.networks.technology_network"),
         DOC(fiction_synthesis_convert_network));
     detail::convert_network_to<detail::network_target::AIG>(
-        m, "def convert_network(network: mnt.pyfiction.networks.technology_network | "
-           "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
-           "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.AIG]) "
-           "-> mnt.pyfiction.networks.aig_network");
+        m, "def convert_network(network: mnt.pyfiction._native.networks.technology_network | "
+           "mnt.pyfiction._native.networks.aig_network | mnt.pyfiction._native.networks.xag_network | "
+           "mnt.pyfiction._native.networks.mig_network, target: "
+           "typing.Literal[mnt.pyfiction._native.synthesis.network_target.AIG]) "
+           "-> mnt.pyfiction._native.networks.aig_network");
     detail::convert_network_to<detail::network_target::XAG>(
-        m, "def convert_network(network: mnt.pyfiction.networks.technology_network | "
-           "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
-           "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.XAG]) "
-           "-> mnt.pyfiction.networks.xag_network");
+        m, "def convert_network(network: mnt.pyfiction._native.networks.technology_network | "
+           "mnt.pyfiction._native.networks.aig_network | mnt.pyfiction._native.networks.xag_network | "
+           "mnt.pyfiction._native.networks.mig_network, target: "
+           "typing.Literal[mnt.pyfiction._native.synthesis.network_target.XAG]) "
+           "-> mnt.pyfiction._native.networks.xag_network");
     detail::convert_network_to<detail::network_target::MIG>(
-        m, "def convert_network(network: mnt.pyfiction.networks.technology_network | "
-           "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
-           "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.MIG]) "
-           "-> mnt.pyfiction.networks.mig_network");
+        m, "def convert_network(network: mnt.pyfiction._native.networks.technology_network | "
+           "mnt.pyfiction._native.networks.aig_network | mnt.pyfiction._native.networks.xag_network | "
+           "mnt.pyfiction._native.networks.mig_network, target: "
+           "typing.Literal[mnt.pyfiction._native.synthesis.network_target.MIG]) "
+           "-> mnt.pyfiction._native.networks.mig_network");
     // a target that is not a literal
     m.def("convert_network", &detail::convert_to_target, py::arg("network"), py::arg("target"),
-          py::sig("def convert_network(network: mnt.pyfiction.networks.technology_network | "
-                  "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
-                  "mnt.pyfiction.networks.mig_network, target: mnt.pyfiction.synthesis.network_target) -> "
-                  "mnt.pyfiction.networks.technology_network | mnt.pyfiction.networks.aig_network | "
-                  "mnt.pyfiction.networks.xag_network | mnt.pyfiction.networks.mig_network"));
+          py::sig(
+              "def convert_network(network: mnt.pyfiction._native.networks.technology_network | "
+              "mnt.pyfiction._native.networks.aig_network | mnt.pyfiction._native.networks.xag_network | "
+              "mnt.pyfiction._native.networks.mig_network, target: mnt.pyfiction._native.synthesis.network_target) -> "
+              "mnt.pyfiction._native.networks.technology_network | mnt.pyfiction._native.networks.aig_network | "
+              "mnt.pyfiction._native.networks.xag_network | mnt.pyfiction._native.networks.mig_network"));
 }
 
 }  // namespace pyfiction

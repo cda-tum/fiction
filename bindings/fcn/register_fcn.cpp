@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Entry point of the `mnt.pyfiction.fcn` extension module.
+ * @brief Entry point of the `mnt.pyfiction._native.fcn` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -24,7 +24,7 @@ namespace pyfiction
 void area(nanobind::module_& m);
 
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.fcn.io` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.fcn.io` submodule.
  *
  * @param m Python submodule.
  */
@@ -40,10 +40,10 @@ NB_MODULE(fcn, m)
     m.doc() = "Technology-independent FCN layout properties.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.qca");
-    nanobind::module_::import_("mnt.pyfiction.mol_qca");
-    nanobind::module_::import_("mnt.pyfiction.inml");
-    nanobind::module_::import_("mnt.pyfiction.sidb");
+    nanobind::module_::import_("mnt.pyfiction._native.qca");
+    nanobind::module_::import_("mnt.pyfiction._native.mol_qca");
+    nanobind::module_::import_("mnt.pyfiction._native.inml");
+    nanobind::module_::import_("mnt.pyfiction._native.sidb");
 
     pyfiction::area(m);
     auto io = pyfiction::def_submodule(m, "io", "Technology-independent readers and writers of cell-level layouts.");

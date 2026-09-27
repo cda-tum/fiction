@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Entry point of the `mnt.pyfiction.inml` extension module.
+ * @brief Entry point of the `mnt.pyfiction._native.inml` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -24,7 +24,7 @@ namespace pyfiction
 void inml_layout(nanobind::module_& m);
 
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.inml.io` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.inml.io` submodule.
  *
  * @param m Python submodule.
  */
@@ -40,7 +40,7 @@ NB_MODULE(inml, m)
     m.doc() = "In-plane Nanomagnet Logic (iNML) cell-level layouts.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.layouts");
+    nanobind::module_::import_("mnt.pyfiction._native.layouts");
 
     pyfiction::inml_layout(m);
     auto io = pyfiction::def_submodule(m, "io", "Readers and writers of iNML cell-level layouts.");

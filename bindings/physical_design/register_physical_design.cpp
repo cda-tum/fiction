@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Entry point of the `mnt.pyfiction.physical_design` extension module.
+ * @brief Entry point of the `mnt.pyfiction._native.physical_design` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -38,7 +38,7 @@ void routing_utils(nanobind::module_& m);
 void placement_utils(nanobind::module_& m);
 
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.physical_design.path_finding` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.physical_design.path_finding` submodule.
  *
  * @param m Python submodule.
  */
@@ -54,12 +54,12 @@ NB_MODULE(physical_design, m)
     m.doc() = "Placement and routing of logic networks into gate-level layouts.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.layouts");
-    nanobind::module_::import_("mnt.pyfiction.networks");
-    nanobind::module_::import_("mnt.pyfiction.qca");
-    nanobind::module_::import_("mnt.pyfiction.mol_qca");
-    nanobind::module_::import_("mnt.pyfiction.inml");
-    nanobind::module_::import_("mnt.pyfiction.sidb");
+    nanobind::module_::import_("mnt.pyfiction._native.layouts");
+    nanobind::module_::import_("mnt.pyfiction._native.networks");
+    nanobind::module_::import_("mnt.pyfiction._native.qca");
+    nanobind::module_::import_("mnt.pyfiction._native.mol_qca");
+    nanobind::module_::import_("mnt.pyfiction._native.inml");
+    nanobind::module_::import_("mnt.pyfiction._native.sidb");
 
     // `networks` owns the Python class of `high_degree_fanin_exception`, but the placement algorithms of
     // this module throw it. A translator catches the exception only in the module whose code threw it,
@@ -74,7 +74,7 @@ NB_MODULE(physical_design, m)
             catch (const fiction::networks::high_degree_fanin_exception& error)
             {
                 const auto python_class =
-                    nanobind::module_::import_("mnt.pyfiction.networks").attr("high_degree_fanin_exception");
+                    nanobind::module_::import_("mnt.pyfiction._native.networks").attr("high_degree_fanin_exception");
                 PyErr_SetString(python_class.ptr(), error.what());
             }
         });

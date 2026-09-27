@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the bindings of the `mnt.pyfiction.mol_qca.io` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.mol_qca.io` submodule.
  * @author Marcel Walter (marcelwa)
  */
 

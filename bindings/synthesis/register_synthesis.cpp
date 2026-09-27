@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Entry point of the `mnt.pyfiction.synthesis` extension module.
+ * @brief Entry point of the `mnt.pyfiction._native.synthesis` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -41,7 +41,7 @@ NB_MODULE(synthesis, m)
     m.doc() = "Truth tables and logic network transformations.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.networks");
+    nanobind::module_::import_("mnt.pyfiction._native.networks");
 
     pyfiction::dynamic_truth_table(m);
     pyfiction::truth_tables(m);

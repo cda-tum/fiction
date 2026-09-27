@@ -9,13 +9,13 @@ Three trees make up `mnt.pyfiction`:
 - `bindings/` holds the C++ sources. Each top-level C++ namespace (`layouts`, `sidb`, …)
   is one extension module, built from `bindings/<namespace>/`.
 - `python/mnt/` holds the Python package: the lazy `mnt/pyfiction/__init__.py`, the
-  generated `.pyi` stubs, and the pure-Python CLI in `mnt/fiction/cli/`.
+  generated private `.pyi` stubs, typed public facades, and the pure-Python CLI in `mnt/fiction/cli/`.
 - `test/python/` holds the Python tests, laid out like the Python module tree.
 
-**The Python module tree mirrors the C++ namespaces.** `fiction::sidb::simulation::engines`
-is `mnt.pyfiction.sidb.simulation.engines`, built from `bindings/sidb/simulation/engines/`.
-The `technology` directory level of `include/fiction/` has no namespace, so it has no
-module either.
+The private `mnt.pyfiction._native` tree mirrors the C++ namespaces. Public Python
+modules under `python/mnt/pyfiction/` select and adapt the supported FCN tools.
+Native modules import only native dependencies; they never import the public facades.
+The CLI and user examples import only public modules.
 
 A new binding:
 
@@ -27,9 +27,10 @@ A new binding:
 3. Needs nothing else if its directory already exists. A new nested namespace also gets a
    `pyfiction::def_submodule` call in the `NB_MODULE` block of its top-level
    `register_<namespace>.cpp`. A new top-level namespace also goes into the module list
-   of `bindings/CMakeLists.txt`, `python/mnt/pyfiction/__init__.py`, and `nox -s stubs`.
+   of `bindings/CMakeLists.txt` and `nox -s stubs`. Public exports are explicit and
+   belong to the domain module that provides the user-facing operation.
 4. Names types of other modules only if its `NB_MODULE` block imports them with
-   `nanobind::module_::import_("mnt.pyfiction.<module>")`. Keep the imports acyclic: the
+   `nanobind::module_::import_("mnt.pyfiction._native.<module>")`. Keep the imports acyclic: the
    modules form the chain in the list of `bindings/CMakeLists.txt`, and a module imports
    only modules before it.
 5. Translates the C++ exceptions its own code throws in its own module. A translator catches

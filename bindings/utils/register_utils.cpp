@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Entry point of the `mnt.pyfiction.utils` extension module.
+ * @brief Entry point of the `mnt.pyfiction._native.utils` extension module.
  * @author Marcel Walter (marcelwa)
  */
 

@@ -26,7 +26,7 @@ namespace pyfiction
  *
  * `nanobind::module_::def_submodule` makes the submodule reachable as an attribute only.
  * The `sys.modules` entry lets `import` and `from ... import` statements resolve the full
- * dotted name, such as `mnt.pyfiction.sidb.simulation.engines`.
+ * dotted name, such as `mnt.pyfiction._native.sidb.simulation.engines`.
  *
  * @param parent Module that holds the submodule.
  * @param name Unqualified submodule name.

@@ -253,16 +253,17 @@ bindings/
 └── ...
 python/mnt/pyfiction/
 ├── __init__.py                                    # loads the submodules lazily
-├── physical_design/__init__.pyi, path_finding.pyi # generated stubs
+├── physical_design/                              # typed public facade
+├── _native/                                      # generated native stubs
 └── ...
 ```
 
-The Python module tree mirrors the C++ namespaces: `fiction::sidb::simulation::engines::quickexact` is
-`mnt.pyfiction.sidb.simulation.engines.quickexact`. Each top-level namespace (`layouts`, `networks`, `synthesis`,
-`physical_design`, `verification`, `utils`, `qca`, `mol_qca`, `inml`, `sidb`, `fcn`) is its own extension module.
-Each nested namespace is a submodule of it. For example, import coordinate types with
-`from mnt.pyfiction.layouts.coords import offset_coordinate, cube_coordinate`. The directories under `bindings/`
-follow the same tree, so a binding sits in the directory of the namespace it wraps: `a_star.cpp` is under `physical_design/path_finding/`.
+The private `mnt.pyfiction._native` tree mirrors the C++ namespaces. Each top-level
+namespace remains a separate extension module, and nested namespaces remain native
+submodules. Public modules under `python/mnt/pyfiction/` explicitly export the supported
+tools. Users and the CLI import these public modules; `_native` has no API compatibility
+guarantee. Native modules import their dependencies from `_native` to keep type
+registration independent of the public facade.
 
 Each leaf `.cpp` file defines exactly one binding function named after the file (e.g.
 `void a_star(nanobind::module_& m)`) that binds a single class, function, or closely related group thereof. Each
@@ -274,7 +275,8 @@ the submodule's registry.
 
 New source files do not need to be added anywhere manually: `bindings/CMakeLists.txt` collects each module's
 sources with `file(GLOB_RECURSE ...)`. Wire the new function into the directory's `register_<path>.cpp`, then run
-`nox -s stubs` to regenerate the `.pyi` files under `python/mnt/pyfiction/` and commit them.
+`nox -s stubs` to regenerate the `.pyi` files under `python/mnt/pyfiction/_native/` and commit them. Public Python functions carry
+inline annotations; native re-exports use the generated stubs.
 
 :::{note}
 The bindings are built with [nanobind](https://github.com/wjakob/nanobind), which (unlike the previous
