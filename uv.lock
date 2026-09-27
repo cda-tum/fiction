@@ -763,7 +763,7 @@ requires-dist = [
 build = [
     { name = "nanobind", specifier = "~=3.1.0" },
     { name = "scikit-build-core", specifier = "~=1.0.3" },
-    { name = "vcs-versioning", specifier = "~=2.4.0" },
+    { name = "vcs-versioning", specifier = "~=2.5.0" },
 ]
 dev = [
     { name = "nanobind", specifier = "~=3.1.0" },
@@ -773,7 +773,7 @@ dev = [
     { name = "pytest-sugar", specifier = ">=1.1.1" },
     { name = "pytest-xdist", specifier = ">=3.8.0" },
     { name = "scikit-build-core", specifier = "~=1.0.3" },
-    { name = "vcs-versioning", specifier = "~=2.4.0" },
+    { name = "vcs-versioning", specifier = "~=2.5.0" },
 ]
 docs = [
     { name = "breathe", marker = "python_full_version >= '3.12'", specifier = ">=4.36.0" },
@@ -1491,16 +1491,16 @@ wheels = [
 
 [[package]]
 name = "vcs-versioning"
-version = "2.4.1"
+version = "2.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3e/97/792a4ef20344f9af3e16098b58b45eb5d6202259b84fc80c43bc000a5e6c/vcs_versioning-2.4.1.tar.gz", hash = "sha256:d4575de3115ec9434393c87c80ffb0eb98a16056bfe2b11ce0f3a97aff67fe0a", size = 164222, upload-time = "2026-09-16T07:47:40.267Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6f/a0/6977bb418312ad30f27e522c5040604d4bbf7e40ccd5a11d333afe549354/vcs_versioning-2.5.0.tar.gz", hash = "sha256:956a796e31f80fe714d219d6d1df15a6bf247d10f6d851bf4b98279d0a42da55", size = 165975, upload-time = "2026-09-23T19:21:10.795Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d7/20/29378edc8d7d2ce41892adc1356f4c6c6ae03b945d04ca6ade61afa3d5dc/vcs_versioning-2.4.1-py3-none-any.whl", hash = "sha256:b7089ec9bef67b2cad82148366e8eac4d63173f440ec62628282b59eb96bbcb0", size = 122157, upload-time = "2026-09-16T07:47:38.811Z" },
+    { url = "https://files.pythonhosted.org/packages/e4/e6/b4dedd1efea8a1e432123575896328dec83c26327164f7098db415d13f6f/vcs_versioning-2.5.0-py3-none-any.whl", hash = "sha256:dbf44f6303dc817e5792cb7d0e9cc90e3046ee1e32eaa357b20ad368811313d0", size = 122897, upload-time = "2026-09-23T19:21:09.3Z" },
 ]
 
 [[package]]
