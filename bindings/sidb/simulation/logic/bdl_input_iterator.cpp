@@ -25,14 +25,7 @@
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/tuple.h>          // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner): converts caller-supplied BDL wires.
 
 namespace pyfiction
 {
