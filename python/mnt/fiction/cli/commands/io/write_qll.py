@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
 from mnt.pyfiction.fcn.io import write_qll_layout
@@ -41,11 +41,7 @@ def write_qll_command(session: Session, args: argparse.Namespace) -> Result:
     Without a filename, use the active element's name and ``.qll``.
     """
     entry = session.cell_layouts.current()
-    # mypy binds T to the join of the three types, their common base class, so the union is restated
-    element = cast(
-        "qca_layout | mol_qca_layout | inml_layout",
-        require_cell_type(entry.layout, (qca_layout, mol_qca_layout, inml_layout), ".qll"),
-    )
+    element = require_cell_type(entry.layout, (qca_layout, mol_qca_layout, inml_layout), ".qll")
     path = output_path(element, args.file, ".qll")
     write_qll_layout(element, str(path), on_progress=session.report_progress)
     return written(session, path)

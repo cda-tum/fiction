@@ -370,9 +370,18 @@ sub_table_spacing = "\n"
 # Error if ty emits any warning-level diagnostics.
 error-on-warning = true
 
-[tool.ty.analysis]
-# The extension modules ship no stubs
-allowed-unresolved-imports = [ "mnt.pyfiction.**" ]
+# nanobind generates comparison operands narrower than object.__eq__/__ne__.
+[[tool.ty.overrides]]
+include = [
+    "python/mnt/pyfiction/inml/__init__.pyi",
+    "python/mnt/pyfiction/layouts/coords.pyi",
+    "python/mnt/pyfiction/mol_qca/__init__.pyi",
+    "python/mnt/pyfiction/qca/__init__.pyi",
+    "python/mnt/pyfiction/sidb/__init__.pyi",
+    "python/mnt/pyfiction/sidb/model.pyi",
+    "python/mnt/pyfiction/sidb/simulation/logic.pyi",
+]
+rules = { invalid-method-override = "ignore" }
 
 [tool.pytest]
 addopts = [

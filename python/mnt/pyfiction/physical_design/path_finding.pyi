@@ -434,11 +434,11 @@ class yen_k_shortest_paths_params:
         """Default constructor."""
 
     @property
-    def a_star_params(self) -> a_star_params:
+    def a_star_params(self) -> mnt.pyfiction.physical_design.path_finding.a_star_params:
         """Parameters for the internal A* algorithm."""
 
     @a_star_params.setter
-    def a_star_params(self, arg: a_star_params, /) -> None: ...
+    def a_star_params(self, arg: mnt.pyfiction.physical_design.path_finding.a_star_params, /) -> None: ...
 
 @overload
 def yen_k_shortest_paths(

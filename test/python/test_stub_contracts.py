@@ -60,7 +60,7 @@ def test_optional_relocation_limit() -> None:
     params.max_gate_relocations = None
     assert params.max_gate_relocations is None
     with pytest.raises(TypeError):
-        params.max_gate_relocations = "not a count"  # type: ignore[assignment]
+        params.max_gate_relocations = "not a count"  # ty: ignore[invalid-assignment]
 
 
 def test_reserved_input_node_mapping(mux21: technology_network) -> None:

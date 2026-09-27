@@ -666,7 +666,7 @@ class technology_mapping_stats:
         """Report statistics."""
 
     @property
-    def mapper_stats(self) -> mapper_stats:
+    def mapper_stats(self) -> mnt.pyfiction.synthesis.mapper_stats:
         """Statistics for mockturtle's mapper."""
 
 def and_or_not() -> technology_mapping_params:
