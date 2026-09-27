@@ -48,7 +48,7 @@ def test_help_of_a_command(shell: Shell) -> None:
 
 def test_version(shell: Shell) -> None:
     assert "fiction" in shell.ok("version")
-    assert shell.session.log[-1]["result"]["version"]  # type: ignore[index]
+    assert shell.session.log[-1]["result"]["version"]
 
 
 def test_quit_stops_the_session(shell: Shell) -> None:
@@ -245,9 +245,9 @@ def test_show_takes_an_explicit_program(mux21_shell: Shell, tmp_path: Path, monk
 def test_show_keeps_its_temporary_file_after_the_session_closes(mux21_shell: Shell) -> None:
     """The viewer reads the file after `show` returns, so the file must outlive the session."""
     mux21_shell.ok("show -n --silent")
-    kept = Path(str(mux21_shell.session.log[-1]["result"]["file"]))  # type: ignore[index]
+    kept = Path(str(mux21_shell.session.log[-1]["result"]["file"]))
     mux21_shell.ok("show -n --silent --delete")
-    deleted = Path(str(mux21_shell.session.log[-1]["result"]["file"]))  # type: ignore[index]
+    deleted = Path(str(mux21_shell.session.log[-1]["result"]["file"]))
     mux21_shell.session.close()
     assert kept.is_file()
     assert not deleted.exists()

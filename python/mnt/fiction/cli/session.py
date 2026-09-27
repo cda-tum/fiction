@@ -247,7 +247,7 @@ class Session:
         self.report_progress: ProgressCallback = ignore_progress
         self.report_worker_progress: WorkerProgressCallback = ignore_worker_progress
         self.log_path = log_path
-        self.log: list[dict[str, object]] = []
+        self.log: list[dict[str, Any]] = []
         self._source: tuple[str, int] | None = None
         self.close_failed = False
         self._temp_dir: Path | None = None

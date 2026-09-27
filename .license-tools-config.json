@@ -16,7 +16,7 @@
     "^vendors/",
     "^bindings/include/pyfiction/pybind11_mkdoc_docstrings\\.hpp$",
     "^benchmarks/",
-    "(^|/)\\.(ai|git|mypy_cache|nox|pytest_cache|ruff_cache|tox|venv[^/]*)/",
+    "(^|/)\\.(ai|git|nox|pytest_cache|ruff_cache|tox|venv[^/]*)/",
     "(^|/)(build|cmake-build)[^/]*/",
     "(^|/)(dist|venv|_deps|__pycache__)/",
     "\\.egg-info/"
