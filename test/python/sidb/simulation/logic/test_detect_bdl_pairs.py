@@ -10,33 +10,33 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb import DotTag, Lattice, LatticeSite, SiDBLayout
 from mnt.pyfiction.sidb.simulation.logic import detect_bdl_pairs, detect_bdl_pairs_params
 
 
 @pytest.mark.parametrize(
     "lat",
-    [pytest.param(lattice.si_100_2x1(), id="100"), pytest.param(lattice.si_111_1x1(), id="111")],
+    [pytest.param(Lattice.si_100_2x1(), id="100"), pytest.param(Lattice.si_111_1x1(), id="111")],
 )
 def test_detect_bdl_pairs(lat):
-    lyt = sidb_layout(lat)
+    lyt = SiDBLayout(lat)
 
-    lyt.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
-    lyt.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.INPUT)
+    lyt.assign_sidb(LatticeSite(0, 0, 0), DotTag.INPUT)
+    lyt.assign_sidb(LatticeSite(1, 0, 0), DotTag.INPUT)
 
-    lyt.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(4, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(5, 0, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(2, 0, 0), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(3, 0, 0), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(4, 0, 0), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(5, 0, 0), DotTag.NORMAL)
 
-    lyt.assign_sidb(lattice_site(6, 0, 0), sidb_dot_tag.OUTPUT)
-    lyt.assign_sidb(lattice_site(7, 0, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_sidb(LatticeSite(6, 0, 0), DotTag.OUTPUT)
+    lyt.assign_sidb(LatticeSite(7, 0, 0), DotTag.OUTPUT)
 
     params = detect_bdl_pairs_params()
 
-    input_bdl_pairs = detect_bdl_pairs(lyt, sidb_dot_tag.INPUT, params)
-    output_bdl_pairs = detect_bdl_pairs(lyt, sidb_dot_tag.OUTPUT, params)
-    normal_bdl_pairs = detect_bdl_pairs(lyt, sidb_dot_tag.NORMAL, params)
+    input_bdl_pairs = detect_bdl_pairs(lyt, DotTag.INPUT, params)
+    output_bdl_pairs = detect_bdl_pairs(lyt, DotTag.OUTPUT, params)
+    normal_bdl_pairs = detect_bdl_pairs(lyt, DotTag.NORMAL, params)
 
     assert len(input_bdl_pairs) == 0
     assert len(output_bdl_pairs) == 0

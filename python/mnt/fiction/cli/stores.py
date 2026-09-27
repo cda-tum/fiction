@@ -34,7 +34,7 @@ from mnt.pyfiction.layouts import (
 from mnt.pyfiction.mol_qca import MolecularQCALayout
 from mnt.pyfiction.networks import AigNetwork, MigNetwork, TechnologyNetwork, XagNetwork, get_name
 from mnt.pyfiction.qca import QCALayout
-from mnt.pyfiction.sidb import charge_distribution, row_of, sidb_layout
+from mnt.pyfiction.sidb import ChargeDistribution, SiDBLayout, row_of
 from mnt.pyfiction.synthesis import TruthTable
 from mnt.pyfiction.verification import critical_path_length_and_throughput
 
@@ -43,7 +43,7 @@ from .errors import CommandError
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from mnt.pyfiction.sidb.simulation import sidb_simulation_result
+    from mnt.pyfiction.sidb.simulation import SimulationResult
 
 Network: TypeAlias = AigNetwork | XagNetwork | MigNetwork | TechnologyNetwork
 """Logic network types held by the shell."""
@@ -59,7 +59,7 @@ GateLayout: TypeAlias = (
     | EvenColumnHexGateLayout
 )
 """The nine supported gate-level layout topologies."""
-CellLayout: TypeAlias = QCALayout | INMLLayout | MolecularQCALayout | sidb_layout
+CellLayout: TypeAlias = QCALayout | INMLLayout | MolecularQCALayout | SiDBLayout
 """Cell-level layout types held by the shell."""
 
 NETWORK_TYPES: dict[type[Network], str] = {
@@ -75,7 +75,7 @@ TECHNOLOGIES: dict[type[CellLayout], str] = {
     QCALayout: "QCA",
     INMLLayout: "iNML",
     MolecularQCALayout: "molQCA",
-    sidb_layout: "SiDB",
+    SiDBLayout: "SiDB",
 }
 """The cell-level layout classes and their technology names."""
 
@@ -96,7 +96,7 @@ class CellEntry:
     """
 
     layout: CellLayout
-    result: sidb_simulation_result | None = None
+    result: SimulationResult | None = None
     engine: str | None = None
 
 
@@ -306,7 +306,7 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
         "technology": TECHNOLOGIES[type(layout)],
         "area_nm2": area(layout),
     }
-    if isinstance(layout, sidb_layout):
+    if isinstance(layout, SiDBLayout):
         description["lattice"] = layout.get_lattice().name
         if layout.is_empty():
             description["size"] = {"x": 0, "y": 0}
@@ -322,7 +322,7 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
             description["tile"] = {"x": layout.get_tile_size_x(), "y": layout.get_tile_size_y()}
     description["inputs"] = layout.num_pis()
     description["outputs"] = layout.num_pos()
-    if isinstance(layout, sidb_layout):
+    if isinstance(layout, SiDBLayout):
         description["dots"] = layout.num_dots()
         description["defects"] = layout.num_defects()
     else:
@@ -345,16 +345,16 @@ def describe_simulation(entry: CellEntry) -> dict[str, object]:
     result = entry.result
     if result is None:
         return {}
-    ground_states = result.groundstates()
+    ground_states = result.ground_states()
     return {
         "engine": entry.engine,
         "stable_states": len(result.charge_distributions),
-        "ground_state_energy_ev": ground_states[0].energy() if ground_states else None,
+        "ground_state_energy_ev": ground_states[0].energy if ground_states else None,
         "runtime_s": result.simulation_runtime.total_seconds(),
     }
 
 
-def ground_state(entry: CellEntry) -> charge_distribution | None:
+def ground_state(entry: CellEntry) -> ChargeDistribution | None:
     """Return the ground state of a simulated cell entry.
 
     Args:
@@ -366,7 +366,7 @@ def ground_state(entry: CellEntry) -> charge_distribution | None:
     """
     if entry.result is None:
         return None
-    states = entry.result.groundstates()
+    states = entry.result.ground_states()
     return states[0] if states else None
 
 

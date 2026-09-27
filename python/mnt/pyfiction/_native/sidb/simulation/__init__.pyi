@@ -10,7 +10,7 @@
 
 import datetime
 import enum
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from typing import overload
 
 import mnt.pyfiction._native.sidb
@@ -21,7 +21,7 @@ from mnt.pyfiction._native.sidb.simulation import engines as engines
 from mnt.pyfiction._native.sidb.simulation import io as io
 from mnt.pyfiction._native.sidb.simulation import logic as logic
 
-class sidb_simulation_engine(enum.Enum):
+class SimulationEngine(enum.Enum):
     """Selector for the available SiDB simulation engines."""
 
     EXGS = 0
@@ -54,7 +54,7 @@ class sidb_simulation_engine(enum.Enum):
     (2 or 3).
     """
 
-class exact_sidb_simulation_engine(enum.Enum):
+class ExactSimulationEngine(enum.Enum):
     """Selector exclusively for exact SiDB simulation engines."""
 
     EXGS = 0
@@ -80,7 +80,7 @@ class exact_sidb_simulation_engine(enum.Enum):
     base, it simulates very effectively for either base number (2 or 3).
     """
 
-class heuristic_sidb_simulation_engine(enum.Enum):
+class HeuristicSimulationEngine(enum.Enum):
     """Selector exclusively for heuristic SiDB simulation engines."""
 
     QUICKSIM = 0
@@ -90,11 +90,11 @@ class heuristic_sidb_simulation_engine(enum.Enum):
     """
 
 @overload
-def sidb_simulation_engine_name(engine: sidb_simulation_engine) -> str: ...
+def sidb_simulation_engine_name(engine: SimulationEngine) -> str: ...
 @overload
-def sidb_simulation_engine_name(engine: exact_sidb_simulation_engine) -> str: ...
+def sidb_simulation_engine_name(engine: ExactSimulationEngine) -> str: ...
 @overload
-def sidb_simulation_engine_name(engine: heuristic_sidb_simulation_engine) -> str:
+def sidb_simulation_engine_name(engine: HeuristicSimulationEngine) -> str:
     """
     Returns the name of the given simulation engine.
 
@@ -109,7 +109,7 @@ def sidb_simulation_engine_name(engine: heuristic_sidb_simulation_engine) -> str
         The name of the simulation engine.
     """
 
-class charge_transition_threshold_bounds(enum.Enum):
+class ChargeTransitionThresholdBounds(enum.Enum):
     """
     The bounds a local potential is tested against to decide whether a
     charge state is population stable.
@@ -127,7 +127,7 @@ class charge_transition_threshold_bounds(enum.Enum):
     NEUTRAL_UPPER_BOUND = 3
     """The upper bound check against `mu_plus` to validate DB0."""
 
-class potential_landscape:
+class PotentialLandscape:
     """
     The static electrostatics of an SiDB layout under one set of physical
     parameters: the screened Coulomb potential every SiDB exerts on every
@@ -142,9 +142,10 @@ class potential_landscape:
 
     def __init__(
         self,
-        layout: mnt.pyfiction._native.sidb.sidb_layout,
-        params: mnt.pyfiction._native.sidb.model.sidb_simulation_parameters = ...,
-        local_external_potential: Mapping[mnt.pyfiction._native.sidb.lattice_site, float] = {},
+        layout: mnt.pyfiction._native.sidb.SiDBLayout,
+        *,
+        params: mnt.pyfiction._native.sidb.model.SimulationParams = ...,
+        local_external_potential: Mapping[mnt.pyfiction._native.sidb.LatticeSite, float] = {},
         global_external_potential: float = 0.0,
     ) -> None:
         """
@@ -166,7 +167,8 @@ class potential_landscape:
                                basis index.
         """
 
-    def get_layout(self) -> mnt.pyfiction._native.sidb.sidb_layout:
+    @property
+    def layout(self) -> mnt.pyfiction._native.sidb.SiDBLayout:
         """
         The layout the landscape describes.
 
@@ -174,7 +176,8 @@ class potential_landscape:
             The layout.
         """
 
-    def params(self) -> mnt.pyfiction._native.sidb.model.sidb_simulation_parameters:
+    @property
+    def params(self) -> mnt.pyfiction._native.sidb.model.SimulationParams:
         """
         The physical parameters.
 
@@ -190,7 +193,8 @@ class potential_landscape:
             Number of SiDBs.
         """
 
-    def sites(self) -> list[mnt.pyfiction._native.sidb.lattice_site]:
+    @property
+    def sites(self) -> list[mnt.pyfiction._native.sidb.LatticeSite]:
         """
         The SiDB sites in raster order, shared with the charge distributions
         built over this landscape.
@@ -199,9 +203,7 @@ class potential_landscape:
             The shared site list.
         """
 
-    def defects(
-        self,
-    ) -> list[tuple[mnt.pyfiction._native.sidb.lattice_site, mnt.pyfiction._native.sidb.model.sidb_defect]]:
+    def defects(self) -> list[tuple[mnt.pyfiction._native.sidb.LatticeSite, mnt.pyfiction._native.sidb.model.Defect]]:
         """
         The charged surface defects that enter the landscape.
 
@@ -296,7 +298,7 @@ class potential_landscape:
             Chargeless potential (unit: V); 0 at distance 0.
         """
 
-    def local_internal_potentials(self, cd: mnt.pyfiction._native.sidb.charge_distribution) -> list[float]:
+    def local_internal_potentials(self, cd: mnt.pyfiction._native.sidb.ChargeDistribution) -> list[float]:
         """
         The local internal potentials of a charge distribution: at every SiDB,
         the potential of the charged SiDBs plus the potential of the charged
@@ -313,7 +315,7 @@ class potential_landscape:
                                    landscape.
         """
 
-    def local_potentials(self, cd: mnt.pyfiction._native.sidb.charge_distribution) -> list[float]:
+    def local_potentials(self, cd: mnt.pyfiction._native.sidb.ChargeDistribution) -> list[float]:
         """
         The local potentials of a charge distribution: internal plus external
         potential per SiDB. O(N²).
@@ -329,7 +331,7 @@ class potential_landscape:
                                    landscape.
         """
 
-    def energy(self, cd: mnt.pyfiction._native.sidb.charge_distribution) -> float:
+    def energy(self, cd: mnt.pyfiction._native.sidb.ChargeDistribution) -> float:
         """
         The electrostatic potential energy of a charge distribution. O(N²).
 
@@ -344,7 +346,7 @@ class potential_landscape:
                                    landscape.
         """
 
-    def is_physically_valid(self, cd: mnt.pyfiction._native.sidb.charge_distribution) -> bool:
+    def is_physically_valid(self, cd: mnt.pyfiction._native.sidb.ChargeDistribution) -> bool:
         """
         Whether a charge distribution is physically valid. O(N²).
 
@@ -360,24 +362,13 @@ class potential_landscape:
         """
 
     def evaluate(
-        self, cd: mnt.pyfiction._native.sidb.charge_distribution
-    ) -> mnt.pyfiction._native.sidb.charge_distribution:
+        self, states: Sequence[mnt.pyfiction._native.sidb.model.ChargeState]
+    ) -> mnt.pyfiction._native.sidb.ChargeDistribution:
         """
-        Evaluates a charge distribution: returns a copy with its energy set.
-        O(N²).
-
-        Args:
-            cd: Charge distribution over this landscape's SiDBs.
-
-        Returns:
-            `cd` with its energy assigned.
-
-        Raises:
-            std::invalid_argument: if the distribution sites differ from the
-                                   landscape.
+        Evaluate one charge state per site in raster order and return a read-only distribution. Energy includes this landscape's defects and external potentials. Raises ValueError for a wrong state count or a NONE state; physical validity is a separate query.
         """
 
-class sidb_simulation_result:
+class SimulationResult:
     """
     The unified return type of every SiDB simulation algorithm: the name
     of the algorithm, its runtime, the layout it simulated, the physically
@@ -388,39 +379,26 @@ class sidb_simulation_result:
     state per SiDB in the layout's raster order plus its energy.
     """
 
-    def __init__(self) -> None:
-        """Default constructor."""
-
     @property
     def algorithm_name(self) -> str:
         """Name of the algorithm used to determine the charge distributions."""
 
-    @algorithm_name.setter
-    def algorithm_name(self, arg: str, /) -> None: ...
     @property
     def simulation_runtime(self) -> datetime.timedelta:
         """Total simulation runtime in seconds."""
 
-    @simulation_runtime.setter
-    def simulation_runtime(self, arg: datetime.timedelta, /) -> None: ...
     @property
-    def layout(self) -> mnt.pyfiction._native.sidb.sidb_layout:
+    def layout(self) -> mnt.pyfiction._native.sidb.SiDBLayout:
         """The simulated layout."""
 
-    @layout.setter
-    def layout(self, arg: mnt.pyfiction._native.sidb.sidb_layout, /) -> None: ...
     @property
-    def charge_distributions(self) -> list[mnt.pyfiction._native.sidb.charge_distribution]:
+    def charge_distributions(self) -> list[mnt.pyfiction._native.sidb.ChargeDistribution]:
         """Charge distributions determined by the algorithm."""
 
-    @charge_distributions.setter
-    def charge_distributions(self, arg: Sequence[mnt.pyfiction._native.sidb.charge_distribution], /) -> None: ...
     @property
-    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.sidb_simulation_parameters:
+    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.SimulationParams:
         """Physical parameters used in the simulation."""
 
-    @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.sidb_simulation_parameters, /) -> None: ...
     @property
     def additional_simulation_parameters(self) -> dict[str, int | float | bool | str]:
         """
@@ -432,9 +410,11 @@ class sidb_simulation_result:
         value of the parameter.
         """
 
+    def __len__(self) -> int: ...
+    def __iter__(self) -> Iterator[mnt.pyfiction._native.sidb.ChargeDistribution]: ...
     def charge_state(
-        self, distribution: int, site: mnt.pyfiction._native.sidb.lattice_site
-    ) -> mnt.pyfiction._native.sidb.model.sidb_charge_state:
+        self, distribution: int, site: mnt.pyfiction._native.sidb.LatticeSite
+    ) -> mnt.pyfiction._native.sidb.model.ChargeState:
         """
         The charge state of an SiDB in one of the charge distributions.
 
@@ -449,7 +429,7 @@ class sidb_simulation_result:
             std::out_of_range: if the distribution index is out of range.
         """
 
-    def groundstates(self) -> list[mnt.pyfiction._native.sidb.charge_distribution]:
+    def ground_states(self) -> list[mnt.pyfiction._native.sidb.ChargeDistribution]:
         """
         The charge distributions of minimal energy. Distributions with
         identical charge states count once.
@@ -462,7 +442,7 @@ class sidb_simulation_result:
             returns multiple ground states that all possess the same energy.
         """
 
-def is_ground_state(heuristic_results: sidb_simulation_result, exhaustive_results: sidb_simulation_result) -> bool:
+def is_ground_state(heuristic_results: SimulationResult, exhaustive_results: SimulationResult) -> bool:
     """
     Whether a heuristic simulation found every ground state an exact
     simulation found: the two results have the same number of ground
@@ -477,7 +457,7 @@ def is_ground_state(heuristic_results: sidb_simulation_result, exhaustive_result
         exact one.
     """
 
-def check_simulation_results_for_equivalence(result1: sidb_simulation_result, result2: sidb_simulation_result) -> bool:
+def check_simulation_results_for_equivalence(result1: SimulationResult, result2: SimulationResult) -> bool:
     """
     Whether two simulation results of the same layout are equivalent: the
     same number of distinct charge distributions, and, sorted by charge

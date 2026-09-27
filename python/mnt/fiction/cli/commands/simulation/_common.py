@@ -15,8 +15,8 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import finite_float, integer, positive_float
 from mnt.fiction.cli.stores import TECHNOLOGIES, CellEntry, describe
-from mnt.pyfiction.sidb import sidb_layout
-from mnt.pyfiction.sidb.simulation import sidb_simulation_engine, sidb_simulation_result
+from mnt.pyfiction.sidb import SiDBLayout
+from mnt.pyfiction.sidb.simulation import SimulationEngine, SimulationResult
 
 if TYPE_CHECKING:
     import argparse
@@ -24,10 +24,10 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-    from mnt.pyfiction.sidb.model import sidb_simulation_parameters
+    from mnt.pyfiction.sidb import SimulationParams
 
 
-ENGINES = {name.lower(): member for name, member in sidb_simulation_engine.__members__.items()}
+ENGINES = {name.lower(): member for name, member in SimulationEngine.__members__.items()}
 """The ``--engine`` names and the engines they select; ``clustercomplete`` exists only with ALGLIB."""
 
 
@@ -62,7 +62,7 @@ def _physical_arguments(parser: Parser, *, base: bool, base_default: int = 2, po
         )
 
 
-def _apply_physical(params: sidb_simulation_parameters, args: argparse.Namespace) -> dict[str, object]:
+def _apply_physical(params: SimulationParams, args: argparse.Namespace) -> dict[str, object]:
     """Copy the physical parameters of ``args`` into a ``sidb_simulation_parameters`` and describe them."""
     params.epsilon_r = args.epsilon_r
     params.lambda_tf = args.lambda_tf
@@ -78,7 +78,7 @@ def _apply_physical(params: sidb_simulation_parameters, args: argparse.Namespace
     return description
 
 
-def _active_sidb_layout(session: Session) -> sidb_layout:
+def _active_sidb_layout(session: Session) -> SiDBLayout:
     """Return the active SiDB layout.
 
     Args:
@@ -91,14 +91,14 @@ def _active_sidb_layout(session: Session) -> sidb_layout:
         CommandError: When the active element is of another technology.
     """
     entry = session.cell_layouts.current()
-    if not isinstance(entry.layout, sidb_layout):
+    if not isinstance(entry.layout, SiDBLayout):
         msg = f"the active layout is {TECHNOLOGIES[type(entry.layout)]}; an SiDB layout is needed"
         raise CommandError(msg)
     return entry.layout
 
 
 def _store_result(
-    session: Session, layout: sidb_layout, result: sidb_simulation_result | None, parameters: dict[str, object]
+    session: Session, layout: SiDBLayout, result: SimulationResult | None, parameters: dict[str, object]
 ) -> Result:
     """Store the simulation result and describe its physical parameters."""
     if result is None:

@@ -45,7 +45,7 @@ described by setting the vectors directly.
 
 ```{eval-rst}
 
-.. autoclass:: mnt.pyfiction.sidb.lattice_site
+.. autoclass:: mnt.pyfiction.sidb.LatticeSite
     :members:
 
 .. autofunction:: mnt.pyfiction.sidb.row_of
@@ -54,7 +54,7 @@ described by setting the vectors directly.
 
 .. autofunction:: mnt.pyfiction.sidb.sites_in_area
 
-.. autoclass:: mnt.pyfiction.sidb.lattice
+.. autoclass:: mnt.pyfiction.sidb.Lattice
     :members:
 
 ```
@@ -93,10 +93,10 @@ Python exposes the tags as `sidb_dot_tag`.
 
 ```{eval-rst}
 
-.. autoclass:: mnt.pyfiction.sidb.sidb_dot_tag
+.. autoclass:: mnt.pyfiction.sidb.DotTag
     :members:
 
-.. autoclass:: mnt.pyfiction.sidb.sidb_layout
+.. autoclass:: mnt.pyfiction.sidb.SiDBLayout
     :members:
 
 ```
@@ -129,7 +129,7 @@ distribution per physically valid state beside a single copy of the simulated la
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.charge_distribution
+.. autoclass:: mnt.pyfiction.sidb.ChargeDistribution
    :members:
 ```
 

@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.sidb.io import read_sqd_layout
-from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation import SimulationEngine
 from mnt.pyfiction.sidb.simulation.logic import (
     operational_domain_params,
     operational_domain_ratio,
@@ -37,7 +37,7 @@ def test_and_gate_100_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
     params = operational_domain_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
 
     params.sweep_dimensions = [
@@ -71,7 +71,7 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
                 import threading
                 import time
                 from mnt.pyfiction.sidb.io import read_sqd_layout
-                from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
+                from mnt.pyfiction.sidb.simulation import SimulationEngine
                 from mnt.pyfiction.sidb.simulation.logic import (
                     operational_domain_params,
                     operational_domain_ratio,
@@ -85,7 +85,7 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
                 layout = read_sqd_layout(sys.argv[1])
                 params = operational_domain_params()
                 params.number_of_threads = 2
-                params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+                params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
                 params.operational_params.simulation_parameters.base = 2
                 params.sweep_dimensions = [
                     operational_domain_value_range(sweep_parameter.EPSILON_R, 5.5, 5.7, 0.02),

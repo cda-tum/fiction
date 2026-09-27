@@ -10,24 +10,24 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb import ChargeState, DotTag, LatticeSite, SiDBLayout
 from mnt.pyfiction.sidb.io import color_mode, write_sidb_layout_svg_params, write_sidb_layout_svg_to_string
-from mnt.pyfiction.sidb.model import sidb_charge_state
+from mnt.pyfiction.sidb.simulation import PotentialLandscape
 from mnt.pyfiction.utils import __repo__, __version__
 
 
 @pytest.fixture
-def four_sidb_layout() -> sidb_layout:
+def four_sidb_layout() -> SiDBLayout:
     """A four-SiDB layout covering the dot tags the SVG writer draws.
 
     Returns:
         The layout on the H-Si(100) 2x1 lattice.
     """
-    lyt = sidb_layout()
-    lyt.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(3, 1, 1), sidb_dot_tag.NORMAL)
+    lyt = SiDBLayout()
+    lyt.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(1, 0, 1), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(1, 0, 0), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(3, 1, 1), DotTag.NORMAL)
     return lyt
 
 
@@ -218,7 +218,7 @@ cds_light_mode = (
 )
 
 
-def test_write_sidb_layout_to_svg(four_sidb_layout: sidb_layout) -> None:
+def test_write_sidb_layout_to_svg(four_sidb_layout: SiDBLayout) -> None:
     """SiDB layouts render the expected SVG in both color modes."""
     params = write_sidb_layout_svg_params()
 
@@ -231,13 +231,14 @@ def test_write_sidb_layout_to_svg(four_sidb_layout: sidb_layout) -> None:
     assert normalize_svg(generated_svg_cell_level_light_mode) == normalize_svg(cell_level_light_mode)
 
 
-def test_write_sidb_charge_distribution_to_svg(four_sidb_layout: sidb_layout) -> None:
+def test_write_sidb_charge_distribution_to_svg(four_sidb_layout: SiDBLayout) -> None:
     """SiDB charge distributions render charge states in both color modes."""
-    cd = charge_distribution(four_sidb_layout)
-    cd.assign_charge_state(lattice_site(0, 0, 0), sidb_charge_state.NEGATIVE)
-    cd.assign_charge_state(lattice_site(1, 0, 1), sidb_charge_state.NEGATIVE)
-    cd.assign_charge_state(lattice_site(1, 0, 0), sidb_charge_state.NEUTRAL)
-    cd.assign_charge_state(lattice_site(3, 1, 1), sidb_charge_state.POSITIVE)
+    cd = PotentialLandscape(four_sidb_layout).evaluate([
+        ChargeState.NEGATIVE,
+        ChargeState.NEUTRAL,
+        ChargeState.NEGATIVE,
+        ChargeState.POSITIVE,
+    ])
 
     params = write_sidb_layout_svg_params()
 
@@ -252,11 +253,11 @@ def test_write_sidb_charge_distribution_to_svg(four_sidb_layout: sidb_layout) ->
 
 def test_sidb_layout_svg() -> None:
     """Lattice layouts render occupied sites and their surrounding lattice."""
-    lyt = sidb_layout()
-    lyt.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(3, 1, 1), sidb_dot_tag.NORMAL)
+    lyt = SiDBLayout()
+    lyt.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(1, 0, 1), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(1, 0, 0), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(3, 1, 1), DotTag.NORMAL)
 
     params = write_sidb_layout_svg_params()
     params.color_background = color_mode.LIGHT

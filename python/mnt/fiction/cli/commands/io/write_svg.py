@@ -16,7 +16,7 @@ from mnt.fiction.cli.drawing import validate_drawing_options, write_svg
 from mnt.fiction.cli.registry import Category, command
 from mnt.pyfiction.mol_qca import MolecularQCALayout
 from mnt.pyfiction.qca import QCALayout
-from mnt.pyfiction.sidb import sidb_layout
+from mnt.pyfiction.sidb import SiDBLayout
 
 from ._write import output_argument, output_path, require_cell_type, written
 
@@ -49,7 +49,7 @@ def write_svg_command(session: Session, args: argparse.Namespace) -> Result:
     """
     entry = session.cell_layouts.current()
     element = entry.layout
-    require_cell_type(element, (QCALayout, MolecularQCALayout, sidb_layout), ".svg")
+    require_cell_type(element, (QCALayout, MolecularQCALayout, SiDBLayout), ".svg")
     validate_drawing_options(
         args, dot=False, gate_layout=False, qca_svg=isinstance(element, QCALayout | MolecularQCALayout)
     )

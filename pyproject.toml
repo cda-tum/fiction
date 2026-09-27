@@ -305,6 +305,8 @@ docstring-code-format = true
 "python/mnt/pyfiction/__init__.py" = [ "non-empty-init-module" ]
 # Optional Z3 exports depend on the capabilities of the installed native extension.
 "python/mnt/pyfiction/physical_design/__init__.py" = [ "non-empty-init-module" ]
+# Simulation exports optional engines when their native dependencies are available.
+"python/mnt/pyfiction/sidb/simulation/__init__.py" = [ "non-empty-init-module" ]
 # standalone scripts run by path, not modules anything imports, so an `__init__.py` would be wrong
 ".github/scripts/**" = [ "implicit-namespace-package" ]
 "experiments/**" = [

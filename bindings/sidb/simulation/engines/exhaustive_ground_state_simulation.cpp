@@ -44,7 +44,7 @@ void exhaustive_ground_state_simulation(nanobind::module_& m)
         [](const fiction::sidb::layout& lyt, const fiction::sidb::model::simulation_parameters& params,
            const fiction::utils::progress_callback& on_progress)
         { return fiction::sidb::simulation::engines::exhaustive_ground_state_simulation(lyt, params, on_progress); },
-        py::arg("lyt"), py::arg("params") = fiction::sidb::model::simulation_parameters{},
+        py::arg("layout"), py::kw_only(), py::arg("params") = fiction::sidb::model::simulation_parameters{},
         py::arg("on_progress").none() = py::none(), py::call_guard<py::gil_scoped_release>(),
         DOC(fiction_sidb_simulation_engines_exhaustive_ground_state_simulation));
 }

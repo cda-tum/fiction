@@ -33,6 +33,10 @@
 namespace pyfiction
 {
 
+/**
+ * @brief Registers the ClusterComplete engine and its options.
+ * @param m Python module.
+ */
 void clustercomplete(nanobind::module_& m)
 {
     namespace py = nanobind;
@@ -43,7 +47,7 @@ void clustercomplete(nanobind::module_& m)
      * Report *Ground State Space* stats.
      */
     py::enum_<clustercomplete_params::ground_state_space_reporting>(
-        m, "ground_state_space_reporting",
+        m, "GroundStateSpaceReporting",
         DOC(fiction_sidb_simulation_engines_clustercomplete_params_ground_state_space_reporting))
         .value("ON", clustercomplete_params::ground_state_space_reporting::ON,
                DOC(fiction_sidb_simulation_engines_clustercomplete_params_ground_state_space_reporting_ON))
@@ -53,7 +57,7 @@ void clustercomplete(nanobind::module_& m)
     /**
      * ClusterComplete parameters.
      */
-    py::class_<clustercomplete_params>(m, "clustercomplete_params",
+    py::class_<clustercomplete_params>(m, "ClusterCompleteParams",
                                        DOC(fiction_sidb_simulation_engines_clustercomplete_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("simulation_parameters", &clustercomplete_params::sim_params,
@@ -83,8 +87,9 @@ void clustercomplete(nanobind::module_& m)
                                                                        const clustercomplete_params&) =
         &fiction::sidb::simulation::engines::clustercomplete;
 
-    m.def("clustercomplete", clustercomplete_pointer, py::arg("lyt"), py::arg("params") = clustercomplete_params{},
-          py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_clustercomplete));
+    m.def("clustercomplete", clustercomplete_pointer, py::arg("layout"), py::kw_only(),
+          py::arg("params") = clustercomplete_params{}, py::call_guard<py::gil_scoped_release>(),
+          DOC(fiction_sidb_simulation_engines_clustercomplete));
 }
 
 }  // namespace pyfiction

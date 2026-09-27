@@ -8,13 +8,13 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.sidb.model import sidb_defect, sidb_defect_type
+from mnt.pyfiction.sidb import Defect, DefectType
 
 
 def test_default_arguments():
-    defect = sidb_defect(sidb_defect_type.DB)
+    defect = Defect(DefectType.DB)
 
-    assert defect.type == sidb_defect_type.DB
+    assert defect.type == DefectType.DB
     assert defect.charge == 0
     assert defect.epsilon_r == 0.0
     assert defect.lambda_tf == 0.0

@@ -30,7 +30,7 @@ void charge_state(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::enum_<fiction::sidb::model::charge_state>(m, "sidb_charge_state", DOC(fiction_sidb_model_charge_state))
+    py::enum_<fiction::sidb::model::charge_state>(m, "ChargeState", DOC(fiction_sidb_model_charge_state))
         .value("NEGATIVE", fiction::sidb::model::charge_state::NEGATIVE, DOC(fiction_sidb_model_charge_state_NEGATIVE))
         .value("NEUTRAL", fiction::sidb::model::charge_state::NEUTRAL, DOC(fiction_sidb_model_charge_state_NEUTRAL))
         .value("POSITIVE", fiction::sidb::model::charge_state::POSITIVE, DOC(fiction_sidb_model_charge_state_POSITIVE))

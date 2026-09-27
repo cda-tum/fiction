@@ -11,7 +11,7 @@ Silicon Dangling Bond (SiDB) lattices, layouts, charge distributions, and simula
 """
 
 import enum
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from typing import overload
 
 from mnt.pyfiction._native.sidb import generators as generators
@@ -19,7 +19,7 @@ from mnt.pyfiction._native.sidb import io as io
 from mnt.pyfiction._native.sidb import model as model
 from mnt.pyfiction._native.sidb import simulation as simulation
 
-class lattice_site:
+class LatticeSite:
     """
     A site of the H-Si surface lattice. Site `(x, y, z)` is the `z`-th
     basis site of the unit cell reached by `x` steps along the first and
@@ -63,21 +63,15 @@ class lattice_site:
     def x(self) -> int:
         """Steps along the first lattice vector."""
 
-    @x.setter
-    def x(self, arg: int, /) -> None: ...
     @property
     def y(self) -> int:
         """Steps along the second lattice vector."""
 
-    @y.setter
-    def y(self, arg: int, /) -> None: ...
     @property
     def z(self) -> int:
         """Basis site within the unit cell, 0 or 1."""
 
-    @z.setter
-    def z(self, arg: int, /) -> None: ...
-    def __eq__(self, arg: lattice_site, /) -> bool:
+    def __eq__(self, arg: LatticeSite, /) -> bool:
         """
         Compares two sites for equality.
 
@@ -88,8 +82,8 @@ class lattice_site:
             `true` iff both sites are identical.
         """
 
-    def __ne__(self, arg: lattice_site, /) -> bool: ...
-    def __lt__(self, arg: lattice_site, /) -> bool:
+    def __ne__(self, arg: LatticeSite, /) -> bool: ...
+    def __lt__(self, arg: LatticeSite, /) -> bool:
         """
         Orders two sites in raster order: by `y`, then by `z`, then by `x`.
 
@@ -100,10 +94,10 @@ class lattice_site:
             The ordering of this site relative to `other`.
         """
 
-    def __le__(self, arg: lattice_site, /) -> bool: ...
-    def __gt__(self, arg: lattice_site, /) -> bool: ...
-    def __ge__(self, arg: lattice_site, /) -> bool: ...
-    def __add__(self, arg: lattice_site, /) -> lattice_site:
+    def __le__(self, arg: LatticeSite, /) -> bool: ...
+    def __gt__(self, arg: LatticeSite, /) -> bool: ...
+    def __ge__(self, arg: LatticeSite, /) -> bool: ...
+    def __add__(self, arg: LatticeSite, /) -> LatticeSite:
         """
         Adds another site to this one, carrying an overflowing basis index
         into the next unit cell along the second lattice vector. Does not
@@ -120,7 +114,7 @@ class lattice_site:
                                coordinate exceeds the lattice-site range.
         """
 
-    def __sub__(self, arg: lattice_site, /) -> lattice_site:
+    def __sub__(self, arg: LatticeSite, /) -> LatticeSite:
         """
         Subtracts another site from this one, borrowing from the previous unit
         cell along the second lattice vector when the basis index underflows.
@@ -139,7 +133,7 @@ class lattice_site:
 
     def __hash__(self) -> int: ...
 
-def row_of(site: lattice_site) -> int:
+def row_of(site: LatticeSite) -> int:
     """
     The row of a site counted in single SiDB rows: `2 * y + z`. SiDB gate
     libraries describe their gates on a grid of such rows.
@@ -151,7 +145,7 @@ def row_of(site: lattice_site) -> int:
         Row of `s`.
     """
 
-def site_at_row(x: int, row: int) -> lattice_site:
+def site_at_row(x: int, row: int) -> LatticeSite:
     """
     The site at a given column and single-SiDB row, the inverse of
     `row_of`. Negative rows map to the unit cell below them, so `(x, -1)`
@@ -168,7 +162,7 @@ def site_at_row(x: int, row: int) -> lattice_site:
         std::out_of_range: if the row exceeds the range of lattice sites.
     """
 
-def sites_in_area(first_corner: lattice_site, second_corner: lattice_site) -> list[lattice_site]:
+def sites_in_area(first_corner: LatticeSite, second_corner: LatticeSite) -> list[LatticeSite]:
     """
     All sites in the rectangle spanned by two corner sites, in raster
     order (top to bottom, left to right), both corners included. The
@@ -186,7 +180,7 @@ def sites_in_area(first_corner: lattice_site, second_corner: lattice_site) -> li
                            size.
     """
 
-class lattice:
+class Lattice:
     """
     A hydrogen-passivated silicon surface lattice: a Bravais lattice given
     by two lattice vectors plus a two-site basis. Site `(x, y, z)` lies at
@@ -216,7 +210,7 @@ class lattice:
         """
 
     @staticmethod
-    def si_100_2x1() -> lattice:
+    def si_100_2x1() -> Lattice:
         """
         The H-Si(100)-2x1 surface: dimer rows 7.68 Å apart, dimer atoms 3.84 Å
         apart along the row and 2.25 Å apart across it.
@@ -226,7 +220,7 @@ class lattice:
         """
 
     @staticmethod
-    def si_111_1x1() -> lattice:
+    def si_111_1x1() -> Lattice:
         """
         The H-Si(111)-1x1 surface: a hexagonal arrangement with 3.84 Å between
         neighboring sites, described by a rectangular 6.65 Å × 3.84 Å cell
@@ -266,7 +260,7 @@ class lattice:
 
     @basis.setter
     def basis(self, arg: Sequence[tuple[float, float]], /) -> None: ...
-    def nm_position(self, site: lattice_site) -> tuple[float, float]:
+    def nm_position(self, site: LatticeSite) -> tuple[float, float]:
         """
         The position of a site relative to the site `(0, 0, 0)`.
 
@@ -280,7 +274,7 @@ class lattice:
             std::out_of_range: if the basis index is not 0 or 1.
         """
 
-    def nm_distance(self, source: lattice_site, target: lattice_site) -> float:
+    def nm_distance(self, source: LatticeSite, target: LatticeSite) -> float:
         """
         The Euclidean distance between two sites.
 
@@ -295,7 +289,7 @@ class lattice:
             std::out_of_range: if either basis index is not 0 or 1.
         """
 
-    def __eq__(self, arg: lattice, /) -> bool:
+    def __eq__(self, arg: Lattice, /) -> bool:
         """
         Compares two lattices for equality.
 
@@ -306,9 +300,9 @@ class lattice:
             `true` iff name, vectors, and basis are identical.
         """
 
-    def __ne__(self, arg: lattice, /) -> bool: ...
+    def __ne__(self, arg: Lattice, /) -> bool: ...
 
-class sidb_dot_tag(enum.Enum):
+class DotTag(enum.Enum):
     """
     Tags describing the role of a silicon dangling bond. EMPTY denotes an
     unoccupied site.
@@ -329,7 +323,7 @@ class sidb_dot_tag(enum.Enum):
     LOGIC = 108
     """Logic dot (e.g., a canvas SiDB)."""
 
-class sidb_layout:
+class SiDBLayout:
     """
     An SiDB layout: tagged SiDBs and surface defects placed on lattice
     sites of one H-Si lattice. The layout has value semantics; copies are
@@ -346,7 +340,7 @@ class sidb_layout:
         """Creates an empty layout on the H-Si(100)-2x1 lattice."""
 
     @overload
-    def __init__(self, lattice: lattice, name: str = "") -> None:
+    def __init__(self, lattice: Lattice, name: str = "") -> None:
         """
         Creates an empty layout on the given lattice.
 
@@ -355,7 +349,7 @@ class sidb_layout:
             name: Layout name.
         """
 
-    def get_lattice(self) -> lattice:
+    def get_lattice(self) -> Lattice:
         """
         The lattice of the surface.
 
@@ -363,7 +357,7 @@ class sidb_layout:
             The lattice.
         """
 
-    def set_lattice(self, lattice: lattice) -> None:
+    def set_lattice(self, lattice: Lattice) -> None:
         """
         Reassigns the lattice. Sites are kept as they are; only their physical
         positions change.
@@ -388,7 +382,7 @@ class sidb_layout:
             name: New layout name.
         """
 
-    def assign_sidb(self, site: lattice_site, dot_tag: sidb_dot_tag = ...) -> None:
+    def assign_sidb(self, site: LatticeSite, dot_tag: DotTag = ...) -> None:
         """
         Assigns an SiDB to a lattice site with the given tag, or
         `dot_tag::NORMAL` by default. Reassigning an occupied site updates its
@@ -400,7 +394,7 @@ class sidb_layout:
             tag: Dot tag to assign; defaults to `dot_tag::NORMAL`.
         """
 
-    def get_dot_tag(self, site: lattice_site) -> sidb_dot_tag:
+    def get_dot_tag(self, site: LatticeSite) -> DotTag:
         """
         The dot tag at a site.
 
@@ -411,7 +405,7 @@ class sidb_layout:
             Dot tag at `s`, `dot_tag::EMPTY` if no SiDB is there.
         """
 
-    def is_empty_site(self, site: lattice_site) -> bool:
+    def is_empty_site(self, site: LatticeSite) -> bool:
         """
         Whether no SiDB sits at a site.
 
@@ -438,7 +432,7 @@ class sidb_layout:
             Number of SiDBs.
         """
 
-    def num_dots_with_tag(self, dot_tag: sidb_dot_tag) -> int:
+    def num_dots_with_tag(self, dot_tag: DotTag) -> int:
         """
         Number of tagged SiDBs.
 
@@ -449,7 +443,7 @@ class sidb_layout:
             Number of SiDBs with tag `tag`.
         """
 
-    def dots_with_tag(self, dot_tag: sidb_dot_tag) -> list[lattice_site]:
+    def dots_with_tag(self, dot_tag: DotTag) -> list[LatticeSite]:
         """
         All sites holding an SiDB of a given dot tag, in raster order.
 
@@ -460,7 +454,7 @@ class sidb_layout:
             Sites with tag `tag`.
         """
 
-    def sidbs(self) -> list[lattice_site]:
+    def sidbs(self) -> list[LatticeSite]:
         """
         All sites holding an SiDB, in raster order. This is the canonical SiDB
         order that index-based structures refer to.
@@ -469,7 +463,7 @@ class sidb_layout:
             Sorted SiDB sites.
         """
 
-    def index_of(self, site: lattice_site) -> int | None:
+    def index_of(self, site: LatticeSite) -> int | None:
         """
         The index of a site in `sidbs()`.
 
@@ -496,7 +490,7 @@ class sidb_layout:
             Number of output SiDBs.
         """
 
-    def is_pi(self, site: lattice_site) -> bool:
+    def is_pi(self, site: LatticeSite) -> bool:
         """
         Whether a site holds an input SiDB.
 
@@ -507,7 +501,7 @@ class sidb_layout:
             `true` iff `s` holds an input SiDB.
         """
 
-    def is_po(self, site: lattice_site) -> bool:
+    def is_po(self, site: LatticeSite) -> bool:
         """
         Whether a site holds an output SiDB.
 
@@ -518,13 +512,13 @@ class sidb_layout:
             `true` iff `s` holds an output SiDB.
         """
 
-    def pis(self) -> list[lattice_site]:
+    def pis(self) -> list[LatticeSite]:
         """Returns the sites of all input SiDBs."""
 
-    def pos(self) -> list[lattice_site]:
+    def pos(self) -> list[LatticeSite]:
         """Returns the sites of all output SiDBs."""
 
-    def assign_defect(self, site: lattice_site, defect: model.sidb_defect) -> None:
+    def assign_defect(self, site: LatticeSite, defect: model.Defect) -> None:
         """
         Places a surface defect at a site. A defect of type
         `defect_type::NONE` removes the defect from the site.
@@ -534,7 +528,7 @@ class sidb_layout:
             d: Defect to place.
         """
 
-    def move_defect(self, source: lattice_site, target: lattice_site) -> None:
+    def move_defect(self, source: LatticeSite, target: LatticeSite) -> None:
         """
         Moves the defect at one site to another, replacing whatever defect the
         target site held. An empty source or identical source and target
@@ -545,7 +539,7 @@ class sidb_layout:
             target: Site to move the defect to.
         """
 
-    def get_defect(self, site: lattice_site) -> model.sidb_defect:
+    def get_defect(self, site: LatticeSite) -> model.Defect:
         """
         The defect at a site.
 
@@ -597,7 +591,7 @@ class sidb_layout:
             Number of defects with zero charge.
         """
 
-    def defects(self) -> list[tuple[lattice_site, model.sidb_defect]]:
+    def defects(self) -> list[tuple[LatticeSite, model.Defect]]:
         """
         All defects with their sites, in raster order.
 
@@ -607,10 +601,10 @@ class sidb_layout:
 
     def affected_sidbs(
         self,
-        site: lattice_site,
+        site: LatticeSite,
         charged_defect_spacing_overwrite: tuple[int, int] | None = None,
         neutral_defect_spacing_overwrite: tuple[int, int] | None = None,
-    ) -> set[lattice_site]:
+    ) -> set[LatticeSite]:
         """
         The sites whose SiDBs the defect at a given site would influence: the
         rectangle around the defect spanned by `model::defect_extent`, counted
@@ -636,7 +630,7 @@ class sidb_layout:
         self,
         charged_defect_spacing_overwrite: tuple[int, int] | None = None,
         neutral_defect_spacing_overwrite: tuple[int, int] | None = None,
-    ) -> set[lattice_site]:
+    ) -> set[LatticeSite]:
         """
         The union of `affected_sidbs` over every defect.
 
@@ -652,7 +646,7 @@ class sidb_layout:
             Sites influenced by any defect.
         """
 
-    def bounding_box(self) -> tuple[lattice_site, lattice_site]:
+    def bounding_box(self) -> tuple[LatticeSite, LatticeSite]:
         """
         The smallest rectangle of sites containing every SiDB and every
         defect. The corners are the north-western and south-eastern site; an
@@ -662,7 +656,7 @@ class sidb_layout:
             North-western and south-eastern corner.
         """
 
-    def __eq__(self, arg: sidb_layout, /) -> bool:
+    def __eq__(self, arg: SiDBLayout, /) -> bool:
         """
         Compares two layouts for equality: same lattice, name, SiDBs, and
         defects.
@@ -674,10 +668,10 @@ class sidb_layout:
             `true` iff both layouts are identical.
         """
 
-    def __ne__(self, arg: sidb_layout, /) -> bool: ...
+    def __ne__(self, arg: SiDBLayout, /) -> bool: ...
     def __hash__(self) -> int: ...
 
-class charge_distribution:
+class ChargeDistribution:
     """
     A charge distribution assigns one charge state to every SiDB of a
     layout, in the layout's canonical raster order (`layout::sidbs()`),
@@ -686,22 +680,8 @@ class charge_distribution:
     a distribution costs one byte per SiDB.
     """
 
-    @overload
-    def __init__(self) -> None:
-        """Creates a distribution over no SiDBs."""
-
-    @overload
-    def __init__(self, layout: sidb_layout, charge_state: model.sidb_charge_state = ...) -> None:
-        """
-        Creates a distribution over the SiDBs of a layout with every SiDB in
-        one charge state.
-
-        Args:
-            lyt: Layout whose SiDBs the distribution covers.
-            cs: Charge state of every SiDB.
-        """
-
-    def sites(self) -> list[lattice_site]:
+    @property
+    def sites(self) -> list[LatticeSite]:
         """
         The sites the distribution covers, in raster order.
 
@@ -725,7 +705,7 @@ class charge_distribution:
             `true` iff there is no SiDB.
         """
 
-    def index_of(self, site: lattice_site) -> int | None:
+    def index_of(self, site: LatticeSite) -> int | None:
         """
         The index of a site in the distribution.
 
@@ -737,7 +717,7 @@ class charge_distribution:
             at `s`.
         """
 
-    def get_charge_state(self, site: lattice_site) -> model.sidb_charge_state:
+    def get_charge_state(self, site: LatticeSite) -> model.ChargeState:
         """
         The charge state of the SiDB at a site.
 
@@ -749,7 +729,7 @@ class charge_distribution:
             covers no SiDB at `s`.
         """
 
-    def get_charge_state_by_index(self, index: int) -> model.sidb_charge_state:
+    def get_charge_state_by_index(self, index: int) -> model.ChargeState:
         """
         The charge state of the SiDB at an index.
 
@@ -761,37 +741,8 @@ class charge_distribution:
             of range.
         """
 
-    def assign_charge_state(self, site: lattice_site, charge_state: model.sidb_charge_state) -> None:
-        """
-        Assigns the charge state of the SiDB at a site. A site the
-        distribution does not cover is ignored.
-
-        Args:
-            s: Site.
-            cs: Charge state to assign.
-        """
-
-    def assign_charge_state_by_index(self, index: int, charge_state: model.sidb_charge_state) -> None:
-        """
-        Assigns the charge state of the SiDB at an index.
-
-        Args:
-            index: Index in raster order.
-            cs: Charge state to assign.
-
-        Raises:
-            std::out_of_range: if the index is out of range.
-        """
-
-    def assign_all_charge_states(self, charge_state: model.sidb_charge_state) -> None:
-        """
-        Assigns one charge state to every SiDB.
-
-        Args:
-            cs: Charge state to assign.
-        """
-
-    def charge_states(self) -> list[model.sidb_charge_state]:
+    @property
+    def charge_states(self) -> list[model.ChargeState]:
         """
         All charge states in raster order.
 
@@ -799,6 +750,7 @@ class charge_distribution:
             The charge states.
         """
 
+    @property
     def energy(self) -> float:
         """
         The electrostatic potential energy of the distribution.
@@ -807,15 +759,7 @@ class charge_distribution:
             Energy (unit: eV).
         """
 
-    def assign_energy(self, energy: float) -> None:
-        """
-        Sets the electrostatic potential energy of the distribution.
-
-        Args:
-            e: Energy (unit: eV).
-        """
-
-    def charge_exists(self, charge_state: model.sidb_charge_state) -> bool:
+    def charge_exists(self, charge_state: model.ChargeState) -> bool:
         """
         Whether any SiDB has a given charge state.
 
@@ -850,22 +794,7 @@ class charge_distribution:
             Number of positively charged SiDBs.
         """
 
-    def charge_index(self, base: int) -> int:
-        """
-        The charge index: the distribution read as a number in the given base
-        with the first SiDB as the most significant digit and digit `sign + 1`
-        per SiDB. The index wraps around past 64 base-2 digits, so it
-        identifies distributions uniquely only for layouts of at most 64 (base
-        2) or 40 (base 3) SiDBs.
-
-        Args:
-            base: Base of the index, 2 or 3.
-
-        Returns:
-            The charge index.
-        """
-
-    def same_charge_states(self, other: charge_distribution) -> bool:
+    def same_charge_states(self, other: ChargeDistribution) -> bool:
         """
         Compares two distributions for equal charge states, ignoring the
         energy.
@@ -878,7 +807,7 @@ class charge_distribution:
             of SiDBs.
         """
 
-    def __eq__(self, arg: charge_distribution, /) -> bool:
+    def __eq__(self, arg: ChargeDistribution, /) -> bool:
         """
         Compares two distributions: same charge states and same energy.
 
@@ -889,7 +818,9 @@ class charge_distribution:
             `true` iff charge states and energy are equal.
         """
 
-    def __ne__(self, arg: charge_distribution, /) -> bool: ...
+    def __ne__(self, arg: ChargeDistribution, /) -> bool: ...
     def __len__(self) -> int: ...
+    def __iter__(self) -> Iterator[model.ChargeState]: ...
+    def __getitem__(self, site: LatticeSite) -> model.ChargeState: ...
 
     __hash__: None = None

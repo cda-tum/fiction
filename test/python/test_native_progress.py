@@ -34,11 +34,10 @@ from mnt.pyfiction.physical_design import (
     orthogonal,
 )
 from mnt.pyfiction.qca import io as qca_io
-from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb import DotTag, LatticeSite, SiDBLayout
 from mnt.pyfiction.sidb.io import read_sqd_layout, write_sidb_layout_svg, write_sidb_layout_svg_params, write_sqd_layout
-from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation import ClusterCompleteParams, SimulationEngine, clustercomplete
 from mnt.pyfiction.sidb.simulation.analysis import critical_temperature_gate_based, critical_temperature_params
-from mnt.pyfiction.sidb.simulation.engines import clustercomplete, clustercomplete_params
 from mnt.pyfiction.synthesis import (
     fanout_substitution,
     fanout_substitution_params,
@@ -188,9 +187,9 @@ def test_writer_counts_and_output(mux21: TechnologyNetwork, tmp_path: Path, kind
         elif kind == "qll":
             write_qll_layout(apply_sim7_mol_library(gate_layout), str(path), **kwargs)
         elif kind in {"sqd", "sidb_svg"}:
-            layout = sidb_layout()
-            layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-            layout.assign_sidb(lattice_site(2, 1, 1), sidb_dot_tag.NORMAL)
+            layout = SiDBLayout()
+            layout.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
+            layout.assign_sidb(LatticeSite(2, 1, 1), DotTag.NORMAL)
             if kind == "sqd":
                 write_sqd_layout(layout, str(path), **kwargs)
             else:
@@ -222,14 +221,14 @@ def test_writer_counts_and_output(mux21: TechnologyNetwork, tmp_path: Path, kind
 def test_clustercomplete_worker_counts(resources_dir: Path, threads: int) -> None:
     """Serial and stolen compositions contribute to the same aggregate count."""
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
-    params = clustercomplete_params()
+    params = ClusterCompleteParams()
     params.available_threads = threads
     params.simulation_parameters.base = 2
     reports: list[tuple[int, int, str, int, int, bool]] = []
     counts: list[tuple[str, int, int]] = []
     params.on_worker_progress = lambda *report: reports.append(report)
     params.on_progress = lambda *report: counts.append(report)
-    result = clustercomplete(layout, params)
+    result = clustercomplete(layout, params=params)
     assert result.charge_distributions
     assert reports
     final = {worker: done for worker, count, description, done, total, active in reports if not active}
@@ -265,7 +264,7 @@ def test_temperature_forwards_simulation_workers(resources_dir: Path) -> None:
     """Temperature analysis keeps outer phases and forwards the active simulation's workers."""
     layout = read_sqd_layout(str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"))
     params = critical_temperature_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.CLUSTERCOMPLETE
+    params.operational_params.sim_engine = SimulationEngine.CLUSTERCOMPLETE
     params.operational_params.simulation_parameters.base = 2
     workers: list[tuple[int, int, str, int, int, bool]] = []
     phases: list[tuple[str, int, int]] = []

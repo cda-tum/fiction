@@ -37,7 +37,7 @@ class state_type(enum.Enum):
 
 def calculate_energy_and_state_type_with_kinks_accepted(
     energy_distribution: energy_distribution,
-    valid_charge_distributions: Sequence[mnt.pyfiction._native.sidb.charge_distribution],
+    valid_charge_distributions: Sequence[mnt.pyfiction._native.sidb.ChargeDistribution],
     output_bdl_pairs: Sequence[mnt.pyfiction._native.sidb.simulation.logic.bdl_pair],
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     input_index: int,
@@ -63,9 +63,9 @@ def calculate_energy_and_state_type_with_kinks_accepted(
     """
 
 def calculate_energy_and_state_type_with_kinks_rejected(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     energy_distribution: energy_distribution,
-    valid_charge_distributions: Sequence[mnt.pyfiction._native.sidb.charge_distribution],
+    valid_charge_distributions: Sequence[mnt.pyfiction._native.sidb.ChargeDistribution],
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     input_index: int,
     input_bdl_wires: Sequence[mnt.pyfiction._native.sidb.simulation.logic.bdl_wire],
@@ -97,7 +97,7 @@ def calculate_energy_and_state_type_with_kinks_rejected(
     """
 
 def can_positive_charges_occur(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout, sim_params: mnt.pyfiction._native.sidb.model.sidb_simulation_parameters
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout, sim_params: mnt.pyfiction._native.sidb.model.SimulationParams
 ) -> bool:
     """
     Checks whether positively charged SiDBs can occur in a layout under
@@ -200,7 +200,7 @@ class critical_temperature_params:
 
 @overload
 def critical_temperature_gate_based(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: critical_temperature_params = ...,
     stats: critical_temperature_stats | None = None,
@@ -230,7 +230,7 @@ def critical_temperature_gate_based(
 
 @overload
 def critical_temperature_gate_based(
-    input_pattern_layouts: Sequence[mnt.pyfiction._native.sidb.sidb_layout],
+    input_pattern_layouts: Sequence[mnt.pyfiction._native.sidb.SiDBLayout],
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: critical_temperature_params,
     output_bdl_pairs: Sequence[mnt.pyfiction._native.sidb.simulation.logic.bdl_pair],
@@ -278,7 +278,7 @@ def critical_temperature_gate_based(
     """
 
 def critical_temperature_non_gate_based(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     params: critical_temperature_params = ...,
     stats: critical_temperature_stats | None = None,
 ) -> float:
@@ -391,7 +391,7 @@ class energy_distribution:
         """
 
 def calculate_energy_distribution(
-    charge_distributions: Sequence[mnt.pyfiction._native.sidb.charge_distribution],
+    charge_distributions: Sequence[mnt.pyfiction._native.sidb.ChargeDistribution],
 ) -> energy_distribution:
     """
     The energy distribution of a set of charge distributions: every
@@ -405,7 +405,7 @@ def calculate_energy_distribution(
         The energy distribution.
     """
 
-def minimum_energy(charge_distributions: Sequence[mnt.pyfiction._native.sidb.charge_distribution]) -> float:
+def minimum_energy(charge_distributions: Sequence[mnt.pyfiction._native.sidb.ChargeDistribution]) -> float:
     """
     Computes the minimum energy of a range of charge distributions. If the
     range is empty, infinity is returned to indicate no valid energy value
@@ -483,11 +483,11 @@ class physical_population_stability_params:
     @timeout.setter
     def timeout(self, arg: int, /) -> None: ...
     @property
-    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.sidb_simulation_parameters:
+    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.SimulationParams:
         """Parameters of the population stability analysis."""
 
     @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.sidb_simulation_parameters, /) -> None: ...
+    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.SimulationParams, /) -> None: ...
     @property
     def precision_for_distance_corresponding_to_potential(self) -> int:
         """
@@ -510,16 +510,16 @@ class population_stability_information:
         """Default constructor."""
 
     @property
-    def critical_dot(self) -> mnt.pyfiction._native.sidb.lattice_site:
+    def critical_dot(self) -> mnt.pyfiction._native.sidb.LatticeSite:
         """
         SiDB with the minimum potential difference to any charge transition
         threshold.
         """
 
     @critical_dot.setter
-    def critical_dot(self, arg: mnt.pyfiction._native.sidb.lattice_site, /) -> None: ...
+    def critical_dot(self, arg: mnt.pyfiction._native.sidb.LatticeSite, /) -> None: ...
     @property
-    def transition_potentials(self) -> dict[transition_type, tuple[mnt.pyfiction._native.sidb.lattice_site, float]]:
+    def transition_potentials(self) -> dict[transition_type, tuple[mnt.pyfiction._native.sidb.LatticeSite, float]]:
         """
         For each transition type, the SiDB closest to it and the required
         potential difference (unit: V).
@@ -527,7 +527,7 @@ class population_stability_information:
 
     @transition_potentials.setter
     def transition_potentials(
-        self, arg: Mapping[transition_type, tuple[mnt.pyfiction._native.sidb.lattice_site, float]], /
+        self, arg: Mapping[transition_type, tuple[mnt.pyfiction._native.sidb.LatticeSite, float]], /
     ) -> None: ...
     @property
     def distance_corresponding_to_potential(self) -> dict[transition_type, float]:
@@ -547,7 +547,7 @@ class population_stability_information:
     def system_energy(self, arg: float, /) -> None: ...
 
 def physical_population_stability(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout, params: physical_population_stability_params = ...
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout, params: physical_population_stability_params = ...
 ) -> list[population_stability_information]:
     """
     Assesses the population stability of an SiDB layout: for every
@@ -575,8 +575,8 @@ class physically_valid_parameters_domain:
     ) -> int: ...
 
 def physically_valid_parameters(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    cd: mnt.pyfiction._native.sidb.charge_distribution,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
+    cd: mnt.pyfiction._native.sidb.ChargeDistribution,
     params: mnt.pyfiction._native.sidb.simulation.logic.operational_domain_params = ...,
 ) -> physically_valid_parameters_domain:
     """
@@ -624,14 +624,14 @@ class time_to_solution_params:
     @timeout.setter
     def timeout(self, arg: int, /) -> None: ...
     @property
-    def engine(self) -> mnt.pyfiction._native.sidb.simulation.exact_sidb_simulation_engine:
+    def engine(self) -> mnt.pyfiction._native.sidb.simulation.ExactSimulationEngine:
         """
         Exhaustive simulation algorithm used to simulate the ground state as
         reference.
         """
 
     @engine.setter
-    def engine(self, arg: mnt.pyfiction._native.sidb.simulation.exact_sidb_simulation_engine, /) -> None: ...
+    def engine(self, arg: mnt.pyfiction._native.sidb.simulation.ExactSimulationEngine, /) -> None: ...
     @property
     def repetitions(self) -> int:
         """
@@ -702,8 +702,8 @@ class time_to_solution_stats:
         """
 
 def time_to_solution(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    quicksim_params: mnt.pyfiction._native.sidb.simulation.engines.quicksim_params,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
+    quicksim_params: mnt.pyfiction._native.sidb.simulation.engines.QuickSimParams,
     tts_params: time_to_solution_params = ...,
     ps: time_to_solution_stats | None = None,
 ) -> None:
@@ -724,8 +724,8 @@ def time_to_solution(
     """
 
 def time_to_solution_for_given_simulation_results(
-    results_exact: mnt.pyfiction._native.sidb.simulation.sidb_simulation_result,
-    results_heuristic: Sequence[mnt.pyfiction._native.sidb.simulation.sidb_simulation_result],
+    results_exact: mnt.pyfiction._native.sidb.simulation.SimulationResult,
+    results_heuristic: Sequence[mnt.pyfiction._native.sidb.simulation.SimulationResult],
     confidence_level: float = 0.997,
     ps: time_to_solution_stats | None = None,
 ) -> None:

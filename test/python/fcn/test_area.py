@@ -13,7 +13,7 @@ import pytest
 from mnt.pyfiction.fcn import area
 from mnt.pyfiction.inml import INMLLayout
 from mnt.pyfiction.qca import QCALayout
-from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb import DotTag, LatticeSite, SiDBLayout
 
 
 def test_qca_area() -> None:
@@ -30,10 +30,10 @@ def test_inml_area() -> None:
 
 def test_sidb_area() -> None:
     """SiDB sites determine the physical area of a lattice layout."""
-    lyt = sidb_layout()
+    lyt = SiDBLayout()
     assert area(lyt) == pytest.approx(0.0, abs=1e-7)
 
     # four columns and four single-SiDB rows
-    lyt.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(4, 2, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(4, 2, 0), DotTag.NORMAL)
     assert area(lyt) == pytest.approx(2.359296, abs=1e-7)

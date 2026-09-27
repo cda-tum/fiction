@@ -42,14 +42,12 @@ class generate_random_sidb_layout_params:
         """Default constructor."""
 
     @property
-    def coordinate_pair(
-        self,
-    ) -> tuple[mnt.pyfiction._native.sidb.lattice_site, mnt.pyfiction._native.sidb.lattice_site]:
+    def coordinate_pair(self) -> tuple[mnt.pyfiction._native.sidb.LatticeSite, mnt.pyfiction._native.sidb.LatticeSite]:
         """The area to place SiDBs in, as two opposite corners."""
 
     @coordinate_pair.setter
     def coordinate_pair(
-        self, arg: tuple[mnt.pyfiction._native.sidb.lattice_site, mnt.pyfiction._native.sidb.lattice_site], /
+        self, arg: tuple[mnt.pyfiction._native.sidb.LatticeSite, mnt.pyfiction._native.sidb.LatticeSite], /
     ) -> None: ...
     @property
     def number_of_sidbs(self) -> int:
@@ -64,11 +62,11 @@ class generate_random_sidb_layout_params:
     @positive_sidbs.setter
     def positive_sidbs(self, arg: positive_charges, /) -> None: ...
     @property
-    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.sidb_simulation_parameters:
+    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.SimulationParams:
         """Physical parameters for the positive charge check."""
 
     @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.sidb_simulation_parameters, /) -> None: ...
+    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.SimulationParams, /) -> None: ...
     @property
     def maximal_attempts(self) -> int:
         """Maximum number of placement attempts."""
@@ -101,8 +99,8 @@ class generate_random_sidb_layout_params:
     def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 def generate_random_sidb_layout(
-    params: generate_random_sidb_layout_params, lyt_skeleton: mnt.pyfiction._native.sidb.sidb_layout | None = None
-) -> mnt.pyfiction._native.sidb.sidb_layout | None:
+    params: generate_random_sidb_layout_params, lyt_skeleton: mnt.pyfiction._native.sidb.SiDBLayout | None = None
+) -> mnt.pyfiction._native.sidb.SiDBLayout | None:
     """
     Generates a random SiDB layout by placing SiDBs at random sites of an
     area, optionally on top of a skeleton. The skeleton's lattice, dots,
@@ -121,8 +119,8 @@ def generate_random_sidb_layout(
     """
 
 def generate_multiple_random_sidb_layouts(
-    params: generate_random_sidb_layout_params, lyt_skeleton: mnt.pyfiction._native.sidb.sidb_layout | None = None
-) -> list[mnt.pyfiction._native.sidb.sidb_layout] | None:
+    params: generate_random_sidb_layout_params, lyt_skeleton: mnt.pyfiction._native.sidb.SiDBLayout | None = None
+) -> list[mnt.pyfiction._native.sidb.SiDBLayout] | None:
     """
     Generates several unique random SiDB layouts with
     `generate_random_layout`.
@@ -191,7 +189,7 @@ class design_sidb_gates_params:
     @design_mode.setter
     def design_mode(self, arg: design_sidb_gates_mode, /) -> None: ...
     @property
-    def canvas(self) -> tuple[mnt.pyfiction._native.sidb.lattice_site, mnt.pyfiction._native.sidb.lattice_site]:
+    def canvas(self) -> tuple[mnt.pyfiction._native.sidb.LatticeSite, mnt.pyfiction._native.sidb.LatticeSite]:
         """
         The canvas: the area canvas SiDBs are placed in, as two opposite
         corners.
@@ -199,7 +197,7 @@ class design_sidb_gates_params:
 
     @canvas.setter
     def canvas(
-        self, arg: tuple[mnt.pyfiction._native.sidb.lattice_site, mnt.pyfiction._native.sidb.lattice_site], /
+        self, arg: tuple[mnt.pyfiction._native.sidb.LatticeSite, mnt.pyfiction._native.sidb.LatticeSite], /
     ) -> None: ...
     @property
     def number_of_canvas_sidbs(self) -> int:
@@ -230,11 +228,11 @@ class design_sidb_gates_params:
     def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 def design_sidb_gates(
-    skeleton: mnt.pyfiction._native.sidb.sidb_layout,
+    skeleton: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: design_sidb_gates_params = ...,
     stats: design_sidb_gates_stats | None = None,
-) -> list[mnt.pyfiction._native.sidb.sidb_layout]:
+) -> list[mnt.pyfiction._native.sidb.SiDBLayout]:
     """
     Designs SiDB gates on a skeleton: canvas SiDBs are placed in the
     canvas area so that the skeleton's input and output wires implement
@@ -361,7 +359,7 @@ class on_the_fly_sidb_circuit_design_params:
 
 def on_the_fly_sidb_circuit_design(
     layout: mnt.pyfiction._native.layouts.HexagonalGateLayout, params: on_the_fly_sidb_circuit_design_params = ...
-) -> mnt.pyfiction._native.sidb.sidb_layout:
+) -> mnt.pyfiction._native.sidb.SiDBLayout:
     """
     Design an SiDB circuit from a placed and routed hexagonal gate-level layout.
 

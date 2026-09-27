@@ -11,32 +11,60 @@
 from __future__ import annotations
 
 from mnt.pyfiction._native.sidb.simulation import (
-    charge_transition_threshold_bounds,
+    ChargeTransitionThresholdBounds,
+    ExactSimulationEngine,
+    HeuristicSimulationEngine,
+    PotentialLandscape,
+    SimulationEngine,
+    SimulationResult,
     check_simulation_results_for_equivalence,
-    exact_sidb_simulation_engine,
-    heuristic_sidb_simulation_engine,
     is_ground_state,
-    potential_landscape,
-    sidb_simulation_engine,
     sidb_simulation_engine_name,
-    sidb_simulation_result,
+)
+from mnt.pyfiction._native.sidb.simulation.engines import (
+    AutomaticBaseNumberDetection,
+    QuickExactParams,
+    QuickSimParams,
+    exhaustive_ground_state_simulation,
+    quickexact,
+    quicksim,
 )
 
-from . import analysis, defects, engines, io, logic
+from . import analysis, defects, io, logic
 
 __all__ = [
+    "AutomaticBaseNumberDetection",
+    "ChargeTransitionThresholdBounds",
+    "ExactSimulationEngine",
+    "HeuristicSimulationEngine",
+    "PotentialLandscape",
+    "QuickExactParams",
+    "QuickSimParams",
+    "SimulationEngine",
+    "SimulationResult",
     "analysis",
-    "charge_transition_threshold_bounds",
     "check_simulation_results_for_equivalence",
     "defects",
-    "engines",
-    "exact_sidb_simulation_engine",
-    "heuristic_sidb_simulation_engine",
+    "exhaustive_ground_state_simulation",
     "io",
     "is_ground_state",
     "logic",
-    "potential_landscape",
-    "sidb_simulation_engine",
+    "quickexact",
+    "quicksim",
     "sidb_simulation_engine_name",
-    "sidb_simulation_result",
 ]
+
+try:
+    from mnt.pyfiction._native.sidb.simulation.engines import (
+        ClusterCompleteParams,
+        GroundStateSpaceReporting,
+        clustercomplete,
+    )
+except ImportError:
+    pass
+else:
+    __all__ += [
+        "ClusterCompleteParams",
+        "GroundStateSpaceReporting",
+        "clustercomplete",
+    ]

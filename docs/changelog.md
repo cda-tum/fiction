@@ -379,6 +379,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** SiDB types use PascalCase; model data live in `sidb` and engines in
+    `sidb.simulation`. Results and lattice sites are read-only; evaluate custom charge states
+    with `PotentialLandscape.evaluate(states)` and read their `.energy` property.
+
   - **Breaking:** Physical-design workflows return a `LayoutResult` with layout and statistics. Select the topology with `layout_type`, pass options by keyword, and use `physical_design.routing` for custom routing. Optimization preserves its input.
 
   - **Breaking:** `layouts.io.read_fgl_layout` selects the topology with `layout_type`. Layout readers and writers accept filesystem paths.

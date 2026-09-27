@@ -70,7 +70,7 @@ class bdl_input_iterator:
     """
 
     @overload
-    def __init__(self, lyt: mnt.pyfiction._native.sidb.sidb_layout, params: bdl_input_iterator_params = ...) -> None:
+    def __init__(self, lyt: mnt.pyfiction._native.sidb.SiDBLayout, params: bdl_input_iterator_params = ...) -> None:
         """
         Detects the input BDL pairs and wires of `source_layout` and applies
         input pattern `0`.
@@ -84,7 +84,7 @@ class bdl_input_iterator:
     @overload
     def __init__(
         self,
-        lyt: mnt.pyfiction._native.sidb.sidb_layout,
+        lyt: mnt.pyfiction._native.sidb.SiDBLayout,
         params: bdl_input_iterator_params,
         input_wires: Sequence[bdl_wire],
     ) -> None:
@@ -99,7 +99,7 @@ class bdl_input_iterator:
         """
 
     def __iter__(self) -> bdl_input_iterator: ...
-    def __next__(self) -> mnt.pyfiction._native.sidb.sidb_layout:
+    def __next__(self) -> mnt.pyfiction._native.sidb.SiDBLayout:
         """
         The layout with the current input pattern applied.
 
@@ -194,15 +194,15 @@ class bdl_input_iterator:
             The pattern.
         """
 
-    def get_layout(self) -> mnt.pyfiction._native.sidb.sidb_layout:
+    def get_layout(self) -> mnt.pyfiction._native.sidb.SiDBLayout:
         """
         Returns the layout that represents the current input state, equivalent to dereferencing the iterator.
         """
 
 @overload
 def generate_bdl_input_pattern_layouts(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout, params: bdl_input_iterator_params = ...
-) -> list[mnt.pyfiction._native.sidb.sidb_layout]:
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout, params: bdl_input_iterator_params = ...
+) -> list[mnt.pyfiction._native.sidb.SiDBLayout]:
     """
     Applies every input pattern to the input BDL pairs of a layout and
     returns the resulting layouts, pattern `0` first; the input wires are
@@ -218,8 +218,8 @@ def generate_bdl_input_pattern_layouts(
 
 @overload
 def generate_bdl_input_pattern_layouts(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout, params: bdl_input_iterator_params, input_wires: Sequence[bdl_wire]
-) -> list[mnt.pyfiction._native.sidb.sidb_layout]:
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout, params: bdl_input_iterator_params, input_wires: Sequence[bdl_wire]
+) -> list[mnt.pyfiction._native.sidb.SiDBLayout]:
     """
     Applies every input pattern to the input BDL pairs of a layout and
     returns the resulting layouts, pattern `0` first, with the input wires
@@ -247,9 +247,9 @@ class bdl_pair:
     @overload
     def __init__(
         self,
-        t: mnt.pyfiction._native.sidb.sidb_dot_tag,
-        u: mnt.pyfiction._native.sidb.lattice_site,
-        l: mnt.pyfiction._native.sidb.lattice_site,
+        t: mnt.pyfiction._native.sidb.DotTag,
+        u: mnt.pyfiction._native.sidb.LatticeSite,
+        l: mnt.pyfiction._native.sidb.LatticeSite,
     ) -> None:
         """
         Constructor for BDL pairs.
@@ -261,21 +261,21 @@ class bdl_pair:
         """
 
     @property
-    def type(self) -> mnt.pyfiction._native.sidb.sidb_dot_tag:
+    def type(self) -> mnt.pyfiction._native.sidb.DotTag:
         """
         The type of the SiDBs in the pair. BDL SiDBs must be of the same type.
         They can either be normal, input, or output SiDBs.
         """
 
     @property
-    def upper(self) -> mnt.pyfiction._native.sidb.lattice_site:
+    def upper(self) -> mnt.pyfiction._native.sidb.LatticeSite:
         """
         The upper SiDB of the pair. Upper and lower are defined relative to
         each other via the `operator<` overload.
         """
 
     @property
-    def lower(self) -> mnt.pyfiction._native.sidb.lattice_site:
+    def lower(self) -> mnt.pyfiction._native.sidb.LatticeSite:
         """
         The lower SiDB of the pair. Upper and lower are defined relative to
         each other via the `operator<` overload.
@@ -335,8 +335,8 @@ class detect_bdl_pairs_params:
     def maximum_distance(self, arg: float, /) -> None: ...
 
 def detect_bdl_pairs(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    type: mnt.pyfiction._native.sidb.sidb_dot_tag | None = None,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
+    type: mnt.pyfiction._native.sidb.DotTag | None = None,
     params: detect_bdl_pairs_params = ...,
 ) -> list[bdl_pair]:
     """
@@ -516,7 +516,7 @@ class bdl_wire:
             pair: The BDL pair to remove.
         """
 
-    def find_bdl_pair_by_type(self, t: mnt.pyfiction._native.sidb.sidb_dot_tag) -> bdl_pair | None:
+    def find_bdl_pair_by_type(self, t: mnt.pyfiction._native.sidb.DotTag) -> bdl_pair | None:
         """
         Finds the first BDL pair of the given type.
 
@@ -542,7 +542,7 @@ class bdl_wire:
     def __ne__(self, arg: bdl_wire, /) -> bool: ...
 
 def detect_bdl_wires(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     params: detect_bdl_wires_params = ...,
     wire_selection: bdl_wire_selection = ...,
 ) -> list[bdl_wire]:
@@ -660,23 +660,23 @@ class is_operational_params:
     @timeout.setter
     def timeout(self, arg: int, /) -> None: ...
     @property
-    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.sidb_simulation_parameters:
+    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.SimulationParams:
         """
         The simulation parameters for the physical simulation of the ground
         state.
         """
 
     @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.sidb_simulation_parameters, /) -> None: ...
+    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.SimulationParams, /) -> None: ...
     @property
-    def sim_engine(self) -> mnt.pyfiction._native.sidb.simulation.sidb_simulation_engine:
+    def sim_engine(self) -> mnt.pyfiction._native.sidb.simulation.SimulationEngine:
         """
         The simulation engine to be used for the operational domain
         computation.
         """
 
     @sim_engine.setter
-    def sim_engine(self, arg: mnt.pyfiction._native.sidb.simulation.sidb_simulation_engine, /) -> None: ...
+    def sim_engine(self, arg: mnt.pyfiction._native.sidb.simulation.SimulationEngine, /) -> None: ...
     @property
     def input_bdl_iterator_params(self) -> bdl_input_iterator_params:
         """Parameters for the BDL input iterator."""
@@ -704,7 +704,7 @@ class is_operational_params:
 
 @overload
 def is_operational(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params = ...,
 ) -> tuple[operational_status, int]:
@@ -728,12 +728,12 @@ def is_operational(
 
 @overload
 def is_operational(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
-    canvas_lyt: mnt.pyfiction._native.sidb.sidb_layout | None = None,
+    canvas_lyt: mnt.pyfiction._native.sidb.SiDBLayout | None = None,
 ) -> tuple[operational_status, int]:
     """
     Like the overload above, with the BDL wires and, optionally, the
@@ -753,12 +753,12 @@ def is_operational(
 
 @overload
 def is_operational(
-    input_pattern_layouts: Sequence[mnt.pyfiction._native.sidb.sidb_layout],
+    input_pattern_layouts: Sequence[mnt.pyfiction._native.sidb.SiDBLayout],
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
-    canvas_lyt: mnt.pyfiction._native.sidb.sidb_layout | None = None,
+    canvas_lyt: mnt.pyfiction._native.sidb.SiDBLayout | None = None,
 ) -> tuple[operational_status, int]:
     """
     Like the overloads above, but with one layout per input pattern given
@@ -784,7 +784,7 @@ def is_operational(
 
 @overload
 def operational_input_patterns(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params = ...,
 ) -> set[int]:
@@ -802,12 +802,12 @@ def operational_input_patterns(
 
 @overload
 def operational_input_patterns(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
-    canvas_lyt: mnt.pyfiction._native.sidb.sidb_layout | None = None,
+    canvas_lyt: mnt.pyfiction._native.sidb.SiDBLayout | None = None,
 ) -> set[int]:
     """
     Like the overload above, with the BDL wires and, optionally, the
@@ -827,7 +827,7 @@ def operational_input_patterns(
 
 @overload
 def kink_induced_non_operational_input_patterns(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params = ...,
 ) -> set[int]:
@@ -847,12 +847,12 @@ def kink_induced_non_operational_input_patterns(
 
 @overload
 def kink_induced_non_operational_input_patterns(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
-    canvas_lyt: mnt.pyfiction._native.sidb.sidb_layout | None = None,
+    canvas_lyt: mnt.pyfiction._native.sidb.SiDBLayout | None = None,
 ) -> set[int]:
     """
     Like the overload above, with the BDL wires and, optionally, the
@@ -873,7 +873,7 @@ def kink_induced_non_operational_input_patterns(
 
 @overload
 def is_kink_induced_non_operational(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params = ...,
 ) -> bool:
@@ -892,12 +892,12 @@ def is_kink_induced_non_operational(
 
 @overload
 def is_kink_induced_non_operational(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
-    canvas_lyt: mnt.pyfiction._native.sidb.sidb_layout | None = None,
+    canvas_lyt: mnt.pyfiction._native.sidb.SiDBLayout | None = None,
 ) -> bool:
     """
     Like the overload above, with the BDL wires and, optionally, the
@@ -1291,7 +1291,7 @@ class operational_domain_stats:
         """Total number of parameter points in the parameter space."""
 
 def operational_domain_grid_search(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: operational_domain_params = ...,
     stats: operational_domain_stats | None = None,
@@ -1335,7 +1335,7 @@ def operational_domain_grid_search(
     """
 
 def operational_domain_random_sampling(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
     params: operational_domain_params = ...,
@@ -1379,7 +1379,7 @@ def operational_domain_random_sampling(
     """
 
 def operational_domain_flood_fill(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
     params: operational_domain_params = ...,
@@ -1439,7 +1439,7 @@ def operational_domain_flood_fill(
     """
 
 def operational_domain_contour_tracing(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
     params: operational_domain_params = ...,
@@ -1497,7 +1497,7 @@ def operational_domain_contour_tracing(
     """
 
 def critical_temperature_domain_grid_search(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: operational_domain_params = ...,
     stats: operational_domain_stats | None = None,
@@ -1539,7 +1539,7 @@ def critical_temperature_domain_grid_search(
     """
 
 def critical_temperature_domain_random_sampling(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
     params: operational_domain_params = ...,
@@ -1581,7 +1581,7 @@ def critical_temperature_domain_random_sampling(
     """
 
 def critical_temperature_domain_flood_fill(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
     params: operational_domain_params = ...,
@@ -1634,7 +1634,7 @@ def critical_temperature_domain_flood_fill(
     """
 
 def critical_temperature_domain_contour_tracing(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
     params: operational_domain_params = ...,
@@ -1708,7 +1708,7 @@ class operational_domain_ratio_params:
     def op_domain_params(self, arg: operational_domain_params, /) -> None: ...
 
 def operational_domain_ratio(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
+    lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     pp: parameter_point,
     params: operational_domain_ratio_params = ...,

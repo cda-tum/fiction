@@ -122,23 +122,30 @@ void result(nanobind::module_& m)
 
     using fiction::sidb::simulation::result;
 
-    py::class_<result>(m, "sidb_simulation_result", DOC(fiction_sidb_simulation_result))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("algorithm_name", &result::algorithm_name, DOC(fiction_sidb_simulation_result_algorithm_name))
-        .def_rw("simulation_runtime", &result::simulation_runtime,
+    py::class_<result>(m, "SimulationResult", DOC(fiction_sidb_simulation_result))
+        .def_ro("algorithm_name", &result::algorithm_name, DOC(fiction_sidb_simulation_result_algorithm_name))
+        .def_ro("simulation_runtime", &result::simulation_runtime,
                 DOC(fiction_sidb_simulation_result_simulation_runtime))
-        .def_rw("layout", &result::lyt, DOC(fiction_sidb_simulation_result_lyt))
-        .def_rw("charge_distributions", &result::charge_distributions,
-                DOC(fiction_sidb_simulation_result_charge_distributions))
-        .def_rw("simulation_parameters", &result::sim_params, DOC(fiction_sidb_simulation_result_sim_params))
+        .def_prop_ro(
+            "layout", [](const result& self) { return self.lyt; }, DOC(fiction_sidb_simulation_result_lyt))
+        .def_prop_ro(
+            "charge_distributions", [](const result& self) { return self.charge_distributions; },
+            DOC(fiction_sidb_simulation_result_charge_distributions))
+        .def_prop_ro(
+            "simulation_parameters", [](const result& self) { return self.sim_params; },
+            DOC(fiction_sidb_simulation_result_sim_params))
         .def_prop_ro(
             "additional_simulation_parameters",
             [](const result& self) { return detail::convert_map_to_py(self.additional_simulation_parameters); },
             py::sig("def additional_simulation_parameters(self) -> dict[str, int | float | bool | str]"),
             DOC(fiction_sidb_simulation_result_additional_simulation_parameters))
+        .def("__len__", [](const result& self) { return self.charge_distributions.size(); })
+        .def(
+            "__iter__", [](const result& self) { return py::iter(py::cast(self.charge_distributions)); },
+            py::sig("def __iter__(self) -> collections.abc.Iterator[mnt.pyfiction._native.sidb.ChargeDistribution]"))
         .def("charge_state", &result::charge_state, py::arg("distribution"), py::arg("site"),
              DOC(fiction_sidb_simulation_result_charge_state))
-        .def("groundstates", &result::groundstates, DOC(fiction_sidb_simulation_result_groundstates))
+        .def("ground_states", &result::groundstates, DOC(fiction_sidb_simulation_result_groundstates))
 
         ;
 }

@@ -29,7 +29,7 @@ from mnt.pyfiction.mol_qca.io import write_mol_qca_layout_svg, write_mol_qca_lay
 from mnt.pyfiction.networks.io import write_dot_network
 from mnt.pyfiction.qca import QCALayout
 from mnt.pyfiction.qca.io import write_qca_layout_svg, write_qca_layout_svg_params
-from mnt.pyfiction.sidb import sidb_layout
+from mnt.pyfiction.sidb import SiDBLayout
 from mnt.pyfiction.sidb.io import write_sidb_layout_svg, write_sidb_layout_svg_params
 
 from .errors import CommandError
@@ -126,7 +126,7 @@ def write_svg(entry: CellEntry, path: Path, *, simple: bool, on_progress: Progre
         mol_params.simple = simple
         mol_params.on_progress = on_progress
         write_mol_qca_layout_svg(layout, str(path), mol_params)
-    elif isinstance(layout, sidb_layout):
+    elif isinstance(layout, SiDBLayout):
         sidb_params = write_sidb_layout_svg_params()
         sidb_params.on_progress = on_progress
         state = ground_state(entry)

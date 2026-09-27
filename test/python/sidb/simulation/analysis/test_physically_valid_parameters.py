@@ -14,17 +14,20 @@ import textwrap
 
 import pytest
 
-from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb import ChargeState, DotTag, Lattice, LatticeSite, SiDBLayout
+from mnt.pyfiction.sidb.simulation import PotentialLandscape
 from mnt.pyfiction.sidb.simulation.analysis import physically_valid_parameters
 from mnt.pyfiction.sidb.simulation.logic import parameter_point
 
 
 def test_one_sidb_100_lattice() -> None:
     """Check physical parameter validity on the Si(100) lattice."""
-    layout = sidb_layout()
-    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout = SiDBLayout()
+    layout.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
 
-    valid_parameters = physically_valid_parameters(layout, charge_distribution(layout))
+    valid_parameters = physically_valid_parameters(
+        layout, PotentialLandscape(layout).evaluate([ChargeState.NEGATIVE] * layout.num_dots())
+    )
 
     assert valid_parameters.get_excited_state_number_for_parameter(parameter_point([5, 5])) == 0
 
@@ -37,10 +40,12 @@ def test_one_sidb_100_lattice() -> None:
 
 def test_one_sidb_111_lattice() -> None:
     """Check physical parameter validity on the Si(111) lattice."""
-    layout = sidb_layout(lattice.si_111_1x1())
-    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout = SiDBLayout(Lattice.si_111_1x1())
+    layout.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
 
-    valid_parameters = physically_valid_parameters(layout, charge_distribution(layout))
+    valid_parameters = physically_valid_parameters(
+        layout, PotentialLandscape(layout).evaluate([ChargeState.NEGATIVE] * layout.num_dots())
+    )
 
     assert valid_parameters.get_excited_state_number_for_parameter(parameter_point([5, 5])) == 0
 
@@ -59,7 +64,8 @@ def test_progress_callback_completes() -> None:
             "-c",
             textwrap.dedent("""
                 import time
-                from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
+                from mnt.pyfiction.sidb import ChargeState, LatticeSite, DotTag, SiDBLayout
+                from mnt.pyfiction.sidb.simulation import PotentialLandscape
                 from mnt.pyfiction.sidb.simulation.analysis import physically_valid_parameters
                 from mnt.pyfiction.sidb.simulation.logic import (
                     operational_domain_params,
@@ -67,8 +73,8 @@ def test_progress_callback_completes() -> None:
                     sweep_parameter,
                 )
 
-                layout = sidb_layout()
-                layout.assign_sidb(lattice_site(0, 0), sidb_dot_tag.NORMAL)
+                layout = SiDBLayout()
+                layout.assign_sidb(LatticeSite(0, 0), DotTag.NORMAL)
                 params = operational_domain_params()
                 params.number_of_threads = 2
                 params.sweep_dimensions = [
@@ -83,7 +89,8 @@ def test_progress_callback_completes() -> None:
                         time.sleep(0.2)
 
                 params.on_progress = report
-                physically_valid_parameters(layout, charge_distribution(layout), params)
+                charges = PotentialLandscape(layout).evaluate([ChargeState.NEGATIVE])
+                physically_valid_parameters(layout, charges, params)
                 assert reports[-1] == ("parameter points", 3, 3), reports
             """),
         ],

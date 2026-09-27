@@ -12,34 +12,33 @@ import math
 
 import pytest
 
-from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.model import sidb_simulation_parameters
-from mnt.pyfiction.sidb.simulation import exact_sidb_simulation_engine
+from mnt.pyfiction.sidb import DotTag, Lattice, LatticeSite, SiDBLayout, SimulationParams
+from mnt.pyfiction.sidb.simulation import (
+    AutomaticBaseNumberDetection,
+    ExactSimulationEngine,
+    QuickExactParams,
+    QuickSimParams,
+    quickexact,
+    quicksim,
+)
 from mnt.pyfiction.sidb.simulation.analysis import (
     time_to_solution,
     time_to_solution_for_given_simulation_results,
     time_to_solution_params,
     time_to_solution_stats,
 )
-from mnt.pyfiction.sidb.simulation.engines import (
-    automatic_base_number_detection,
-    quickexact,
-    quickexact_params,
-    quicksim,
-    quicksim_params,
-)
 
 
 def test_one_sidb_100_lattice() -> None:
     """Check time to solution on the Si(100) lattice."""
-    layout = sidb_layout()
-    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout = SiDBLayout()
+    layout.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
 
-    quicksim_parameter = quicksim_params()
-    quicksim_parameter.simulation_parameters = sidb_simulation_parameters(3, -0.3)
+    quicksim_parameter = QuickSimParams()
+    quicksim_parameter.simulation_parameters = SimulationParams(3, -0.3)
 
     tts_params = time_to_solution_params()
-    tts_params.engine = exact_sidb_simulation_engine.QUICKEXACT
+    tts_params.engine = ExactSimulationEngine.QUICKEXACT
     stats = time_to_solution_stats()
 
     time_to_solution(layout, quicksim_parameter, tts_params, stats)
@@ -51,14 +50,14 @@ def test_one_sidb_100_lattice() -> None:
 
 def test_one_sidb_111_lattice() -> None:
     """Check time to solution on the Si(111) lattice."""
-    layout = sidb_layout(lattice.si_111_1x1())
-    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout = SiDBLayout(Lattice.si_111_1x1())
+    layout.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
 
-    quicksim_parameter = quicksim_params()
-    quicksim_parameter.simulation_parameters = sidb_simulation_parameters(3, -0.3)
+    quicksim_parameter = QuickSimParams()
+    quicksim_parameter.simulation_parameters = SimulationParams(3, -0.3)
 
     tts_params = time_to_solution_params()
-    tts_params.engine = exact_sidb_simulation_engine.QUICKEXACT
+    tts_params.engine = ExactSimulationEngine.QUICKEXACT
     stats = time_to_solution_stats()
 
     time_to_solution(layout, quicksim_parameter, tts_params, stats)
@@ -70,38 +69,38 @@ def test_one_sidb_111_lattice() -> None:
 
 def test_time_to_solution_with_simulation_results() -> None:
     """Check time to solution from exact and heuristic results."""
-    layout = sidb_layout()
+    layout = SiDBLayout()
 
     # Assign SiDBs to the layout
-    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(1, 3, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(3, 3, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(5, 3, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(10, 3, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(15, 3, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(18, 3, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(1, 3, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(3, 3, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(5, 3, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(10, 3, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(15, 3, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(18, 3, 0), DotTag.NORMAL)
 
     # Define simulation parameters
-    params = sidb_simulation_parameters(2, -0.32)
-    quicksim_params_inst = quicksim_params()
+    params = SimulationParams(2, -0.32)
+    quicksim_params_inst = QuickSimParams()
     quicksim_params_inst.simulation_parameters = params
 
     number_of_repetitions = 100
     # Run the QuickSim simulations
     simulation_results_quicksim = []
     for _ in range(number_of_repetitions):
-        result = quicksim(layout, quicksim_params_inst)
+        result = quicksim(layout, params=quicksim_params_inst)
         assert result is not None
         simulation_results_quicksim.append(result)
 
-    quickexact_params_inst = quickexact_params()
+    quickexact_params_inst = QuickExactParams()
     quickexact_params_inst.simulation_parameters = params
-    quickexact_params_inst.base_number_detection = automatic_base_number_detection.OFF
+    quickexact_params_inst.base_number_detection = AutomaticBaseNumberDetection.OFF
     assert quickexact_params_inst.simulation_parameters.mu_minus == -0.32
-    assert quickexact_params_inst.base_number_detection == automatic_base_number_detection.OFF
+    assert quickexact_params_inst.base_number_detection == AutomaticBaseNumberDetection.OFF
 
     # Run the QuickExact simulation
-    simulation_results_quickexact = quickexact(layout, quickexact_params_inst)
+    simulation_results_quickexact = quickexact(layout, params=quickexact_params_inst)
 
     # Calculate time-to-solution using the simulation results
     st = time_to_solution_stats()

@@ -22,6 +22,8 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 
+#include <algorithm>
+#include <stdexcept>
 #include <unordered_map>
 #include <vector>
 
@@ -46,7 +48,7 @@ void potential_landscape(nanobind::module_& m)
     using fiction::sidb::simulation::potential_landscape;
 
     py::enum_<fiction::sidb::simulation::charge_transition_threshold_bounds>(
-        m, "charge_transition_threshold_bounds", DOC(fiction_sidb_simulation_charge_transition_threshold_bounds))
+        m, "ChargeTransitionThresholdBounds", DOC(fiction_sidb_simulation_charge_transition_threshold_bounds))
         .value("NEGATIVE_UPPER_BOUND",
                fiction::sidb::simulation::charge_transition_threshold_bounds::NEGATIVE_UPPER_BOUND,
                DOC(fiction_sidb_simulation_charge_transition_threshold_bounds_NEGATIVE_UPPER_BOUND))
@@ -60,18 +62,21 @@ void potential_landscape(nanobind::module_& m)
                fiction::sidb::simulation::charge_transition_threshold_bounds::NEUTRAL_UPPER_BOUND,
                DOC(fiction_sidb_simulation_charge_transition_threshold_bounds_NEUTRAL_UPPER_BOUND));
 
-    py::class_<potential_landscape>(m, "potential_landscape", DOC(fiction_sidb_simulation_potential_landscape))
+    py::class_<potential_landscape>(m, "PotentialLandscape", DOC(fiction_sidb_simulation_potential_landscape))
         .def(py::init<const fiction::sidb::layout&, const fiction::sidb::model::simulation_parameters&,
                       const std::unordered_map<fiction::sidb::lattice_site, double>&, double>(),
-             py::arg("layout"), py::arg("params") = fiction::sidb::model::simulation_parameters{},
+             py::arg("layout"), py::kw_only(), py::arg("params") = fiction::sidb::model::simulation_parameters{},
              py::arg("local_external_potential")  = std::unordered_map<fiction::sidb::lattice_site, double>{},
              py::arg("global_external_potential") = 0.0,
              DOC(fiction_sidb_simulation_potential_landscape_potential_landscape))
-        .def("get_layout", &potential_landscape::get_layout,
-             DOC(fiction_sidb_simulation_potential_landscape_get_layout))
-        .def("params", &potential_landscape::params, DOC(fiction_sidb_simulation_potential_landscape_params))
+        .def_prop_ro(
+            "layout", [](const potential_landscape& land) { return land.get_layout(); },
+            DOC(fiction_sidb_simulation_potential_landscape_get_layout))
+        .def_prop_ro(
+            "params", [](const potential_landscape& land) { return land.params(); },
+            DOC(fiction_sidb_simulation_potential_landscape_params))
         .def("num_sidbs", &potential_landscape::num_sidbs, DOC(fiction_sidb_simulation_potential_landscape_num_sidbs))
-        .def(
+        .def_prop_ro(
             "sites", [](const potential_landscape& land) { return *land.sites(); },
             DOC(fiction_sidb_simulation_potential_landscape_sites))
         .def("defects", &potential_landscape::defects, DOC(fiction_sidb_simulation_potential_landscape_defects))
@@ -98,8 +103,21 @@ void potential_landscape(nanobind::module_& m)
             "is_physically_valid", [](const potential_landscape& land, const fiction::sidb::charge_distribution& cd)
             { return land.is_physically_valid(cd); }, py::arg("cd"),
             DOC(fiction_sidb_simulation_potential_landscape_is_physically_valid_2))
-        .def("evaluate", &potential_landscape::evaluate, py::arg("cd"),
-             DOC(fiction_sidb_simulation_potential_landscape_evaluate))
+        .def(
+            "evaluate",
+            [](const potential_landscape& land, const std::vector<fiction::sidb::model::charge_state>& states)
+            {
+                if (std::ranges::any_of(states, [](const auto state)
+                                        { return state == fiction::sidb::model::charge_state::NONE; }))
+                {
+                    throw std::invalid_argument("Each SiDB requires a negative, neutral, or positive charge state");
+                }
+                return land.evaluate(fiction::sidb::charge_distribution{land.sites(), states, 0.0});
+            },
+            py::arg("states"),
+            "Evaluate one charge state per site in raster order and return a read-only distribution. "
+            "Energy includes this landscape's defects and external potentials. "
+            "Raises ValueError for a wrong state count or a NONE state; physical validity is a separate query.")
 
         ;
 }

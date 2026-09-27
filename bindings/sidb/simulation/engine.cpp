@@ -49,7 +49,7 @@ void engine(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::enum_<fiction::sidb::simulation::engine>(m, "sidb_simulation_engine", DOC(fiction_sidb_simulation_engine))
+    py::enum_<fiction::sidb::simulation::engine>(m, "SimulationEngine", DOC(fiction_sidb_simulation_engine))
         .value("EXGS", fiction::sidb::simulation::engine::EXGS, DOC(fiction_sidb_simulation_engine_EXGS))
         .value("QUICKSIM", fiction::sidb::simulation::engine::QUICKSIM, DOC(fiction_sidb_simulation_engine_QUICKSIM))
         .value("QUICKEXACT", fiction::sidb::simulation::engine::QUICKEXACT,
@@ -61,7 +61,7 @@ void engine(nanobind::module_& m)
 
         ;
 
-    py::enum_<fiction::sidb::simulation::exact_engine>(m, "exact_sidb_simulation_engine",
+    py::enum_<fiction::sidb::simulation::exact_engine>(m, "ExactSimulationEngine",
                                                        DOC(fiction_sidb_simulation_exact_engine))
         .value("EXGS", fiction::sidb::simulation::exact_engine::EXGS, DOC(fiction_sidb_simulation_exact_engine_EXGS))
         .value("QUICKEXACT", fiction::sidb::simulation::exact_engine::QUICKEXACT,
@@ -73,7 +73,7 @@ void engine(nanobind::module_& m)
 
         ;
 
-    py::enum_<fiction::sidb::simulation::heuristic_engine>(m, "heuristic_sidb_simulation_engine",
+    py::enum_<fiction::sidb::simulation::heuristic_engine>(m, "HeuristicSimulationEngine",
                                                            DOC(fiction_sidb_simulation_heuristic_engine))
         .value("QUICKSIM", fiction::sidb::simulation::heuristic_engine::QUICKSIM,
                DOC(fiction_sidb_simulation_heuristic_engine_QUICKSIM))

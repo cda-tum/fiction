@@ -18,7 +18,8 @@ from mnt.pyfiction.layouts import CartesianGateLayout
 from mnt.pyfiction.layouts.coords import CubeCoordinate, OffsetCoordinate
 from mnt.pyfiction.physical_design import PostLayoutOptimizationParams
 from mnt.pyfiction.physical_design.routing import reserve_input_nodes
-from mnt.pyfiction.sidb.simulation import sidb_simulation_result
+from mnt.pyfiction.sidb import SiDBLayout
+from mnt.pyfiction.sidb.simulation import quickexact
 from mnt.pyfiction.sidb.simulation.logic import (
     bdl_wire,
     critical_temperature_domain,
@@ -110,7 +111,7 @@ def test_domain_iterator_types() -> None:
 
 def test_additional_simulation_parameter_types() -> None:
     """Additional parameters expose string keys and supported scalar values."""
-    result = sidb_simulation_result()
-    assert result.additional_simulation_parameters == {}
+    result = quickexact(SiDBLayout())
+    assert isinstance(result.additional_simulation_parameters, dict)
     if TYPE_CHECKING:
         assert_type(result.additional_simulation_parameters, dict[str, int | float | bool | str])

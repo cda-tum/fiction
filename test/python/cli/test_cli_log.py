@@ -20,7 +20,7 @@ from rich.console import Console
 from mnt.fiction.cli.session import Session
 from mnt.fiction.cli.statistics import json_value
 from mnt.pyfiction.fcn import area
-from mnt.pyfiction.sidb import sidb_layout
+from mnt.pyfiction.sidb import SiDBLayout
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -97,7 +97,7 @@ def test_sidb_statistics_use_dots(shell: Shell, resource: Callable[[str], str]) 
     shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
     description = shell.session.log[-1]["result"]["cell_layout"]
     layout = shell.session.cell_layouts.current().layout
-    assert isinstance(layout, sidb_layout)
+    assert isinstance(layout, SiDBLayout)
     assert description["dots"] == layout.num_dots()
     assert "cells" not in description
     # the store listing shows the layout extent; the dot count is in the ps block

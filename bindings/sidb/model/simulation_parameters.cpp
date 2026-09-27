@@ -31,7 +31,7 @@ void simulation_parameters(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<fiction::sidb::model::simulation_parameters>(m, "sidb_simulation_parameters",
+    py::class_<fiction::sidb::model::simulation_parameters>(m, "SimulationParams",
                                                             DOC(fiction_sidb_model_simulation_parameters))
         .def(py::init<const uint8_t, const double, const double, const double>(), py::arg("base_number") = 3,
              py::arg("mu_minus") = -0.32, py::arg("relative_permittivity") = 5.6, py::arg("screening_distance") = 5.0,

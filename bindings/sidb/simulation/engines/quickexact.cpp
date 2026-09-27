@@ -33,6 +33,10 @@
 namespace pyfiction
 {
 
+/**
+ * @brief Registers the QuickExact engine and its options.
+ * @param m Python module.
+ */
 void quickexact(nanobind::module_& m)
 {
     namespace py = nanobind;
@@ -40,14 +44,14 @@ void quickexact(nanobind::module_& m)
     using fiction::sidb::simulation::engines::quickexact_params;
 
     py::enum_<quickexact_params::automatic_base_number_detection>(
-        m, "automatic_base_number_detection",
+        m, "AutomaticBaseNumberDetection",
         DOC(fiction_sidb_simulation_engines_quickexact_params_automatic_base_number_detection))
         .value("ON", quickexact_params::automatic_base_number_detection::ON,
                DOC(fiction_sidb_simulation_engines_quickexact_params_automatic_base_number_detection_ON))
         .value("OFF", quickexact_params::automatic_base_number_detection::OFF,
                DOC(fiction_sidb_simulation_engines_quickexact_params_automatic_base_number_detection_OFF));
 
-    py::class_<quickexact_params>(m, "quickexact_params", DOC(fiction_sidb_simulation_engines_quickexact_params))
+    py::class_<quickexact_params>(m, "QuickExactParams", DOC(fiction_sidb_simulation_engines_quickexact_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("simulation_parameters", &quickexact_params::sim_params,
                 DOC(fiction_sidb_simulation_engines_quickexact_params_sim_params))
@@ -64,7 +68,7 @@ void quickexact(nanobind::module_& m)
     fiction::sidb::simulation::result (*const quickexact_pointer)(
         const fiction::sidb::layout&, const quickexact_params&) = &fiction::sidb::simulation::engines::quickexact;
 
-    m.def("quickexact", quickexact_pointer, py::arg("lyt"), py::arg("params") = quickexact_params{},
+    m.def("quickexact", quickexact_pointer, py::arg("layout"), py::kw_only(), py::arg("params") = quickexact_params{},
           py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_quickexact));
 }
 

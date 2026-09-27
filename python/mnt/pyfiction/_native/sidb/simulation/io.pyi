@@ -13,9 +13,7 @@ import enum
 import mnt.pyfiction._native.sidb.simulation
 import mnt.pyfiction._native.sidb.simulation.logic
 
-def write_sqd_sim_result(
-    sim_result: mnt.pyfiction._native.sidb.simulation.sidb_simulation_result, filename: str
-) -> None:
+def write_sqd_sim_result(sim_result: mnt.pyfiction._native.sidb.simulation.SimulationResult, filename: str) -> None:
     """
     Writes a simulation result as a SiQAD simulation result file.
 
@@ -160,7 +158,7 @@ def write_critical_temperature_domain_to_string(
     params: write_operational_domain_params = ...,
 ) -> str: ...
 def write_location_and_ground_state(
-    sim_result: mnt.pyfiction._native.sidb.simulation.sidb_simulation_result, filename: str
+    sim_result: mnt.pyfiction._native.sidb.simulation.SimulationResult, filename: str
 ) -> None:
     """
     Writes the SiDB positions of a simulation result and the charge states

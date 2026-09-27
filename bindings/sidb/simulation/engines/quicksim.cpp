@@ -34,13 +34,17 @@
 namespace pyfiction
 {
 
+/**
+ * @brief Registers the QuickSim engine and its options.
+ * @param m Python module.
+ */
 void quicksim(nanobind::module_& m)
 {
     namespace py = nanobind;
 
     using fiction::sidb::simulation::engines::quicksim_params;
 
-    py::class_<quicksim_params>(m, "quicksim_params", DOC(fiction_sidb_simulation_engines_quicksim_params))
+    py::class_<quicksim_params>(m, "QuickSimParams", DOC(fiction_sidb_simulation_engines_quicksim_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("simulation_parameters", &quicksim_params::sim_params,
                 DOC(fiction_sidb_simulation_engines_quicksim_params_sim_params))
@@ -59,7 +63,7 @@ void quicksim(nanobind::module_& m)
     std::optional<fiction::sidb::simulation::result> (*const quicksim_pointer)(
         const fiction::sidb::layout&, const quicksim_params&) = &fiction::sidb::simulation::engines::quicksim;
 
-    m.def("quicksim", quicksim_pointer, py::arg("lyt"), py::arg("params") = quicksim_params{},
+    m.def("quicksim", quicksim_pointer, py::arg("layout"), py::kw_only(), py::arg("params") = quicksim_params{},
           py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_quicksim));
 }
 

@@ -92,7 +92,7 @@ configuration, together with the algorithm name, runtime, and physical parameter
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.sidb_simulation_result
+.. autoclass:: mnt.pyfiction.sidb.simulation.SimulationResult
    :members:
 ```
 
@@ -128,10 +128,10 @@ landscape across worker threads; it evaluates local potentials, energy, and phys
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.charge_transition_threshold_bounds
+.. autoclass:: mnt.pyfiction.sidb.simulation.ChargeTransitionThresholdBounds
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.potential_landscape
+.. autoclass:: mnt.pyfiction.sidb.simulation.PotentialLandscape
    :members:
 ```
 
@@ -171,13 +171,13 @@ landscape across worker threads; it evaluates local potentials, energy, and phys
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.sidb_simulation_engine
+.. autoclass:: mnt.pyfiction.sidb.simulation.SimulationEngine
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.exact_sidb_simulation_engine
+.. autoclass:: mnt.pyfiction.sidb.simulation.ExactSimulationEngine
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.heuristic_sidb_simulation_engine
+.. autoclass:: mnt.pyfiction.sidb.simulation.HeuristicSimulationEngine
    :members:
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.sidb_simulation_engine_name

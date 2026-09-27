@@ -10,20 +10,19 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_simulation_parameters
-from mnt.pyfiction.sidb.simulation.engines import exhaustive_ground_state_simulation
+from mnt.pyfiction.sidb import ChargeState, DotTag, Lattice, LatticeSite, SiDBLayout, SimulationParams
+from mnt.pyfiction.sidb.simulation import exhaustive_ground_state_simulation
 
 
 def test_perturber_and_sidb_pair() -> None:
     """ExGS finds the H-Si(100)-2x1 ground state."""
 
-    layout = sidb_layout()
-    layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
+    layout = SiDBLayout()
+    layout.assign_sidb(LatticeSite(0, 0, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(4, 0, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(6, 0, 1), DotTag.NORMAL)
 
-    result = exhaustive_ground_state_simulation(layout, sidb_simulation_parameters())
+    result = exhaustive_ground_state_simulation(layout, params=SimulationParams())
 
     assert result.algorithm_name == "ExGS"
     assert result.layout == layout
@@ -31,53 +30,53 @@ def test_perturber_and_sidb_pair() -> None:
 
     groundstate = result.charge_distributions[0]
 
-    assert groundstate.get_charge_state(lattice_site(0, 0, 1)) == sidb_charge_state.NEGATIVE
-    assert groundstate.get_charge_state(lattice_site(4, 0, 1)) == sidb_charge_state.NEUTRAL
-    assert groundstate.get_charge_state(lattice_site(6, 0, 1)) == sidb_charge_state.NEGATIVE
+    assert groundstate.get_charge_state(LatticeSite(0, 0, 1)) == ChargeState.NEGATIVE
+    assert groundstate.get_charge_state(LatticeSite(4, 0, 1)) == ChargeState.NEUTRAL
+    assert groundstate.get_charge_state(LatticeSite(6, 0, 1)) == ChargeState.NEGATIVE
 
 
 def test_perturber_and_sidb_pair_111() -> None:
     """ExGS finds the H-Si(111)-1x1 ground state."""
 
-    layout = sidb_layout(lattice.si_111_1x1())
-    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
+    layout = SiDBLayout(Lattice.si_111_1x1())
+    layout.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(1, 0, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(2, 0, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(3, 0, 0), DotTag.NORMAL)
 
-    params = sidb_simulation_parameters()
+    params = SimulationParams()
     params.mu_minus = -0.32
     params.base = 2
 
-    result = exhaustive_ground_state_simulation(layout, params)
+    result = exhaustive_ground_state_simulation(layout, params=params)
 
     assert result.algorithm_name == "ExGS"
 
-    groundstate = result.groundstates()
+    groundstate = result.ground_states()
 
     assert len(groundstate) == 1
 
-    assert groundstate[0].get_charge_state(lattice_site(0, 0, 0)) == sidb_charge_state.NEGATIVE
-    assert groundstate[0].get_charge_state(lattice_site(1, 0, 0)) == sidb_charge_state.NEUTRAL
-    assert groundstate[0].get_charge_state(lattice_site(2, 0, 0)) == sidb_charge_state.NEUTRAL
-    assert groundstate[0].get_charge_state(lattice_site(3, 0, 0)) == sidb_charge_state.NEGATIVE
+    assert groundstate[0].get_charge_state(LatticeSite(0, 0, 0)) == ChargeState.NEGATIVE
+    assert groundstate[0].get_charge_state(LatticeSite(1, 0, 0)) == ChargeState.NEUTRAL
+    assert groundstate[0].get_charge_state(LatticeSite(2, 0, 0)) == ChargeState.NEUTRAL
+    assert groundstate[0].get_charge_state(LatticeSite(3, 0, 0)) == ChargeState.NEGATIVE
 
 
 def test_exgs_reports_progress() -> None:
     """Every charge configuration is counted, and the callback may be omitted or ``None``."""
 
-    layout = sidb_layout()
-    layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
+    layout = SiDBLayout()
+    layout.assign_sidb(LatticeSite(0, 0, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(4, 0, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(6, 0, 1), DotTag.NORMAL)
 
-    params = sidb_simulation_parameters()
+    params = SimulationParams()
     params.base = 2
 
     reports: list[tuple[str, int, int]] = []
 
     result = exhaustive_ground_state_simulation(
-        layout, params, lambda task, done, total: reports.append((task, done, total))
+        layout, params=params, on_progress=lambda task, done, total: reports.append((task, done, total))
     )
 
     assert len(result.charge_distributions) == 1
@@ -85,5 +84,5 @@ def test_exgs_reports_progress() -> None:
     assert reports[0] == ("charge configurations", 0, 8)
     assert reports[-1] == ("charge configurations", 8, 8)
 
-    silent = exhaustive_ground_state_simulation(layout, params, None)
+    silent = exhaustive_ground_state_simulation(layout, params=params, on_progress=None)
     assert len(silent.charge_distributions) == 1

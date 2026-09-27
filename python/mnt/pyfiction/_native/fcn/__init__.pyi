@@ -63,7 +63,7 @@ def area(
 
 @overload
 def area(
-    layout: mnt.pyfiction._native.sidb.sidb_layout,
+    layout: mnt.pyfiction._native.sidb.SiDBLayout,
     width: float = 0.0,
     height: float = 0.0,
     hspace: float = 0.384,

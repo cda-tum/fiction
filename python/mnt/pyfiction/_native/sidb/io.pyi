@@ -15,7 +15,7 @@ from typing import overload
 import mnt.pyfiction._native.sidb
 
 def write_sqd_layout(
-    layout: mnt.pyfiction._native.sidb.sidb_layout,
+    layout: mnt.pyfiction._native.sidb.SiDBLayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None:
@@ -34,7 +34,7 @@ def write_sqd_layout(
 
 class sqd_parsing_error(RuntimeError): ...
 
-def read_sqd_layout(filename: str, layout_name: str = "") -> mnt.pyfiction._native.sidb.sidb_layout:
+def read_sqd_layout(filename: str, layout_name: str = "") -> mnt.pyfiction._native.sidb.SiDBLayout:
     """
     Reads an SQD file into an `sidb::layout`. See the stream overload for
     the file's interpretation.
@@ -55,7 +55,7 @@ def read_sqd_layout(filename: str, layout_name: str = "") -> mnt.pyfiction._nati
 class unsupported_defect_index_exception(ValueError): ...
 class missing_position_exception(ValueError): ...
 
-def read_surface_defects(filename: str, layout_name: str = "") -> mnt.pyfiction._native.sidb.sidb_layout:
+def read_surface_defects(filename: str, layout_name: str = "") -> mnt.pyfiction._native.sidb.SiDBLayout:
     """
     Reads a defect matrix from a file into a defects-only `sidb::layout`.
     See the stream overload for the format.
@@ -137,7 +137,7 @@ class write_sidb_layout_svg_params:
 
 @overload
 def write_sidb_layout_svg(
-    layout: mnt.pyfiction._native.sidb.sidb_layout, filename: str, ps: write_sidb_layout_svg_params = ...
+    layout: mnt.pyfiction._native.sidb.SiDBLayout, filename: str, ps: write_sidb_layout_svg_params = ...
 ) -> None:
     """
     Writes an `sidb::layout` as an SVG image. See the stream overload for
@@ -156,8 +156,8 @@ def write_sidb_layout_svg(
 
 @overload
 def write_sidb_layout_svg(
-    layout: mnt.pyfiction._native.sidb.sidb_layout,
-    charge_distribution: mnt.pyfiction._native.sidb.charge_distribution,
+    layout: mnt.pyfiction._native.sidb.SiDBLayout,
+    charge_distribution: mnt.pyfiction._native.sidb.ChargeDistribution,
     filename: str,
     ps: write_sidb_layout_svg_params = ...,
 ) -> None:
@@ -179,7 +179,7 @@ def write_sidb_layout_svg(
 
 @overload
 def write_sidb_layout_svg_to_string(
-    layout: mnt.pyfiction._native.sidb.sidb_layout, ps: write_sidb_layout_svg_params = ...
+    layout: mnt.pyfiction._native.sidb.SiDBLayout, ps: write_sidb_layout_svg_params = ...
 ) -> str:
     """
     Writes an `sidb::layout` as an SVG image to a stream: the lattice
@@ -199,8 +199,8 @@ def write_sidb_layout_svg_to_string(
 
 @overload
 def write_sidb_layout_svg_to_string(
-    layout: mnt.pyfiction._native.sidb.sidb_layout,
-    charge_distribution: mnt.pyfiction._native.sidb.charge_distribution,
+    layout: mnt.pyfiction._native.sidb.SiDBLayout,
+    charge_distribution: mnt.pyfiction._native.sidb.ChargeDistribution,
     ps: write_sidb_layout_svg_params = ...,
 ) -> str:
     """
@@ -220,8 +220,8 @@ def write_sidb_layout_svg_to_string(
     """
 
 def print_sidb_layout(
-    layout: mnt.pyfiction._native.sidb.sidb_layout,
-    charge_distribution: mnt.pyfiction._native.sidb.charge_distribution | None = None,
+    layout: mnt.pyfiction._native.sidb.SiDBLayout,
+    charge_distribution: mnt.pyfiction._native.sidb.ChargeDistribution | None = None,
     lat_color: bool = True,
     crop_layout: bool = False,
     draw_lattice: bool = True,

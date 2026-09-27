@@ -15,8 +15,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.sidb import charge_distribution
+from mnt.pyfiction.sidb import ChargeState
 from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.sidb.simulation import PotentialLandscape, QuickSimParams
 from mnt.pyfiction.sidb.simulation.analysis import (
     critical_temperature_gate_based,
     critical_temperature_non_gate_based,
@@ -31,7 +32,6 @@ from mnt.pyfiction.sidb.simulation.defects import (
     determine_displacement_robustness_domain,
     displacement_robustness_domain_params,
 )
-from mnt.pyfiction.sidb.simulation.engines import quicksim_params
 from mnt.pyfiction.sidb.simulation.logic import (
     critical_temperature_domain_contour_tracing,
     critical_temperature_domain_flood_fill,
@@ -107,9 +107,11 @@ def test_zero_budgets(resources_dir: Path) -> None:
         lambda: critical_temperature_non_gate_based(layout, temperature),
         lambda: determine_displacement_robustness_domain(layout, spec, displacement),
         lambda: operational_domain_ratio(layout, spec, parameter_point([5.6, 5.0]), ratio),
-        lambda: physically_valid_parameters(layout, charge_distribution(layout), domain),
+        lambda: physically_valid_parameters(
+            layout, PotentialLandscape(layout).evaluate([ChargeState.NEGATIVE] * layout.num_dots()), domain
+        ),
         lambda: physical_population_stability(layout, population),
-        lambda: time_to_solution(layout, quicksim_params(), tts),
+        lambda: time_to_solution(layout, QuickSimParams(), tts),
     ]
     for call in calls:
         with pytest.raises(TimeoutError, match="deadline"):

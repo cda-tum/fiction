@@ -8,8 +8,7 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.model import sidb_simulation_parameters
+from mnt.pyfiction.sidb import DotTag, LatticeSite, SiDBLayout, SimulationParams
 from mnt.pyfiction.sidb.simulation.defects import (
     determine_displacement_robustness_domain,
     dimer_displacement_policy,
@@ -23,44 +22,44 @@ from mnt.pyfiction.synthesis import (
 
 
 def test_siqad_and_gate_100_lattice():
-    layout = sidb_layout()
+    layout = SiDBLayout()
 
-    layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
-    layout.assign_sidb(lattice_site(2, 1, 1), sidb_dot_tag.INPUT)
+    layout.assign_sidb(LatticeSite(0, 0, 1), DotTag.INPUT)
+    layout.assign_sidb(LatticeSite(2, 1, 1), DotTag.INPUT)
 
-    layout.assign_sidb(lattice_site(20, 0, 1), sidb_dot_tag.INPUT)
-    layout.assign_sidb(lattice_site(18, 1, 1), sidb_dot_tag.INPUT)
+    layout.assign_sidb(LatticeSite(20, 0, 1), DotTag.INPUT)
+    layout.assign_sidb(LatticeSite(18, 1, 1), DotTag.INPUT)
 
-    layout.assign_sidb(lattice_site(4, 2, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(6, 3, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(4, 2, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(6, 3, 1), DotTag.NORMAL)
 
-    layout.assign_sidb(lattice_site(14, 3, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(16, 2, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(14, 3, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(16, 2, 1), DotTag.NORMAL)
 
-    layout.assign_sidb(lattice_site(10, 6, 0), sidb_dot_tag.OUTPUT)
-    layout.assign_sidb(lattice_site(10, 7, 0), sidb_dot_tag.OUTPUT)
+    layout.assign_sidb(LatticeSite(10, 6, 0), DotTag.OUTPUT)
+    layout.assign_sidb(LatticeSite(10, 7, 0), DotTag.OUTPUT)
 
-    layout.assign_sidb(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(10, 9, 1), DotTag.NORMAL)
 
     params = displacement_robustness_domain_params()
 
     params.displacement_variations = (1, 1)
-    params.operational_params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
+    params.operational_params.simulation_parameters = SimulationParams(2, -0.28)
 
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2
 
     # only the SiDBs at (4, 5) and (10, 12) are affected by displacement
     params.fixed_sidbs = {
-        lattice_site(0, 0, 1),
-        lattice_site(2, 1, 1),
-        lattice_site(20, 0, 1),
-        lattice_site(18, 1, 1),
-        lattice_site(4, 2, 1),
-        lattice_site(14, 3, 1),
-        lattice_site(16, 2, 1),
-        lattice_site(10, 7, 0),
-        lattice_site(10, 9, 1),
+        LatticeSite(0, 0, 1),
+        LatticeSite(2, 1, 1),
+        LatticeSite(20, 0, 1),
+        LatticeSite(18, 1, 1),
+        LatticeSite(4, 2, 1),
+        LatticeSite(14, 3, 1),
+        LatticeSite(16, 2, 1),
+        LatticeSite(10, 7, 0),
+        LatticeSite(10, 9, 1),
     }
 
     params.percentage_of_analyzed_displaced_layouts = 0.1

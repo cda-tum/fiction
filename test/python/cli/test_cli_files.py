@@ -23,7 +23,7 @@ from mnt.pyfiction.layouts import ShiftedCartesianGateLayout
 from mnt.pyfiction.layouts.io import write_fgl_layout
 from mnt.pyfiction.networks import AigNetwork, MigNetwork, TechnologyNetwork, XagNetwork, set_name, simulate_outputs
 from mnt.pyfiction.qca import QCALayout
-from mnt.pyfiction.sidb import sidb_layout
+from mnt.pyfiction.sidb import SiDBLayout
 from mnt.pyfiction.sidb.io import read_sqd_layout
 
 if TYPE_CHECKING:
@@ -126,7 +126,7 @@ def test_read_unparsable_file_reports_the_parser(shell: Shell, tmp_path: Path) -
 def test_read_sqd(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
     entry = shell.session.cell_layouts.current()
-    assert isinstance(entry.layout, sidb_layout)
+    assert isinstance(entry.layout, SiDBLayout)
     assert entry.layout.num_dots() > 0
     assert shell.session.log[-1]["result"]["cell_layout"]["technology"] == "SiDB"
 
@@ -137,8 +137,8 @@ def test_sqd_shell_round_trip(shell: Shell, resource: Callable[[str], str], tmp_
     path = tmp_path / "gate.sqd"
     shell.ok(f'write_sqd "{path}"; clear -c; read "{path}"')
     after = shell.session.cell_layouts.current().layout
-    assert isinstance(before, sidb_layout)
-    assert isinstance(after, sidb_layout)
+    assert isinstance(before, SiDBLayout)
+    assert isinstance(after, SiDBLayout)
     assert after.num_dots() == before.num_dots()
     assert after.num_pis() == before.num_pis()
     assert after.num_pos() == before.num_pos()
@@ -435,7 +435,7 @@ def test_complete_design_and_export_workflows(shell: Shell, tmp_path: Path, libr
         shell.ok(f'write_{suffix} "{destination}"{options}')
         text = destination.read_text(encoding="utf-8")
         if suffix == "sqd":
-            assert isinstance(entry.layout, sidb_layout)
+            assert isinstance(entry.layout, SiDBLayout)
             restored = read_sqd_layout(str(destination))
             assert restored.num_dots() == entry.layout.num_dots()
             assert restored.num_pis() == entry.layout.num_pis()
@@ -451,7 +451,7 @@ def test_complete_design_and_export_workflows(shell: Shell, tmp_path: Path, libr
                 else root.tag == {"qll": "qcalayout", "qcc": "qcacomponent"}[suffix]
             )
             if suffix == "qll":
-                assert not isinstance(entry.layout, sidb_layout)
+                assert not isinstance(entry.layout, SiDBLayout)
                 items = root.findall("./layout/item")
                 pins = root.findall("./layout/pin")
                 if library == "topolinano":

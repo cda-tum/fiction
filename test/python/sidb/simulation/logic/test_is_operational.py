@@ -10,9 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb import DotTag, LatticeSite, SiDBLayout, SimulationParams
 from mnt.pyfiction.sidb.io import read_sqd_layout
-from mnt.pyfiction.sidb.model import sidb_simulation_parameters
 from mnt.pyfiction.sidb.simulation.logic import (
     bdl_input_iterator_params,
     bdl_wire_selection,
@@ -34,33 +33,33 @@ from mnt.pyfiction.synthesis import (
 
 
 def test_is_operational():
-    lyt = sidb_layout()
+    lyt = SiDBLayout()
 
-    lyt.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
-    lyt.assign_sidb(lattice_site(2, 1, 1), sidb_dot_tag.INPUT)
+    lyt.assign_sidb(LatticeSite(0, 0, 1), DotTag.INPUT)
+    lyt.assign_sidb(LatticeSite(2, 1, 1), DotTag.INPUT)
 
-    lyt.assign_sidb(lattice_site(20, 0, 1), sidb_dot_tag.INPUT)
-    lyt.assign_sidb(lattice_site(19, 1, 1), sidb_dot_tag.INPUT)
+    lyt.assign_sidb(LatticeSite(20, 0, 1), DotTag.INPUT)
+    lyt.assign_sidb(LatticeSite(19, 1, 1), DotTag.INPUT)
 
-    lyt.assign_sidb(lattice_site(4, 2, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(6, 3, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(4, 2, 1), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(6, 3, 1), DotTag.NORMAL)
 
-    lyt.assign_sidb(lattice_site(14, 3, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(16, 2, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(14, 3, 1), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(16, 2, 1), DotTag.NORMAL)
 
-    lyt.assign_sidb(lattice_site(10, 6, 0), sidb_dot_tag.OUTPUT)
-    lyt.assign_sidb(lattice_site(10, 7, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_sidb(LatticeSite(10, 6, 0), DotTag.OUTPUT)
+    lyt.assign_sidb(LatticeSite(10, 7, 0), DotTag.OUTPUT)
 
-    lyt.assign_sidb(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(10, 9, 1), DotTag.NORMAL)
 
     params = is_operational_params()
-    params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
+    params.simulation_parameters = SimulationParams(2, -0.28)
 
     [op_status, _evaluated_input_combinations] = is_operational(lyt, [standard_functions("and")[0]], params)
 
     assert op_status == operational_status.OPERATIONAL
 
-    params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
+    params.simulation_parameters = SimulationParams(2, -0.1)
 
     [op_status, _evaluated_input_combinations] = is_operational(lyt, [standard_functions("and")[0]], params)
 
@@ -79,9 +78,9 @@ def test_is_operational():
     assert op_status == operational_status.NON_OPERATIONAL
 
     # pre-determined I/O pins and canvas layout
-    canvas_lyt = sidb_layout()
-    canvas_lyt.assign_sidb(lattice_site(4, 2, 1), sidb_dot_tag.LOGIC)
-    canvas_lyt.assign_sidb(lattice_site(6, 3, 1), sidb_dot_tag.LOGIC)
+    canvas_lyt = SiDBLayout()
+    canvas_lyt.assign_sidb(LatticeSite(4, 2, 1), DotTag.LOGIC)
+    canvas_lyt.assign_sidb(LatticeSite(6, 3, 1), DotTag.LOGIC)
     [op_status, _evaluated_input_combinations] = is_operational(
         lyt,
         [standard_functions("and")[0]],
@@ -99,24 +98,24 @@ def and_gate_with_bdl_wires():
     Returns:
         The layout, its input BDL wires, and its output BDL wires.
     """
-    lyt = sidb_layout()
+    lyt = SiDBLayout()
 
-    lyt.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
-    lyt.assign_sidb(lattice_site(2, 1, 1), sidb_dot_tag.INPUT)
+    lyt.assign_sidb(LatticeSite(0, 0, 1), DotTag.INPUT)
+    lyt.assign_sidb(LatticeSite(2, 1, 1), DotTag.INPUT)
 
-    lyt.assign_sidb(lattice_site(20, 0, 1), sidb_dot_tag.INPUT)
-    lyt.assign_sidb(lattice_site(19, 1, 1), sidb_dot_tag.INPUT)
+    lyt.assign_sidb(LatticeSite(20, 0, 1), DotTag.INPUT)
+    lyt.assign_sidb(LatticeSite(19, 1, 1), DotTag.INPUT)
 
-    lyt.assign_sidb(lattice_site(4, 2, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(6, 3, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(4, 2, 1), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(6, 3, 1), DotTag.NORMAL)
 
-    lyt.assign_sidb(lattice_site(14, 3, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(16, 2, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(14, 3, 1), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(16, 2, 1), DotTag.NORMAL)
 
-    lyt.assign_sidb(lattice_site(10, 6, 0), sidb_dot_tag.OUTPUT)
-    lyt.assign_sidb(lattice_site(10, 7, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_sidb(LatticeSite(10, 6, 0), DotTag.OUTPUT)
+    lyt.assign_sidb(LatticeSite(10, 7, 0), DotTag.OUTPUT)
 
-    lyt.assign_sidb(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(10, 9, 1), DotTag.NORMAL)
 
     return (
         lyt,
@@ -147,7 +146,7 @@ def test_input_pattern_layouts_yield_the_same_verdict(and_gate_with_bdl_wires, m
     input_pattern_layouts = generate_bdl_input_pattern_layouts(lyt, bdl_input_iterator_params(), input_bdl_wires)
 
     params = is_operational_params()
-    params.simulation_parameters = sidb_simulation_parameters(2, mu_minus)
+    params.simulation_parameters = SimulationParams(2, mu_minus)
 
     [reference_status, reference_calls] = is_operational(
         lyt,
@@ -188,7 +187,7 @@ def test_and_gate_kinks(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_kinks.sqd"))
 
     params = is_operational_params()
-    params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
+    params.simulation_parameters = SimulationParams(2, -0.32)
 
     [op_status, _evaluated_input_combinations] = is_operational(lyt, [standard_functions("and")[0]], params)
 
@@ -205,7 +204,7 @@ def test_and_gate_non_operational_due_to_kinks(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_kinks.sqd"))
 
     params = is_operational_params()
-    params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
+    params.simulation_parameters = SimulationParams(2, -0.32)
 
     result = is_kink_induced_non_operational(lyt, [standard_functions("and")[0]], params)
 
@@ -216,7 +215,7 @@ def test_and_gate_non_operational_input_patterns_due_to_kinks(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_kinks.sqd"))
 
     params = is_operational_params()
-    params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
+    params.simulation_parameters = SimulationParams(2, -0.32)
 
     non_operational_pattern_kinks = kink_induced_non_operational_input_patterns(
         lyt, [standard_functions("and")[0]], params
@@ -229,13 +228,13 @@ def test_and_gate_111_lattice_11_input_pattern(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
     params = is_operational_params()
-    params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
+    params.simulation_parameters = SimulationParams(2, -0.32)
 
     [op_status, _evaluated_input_combinations] = is_operational(lyt, [standard_functions("and")[0]], params)
 
     assert op_status == operational_status.OPERATIONAL
 
-    params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
+    params.simulation_parameters = SimulationParams(2, -0.1)
 
     assert params.simulation_parameters.mu_minus == -0.1
 
@@ -260,7 +259,7 @@ def test_and_gate_111_lattice_operational_input_pattern(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
     params = is_operational_params()
-    params.simulation_parameters = sidb_simulation_parameters(2, -0.30)
+    params.simulation_parameters = SimulationParams(2, -0.30)
 
     operational_patterns = operational_input_patterns(lyt, [standard_functions("and")[0]], params)
 

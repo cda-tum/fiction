@@ -17,7 +17,7 @@ import pytest
 from mnt.pyfiction.layouts import ShiftedCartesianGateLayout
 from mnt.pyfiction.mol_qca import MolecularQCALayout
 from mnt.pyfiction.qca import QCALayout
-from mnt.pyfiction.sidb import sidb_layout
+from mnt.pyfiction.sidb import SiDBLayout
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -35,7 +35,7 @@ def test_cell_qca_one_and_sim7(mux21_shell: Shell) -> None:
 def test_cell_bestagon(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho; hex; cell -l bestagon")
     entry = mux21_shell.session.cell_layouts.current()
-    assert isinstance(entry.layout, sidb_layout)
+    assert isinstance(entry.layout, SiDBLayout)
     assert "Si(100)" in mux21_shell.ok("ps -c")
 
 

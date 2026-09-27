@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command, one_store, store_flags
 from mnt.fiction.cli.stores import ground_state
-from mnt.pyfiction.sidb import sidb_layout
+from mnt.pyfiction.sidb import SiDBLayout
 from mnt.pyfiction.sidb.io import print_sidb_layout
 
 if TYPE_CHECKING:
@@ -50,7 +50,7 @@ def print_command(session: Session, args: argparse.Namespace) -> Result:
         session.output(repr(session.gate_layouts.current()))
         return None
     entry = session.cell_layouts.current()
-    if not isinstance(entry.layout, sidb_layout):
+    if not isinstance(entry.layout, SiDBLayout):
         session.output(repr(entry.layout))
         return None
     state = ground_state(entry)
@@ -59,5 +59,5 @@ def print_command(session: Session, args: argparse.Namespace) -> Result:
     )
     session.output(picture.rstrip())
     if state is not None:
-        session.output(f"Ground state energy: {state.energy():.6f} eV", style="result")
+        session.output(f"Ground state energy: {state.energy:.6f} eV", style="result")
     return None

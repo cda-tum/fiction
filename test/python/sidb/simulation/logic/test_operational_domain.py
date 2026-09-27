@@ -12,9 +12,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb import DotTag, LatticeSite, SiDBLayout
 from mnt.pyfiction.sidb.io import read_sqd_layout
-from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation import SimulationEngine
 from mnt.pyfiction.sidb.simulation.logic import (
     critical_temperature_domain,
     critical_temperature_domain_contour_tracing,
@@ -45,32 +45,32 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def wire_with_canvas() -> sidb_layout:
+def wire_with_canvas() -> SiDBLayout:
     """A BDL wire with two LOGIC dots, so that the sketch has a canvas to enumerate.
 
     Returns:
         The wire layout.
     """
-    lyt = sidb_layout()
+    lyt = SiDBLayout()
 
-    lyt.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
-    lyt.assign_sidb(lattice_site(2, 0, 1), sidb_dot_tag.INPUT)
+    lyt.assign_sidb(LatticeSite(0, 0, 0), DotTag.INPUT)
+    lyt.assign_sidb(LatticeSite(2, 0, 1), DotTag.INPUT)
 
-    lyt.assign_sidb(lattice_site(6, 1, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(8, 1, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(12, 2, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(14, 2, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(6, 1, 0), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(8, 1, 1), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(12, 2, 0), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(14, 2, 1), DotTag.NORMAL)
 
-    lyt.assign_sidb(lattice_site(11, 3, 1), sidb_dot_tag.LOGIC)
-    lyt.assign_sidb(lattice_site(13, 6, 1), sidb_dot_tag.LOGIC)
+    lyt.assign_sidb(LatticeSite(11, 3, 1), DotTag.LOGIC)
+    lyt.assign_sidb(LatticeSite(13, 6, 1), DotTag.LOGIC)
 
-    lyt.assign_sidb(lattice_site(14, 7, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(12, 8, 0), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(14, 7, 1), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(12, 8, 0), DotTag.NORMAL)
 
-    lyt.assign_sidb(lattice_site(8, 8, 1), sidb_dot_tag.OUTPUT)
-    lyt.assign_sidb(lattice_site(6, 9, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_sidb(LatticeSite(8, 8, 1), DotTag.OUTPUT)
+    lyt.assign_sidb(LatticeSite(6, 9, 0), DotTag.OUTPUT)
 
-    lyt.assign_sidb(lattice_site(2, 9, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(2, 9, 1), DotTag.NORMAL)
 
     return lyt
 
@@ -79,7 +79,7 @@ def test_operational_domain_siqad_or_100_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
     params = operational_domain_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
 
     params.operational_params.simulation_parameters.mu_minus = -0.28
@@ -102,7 +102,7 @@ def test_number_of_threads(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
     params = operational_domain_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
     params.operational_params.simulation_parameters.mu_minus = -0.28
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5
@@ -133,7 +133,7 @@ def test_three_dimensional_operational_domain_sketch(wire_with_canvas):
     lyt = wire_with_canvas
 
     params = operational_domain_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
     params.operational_params.op_condition = operational_condition.REJECT_KINKS
     params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
@@ -169,7 +169,7 @@ def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
     params = operational_domain_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
     params.operational_params.op_condition = operational_condition.REJECT_KINKS
     params.sweep_dimensions = [
@@ -198,7 +198,7 @@ def test_operational_domain_xor_gate_100_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
     params = operational_domain_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
 
     params.sweep_dimensions = [
@@ -228,7 +228,7 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir: Path) -
     lyt = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
     params = operational_domain_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
 
     params.sweep_dimensions = [
@@ -289,7 +289,7 @@ def test_operational_domain_and_gate_111_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
     params = operational_domain_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
 
     params.sweep_dimensions = [
@@ -441,21 +441,21 @@ def test_operational_domain():
 
 
 def test_operational_domain_two_bdl_pair_wire():
-    bdl_wire = sidb_layout()
+    bdl_wire = SiDBLayout()
 
-    bdl_wire.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
-    bdl_wire.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.INPUT)
+    bdl_wire.assign_sidb(LatticeSite(0, 0, 0), DotTag.INPUT)
+    bdl_wire.assign_sidb(LatticeSite(2, 0, 0), DotTag.INPUT)
 
-    bdl_wire.assign_sidb(lattice_site(6, 0, 0), sidb_dot_tag.NORMAL)
-    bdl_wire.assign_sidb(lattice_site(8, 0, 0), sidb_dot_tag.NORMAL)
+    bdl_wire.assign_sidb(LatticeSite(6, 0, 0), DotTag.NORMAL)
+    bdl_wire.assign_sidb(LatticeSite(8, 0, 0), DotTag.NORMAL)
 
-    bdl_wire.assign_sidb(lattice_site(12, 0, 0), sidb_dot_tag.OUTPUT)
-    bdl_wire.assign_sidb(lattice_site(14, 0, 0), sidb_dot_tag.OUTPUT)
+    bdl_wire.assign_sidb(LatticeSite(12, 0, 0), DotTag.OUTPUT)
+    bdl_wire.assign_sidb(LatticeSite(14, 0, 0), DotTag.OUTPUT)
 
-    bdl_wire.assign_sidb(lattice_site(18, 0, 0), sidb_dot_tag.NORMAL)
+    bdl_wire.assign_sidb(LatticeSite(18, 0, 0), DotTag.NORMAL)
 
     params = operational_domain_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
     params.operational_params.input_bdl_iterator_params.input_bdl_config = (
         input_bdl_configuration.PERTURBER_DISTANCE_ENCODED
@@ -483,7 +483,7 @@ def test_domain_reports_progress(resources_dir: Path, strategy: str) -> None:
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
     params = operational_domain_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
     params.operational_params.simulation_parameters.mu_minus = -0.28
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5

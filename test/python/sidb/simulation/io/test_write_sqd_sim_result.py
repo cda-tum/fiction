@@ -12,8 +12,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.simulation.engines import quickexact, quickexact_params
+from mnt.pyfiction.sidb import DotTag, LatticeSite, SiDBLayout
+from mnt.pyfiction.sidb.simulation import QuickExactParams, quickexact
 from mnt.pyfiction.sidb.simulation.io import write_sqd_sim_result
 
 if TYPE_CHECKING:
@@ -27,11 +27,11 @@ def test_write_sqd_sim_result(tmp_path: Path) -> None:
         tmp_path: Temporary output directory.
     """
 
-    layout = sidb_layout()
-    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
+    layout = SiDBLayout()
+    layout.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(2, 0, 0), DotTag.NORMAL)
 
-    result = quickexact(layout, quickexact_params())
+    result = quickexact(layout, params=QuickExactParams())
     assert result.charge_distributions
 
     filename = tmp_path / "result.xml"

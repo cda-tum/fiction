@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb import DotTag, Lattice, LatticeSite, SiDBLayout
 from mnt.pyfiction.sidb.generators import (
     design_sidb_gates,
     design_sidb_gates_mode,
@@ -18,7 +18,7 @@ from mnt.pyfiction.sidb.generators import (
     design_sidb_gates_stats,
     termination_condition,
 )
-from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation import SimulationEngine
 from mnt.pyfiction.sidb.simulation.logic import operational_condition
 from mnt.pyfiction.synthesis import (
     standard_functions,
@@ -26,77 +26,77 @@ from mnt.pyfiction.synthesis import (
 
 
 @pytest.fixture
-def nor_gate_skeleton() -> sidb_layout:
+def nor_gate_skeleton() -> SiDBLayout:
     """The H-Si(111) 1x1 NOR gate skeleton that the canvas SiDBs are designed into.
 
     Returns:
         The skeleton as an SiDB layout over the H-Si(111) 1x1 lattice, with an empty canvas.
     """
-    layout = sidb_layout(lattice.si_111_1x1())
+    layout = SiDBLayout(Lattice.si_111_1x1())
 
-    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
-    layout.assign_sidb(lattice_site(1, 1, 1), sidb_dot_tag.INPUT)
+    layout.assign_sidb(LatticeSite(0, 0, 0), DotTag.INPUT)
+    layout.assign_sidb(LatticeSite(1, 1, 1), DotTag.INPUT)
 
-    layout.assign_sidb(lattice_site(25, 0, 0), sidb_dot_tag.INPUT)
-    layout.assign_sidb(lattice_site(23, 1, 1), sidb_dot_tag.INPUT)
+    layout.assign_sidb(LatticeSite(25, 0, 0), DotTag.INPUT)
+    layout.assign_sidb(LatticeSite(23, 1, 1), DotTag.INPUT)
 
-    layout.assign_sidb(lattice_site(4, 4, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(21, 4, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(4, 4, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(21, 4, 0), DotTag.NORMAL)
 
-    layout.assign_sidb(lattice_site(5, 5, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(19, 5, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(5, 5, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(19, 5, 1), DotTag.NORMAL)
 
-    layout.assign_sidb(lattice_site(8, 8, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(17, 8, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(8, 8, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(17, 8, 0), DotTag.NORMAL)
 
-    layout.assign_sidb(lattice_site(9, 9, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(15, 9, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(9, 9, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(15, 9, 1), DotTag.NORMAL)
 
-    layout.assign_sidb(lattice_site(15, 21, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(17, 23, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(15, 21, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(17, 23, 0), DotTag.NORMAL)
 
-    layout.assign_sidb(lattice_site(19, 25, 1), sidb_dot_tag.OUTPUT)
-    layout.assign_sidb(lattice_site(21, 27, 0), sidb_dot_tag.OUTPUT)
+    layout.assign_sidb(LatticeSite(19, 25, 1), DotTag.OUTPUT)
+    layout.assign_sidb(LatticeSite(21, 27, 0), DotTag.OUTPUT)
 
-    layout.assign_sidb(lattice_site(23, 29, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(23, 29, 1), DotTag.NORMAL)
     return layout
 
 
 def test_siqad_and_gate_skeleton_100():
-    layout = sidb_layout()
+    layout = SiDBLayout()
 
-    layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
-    layout.assign_sidb(lattice_site(2, 1, 1), sidb_dot_tag.INPUT)
+    layout.assign_sidb(LatticeSite(0, 0, 1), DotTag.INPUT)
+    layout.assign_sidb(LatticeSite(2, 1, 1), DotTag.INPUT)
 
-    layout.assign_sidb(lattice_site(20, 0, 1), sidb_dot_tag.INPUT)
-    layout.assign_sidb(lattice_site(18, 1, 1), sidb_dot_tag.INPUT)
+    layout.assign_sidb(LatticeSite(20, 0, 1), DotTag.INPUT)
+    layout.assign_sidb(LatticeSite(18, 1, 1), DotTag.INPUT)
 
-    layout.assign_sidb(lattice_site(4, 2, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(6, 3, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(4, 2, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(6, 3, 1), DotTag.NORMAL)
 
-    layout.assign_sidb(lattice_site(14, 3, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(16, 2, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(14, 3, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(16, 2, 1), DotTag.NORMAL)
 
-    layout.assign_sidb(lattice_site(10, 6, 0), sidb_dot_tag.OUTPUT)
-    layout.assign_sidb(lattice_site(10, 7, 0), sidb_dot_tag.OUTPUT)
+    layout.assign_sidb(LatticeSite(10, 6, 0), DotTag.OUTPUT)
+    layout.assign_sidb(LatticeSite(10, 7, 0), DotTag.OUTPUT)
 
-    layout.assign_sidb(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(LatticeSite(10, 9, 1), DotTag.NORMAL)
 
     params = design_sidb_gates_params()
     params.operational_params.simulation_parameters.base = 2
     params.operational_params.simulation_parameters.mu_minus = -0.28
     params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
     params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
-    params.canvas = (lattice_site(4, 4, 0), lattice_site(14, 5, 1))
+    params.canvas = (LatticeSite(4, 4, 0), LatticeSite(14, 5, 1))
     params.number_of_canvas_sidbs = 1
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
 
     assert params.operational_params.simulation_parameters.mu_minus == -0.28
     assert params.number_of_canvas_sidbs == 1
     assert params.maximal_random_design_attempts == 1_000_000
     assert params.operational_params.timeout == 2**64 - 1
-    assert params.canvas[0] == lattice_site(4, 4, 0)
-    assert params.canvas[1] == lattice_site(14, 5, 1)
+    assert params.canvas[0] == LatticeSite(4, 4, 0)
+    assert params.canvas[1] == LatticeSite(14, 5, 1)
 
     reports: list[tuple[str, int, int]] = []
     params.on_progress = lambda task, done, total: reports.append((task, done, total))
@@ -117,15 +117,15 @@ def test_nor_gate_111(nor_gate_skeleton):
     params.operational_params.simulation_parameters.mu_minus = -0.32
     params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
     params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
-    params.canvas = (lattice_site(10, 11, 0), lattice_site(14, 17, 0))
+    params.canvas = (LatticeSite(10, 11, 0), LatticeSite(14, 17, 0))
     params.number_of_canvas_sidbs = 3
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.op_condition = operational_condition.REJECT_KINKS
 
     assert params.operational_params.simulation_parameters.mu_minus == -0.32
     assert params.number_of_canvas_sidbs == 3
-    assert params.canvas[0] == lattice_site(10, 11, 0)
-    assert params.canvas[1] == lattice_site(14, 17, 0)
+    assert params.canvas[0] == LatticeSite(10, 11, 0)
+    assert params.canvas[1] == LatticeSite(14, 17, 0)
 
     designed_gates = design_sidb_gates(layout, [standard_functions("nor")[0]], params)
     assert len(designed_gates) == 44
@@ -149,14 +149,14 @@ def test_nor_gate_111_quickcell(nor_gate_skeleton):
     params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
     params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
 
-    params.canvas = (lattice_site(10, 13, 0), lattice_site(14, 17, 0))
+    params.canvas = (LatticeSite(10, 13, 0), LatticeSite(14, 17, 0))
     params.number_of_canvas_sidbs = 3
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
 
     assert params.operational_params.simulation_parameters.mu_minus == -0.32
     assert params.number_of_canvas_sidbs == 3
-    assert params.canvas[0] == lattice_site(10, 13, 0)
-    assert params.canvas[1] == lattice_site(14, 17, 0)
+    assert params.canvas[0] == LatticeSite(10, 13, 0)
+    assert params.canvas[1] == LatticeSite(14, 17, 0)
 
     designed_gates = design_sidb_gates(layout, [standard_functions("nor")[0]], params)
     assert len(designed_gates) == 14
@@ -171,7 +171,7 @@ def test_nor_gate_111_quickcell(nor_gate_skeleton):
         design_sidb_gates_mode.PRUNING_ONLY,
     ],
 )
-def test_gate_design_timeout(nor_gate_skeleton: sidb_layout, mode: design_sidb_gates_mode) -> None:
+def test_gate_design_timeout(nor_gate_skeleton: SiDBLayout, mode: design_sidb_gates_mode) -> None:
     """Every search mode raises TimeoutError without changing its inputs or publishing partial statistics."""
     params = design_sidb_gates_params()
     params.operational_params.timeout = 0

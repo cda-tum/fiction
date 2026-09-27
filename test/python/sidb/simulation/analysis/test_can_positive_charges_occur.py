@@ -8,33 +8,32 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.model import sidb_simulation_parameters
+from mnt.pyfiction.sidb import DotTag, Lattice, LatticeSite, SiDBLayout, SimulationParams
 from mnt.pyfiction.sidb.simulation.analysis import can_positive_charges_occur
 
 
 def test_three_sidbs_100_lattice() -> None:
     """Check positive-charge feasibility on the Si(100) lattice."""
-    layout = sidb_layout()
-    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
+    layout = SiDBLayout()
+    layout.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(1, 0, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(2, 0, 0), DotTag.NORMAL)
 
-    assert can_positive_charges_occur(layout, sidb_simulation_parameters())
+    assert can_positive_charges_occur(layout, SimulationParams())
 
-    params = sidb_simulation_parameters()
+    params = SimulationParams()
     params.mu_minus = -0.8
     assert not can_positive_charges_occur(layout, params)
 
 
 def test_three_sidbs_111_lattice() -> None:
     """Check positive-charge feasibility on the Si(111) lattice."""
-    layout = sidb_layout(lattice.si_111_1x1())
-    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
+    layout = SiDBLayout(Lattice.si_111_1x1())
+    layout.assign_sidb(LatticeSite(0, 0, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(1, 0, 0), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(2, 0, 0), DotTag.NORMAL)
 
-    params = sidb_simulation_parameters()
+    params = SimulationParams()
     params.mu_minus = -0.05
 
     assert can_positive_charges_occur(layout, params)

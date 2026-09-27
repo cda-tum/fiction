@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout
-from mnt.pyfiction.sidb import sidb_layout, site_at_row
+from mnt.pyfiction.sidb import SiDBLayout, site_at_row
 from mnt.pyfiction.sidb.generators import (
     design_sidb_gates_mode,
     on_the_fly_sidb_circuit_design,
@@ -110,7 +110,7 @@ def test_design_and_export(and_circuit: HexagonalGateLayout, tmp_path: Path) -> 
     gates.design_mode = design_sidb_gates_mode.QUICKCELL
     gates.number_of_canvas_sidbs = 3
     result = on_the_fly_sidb_circuit_design(and_circuit, params)
-    assert isinstance(result, sidb_layout)
+    assert isinstance(result, SiDBLayout)
     assert result.num_dots() > 0
     assert result.num_pis() > 0
     assert result.num_pos() > 0

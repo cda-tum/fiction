@@ -1681,7 +1681,7 @@ def apply_topolinano_library(
 def apply_bestagon_library(
     layout: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     on_progress: Callable[[str, int, int], None] | None = None,
-) -> mnt.pyfiction._native.sidb.sidb_layout:
+) -> mnt.pyfiction._native.sidb.SiDBLayout:
     """
     Applies a gate library to a given gate-level layout and, thereby,
     creates and returns the layout type the library produces, e.g.,

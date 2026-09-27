@@ -16,8 +16,7 @@ import pytest
 
 from mnt.fiction.cli.registry import REGISTRY
 from mnt.fiction.cli.stores import CellEntry
-from mnt.pyfiction.sidb import sidb_layout
-from mnt.pyfiction.sidb.simulation import engines
+from mnt.pyfiction.sidb import SiDBLayout, simulation
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -50,15 +49,15 @@ def xor_gate(shell: Shell, resource: Callable[[str], str]) -> Shell:
 
 @pytest.mark.parametrize("engine", ["quickexact", "quicksim", "clustercomplete"])
 def test_ground_state_engines(or_gate: Shell, engine: str) -> None:
-    if engine == "clustercomplete" and not hasattr(engines, "clustercomplete"):
+    if engine == "clustercomplete" and not hasattr(simulation, "clustercomplete"):
         pytest.skip("pyfiction was built without ALGLIB")
     or_gate.ok(f"{engine} -e 5.6 -l 5 -m -0.28")
     entry = or_gate.session.cell_layouts.current()
     assert entry.result is not None
     assert entry.engine
-    simulation = or_gate.session.log[-1]["result"]["cell_layout"]["simulation"]
-    assert simulation["stable_states"] >= 1
-    assert simulation["ground_state_energy_ev"] is not None
+    simulation_log = or_gate.session.log[-1]["result"]["cell_layout"]["simulation"]
+    assert simulation_log["stable_states"] >= 1
+    assert simulation_log["ground_state_energy_ev"] is not None
     assert "Ground state" in or_gate.ok("print -c")
     or_gate.ok(f"{engine} -m -0.28")
     assert len(or_gate.session.cell_layouts) == 3
@@ -87,7 +86,7 @@ def test_simulation_rejects_invalid_physical_parameters(or_gate: Shell, command:
 
 
 def test_simulation_reports_an_empty_result(shell: Shell) -> None:
-    shell.session.cell_layouts.add(CellEntry(sidb_layout()))
+    shell.session.cell_layouts.add(CellEntry(SiDBLayout()))
     assert "no physically valid charge distribution" in shell.ok("quickexact")
     simulation = shell.session.log[-1]["result"]["cell_layout"]["simulation"]
     assert simulation["stable_states"] == 0
@@ -95,7 +94,7 @@ def test_simulation_reports_an_empty_result(shell: Shell) -> None:
 
 
 def test_temp_rejects_missing_gate_ports_and_invalid_temperature(shell: Shell) -> None:
-    shell.session.cell_layouts.add(CellEntry(sidb_layout()))
+    shell.session.cell_layouts.add(CellEntry(SiDBLayout()))
     assert "must be positive" in shell.fails("temp -t 0")
     assert "input and output dots" in shell.fails("temp -g")
 

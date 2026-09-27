@@ -12,10 +12,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb import DotTag, Lattice, LatticeSite, SiDBLayout, SimulationParams
 from mnt.pyfiction.sidb.io import read_sqd_layout
-from mnt.pyfiction.sidb.model import sidb_simulation_parameters
-from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation import SimulationEngine
 from mnt.pyfiction.sidb.simulation.analysis import (
     critical_temperature_gate_based,
     critical_temperature_non_gate_based,
@@ -41,22 +40,22 @@ if TYPE_CHECKING:
 
 @pytest.mark.parametrize(
     "lat",
-    [pytest.param(lattice.si_100_2x1(), id="100"), pytest.param(lattice.si_111_1x1(), id="111")],
+    [pytest.param(Lattice.si_100_2x1(), id="100"), pytest.param(Lattice.si_111_1x1(), id="111")],
 )
-def test_perturber_and_sidb_pair(lat: lattice) -> None:
+def test_perturber_and_sidb_pair(lat: Lattice) -> None:
     """Check non-gate critical temperature on both supported lattices.
 
     Args:
         lat: Lattice used for the test layout.
     """
-    layout = sidb_layout(lat)
-    layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
+    layout = SiDBLayout(lat)
+    layout.assign_sidb(LatticeSite(0, 0, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(4, 0, 1), DotTag.NORMAL)
+    layout.assign_sidb(LatticeSite(6, 0, 1), DotTag.NORMAL)
 
     params = critical_temperature_params()
 
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
 
     stats = critical_temperature_stats()
 
@@ -77,7 +76,7 @@ def test_gate_based_simulation(resources_dir: Path) -> None:
 
     params.operational_params.simulation_parameters.base = 2
 
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
 
     stats = critical_temperature_stats()
     spec = [standard_functions("xor")[0]]
@@ -100,7 +99,7 @@ def test_bestagon_inv(resources_dir: Path) -> None:
 
     params = critical_temperature_params()
 
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKSIM
+    params.operational_params.sim_engine = SimulationEngine.QUICKSIM
     params.operational_params.simulation_parameters.base = 2  # QuickSim simulates two charge states only
 
     stats = critical_temperature_stats()
@@ -127,7 +126,7 @@ def test_bestagon_inv_with_different_mu(resources_dir: Path) -> None:
     params.operational_params.simulation_parameters.base = 2
     params.operational_params.simulation_parameters.mu_minus = -0.2
 
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
 
     stats = critical_temperature_stats()
     spec = [standard_functions("not")[0]]
@@ -139,32 +138,32 @@ def test_bestagon_inv_with_different_mu(resources_dir: Path) -> None:
 
 def test_critical_temperature_with_input_pattern_layouts() -> None:
     """Compare pre-generated input layouts with the layout-based overload."""
-    lyt = sidb_layout()
+    lyt = SiDBLayout()
 
-    lyt.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
-    lyt.assign_sidb(lattice_site(2, 1, 1), sidb_dot_tag.INPUT)
+    lyt.assign_sidb(LatticeSite(0, 0, 1), DotTag.INPUT)
+    lyt.assign_sidb(LatticeSite(2, 1, 1), DotTag.INPUT)
 
-    lyt.assign_sidb(lattice_site(20, 0, 1), sidb_dot_tag.INPUT)
-    lyt.assign_sidb(lattice_site(19, 1, 1), sidb_dot_tag.INPUT)
+    lyt.assign_sidb(LatticeSite(20, 0, 1), DotTag.INPUT)
+    lyt.assign_sidb(LatticeSite(19, 1, 1), DotTag.INPUT)
 
-    lyt.assign_sidb(lattice_site(4, 2, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(6, 3, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(4, 2, 1), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(6, 3, 1), DotTag.NORMAL)
 
-    lyt.assign_sidb(lattice_site(14, 3, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(16, 2, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(14, 3, 1), DotTag.NORMAL)
+    lyt.assign_sidb(LatticeSite(16, 2, 1), DotTag.NORMAL)
 
-    lyt.assign_sidb(lattice_site(10, 6, 0), sidb_dot_tag.OUTPUT)
-    lyt.assign_sidb(lattice_site(10, 7, 0), sidb_dot_tag.OUTPUT)
+    lyt.assign_sidb(LatticeSite(10, 6, 0), DotTag.OUTPUT)
+    lyt.assign_sidb(LatticeSite(10, 7, 0), DotTag.OUTPUT)
 
-    lyt.assign_sidb(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
+    lyt.assign_sidb(LatticeSite(10, 9, 1), DotTag.NORMAL)
 
     params = critical_temperature_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
-    params.operational_params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
+    params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
+    params.operational_params.simulation_parameters = SimulationParams(2, -0.28)
 
     input_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
     output_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
-    output_bdl_pairs = detect_bdl_pairs(lyt, sidb_dot_tag.OUTPUT, detect_bdl_pairs_params())
+    output_bdl_pairs = detect_bdl_pairs(lyt, DotTag.OUTPUT, detect_bdl_pairs_params())
 
     input_pattern_layouts = generate_bdl_input_pattern_layouts(
         lyt,

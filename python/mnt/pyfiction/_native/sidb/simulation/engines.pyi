@@ -15,7 +15,7 @@ import mnt.pyfiction._native.sidb
 import mnt.pyfiction._native.sidb.model
 import mnt.pyfiction._native.sidb.simulation
 
-class automatic_base_number_detection(enum.Enum):
+class AutomaticBaseNumberDetection(enum.Enum):
     """Modes to use for the *QuickExact* algorithm."""
 
     ON = 0
@@ -31,20 +31,20 @@ class automatic_base_number_detection(enum.Enum):
     simulation.
     """
 
-class quickexact_params:
+class QuickExactParams:
     """This struct stores the parameters for the *QuickExact* algorithm."""
 
     def __init__(self) -> None:
         """Default constructor."""
 
     @property
-    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.sidb_simulation_parameters:
+    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.SimulationParams:
         """All parameters for physical SiDB simulations."""
 
     @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.sidb_simulation_parameters, /) -> None: ...
+    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.SimulationParams, /) -> None: ...
     @property
-    def base_number_detection(self) -> automatic_base_number_detection:
+    def base_number_detection(self) -> AutomaticBaseNumberDetection:
         """
         If `ON`, *QuickExact* checks which base number is required for the
         simulation, i.e., whether positively charged SiDBs can occur. If
@@ -52,16 +52,16 @@ class quickexact_params:
         """
 
     @base_number_detection.setter
-    def base_number_detection(self, arg: automatic_base_number_detection, /) -> None: ...
+    def base_number_detection(self, arg: AutomaticBaseNumberDetection, /) -> None: ...
     @property
-    def local_external_potential(self) -> dict[mnt.pyfiction._native.sidb.lattice_site, float]:
+    def local_external_potential(self) -> dict[mnt.pyfiction._native.sidb.LatticeSite, float]:
         """
         Local external electrostatic potentials (e.g., locally applied
         electrodes), per site (unit: V).
         """
 
     @local_external_potential.setter
-    def local_external_potential(self, arg: Mapping[mnt.pyfiction._native.sidb.lattice_site, float], /) -> None: ...
+    def local_external_potential(self, arg: Mapping[mnt.pyfiction._native.sidb.LatticeSite, float], /) -> None: ...
     @property
     def global_potential(self) -> float:
         """
@@ -79,8 +79,8 @@ class quickexact_params:
     def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 def quickexact(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout, params: quickexact_params = ...
-) -> mnt.pyfiction._native.sidb.simulation.sidb_simulation_result:
+    layout: mnt.pyfiction._native.sidb.SiDBLayout, *, params: QuickExactParams = ...
+) -> mnt.pyfiction._native.sidb.simulation.SimulationResult:
     """
     *QuickExact* is a quick and exact physical simulation algorithm
     designed specifically for SiDB layouts. It was proposed in \\"The Need
@@ -113,18 +113,18 @@ def quickexact(
                               partial result is returned.
     """
 
-class quicksim_params:
+class QuickSimParams:
     """This struct stores the parameters for the *QuickSim* algorithm."""
 
     def __init__(self) -> None:
         """Default constructor."""
 
     @property
-    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.sidb_simulation_parameters:
+    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.SimulationParams:
         """Simulation parameters for the simulation of the physical SiDB system."""
 
     @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.sidb_simulation_parameters, /) -> None: ...
+    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.SimulationParams, /) -> None: ...
     @property
     def iteration_steps(self) -> int:
         """Number of iterations to run the simulation for."""
@@ -172,8 +172,8 @@ class quicksim_params:
     def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
 
 def quicksim(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout, params: quicksim_params = ...
-) -> mnt.pyfiction._native.sidb.simulation.sidb_simulation_result | None:
+    layout: mnt.pyfiction._native.sidb.SiDBLayout, *, params: QuickSimParams = ...
+) -> mnt.pyfiction._native.sidb.simulation.SimulationResult | None:
     """
     *QuickSim* is a heuristic ground-state simulation of SiDB layouts
     proposed in \\"QuickSim: Efficient and Accurate Physical Simulation of
@@ -203,10 +203,11 @@ def quicksim(
     """
 
 def exhaustive_ground_state_simulation(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    params: mnt.pyfiction._native.sidb.model.sidb_simulation_parameters = ...,
+    layout: mnt.pyfiction._native.sidb.SiDBLayout,
+    *,
+    params: mnt.pyfiction._native.sidb.model.SimulationParams = ...,
     on_progress: Callable[[str, int, int], None] | None = None,
-) -> mnt.pyfiction._native.sidb.simulation.sidb_simulation_result:
+) -> mnt.pyfiction._native.sidb.simulation.SimulationResult:
     """
     *Exhaustive Ground State Simulation* (*ExGS*) which was proposed in
     \\"Computer-Aided Design of Atomic Silicon Quantum Dots and
@@ -233,7 +234,7 @@ def exhaustive_ground_state_simulation(
                               partial result is returned.
     """
 
-class ground_state_space_reporting(enum.Enum):
+class GroundStateSpaceReporting(enum.Enum):
     """
     This enum class provides meaningful options for configuring the
     reporting of the *Ground State Space* statistics. These statistic may
@@ -256,7 +257,7 @@ class ground_state_space_reporting(enum.Enum):
     statistics.
     """
 
-class clustercomplete_params:
+class ClusterCompleteParams:
     """
     The struct containing the parameters both passed on to pre-simulator
     Ground State Space, and used during simulation.
@@ -266,20 +267,20 @@ class clustercomplete_params:
         """Default constructor."""
 
     @property
-    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.sidb_simulation_parameters:
+    def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.SimulationParams:
         """Physical simulation parameters."""
 
     @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.sidb_simulation_parameters, /) -> None: ...
+    def simulation_parameters(self, arg: mnt.pyfiction._native.sidb.model.SimulationParams, /) -> None: ...
     @property
-    def local_external_potential(self) -> dict[mnt.pyfiction._native.sidb.lattice_site, float]:
+    def local_external_potential(self) -> dict[mnt.pyfiction._native.sidb.LatticeSite, float]:
         """
         Local external electrostatic potentials (e.g., locally applied
         electrodes).
         """
 
     @local_external_potential.setter
-    def local_external_potential(self, arg: Mapping[mnt.pyfiction._native.sidb.lattice_site, float], /) -> None: ...
+    def local_external_potential(self, arg: Mapping[mnt.pyfiction._native.sidb.LatticeSite, float], /) -> None: ...
     @property
     def global_potential(self) -> float:
         """
@@ -326,14 +327,14 @@ class clustercomplete_params:
     @available_threads.setter
     def available_threads(self, arg: int, /) -> None: ...
     @property
-    def report_gss_stats(self) -> ground_state_space_reporting:
+    def report_gss_stats(self) -> GroundStateSpaceReporting:
         """
         Option to decide if the *Ground State Space* statistics are reported
         to the standard output. By default, this option is disabled.
         """
 
     @report_gss_stats.setter
-    def report_gss_stats(self, arg: ground_state_space_reporting, /) -> None: ...
+    def report_gss_stats(self, arg: GroundStateSpaceReporting, /) -> None: ...
     @property
     def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """
@@ -354,8 +355,8 @@ class clustercomplete_params:
     def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
 
 def clustercomplete(
-    lyt: mnt.pyfiction._native.sidb.sidb_layout, params: clustercomplete_params = ...
-) -> mnt.pyfiction._native.sidb.simulation.sidb_simulation_result:
+    layout: mnt.pyfiction._native.sidb.SiDBLayout, *, params: ClusterCompleteParams = ...
+) -> mnt.pyfiction._native.sidb.simulation.SimulationResult:
     """
     *ClusterComplete* is an instantiation of a general solution to
     exhaustive state assignment searching for which all local predicates

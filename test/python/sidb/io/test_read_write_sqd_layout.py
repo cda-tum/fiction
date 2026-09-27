@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag
+from mnt.pyfiction.sidb import DotTag, Lattice, LatticeSite
 from mnt.pyfiction.sidb.io import read_sqd_layout, write_sqd_layout
 
 if TYPE_CHECKING:
@@ -27,10 +27,10 @@ def test_read_write_sidb_layout(resources_dir: Path, tmp_path: Path) -> None:
     """SQD export and import preserve the lattice, name, and dot tags."""
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"), "and")
     assert lyt.get_layout_name() == "and"
-    assert lyt.get_lattice() == lattice.si_111_1x1()
+    assert lyt.get_lattice() == Lattice.si_111_1x1()
     assert lyt.num_dots() > 0
 
-    lyt.assign_sidb(lattice_site(-3, 2, 1), sidb_dot_tag.LOGIC)
+    lyt.assign_sidb(LatticeSite(-3, 2, 1), DotTag.LOGIC)
 
     path = tmp_path / "and.sqd"
     write_sqd_layout(lyt, str(path))

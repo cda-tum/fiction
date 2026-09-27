@@ -13,15 +13,15 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.sidb import sidb_dot_tag
+from mnt.pyfiction.sidb import DotTag
 from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.sidb.simulation import quickexact
 from mnt.pyfiction.sidb.simulation.analysis import (
     calculate_energy_and_state_type_with_kinks_accepted,
     calculate_energy_distribution,
     occupation_probability_gate_based,
     state_type,
 )
-from mnt.pyfiction.sidb.simulation.engines import quickexact
 from mnt.pyfiction.sidb.simulation.logic import bdl_input_iterator, detect_bdl_pairs
 from mnt.pyfiction.synthesis import (
     standard_functions,
@@ -56,7 +56,7 @@ def test_calculate_energy_and_state_type(resources_dir: Path) -> None:
     input_iterator += 1
     layout_with_inputs = input_iterator.get_layout()
 
-    output_bdl_pairs = detect_bdl_pairs(layout_with_inputs, sidb_dot_tag.OUTPUT)
+    output_bdl_pairs = detect_bdl_pairs(layout_with_inputs, DotTag.OUTPUT)
     assert len(output_bdl_pairs) == 1
 
     charge_distributions = quickexact(layout_with_inputs).charge_distributions

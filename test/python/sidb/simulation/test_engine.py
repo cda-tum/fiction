@@ -9,21 +9,21 @@
 from __future__ import annotations
 
 from mnt.pyfiction.sidb.simulation import (
-    exact_sidb_simulation_engine,
-    heuristic_sidb_simulation_engine,
-    sidb_simulation_engine,
+    ExactSimulationEngine,
+    HeuristicSimulationEngine,
+    SimulationEngine,
     sidb_simulation_engine_name,
 )
 
 
 def test_sidb_simulation_engine_names():
-    assert sidb_simulation_engine_name(sidb_simulation_engine.QUICKEXACT) == "QuickExact"
-    assert sidb_simulation_engine_name(sidb_simulation_engine.QUICKSIM) == "QuickSim"
-    assert sidb_simulation_engine_name(sidb_simulation_engine.EXGS) == "ExGS"
-    assert sidb_simulation_engine_name(sidb_simulation_engine.CLUSTERCOMPLETE) == "ClusterComplete"
+    assert sidb_simulation_engine_name(SimulationEngine.QUICKEXACT) == "QuickExact"
+    assert sidb_simulation_engine_name(SimulationEngine.QUICKSIM) == "QuickSim"
+    assert sidb_simulation_engine_name(SimulationEngine.EXGS) == "ExGS"
+    assert sidb_simulation_engine_name(SimulationEngine.CLUSTERCOMPLETE) == "ClusterComplete"
 
-    assert sidb_simulation_engine_name(exact_sidb_simulation_engine.QUICKEXACT) == "QuickExact"
-    assert sidb_simulation_engine_name(exact_sidb_simulation_engine.EXGS) == "ExGS"
-    assert sidb_simulation_engine_name(exact_sidb_simulation_engine.CLUSTERCOMPLETE) == "ClusterComplete"
+    assert sidb_simulation_engine_name(ExactSimulationEngine.QUICKEXACT) == "QuickExact"
+    assert sidb_simulation_engine_name(ExactSimulationEngine.EXGS) == "ExGS"
+    assert sidb_simulation_engine_name(ExactSimulationEngine.CLUSTERCOMPLETE) == "ClusterComplete"
 
-    assert sidb_simulation_engine_name(heuristic_sidb_simulation_engine.QUICKSIM) == "QuickSim"
+    assert sidb_simulation_engine_name(HeuristicSimulationEngine.QUICKSIM) == "QuickSim"

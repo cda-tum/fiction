@@ -8,11 +8,11 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.sidb.model import sidb_simulation_parameters
+from mnt.pyfiction.sidb import SimulationParams
 
 
 def test_initialization():
-    params = sidb_simulation_parameters()
+    params = SimulationParams()
 
     # Check if it is initialized correctly.
     assert params.epsilon_r == 5.6
@@ -22,7 +22,7 @@ def test_initialization():
 
 
 def test_custom_initialization():
-    params = sidb_simulation_parameters(2, -0.4, 7.1, 10.0)
+    params = SimulationParams(2, -0.4, 7.1, 10.0)
 
     # Check if it is initialized correctly.
     assert params.epsilon_r == 7.1

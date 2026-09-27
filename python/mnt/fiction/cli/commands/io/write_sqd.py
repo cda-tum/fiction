@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction.sidb import sidb_layout
+from mnt.pyfiction.sidb import SiDBLayout
 from mnt.pyfiction.sidb.io import write_sqd_layout
 
 from ._write import output_argument, output_path, require_cell_type, written
@@ -39,7 +39,7 @@ def write_sqd_command(session: Session, args: argparse.Namespace) -> Result:
     Without a filename, use the active element's name and ``.sqd``.
     """
     entry = session.cell_layouts.current()
-    element = require_cell_type(entry.layout, (sidb_layout,), ".sqd")
+    element = require_cell_type(entry.layout, (SiDBLayout,), ".sqd")
     path = output_path(element, args.file, ".sqd")
     write_sqd_layout(element, str(path), on_progress=session.report_progress)
     return written(session, path)

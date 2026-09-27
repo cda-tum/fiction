@@ -11,7 +11,7 @@
 import enum
 from collections.abc import Sequence
 
-class sidb_defect_type(enum.Enum):
+class DefectType(enum.Enum):
     """
     Specifies the types of fabrication defects that can occur on the
     H-Si(100) 2x1 surface according to \\"Atomic defect classification of
@@ -65,7 +65,7 @@ class sidb_defect_type(enum.Enum):
     UNKNOWN = 14
     """Unknown defect."""
 
-class sidb_defect:
+class Defect:
     """
     In accordance with the paper mentioned above, the `defect` struct is
     used to represent a specific defect on the H-Si(100) 2x1 surface that
@@ -81,13 +81,13 @@ class sidb_defect:
 
     def __init__(
         self,
-        defect_type: sidb_defect_type = ...,
+        defect_type: DefectType = ...,
         electric_charge: int = 0,
         relative_permittivity: float = 0.0,
         screening_distance: float = 0.0,
     ) -> None: ...
     @property
-    def type(self) -> sidb_defect_type:
+    def type(self) -> DefectType:
         """
         Specifies the types of fabrication defects that can occur on the
         H-Si(100) 2x1 surface according to \\"Atomic defect classification of
@@ -111,7 +111,7 @@ class sidb_defect:
     def lambda_tf(self) -> float:
         """Thomas-Fermi screening distance in nm."""
 
-    def __eq__(self, rhs: sidb_defect) -> bool:
+    def __eq__(self, rhs: Defect) -> bool:
         """
         This operator compares two `defect` instances for equality. It checks
         if the `type`, `charge`, `epsilon_r`, and `lambda_tf` members of the
@@ -121,7 +121,7 @@ class sidb_defect:
             rhs: `defect` instance to compare against.
         """
 
-    def __ne__(self, rhs: sidb_defect) -> bool:
+    def __ne__(self, rhs: Defect) -> bool:
         """
         This operator compares two `sidb_defect` instances for inequality. It uses the `operator==` to check if the two instances are equal and returns the negation of the result.
 
@@ -129,7 +129,7 @@ class sidb_defect:
             `sidb_defect` instance to compare against.
         """
 
-def is_charged_defect_type(defect: sidb_defect) -> bool:
+def is_charged_defect_type(defect: Defect) -> bool:
     """
     Checks whether the given defect type is a charged one. `DB`,
     `SI_VACANCY` and `ARSENIC` types are charged. Those charged defects
@@ -142,7 +142,7 @@ def is_charged_defect_type(defect: sidb_defect) -> bool:
         `true` iff `defect` is of a charged type.
     """
 
-def is_neutral_defect_type(defect: sidb_defect) -> bool:
+def is_neutral_defect_type(defect: Defect) -> bool:
     """
     Checks whether the given defect type is not a charged one. Neutral
     defects are to be avoided as well, but not by such a large distance.
@@ -157,7 +157,7 @@ def is_neutral_defect_type(defect: sidb_defect) -> bool:
         `true` iff `defect` is not of a charged type.
     """
 
-def is_positively_charged_defect(defect: sidb_defect) -> bool:
+def is_positively_charged_defect(defect: Defect) -> bool:
     """
     Checks whether the given defect has a positive charge value assigned
     to it. This function is irrespective of the associated defect type.
@@ -169,7 +169,7 @@ def is_positively_charged_defect(defect: sidb_defect) -> bool:
         `true` iff `defect` has a positive charge value.
     """
 
-def is_negatively_charged_defect(defect: sidb_defect) -> bool:
+def is_negatively_charged_defect(defect: Defect) -> bool:
     """
     Checks whether the given defect has a negative charge value assigned
     to it. This function is irrespective of the associated defect type.
@@ -181,7 +181,7 @@ def is_negatively_charged_defect(defect: sidb_defect) -> bool:
         `true` iff `defect` has a negative charge value.
     """
 
-def is_neutrally_charged_defect(defect: sidb_defect) -> bool:
+def is_neutrally_charged_defect(defect: Defect) -> bool:
     """
     Checks whether the given defect has a neutral charge value, i.e., `0`,
     assigned to it. This function is irrespective of the associated defect
@@ -195,7 +195,7 @@ def is_neutrally_charged_defect(defect: sidb_defect) -> bool:
     """
 
 def defect_extent(
-    defect: sidb_defect,
+    defect: Defect,
     charged_defect_spacing_overwrite: tuple[int, int] | None,
     neutral_defect_spacing_overwrite: tuple[int, int] | None,
 ) -> tuple[int, int]:
@@ -222,7 +222,7 @@ def defect_extent(
         and vertical SiDBs affected by the given defect type.
     """
 
-class sidb_charge_state(enum.Enum):
+class ChargeState(enum.Enum):
     """Charge states of SiDBs."""
 
     NEGATIVE = -1
@@ -237,7 +237,7 @@ SIDB_CHARGE_STATES_BASE_2: list = ...
 
 SIDB_CHARGE_STATES_BASE_3: list = ...
 
-def sidb_charge_states_for_base_number(base: int) -> list[sidb_charge_state]:
+def sidb_charge_states_for_base_number(base: int) -> list[ChargeState]:
     """
     Charge states of SiDBs for a given simulation base number. The full
     base states are returned for an invalid simulation base.
@@ -251,7 +251,7 @@ def sidb_charge_states_for_base_number(base: int) -> list[sidb_charge_state]:
         associated with base 2 simulation.
     """
 
-def charge_state_to_sign(cs: sidb_charge_state) -> int:
+def charge_state_to_sign(cs: ChargeState) -> int:
     """
     Converts the charge state into an integer (`-1`, `0`, `1`).
 
@@ -262,7 +262,7 @@ def charge_state_to_sign(cs: sidb_charge_state) -> int:
         Integer representing the SiDB's charge state.
     """
 
-def sign_to_charge_state(sg: int) -> sidb_charge_state:
+def sign_to_charge_state(sg: int) -> ChargeState:
     """
     Converts an integer (`-1`, `0`, `1`) into a charge state.
 
@@ -273,7 +273,7 @@ def sign_to_charge_state(sg: int) -> sidb_charge_state:
         charge_state representation of `sg`.
     """
 
-def charge_configuration_to_string(cc: Sequence[sidb_charge_state]) -> str:
+def charge_configuration_to_string(cc: Sequence[ChargeState]) -> str:
     """
     Converts a vector of charge states to a string representation
     (`"-101..."`).
@@ -285,7 +285,7 @@ def charge_configuration_to_string(cc: Sequence[sidb_charge_state]) -> str:
         A string representation of the charge states.
     """
 
-class sidb_simulation_parameters:
+class SimulationParams:
     """
     This struct collects all physical parameters for physical SiDB
     simulations. It can be useful to adjust them, especially when
@@ -355,7 +355,7 @@ class sidb_simulation_parameters:
     def mu_plus(self) -> float:
         """`mu_plus` (µ+) is the energy transition level (+/0) (unit: eV)."""
 
-def potential_to_distance_conversion(potential: float, params: sidb_simulation_parameters, precision: int) -> float:
+def potential_to_distance_conversion(potential: float, params: SimulationParams, precision: int) -> float:
     """
     The electrostatic potential on hydrogen-passivated silicon is
     typically modeled using a screened Coulomb potential. This

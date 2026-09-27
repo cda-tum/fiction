@@ -21,7 +21,6 @@
 #include <array>
 #include <cstdint>
 #include <functional>
-#include <stdexcept>
 #include <string>
 
 #include <nanobind/nanobind.h>
@@ -43,24 +42,14 @@ void lattice(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::class_<fiction::sidb::lattice_site>(m, "lattice_site", DOC(fiction_sidb_lattice_site))
+    py::class_<fiction::sidb::lattice_site>(m, "LatticeSite", DOC(fiction_sidb_lattice_site))
         .def(py::init<>(), DOC(fiction_sidb_lattice_site_lattice_site))
         .def(py::init<int32_t, int32_t, int8_t>(), py::arg("x"), py::arg("y"), py::arg("z"),
              DOC(fiction_sidb_lattice_site_lattice_site_2))
         .def(py::init<int32_t, int32_t>(), py::arg("x"), py::arg("y"), DOC(fiction_sidb_lattice_site_lattice_site_3))
-        .def_rw("x", &fiction::sidb::lattice_site::x, DOC(fiction_sidb_lattice_site_x))
-        .def_rw("y", &fiction::sidb::lattice_site::y, DOC(fiction_sidb_lattice_site_y))
-        .def_prop_rw(
-            "z", [](const fiction::sidb::lattice_site& s) { return s.z; },
-            [](fiction::sidb::lattice_site& s, const int64_t z)
-            {
-                if (z != 0 && z != 1)
-                {
-                    throw std::out_of_range("Invalid lattice basis index");
-                }
-                s.z = static_cast<int8_t>(z);
-            },
-            DOC(fiction_sidb_lattice_site_z))
+        .def_ro("x", &fiction::sidb::lattice_site::x, DOC(fiction_sidb_lattice_site_x))
+        .def_ro("y", &fiction::sidb::lattice_site::y, DOC(fiction_sidb_lattice_site_y))
+        .def_ro("z", &fiction::sidb::lattice_site::z, DOC(fiction_sidb_lattice_site_z))
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
         .def(py::self == py::self, DOC(fiction_sidb_lattice_site_operator_eq))
         .def(py::self != py::self)
@@ -82,7 +71,7 @@ void lattice(nanobind::module_& m)
     m.def("sites_in_area", &fiction::sidb::sites_in_area, py::arg("first_corner"), py::arg("second_corner"),
           DOC(fiction_sidb_sites_in_area));
 
-    py::class_<fiction::sidb::lattice>(m, "lattice", DOC(fiction_sidb_lattice))
+    py::class_<fiction::sidb::lattice>(m, "Lattice", DOC(fiction_sidb_lattice))
         .def(py::init<>(), "Default constructor.")
         .def(py::init<const std::string&, const fiction::sidb::lattice::vector&, const fiction::sidb::lattice::vector&,
                       const std::array<fiction::sidb::lattice::vector, 2>&>(),

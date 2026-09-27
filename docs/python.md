@@ -121,3 +121,44 @@ separate topology-specific readers. The file must match the selected topology.
 Readers and writers accept strings and `pathlib.Path` values. `write_fgl_layout`
 and `write_dot_layout` retain progress callbacks; DOT output also accepts
 `clock_colors` and `indexes` as keyword options.
+
+## SiDB simulation
+
+`sidb` provides `SiDBLayout`, immutable `LatticeSite` coordinates, `Lattice`,
+`DotTag`, `Defect`, `DefectType`, `ChargeState`, and `SimulationParams`.
+`sidb.simulation` exposes `quickexact`, `quicksim`, and
+`exhaustive_ground_state_simulation` directly, with `clustercomplete` available
+in builds with ALGLIB. Engine options use keyword-only `params`; the named engine
+parameter types retain physical settings, external potentials, and progress callbacks.
+QuickSim can return `None` when it finds no valid state.
+
+```python
+from mnt.pyfiction.sidb import ChargeState, DotTag, LatticeSite, SiDBLayout
+from mnt.pyfiction.sidb.simulation import PotentialLandscape, quickexact
+
+layout = SiDBLayout()
+layout.assign_sidb(LatticeSite(0, 0), DotTag.NORMAL)
+layout.assign_sidb(LatticeSite(3, 0), DotTag.NORMAL)
+result = quickexact(layout)
+for charges in result.ground_states():
+    print(charges.energy, charges[LatticeSite(0, 0)])
+
+landscape = PotentialLandscape(layout)
+custom = landscape.evaluate([ChargeState.NEGATIVE, ChargeState.NEUTRAL])
+print(custom.energy, landscape.is_physically_valid(custom))
+```
+
+`SimulationResult` and `ChargeDistribution` are read-only. Iterate a result to
+read its distributions and a distribution to read its charge states in raster
+order. `.sites` and `.charge_states` return list snapshots; result layout and
+parameter properties also return independent copies. Use `PotentialLandscape`
+to evaluate custom states with consistent energy, including defects and external
+potentials. Supply exactly one negative, neutral, or positive state per site in
+`landscape.sites` order. Evaluation does not require physical validity; call
+`is_physically_valid` to check that condition. Distances, local potentials, and
+charge-transition thresholds remain available for physical-model inspection.
+
+Replace imports from `sidb.model` with `sidb`, and imports from
+`sidb.simulation.engines` with `sidb.simulation`. Replace direct distribution
+construction and mutation with `PotentialLandscape.evaluate(states)`, `energy()`
+with `.energy`, and `groundstates()` with `ground_states()`.

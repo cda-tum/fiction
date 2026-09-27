@@ -76,11 +76,11 @@ class displacement_robustness_domain_params:
     @operational_params.setter
     def operational_params(self, arg: mnt.pyfiction._native.sidb.simulation.logic.is_operational_params, /) -> None: ...
     @property
-    def fixed_sidbs(self) -> set[mnt.pyfiction._native.sidb.lattice_site]:
+    def fixed_sidbs(self) -> set[mnt.pyfiction._native.sidb.LatticeSite]:
         """SiDBs that are not displaced."""
 
     @fixed_sidbs.setter
-    def fixed_sidbs(self, arg: AbstractSet[mnt.pyfiction._native.sidb.lattice_site], /) -> None: ...
+    def fixed_sidbs(self, arg: AbstractSet[mnt.pyfiction._native.sidb.LatticeSite], /) -> None: ...
     @property
     def dimer_policy(self) -> dimer_displacement_policy:
         """The dimer policy."""
@@ -138,7 +138,7 @@ class displacement_robustness_domain:
     def influence_information(
         self,
     ) -> list[
-        tuple[mnt.pyfiction._native.sidb.sidb_layout, mnt.pyfiction._native.sidb.simulation.logic.operational_status]
+        tuple[mnt.pyfiction._native.sidb.SiDBLayout, mnt.pyfiction._native.sidb.simulation.logic.operational_status]
     ]:
         """The displaced layouts and their operational status."""
 
@@ -146,15 +146,13 @@ class displacement_robustness_domain:
     def influence_information(
         self,
         arg: Sequence[
-            tuple[
-                mnt.pyfiction._native.sidb.sidb_layout, mnt.pyfiction._native.sidb.simulation.logic.operational_status
-            ]
+            tuple[mnt.pyfiction._native.sidb.SiDBLayout, mnt.pyfiction._native.sidb.simulation.logic.operational_status]
         ],
         /,
     ) -> None: ...
 
 def determine_displacement_robustness_domain(
-    layout: mnt.pyfiction._native.sidb.sidb_layout,
+    layout: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: displacement_robustness_domain_params = ...,
     stats: displacement_robustness_domain_stats | None = None,

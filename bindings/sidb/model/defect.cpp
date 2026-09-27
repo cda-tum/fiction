@@ -33,7 +33,7 @@ void defect(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::enum_<fiction::sidb::model::defect_type>(m, "sidb_defect_type", DOC(fiction_sidb_model_defect_type))
+    py::enum_<fiction::sidb::model::defect_type>(m, "DefectType", DOC(fiction_sidb_model_defect_type))
         .value("NONE", fiction::sidb::model::defect_type::NONE, DOC(fiction_sidb_model_defect_type_NONE))
         .value("DB", fiction::sidb::model::defect_type::DB, DOC(fiction_sidb_model_defect_type_DB))
         .value("SI_VACANCY", fiction::sidb::model::defect_type::SI_VACANCY,
@@ -57,7 +57,7 @@ void defect(nanobind::module_& m)
 
         ;
 
-    py::class_<fiction::sidb::model::defect>(m, "sidb_defect", DOC(fiction_sidb_model_defect))
+    py::class_<fiction::sidb::model::defect>(m, "Defect", DOC(fiction_sidb_model_defect))
         .def(py::init<const fiction::sidb::model::defect_type, const int64_t, const double, const double>(),
              py::arg("defect_type") = fiction::sidb::model::defect_type::UNKNOWN, py::arg("electric_charge") = 0,
              py::arg("relative_permittivity") = 0.0, py::arg("screening_distance") = 0.0)

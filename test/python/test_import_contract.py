@@ -43,11 +43,9 @@ NESTED_SUBMODULES = [
     "qca.io",
     "sidb.generators",
     "sidb.io",
-    "sidb.model",
     "sidb.simulation",
     "sidb.simulation.analysis",
     "sidb.simulation.defects",
-    "sidb.simulation.engines",
     "sidb.simulation.io",
     "sidb.simulation.logic",
 ]
@@ -81,7 +79,7 @@ def test_submodules_load_lazily() -> None:
         "import sys\n"
         "import mnt.pyfiction as pf\n"
         "assert 'mnt.pyfiction.sidb' not in sys.modules\n"
-        "assert pf.sidb.simulation.engines.quickexact\n"
+        "assert pf.sidb.simulation.quickexact\n"
         "assert 'mnt.pyfiction.sidb' in sys.modules\n"
     )
     subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
@@ -137,5 +135,21 @@ def test_orthogonal_options_without_exact_solver() -> None:
         "    assert 'Z3' in str(error)\n"
         "else:\n"
         "    raise AssertionError('missing solver must be reported')\n"
+    )
+    subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
+
+
+def test_simulation_without_clustercomplete() -> None:
+    """Basic SiDB engines remain available when ALGLIB is absent."""
+    script = (
+        "import importlib\n"
+        "native = importlib.import_module('mnt.pyfiction._native.sidb.simulation.engines')\n"
+        "for name in ('ClusterCompleteParams', 'GroundStateSpaceReporting', 'clustercomplete'):\n"
+        "    if hasattr(native, name): delattr(native, name)\n"
+        "from mnt.pyfiction.sidb import SiDBLayout, simulation\n"
+        "assert not hasattr(simulation, 'clustercomplete')\n"
+        "assert simulation.quickexact(SiDBLayout()).ground_states() == []\n"
+        "assert simulation.quicksim\n"
+        "assert simulation.exhaustive_ground_state_simulation\n"
     )
     subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
