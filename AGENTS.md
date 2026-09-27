@@ -240,7 +240,7 @@ Use these commands to validate your work.
 - **Test (Quick)**: `pytest` (Use if only Python code changed to avoid C++ rebuilds)
 - **Test (Floors)**: `nox -s minimums` (Runs pytest on Python 3.10 against the lowest declared
   dependency versions)
-- **Lint**: `nox -s lint` (Runs prek hooks including ruff and mypy)
+- **Lint**: `nox -s lint` (Runs prek hooks including ruff and ty)
 - **C++ Lint**: `nox -s cpp_lint -- --all` (Runs the CI Clang-Tidy configuration on all eligible C++ files)
 
 ### General
@@ -302,7 +302,7 @@ imitate.
 ## Code Style
 
 `clang-format` and `clang-tidy` enforce C++ formatting and identifier naming; `ruff` and
-`mypy` cover Python. The rules below are the ones no tool checks.
+`ty` cover Python. The rules below are the ones no tool checks.
 
 ### C++
 

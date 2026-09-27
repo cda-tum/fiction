@@ -35,7 +35,7 @@ def test_map_on_a_technology_network(mux21_shell: Shell) -> None:
     mux21_shell.ok("map --and --or --inv")
     mapped = mux21_shell.session.networks.current()
     assert isinstance(mapped, technology_network)
-    assert "stats" in mux21_shell.session.log[-1]["result"]  # type: ignore[operator]
+    assert "stats" in mux21_shell.session.log[-1]["result"]
 
 
 def test_map_on_an_aig(shell: Shell, resource: Callable[[str], str]) -> None:
@@ -73,7 +73,7 @@ def test_gates(mux21_shell: Shell) -> None:
     output = mux21_shell.ok("gates -n --detailed")
     assert "AND2" in output
     assert "LT2" in output
-    assert mux21_shell.session.log[-1]["result"]["num_and2"] >= 1  # type: ignore[index]
+    assert mux21_shell.session.log[-1]["result"]["num_and2"] >= 1
     mux21_shell.ok("ortho")
     assert "FANOUT" in mux21_shell.ok("gates -g")
 
@@ -85,7 +85,7 @@ def test_simulate(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok("ortho")
     shell.ok("simulate -g --silent")
     assert not shell.output
-    assert shell.session.log[-1]["result"]["tables"][0]["binary"] == "0110"  # type: ignore[index]
+    assert shell.session.log[-1]["result"]["tables"][0]["binary"] == "0110"
 
 
 def test_random_and_generate(shell: Shell) -> None:
@@ -93,7 +93,7 @@ def test_random_and_generate(shell: Shell) -> None:
     network = shell.session.networks.current()
     assert isinstance(network, aig_network)
     assert network.num_pis() == 4
-    assert shell.session.log[-1]["result"]["network"]["name"] == "7"  # type: ignore[index]
+    assert shell.session.log[-1]["result"]["network"]["name"] == "7"
     shell.ok("generate rca -b 4")
     assert shell.session.networks.current().num_pis() == 8
     shell.ok("random -n 2 -g 3")
@@ -107,7 +107,7 @@ def test_aig_passes_preserve_the_function(shell: Shell, resource: Callable[[str]
     assert isinstance(original, aig_network)
     assert isinstance(optimized, aig_network)
     assert aig_equivalent(to_aigverse(shell.session, original), to_aigverse(shell.session, optimized))
-    assert shell.session.log[-1]["result"]["passes"] == ["rewrite", "resub", "refactor", "balance", "cleanup"]  # type: ignore[index]
+    assert shell.session.log[-1]["result"]["passes"] == ["rewrite", "resub", "refactor", "balance", "cleanup"]
 
 
 def test_aig_reports_gates_and_depth(shell: Shell) -> None:
@@ -121,8 +121,8 @@ def test_aig_reports_gates_and_depth(shell: Shell) -> None:
     assert f"{before.num_gates()} -> {after.num_gates()} gates" in shell.stdout
     assert f"depth {before.depth()} -> {after.depth()}" in shell.stdout
     result = shell.session.log[-1]["result"]
-    assert result["gates_before"] == before.num_gates()  # type: ignore[index]
-    assert result["depth_before"] == before.depth()  # type: ignore[index]
+    assert result["gates_before"] == before.num_gates()
+    assert result["depth_before"] == before.depth()
 
 
 def test_size_and_depth_without_an_input_network(shell: Shell) -> None:

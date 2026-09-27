@@ -54,12 +54,12 @@ def test_failed_command_is_logged_with_its_error(shell: Shell) -> None:
 def test_store_schemas(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("mux21.v")}"; tt -t 1110; ortho; cell')
     log = shell.session.log
-    network = log[0]["result"]["network"]  # type: ignore[index]
+    network = log[0]["result"]["network"]
     assert set(network) >= {"name", "type", "inputs", "outputs", "gates", "depth"}
     assert network["type"] == "TEC"
-    truth_table = log[1]["result"]["truth_table"]  # type: ignore[index]
+    truth_table = log[1]["result"]["truth_table"]
     assert truth_table == {"vars": 2, "hex": "e", "binary": "1110"}
-    layout = log[2]["result"]["gate_layout"]  # type: ignore[index]
+    layout = log[2]["result"]["gate_layout"]
     assert set(layout) >= {
         "name",
         "topology",
@@ -75,13 +75,13 @@ def test_store_schemas(shell: Shell, resource: Callable[[str], str]) -> None:
     assert layout["clocking"] == "2DDWAVE"
     assert "throughput" not in layout
     shell.ok("ps -g")
-    timing = log[-1]["result"]["gate_layout"]  # type: ignore[index]
+    timing = log[-1]["result"]["gate_layout"]
     assert isinstance(timing["throughput"], int)
     assert isinstance(timing["critical_path"], int)
     assert set(layout["size"]) >= {"x", "y", "area"}
-    stats = log[2]["result"]["stats"]  # type: ignore[index]
+    stats = log[2]["result"]["stats"]
     assert isinstance(stats["time_total_s"], float)
-    cell = log[3]["result"]["cell_layout"]  # type: ignore[index]
+    cell = log[3]["result"]["cell_layout"]
     assert cell["technology"] == "QCA"
     assert set(cell) >= {"name", "technology", "size", "tile", "inputs", "outputs", "cells", "area_nm2"}
     assert cell["tile"] == {"x": 5, "y": 5}
@@ -95,7 +95,7 @@ def test_help_is_logged(shell: Shell) -> None:
 def test_sidb_statistics_use_dots(shell: Shell, resource: Callable[[str], str]) -> None:
     """SiDB store output and JSON describe dots under the shared cell-layout store."""
     shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
-    description = shell.session.log[-1]["result"]["cell_layout"]  # type: ignore[index]
+    description = shell.session.log[-1]["result"]["cell_layout"]
     layout = shell.session.cell_layouts.current().layout
     assert isinstance(layout, sidb_layout)
     assert description["dots"] == layout.num_dots()
