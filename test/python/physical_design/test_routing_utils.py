@@ -76,6 +76,22 @@ def test_place_uses_coordinates_and_validates_inputs(tmp_path: Path) -> None:
         place(layout, (1, 1), network, gate, left, right)
     with pytest.raises(ValueError, match="existing gates"):
         place(layout, (2, 1), network, gate, left, (2, 0))
+    with pytest.raises(ValueError, match="three-input function"):
+        place(layout, (2, 1), network, gate, left, right, constant=False)
+    assert layout.is_empty_tile((2, 1))
+
+
+def test_place_inverter(tmp_path: Path) -> None:
+    path = tmp_path / "not.v"
+    path.write_text("module top(a, y);\ninput a;\noutput y;\nassign y = ~a;\nendmodule\n", encoding="utf-8")
+    network = read_technology_network(str(path))
+    layout = CartesianGateLayout((1, 0), "2DDWave")
+    source = place(layout, (0, 0), network, network.pis()[0])
+    gate = next(node for node in network.gates() if network.is_inv(node))
+    tile = place(layout, (1, 0), network, gate, source)
+    assert tile == OffsetCoordinate(1, 0)
+    assert layout.is_inv(layout.get_node(tile))
+    assert layout.fanins(tile) == [source]
 
 
 @pytest.mark.parametrize("constant", [None, False, True])
@@ -88,6 +104,10 @@ def test_place_majority_inputs(tmp_path: Path, *, constant: bool | None) -> None
     layout = CartesianGateLayout((2, 2))
     inputs = [place(layout, (0, i), network, node) for i, node in enumerate(network.pis())]
     gate = next(node for node in network.gates() if network.is_maj(node))
+    if constant is not None:
+        with pytest.raises(ValueError, match="two coordinate inputs"):
+            place(layout, (1, 1), network, gate, *inputs, constant=constant)
+        assert layout.is_empty_tile((1, 1))
     selected = inputs if constant is None else inputs[:2]
     tile = place(layout, (1, 1), network, gate, *selected, constant=constant)
     node = layout.get_node(tile)

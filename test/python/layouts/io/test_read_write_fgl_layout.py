@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pytest
 
@@ -20,6 +20,13 @@ from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+
+def test_fgl_rejects_unsupported_layout_type(tmp_path: Path) -> None:
+    path = tmp_path / "layout.fgl"
+    write_fgl_layout(CartesianGateLayout((1, 0)), path)
+    with pytest.raises(ValueError, match="read_fgl does not support int"):
+        read_fgl_layout(path, layout_type=cast("type[CartesianGateLayout]", int))
 
 
 def test_read_write(mux21, tmp_path):

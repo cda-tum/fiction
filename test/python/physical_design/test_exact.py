@@ -8,9 +8,21 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, cast
+
+import pytest
+
 from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout
 from mnt.pyfiction.physical_design import ExactParams, exact
 from mnt.pyfiction.verification import eq_type, equivalence_checking
+
+if TYPE_CHECKING:
+    from mnt.pyfiction.networks import TechnologyNetwork
+
+
+def test_exact_rejects_unsupported_layout_type(mux21: TechnologyNetwork) -> None:
+    with pytest.raises(ValueError, match="exact does not support int"):
+        exact(mux21, layout_type=cast("type[CartesianGateLayout]", int))
 
 
 def test_exact_cartesian_default(mux21):
