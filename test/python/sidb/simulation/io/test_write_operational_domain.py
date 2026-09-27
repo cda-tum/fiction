@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from mnt.pyfiction.sidb.analysis import (
     CriticalTemperatureDomain,
     OperationalDomain,
@@ -18,9 +20,13 @@ from mnt.pyfiction.sidb.analysis import (
 from mnt.pyfiction.sidb.io import (
     SampleWritingMode,
     WriteOperationalDomainParams,
+    write_critical_temperature_domain,
     write_critical_temperature_domain_to_string,
     write_operational_domain_to_string,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def test_write_simple_operational_domain():
@@ -75,7 +81,7 @@ def test_write_operational_domain_with_floating_point_values():
     )
 
 
-def test_write_operational_domain_with_metric_values():
+def test_write_operational_domain_with_metric_values(tmp_path: Path) -> None:
     opdom = CriticalTemperatureDomain([SweepParameter.EPSILON_R, SweepParameter.LAMBDA_TF])
 
     # Adding metric values
@@ -88,6 +94,9 @@ def test_write_operational_domain_with_metric_values():
     temperature_operational_domain_as_string = write_critical_temperature_domain_to_string(opdom)
 
     assert sorted(temperature_operational_domain_as_string.strip().split("\n")) == sorted(expected.strip().split("\n"))
+    path = tmp_path / "temperature.csv"
+    write_critical_temperature_domain(opdom, path)
+    assert sorted(path.read_text(encoding="utf-8").strip().splitlines()) == sorted(expected.splitlines())
 
     # Custom operational tags
     expected_custom = (
@@ -104,6 +113,8 @@ def test_write_operational_domain_with_metric_values():
     assert sorted(temperature_operational_domain_custom_as_string.strip().split("\n")) == sorted(
         expected_custom.strip().split("\n")
     )
+    write_critical_temperature_domain(opdom, path, params=params)
+    assert sorted(path.read_text(encoding="utf-8").strip().splitlines()) == sorted(expected_custom.splitlines())
 
 
 def test_skip_non_operational_samples():
