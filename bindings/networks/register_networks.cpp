@@ -44,9 +44,6 @@ NB_MODULE(networks, m)
     // Registers the types this module names in signatures and default arguments.
     nanobind::module_::import_("mnt.pyfiction._native.layouts");
 
-    // Overloads on the cell-level layouts of `qca`, `mol_qca`, `inml`, and `sidb` import nothing: those
-    // modules come later in the import chain, and an argument of their type implies that they are loaded.
-
     pyfiction::logic_networks(m);
     pyfiction::network_utils(m);
     pyfiction::logic_simulation(m);

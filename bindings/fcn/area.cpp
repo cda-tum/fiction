@@ -23,12 +23,6 @@
 #include <fiction/technology/sidb/layout.hpp>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -50,12 +44,9 @@ void area(nanobind::module_& m, const char* doc)
         "area",
         [](const Lyt& lyt, const double width, const double height, const double hspace, const double vspace)
         {
-            fiction::fcn::area_stats stats{};
-
             return fiction::fcn::area(
                 lyt,
-                fiction::fcn::area_params<Lyt>{.width = width, .height = height, .hspace = hspace, .vspace = vspace},
-                &stats);
+                fiction::fcn::area_params<Lyt>{.width = width, .height = height, .hspace = hspace, .vspace = vspace});
         },
         nanobind::arg("layout"), nanobind::arg("width") = Lyt::CELL_WIDTH, nanobind::arg("height") = Lyt::CELL_HEIGHT,
         nanobind::arg("hspace") = Lyt::CELL_HSPACE, nanobind::arg("vspace") = Lyt::CELL_VSPACE, doc);

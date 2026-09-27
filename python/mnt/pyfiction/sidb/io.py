@@ -174,7 +174,7 @@ def write_sqd_sim_result(sim_result: SimulationResult, path: str | PathLike[str]
 
 
 def write_location_and_ground_state(sim_result: SimulationResult, path: str | PathLike[str]) -> None:
-    """Write SiDB locations and a ground state in CSV format.
+    """Write SiDB locations and all ground states in semicolon-separated CSV format.
 
     Args:
         sim_result: Simulation result to serialize.

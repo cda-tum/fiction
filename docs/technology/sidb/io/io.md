@@ -10,8 +10,10 @@
 
 **Header:** `fiction/technology/sidb/io/read_sqd_layout.hpp`
 
-```{doxygenfile} fiction/technology/sidb/io/read_sqd_layout.hpp
-:sections: func
+```{doxygenfunction} fiction::sidb::io::read_sqd_layout(std::istream& is, const std::string_view& name)
+```
+
+```{doxygenfunction} fiction::sidb::io::read_sqd_layout(const std::string_view& filename, const std::string_view& name)
 ```
 
 ```{doxygenclass} fiction::sidb::io::sqd_parsing_error
@@ -45,8 +47,10 @@
 
 **Header:** `fiction/technology/sidb/io/read_surface_defects.hpp`
 
-```{doxygenfile} fiction/technology/sidb/io/read_surface_defects.hpp
-:sections: func
+```{doxygenfunction} fiction::sidb::io::read_surface_defects(std::istream& is, const std::string_view& name)
+```
+
+```{doxygenfunction} fiction::sidb::io::read_surface_defects(const std::string_view& filename, const std::string_view& name)
 ```
 
 ```{doxygenclass} fiction::sidb::io::unsupported_defect_index_exception
