@@ -16,7 +16,7 @@ from mnt.pyfiction.layouts import (
     ShiftedCartesianGateLayout,
 )
 from mnt.pyfiction.layouts.coords import OffsetCoordinate
-from mnt.pyfiction.physical_design.path_finding import (
+from mnt.pyfiction.physical_design.routing import (
     chebyshev_distance,
     euclidean_distance,
     manhattan_distance,

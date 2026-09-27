@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-    from mnt.pyfiction.physical_design import exact_params
+    from mnt.pyfiction.physical_design import ExactParams
 from ._common import _added, _seconds_to_ms
 
 
@@ -99,7 +99,7 @@ def _exact_arguments(parser: Parser) -> None:
     inputs="Active network.",
     example="generate mux -b 1; exact --timeout 10",
     unavailable=None
-    if hasattr(physical_design, "exact_cartesian")
+    if physical_design.exact_available()
     else "this build of pyfiction has no Z3 solver, which 'exact' needs",
     progress=True,
 )
@@ -114,15 +114,13 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
     params = _exact_parameters(args, _clocking_scheme(args.scheme, topology))
     params.on_progress = session.report_progress
     params.on_worker_progress = session.report_worker_progress
-    native_topology = {"odd_column_cartesian": "shifted_cartesian", "even_row_hex": "hexagonal"}.get(topology, topology)
-    design = getattr(physical_design, f"exact_{native_topology}")
     if args.synchronization_elements and topology != "cartesian":
         msg_0 = "synchronization elements require Cartesian topology"
         raise CommandError(msg_0)
 
     network = session.as_technology_network(session.networks.current())
-    stats = physical_design.exact_stats()
-    layout = design(network, params, stats)
+    result = physical_design.exact(network, params=params, layout_type=GATE_LAYOUTS[topology])
+    layout, stats = result.layout, result.stats
     if layout is None:
         msg = f"no layout found for '{get_name(network)}' within the search bounds or timeout"
         error = CommandError(msg)
@@ -132,9 +130,9 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
     return _added(session, layout, stats, verbose=args.verbose)
 
 
-def _exact_parameters(args: argparse.Namespace, scheme: str) -> exact_params:
+def _exact_parameters(args: argparse.Namespace, scheme: str) -> ExactParams:
     """Build exact placement parameters from validated command options."""
-    params = physical_design.exact_params()
+    params = physical_design.ExactParams()
     params.scheme = scheme
     params.synchronization_elements = args.synchronization_elements
     params.crossings = args.crossings
@@ -161,5 +159,5 @@ def _exact_parameters(args: argparse.Namespace, scheme: str) -> exact_params:
     elif args.threads is not None:
         params.num_threads = args.threads
     if args.topolinano:
-        params.technology_specifics = physical_design.technology_constraints.TOPOLINANO
+        params.technology_specifics = physical_design.TechnologyConstraints.TOPOLINANO
     return params

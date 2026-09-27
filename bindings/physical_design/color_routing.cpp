@@ -75,7 +75,7 @@ void color_routing(nanobind::module_& m)
     /**
      * Graph coloring engine selector type.
      */
-    nanobind::enum_<fiction::utils::graph::graph_coloring_engine>(m, "graph_coloring_engine",
+    nanobind::enum_<fiction::utils::graph::graph_coloring_engine>(m, "GraphColoringEngine",
                                                                   DOC(fiction_utils_graph_graph_coloring_engine))
         .value("MCS", fiction::utils::graph::graph_coloring_engine::MCS,
                DOC(fiction_utils_graph_graph_coloring_engine_MCS))
@@ -88,7 +88,7 @@ void color_routing(nanobind::module_& m)
         .value("SAT", fiction::utils::graph::graph_coloring_engine::SAT,
                DOC(fiction_utils_graph_graph_coloring_engine_SAT));
 
-    py::class_<fiction::physical_design::color_routing_params>(m, "color_routing_params",
+    py::class_<fiction::physical_design::color_routing_params>(m, "ColorRoutingParams",
                                                                DOC(fiction_physical_design_color_routing_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("conduct_partial_routing", &fiction::physical_design::color_routing_params::conduct_partial_routing,

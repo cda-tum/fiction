@@ -10,7 +10,13 @@
 
 from __future__ import annotations
 
+from functools import partial
+from typing import TYPE_CHECKING
+
 from mnt.pyfiction import layouts
+
+if TYPE_CHECKING:
+    from mnt.pyfiction.layouts._types import GateLayout
 
 NATIVE_NAMES = {
     "cartesian": "cartesian",
@@ -38,7 +44,7 @@ DISPLAY_NAMES = {
 }
 """Human-readable topology names; command options and JSON retain canonical names."""
 
-_LAYOUT_TYPES = {
+_LAYOUT_TYPES: dict[str, type[GateLayout]] = {
     "cartesian": layouts.CartesianGateLayout,
     "shifted_cartesian": layouts.ShiftedCartesianGateLayout,
     "hexagonal": layouts.HexagonalGateLayout,
@@ -56,7 +62,9 @@ TOPOLOGIES: dict[type[object], str] = {_LAYOUT_TYPES[native]: name for name, nat
 NAMES = {**NATIVE_NAMES, "shifted_cartesian": "shifted_cartesian", "hexagonal": "hexagonal"}
 """Accepted topology names, including the two established aliases."""
 
-FGL_READERS = {name: getattr(layouts.io, f"read_{native}_fgl_layout") for name, native in NAMES.items()}
+FGL_READERS = {
+    name: partial(layouts.io.read_fgl_layout, layout_type=_LAYOUT_TYPES[native]) for name, native in NAMES.items()
+}
 """The reader for each accepted FGL topology."""
 
 GATE_LAYOUTS = {name: _LAYOUT_TYPES[native] for name, native in NAMES.items()}

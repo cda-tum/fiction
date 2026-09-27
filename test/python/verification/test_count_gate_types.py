@@ -43,7 +43,7 @@ def test_count_gate_types_of_an_aig(resources_dir: Path) -> None:
 
 
 def test_count_gate_types_of_a_layout(mux21: TechnologyNetwork) -> None:
-    layout = orthogonal(mux21)
+    layout = orthogonal(mux21).layout
     stats = count_gate_types(layout)
     assert stats.num_and2 == 2
     assert stats.num_or2 == 1

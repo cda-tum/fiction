@@ -162,6 +162,10 @@ void network(nanobind::module_& m, const char* network_name, const char* doc)
             { ntk.set_output_name(index, name); }, py::arg("index"), py::arg("name"));
 
     // the is_* functions are wrapped in lambdas so that the bound overload is the one of Ntk itself
+    if constexpr (mockturtle::has_is_function_v<Ntk>)
+    {
+        cls.def("is_function", &Ntk::is_function, py::arg("n"), "Whether a node computes a Boolean function.");
+    }
     if constexpr (fiction::has_is_po_v<Ntk>)
     {
         cls.def("is_po", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_po(n); }, py::arg("n"));

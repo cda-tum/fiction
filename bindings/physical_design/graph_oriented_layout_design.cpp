@@ -45,7 +45,7 @@ void graph_oriented_layout_design(nanobind::module_& m)
     namespace py = nanobind;
 
     py::enum_<fiction::physical_design::graph_oriented_layout_design_params::effort_mode>(
-        m, "gold_effort_mode", DOC(fiction_physical_design_graph_oriented_layout_design_params_effort_mode))
+        m, "GoldEffortMode", DOC(fiction_physical_design_graph_oriented_layout_design_params_effort_mode))
         .value("HIGH_EFFICIENCY",
                fiction::physical_design::graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY,
                DOC(fiction_physical_design_graph_oriented_layout_design_params_effort_mode_HIGH_EFFICIENCY))
@@ -59,7 +59,7 @@ void graph_oriented_layout_design(nanobind::module_& m)
                DOC(fiction_physical_design_graph_oriented_layout_design_params_effort_mode_MAXIMUM_EFFORT));
 
     py::enum_<fiction::physical_design::graph_oriented_layout_design_params::cost_objective>(
-        m, "gold_cost_objective", DOC(fiction_physical_design_graph_oriented_layout_design_params_cost_objective))
+        m, "GoldCostObjective", DOC(fiction_physical_design_graph_oriented_layout_design_params_cost_objective))
         .value("AREA", fiction::physical_design::graph_oriented_layout_design_params::cost_objective::AREA,
                DOC(fiction_physical_design_graph_oriented_layout_design_params_cost_objective_AREA))
         .value("WIRES", fiction::physical_design::graph_oriented_layout_design_params::cost_objective::WIRES,
@@ -72,7 +72,7 @@ void graph_oriented_layout_design(nanobind::module_& m)
                DOC(fiction_physical_design_graph_oriented_layout_design_params_cost_objective_CUSTOM));
 
     py::class_<fiction::physical_design::graph_oriented_layout_design_params>(
-        m, "graph_oriented_layout_design_params", DOC(fiction_physical_design_graph_oriented_layout_design_params))
+        m, "GraphOrientedLayoutDesignParams", DOC(fiction_physical_design_graph_oriented_layout_design_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("timeout", &fiction::physical_design::graph_oriented_layout_design_params::timeout,
                 DOC(fiction_physical_design_graph_oriented_layout_design_params_timeout))
@@ -112,7 +112,7 @@ void graph_oriented_layout_design(nanobind::module_& m)
                 DOC(fiction_physical_design_graph_oriented_layout_design_params_on_worker_progress));
 
     py::class_<fiction::physical_design::graph_oriented_layout_design_stats>(
-        m, "graph_oriented_layout_design_stats", DOC(fiction_physical_design_graph_oriented_layout_design_stats))
+        m, "GraphOrientedLayoutDesignStats", DOC(fiction_physical_design_graph_oriented_layout_design_stats))
         .def(py::init<>(), "Default constructor.")
         .def(
             "__repr__",

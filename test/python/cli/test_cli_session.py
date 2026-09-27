@@ -31,7 +31,7 @@ from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import Store
 from mnt.pyfiction.networks import set_name
 from mnt.pyfiction.networks.io import read_technology_network
-from mnt.pyfiction.physical_design import orthogonal, orthogonal_stats
+from mnt.pyfiction.physical_design import orthogonal
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -166,8 +166,7 @@ def test_status_line_fits_terminal(shell: Shell, width: int) -> None:
 
 
 def test_stats_to_dict(mux21: TechnologyNetwork) -> None:
-    stats = orthogonal_stats()
-    orthogonal(mux21, statistics=stats)
+    stats = orthogonal(mux21).stats
     result = stats_to_dict(stats)
     assert isinstance(result["time_total_s"], float)
     assert isinstance(result["num_gates"], int)

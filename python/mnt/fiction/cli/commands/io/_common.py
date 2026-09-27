@@ -217,7 +217,7 @@ def read_file(
         session.networks.add(network)
         return {"network": describe(network)}
     if suffix == ".fgl":
-        layout = FGL_READERS[topology](str(path), path.stem)
+        layout = FGL_READERS[topology](path, name=path.stem)
         session.gate_layouts.add(layout)
         return {"gate_layout": describe(layout)}
     if suffix == ".sqd":

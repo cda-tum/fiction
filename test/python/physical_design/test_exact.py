@@ -8,59 +8,60 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.physical_design import exact_cartesian, exact_hexagonal, exact_params, exact_stats
+from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout
+from mnt.pyfiction.physical_design import ExactParams, exact
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 
 def test_exact_cartesian_default(mux21):
-    layout = exact_cartesian(mux21)
+    layout = exact(mux21, layout_type=CartesianGateLayout).layout
     assert layout is not None
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
 def test_exact_cartesian_with_parameters(mux21):
-    params = exact_params()
+    params = ExactParams()
     params.border_io = True
     params.crossings = True
     params.scheme = "ESR"
 
-    layout = exact_cartesian(mux21, params)
+    layout = exact(mux21, params=params, layout_type=CartesianGateLayout).layout
     assert layout is not None
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
 def test_exact_cartesian_with_stats(mux21):
-    stats = exact_stats()
 
-    layout = exact_cartesian(mux21, statistics=stats)
+    result = exact(mux21, layout_type=CartesianGateLayout)
+    layout = result.layout
     assert layout is not None
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
 def test_exact_hexagonal_default(mux21):
-    layout = exact_hexagonal(mux21)
+    layout = exact(mux21, layout_type=HexagonalGateLayout).layout
     assert layout is not None
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
 def test_exact_hexagonal_with_parameters(mux21):
-    params = exact_params()
+    params = ExactParams()
     params.border_io = True
     params.crossings = True
     params.scheme = "ESR"
 
-    layout = exact_hexagonal(mux21, params)
+    layout = exact(mux21, params=params, layout_type=HexagonalGateLayout).layout
     assert layout is not None
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
 def test_exact_hexagonal_with_stats(mux21):
-    stats = exact_stats()
 
-    layout = exact_hexagonal(mux21, statistics=stats)
+    result = exact(mux21, layout_type=HexagonalGateLayout)
+    layout = result.layout
     assert layout is not None
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG

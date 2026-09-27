@@ -39,7 +39,7 @@ NESTED_SUBMODULES = [
     "layouts.io",
     "mol_qca.io",
     "networks.io",
-    "physical_design.path_finding",
+    "physical_design.routing",
     "qca.io",
     "sidb.generators",
     "sidb.io",
@@ -118,3 +118,24 @@ def test_public_exports_are_explicit(name: str) -> None:
     module = importlib.import_module(f"mnt.pyfiction.{name}")
     assert all(hasattr(module, member) for member in module.__all__)
     assert "_native" not in module.__all__
+
+
+def test_orthogonal_options_without_exact_solver() -> None:
+    """An optional exact solver does not control the orthogonal clock-phase enum."""
+    script = (
+        "import importlib\n"
+        "native = importlib.import_module('mnt.pyfiction._native.physical_design')\n"
+        "for name in ('ExactParams', 'ExactStats', 'TechnologyConstraints', 'exact_cartesian'):\n"
+        "    if hasattr(native, name): delattr(native, name)\n"
+        "from mnt.pyfiction import physical_design as pd\n"
+        "from mnt.pyfiction.networks import TechnologyNetwork\n"
+        "assert not pd.exact_available()\n"
+        "assert pd.OrthogonalParams().number_of_clock_phases == pd.ClockPhases.FOUR\n"
+        "try:\n"
+        "    pd.exact(TechnologyNetwork())\n"
+        "except RuntimeError as error:\n"
+        "    assert 'Z3' in str(error)\n"
+        "else:\n"
+        "    raise AssertionError('missing solver must be reported')\n"
+    )
+    subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script

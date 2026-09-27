@@ -16,7 +16,8 @@ import pytest
 
 from mnt.pyfiction.layouts import CartesianGateLayout
 from mnt.pyfiction.layouts.coords import CubeCoordinate, OffsetCoordinate
-from mnt.pyfiction.physical_design import post_layout_optimization_params, reserve_input_nodes
+from mnt.pyfiction.physical_design import PostLayoutOptimizationParams
+from mnt.pyfiction.physical_design.routing import reserve_input_nodes
 from mnt.pyfiction.sidb.simulation import sidb_simulation_result
 from mnt.pyfiction.sidb.simulation.logic import (
     bdl_wire,
@@ -55,7 +56,7 @@ def test_coordinate_input_and_output_types() -> None:
 
 def test_optional_relocation_limit() -> None:
     """The relocation limit accepts an integer and can be cleared."""
-    params = post_layout_optimization_params()
+    params = PostLayoutOptimizationParams()
     if TYPE_CHECKING:
         assert_type(params.max_gate_relocations, int | None)
     params.max_gate_relocations = 7

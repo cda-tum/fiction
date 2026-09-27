@@ -21,6 +21,7 @@
 #include <fiction/traits.hpp>
 
 #include <algorithm>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -48,6 +49,11 @@ void is_crossable_wire(nanobind::module_& m)
           py::arg("successor"), DOC(fiction_physical_design_is_crossable_wire));
 }
 
+/**
+ * @brief Binds path routing with validated endpoints and layout bounds.
+ * @tparam Lyt Gate-level layout type.
+ * @param m Python physical-design module.
+ */
 template <typename Lyt>
 void route_path(nanobind::module_& m)
 {
@@ -57,8 +63,20 @@ void route_path(nanobind::module_& m)
         "route_path",
         [](Lyt& lyt, const std::vector<fiction::coordinate<Lyt>>& path)
         {
+            if (path.size() < 2u)
+            {
+                throw std::invalid_argument("a routing path needs at least two coordinates");
+            }
+            if (lyt.is_empty_tile(path.front()) || lyt.is_empty_tile(path.back()))
+            {
+                throw std::invalid_argument("routing path endpoints must contain gates or wires");
+            }
+            if (std::any_of(path.cbegin(), path.cend(),
+                            [&lyt](const auto& coordinate) { return !lyt.is_within_bounds(coordinate); }))
+            {
+                throw std::invalid_argument("routing path coordinates must be within layout bounds");
+            }
             fiction::physical_design::layout_coordinate_path<Lyt> converted_path{};
-            converted_path.resize(path.size());
             converted_path.assign(path.cbegin(), path.cend());
 
             fiction::physical_design::route_path(lyt, converted_path);

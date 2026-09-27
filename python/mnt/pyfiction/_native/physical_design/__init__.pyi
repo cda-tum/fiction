@@ -22,7 +22,7 @@ import mnt.pyfiction._native.qca
 import mnt.pyfiction._native.sidb
 from mnt.pyfiction._native.physical_design import path_finding as path_finding
 
-class technology_constraints(enum.Enum):
+class TechnologyConstraints(enum.Enum):
     """Target technologies."""
 
     NONE = 0
@@ -31,7 +31,7 @@ class technology_constraints(enum.Enum):
     TOPOLINANO = 1
     """ToPoLiNano technology-specific constraints."""
 
-class exact_params:
+class ExactParams:
     """Parameters for the exact physical design algorithm."""
 
     def __init__(self) -> None:
@@ -149,14 +149,14 @@ class exact_params:
     @timeout.setter
     def timeout(self, arg: int, /) -> None: ...
     @property
-    def technology_specifics(self) -> technology_constraints:
+    def technology_specifics(self) -> TechnologyConstraints:
         """
         Technology-specific constraints that are only to be added for a
         certain target technology.
         """
 
     @technology_specifics.setter
-    def technology_specifics(self, arg: technology_constraints, /) -> None: ...
+    def technology_specifics(self, arg: TechnologyConstraints, /) -> None: ...
     @property
     def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Callback that receives the number of examined aspect ratios."""
@@ -173,7 +173,7 @@ class exact_params:
     @on_worker_progress.setter
     def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
 
-class exact_stats:
+class ExactStats:
     """Statistics."""
 
     def __init__(self) -> None:
@@ -196,8 +196,8 @@ class exact_stats:
 
 def exact_cartesian(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
+    parameters: ExactParams = ...,
+    statistics: ExactStats | None = None,
 ) -> mnt.pyfiction._native.layouts.CartesianGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
@@ -275,8 +275,8 @@ def exact_cartesian(
 
 def exact_shifted_cartesian(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
+    parameters: ExactParams = ...,
+    statistics: ExactStats | None = None,
 ) -> mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
@@ -354,8 +354,8 @@ def exact_shifted_cartesian(
 
 def exact_hexagonal(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
+    parameters: ExactParams = ...,
+    statistics: ExactStats | None = None,
 ) -> mnt.pyfiction._native.layouts.HexagonalGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
@@ -433,8 +433,8 @@ def exact_hexagonal(
 
 def exact_odd_row_cartesian(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
+    parameters: ExactParams = ...,
+    statistics: ExactStats | None = None,
 ) -> mnt.pyfiction._native.layouts.OddRowCartesianGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
@@ -512,8 +512,8 @@ def exact_odd_row_cartesian(
 
 def exact_even_row_cartesian(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
+    parameters: ExactParams = ...,
+    statistics: ExactStats | None = None,
 ) -> mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
@@ -591,8 +591,8 @@ def exact_even_row_cartesian(
 
 def exact_even_column_cartesian(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
+    parameters: ExactParams = ...,
+    statistics: ExactStats | None = None,
 ) -> mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
@@ -670,8 +670,8 @@ def exact_even_column_cartesian(
 
 def exact_odd_row_hex(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
+    parameters: ExactParams = ...,
+    statistics: ExactStats | None = None,
 ) -> mnt.pyfiction._native.layouts.OddRowHexGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
@@ -749,8 +749,8 @@ def exact_odd_row_hex(
 
 def exact_odd_column_hex(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
+    parameters: ExactParams = ...,
+    statistics: ExactStats | None = None,
 ) -> mnt.pyfiction._native.layouts.OddColumnHexGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
@@ -828,8 +828,8 @@ def exact_odd_column_hex(
 
 def exact_even_column_hex(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
+    parameters: ExactParams = ...,
+    statistics: ExactStats | None = None,
 ) -> mnt.pyfiction._native.layouts.EvenColumnHexGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
@@ -905,7 +905,7 @@ def exact_even_column_hex(
         `std::nullopt`, otherwise.
     """
 
-class num_clks(enum.Enum):
+class ClockPhases(enum.Enum):
     """Number of clock phases of a clocking scheme."""
 
     THREE = 0
@@ -914,18 +914,18 @@ class num_clks(enum.Enum):
     FOUR = 1
     """Four clocks."""
 
-class orthogonal_params:
+class OrthogonalParams:
     """Parameters for the orthogonal physical design algorithm."""
 
     def __init__(self) -> None:
         """Default constructor."""
 
     @property
-    def number_of_clock_phases(self) -> num_clks:
+    def number_of_clock_phases(self) -> ClockPhases:
         """Number of clock phases to use. 3 and 4 are supported."""
 
     @number_of_clock_phases.setter
-    def number_of_clock_phases(self, arg: num_clks, /) -> None: ...
+    def number_of_clock_phases(self, arg: ClockPhases, /) -> None: ...
     @property
     def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Callback that receives the progress of the gate placement."""
@@ -933,7 +933,7 @@ class orthogonal_params:
     @on_progress.setter
     def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
-class orthogonal_stats:
+class OrthogonalStats:
     def __init__(self) -> None:
         """Default constructor."""
 
@@ -952,8 +952,8 @@ class orthogonal_stats:
 
 def orthogonal(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: orthogonal_params = ...,
-    statistics: orthogonal_stats | None = None,
+    parameters: OrthogonalParams = ...,
+    statistics: OrthogonalStats | None = None,
 ) -> mnt.pyfiction._native.layouts.CartesianGateLayout:
     """
     A scalable placement & routing approach based on orthogonal graph
@@ -1009,8 +1009,8 @@ def orthogonal(
 
 def orthogonal_hexagonal(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: orthogonal_params = ...,
-    statistics: orthogonal_stats | None = None,
+    parameters: OrthogonalParams = ...,
+    statistics: OrthogonalStats | None = None,
 ) -> mnt.pyfiction._native.layouts.HexagonalGateLayout:
     """
     A scalable placement & routing approach based on orthogonal graph
@@ -1066,8 +1066,8 @@ def orthogonal_hexagonal(
 
 def orthogonal_odd_row_hex(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: orthogonal_params = ...,
-    statistics: orthogonal_stats | None = None,
+    parameters: OrthogonalParams = ...,
+    statistics: OrthogonalStats | None = None,
 ) -> mnt.pyfiction._native.layouts.OddRowHexGateLayout:
     """
     A scalable placement & routing approach based on orthogonal graph
@@ -1123,8 +1123,8 @@ def orthogonal_odd_row_hex(
 
 def orthogonal_odd_column_hex(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: orthogonal_params = ...,
-    statistics: orthogonal_stats | None = None,
+    parameters: OrthogonalParams = ...,
+    statistics: OrthogonalStats | None = None,
 ) -> mnt.pyfiction._native.layouts.OddColumnHexGateLayout:
     """
     A scalable placement & routing approach based on orthogonal graph
@@ -1180,8 +1180,8 @@ def orthogonal_odd_column_hex(
 
 def orthogonal_even_column_hex(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: orthogonal_params = ...,
-    statistics: orthogonal_stats | None = None,
+    parameters: OrthogonalParams = ...,
+    statistics: OrthogonalStats | None = None,
 ) -> mnt.pyfiction._native.layouts.EvenColumnHexGateLayout:
     """
     A scalable placement & routing approach based on orthogonal graph
@@ -1235,7 +1235,7 @@ def orthogonal_even_column_hex(
         circuit.
     """
 
-class gold_effort_mode(enum.Enum):
+class GoldEffortMode(enum.Enum):
     """
     The `effort_mode` enum defines different levels of computational
     effort for generating and exploring search space graphs for during the
@@ -1283,7 +1283,7 @@ class gold_effort_mode(enum.Enum):
     runtime.
     """
 
-class gold_cost_objective(enum.Enum):
+class GoldCostObjective(enum.Enum):
     """
     The `cost_objective` enum defines various cost objectives that can be
     used in the graph-oriented layout design process. Each cost objective
@@ -1319,7 +1319,7 @@ class gold_cost_objective(enum.Enum):
     the predefined options.
     """
 
-class graph_oriented_layout_design_params:
+class GraphOrientedLayoutDesignParams:
     """Parameters for the graph-oriented layout design algorithm."""
 
     def __init__(self) -> None:
@@ -1352,17 +1352,17 @@ class graph_oriented_layout_design_params:
     @verbose.setter
     def verbose(self, arg: bool, /) -> None: ...
     @property
-    def mode(self) -> gold_effort_mode:
+    def mode(self) -> GoldEffortMode:
         """The effort mode used. Defaults to HIGH_EFFORT."""
 
     @mode.setter
-    def mode(self, arg: gold_effort_mode, /) -> None: ...
+    def mode(self, arg: GoldEffortMode, /) -> None: ...
     @property
-    def cost(self) -> gold_cost_objective:
+    def cost(self) -> GoldCostObjective:
         """The cost objective used. Defaults to AREA"""
 
     @cost.setter
-    def cost(self, arg: gold_cost_objective, /) -> None: ...
+    def cost(self, arg: GoldCostObjective, /) -> None: ...
     @property
     def return_first(self) -> bool:
         """
@@ -1477,7 +1477,7 @@ class graph_oriented_layout_design_params:
     @on_worker_progress.setter
     def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
 
-class graph_oriented_layout_design_stats:
+class GraphOrientedLayoutDesignStats:
     """
     This struct stores statistics about the graph-oriented layout design
     process.
@@ -1512,8 +1512,8 @@ class graph_oriented_layout_design_stats:
 
 def graph_oriented_layout_design(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    parameters: graph_oriented_layout_design_params = ...,
-    statistics: graph_oriented_layout_design_stats | None = None,
+    parameters: GraphOrientedLayoutDesignParams = ...,
+    statistics: GraphOrientedLayoutDesignStats | None = None,
     custom_cost_objective: Callable[[mnt.pyfiction._native.layouts.CartesianGateLayout], int] | None = None,
 ) -> mnt.pyfiction._native.layouts.CartesianGateLayout | None:
     """
@@ -1716,7 +1716,7 @@ def apply_bestagon_library(
         defined in `GateLibrary`.
     """
 
-class graph_coloring_engine(enum.Enum):
+class GraphColoringEngine(enum.Enum):
     """
     An enumeration of coloring engines to use for the graph coloring. All
     but SAT are using the graph-coloring library by Brian Crites.
@@ -1759,7 +1759,7 @@ class graph_coloring_engine(enum.Enum):
     SAT = 4
     """Custom iterative SAT-based encoding that finds optimal colorings."""
 
-class color_routing_params:
+class ColorRoutingParams:
     """Parameters for the color routing algorithm."""
 
     def __init__(self) -> None:
@@ -1791,11 +1791,11 @@ class color_routing_params:
     @path_limit.setter
     def path_limit(self, arg: int | None, /) -> None: ...
     @property
-    def engine(self) -> graph_coloring_engine:
+    def engine(self) -> GraphColoringEngine:
         """The engine to use."""
 
     @engine.setter
-    def engine(self, arg: graph_coloring_engine, /) -> None: ...
+    def engine(self, arg: GraphColoringEngine, /) -> None: ...
     @property
     def partial_sat(self) -> bool:
         """Allow partial solutions when the SAT engine is used."""
@@ -1812,7 +1812,7 @@ def color_routing(
             mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
         ]
     ],
-    params: color_routing_params = ...,
+    params: ColorRoutingParams = ...,
 ) -> bool: ...
 @overload
 def color_routing(
@@ -1823,7 +1823,7 @@ def color_routing(
             mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
         ]
     ],
-    params: color_routing_params = ...,
+    params: ColorRoutingParams = ...,
 ) -> bool: ...
 @overload
 def color_routing(
@@ -1834,7 +1834,7 @@ def color_routing(
             mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
         ]
     ],
-    params: color_routing_params = ...,
+    params: ColorRoutingParams = ...,
 ) -> bool:
     """
     A multi-path signal routing approach based on coloring of edge
@@ -1892,9 +1892,9 @@ def color_routing(
         be satisfied.
     """
 
-class hexagonalization_io_pin_routing_error(RuntimeError): ...
+class HexagonalizationIoPinRoutingError(RuntimeError): ...
 
-class hexagonalization_io_pin_extension_mode(enum.Enum):
+class HexagonalizationIoPinExtensionMode(enum.Enum):
     """
     Specifies how primary inputs/outputs should be handled in the
     hexagonalization process.
@@ -1912,7 +1912,7 @@ class hexagonalization_io_pin_extension_mode(enum.Enum):
     rerouting (i.e., without crossings).
     """
 
-class hexagonalization_params:
+class HexagonalizationParams:
     """
     This structure encapsulates settings that determine how primary inputs
     (PIs) and primary outputs (POs) are handled during the conversion from
@@ -1923,17 +1923,17 @@ class hexagonalization_params:
         """Default constructor."""
 
     @property
-    def input_pin_extension(self) -> hexagonalization_io_pin_extension_mode:
+    def input_pin_extension(self) -> HexagonalizationIoPinExtensionMode:
         """Input extension mode. Defaults to none"""
 
     @input_pin_extension.setter
-    def input_pin_extension(self, arg: hexagonalization_io_pin_extension_mode, /) -> None: ...
+    def input_pin_extension(self, arg: HexagonalizationIoPinExtensionMode, /) -> None: ...
     @property
-    def output_pin_extension(self) -> hexagonalization_io_pin_extension_mode:
+    def output_pin_extension(self) -> HexagonalizationIoPinExtensionMode:
         """Output extension mode. Defaults to none"""
 
     @output_pin_extension.setter
-    def output_pin_extension(self, arg: hexagonalization_io_pin_extension_mode, /) -> None: ...
+    def output_pin_extension(self, arg: HexagonalizationIoPinExtensionMode, /) -> None: ...
     @property
     def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """
@@ -1944,7 +1944,7 @@ class hexagonalization_params:
     @on_progress.setter
     def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
-class hexagonalization_stats:
+class HexagonalizationStats:
     """This struct stores statistics about the hexagonalization process."""
 
     def __init__(self) -> None:
@@ -1976,8 +1976,8 @@ class hexagonalization_stats:
 
 def hexagonalization(
     layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
-    parameters: hexagonalization_params = ...,
-    statistics: hexagonalization_stats | None = None,
+    parameters: HexagonalizationParams = ...,
+    statistics: HexagonalizationStats | None = None,
 ) -> mnt.pyfiction._native.layouts.HexagonalGateLayout:
     """
     Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even
@@ -2000,7 +2000,7 @@ def hexagonalization(
         Hexagonal representation of the Cartesian layout.
     """
 
-class post_layout_optimization_params:
+class PostLayoutOptimizationParams:
     """Parameters for the post-layout optimization algorithm."""
 
     def __init__(self) -> None:
@@ -2054,7 +2054,7 @@ class post_layout_optimization_params:
     @on_progress.setter
     def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
-class post_layout_optimization_stats:
+class PostLayoutOptimizationStats:
     """
     This struct stores statistics about the post-layout optimization
     process.
@@ -2105,8 +2105,8 @@ class post_layout_optimization_stats:
 
 def post_layout_optimization(
     layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
-    parameters: post_layout_optimization_params = ...,
-    statistics: post_layout_optimization_stats | None = None,
+    parameters: PostLayoutOptimizationParams = ...,
+    statistics: PostLayoutOptimizationStats | None = None,
 ) -> None:
     """
     A post-layout optimization algorithm as originally proposed in \\"Post-
@@ -2148,7 +2148,7 @@ def post_layout_optimization(
         clocked!
     """
 
-class wiring_reduction_params:
+class WiringReductionParams:
     """Parameters for the wiring reduction algorithm."""
 
     def __init__(self) -> None:
@@ -2174,7 +2174,7 @@ class wiring_reduction_params:
     @on_progress.setter
     def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
-class wiring_reduction_stats:
+class WiringReductionStats:
     """This struct stores statistics about the wiring reduction process."""
 
     def __init__(self) -> None:
@@ -2218,8 +2218,8 @@ class wiring_reduction_stats:
 
 def wiring_reduction(
     layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
-    parameters: wiring_reduction_params = ...,
-    statistics: wiring_reduction_stats | None = None,
+    parameters: WiringReductionParams = ...,
+    statistics: WiringReductionStats | None = None,
 ) -> None:
     """
     A scalable wiring reduction algorithm for 2DDWave-clocked layouts
@@ -2415,102 +2415,104 @@ def place(
     t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
-) -> int: ...
+) -> mnt.pyfiction._native.layouts.coords.OffsetCoordinate: ...
 @overload
 def place(
     lyt: mnt.pyfiction._native.layouts.CartesianGateLayout,
     t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
-    a: int,
-) -> int: ...
+    a: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+) -> mnt.pyfiction._native.layouts.coords.OffsetCoordinate: ...
 @overload
 def place(
     lyt: mnt.pyfiction._native.layouts.CartesianGateLayout,
     t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
-    a: int,
-    b: int,
-    c: bool | None,
-) -> int: ...
+    a: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    b: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    c: bool | None = None,
+) -> mnt.pyfiction._native.layouts.coords.OffsetCoordinate: ...
 @overload
 def place(
     lyt: mnt.pyfiction._native.layouts.CartesianGateLayout,
     t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
-    a: int,
-    b: int,
-    c: int,
-) -> int: ...
+    a: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    b: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    c: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+) -> mnt.pyfiction._native.layouts.coords.OffsetCoordinate: ...
 @overload
 def place(
     lyt: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
-) -> int: ...
+) -> mnt.pyfiction._native.layouts.coords.OffsetCoordinate: ...
 @overload
 def place(
     lyt: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
-    a: int,
-) -> int: ...
+    a: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+) -> mnt.pyfiction._native.layouts.coords.OffsetCoordinate: ...
 @overload
 def place(
     lyt: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
-    a: int,
-    b: int,
-    c: bool | None,
-) -> int: ...
+    a: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    b: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    c: bool | None = None,
+) -> mnt.pyfiction._native.layouts.coords.OffsetCoordinate: ...
 @overload
 def place(
     lyt: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
-    a: int,
-    b: int,
-    c: int,
-) -> int: ...
+    a: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    b: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    c: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+) -> mnt.pyfiction._native.layouts.coords.OffsetCoordinate: ...
 @overload
 def place(
     lyt: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
-) -> int: ...
+) -> mnt.pyfiction._native.layouts.coords.OffsetCoordinate:
+    """Places a primary input and returns its coordinate."""
+
 @overload
 def place(
     lyt: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
-    a: int,
-) -> int: ...
+    a: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+) -> mnt.pyfiction._native.layouts.coords.OffsetCoordinate: ...
 @overload
 def place(
     lyt: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
-    a: int,
-    b: int,
-    c: bool | None,
-) -> int: ...
+    a: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    b: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    c: bool | None = None,
+) -> mnt.pyfiction._native.layouts.coords.OffsetCoordinate: ...
 @overload
 def place(
     lyt: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
-    a: int,
-    b: int,
-    c: int,
-) -> int: ...
+    a: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    b: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    c: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+) -> mnt.pyfiction._native.layouts.coords.OffsetCoordinate: ...

@@ -39,7 +39,7 @@ auto paths = fiction::physical_design::path_finding::yen_k_shortest_paths<path>(
 
 ```python
 from mnt.pyfiction.layouts import CartesianGateLayout, Obstructions
-from mnt.pyfiction.physical_design.path_finding import yen_k_shortest_paths
+from mnt.pyfiction.physical_design.routing import yen_k_shortest_paths
 
 lyt = CartesianGateLayout((3, 3))
 blocked = Obstructions()

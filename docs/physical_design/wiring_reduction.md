@@ -40,10 +40,10 @@ spaces upward and subsequently reconnecting them. This iterative process continu
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.wiring_reduction_params
+.. autoclass:: mnt.pyfiction.physical_design.WiringReductionParams
    :members:
 
-.. autoclass:: mnt.pyfiction.physical_design.wiring_reduction_stats
+.. autoclass:: mnt.pyfiction.physical_design.WiringReductionStats
    :members:
 
 .. autofunction:: mnt.pyfiction.physical_design.wiring_reduction

@@ -183,8 +183,6 @@
 .. autoclass:: mnt.pyfiction.sidb.simulation.analysis.time_to_solution_stats
    :members:
 
-.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.time_to_solution
-
 .. autofunction:: mnt.pyfiction.sidb.simulation.analysis.time_to_solution_for_given_simulation_results
 ```
 

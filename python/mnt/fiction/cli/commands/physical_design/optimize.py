@@ -15,12 +15,12 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.parsing import integer, positive_float
 from mnt.fiction.cli.registry import Category, command
 from mnt.pyfiction.physical_design import (
+    PostLayoutOptimizationParams,
+    PostLayoutOptimizationStats,
+    WiringReductionParams,
+    WiringReductionStats,
     post_layout_optimization,
-    post_layout_optimization_params,
-    post_layout_optimization_stats,
     wiring_reduction,
-    wiring_reduction_params,
-    wiring_reduction_stats,
 )
 
 if TYPE_CHECKING:
@@ -55,25 +55,25 @@ def optimize(session: Session, args: argparse.Namespace) -> Result:
     The optimized copy is added to the store; the original stays. Use -w for very large layouts
     and -m 1 for layouts beyond 100000 tiles.
     """
-    layout = _cartesian_2ddwave(session).clone()
+    layout = _cartesian_2ddwave(session)
     timeout = _seconds_to_ms(args.timeout)
-    stats: post_layout_optimization_stats | wiring_reduction_stats
+    stats: PostLayoutOptimizationStats | WiringReductionStats
     if args.wiring_only:
-        wiring_params = wiring_reduction_params()
+        wiring_params = WiringReductionParams()
         wiring_params.on_progress = session.report_progress
         if timeout is not None:
             wiring_params.timeout = timeout
-        stats = wiring_reduction_stats()
-        wiring_reduction(layout, wiring_params, stats)
+        wiring_result = wiring_reduction(layout, params=wiring_params)
+        layout, stats = wiring_result.layout, wiring_result.stats
     else:
-        params = post_layout_optimization_params()
+        params = PostLayoutOptimizationParams()
         params.on_progress = session.report_progress
         params.planar_optimization = args.planar
         if args.max_relocations is not None:
             params.max_gate_relocations = args.max_relocations
         if timeout is not None:
             params.timeout = timeout
-        stats = post_layout_optimization_stats()
-        post_layout_optimization(layout, params, stats)
+        optimization_result = post_layout_optimization(layout, params=params)
+        layout, stats = optimization_result.layout, optimization_result.stats
     session.gate_layouts.add(layout)
     return _added(session, layout, stats, verbose=args.verbose)

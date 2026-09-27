@@ -217,7 +217,7 @@ def chebyshev_distance(
         Chebyshev distance between `source` and `target`.
     """
 
-class a_star_params:
+class AStarParams:
     """Parameters for the A* algorithm."""
 
     def __init__(self) -> None:
@@ -238,7 +238,7 @@ def a_star(
     layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
     source: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
-    params: a_star_params = ...,
+    params: AStarParams = ...,
     obstructions: mnt.pyfiction._native.layouts.Obstructions = ...,
 ) -> list[mnt.pyfiction._native.layouts.coords.OffsetCoordinate]: ...
 @overload
@@ -246,7 +246,7 @@ def a_star(
     layout: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     source: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
-    params: a_star_params = ...,
+    params: AStarParams = ...,
     obstructions: mnt.pyfiction._native.layouts.Obstructions = ...,
 ) -> list[mnt.pyfiction._native.layouts.coords.OffsetCoordinate]: ...
 @overload
@@ -254,7 +254,7 @@ def a_star(
     layout: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     source: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
-    params: a_star_params = ...,
+    params: AStarParams = ...,
     obstructions: mnt.pyfiction._native.layouts.Obstructions = ...,
 ) -> list[mnt.pyfiction._native.layouts.coords.OffsetCoordinate]:
     """
@@ -382,18 +382,18 @@ def a_star_distance(
         Minimum path length between `source` and `target` in `layout`.
     """
 
-class yen_k_shortest_paths_params:
+class YenKShortestPathsParams:
     """Parameters for Yen's :math:`k`-shortest paths algorithm."""
 
     def __init__(self) -> None:
         """Default constructor."""
 
     @property
-    def a_star_params(self) -> mnt.pyfiction._native.physical_design.path_finding.a_star_params:
+    def a_star_params(self) -> AStarParams:
         """Parameters for the internal A* algorithm."""
 
     @a_star_params.setter
-    def a_star_params(self, arg: mnt.pyfiction._native.physical_design.path_finding.a_star_params, /) -> None: ...
+    def a_star_params(self, arg: AStarParams, /) -> None: ...
 
 @overload
 def yen_k_shortest_paths(
@@ -401,7 +401,7 @@ def yen_k_shortest_paths(
     source: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     k: int,
-    params: yen_k_shortest_paths_params = ...,
+    params: YenKShortestPathsParams = ...,
     obstructions: mnt.pyfiction._native.layouts.Obstructions = ...,
 ) -> list[list[mnt.pyfiction._native.layouts.coords.OffsetCoordinate]]: ...
 @overload
@@ -410,7 +410,7 @@ def yen_k_shortest_paths(
     source: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     k: int,
-    params: yen_k_shortest_paths_params = ...,
+    params: YenKShortestPathsParams = ...,
     obstructions: mnt.pyfiction._native.layouts.Obstructions = ...,
 ) -> list[list[mnt.pyfiction._native.layouts.coords.OffsetCoordinate]]: ...
 @overload
@@ -419,7 +419,7 @@ def yen_k_shortest_paths(
     source: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     k: int,
-    params: yen_k_shortest_paths_params = ...,
+    params: YenKShortestPathsParams = ...,
     obstructions: mnt.pyfiction._native.layouts.Obstructions = ...,
 ) -> list[list[mnt.pyfiction._native.layouts.coords.OffsetCoordinate]]:
     """
@@ -491,7 +491,7 @@ def yen_k_shortest_paths(
         `layout` from `objective.source` to `objective.target`.
     """
 
-class enumerate_all_paths_params:
+class EnumerateAllPathsParams:
     """Parameters for the algorithm that enumerates all paths in a layout."""
 
     def __init__(self) -> None:
@@ -512,7 +512,7 @@ def enumerate_all_paths(
     layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
     source: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
-    params: enumerate_all_paths_params = ...,
+    params: EnumerateAllPathsParams = ...,
     obstructions: mnt.pyfiction._native.layouts.Obstructions = ...,
 ) -> list[list[mnt.pyfiction._native.layouts.coords.OffsetCoordinate]]: ...
 @overload
@@ -520,7 +520,7 @@ def enumerate_all_paths(
     layout: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     source: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
-    params: enumerate_all_paths_params = ...,
+    params: EnumerateAllPathsParams = ...,
     obstructions: mnt.pyfiction._native.layouts.Obstructions = ...,
 ) -> list[list[mnt.pyfiction._native.layouts.coords.OffsetCoordinate]]: ...
 @overload
@@ -528,7 +528,7 @@ def enumerate_all_paths(
     layout: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     source: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
-    params: enumerate_all_paths_params = ...,
+    params: EnumerateAllPathsParams = ...,
     obstructions: mnt.pyfiction._native.layouts.Obstructions = ...,
 ) -> list[list[mnt.pyfiction._native.layouts.coords.OffsetCoordinate]]:
     """

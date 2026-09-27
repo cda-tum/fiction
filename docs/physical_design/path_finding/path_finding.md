@@ -60,15 +60,15 @@ Distance functions compute (an approximation for) the distance between two coord
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.physical_design.path_finding.manhattan_distance
+.. autofunction:: mnt.pyfiction.physical_design.routing.manhattan_distance
 
-.. autofunction:: mnt.pyfiction.physical_design.path_finding.euclidean_distance
+.. autofunction:: mnt.pyfiction.physical_design.routing.euclidean_distance
 
-.. autofunction:: mnt.pyfiction.physical_design.path_finding.squared_euclidean_distance
+.. autofunction:: mnt.pyfiction.physical_design.routing.squared_euclidean_distance
 
-.. autofunction:: mnt.pyfiction.physical_design.path_finding.twoddwave_distance
+.. autofunction:: mnt.pyfiction.physical_design.routing.twoddwave_distance
 
-.. autofunction:: mnt.pyfiction.physical_design.path_finding.chebyshev_distance
+.. autofunction:: mnt.pyfiction.physical_design.routing.chebyshev_distance
 ```
 
 :::
@@ -169,12 +169,10 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.path_finding.a_star_params
+.. autoclass:: mnt.pyfiction.physical_design.routing.AStarParams
    :members:
 
-.. autofunction:: mnt.pyfiction.physical_design.path_finding.a_star
-
-.. autofunction:: mnt.pyfiction.physical_design.path_finding.a_star_distance
+.. autofunction:: mnt.pyfiction.physical_design.routing.a_star_distance
 ```
 
 :::
@@ -205,10 +203,10 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.path_finding.yen_k_shortest_paths_params
+.. autoclass:: mnt.pyfiction.physical_design.routing.YenKShortestPathsParams
    :members:
 
-.. autofunction:: mnt.pyfiction.physical_design.path_finding.yen_k_shortest_paths
+.. autofunction:: mnt.pyfiction.physical_design.routing.yen_k_shortest_paths
 ```
 
 :::
@@ -239,10 +237,10 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.path_finding.enumerate_all_paths_params
+.. autoclass:: mnt.pyfiction.physical_design.routing.EnumerateAllPathsParams
    :members:
 
-.. autofunction:: mnt.pyfiction.physical_design.path_finding.enumerate_all_paths
+.. autofunction:: mnt.pyfiction.physical_design.routing.enumerate_all_paths
 ```
 
 :::

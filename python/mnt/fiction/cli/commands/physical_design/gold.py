@@ -18,11 +18,10 @@ from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.pyfiction.networks import get_name
 from mnt.pyfiction.physical_design import (
-    gold_cost_objective,
-    gold_effort_mode,
+    GoldCostObjective,
+    GoldEffortMode,
+    GraphOrientedLayoutDesignParams,
     graph_oriented_layout_design,
-    graph_oriented_layout_design_params,
-    graph_oriented_layout_design_stats,
 )
 
 if TYPE_CHECKING:
@@ -83,12 +82,12 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
     The result is a 2DDWave-clocked Cartesian layout. The network must not have gates with more
     than two inputs.
     """
-    params = graph_oriented_layout_design_params()
+    params = GraphOrientedLayoutDesignParams()
     params.on_progress = session.report_progress
     params.on_worker_progress = session.report_worker_progress
     params.num_vertex_expansions = args.expansions
-    params.mode = getattr(gold_effort_mode, args.effort.upper())
-    params.cost = getattr(gold_cost_objective, args.cost.upper())
+    params.mode = getattr(GoldEffortMode, args.effort.upper())
+    params.cost = getattr(GoldCostObjective, args.cost.upper())
     params.return_first = args.return_first
     params.planar = args.planar
     params.enable_multithreading = args.multithreading
@@ -103,8 +102,8 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
         params.timeout = timeout
 
     network = session.as_technology_network(session.networks.current())
-    stats = graph_oriented_layout_design_stats()
-    layout = graph_oriented_layout_design(network, params, stats)
+    result = graph_oriented_layout_design(network, params=params)
+    layout, stats = result.layout, result.stats
     if layout is None:
         msg = f"no layout found for '{get_name(network)}' within the search bounds or timeout"
         error = CommandError(msg)

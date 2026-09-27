@@ -168,7 +168,7 @@ def write_fgl_layout(
         Lyt: Layout.
     """
 
-class fgl_parsing_error(RuntimeError): ...
+class FGLParsingError(RuntimeError): ...
 
 def read_cartesian_fgl_layout(
     filename: str, layout_name: str = ""

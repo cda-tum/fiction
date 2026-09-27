@@ -10,16 +10,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from mnt.pyfiction.layouts import HexagonalGateLayout, ShiftedCartesianGateLayout
 from mnt.pyfiction.physical_design import (
+    ExactParams,
+    TechnologyConstraints,
     apply_bestagon_library,
     apply_qca_one_library,
     apply_sim7_mol_library,
     apply_topolinano_library,
-    exact_hexagonal,
-    exact_params,
-    exact_shifted_cartesian,
+    exact,
     orthogonal,
-    technology_constraints,
 )
 
 if TYPE_CHECKING:
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 def test_apply_qca_one_library(mux21: TechnologyNetwork) -> None:
     """Map the library and report every processed source gate."""
-    layout = orthogonal(mux21)
+    layout = orthogonal(mux21).layout
 
     reports: list[tuple[str, int, int]] = []
     apply_qca_one_library(layout, lambda task, done, total: reports.append((task, done, total)))
@@ -37,7 +37,7 @@ def test_apply_qca_one_library(mux21: TechnologyNetwork) -> None:
 
 def test_apply_sim7_mol_library(mux21: TechnologyNetwork) -> None:
     """Map the library and report every processed source gate."""
-    layout = orthogonal(mux21)
+    layout = orthogonal(mux21).layout
 
     reports: list[tuple[str, int, int]] = []
     cell_layout = apply_sim7_mol_library(layout, lambda task, done, total: reports.append((task, done, total)))
@@ -48,12 +48,12 @@ def test_apply_sim7_mol_library(mux21: TechnologyNetwork) -> None:
 
 def test_apply_bestagon_library(mux21: TechnologyNetwork) -> None:
     """Map the library and report every processed source gate."""
-    params = exact_params()
+    params = ExactParams()
     params.scheme = "ROW"
     params.crossings = True
     params.border_io = True
 
-    layout = exact_hexagonal(mux21, params)
+    layout = exact(mux21, params=params, layout_type=HexagonalGateLayout).layout
     assert layout is not None
 
     reports: list[tuple[str, int, int]] = []
@@ -63,13 +63,13 @@ def test_apply_bestagon_library(mux21: TechnologyNetwork) -> None:
 
 def test_apply_topolinano_library(mux21: TechnologyNetwork) -> None:
     """Map the library and report every processed source gate."""
-    params = exact_params()
+    params = ExactParams()
     params.scheme = "COLUMNAR3"
     params.crossings = True
     params.border_io = True
-    params.technology_specifics = technology_constraints.TOPOLINANO
+    params.technology_specifics = TechnologyConstraints.TOPOLINANO
 
-    layout = exact_shifted_cartesian(mux21, params)
+    layout = exact(mux21, params=params, layout_type=ShiftedCartesianGateLayout).layout
     assert layout is not None
 
     reports: list[tuple[str, int, int]] = []

@@ -17,10 +17,10 @@ from mnt.pyfiction.layouts import (
     ShiftedCartesianGateLayout,
 )
 from mnt.pyfiction.layouts.coords import OffsetCoordinate
-from mnt.pyfiction.physical_design.path_finding import (
+from mnt.pyfiction.physical_design.routing import (
+    AStarParams,
     a_star,
     a_star_distance,
-    a_star_params,
     enumerate_all_paths,
     yen_k_shortest_paths,
 )
@@ -154,7 +154,7 @@ def test_path_finding_with_obstructions_and_crossings(make_lyt):
     lyt.obstruct_coordinate((1, 1, 0))
     lyt.obstruct_coordinate((1, 1, 1))
 
-    params = a_star_params()
+    params = AStarParams()
     params.crossings = True
 
     assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(0, 0), params)) == 1

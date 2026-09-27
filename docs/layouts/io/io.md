@@ -38,13 +38,9 @@ Can be used to read gate-level layout files (`.fgl`) as offered by [MNT Bench](h
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.layouts.io.read_cartesian_fgl_layout
+.. autofunction:: mnt.pyfiction.layouts.io.read_fgl_layout
 
-.. autofunction:: mnt.pyfiction.layouts.io.read_shifted_cartesian_fgl_layout
-
-.. autofunction:: mnt.pyfiction.layouts.io.read_hexagonal_fgl_layout
-
-.. autoclass:: mnt.pyfiction.layouts.io.fgl_parsing_error
+.. autoclass:: mnt.pyfiction.layouts.io.FGLParsingError
    :members:
 ```
 

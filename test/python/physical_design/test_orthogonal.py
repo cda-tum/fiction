@@ -8,43 +8,58 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
+
+from mnt.pyfiction.layouts import (
+    CartesianGateLayout,
+    EvenColumnHexGateLayout,
+    HexagonalGateLayout,
+    OddColumnHexGateLayout,
+    OddRowHexGateLayout,
+    ShiftedCartesianGateLayout,
+)
+
+if TYPE_CHECKING:
+    from mnt.pyfiction.layouts._types import GateLayout
+    from mnt.pyfiction.networks import TechnologyNetwork
 
 from mnt.pyfiction.networks import high_degree_fanin_exception
 from mnt.pyfiction.networks.io import read_technology_network
-from mnt.pyfiction.physical_design import orthogonal, orthogonal_params, orthogonal_stats
+from mnt.pyfiction.physical_design import OrthogonalParams, orthogonal
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 
 def test_orthogonal_default(mux21):
-    layout = orthogonal(mux21)
+    layout = orthogonal(mux21).layout
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
 def test_orthogonal_with_parameters(mux21):
-    params = orthogonal_params()
+    params = OrthogonalParams()
 
-    layout = orthogonal(mux21, params)
+    layout = orthogonal(mux21, params=params).layout
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
 def test_orthogonal_with_stats(mux21):
-    stats = orthogonal_stats()
 
-    layout = orthogonal(mux21, statistics=stats)
+    result = orthogonal(mux21)
+    layout = result.layout
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
 def test_orthogonal_reports_progress(mux21):
-    assert orthogonal_params().on_progress is None
+    assert OrthogonalParams().on_progress is None
 
-    params = orthogonal_params()
+    params = OrthogonalParams()
     reports = []
     params.on_progress = lambda task, done, total: reports.append((task, done, total))
 
-    layout = orthogonal(mux21, params)
+    layout = orthogonal(mux21, params=params).layout
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert params.on_progress is not None
@@ -67,3 +82,19 @@ def test_orthogonal_rejects_high_degree_fanin(tmp_path):
 
     with pytest.raises(high_degree_fanin_exception):
         orthogonal(read_technology_network(str(path)))
+
+
+@pytest.mark.parametrize(
+    "layout_type",
+    [CartesianGateLayout, HexagonalGateLayout, OddRowHexGateLayout, OddColumnHexGateLayout, EvenColumnHexGateLayout],
+)
+def test_orthogonal_explicit_topology(mux21: TechnologyNetwork, layout_type: type[GateLayout]) -> None:
+    result = orthogonal(mux21, layout_type=layout_type)
+    assert isinstance(result.layout, layout_type)
+    assert result.stats.num_gates == result.layout.num_gates()
+    assert equivalence_checking(mux21, result.layout) == eq_type.STRONG
+
+
+def test_orthogonal_rejects_unsupported_topology(mux21: TechnologyNetwork) -> None:
+    with pytest.raises(ValueError, match="does not support ShiftedCartesianGateLayout"):
+        orthogonal(mux21, layout_type=ShiftedCartesianGateLayout)

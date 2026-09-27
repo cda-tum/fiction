@@ -77,7 +77,7 @@ void enumerate_all_paths(nanobind::module_& m)
     namespace py = nanobind;
 
     py::class_<fiction::physical_design::path_finding::enumerate_all_paths_params>(
-        m, "enumerate_all_paths_params", DOC(fiction_physical_design_path_finding_enumerate_all_paths_params))
+        m, "EnumerateAllPathsParams", DOC(fiction_physical_design_path_finding_enumerate_all_paths_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("crossings", &fiction::physical_design::path_finding::enumerate_all_paths_params::crossings,
                 DOC(fiction_physical_design_path_finding_enumerate_all_paths_params_crossings))

@@ -63,6 +63,12 @@ void reserve_input_nodes(nanobind::module_& m)
         py::arg("lyt"), py::arg("ntk"), "Reserves input nodes and returns their source-node to layout-node mapping.");
 }
 
+/**
+ * @brief Binds placement of network nodes with incoming layout coordinates.
+ * @tparam Lyt Gate-level layout type.
+ * @tparam Ntk Source network type.
+ * @param m Python physical-design module.
+ */
 template <typename Lyt, typename Ntk>
 void place(nanobind::module_& m)
 {
@@ -70,28 +76,39 @@ void place(nanobind::module_& m)
 
     m.def(
         "place", [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)
-        { return fiction::physical_design::place(lyt, t, ntk, n); }, py::arg("lyt"), py::arg("t"), py::arg("ntk"),
-        py::arg("n"));  // TODO, DOC(fiction_physical_design_place));
+        { return fiction::tile<Lyt>{fiction::physical_design::place(lyt, t, ntk, n)}; }, py::arg("lyt"), py::arg("t"),
+        py::arg("ntk"), py::arg("n"), "Places a primary input and returns its coordinate.");
 
     m.def(
         "place",
         [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-           const mockturtle::signal<Lyt>& a) { return fiction::physical_design::place(lyt, t, ntk, n, a); },
+           const fiction::tile<Lyt>& a)
+        {
+            return fiction::tile<Lyt>{
+                fiction::physical_design::place(lyt, t, ntk, n, static_cast<mockturtle::signal<Lyt>>(a))};
+        },
         py::arg("lyt"), py::arg("t"), py::arg("ntk"), py::arg("n"), py::arg("a"));
 
     m.def(
         "place",
         [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-           const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b,
-           const std::optional<bool>& c = std::nullopt)
-        { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
-        py::arg("lyt"), py::arg("t"), py::arg("ntk"), py::arg("n"), py::arg("a"), py::arg("b"), py::arg("c"));
+           const fiction::tile<Lyt>& a, const fiction::tile<Lyt>& b, const std::optional<bool>& c = std::nullopt)
+        {
+            return fiction::tile<Lyt>{fiction::physical_design::place(
+                lyt, t, ntk, n, static_cast<mockturtle::signal<Lyt>>(a), static_cast<mockturtle::signal<Lyt>>(b), c)};
+        },
+        py::arg("lyt"), py::arg("t"), py::arg("ntk"), py::arg("n"), py::arg("a"), py::arg("b"),
+        py::arg("c") = py::none());
 
     m.def(
         "place",
         [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-           const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b, const mockturtle::signal<Lyt>& c)
-        { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
+           const fiction::tile<Lyt>& a, const fiction::tile<Lyt>& b, const fiction::tile<Lyt>& c)
+        {
+            return fiction::tile<Lyt>{fiction::physical_design::place(
+                lyt, t, ntk, n, static_cast<mockturtle::signal<Lyt>>(a), static_cast<mockturtle::signal<Lyt>>(b),
+                static_cast<mockturtle::signal<Lyt>>(c))};
+        },
         py::arg("lyt"), py::arg("t"), py::arg("ntk"), py::arg("n"), py::arg("a"), py::arg("b"), py::arg("c"));
 }
 

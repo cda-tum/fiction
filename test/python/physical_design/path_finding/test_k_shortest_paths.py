@@ -16,7 +16,7 @@ from mnt.pyfiction.layouts import (
     ShiftedCartesianGateLayout,
 )
 from mnt.pyfiction.layouts.coords import OffsetCoordinate
-from mnt.pyfiction.physical_design.path_finding import yen_k_shortest_paths
+from mnt.pyfiction.physical_design.routing import yen_k_shortest_paths
 
 
 @pytest.mark.parametrize(

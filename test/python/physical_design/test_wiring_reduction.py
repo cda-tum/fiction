@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.physical_design import orthogonal, wiring_reduction, wiring_reduction_params, wiring_reduction_stats
+from mnt.pyfiction.physical_design import WiringReductionParams, orthogonal, wiring_reduction
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 if TYPE_CHECKING:
@@ -20,35 +20,38 @@ if TYPE_CHECKING:
 
 
 def test_wiring_reduction_default(mux21):
-    layout = orthogonal(mux21)
+    layout = orthogonal(mux21).layout
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
-    wiring_reduction(layout)
+    layout = wiring_reduction(layout).layout
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
 def test_wiring_reduction_with_parameters(mux21):
-    layout = orthogonal(mux21)
+    layout = orthogonal(mux21).layout
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
-    params = wiring_reduction_params()
-    wiring_reduction(layout, params)
+    params = WiringReductionParams()
+    layout = wiring_reduction(layout, params=params).layout
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
 def test_wiring_reduction_with_stats(mux21: TechnologyNetwork) -> None:
     """Statistics describe the actual input and result, which remain logically equivalent."""
-    layout = orthogonal(mux21)
+    layout = orthogonal(mux21).layout
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
+    original = layout
     before = layout.clone()
-    stats = wiring_reduction_stats()
-    wiring_reduction(layout, statistics=stats)
+    result = wiring_reduction(layout)
+    stats = result.stats
+    layout = result.layout
+    assert original.area() == before.area()
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0
@@ -68,16 +71,19 @@ def test_wiring_reduction_with_stats(mux21: TechnologyNetwork) -> None:
 
 def test_wiring_reduction_with_stats_and_parameters(mux21: TechnologyNetwork) -> None:
     """Statistics describe the actual input and result, which remain logically equivalent."""
-    layout = orthogonal(mux21)
+    layout = orthogonal(mux21).layout
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
-    params = wiring_reduction_params()
+    params = WiringReductionParams()
     params.timeout = 1000000
 
+    original = layout
     before = layout.clone()
-    stats = wiring_reduction_stats()
-    wiring_reduction(layout, params, stats)
+    result = wiring_reduction(layout, params=params)
+    stats = result.stats
+    layout = result.layout
+    assert original.area() == before.area()
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0

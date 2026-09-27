@@ -410,7 +410,7 @@ def test_named_extensionless_bridges(shell: Shell, tmp_path: Path, format_name: 
 
 @pytest.mark.parametrize("library", ["qca-one", "sim7-mol", "bestagon", "topolinano"])
 def test_complete_design_and_export_workflows(shell: Shell, tmp_path: Path, library: str) -> None:
-    if library == "topolinano" and not hasattr(physical_design, "exact_cartesian"):
+    if library == "topolinano" and not physical_design.exact_available():
         pytest.skip("pyfiction was built without Z3")
     source = tmp_path / "inverter.v"
     source.write_text("module top(a, f);\ninput a;\noutput f;\nassign f = ~a;\nendmodule\n", encoding="utf-8")

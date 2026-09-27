@@ -45,12 +45,12 @@ void hexagonalization(nanobind::module_& m)
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
     py::exception<fiction::physical_design::hexagonalization_io_pin_routing_error>(
-        m, "hexagonalization_io_pin_routing_error",
+        m, "HexagonalizationIoPinRoutingError",
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
     py::enum_<fiction::physical_design::hexagonalization_params::io_pin_extension_mode>(
-        m, "hexagonalization_io_pin_extension_mode",
+        m, "HexagonalizationIoPinExtensionMode",
         DOC(fiction_physical_design_hexagonalization_params_io_pin_extension_mode))
         .value("NONE", fiction::physical_design::hexagonalization_params::io_pin_extension_mode::NONE,
                DOC(fiction_physical_design_hexagonalization_params_io_pin_extension_mode_NONE))
@@ -59,7 +59,7 @@ void hexagonalization(nanobind::module_& m)
         .value("EXTEND_PLANAR", fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR,
                DOC(fiction_physical_design_hexagonalization_params_io_pin_extension_mode_EXTEND_PLANAR));
 
-    py::class_<fiction::physical_design::hexagonalization_params>(m, "hexagonalization_params",
+    py::class_<fiction::physical_design::hexagonalization_params>(m, "HexagonalizationParams",
                                                                   DOC(fiction_physical_design_hexagonalization_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("input_pin_extension", &fiction::physical_design::hexagonalization_params::input_pin_extension,
@@ -70,7 +70,7 @@ void hexagonalization(nanobind::module_& m)
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_hexagonalization_params_on_progress));
 
-    py::class_<fiction::physical_design::hexagonalization_stats>(m, "hexagonalization_stats",
+    py::class_<fiction::physical_design::hexagonalization_stats>(m, "HexagonalizationStats",
                                                                  DOC(fiction_physical_design_hexagonalization_stats))
         .def(py::init<>(), "Default constructor.")
         .def(

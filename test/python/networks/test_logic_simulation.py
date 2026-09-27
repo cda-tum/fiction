@@ -10,9 +10,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from mnt.pyfiction.layouts import CartesianGateLayout
 from mnt.pyfiction.networks import simulate, simulate_outputs
 from mnt.pyfiction.networks.io import read_technology_network
-from mnt.pyfiction.physical_design import exact_cartesian, exact_params
+from mnt.pyfiction.physical_design import ExactParams, exact
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -28,9 +29,9 @@ def test_logic_simulation(resources_dir):
     xnor_sim = simulate(xnor2_net)
     assert xnor_sim["out"] == [True, False, False, True]
 
-    params = exact_params()
+    params = ExactParams()
     params.crossings = True
-    xor_lyt = exact_cartesian(xor2_net, params)
+    xor_lyt = exact(xor2_net, params=params, layout_type=CartesianGateLayout).layout
     assert xor_lyt is not None
     xor_lyt_sim = simulate(xor_lyt)
     assert xor_lyt_sim["out"] == [False, True, True, False]

@@ -379,6 +379,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** Physical-design workflows return a `LayoutResult` with layout and statistics. Select the topology with `layout_type`, pass options by keyword, and use `physical_design.routing` for custom routing. Optimization preserves its input.
+
+  - **Breaking:** `layouts.io.read_fgl_layout` selects the topology with `layout_type`. Layout readers and writers accept filesystem paths.
+
   - **Breaking:** Domain layouts, networks, and coordinates use PascalCase names. Coordinates are immutable, and network connectivity returns signals with inversion polarity.
 
   - **Breaking:** Use `TruthTable.from_binary`, `from_hex`, and `from_expression` for specifications, and `standard_functions` for the standard-function catalog. Geometry operations live directly on gate and cell layouts.

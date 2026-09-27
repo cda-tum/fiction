@@ -139,8 +139,6 @@
 .. autoclass:: mnt.pyfiction.synthesis.technology_mapping_params
    :members:
 
-.. autofunction:: mnt.pyfiction.synthesis.and_or_not
-
 .. autofunction:: mnt.pyfiction.synthesis.and_or_not_maj
 
 .. autofunction:: mnt.pyfiction.synthesis.all_standard_2_input_functions

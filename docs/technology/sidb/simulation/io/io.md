@@ -34,11 +34,7 @@
 .. autoclass:: mnt.pyfiction.sidb.simulation.io.sample_writing_mode
    :members:
 
-.. autofunction:: mnt.pyfiction.sidb.simulation.io.write_operational_domain
-
 .. autofunction:: mnt.pyfiction.sidb.simulation.io.write_operational_domain_to_string
-
-.. autofunction:: mnt.pyfiction.sidb.simulation.io.write_critical_temperature_domain
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.io.write_critical_temperature_domain_to_string
 ```

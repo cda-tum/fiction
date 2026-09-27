@@ -77,7 +77,7 @@ def test_optimize_needs_2ddwave(mux21_shell: Shell) -> None:
     assert "Cartesian layout is needed" in mux21_shell.fails("optimize")
 
 
-@pytest.mark.skipif(not hasattr(physical_design, "exact_cartesian"), reason="pyfiction was built without Z3")
+@pytest.mark.skipif(not physical_design.exact_available(), reason="pyfiction was built without Z3")
 def test_exact(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("xor2.v")}"; exact -x -b -s 2ddwave -t 60')
     layout = shell.session.gate_layouts.current()
@@ -86,7 +86,7 @@ def test_exact(shell: Shell, resource: Callable[[str], str]) -> None:
     assert "not a clocking scheme" in shell.fails("exact -s nope")
 
 
-@pytest.mark.skipif(not hasattr(physical_design, "exact_cartesian"), reason="pyfiction was built without Z3")
+@pytest.mark.skipif(not physical_design.exact_available(), reason="pyfiction was built without Z3")
 def test_exact_topolinano(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("xor2.v")}"; exact -x -b -s columnar --topolinano -t 60')
     assert isinstance(shell.session.gate_layouts.current(), ShiftedCartesianGateLayout)
@@ -110,7 +110,7 @@ def test_direct_hexagonal_ortho_variants(
     assert simulate_outputs(restored) == expected
 
 
-@pytest.mark.skipif(not hasattr(physical_design, "exact_cartesian"), reason="pyfiction was built without Z3")
+@pytest.mark.skipif(not physical_design.exact_available(), reason="pyfiction was built without Z3")
 def test_failed_search_preserves_store_and_statistics(mux21_shell: Shell) -> None:
     before = len(mux21_shell.session.gate_layouts)
     output = mux21_shell.fails("exact --fixed-size 1 --timeout 0.0001")
@@ -121,7 +121,7 @@ def test_failed_search_preserves_store_and_statistics(mux21_shell: Shell) -> Non
 
 
 @pytest.mark.parametrize("topology", [name for name in FGL_READERS if name not in {"shifted_cartesian", "hexagonal"}])
-@pytest.mark.skipif(not hasattr(physical_design, "exact_cartesian"), reason="pyfiction was built without Z3")
+@pytest.mark.skipif(not physical_design.exact_available(), reason="pyfiction was built without Z3")
 def test_exact_topologies_preserve_function(shell: Shell, tmp_path: Path, topology: str) -> None:
     source = tmp_path / "wire.v"
     source.write_text("module top(a,f);\ninput a;\noutput f;\nassign f = a;\nendmodule\n", encoding="utf-8")

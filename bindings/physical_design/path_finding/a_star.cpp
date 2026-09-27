@@ -76,7 +76,7 @@ void a_star(nanobind::module_& m)
     namespace py = nanobind;
 
     py::class_<fiction::physical_design::path_finding::a_star_params>(
-        m, "a_star_params", DOC(fiction_physical_design_path_finding_a_star_params))
+        m, "AStarParams", DOC(fiction_physical_design_path_finding_a_star_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("crossings", &fiction::physical_design::path_finding::a_star_params::crossings,
                 DOC(fiction_physical_design_path_finding_a_star_params_crossings));

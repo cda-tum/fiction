@@ -12,7 +12,7 @@ import pytest
 
 from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout
 from mnt.pyfiction.layouts.coords import OffsetCoordinate
-from mnt.pyfiction.physical_design import color_routing, color_routing_params
+from mnt.pyfiction.physical_design.routing import ColorRoutingParams, color_routing
 
 
 @pytest.mark.parametrize(
@@ -49,7 +49,7 @@ def test_crossings():
     lyt.create_and(x1, x2, (4, 2))
     lyt.move_node(lyt.get_node((4, 2)), (4, 2))
 
-    params = color_routing_params()
+    params = ColorRoutingParams()
     params.crossings = True
     params.path_limit = 1
 

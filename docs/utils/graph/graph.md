@@ -50,7 +50,7 @@ mincross
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.graph_coloring_engine
+.. autoclass:: mnt.pyfiction.physical_design.routing.GraphColoringEngine
    :members:
 ```
 

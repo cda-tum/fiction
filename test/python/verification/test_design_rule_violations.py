@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from mnt.pyfiction.layouts import CartesianGateLayout
-from mnt.pyfiction.physical_design import color_routing
+from mnt.pyfiction.physical_design.routing import color_routing
 from mnt.pyfiction.verification import gate_level_drvs
 
 

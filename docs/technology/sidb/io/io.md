@@ -149,8 +149,6 @@
 .. autoclass:: mnt.pyfiction.sidb.io.color_mode
    :members:
 
-.. autofunction:: mnt.pyfiction.sidb.io.write_sidb_layout_svg
-
 .. autofunction:: mnt.pyfiction.sidb.io.write_sidb_layout_svg_to_string
 
 ```

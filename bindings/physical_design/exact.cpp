@@ -46,7 +46,7 @@ void exact(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::enum_<fiction::physical_design::technology_constraints>(m, "technology_constraints",
+    py::enum_<fiction::physical_design::technology_constraints>(m, "TechnologyConstraints",
                                                                 DOC(fiction_physical_design_technology_constraints))
         .value("NONE", fiction::physical_design::technology_constraints::NONE,
                DOC(fiction_physical_design_technology_constraints_NONE))
@@ -54,7 +54,7 @@ void exact(nanobind::module_& m)
                DOC(fiction_physical_design_technology_constraints_TOPOLINANO));
 
     py::class_<fiction::physical_design::exact_physical_design_params>(
-        m, "exact_params", DOC(fiction_physical_design_exact_physical_design_params))
+        m, "ExactParams", DOC(fiction_physical_design_exact_physical_design_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("scheme", &fiction::physical_design::exact_physical_design_params::scheme,
                 DOC(fiction_physical_design_exact_physical_design_params_scheme))
@@ -94,7 +94,7 @@ void exact(nanobind::module_& m)
                 DOC(fiction_physical_design_exact_physical_design_params_on_worker_progress));
 
     py::class_<fiction::physical_design::exact_physical_design_stats>(
-        m, "exact_stats", DOC(fiction_physical_design_exact_physical_design_stats))
+        m, "ExactStats", DOC(fiction_physical_design_exact_physical_design_stats))
         .def(py::init<>(), "Default constructor.")
         .def(
             "__repr__",

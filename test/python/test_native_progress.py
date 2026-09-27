@@ -23,16 +23,15 @@ from mnt.pyfiction.inml.io import write_qcc_layout, write_qcc_layout_params
 from mnt.pyfiction.layouts import CartesianGateLayout, ShiftedCartesianGateLayout
 from mnt.pyfiction.layouts.io import write_dot_layout, write_fgl_layout
 from mnt.pyfiction.physical_design import (
+    ExactParams,
+    GraphOrientedLayoutDesignParams,
+    TechnologyConstraints,
     apply_qca_one_library,
     apply_sim7_mol_library,
     apply_topolinano_library,
-    exact_cartesian,
-    exact_params,
-    exact_shifted_cartesian,
+    exact,
     graph_oriented_layout_design,
-    graph_oriented_layout_design_params,
     orthogonal,
-    technology_constraints,
 )
 from mnt.pyfiction.qca import io as qca_io
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
@@ -97,11 +96,11 @@ def test_long_route_statistics_release_the_gil() -> None:
 @pytest.mark.parametrize("threads", [1, 4])
 def test_exact_candidate_lifecycle(mux21: TechnologyNetwork, threads: int) -> None:
     """Solver candidates use tile dimensions and leave no active worker after success."""
-    params = exact_params()
+    params = ExactParams()
     params.num_threads = threads
     reports: list[tuple[int, int, str, int, int, bool]] = []
     params.on_worker_progress = lambda *report: reports.append(report)
-    layout = exact_cartesian(mux21, params)
+    layout = exact(mux21, params=params, layout_type=CartesianGateLayout).layout
     assert layout is not None
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert reports
@@ -119,7 +118,7 @@ def test_exact_candidate_lifecycle(mux21: TechnologyNetwork, threads: int) -> No
 @pytest.mark.parametrize("parallel", [False, True])
 def test_gold_graph_expansions(mux21: TechnologyNetwork, *, parallel: bool) -> None:
     """Stable graphs report expansions, accepted solutions, and their final inactive state."""
-    params = graph_oriented_layout_design_params()
+    params = GraphOrientedLayoutDesignParams()
     params.enable_multithreading = parallel
     params.return_first = True
     params.seed = 7
@@ -127,7 +126,7 @@ def test_gold_graph_expansions(mux21: TechnologyNetwork, *, parallel: bool) -> N
     counts: list[tuple[str, int, int]] = []
     params.on_worker_progress = lambda *report: reports.append(report)
     params.on_progress = lambda *report: counts.append(report)
-    layout = graph_oriented_layout_design(mux21, params)
+    layout = graph_oriented_layout_design(mux21, params=params).layout
     assert layout is not None
     assert equivalence_checking(mux21, layout) != eq_type.NO
     assert any("; best " in description for _, _, description, _, _, _ in reports)
@@ -167,7 +166,7 @@ def test_counted_native_phases(mux21: TechnologyNetwork, command: str) -> None:
     else:
         drv_params = gate_level_drv_params()
         drv_params.on_progress = callback
-        gate_level_drvs(orthogonal(mux21), drv_params)
+        gate_level_drvs(orthogonal(mux21).layout, drv_params)
     final = {task: (done, total) for task, done, total in reports}
     assert final
     assert all(done == total for done, total in final.values())
@@ -176,7 +175,7 @@ def test_counted_native_phases(mux21: TechnologyNetwork, command: str) -> None:
 @pytest.mark.parametrize("kind", ["fgl", "dot", "qll", "qca", "svg", "sqd", "sidb_svg"])
 def test_writer_counts_and_output(mux21: TechnologyNetwork, tmp_path: Path, kind: str) -> None:
     """Callbacks leave writer output unchanged and count every completed phase."""
-    gate_layout = orthogonal(mux21)
+    gate_layout = orthogonal(mux21).layout
     reports: list[tuple[str, int, int]] = []
     paths = [tmp_path / f"{index}.{kind}" for index in range(2)]
     for index, path in enumerate(paths):
@@ -240,22 +239,24 @@ def test_clustercomplete_worker_counts(resources_dir: Path, threads: int) -> Non
 
 def test_exact_skips_candidates_outside_area_bound(mux21: TechnologyNetwork) -> None:
     """Candidates rejected by the area bound never appear as active solvers."""
-    params = exact_params()
+    params = ExactParams()
     params.upper_bound_area = 1
     reports: list[tuple[int, int, str, int, int, bool]] = []
     params.on_worker_progress = lambda *report: reports.append(report)
-    assert exact_cartesian(mux21, params) is None
+    result = exact(mux21, params=params, layout_type=CartesianGateLayout)
+    assert result.layout is None
+    assert result.stats.time_total.total_seconds() >= 0
     assert not reports
 
 
 def test_exact_clears_candidates_on_timeout(mux21: TechnologyNetwork) -> None:
     """A timeout leaves no active candidate, whether it interrupts a solver or prevents its start."""
-    params = exact_params()
+    params = ExactParams()
     params.num_threads = 4
     params.timeout = 1
     reports: list[tuple[int, int, str, int, int, bool]] = []
     params.on_worker_progress = lambda *report: reports.append(report)
-    exact_cartesian(mux21, params)
+    exact(mux21, params=params, layout_type=CartesianGateLayout)
     active = {worker: running for worker, count, description, done, total, running in reports}
     assert not any(active.values())
 
@@ -312,12 +313,12 @@ def test_failed_mapping_retains_completed_count() -> None:
 
 def test_qcc_writer_counts_and_output(mux21: TechnologyNetwork, tmp_path: Path) -> None:
     """QCC callbacks count rows without changing the serialized layout."""
-    placement = exact_params()
+    placement = ExactParams()
     placement.scheme = "COLUMNAR3"
     placement.crossings = True
     placement.border_io = True
-    placement.technology_specifics = technology_constraints.TOPOLINANO
-    gate_layout = exact_shifted_cartesian(mux21, placement)
+    placement.technology_specifics = TechnologyConstraints.TOPOLINANO
+    gate_layout = exact(mux21, params=placement, layout_type=ShiftedCartesianGateLayout).layout
     assert gate_layout is not None
     layout = apply_topolinano_library(gate_layout)
     before = tmp_path / "before.qcc"

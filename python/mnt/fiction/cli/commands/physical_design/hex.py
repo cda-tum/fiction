@@ -14,10 +14,9 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
 from mnt.pyfiction.physical_design import (
+    HexagonalizationIoPinExtensionMode,
+    HexagonalizationParams,
     hexagonalization,
-    hexagonalization_io_pin_extension_mode,
-    hexagonalization_params,
-    hexagonalization_stats,
 )
 
 if TYPE_CHECKING:
@@ -54,17 +53,15 @@ def hex_command(session: Session, args: argparse.Namespace) -> Result:
     if args.planar and not (args.extend_inputs or args.extend_outputs):
         session.info("planar rerouting only applies to extended pins; add -i or -o")
     mode = (
-        hexagonalization_io_pin_extension_mode.EXTEND_PLANAR
-        if args.planar
-        else hexagonalization_io_pin_extension_mode.EXTEND
+        HexagonalizationIoPinExtensionMode.EXTEND_PLANAR if args.planar else HexagonalizationIoPinExtensionMode.EXTEND
     )
-    params = hexagonalization_params()
+    params = HexagonalizationParams()
     params.on_progress = session.report_progress
     if args.extend_inputs:
         params.input_pin_extension = mode
     if args.extend_outputs:
         params.output_pin_extension = mode
-    stats = hexagonalization_stats()
-    hexagonal = hexagonalization(layout, params, stats)
+    result = hexagonalization(layout, params=params)
+    hexagonal, stats = result.layout, result.stats
     session.gate_layouts.add(hexagonal)
     return _added(session, hexagonal, stats, verbose=args.verbose)

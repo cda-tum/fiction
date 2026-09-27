@@ -195,4 +195,4 @@ def mux21_layout(mux21: TechnologyNetwork) -> CartesianGateLayout:
     Returns:
         A 2DDWave-clocked Cartesian gate-level layout.
     """
-    return orthogonal(mux21)
+    return orthogonal(mux21).layout

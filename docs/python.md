@@ -83,3 +83,41 @@ Replace a geometry-only layout with the corresponding gate layout. Replace
 `create_<name>_tt()` with `standard_functions("<name>")`; select element zero
 only for a single-output specification. Network connectivity consumers must read
 `Signal.node` and preserve `Signal.complemented`.
+
+## Placement and routing
+
+Placement returns a `LayoutResult` with `.layout` and `.stats`. Select a concrete
+output topology with `layout_type` and pass options with `params`. `orthogonal`
+supports Cartesian and all four hexagonal layouts. `exact` supports all nine gate
+topologies when `exact_available()` reports Z3 support. Exact and graph-oriented
+searches return `layout=None` when their bounds or timeout yield no solution;
+the result still carries statistics. Native progress callbacks and their exception
+behavior apply to the public workflows.
+
+```python
+from mnt.pyfiction.layouts import HexagonalGateLayout
+from mnt.pyfiction.physical_design import orthogonal
+
+# network is a TechnologyNetwork loaded from a logic specification.
+result = orthogonal(network, layout_type=HexagonalGateLayout)
+layout = result.layout
+print(result.stats)
+```
+
+`hexagonalization` also returns a layout and statistics. `post_layout_optimization`
+and `wiring_reduction` optimize an independent copy; use the result's `.layout`.
+
+`physical_design.routing` provides A*, Yen's algorithm, path enumeration, distance
+metrics, graph-coloring routing, `place`, `reserve_input_nodes`, `route_path`, and
+routing extraction and clearing. These primitives support Cartesian, odd-column
+Cartesian, and even-row hexagonal gate layouts. `place` accepts incoming coordinates
+and returns the placed gate's coordinate. `route_path` requires at least two in-bounds
+coordinates with gates or wires at both endpoints.
+
+## Layout files
+
+`layouts.io.read_fgl_layout(path, layout_type=HexagonalGateLayout)` replaces the
+separate topology-specific readers. The file must match the selected topology.
+Readers and writers accept strings and `pathlib.Path` values. `write_fgl_layout`
+and `write_dot_layout` retain progress callbacks; DOT output also accepts
+`clock_colors` and `indexes` as keyword options.
