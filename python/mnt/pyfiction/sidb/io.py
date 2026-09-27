@@ -74,14 +74,18 @@ def read_sqd_layout(path: str | PathLike[str], *, name: str = "") -> SiDBLayout:
 
 
 def read_surface_defects(path: str | PathLike[str], *, name: str = "") -> SiDBLayout:
-    """Read surface defects from an SQD file.
+    """Read a defect-index matrix on the H-Si(100)-2x1 lattice.
+
+    Each bracketed row lists one defect index per column of a single-SiDB row.
+    Unsupported indices raise UnsupportedDefectIndexError. A row shorter than a
+    preceding row raises MissingPositionError.
 
     Args:
-        path: SQD input file.
-        name: Optional layout name override.
+        path: Text file containing the defect-index matrix.
+        name: Optional layout name.
 
     Returns:
-        The parsed SiDB layout.
+        A layout containing defects and no SiDBs.
     """
     return _native.read_surface_defects(fspath(path), name)
 
