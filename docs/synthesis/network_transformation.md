@@ -297,57 +297,10 @@
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.synthesis.create_id_tt
+.. autoclass:: mnt.pyfiction.synthesis.TruthTable
+   :members:
 
-.. autofunction:: mnt.pyfiction.synthesis.create_not_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_and_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_or_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_nand_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_nor_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_xor_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_xnor_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_lt_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_gt_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_le_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_ge_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_and3_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_xor_and_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_or_and_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_onehot_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_maj_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_gamble_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_dot_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_ite_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_and_xor_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_xor3_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_double_wire_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_crossing_wire_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_fan_out_tt
-
-.. autofunction:: mnt.pyfiction.synthesis.create_half_adder_tt
+.. autofunction:: mnt.pyfiction.synthesis.standard_functions
 ```
 
 :::

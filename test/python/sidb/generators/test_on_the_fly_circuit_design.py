@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout
+from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout
 from mnt.pyfiction.sidb import sidb_layout, site_at_row
 from mnt.pyfiction.sidb.generators import (
     design_sidb_gates_mode,
@@ -31,9 +31,9 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def and_circuit() -> hexagonal_gate_layout:
+def and_circuit() -> HexagonalGateLayout:
     """Return a placed AND circuit with two inputs and one output."""
-    layout = hexagonal_gate_layout((2, 2, 0), "ROW", "AND")
+    layout = HexagonalGateLayout((2, 2, 0), "ROW", "AND")
     first = layout.create_pi("a", (0, 0, 0))
     second = layout.create_pi("b", (1, 0, 0))
     gate = layout.create_and(first, second, (1, 1, 0))
@@ -72,7 +72,7 @@ def test_parameters() -> None:
 
 
 @pytest.mark.parametrize("per_gate", [False, True])
-def test_circuit_timeout(and_circuit: hexagonal_gate_layout, *, per_gate: bool) -> None:
+def test_circuit_timeout(and_circuit: HexagonalGateLayout, *, per_gate: bool) -> None:
     """Circuit and nested gate budgets raise TimeoutError instead of returning a partial circuit."""
     params = on_the_fly_sidb_circuit_design_params()
     gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params
@@ -103,7 +103,7 @@ def test_invalid_timeout(timeout: float) -> None:
 
 
 @pytest.mark.slow
-def test_design_and_export(and_circuit: hexagonal_gate_layout, tmp_path: Path) -> None:
+def test_design_and_export(and_circuit: HexagonalGateLayout, tmp_path: Path) -> None:
     """A real circuit produces SiDBs without modifying its gate-level input."""
     params = on_the_fly_sidb_circuit_design_params()
     gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params
@@ -123,7 +123,7 @@ def test_design_and_export(and_circuit: hexagonal_gate_layout, tmp_path: Path) -
     assert and_circuit.is_and(and_circuit.get_node((1, 1, 0)))
 
 
-def test_unsuccessful_design(and_circuit: hexagonal_gate_layout) -> None:
+def test_unsuccessful_design(and_circuit: HexagonalGateLayout) -> None:
     """An insufficient canvas raises a useful error instead of returning a partial circuit."""
     params = on_the_fly_sidb_circuit_design_params()
     gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params
@@ -135,8 +135,8 @@ def test_unsuccessful_design(and_circuit: hexagonal_gate_layout) -> None:
 
 def test_unsupported_gate() -> None:
     """A majority gate reports its unsupported type and tile."""
-    layout = hexagonal_gate_layout((1, 1, 0), "ROW")
-    layout.create_maj(0, 0, 0, (1, 1, 0))
+    layout = HexagonalGateLayout((1, 1, 0), "ROW")
+    layout.create_maj((0, 0), (0, 0), (0, 0), (1, 1, 0))
     with pytest.raises(ValueError, match="Unsupported gate type at tile"):
         on_the_fly_sidb_circuit_design(layout)
 
@@ -144,4 +144,4 @@ def test_unsupported_gate() -> None:
 def test_wrong_topology() -> None:
     """Cartesian layouts require hexagonalization before circuit design."""
     with pytest.raises(TypeError):
-        on_the_fly_sidb_circuit_design(cartesian_gate_layout())  # ty: ignore[invalid-argument-type]  # deliberately wrong topology
+        on_the_fly_sidb_circuit_design(CartesianGateLayout())  # ty: ignore[invalid-argument-type]  # deliberately wrong topology

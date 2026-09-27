@@ -31,10 +31,10 @@ has to have a concrete position assigned, mockturtle cannot be used to generate 
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.layouts.cartesian_gate_layout
+.. autoclass:: mnt.pyfiction.layouts.CartesianGateLayout
    :members:
 
-.. autoclass:: mnt.pyfiction.layouts.hexagonal_gate_layout
+.. autoclass:: mnt.pyfiction.layouts.HexagonalGateLayout
    :members:
 ```
 
@@ -64,9 +64,9 @@ auto independent = lyt.clone();
 :sync: python
 
 ```python
-from mnt.pyfiction.layouts import cartesian_gate_layout
+from mnt.pyfiction.layouts import CartesianGateLayout
 
-lyt = cartesian_gate_layout((4, 4), "2DDWave")
+lyt = CartesianGateLayout((4, 4), "2DDWave")
 lyt.assign_synchronization_element((1, 1), 2)
 lyt.obstruct_coordinate((2, 2))
 independent = lyt.clone()

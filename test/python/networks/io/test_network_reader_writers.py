@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from mnt.pyfiction.networks import aig_network, get_name, mig_network, simulate_outputs, technology_network, xag_network
+from mnt.pyfiction.networks import AigNetwork, MigNetwork, TechnologyNetwork, XagNetwork, get_name, simulate_outputs
 from mnt.pyfiction.networks.io import (
     read_aig_network,
     read_mig_network,
@@ -32,10 +32,10 @@ if TYPE_CHECKING:
 
 
 READERS = [
-    (read_technology_network, technology_network),
-    (read_aig_network, aig_network),
-    (read_xag_network, xag_network),
-    (read_mig_network, mig_network),
+    (read_technology_network, TechnologyNetwork),
+    (read_aig_network, AigNetwork),
+    (read_xag_network, XagNetwork),
+    (read_mig_network, MigNetwork),
 ]
 
 
@@ -83,7 +83,7 @@ def test_reader_reports_diagnostics(tmp_path: Path) -> None:
 @pytest.mark.parametrize("target", ["TEC", "AIG", "XAG", "MIG"])
 @pytest.mark.parametrize("suffix", ["v", "blif"])
 def test_network_writer_round_trip(
-    interface_network: technology_network, tmp_path: Path, target: str, suffix: str
+    interface_network: TechnologyNetwork, tmp_path: Path, target: str, suffix: str
 ) -> None:
     """Network writers retain functions, names, and unused inputs."""
     network = convert_network(interface_network, getattr(network_target, target))
@@ -95,7 +95,7 @@ def test_network_writer_round_trip(
     assert simulate_outputs(restored) == simulate_outputs(interface_network)
 
 
-def test_aiger_round_trip_keeps_names(interface_network: technology_network, tmp_path: Path) -> None:
+def test_aiger_round_trip_keeps_names(interface_network: TechnologyNetwork, tmp_path: Path) -> None:
     """AIGER preserves interface labels and output functions."""
     aig = convert_network(interface_network, network_target.AIG)
     path = tmp_path / "out.aig"

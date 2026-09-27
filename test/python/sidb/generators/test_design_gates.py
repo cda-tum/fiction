@@ -20,7 +20,9 @@ from mnt.pyfiction.sidb.generators import (
 )
 from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
 from mnt.pyfiction.sidb.simulation.logic import operational_condition
-from mnt.pyfiction.synthesis import create_and_tt, create_nor_tt
+from mnt.pyfiction.synthesis import (
+    standard_functions,
+)
 
 
 @pytest.fixture
@@ -100,7 +102,7 @@ def test_siqad_and_gate_skeleton_100():
     params.on_progress = lambda task, done, total: reports.append((task, done, total))
 
     stats = design_sidb_gates_stats()
-    designed_gates = design_sidb_gates(layout, [create_and_tt()], params, stats)
+    designed_gates = design_sidb_gates(layout, [standard_functions("and")[0]], params, stats)
 
     assert len(designed_gates) == 23
     assert "total time" in repr(stats)
@@ -125,17 +127,17 @@ def test_nor_gate_111(nor_gate_skeleton):
     assert params.canvas[0] == lattice_site(10, 11, 0)
     assert params.canvas[1] == lattice_site(14, 17, 0)
 
-    designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
+    designed_gates = design_sidb_gates(layout, [standard_functions("nor")[0]], params)
     assert len(designed_gates) == 44
 
     params.design_mode = design_sidb_gates_mode.PRUNING_ONLY
-    designed_gate_candidates = design_sidb_gates(layout, [create_nor_tt()], params)
+    designed_gate_candidates = design_sidb_gates(layout, [standard_functions("nor")[0]], params)
     assert len(designed_gate_candidates) == 44
 
     # tolerate kink states
     params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
     params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
-    designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
+    designed_gates = design_sidb_gates(layout, [standard_functions("nor")[0]], params)
     assert len(designed_gates) == 175
 
 
@@ -156,7 +158,7 @@ def test_nor_gate_111_quickcell(nor_gate_skeleton):
     assert params.canvas[0] == lattice_site(10, 13, 0)
     assert params.canvas[1] == lattice_site(14, 17, 0)
 
-    designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
+    designed_gates = design_sidb_gates(layout, [standard_functions("nor")[0]], params)
     assert len(designed_gates) == 14
 
 
@@ -181,7 +183,7 @@ def test_gate_design_timeout(nor_gate_skeleton: sidb_layout, mode: design_sidb_g
     initial_dots = nor_gate_skeleton.sidbs()
 
     with pytest.raises(TimeoutError):
-        design_sidb_gates(nor_gate_skeleton, [create_nor_tt()], params, stats)
+        design_sidb_gates(nor_gate_skeleton, [standard_functions("nor")[0]], params, stats)
 
     assert nor_gate_skeleton.sidbs() == initial_dots
     assert params.operational_params.timeout == 0

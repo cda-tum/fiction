@@ -25,7 +25,7 @@ from mnt.pyfiction.synthesis import (
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 if TYPE_CHECKING:
-    from mnt.pyfiction.networks import technology_network
+    from mnt.pyfiction.networks import TechnologyNetwork
 
 GATE_LIBRARIES = [
     pytest.param(and_or_not, id="and_or_not"),
@@ -41,7 +41,7 @@ def test_missing_gate_exception_export():
     assert issubclass(missing_required_gates_exception, RuntimeError)
 
 
-def test_mapping_default(mux21: technology_network) -> None:
+def test_mapping_default(mux21: TechnologyNetwork) -> None:
     """An empty gate library is rejected before native mapping."""
     with pytest.raises(missing_required_gates_exception, match="missing required gates"):
         technology_mapping(mux21)

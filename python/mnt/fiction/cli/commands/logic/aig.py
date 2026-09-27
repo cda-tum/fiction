@@ -18,7 +18,7 @@ from mnt.fiction.cli.aigverse_bridge import from_aigverse, to_aigverse
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe, size_and_depth
-from mnt.pyfiction.networks import aig_network, get_name, technology_network
+from mnt.pyfiction.networks import AigNetwork, TechnologyNetwork, get_name
 
 if TYPE_CHECKING:
     import argparse
@@ -80,11 +80,11 @@ def aig_command(session: Session, args: argparse.Namespace) -> Result:
     }
 
 
-def _active_aig(session: Session) -> aig_network:
+def _active_aig(session: Session) -> AigNetwork:
     """Require an AIG in the active network store."""
     network = session.networks.current()
-    if not isinstance(network, aig_network):
-        kind = "technology network" if isinstance(network, technology_network) else type(network).__name__
+    if not isinstance(network, AigNetwork):
+        kind = "technology network" if isinstance(network, TechnologyNetwork) else type(network).__name__
         msg = f"the active network is a {kind}; read the file with '--type aig'"
         raise CommandError(msg)
     return network

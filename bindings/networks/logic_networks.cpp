@@ -24,6 +24,7 @@
 #include <mockturtle/views/depth_view.hpp>
 
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -39,9 +40,30 @@ namespace detail
 {
 
 /**
+ * @brief A network edge with its node identity and inversion polarity.
+ */
+struct network_signal
+{
+    /**
+     * @brief Node at the source of the edge.
+     */
+    uint64_t node{};
+    /**
+     * @brief Whether the edge inverts the node's Boolean value.
+     */
+    bool complemented{};
+    /**
+     * @brief Compares both node identity and polarity.
+     * @param other Signal to compare.
+     * @return Whether the signals are equal.
+     */
+    bool operator==(const network_signal& other) const noexcept = default;
+};
+
+/**
  * Binds one network type. Node-type queries are bound only where the network implements them, so an AIG exposes
  * `is_and` but not `is_maj`. Output lookups by index (`po_index`, `po_at`) exist on the technology network alone,
- * whose signals are nodes; the mockturtle networks answer them with signals, which have no Python type.
+ * whose signals are nodes. Connectivity queries return signals with their edge polarity.
  */
 template <typename Ntk>
 void network(nanobind::module_& m, const char* network_name, const char* doc)
@@ -55,6 +77,9 @@ void network(nanobind::module_& m, const char* network_name, const char* doc)
     auto cls = py::class_<Ntk>(m, network_name, doc);
 
     cls.def(py::init<>(), "Default constructor.")
+
+        .def_prop_rw("name", &Ntk::get_network_name, &Ntk::set_network_name, "The network's name.")
+        .def("__len__", &Ntk::size, "Returns the number of network nodes.")
 
         .def("size", &Ntk::size)
         .def("num_gates", &Ntk::num_gates)
@@ -91,9 +116,10 @@ void network(nanobind::module_& m, const char* network_name, const char* doc)
         .def("pos",
              [](const Ntk& ntk)
              {
-                 std::vector<mockturtle::node<Ntk>> pos{};
+                 std::vector<network_signal> pos{};
                  pos.reserve(ntk.num_pos());
-                 ntk.foreach_po([&pos, &ntk](const auto& po) { pos.push_back(ntk.get_node(po)); });
+                 ntk.foreach_po([&pos, &ntk](const auto& po)
+                                { pos.push_back({ntk.get_node(po), ntk.is_complemented(po)}); });
                  return pos;
              })
 
@@ -101,9 +127,14 @@ void network(nanobind::module_& m, const char* network_name, const char* doc)
             "fanins",
             [](const Ntk& ntk, const mockturtle::node<Ntk>& n)
             {
-                std::vector<mockturtle::node<Ntk>> fanins{};
+                if (n >= ntk.size())
+                {
+                    throw std::out_of_range("network node index out of range");
+                }
+                std::vector<network_signal> fanins{};
                 fanins.reserve(ntk.fanin_size(n));
-                ntk.foreach_fanin(n, [&fanins, &ntk](const auto& f) { fanins.push_back(ntk.get_node(f)); });
+                ntk.foreach_fanin(n, [&fanins, &ntk](const auto& f)
+                                  { fanins.push_back({ntk.get_node(f), ntk.is_complemented(f)}); });
                 return fanins;
             },
             py::arg("n"))
@@ -207,10 +238,25 @@ void network(nanobind::module_& m, const char* network_name, const char* doc)
 
 void logic_networks(nanobind::module_& m)
 {
-    detail::network<py_tec_network>(m, "technology_network", DOC(fiction_networks_technology_network));
-    detail::network<py_aig_network>(m, "aig_network", "An AND-inverter graph (AIG) with node and output names.");
-    detail::network<py_xag_network>(m, "xag_network", "An XOR-AND-inverter graph (XAG) with node and output names.");
-    detail::network<py_mig_network>(m, "mig_network", "A majority-inverter graph (MIG) with node and output names.");
+    namespace py = nanobind;
+    py::class_<detail::network_signal>(m, "Signal", "A node reference and its edge polarity.")
+        .def(py::init<uint64_t, bool>(), py::arg("node"), py::arg("complemented") = false)
+        .def_ro("node", &detail::network_signal::node)
+        .def_ro("complemented", &detail::network_signal::complemented)
+        .def(
+            "__eq__",
+            [](const detail::network_signal& self, const py::handle& other)
+            {
+                return py::isinstance<detail::network_signal>(other) && self == py::cast<detail::network_signal>(other);
+            },
+            py::arg("other"))
+        .def("__hash__", [](const detail::network_signal& signal)
+             { return py::hash(py::make_tuple(signal.node, signal.complemented)); });
+
+    detail::network<py_tec_network>(m, "TechnologyNetwork", DOC(fiction_networks_technology_network));
+    detail::network<py_aig_network>(m, "AigNetwork", "An AND-inverter graph (AIG) with node and output names.");
+    detail::network<py_xag_network>(m, "XagNetwork", "An XOR-AND-inverter graph (XAG) with node and output names.");
+    detail::network<py_mig_network>(m, "MigNetwork", "A majority-inverter graph (MIG) with node and output names.");
 }
 
 }  // namespace pyfiction

@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout, ShiftedCartesianGateLayout
 from mnt.pyfiction.layouts.io import write_dot_layout
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.parametrize(
     "layout_type",
-    [cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout],
+    [CartesianGateLayout, ShiftedCartesianGateLayout, HexagonalGateLayout],
 )
 def test_write_dot_layout_draws_every_topology(tmp_path: Path, layout_type: type) -> None:
     layout = layout_type((2, 2, 1), "2DDWave", "drawn")
@@ -37,7 +37,7 @@ def test_write_dot_layout_draws_every_topology(tmp_path: Path, layout_type: type
     assert "a" in text
 
 
-def test_clone_is_independent(mux21_layout: cartesian_gate_layout) -> None:
+def test_clone_is_independent(mux21_layout: CartesianGateLayout) -> None:
     copy = mux21_layout.clone()
     assert copy.num_gates() == mux21_layout.num_gates()
     copy.set_layout_name("copy")

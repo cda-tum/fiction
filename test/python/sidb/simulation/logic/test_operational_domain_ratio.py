@@ -25,7 +25,9 @@ from mnt.pyfiction.sidb.simulation.logic import (
     parameter_point,
     sweep_parameter,
 )
-from mnt.pyfiction.synthesis import create_and_tt
+from mnt.pyfiction.synthesis import (
+    standard_functions,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -50,7 +52,7 @@ def test_and_gate_100_lattice(resources_dir):
 
     operational_domain_ratio_result = operational_domain_ratio(
         lyt,
-        [create_and_tt()],
+        [standard_functions("and")[0]],
         parameter_point([5.6, 5.0]),
         ratio_params,
     )
@@ -78,7 +80,7 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
                     parameter_point,
                     sweep_parameter,
                 )
-                from mnt.pyfiction.synthesis import create_and_tt
+                from mnt.pyfiction.synthesis import standard_functions
 
                 layout = read_sqd_layout(sys.argv[1])
                 params = operational_domain_params()
@@ -103,7 +105,7 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
                 ratio_params = operational_domain_ratio_params()
                 ratio_params.op_domain_params = params
                 ratio = operational_domain_ratio(
-                    layout, [create_and_tt()], parameter_point([5.6, 5]), ratio_params
+                    layout, [standard_functions("and")[0]], parameter_point([5.6, 5]), ratio_params
                 )
                 assert 0 <= ratio <= 1, ratio
                 assert reports[-1][1] > 0, reports

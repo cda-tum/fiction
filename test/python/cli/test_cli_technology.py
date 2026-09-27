@@ -14,9 +14,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import shifted_cartesian_gate_layout
-from mnt.pyfiction.mol_qca import mol_qca_layout
-from mnt.pyfiction.qca import qca_layout
+from mnt.pyfiction.layouts import ShiftedCartesianGateLayout
+from mnt.pyfiction.mol_qca import MolecularQCALayout
+from mnt.pyfiction.qca import QCALayout
 from mnt.pyfiction.sidb import sidb_layout
 
 if TYPE_CHECKING:
@@ -27,8 +27,8 @@ if TYPE_CHECKING:
 
 def test_cell_qca_one_and_sim7(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho; cell; cell -l SIM7-MOL")
-    assert isinstance(mux21_shell.session.cell_layouts.items[0].layout, qca_layout)
-    assert isinstance(mux21_shell.session.cell_layouts.items[1].layout, mol_qca_layout)
+    assert isinstance(mux21_shell.session.cell_layouts.items[0].layout, QCALayout)
+    assert isinstance(mux21_shell.session.cell_layouts.items[1].layout, MolecularQCALayout)
     assert mux21_shell.session.log[-1]["result"]["cell_layout"]["technology"] == "molQCA"
 
 
@@ -85,7 +85,7 @@ def test_cell_library_spellings(mux21_shell: Shell, spelling: str) -> None:
 
 
 def test_gate_library_error_preserves_store(shell: Shell) -> None:
-    layout = shifted_cartesian_gate_layout((1, 1), "2DDWave", "unsupported routing")
+    layout = ShiftedCartesianGateLayout((1, 1), "2DDWave", "unsupported routing")
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (0, 1))
     shell.session.gate_layouts.add(layout)

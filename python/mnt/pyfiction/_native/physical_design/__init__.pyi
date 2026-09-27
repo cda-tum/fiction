@@ -195,10 +195,10 @@ class exact_stats:
     def num_aspect_ratios(self) -> int: ...
 
 def exact_cartesian(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: exact_params = ...,
     statistics: exact_stats | None = None,
-) -> mnt.pyfiction._native.layouts.cartesian_gate_layout | None:
+) -> mnt.pyfiction._native.layouts.CartesianGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
     proposed in \\"An Exact Method for Design Exploration of Quantum-dot
@@ -274,10 +274,10 @@ def exact_cartesian(
     """
 
 def exact_shifted_cartesian(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: exact_params = ...,
     statistics: exact_stats | None = None,
-) -> mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout | None:
+) -> mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
     proposed in \\"An Exact Method for Design Exploration of Quantum-dot
@@ -353,10 +353,10 @@ def exact_shifted_cartesian(
     """
 
 def exact_hexagonal(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: exact_params = ...,
     statistics: exact_stats | None = None,
-) -> mnt.pyfiction._native.layouts.hexagonal_gate_layout | None:
+) -> mnt.pyfiction._native.layouts.HexagonalGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
     proposed in \\"An Exact Method for Design Exploration of Quantum-dot
@@ -432,10 +432,10 @@ def exact_hexagonal(
     """
 
 def exact_odd_row_cartesian(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: exact_params = ...,
     statistics: exact_stats | None = None,
-) -> mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout | None:
+) -> mnt.pyfiction._native.layouts.OddRowCartesianGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
     proposed in \\"An Exact Method for Design Exploration of Quantum-dot
@@ -511,10 +511,10 @@ def exact_odd_row_cartesian(
     """
 
 def exact_even_row_cartesian(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: exact_params = ...,
     statistics: exact_stats | None = None,
-) -> mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout | None:
+) -> mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
     proposed in \\"An Exact Method for Design Exploration of Quantum-dot
@@ -590,10 +590,10 @@ def exact_even_row_cartesian(
     """
 
 def exact_even_column_cartesian(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: exact_params = ...,
     statistics: exact_stats | None = None,
-) -> mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout | None:
+) -> mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
     proposed in \\"An Exact Method for Design Exploration of Quantum-dot
@@ -669,10 +669,10 @@ def exact_even_column_cartesian(
     """
 
 def exact_odd_row_hex(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: exact_params = ...,
     statistics: exact_stats | None = None,
-) -> mnt.pyfiction._native.layouts.odd_row_hex_gate_layout | None:
+) -> mnt.pyfiction._native.layouts.OddRowHexGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
     proposed in \\"An Exact Method for Design Exploration of Quantum-dot
@@ -748,10 +748,10 @@ def exact_odd_row_hex(
     """
 
 def exact_odd_column_hex(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: exact_params = ...,
     statistics: exact_stats | None = None,
-) -> mnt.pyfiction._native.layouts.odd_column_hex_gate_layout | None:
+) -> mnt.pyfiction._native.layouts.OddColumnHexGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
     proposed in \\"An Exact Method for Design Exploration of Quantum-dot
@@ -827,10 +827,10 @@ def exact_odd_column_hex(
     """
 
 def exact_even_column_hex(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: exact_params = ...,
     statistics: exact_stats | None = None,
-) -> mnt.pyfiction._native.layouts.even_column_hex_gate_layout | None:
+) -> mnt.pyfiction._native.layouts.EvenColumnHexGateLayout | None:
     """
     An exact placement & routing approach using SMT solving as originally
     proposed in \\"An Exact Method for Design Exploration of Quantum-dot
@@ -951,10 +951,10 @@ class orthogonal_stats:
     def num_crossings(self) -> int: ...
 
 def orthogonal(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: orthogonal_params = ...,
     statistics: orthogonal_stats | None = None,
-) -> mnt.pyfiction._native.layouts.cartesian_gate_layout:
+) -> mnt.pyfiction._native.layouts.CartesianGateLayout:
     """
     A scalable placement & routing approach based on orthogonal graph
     drawing as originally proposed in \\"Scalable Design for Field-coupled
@@ -1008,10 +1008,10 @@ def orthogonal(
     """
 
 def orthogonal_hexagonal(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: orthogonal_params = ...,
     statistics: orthogonal_stats | None = None,
-) -> mnt.pyfiction._native.layouts.hexagonal_gate_layout:
+) -> mnt.pyfiction._native.layouts.HexagonalGateLayout:
     """
     A scalable placement & routing approach based on orthogonal graph
     drawing as originally proposed in \\"Scalable Design for Field-coupled
@@ -1065,10 +1065,10 @@ def orthogonal_hexagonal(
     """
 
 def orthogonal_odd_row_hex(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: orthogonal_params = ...,
     statistics: orthogonal_stats | None = None,
-) -> mnt.pyfiction._native.layouts.odd_row_hex_gate_layout:
+) -> mnt.pyfiction._native.layouts.OddRowHexGateLayout:
     """
     A scalable placement & routing approach based on orthogonal graph
     drawing as originally proposed in \\"Scalable Design for Field-coupled
@@ -1122,10 +1122,10 @@ def orthogonal_odd_row_hex(
     """
 
 def orthogonal_odd_column_hex(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: orthogonal_params = ...,
     statistics: orthogonal_stats | None = None,
-) -> mnt.pyfiction._native.layouts.odd_column_hex_gate_layout:
+) -> mnt.pyfiction._native.layouts.OddColumnHexGateLayout:
     """
     A scalable placement & routing approach based on orthogonal graph
     drawing as originally proposed in \\"Scalable Design for Field-coupled
@@ -1179,10 +1179,10 @@ def orthogonal_odd_column_hex(
     """
 
 def orthogonal_even_column_hex(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: orthogonal_params = ...,
     statistics: orthogonal_stats | None = None,
-) -> mnt.pyfiction._native.layouts.even_column_hex_gate_layout:
+) -> mnt.pyfiction._native.layouts.EvenColumnHexGateLayout:
     """
     A scalable placement & routing approach based on orthogonal graph
     drawing as originally proposed in \\"Scalable Design for Field-coupled
@@ -1511,11 +1511,11 @@ class graph_oriented_layout_design_stats:
         """Number of crossings."""
 
 def graph_oriented_layout_design(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     parameters: graph_oriented_layout_design_params = ...,
     statistics: graph_oriented_layout_design_stats | None = None,
-    custom_cost_objective: Callable[[mnt.pyfiction._native.layouts.cartesian_gate_layout], int] | None = None,
-) -> mnt.pyfiction._native.layouts.cartesian_gate_layout | None:
+    custom_cost_objective: Callable[[mnt.pyfiction._native.layouts.CartesianGateLayout], int] | None = None,
+) -> mnt.pyfiction._native.layouts.CartesianGateLayout | None:
     """
     A scalable and efficient placement & routing approach based on
     spanning a search space graph of partial layouts and finding a path to
@@ -1565,9 +1565,9 @@ def graph_oriented_layout_design(
     """
 
 def apply_qca_one_library(
-    layout: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
     on_progress: Callable[[str, int, int], None] | None = None,
-) -> mnt.pyfiction._native.qca.qca_layout:
+) -> mnt.pyfiction._native.qca.QCALayout:
     """
     Applies a gate library to a given gate-level layout and, thereby,
     creates and returns the layout type the library produces, e.g.,
@@ -1603,9 +1603,9 @@ def apply_qca_one_library(
     """
 
 def apply_sim7_mol_library(
-    layout: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
     on_progress: Callable[[str, int, int], None] | None = None,
-) -> mnt.pyfiction._native.mol_qca.mol_qca_layout:
+) -> mnt.pyfiction._native.mol_qca.MolecularQCALayout:
     """
     Applies a gate library to a given gate-level layout and, thereby,
     creates and returns the layout type the library produces, e.g.,
@@ -1641,9 +1641,9 @@ def apply_sim7_mol_library(
     """
 
 def apply_topolinano_library(
-    layout: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     on_progress: Callable[[str, int, int], None] | None = None,
-) -> mnt.pyfiction._native.inml.inml_layout:
+) -> mnt.pyfiction._native.inml.INMLLayout:
     """
     Applies a gate library to a given gate-level layout and, thereby,
     creates and returns the layout type the library produces, e.g.,
@@ -1679,7 +1679,7 @@ def apply_topolinano_library(
     """
 
 def apply_bestagon_library(
-    layout: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    layout: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> mnt.pyfiction._native.sidb.sidb_layout:
     """
@@ -1805,33 +1805,33 @@ class color_routing_params:
 
 @overload
 def color_routing(
-    layout: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
     objectives: Sequence[
         tuple[
-            mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-            mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
         ]
     ],
     params: color_routing_params = ...,
 ) -> bool: ...
 @overload
 def color_routing(
-    layout: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     objectives: Sequence[
         tuple[
-            mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-            mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
         ]
     ],
     params: color_routing_params = ...,
 ) -> bool: ...
 @overload
 def color_routing(
-    layout: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    layout: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     objectives: Sequence[
         tuple[
-            mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-            mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
         ]
     ],
     params: color_routing_params = ...,
@@ -1975,10 +1975,10 @@ class hexagonalization_stats:
         """Number of crossings."""
 
 def hexagonalization(
-    layout: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
     parameters: hexagonalization_params = ...,
     statistics: hexagonalization_stats | None = None,
-) -> mnt.pyfiction._native.layouts.hexagonal_gate_layout:
+) -> mnt.pyfiction._native.layouts.HexagonalGateLayout:
     """
     Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even
     row clocked layout suitable for SiDBs by remapping all gates and wires
@@ -2104,7 +2104,7 @@ class post_layout_optimization_stats:
         """Number of crossings after the post-layout optimization process."""
 
 def post_layout_optimization(
-    layout: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
     parameters: post_layout_optimization_params = ...,
     statistics: post_layout_optimization_stats | None = None,
 ) -> None:
@@ -2217,7 +2217,7 @@ class wiring_reduction_stats:
         """Improvement in layout area."""
 
 def wiring_reduction(
-    layout: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
     parameters: wiring_reduction_params = ...,
     statistics: wiring_reduction_stats | None = None,
 ) -> None:
@@ -2254,21 +2254,21 @@ def wiring_reduction(
 
 @overload
 def is_crossable_wire(
-    lyt: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    src: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    successor: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    lyt: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    src: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    successor: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
 ) -> bool: ...
 @overload
 def is_crossable_wire(
-    lyt: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    src: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    successor: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    lyt: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    src: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    successor: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
 ) -> bool: ...
 @overload
 def is_crossable_wire(
-    lyt: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    src: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    successor: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    lyt: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    src: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    successor: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
 ) -> bool:
     """
     Checks whether a given coordinate `successor` hosts a crossable wire
@@ -2300,18 +2300,18 @@ def is_crossable_wire(
 
 @overload
 def route_path(
-    layout: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    path: Sequence[mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]],
+    layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    path: Sequence[mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int]],
 ) -> None: ...
 @overload
 def route_path(
-    layout: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    path: Sequence[mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]],
+    layout: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    path: Sequence[mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int]],
 ) -> None: ...
 @overload
 def route_path(
-    layout: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    path: Sequence[mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]],
+    layout: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    path: Sequence[mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int]],
 ) -> None:
     """
     Establishes a wire routing along the given path in the given layout.
@@ -2334,27 +2334,21 @@ def route_path(
 
 @overload
 def extract_routing_objectives(
-    layout: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
 ) -> list[
-    tuple[
-        mnt.pyfiction._native.layouts.coords.offset_coordinate, mnt.pyfiction._native.layouts.coords.offset_coordinate
-    ]
+    tuple[mnt.pyfiction._native.layouts.coords.OffsetCoordinate, mnt.pyfiction._native.layouts.coords.OffsetCoordinate]
 ]: ...
 @overload
 def extract_routing_objectives(
-    layout: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
 ) -> list[
-    tuple[
-        mnt.pyfiction._native.layouts.coords.offset_coordinate, mnt.pyfiction._native.layouts.coords.offset_coordinate
-    ]
+    tuple[mnt.pyfiction._native.layouts.coords.OffsetCoordinate, mnt.pyfiction._native.layouts.coords.OffsetCoordinate]
 ]: ...
 @overload
 def extract_routing_objectives(
-    layout: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    layout: mnt.pyfiction._native.layouts.HexagonalGateLayout,
 ) -> list[
-    tuple[
-        mnt.pyfiction._native.layouts.coords.offset_coordinate, mnt.pyfiction._native.layouts.coords.offset_coordinate
-    ]
+    tuple[mnt.pyfiction._native.layouts.coords.OffsetCoordinate, mnt.pyfiction._native.layouts.coords.OffsetCoordinate]
 ]:
     """
     Extracts all routing objectives from the given layout. To this end,
@@ -2382,11 +2376,11 @@ def extract_routing_objectives(
     """
 
 @overload
-def clear_routing(lyt: mnt.pyfiction._native.layouts.cartesian_gate_layout) -> None: ...
+def clear_routing(lyt: mnt.pyfiction._native.layouts.CartesianGateLayout) -> None: ...
 @overload
-def clear_routing(lyt: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout) -> None: ...
+def clear_routing(lyt: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout) -> None: ...
 @overload
-def clear_routing(lyt: mnt.pyfiction._native.layouts.hexagonal_gate_layout) -> None:
+def clear_routing(lyt: mnt.pyfiction._native.layouts.HexagonalGateLayout) -> None:
     """
     Removes the entire wire routing from the passed layout. This involves
     deleting all wire segments that have been placed on any tile as well
@@ -2401,16 +2395,15 @@ def clear_routing(lyt: mnt.pyfiction._native.layouts.hexagonal_gate_layout) -> N
 
 @overload
 def reserve_input_nodes(
-    lyt: mnt.pyfiction._native.layouts.cartesian_gate_layout, ntk: mnt.pyfiction._native.networks.technology_network
+    lyt: mnt.pyfiction._native.layouts.CartesianGateLayout, ntk: mnt.pyfiction._native.networks.TechnologyNetwork
 ) -> dict[int, int]: ...
 @overload
 def reserve_input_nodes(
-    lyt: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout, ntk: mnt.pyfiction._native.networks.TechnologyNetwork
 ) -> dict[int, int]: ...
 @overload
 def reserve_input_nodes(
-    lyt: mnt.pyfiction._native.layouts.hexagonal_gate_layout, ntk: mnt.pyfiction._native.networks.technology_network
+    lyt: mnt.pyfiction._native.layouts.HexagonalGateLayout, ntk: mnt.pyfiction._native.networks.TechnologyNetwork
 ) -> dict[int, int]:
     """
     Reserves input nodes and returns their source-node to layout-node mapping.
@@ -2418,24 +2411,24 @@ def reserve_input_nodes(
 
 @overload
 def place(
-    lyt: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
 ) -> int: ...
 @overload
 def place(
-    lyt: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
     a: int,
 ) -> int: ...
 @overload
 def place(
-    lyt: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
     a: int,
     b: int,
@@ -2443,9 +2436,9 @@ def place(
 ) -> int: ...
 @overload
 def place(
-    lyt: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
     a: int,
     b: int,
@@ -2453,24 +2446,24 @@ def place(
 ) -> int: ...
 @overload
 def place(
-    lyt: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
 ) -> int: ...
 @overload
 def place(
-    lyt: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
     a: int,
 ) -> int: ...
 @overload
 def place(
-    lyt: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
     a: int,
     b: int,
@@ -2478,9 +2471,9 @@ def place(
 ) -> int: ...
 @overload
 def place(
-    lyt: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
     a: int,
     b: int,
@@ -2488,24 +2481,24 @@ def place(
 ) -> int: ...
 @overload
 def place(
-    lyt: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
 ) -> int: ...
 @overload
 def place(
-    lyt: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
     a: int,
 ) -> int: ...
 @overload
 def place(
-    lyt: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
     a: int,
     b: int,
@@ -2513,9 +2506,9 @@ def place(
 ) -> int: ...
 @overload
 def place(
-    lyt: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction._native.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    ntk: mnt.pyfiction._native.networks.technology_network,
+    lyt: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    t: mnt.pyfiction._native.layouts.coords.OffsetCoordinate | tuple[int, int] | tuple[int, int, int],
+    ntk: mnt.pyfiction._native.networks.TechnologyNetwork,
     n: int,
     a: int,
     b: int,

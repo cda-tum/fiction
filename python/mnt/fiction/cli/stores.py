@@ -19,23 +19,23 @@ from typing import TYPE_CHECKING, Generic, TypeAlias, TypeVar
 
 from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
 from mnt.pyfiction.fcn import area
-from mnt.pyfiction.inml import inml_layout
+from mnt.pyfiction.inml import INMLLayout
 from mnt.pyfiction.layouts import (
-    cartesian_gate_layout,
-    even_column_cartesian_gate_layout,
-    even_column_hex_gate_layout,
-    even_row_cartesian_gate_layout,
-    hexagonal_gate_layout,
-    odd_column_hex_gate_layout,
-    odd_row_cartesian_gate_layout,
-    odd_row_hex_gate_layout,
-    shifted_cartesian_gate_layout,
+    CartesianGateLayout,
+    EvenColumnCartesianGateLayout,
+    EvenColumnHexGateLayout,
+    EvenRowCartesianGateLayout,
+    HexagonalGateLayout,
+    OddColumnHexGateLayout,
+    OddRowCartesianGateLayout,
+    OddRowHexGateLayout,
+    ShiftedCartesianGateLayout,
 )
-from mnt.pyfiction.mol_qca import mol_qca_layout
-from mnt.pyfiction.networks import aig_network, get_name, mig_network, technology_network, xag_network
-from mnt.pyfiction.qca import qca_layout
+from mnt.pyfiction.mol_qca import MolecularQCALayout
+from mnt.pyfiction.networks import AigNetwork, MigNetwork, TechnologyNetwork, XagNetwork, get_name
+from mnt.pyfiction.qca import QCALayout
 from mnt.pyfiction.sidb import charge_distribution, row_of, sidb_layout
-from mnt.pyfiction.synthesis import dynamic_truth_table
+from mnt.pyfiction.synthesis import TruthTable
 from mnt.pyfiction.verification import critical_path_length_and_throughput
 
 from .errors import CommandError
@@ -45,36 +45,36 @@ if TYPE_CHECKING:
 
     from mnt.pyfiction.sidb.simulation import sidb_simulation_result
 
-Network: TypeAlias = aig_network | xag_network | mig_network | technology_network
+Network: TypeAlias = AigNetwork | XagNetwork | MigNetwork | TechnologyNetwork
 """Logic network types held by the shell."""
 GateLayout: TypeAlias = (
-    cartesian_gate_layout
-    | shifted_cartesian_gate_layout
-    | hexagonal_gate_layout
-    | odd_row_cartesian_gate_layout
-    | even_row_cartesian_gate_layout
-    | even_column_cartesian_gate_layout
-    | odd_row_hex_gate_layout
-    | odd_column_hex_gate_layout
-    | even_column_hex_gate_layout
+    CartesianGateLayout
+    | ShiftedCartesianGateLayout
+    | HexagonalGateLayout
+    | OddRowCartesianGateLayout
+    | EvenRowCartesianGateLayout
+    | EvenColumnCartesianGateLayout
+    | OddRowHexGateLayout
+    | OddColumnHexGateLayout
+    | EvenColumnHexGateLayout
 )
 """The nine supported gate-level layout topologies."""
-CellLayout: TypeAlias = qca_layout | inml_layout | mol_qca_layout | sidb_layout
+CellLayout: TypeAlias = QCALayout | INMLLayout | MolecularQCALayout | sidb_layout
 """Cell-level layout types held by the shell."""
 
 NETWORK_TYPES: dict[type[Network], str] = {
-    aig_network: "AIG",
-    xag_network: "XAG",
-    mig_network: "MIG",
-    technology_network: "TEC",
+    AigNetwork: "AIG",
+    XagNetwork: "XAG",
+    MigNetwork: "MIG",
+    TechnologyNetwork: "TEC",
 }
 """The network classes and the type names ``read --type`` accepts, lowercased."""
 
 
 TECHNOLOGIES: dict[type[CellLayout], str] = {
-    qca_layout: "QCA",
-    inml_layout: "iNML",
-    mol_qca_layout: "molQCA",
+    QCALayout: "QCA",
+    INMLLayout: "iNML",
+    MolecularQCALayout: "molQCA",
     sidb_layout: "SiDB",
 }
 """The cell-level layout classes and their technology names."""
@@ -225,7 +225,7 @@ def element_name(element: object) -> str:
     return ""
 
 
-def describe_truth_table(tt: dynamic_truth_table) -> dict[str, object]:
+def describe_truth_table(tt: TruthTable) -> dict[str, object]:
     """Describe a truth table.
 
     Args:
@@ -318,7 +318,7 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
             }
     else:
         description["size"] = {"x": layout.x() + 1, "y": layout.y() + 1, "z": layout.z() + 1, "area": layout.area()}
-        if not isinstance(layout, mol_qca_layout):
+        if not isinstance(layout, MolecularQCALayout):
             description["tile"] = {"x": layout.get_tile_size_x(), "y": layout.get_tile_size_y()}
     description["inputs"] = layout.num_pis()
     description["outputs"] = layout.num_pos()
@@ -383,7 +383,7 @@ def describe(element: object, *, timing: bool = False) -> dict[str, object]:
     Raises:
         TypeError: When the element is of no store type.
     """
-    if isinstance(element, dynamic_truth_table):
+    if isinstance(element, TruthTable):
         return describe_truth_table(element)
     if isinstance(element, Network):
         return describe_network(element)

@@ -155,7 +155,7 @@ class displacement_robustness_domain:
 
 def determine_displacement_robustness_domain(
     layout: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: displacement_robustness_domain_params = ...,
     stats: displacement_robustness_domain_stats | None = None,
 ) -> displacement_robustness_domain:

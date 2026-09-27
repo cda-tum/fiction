@@ -231,7 +231,7 @@ class design_sidb_gates_params:
 
 def design_sidb_gates(
     skeleton: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: design_sidb_gates_params = ...,
     stats: design_sidb_gates_stats | None = None,
 ) -> list[mnt.pyfiction._native.sidb.sidb_layout]:
@@ -360,7 +360,7 @@ class on_the_fly_sidb_circuit_design_params:
     def sidb_on_the_fly_gate_library_parameters(self, arg: sidb_on_the_fly_gate_library_params, /) -> None: ...
 
 def on_the_fly_sidb_circuit_design(
-    layout: mnt.pyfiction._native.layouts.hexagonal_gate_layout, params: on_the_fly_sidb_circuit_design_params = ...
+    layout: mnt.pyfiction._native.layouts.HexagonalGateLayout, params: on_the_fly_sidb_circuit_design_params = ...
 ) -> mnt.pyfiction._native.sidb.sidb_layout:
     """
     Design an SiDB circuit from a placed and routed hexagonal gate-level layout.

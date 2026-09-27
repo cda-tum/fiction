@@ -8,11 +8,11 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.layouts import hexagonal_layout
+from mnt.pyfiction.layouts import HexagonalGateLayout
 
 
 def test_coordinate_iteration():
-    layout = hexagonal_layout((9, 9, 1))
+    layout = HexagonalGateLayout((9, 9, 1))
 
     for t in layout.coordinates():
         assert t <= (9, 9, 1)

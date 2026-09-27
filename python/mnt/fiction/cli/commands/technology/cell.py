@@ -16,7 +16,7 @@ from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import CellEntry, describe
 from mnt.fiction.cli.topologies import TOPOLOGIES
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout, ShiftedCartesianGateLayout
 from mnt.pyfiction.physical_design import (
     apply_bestagon_library,
     apply_qca_one_library,
@@ -35,10 +35,10 @@ if TYPE_CHECKING:
 
 
 GATE_LIBRARIES: dict[str, tuple[type[GateLayout], Callable[..., CellLayout]]] = {
-    "qca-one": (cartesian_gate_layout, apply_qca_one_library),
-    "sim7-mol": (cartesian_gate_layout, apply_sim7_mol_library),
-    "topolinano": (shifted_cartesian_gate_layout, apply_topolinano_library),
-    "bestagon": (hexagonal_gate_layout, apply_bestagon_library),
+    "qca-one": (CartesianGateLayout, apply_qca_one_library),
+    "sim7-mol": (CartesianGateLayout, apply_sim7_mol_library),
+    "topolinano": (ShiftedCartesianGateLayout, apply_topolinano_library),
+    "bestagon": (HexagonalGateLayout, apply_bestagon_library),
 }
 """The gate libraries, each with the gate-level layout topology it maps."""
 

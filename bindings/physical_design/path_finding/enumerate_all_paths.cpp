@@ -87,11 +87,8 @@ void enumerate_all_paths(nanobind::module_& m)
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::enumerate_all_paths_impl<py_cartesian_gate_layout>(m);
-    detail::enumerate_all_paths_impl<py_cartesian_layout>(m);
     detail::enumerate_all_paths_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::enumerate_all_paths_impl<py_shifted_cartesian_layout>(m);
     detail::enumerate_all_paths_impl<py_hexagonal_gate_layout>(m);
-    detail::enumerate_all_paths_impl<py_hexagonal_layout>(m);
 }
 
 }  // namespace pyfiction

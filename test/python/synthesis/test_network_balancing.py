@@ -13,10 +13,10 @@ from typing import TYPE_CHECKING
 from mnt.pyfiction.synthesis import is_balanced, network_balancing, network_balancing_params
 
 if TYPE_CHECKING:
-    from mnt.pyfiction.networks import technology_network
+    from mnt.pyfiction.networks import TechnologyNetwork
 
 
-def test_balancing(mux21: technology_network) -> None:
+def test_balancing(mux21: TechnologyNetwork) -> None:
     """Balancing aligns paths in a network whose output is driven directly by a gate."""
     assert mux21.num_gates() == 4
 

@@ -43,14 +43,13 @@ void offset_coordinate(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<py_offset_coordinate>(m, "offset_coordinate", DOC(fiction_layouts_coords_offset))
+    py::class_<py_offset_coordinate>(m, "OffsetCoordinate", DOC(fiction_layouts_coords_offset))
         .def(py::init<>(), DOC(fiction_layouts_coords_offset_offset))
-        .def(py::init<const uint64_t>(), py::arg("int_repr"), DOC(fiction_layouts_coords_offset_offset_4))
         .def(py::init<const decltype(py_offset_coordinate().x), const decltype(py_offset_coordinate().y),
                       const decltype(py_offset_coordinate().z)>(),
              py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_layouts_coords_offset_offset_2))
         .def(py::init<const py_offset_coordinate>(), py::arg("c"),
-             py::sig("def __init__(self, c: mnt.pyfiction._native.layouts.coords.offset_coordinate) -> None"))
+             py::sig("def __init__(self, c: mnt.pyfiction._native.layouts.coords.OffsetCoordinate) -> None"))
         .def(
             "__init__",
             [](py::pointer_and_handle<py_offset_coordinate> self, const py::tuple& t)
@@ -74,17 +73,14 @@ void offset_coordinate(nanobind::module_& m)
             py::arg("tuple_repr"),
             py::sig("def __init__(self, tuple_repr: tuple[int, int] | tuple[int, int, int]) -> None"))
 
-        .def_prop_rw(
-            "x", [](py_offset_coordinate& self) -> decltype(self.x) { return self.x; },
-            [](py_offset_coordinate& self, const decltype(self.x) value) { self.x = value; },
+        .def_prop_ro(
+            "x", [](const py_offset_coordinate& self) -> decltype(self.x) { return self.x; },
             DOC(fiction_layouts_coords_offset_x))
-        .def_prop_rw(
-            "y", [](py_offset_coordinate& self) -> decltype(self.y) { return self.y; },
-            [](py_offset_coordinate& self, const decltype(self.y) value) { self.y = value; },
+        .def_prop_ro(
+            "y", [](const py_offset_coordinate& self) -> decltype(self.y) { return self.y; },
             DOC(fiction_layouts_coords_offset_y))
-        .def_prop_rw(
-            "z", [](py_offset_coordinate& self) -> decltype(self.z) { return self.z; },
-            [](py_offset_coordinate& self, const decltype(self.z) value) { self.z = value; },
+        .def_prop_ro(
+            "z", [](const py_offset_coordinate& self) -> decltype(self.z) { return self.z; },
             DOC(fiction_layouts_coords_offset_z))
 
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
@@ -114,13 +110,13 @@ void cube_coordinate(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<py_cube_coordinate>(m, "cube_coordinate", DOC(fiction_layouts_coords_cube))
+    py::class_<py_cube_coordinate>(m, "CubeCoordinate", DOC(fiction_layouts_coords_cube))
         .def(py::init<>(), DOC(fiction_layouts_coords_cube_cube))
         .def(py::init<const decltype(py_cube_coordinate().x), const decltype(py_cube_coordinate().y),
                       const decltype(py_cube_coordinate().z)>(),
              py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_layouts_coords_cube_cube_2))
         .def(py::init<const py_cube_coordinate>(), py::arg("c"),
-             py::sig("def __init__(self, c: mnt.pyfiction._native.layouts.coords.cube_coordinate) -> None"))
+             py::sig("def __init__(self, c: mnt.pyfiction._native.layouts.coords.CubeCoordinate) -> None"))
         .def(
             "__init__",
             [](py::pointer_and_handle<py_cube_coordinate> self, const py::tuple& t)
@@ -144,17 +140,14 @@ void cube_coordinate(nanobind::module_& m)
             py::arg("tuple_repr"),
             py::sig("def __init__(self, tuple_repr: tuple[int, int] | tuple[int, int, int]) -> None"))
 
-        .def_prop_rw(
-            "x", [](py_cube_coordinate& self) -> decltype(self.x) { return self.x; },
-            [](py_cube_coordinate& self, const decltype(self.x) value) { self.x = value; },
+        .def_prop_ro(
+            "x", [](const py_cube_coordinate& self) -> decltype(self.x) { return self.x; },
             DOC(fiction_layouts_coords_cube_x))
-        .def_prop_rw(
-            "y", [](py_cube_coordinate& self) -> decltype(self.y) { return self.y; },
-            [](py_cube_coordinate& self, const decltype(self.y) value) { self.y = value; },
+        .def_prop_ro(
+            "y", [](const py_cube_coordinate& self) -> decltype(self.y) { return self.y; },
             DOC(fiction_layouts_coords_cube_y))
-        .def_prop_rw(
-            "z", [](py_cube_coordinate& self) -> decltype(self.z) { return self.z; },
-            [](py_cube_coordinate& self, const decltype(self.z) value) { self.z = value; },
+        .def_prop_ro(
+            "z", [](const py_cube_coordinate& self) -> decltype(self.z) { return self.z; },
             DOC(fiction_layouts_coords_cube_z))
 
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
@@ -174,25 +167,6 @@ void cube_coordinate(nanobind::module_& m)
         ;
 
     py::implicitly_convertible<py::tuple, py_cube_coordinate>();
-}
-
-/**
- * @brief Registers coordinate area and volume functions.
- * @param m Python coordinate submodule.
- */
-void coordinate_utility(nanobind::module_& m)
-{
-    namespace py = nanobind;
-
-    m.def("offset_area", &fiction::layouts::coords::area_of<py_offset_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_area_of));
-    m.def("cube_area", &fiction::layouts::coords::area_of<py_cube_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_area_of));
-
-    m.def("offset_volume", &fiction::layouts::coords::volume_of<py_offset_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_volume_of));
-    m.def("cube_volume", &fiction::layouts::coords::volume_of<py_cube_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_volume_of));
 }
 
 }  // namespace pyfiction

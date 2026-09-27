@@ -41,15 +41,6 @@ namespace detail
 {
 
 template <typename Lyt>
-void num_adjacent_coordinates(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("num_adjacent_coordinates", &fiction::layouts::num_adjacent_coordinates<Lyt>, py::arg("lyt"), py::arg("c"),
-          DOC(fiction_layouts_num_adjacent_coordinates));
-}
-
-template <typename Lyt>
 void normalize_layout_coordinates(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
@@ -58,30 +49,15 @@ void normalize_layout_coordinates(nanobind::module_& m)
           DOC(fiction_layouts_normalize_layout_coordinates));
 }
 
-template <typename Lyt>
-void random_coordinate(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::coordinate<Lyt>>, py::arg("coordinate1"),
-          py::arg("coordinate_2"), DOC(fiction_layouts_random_coordinate));
-}
-
 }  // namespace detail
 
 void layout_utils(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::num_adjacent_coordinates<py_cartesian_gate_layout>(m);
-    detail::num_adjacent_coordinates<py_shifted_cartesian_gate_layout>(m);
-    detail::num_adjacent_coordinates<py_hexagonal_gate_layout>(m);
-
     detail::normalize_layout_coordinates<fiction::qca::layout>(m);
     detail::normalize_layout_coordinates<fiction::mol_qca::layout>(m);
     detail::normalize_layout_coordinates<fiction::inml::layout>(m);
-
-    detail::random_coordinate<py_cartesian_gate_layout>(m);
 }
 
 }  // namespace pyfiction

@@ -68,9 +68,9 @@ void dynamic_truth_table(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::class_<py_tt>(m, "dynamic_truth_table")
-        .def(
-            "__init__", [](py_tt* tt) { new (tt) py_tt{0u}; }, "Constructs the constant-zero truth table.")
+    auto cls = py::class_<py_tt>(m, "TruthTable");
+    cls.def(
+           "__init__", [](py_tt* tt) { new (tt) py_tt{0u}; }, "Constructs the constant-zero truth table.")
         .def(
             "__init__",
             [](py_tt* tt, const uint32_t num_vars)
@@ -159,6 +159,48 @@ void dynamic_truth_table(nanobind::module_& m)
             "Returns the bits as a hexadecimal string, most significant digit first.")
 
         ;
+    cls.def_static(
+        "from_binary",
+        [](const std::string& binary)
+        {
+            const auto bits = binary.size();
+            if (bits == 0 || (bits & (bits - 1)) != 0)
+            {
+                throw std::invalid_argument("binary truth table length must be a power of two");
+            }
+            uint32_t variables{};
+            for (auto size = bits; size > 1; size >>= 1)
+            {
+                ++variables;
+            }
+            auto table = py::module_::import_("mnt.pyfiction._native.synthesis").attr("TruthTable")(variables);
+            table.attr("create_from_binary_string")(binary);
+            return table;
+        },
+        py::arg("binary"), py::sig("def from_binary(binary: str) -> mnt.pyfiction._native.synthesis.TruthTable"),
+        "Constructs a truth table from most-significant-bit-first binary text.");
+    cls.def_static(
+        "from_hex",
+        [](const std::string& hex, const uint32_t num_vars)
+        {
+            auto table = py::module_::import_("mnt.pyfiction._native.synthesis").attr("TruthTable")(num_vars);
+            table.attr("create_from_hex_string")(hex);
+            return table;
+        },
+        py::arg("hex"), py::kw_only(), py::arg("num_vars"),
+        py::sig("def from_hex(hex: str, *, num_vars: int) -> mnt.pyfiction._native.synthesis.TruthTable"),
+        "Constructs a truth table from hexadecimal text and an explicit variable count.");
+    cls.def_static(
+        "from_expression",
+        [](const std::string& expression, const uint32_t num_vars)
+        {
+            auto table = py::module_::import_("mnt.pyfiction._native.synthesis").attr("TruthTable")(num_vars);
+            table.attr("create_from_expression")(expression);
+            return table;
+        },
+        py::arg("expression"), py::kw_only(), py::arg("num_vars"),
+        py::sig("def from_expression(expression: str, *, num_vars: int) -> mnt.pyfiction._native.synthesis.TruthTable"),
+        "Constructs a truth table from a kitty Boolean expression and variable count.");
 }
 
 }  // namespace pyfiction

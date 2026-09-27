@@ -39,7 +39,7 @@ def calculate_energy_and_state_type_with_kinks_accepted(
     energy_distribution: energy_distribution,
     valid_charge_distributions: Sequence[mnt.pyfiction._native.sidb.charge_distribution],
     output_bdl_pairs: Sequence[mnt.pyfiction._native.sidb.simulation.logic.bdl_pair],
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     input_index: int,
 ) -> list[tuple[float, state_type]]:
     """
@@ -66,7 +66,7 @@ def calculate_energy_and_state_type_with_kinks_rejected(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
     energy_distribution: energy_distribution,
     valid_charge_distributions: Sequence[mnt.pyfiction._native.sidb.charge_distribution],
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     input_index: int,
     input_bdl_wires: Sequence[mnt.pyfiction._native.sidb.simulation.logic.bdl_wire],
     output_bdl_wires: Sequence[mnt.pyfiction._native.sidb.simulation.logic.bdl_wire],
@@ -201,7 +201,7 @@ class critical_temperature_params:
 @overload
 def critical_temperature_gate_based(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: critical_temperature_params = ...,
     stats: critical_temperature_stats | None = None,
 ) -> float:
@@ -231,7 +231,7 @@ def critical_temperature_gate_based(
 @overload
 def critical_temperature_gate_based(
     input_pattern_layouts: Sequence[mnt.pyfiction._native.sidb.sidb_layout],
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: critical_temperature_params,
     output_bdl_pairs: Sequence[mnt.pyfiction._native.sidb.simulation.logic.bdl_pair],
     input_bdl_wires: Sequence[mnt.pyfiction._native.sidb.simulation.logic.bdl_wire],

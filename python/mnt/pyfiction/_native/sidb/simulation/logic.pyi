@@ -430,7 +430,10 @@ class bdl_wire:
         """Direction and I/O flags of a BDL wire port."""
 
         def __init__(
-            self, direction: bdl_wire.port_direction.cardinal = ..., pi: bool = False, po: bool = False
+            self,
+            direction: bdl_wire.port_direction.cardinal = ...,
+            pi: bool = False,
+            po: bool = False,
         ) -> None:
             """Constructs a port with a cardinal direction and input/output flags."""
 
@@ -705,7 +708,7 @@ class is_operational_params:
 @overload
 def is_operational(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params = ...,
 ) -> tuple[operational_status, int]:
     """
@@ -729,7 +732,7 @@ def is_operational(
 @overload
 def is_operational(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
@@ -754,7 +757,7 @@ def is_operational(
 @overload
 def is_operational(
     input_pattern_layouts: Sequence[mnt.pyfiction._native.sidb.sidb_layout],
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
@@ -785,7 +788,7 @@ def is_operational(
 @overload
 def operational_input_patterns(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params = ...,
 ) -> set[int]:
     """
@@ -803,7 +806,7 @@ def operational_input_patterns(
 @overload
 def operational_input_patterns(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
@@ -828,7 +831,7 @@ def operational_input_patterns(
 @overload
 def kink_induced_non_operational_input_patterns(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params = ...,
 ) -> set[int]:
     """
@@ -848,7 +851,7 @@ def kink_induced_non_operational_input_patterns(
 @overload
 def kink_induced_non_operational_input_patterns(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
@@ -874,7 +877,7 @@ def kink_induced_non_operational_input_patterns(
 @overload
 def is_kink_induced_non_operational(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params = ...,
 ) -> bool:
     """
@@ -893,7 +896,7 @@ def is_kink_induced_non_operational(
 @overload
 def is_kink_induced_non_operational(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
@@ -1292,7 +1295,7 @@ class operational_domain_stats:
 
 def operational_domain_grid_search(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: operational_domain_params = ...,
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
@@ -1336,7 +1339,7 @@ def operational_domain_grid_search(
 
 def operational_domain_random_sampling(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
     params: operational_domain_params = ...,
     stats: operational_domain_stats | None = None,
@@ -1380,7 +1383,7 @@ def operational_domain_random_sampling(
 
 def operational_domain_flood_fill(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
     params: operational_domain_params = ...,
     stats: operational_domain_stats | None = None,
@@ -1440,7 +1443,7 @@ def operational_domain_flood_fill(
 
 def operational_domain_contour_tracing(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
     params: operational_domain_params = ...,
     stats: operational_domain_stats | None = None,
@@ -1498,7 +1501,7 @@ def operational_domain_contour_tracing(
 
 def critical_temperature_domain_grid_search(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     params: operational_domain_params = ...,
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
@@ -1540,7 +1543,7 @@ def critical_temperature_domain_grid_search(
 
 def critical_temperature_domain_random_sampling(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
     params: operational_domain_params = ...,
     stats: operational_domain_stats | None = None,
@@ -1582,7 +1585,7 @@ def critical_temperature_domain_random_sampling(
 
 def critical_temperature_domain_flood_fill(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
     params: operational_domain_params = ...,
     stats: operational_domain_stats | None = None,
@@ -1635,7 +1638,7 @@ def critical_temperature_domain_flood_fill(
 
 def critical_temperature_domain_contour_tracing(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
     params: operational_domain_params = ...,
     stats: operational_domain_stats | None = None,
@@ -1709,7 +1712,7 @@ class operational_domain_ratio_params:
 
 def operational_domain_ratio(
     lyt: mnt.pyfiction._native.sidb.sidb_layout,
-    spec: Sequence[mnt.pyfiction._native.synthesis.dynamic_truth_table],
+    spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     pp: parameter_point,
     params: operational_domain_ratio_params = ...,
 ) -> float:

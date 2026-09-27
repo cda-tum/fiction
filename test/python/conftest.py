@@ -20,8 +20,8 @@ from mnt.pyfiction.networks.io import read_technology_network
 from mnt.pyfiction.physical_design import orthogonal
 
 if TYPE_CHECKING:
-    from mnt.pyfiction.layouts import cartesian_gate_layout
-    from mnt.pyfiction.networks import technology_network
+    from mnt.pyfiction.layouts import CartesianGateLayout
+    from mnt.pyfiction.networks import TechnologyNetwork
 
 RESOURCES_DIR = Path(__file__).resolve().parent / "resources"
 pytest_plugins = ["pytester"]
@@ -166,20 +166,20 @@ def resources_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture
-def mux21(resources_dir: Path) -> technology_network:
+def mux21(resources_dir: Path) -> TechnologyNetwork:
     """A 2:1 multiplexer, the network most physical design tests place and route.
 
     Read once per test rather than once per session, because callers pass it to algorithms
     that modify it in place.
 
     Returns:
-        The ``mux21.v`` network as a ``technology_network``.
+        The ``mux21.v`` network as a ``TechnologyNetwork``.
     """
     return read_technology_network(str(resources_dir / "mux21.v"))
 
 
 @pytest.fixture
-def interface_network(resources_dir: Path) -> technology_network:
+def interface_network(resources_dir: Path) -> TechnologyNetwork:
     """A network with constants, inverted edges, LUTs, labels, and an unused input.
 
     Returns:
@@ -189,7 +189,7 @@ def interface_network(resources_dir: Path) -> technology_network:
 
 
 @pytest.fixture
-def mux21_layout(mux21: technology_network) -> cartesian_gate_layout:
+def mux21_layout(mux21: TechnologyNetwork) -> CartesianGateLayout:
     """The ``mux21`` network placed and routed with ``orthogonal``.
 
     Returns:

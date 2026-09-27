@@ -18,7 +18,7 @@ from aigverse import abc
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe, size_and_depth
-from mnt.pyfiction.networks import aig_network, get_name, set_name, xag_network
+from mnt.pyfiction.networks import AigNetwork, XagNetwork, get_name, set_name
 from mnt.pyfiction.networks.io import read_aig_network, write_aiger
 from mnt.pyfiction.synthesis import convert_network, network_target
 
@@ -62,10 +62,10 @@ def abc_command(session: Session, args: argparse.Namespace) -> Result:
         msg = "ABC was not found; install it on PATH or point AIGVERSE_ABC at the binary"
         raise CommandError(msg)
     network = None if args.no_read else session.networks.current()
-    if network is not None and not isinstance(network, (aig_network, xag_network)):
+    if network is not None and not isinstance(network, (AigNetwork, XagNetwork)):
         msg_0 = "ABC requires an AIG or XAG; use read --type aig or --type xag"
         raise CommandError(msg_0)
-    aig = convert_network(network, network_target.AIG) if isinstance(network, xag_network) else network
+    aig = convert_network(network, network_target.AIG) if isinstance(network, XagNetwork) else network
     input_path = session.temp_file(".aig")
     output_path = session.temp_file(".aig")
     flow: list[str] = []

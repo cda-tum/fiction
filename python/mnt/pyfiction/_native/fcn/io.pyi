@@ -17,19 +17,19 @@ import mnt.pyfiction._native.qca
 
 @overload
 def write_qll_layout(
-    layout: mnt.pyfiction._native.qca.qca_layout,
+    layout: mnt.pyfiction._native.qca.QCALayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None: ...
 @overload
 def write_qll_layout(
-    layout: mnt.pyfiction._native.inml.inml_layout,
+    layout: mnt.pyfiction._native.inml.INMLLayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None: ...
 @overload
 def write_qll_layout(
-    layout: mnt.pyfiction._native.mol_qca.mol_qca_layout,
+    layout: mnt.pyfiction._native.mol_qca.MolecularQCALayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None:

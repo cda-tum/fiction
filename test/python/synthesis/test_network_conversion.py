@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from mnt.pyfiction.networks import simulate_outputs, technology_network
+from mnt.pyfiction.networks import TechnologyNetwork, simulate_outputs
 from mnt.pyfiction.networks.io import read_aig_network, read_mig_network, read_technology_network, read_xag_network
 from mnt.pyfiction.synthesis import (
     all_supported_standard_functions,
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 def test_convert_network_is_equivalent(resources_dir: Path, reader: Callable[[str], Any]) -> None:
     network = reader(str(resources_dir / "mux21.v"))
     converted = convert_network(network)
-    assert isinstance(converted, technology_network)
+    assert isinstance(converted, TechnologyNetwork)
     assert equivalence_checking(read_technology_network(str(resources_dir / "mux21.v")), converted) == eq_type.STRONG
 
 
@@ -43,12 +43,12 @@ def test_technology_mapping_accepts_every_network_type(resources_dir: Path, read
     params = all_supported_standard_functions()
     params.lt2 = True
     mapped = technology_mapping(network, params)
-    assert isinstance(mapped, technology_network)
+    assert isinstance(mapped, TechnologyNetwork)
     assert equivalence_checking(convert_network(network), mapped) == eq_type.STRONG
 
 
 @pytest.mark.parametrize("target", ["TEC", "AIG", "XAG", "MIG"])
-def test_conversion_preserves_interfaces(interface_network: technology_network, target: str) -> None:
+def test_conversion_preserves_interfaces(interface_network: TechnologyNetwork, target: str) -> None:
     """Conversion retains all inputs, output order, labels, and output functions."""
     network = convert_network(interface_network, getattr(network_target, target))
     assert [network.get_name(pi) for pi in network.pis()] == ["apple", "banana", "cherry", "unused"]

@@ -19,14 +19,14 @@ from mnt.pyfiction.verification import count_gate_types
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from mnt.pyfiction.networks import technology_network
+    from mnt.pyfiction.networks import TechnologyNetwork
 
 
 def _total(stats: object) -> int:
     return sum(getattr(stats, name) for name in dir(stats) if name.startswith("num_"))
 
 
-def test_count_gate_types_of_a_network(mux21: technology_network) -> None:
+def test_count_gate_types_of_a_network(mux21: TechnologyNetwork) -> None:
     stats = count_gate_types(mux21)
     assert stats.num_and2 == 2
     assert stats.num_or2 == 1
@@ -42,7 +42,7 @@ def test_count_gate_types_of_an_aig(resources_dir: Path) -> None:
     assert count_gate_types(aig).num_and2 == aig.num_gates()
 
 
-def test_count_gate_types_of_a_layout(mux21: technology_network) -> None:
+def test_count_gate_types_of_a_layout(mux21: TechnologyNetwork) -> None:
     layout = orthogonal(mux21)
     stats = count_gate_types(layout)
     assert stats.num_and2 == 2

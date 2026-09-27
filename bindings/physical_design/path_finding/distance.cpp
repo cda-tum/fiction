@@ -51,9 +51,9 @@ void distance_impl(nanobind::module_& m)
 
 void distance(nanobind::module_& m)
 {
-    detail::distance_impl<py_cartesian_layout>(m);
-    detail::distance_impl<py_shifted_cartesian_layout>(m);
-    detail::distance_impl<py_hexagonal_layout>(m);
+    detail::distance_impl<py_cartesian_gate_layout>(m);
+    detail::distance_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::distance_impl<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

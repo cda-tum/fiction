@@ -24,8 +24,8 @@ from mnt.fiction.cli.drawing import (
 )
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command, one_store, store_flags
-from mnt.pyfiction.mol_qca import mol_qca_layout
-from mnt.pyfiction.qca import qca_layout
+from mnt.pyfiction.mol_qca import MolecularQCALayout
+from mnt.pyfiction.qca import QCALayout
 
 if TYPE_CHECKING:
     import argparse
@@ -82,7 +82,7 @@ def show(session: Session, args: argparse.Namespace) -> Result:
         args,
         dot=entry is None,
         gate_layout=name == "gate_layout",
-        qca_svg=entry is not None and isinstance(entry.layout, qca_layout | mol_qca_layout),
+        qca_svg=entry is not None and isinstance(entry.layout, QCALayout | MolecularQCALayout),
     )
     path = args.output if args.output is not None else session.viewer_file(suffix, delete=args.delete)
     if entry is not None:

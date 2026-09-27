@@ -23,10 +23,10 @@ from mnt.pyfiction.physical_design import (
 )
 
 if TYPE_CHECKING:
-    from mnt.pyfiction.networks import technology_network
+    from mnt.pyfiction.networks import TechnologyNetwork
 
 
-def test_apply_qca_one_library(mux21: technology_network) -> None:
+def test_apply_qca_one_library(mux21: TechnologyNetwork) -> None:
     """Map the library and report every processed source gate."""
     layout = orthogonal(mux21)
 
@@ -35,7 +35,7 @@ def test_apply_qca_one_library(mux21: technology_network) -> None:
     assert reports[-1][1] == reports[-1][2] > 0
 
 
-def test_apply_sim7_mol_library(mux21: technology_network) -> None:
+def test_apply_sim7_mol_library(mux21: TechnologyNetwork) -> None:
     """Map the library and report every processed source gate."""
     layout = orthogonal(mux21)
 
@@ -46,7 +46,7 @@ def test_apply_sim7_mol_library(mux21: technology_network) -> None:
     assert cell_layout.num_cells() > 0
 
 
-def test_apply_bestagon_library(mux21: technology_network) -> None:
+def test_apply_bestagon_library(mux21: TechnologyNetwork) -> None:
     """Map the library and report every processed source gate."""
     params = exact_params()
     params.scheme = "ROW"
@@ -61,7 +61,7 @@ def test_apply_bestagon_library(mux21: technology_network) -> None:
     assert reports[-1][1] == reports[-1][2] > 0
 
 
-def test_apply_topolinano_library(mux21: technology_network) -> None:
+def test_apply_topolinano_library(mux21: TechnologyNetwork) -> None:
     """Map the library and report every processed source gate."""
     params = exact_params()
     params.scheme = "COLUMNAR3"

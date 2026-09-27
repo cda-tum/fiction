@@ -18,10 +18,10 @@ from mnt.pyfiction.synthesis import (
 )
 
 if TYPE_CHECKING:
-    from mnt.pyfiction.networks import technology_network
+    from mnt.pyfiction.networks import TechnologyNetwork
 
 
-def test_substitution(mux21: technology_network) -> None:
+def test_substitution(mux21: TechnologyNetwork) -> None:
     """Fanout substitution adds the required fanout node without adding an output buffer."""
     assert mux21.num_gates() == 4
 

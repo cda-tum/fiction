@@ -36,7 +36,9 @@ from mnt.pyfiction.sidb.simulation.logic import (
     parameter_point,
     sweep_parameter,
 )
-from mnt.pyfiction.synthesis import create_and_tt, create_id_tt, create_or_tt, create_xor_tt
+from mnt.pyfiction.synthesis import (
+    standard_functions,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -91,7 +93,7 @@ def test_operational_domain_siqad_or_100_lattice(resources_dir):
     ]
 
     stats_grid = operational_domain_stats()
-    operational_domain_grid_search(lyt, [create_or_tt()], params, stats_grid)
+    operational_domain_grid_search(lyt, [standard_functions("or")[0]], params, stats_grid)
     assert stats_grid.num_operational_parameter_combinations == 10201
 
 
@@ -115,12 +117,12 @@ def test_number_of_threads(resources_dir):
     assert params.number_of_threads >= 1
 
     stats_default = operational_domain_stats()
-    operational_domain_grid_search(lyt, [create_or_tt()], params, stats_default)
+    operational_domain_grid_search(lyt, [standard_functions("or")[0]], params, stats_default)
 
     params.number_of_threads = 1
 
     stats_single = operational_domain_stats()
-    operational_domain_grid_search(lyt, [create_or_tt()], params, stats_single)
+    operational_domain_grid_search(lyt, [standard_functions("or")[0]], params, stats_single)
 
     assert stats_single.num_operational_parameter_combinations == stats_default.num_operational_parameter_combinations
     assert stats_single.num_evaluated_parameter_combinations == stats_default.num_evaluated_parameter_combinations
@@ -144,14 +146,14 @@ def test_three_dimensional_operational_domain_sketch(wire_with_canvas):
 
     # 3 x 3 x 2 parameter points
     stats_grid = operational_domain_stats()
-    grid_domain = operational_domain_grid_search(lyt, [create_id_tt()], params, stats_grid)
+    grid_domain = operational_domain_grid_search(lyt, [standard_functions("id")[0]], params, stats_grid)
     assert stats_grid.num_evaluated_parameter_combinations == 18
     assert len(grid_domain) == 18
 
     # flood fill and contour tracing both accept three dimensions. They sample the same grid, so every point they
     # report must carry the status the exhaustive search determined for it
-    flood_domain = operational_domain_flood_fill(lyt, [create_id_tt()], 4, params)
-    contour_domain = operational_domain_contour_tracing(lyt, [create_id_tt()], 4, params)
+    flood_domain = operational_domain_flood_fill(lyt, [standard_functions("id")[0]], 4, params)
+    contour_domain = operational_domain_contour_tracing(lyt, [standard_functions("id")[0]], 4, params)
 
     for domain in (flood_domain, contour_domain):
         assert len(domain) > 0
@@ -177,7 +179,7 @@ def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir
 
     # the layout has no LOGIC dots, so there is no canvas for the filtering steps to enumerate
     with pytest.raises(ValueError, match="requires a canvas"):
-        operational_domain_grid_search(lyt, [create_or_tt()], params)
+        operational_domain_grid_search(lyt, [standard_functions("or")[0]], params)
 
     # tolerating kinks leaves the filtering steps undefined. This uses a layout that does have a canvas, so that
     # the rejection can only come from the kink condition
@@ -185,11 +187,11 @@ def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir
 
     params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
     with pytest.raises(ValueError, match="requires that kinks are rejected"):
-        operational_domain_grid_search(canvas_lyt, [create_id_tt()], params)
+        operational_domain_grid_search(canvas_lyt, [standard_functions("id")[0]], params)
 
     # the same layout is accepted once kinks are rejected again
     params.operational_params.op_condition = operational_condition.REJECT_KINKS
-    operational_domain_grid_search(canvas_lyt, [create_id_tt()], params)
+    operational_domain_grid_search(canvas_lyt, [standard_functions("id")[0]], params)
 
 
 def test_operational_domain_xor_gate_100_lattice(resources_dir):
@@ -205,19 +207,19 @@ def test_operational_domain_xor_gate_100_lattice(resources_dir):
     ]
 
     stats_grid = operational_domain_stats()
-    operational_domain_grid_search(lyt, [create_xor_tt()], params, stats_grid)
+    operational_domain_grid_search(lyt, [standard_functions("xor")[0]], params, stats_grid)
     assert stats_grid.num_operational_parameter_combinations > 0
 
     stats_flood_fill = operational_domain_stats()
-    operational_domain_flood_fill(lyt, [create_xor_tt()], 100, params, stats_flood_fill)
+    operational_domain_flood_fill(lyt, [standard_functions("xor")[0]], 100, params, stats_flood_fill)
     assert stats_flood_fill.num_operational_parameter_combinations > 0
 
     stats_random_sampling = operational_domain_stats()
-    operational_domain_random_sampling(lyt, [create_xor_tt()], 100, params, stats_random_sampling)
+    operational_domain_random_sampling(lyt, [standard_functions("xor")[0]], 100, params, stats_random_sampling)
     assert stats_random_sampling.num_operational_parameter_combinations > 0
 
     stats_contour_tracing = operational_domain_stats()
-    operational_domain_contour_tracing(lyt, [create_xor_tt()], 100, params, stats_contour_tracing)
+    operational_domain_contour_tracing(lyt, [standard_functions("xor")[0]], 100, params, stats_contour_tracing)
     assert stats_contour_tracing.num_operational_parameter_combinations > 0
 
 
@@ -235,7 +237,7 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir: Path) -
     ]
 
     stats_grid = operational_domain_stats()
-    ct_domain_grid = critical_temperature_domain_grid_search(lyt, [create_xor_tt()], params, stats_grid)
+    ct_domain_grid = critical_temperature_domain_grid_search(lyt, [standard_functions("xor")[0]], params, stats_grid)
     assert ct_domain_grid[parameter_point([5.6, 5.0])][0] == operational_status.OPERATIONAL
     assert ct_domain_grid[parameter_point([5.6, 5.0])][1] > 30
     assert stats_grid.num_operational_parameter_combinations > 0
@@ -243,7 +245,9 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir: Path) -
     assert ct_domain_grid.maximum_ct() < 38
 
     stats_flood_fill = operational_domain_stats()
-    ct_domain_flood = critical_temperature_domain_flood_fill(lyt, [create_xor_tt()], 100, params, stats_flood_fill)
+    ct_domain_flood = critical_temperature_domain_flood_fill(
+        lyt, [standard_functions("xor")[0]], 100, params, stats_flood_fill
+    )
     assert ct_domain_flood[parameter_point([5.6, 5.0])][0] == operational_status.OPERATIONAL
     assert ct_domain_flood[parameter_point([5.6, 5.0])][1] > 30
     assert stats_flood_fill.num_operational_parameter_combinations > 0
@@ -251,7 +255,7 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir: Path) -
     stats_contour_tracing = operational_domain_stats()
     ct_domain_contour = critical_temperature_domain_contour_tracing(
         lyt,
-        [create_xor_tt()],
+        [standard_functions("xor")[0]],
         1000,
         params,
         stats_contour_tracing,
@@ -271,7 +275,7 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir: Path) -
     stats_random_sampling = operational_domain_stats()
     ct_domain_random = critical_temperature_domain_random_sampling(
         lyt,
-        [create_xor_tt()],
+        [standard_functions("xor")[0]],
         1000,
         params,
         stats_random_sampling,
@@ -294,19 +298,19 @@ def test_operational_domain_and_gate_111_lattice(resources_dir):
     ]
 
     stats_grid = operational_domain_stats()
-    operational_domain_grid_search(lyt, [create_and_tt()], params, stats_grid)
+    operational_domain_grid_search(lyt, [standard_functions("and")[0]], params, stats_grid)
     assert stats_grid.num_operational_parameter_combinations > 0
 
     stats_flood_fill = operational_domain_stats()
-    operational_domain_flood_fill(lyt, [create_and_tt()], 100, params, stats_flood_fill)
+    operational_domain_flood_fill(lyt, [standard_functions("and")[0]], 100, params, stats_flood_fill)
     assert stats_flood_fill.num_operational_parameter_combinations > 0
 
     stats_random_sampling = operational_domain_stats()
-    operational_domain_random_sampling(lyt, [create_and_tt()], 100, params, stats_random_sampling)
+    operational_domain_random_sampling(lyt, [standard_functions("and")[0]], 100, params, stats_random_sampling)
     assert stats_random_sampling.num_operational_parameter_combinations > 0
 
     stats_contour_tracing = operational_domain_stats()
-    operational_domain_contour_tracing(lyt, [create_and_tt()], 1000, params, stats_contour_tracing)
+    operational_domain_contour_tracing(lyt, [standard_functions("and")[0]], 1000, params, stats_contour_tracing)
     assert stats_contour_tracing.num_operational_parameter_combinations > 0
 
 
@@ -463,7 +467,7 @@ def test_operational_domain_two_bdl_pair_wire():
     ]
 
     stats_grid = operational_domain_stats()
-    op_domain = operational_domain_grid_search(bdl_wire, [create_id_tt()], params, stats_grid)
+    op_domain = operational_domain_grid_search(bdl_wire, [standard_functions("id")[0]], params, stats_grid)
 
     assert len(op_domain) == 8281
 
@@ -497,9 +501,9 @@ def test_domain_reports_progress(resources_dir: Path, strategy: str) -> None:
 
     stats = operational_domain_stats()
     if strategy == "grid":
-        operational_domain_grid_search(lyt, [create_or_tt()], params, stats)
+        operational_domain_grid_search(lyt, [standard_functions("or")[0]], params, stats)
     else:
-        operational_domain_flood_fill(lyt, [create_or_tt()], 1, params, stats)
+        operational_domain_flood_fill(lyt, [standard_functions("or")[0]], 1, params, stats)
 
     points = [(done, total) for task, done, total in reports if task == "parameter points"]
     assert points[0] == (0, 0)  # the total is unknown until the grid is set up

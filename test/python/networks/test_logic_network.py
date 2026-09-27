@@ -12,9 +12,26 @@ from pathlib import Path
 
 import pytest
 
-from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.networks import Signal
+from mnt.pyfiction.networks.io import read_aig_network, read_technology_network
 
 DIR_PATH = Path(__file__).resolve().parent
+
+
+def test_connectivity_preserves_complemented_edges(tmp_path: Path) -> None:
+    path = tmp_path / "inverted.v"
+    path.write_text(
+        "module top(a, b, y);\ninput a, b;\noutput y;\nwire n;\nassign n = a & ~b;\nassign y = ~n;\nendmodule\n"
+    )
+    network = read_aig_network(str(path))
+    output = network.pos()[0]
+    assert output.complemented
+    assert sorted(signal.complemented for signal in network.fanins(output.node)) == [False, True]
+    assert {output: "output"}[Signal(output.node, complemented=True)] == "output"
+    with pytest.raises(AttributeError):
+        output.complemented = False  # ty: ignore[invalid-assignment]  # verify the read-only runtime contract
+    with pytest.raises(IndexError):
+        network.fanins(len(network))
 
 
 def test_read_technology_network(resources_dir: Path) -> None:
@@ -46,7 +63,7 @@ def test_read_technology_network(resources_dir: Path) -> None:
     assert network.get_name(4) == "in2"
 
     assert network.num_pos() == 1
-    assert network.pos() == [8]
+    assert network.pos() == [Signal(8)]
     assert network.is_po(8)
     assert network.po_index(8) == 0
     assert network.po_at(0) == 8
@@ -58,10 +75,10 @@ def test_read_technology_network(resources_dir: Path) -> None:
     assert network.fanins(2) == []
     assert network.fanins(3) == []
     assert network.fanins(4) == []
-    assert network.fanins(5) == [4]
-    assert network.fanins(6) == [2, 5]
-    assert network.fanins(7) == [3, 4]
-    assert network.fanins(8) == [6, 7]
+    assert network.fanins(5) == [Signal(4)]
+    assert network.fanins(6) == [Signal(2), Signal(5)]
+    assert network.fanins(7) == [Signal(3), Signal(4)]
+    assert network.fanins(8) == [Signal(6), Signal(7)]
 
     with pytest.raises(RuntimeError):
         read_technology_network(str(DIR_PATH / "mux41.v"))

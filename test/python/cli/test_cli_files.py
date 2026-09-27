@@ -18,11 +18,11 @@ import pytest
 from mnt.fiction.cli.stores import CellEntry, describe
 from mnt.fiction.cli.topologies import FGL_READERS
 from mnt.pyfiction import layouts, physical_design
-from mnt.pyfiction.inml import inml_layout, inml_magnet_type
-from mnt.pyfiction.layouts import shifted_cartesian_gate_layout
+from mnt.pyfiction.inml import INMLLayout, InmlMagnetType
+from mnt.pyfiction.layouts import ShiftedCartesianGateLayout
 from mnt.pyfiction.layouts.io import write_fgl_layout
-from mnt.pyfiction.networks import aig_network, mig_network, set_name, simulate_outputs, technology_network, xag_network
-from mnt.pyfiction.qca import qca_layout
+from mnt.pyfiction.networks import AigNetwork, MigNetwork, TechnologyNetwork, XagNetwork, set_name, simulate_outputs
+from mnt.pyfiction.qca import QCALayout
 from mnt.pyfiction.sidb import sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
 
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.parametrize(
     ("network_type", "cls"),
-    [("tec", technology_network), ("aig", aig_network), ("xag", xag_network), ("mig", mig_network)],
+    [("tec", TechnologyNetwork), ("aig", AigNetwork), ("xag", XagNetwork), ("mig", MigNetwork)],
 )
 def test_read_verilog_as_every_type(shell: Shell, resource: Callable[[str], str], network_type: str, cls: type) -> None:
     shell.ok(f'read "{resource("mux21.v")}" --type {network_type}')
@@ -46,7 +46,7 @@ def test_read_verilog_as_every_type(shell: Shell, resource: Callable[[str], str]
 
 
 def test_read_defaults_to_a_technology_network(mux21_shell: Shell) -> None:
-    assert isinstance(mux21_shell.session.networks.current(), technology_network)
+    assert isinstance(mux21_shell.session.networks.current(), TechnologyNetwork)
 
 
 @pytest.mark.parametrize(("network_type", "expected"), [("aig", "AIG"), ("xag", "XAG"), ("mig", "MIG"), ("tec", "TEC")])
@@ -151,7 +151,7 @@ def test_fgl_round_trip(shell: Shell, resource: Callable[[str], str], tmp_path: 
     if topology == "hexagonal":
         shell.ok("hex")
     if topology == "shifted_cartesian":
-        layout = shifted_cartesian_gate_layout((1, 0), "2DDWave", "wire")
+        layout = ShiftedCartesianGateLayout((1, 0), "2DDWave", "wire")
         source = layout.create_pi("a", (0, 0))
         layout.create_po(source, "f", (1, 0))
         shell.session.gate_layouts.add(layout)
@@ -190,8 +190,8 @@ def test_write_via_layer_flags(mux21_shell: Shell, tmp_path: Path) -> None:
 
 def test_write_technology_mismatch(mux21_shell: Shell, tmp_path: Path) -> None:
     mux21_shell.ok("ortho; cell")
-    assert "not a qca_layout" in mux21_shell.fails(f'write_sqd "{tmp_path / "x.sqd"}"')
-    assert "not a qca_layout" in mux21_shell.fails(f'write_qcc "{tmp_path / "x.qcc"}"')
+    assert "not a QCALayout" in mux21_shell.fails(f'write_sqd "{tmp_path / "x.sqd"}"')
+    assert "not a QCALayout" in mux21_shell.fails(f'write_qcc "{tmp_path / "x.qcc"}"')
 
 
 @pytest.mark.parametrize(
@@ -278,9 +278,9 @@ def test_write_more_cell_formats(shell: Shell, resource: Callable[[str], str], t
 
 def test_write_qcc_component_name(shell: Shell, tmp_path: Path) -> None:
     """--component-name names the QCC component after the file, as the C++ `qcc -c` did."""
-    layout = inml_layout((3, 0))
+    layout = INMLLayout((3, 0))
     layout.set_layout_name("mygate")
-    cell = inml_magnet_type
+    cell = InmlMagnetType
     layout.assign_cell_type((0, 0), cell.INPUT)
     layout.assign_cell_type((1, 0), cell.NORMAL)
     layout.assign_cell_type((2, 0), cell.NORMAL)
@@ -320,7 +320,7 @@ def test_implicit_output_requires_a_simple_name(
 ) -> None:
     """An embedded name cannot choose an output directory."""
     monkeypatch.chdir(tmp_path)
-    network = technology_network()
+    network = TechnologyNetwork()
     set_name(network, name)
     shell.session.networks.add(network)
     message = "explicit output path" if name else "no name"
@@ -378,7 +378,9 @@ def test_all_topologies_round_trip_small_fixture(shell: Shell, tmp_path: Path, t
         "odd_column_cartesian": "shifted_cartesian",
         "even_row_hex": "hexagonal",
     }.get(topology, topology)
-    layout = getattr(layouts, f"{native}_gate_layout")((2, 1), f"2DDWave{phases}", topology)
+    layout = getattr(layouts, "".join(part.title() for part in native.split("_")) + "GateLayout")(
+        (2, 1), f"2DDWave{phases}", topology
+    )
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (1, 0))
     path = tmp_path / f"{topology}.fgl"
@@ -439,7 +441,7 @@ def test_complete_design_and_export_workflows(shell: Shell, tmp_path: Path, libr
             assert restored.num_pis() == entry.layout.num_pis()
             assert restored.num_pos() == entry.layout.num_pos()
         elif suffix == "qca":
-            assert isinstance(entry.layout, qca_layout)
+            assert isinstance(entry.layout, QCALayout)
             assert text.count("[TYPE:QCADCell]") >= entry.layout.num_cells()
         else:
             root = ET.fromstring(text)  # ruff: ignore[suspicious-xml-element-tree-usage] -- writer output

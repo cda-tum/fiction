@@ -21,7 +21,7 @@ from mnt.pyfiction.physical_design import (
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 if TYPE_CHECKING:
-    from mnt.pyfiction.networks import technology_network
+    from mnt.pyfiction.networks import TechnologyNetwork
 
 
 def test_post_layout_optimization_default(mux21):
@@ -45,7 +45,7 @@ def test_post_layout_optimization_with_parameters(mux21):
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
-def test_post_layout_optimization_with_stats(mux21: technology_network) -> None:
+def test_post_layout_optimization_with_stats(mux21: TechnologyNetwork) -> None:
     """Statistics describe the actual input and result, which remain logically equivalent."""
     layout = orthogonal(mux21)
 
@@ -65,7 +65,7 @@ def test_post_layout_optimization_with_stats(mux21: technology_network) -> None:
     assert stats.area_improvement == pytest.approx(100 * (1 - layout.area() / before.area()), abs=0.01)
 
 
-def test_post_layout_optimization_with_stats_and_parameters(mux21: technology_network) -> None:
+def test_post_layout_optimization_with_stats_and_parameters(mux21: TechnologyNetwork) -> None:
     """Statistics describe the actual input and result, which remain logically equivalent."""
     layout = orthogonal(mux21)
 

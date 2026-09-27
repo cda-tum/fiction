@@ -46,7 +46,7 @@ Choose the gate-search algorithm through `design_gate_params.design_mode`, as sh
 The `PRUNING_ONLY` mode skips operational simulation, so it does not verify the designed gates' functionality.
 
 ```python
-from mnt.pyfiction.layouts import hexagonal_gate_layout
+from mnt.pyfiction.layouts import HexagonalGateLayout
 from mnt.pyfiction.sidb.generators import (
     design_sidb_gates_mode,
     on_the_fly_sidb_circuit_design,
@@ -54,7 +54,7 @@ from mnt.pyfiction.sidb.generators import (
 )
 from mnt.pyfiction.sidb.io import write_sqd_layout
 
-layout = hexagonal_gate_layout((2, 2, 0), "ROW", "AND")
+layout = HexagonalGateLayout((2, 2, 0), "ROW", "AND")
 a = layout.create_pi("a", (0, 0, 0))
 b = layout.create_pi("b", (1, 0, 0))
 gate = layout.create_and(a, b, (1, 1, 0))

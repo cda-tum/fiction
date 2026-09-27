@@ -197,7 +197,7 @@ $ pip install mnt.pyfiction
 Import what you need from the submodule that mirrors its C++ namespace:
 
 ```python
-from mnt.pyfiction.layouts import cartesian_layout
+from mnt.pyfiction.layouts import CartesianGateLayout
 ```
 
 The Python synopsis is modeled after the C++ API to make it feel as familiar as possible. However, all available Python

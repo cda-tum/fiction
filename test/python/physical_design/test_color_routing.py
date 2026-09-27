@@ -10,26 +10,26 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout
-from mnt.pyfiction.layouts.coords import offset_coordinate
+from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout
+from mnt.pyfiction.layouts.coords import OffsetCoordinate
 from mnt.pyfiction.physical_design import color_routing, color_routing_params
 
 
 @pytest.mark.parametrize(
     "make_lyt",
     [
-        pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
-        pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+        pytest.param(lambda: CartesianGateLayout((4, 4), "2DDWave", "Layout"), id="CartesianGateLayout"),
+        pytest.param(lambda: HexagonalGateLayout((4, 4), "2DDWave", "Layout"), id="HexagonalGateLayout"),
     ],
 )
 def test_routing(make_lyt):
     lyt = make_lyt()
-    x1 = lyt.create_pi("x1", offset_coordinate(0, 0))
-    x2 = lyt.create_pi("x2", offset_coordinate(0, 1))
+    x1 = lyt.create_pi("x1", OffsetCoordinate(0, 0))
+    x2 = lyt.create_pi("x2", OffsetCoordinate(0, 1))
 
-    a = lyt.create_and(x1, x2, offset_coordinate(2, 2))
+    a = lyt.create_and(x1, x2, OffsetCoordinate(2, 2))
 
-    lyt.create_po(a, "f1", offset_coordinate(4, 4))
+    lyt.create_po(a, "f1", OffsetCoordinate(4, 4))
 
     success = color_routing(lyt, [((0, 0), (2, 2)), ((0, 1), (2, 2)), ((2, 2), (4, 4))])
 
@@ -37,7 +37,7 @@ def test_routing(make_lyt):
 
 
 def test_crossings():
-    lyt = cartesian_gate_layout((4, 2, 1), "2DDWave", "Layout")
+    lyt = CartesianGateLayout((4, 2, 1), "2DDWave", "Layout")
 
     x1 = lyt.create_pi("x1", (0, 1))
     x2 = lyt.create_pi("x2", (3, 2))

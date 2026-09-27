@@ -38,7 +38,19 @@ DISPLAY_NAMES = {
 }
 """Human-readable topology names; command options and JSON retain canonical names."""
 
-TOPOLOGIES = {getattr(layouts, f"{native}_gate_layout"): name for name, native in NATIVE_NAMES.items()}
+_LAYOUT_TYPES = {
+    "cartesian": layouts.CartesianGateLayout,
+    "shifted_cartesian": layouts.ShiftedCartesianGateLayout,
+    "hexagonal": layouts.HexagonalGateLayout,
+    "odd_row_cartesian": layouts.OddRowCartesianGateLayout,
+    "even_row_cartesian": layouts.EvenRowCartesianGateLayout,
+    "even_column_cartesian": layouts.EvenColumnCartesianGateLayout,
+    "odd_row_hex": layouts.OddRowHexGateLayout,
+    "odd_column_hex": layouts.OddColumnHexGateLayout,
+    "even_column_hex": layouts.EvenColumnHexGateLayout,
+}
+
+TOPOLOGIES = {_LAYOUT_TYPES[native]: name for name, native in NATIVE_NAMES.items()}
 """Gate-level layout classes mapped to canonical names for descriptions."""
 
 NAMES = {**NATIVE_NAMES, "shifted_cartesian": "shifted_cartesian", "hexagonal": "hexagonal"}
@@ -47,5 +59,5 @@ NAMES = {**NATIVE_NAMES, "shifted_cartesian": "shifted_cartesian", "hexagonal": 
 FGL_READERS = {name: getattr(layouts.io, f"read_{native}_fgl_layout") for name, native in NAMES.items()}
 """The reader for each accepted FGL topology."""
 
-GATE_LAYOUTS = {name: getattr(layouts, f"{native}_gate_layout") for name, native in NAMES.items()}
+GATE_LAYOUTS = {name: _LAYOUT_TYPES[native] for name, native in NAMES.items()}
 """Gate constructors used to validate a topology's clocking schemes."""

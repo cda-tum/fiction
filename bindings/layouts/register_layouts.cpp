@@ -26,9 +26,6 @@ namespace pyfiction
  * @param m Python coordinate submodule.
  */
 void register_layouts_coords(nanobind::module_& m);
-void cartesian_layout(nanobind::module_& m);
-void shifted_cartesian_layout(nanobind::module_& m);
-void hexagonal_layout(nanobind::module_& m);
 void gate_level_layout(nanobind::module_& m);
 void obstructions(nanobind::module_& m);
 void layout_utils(nanobind::module_& m);
@@ -52,11 +49,8 @@ NB_MODULE(layouts, m)
     // Overloads on the cell-level layouts of `qca`, `mol_qca`, `inml`, and `sidb` import nothing: those
     // modules come later in the import chain, and an argument of their type implies that they are loaded.
 
-    auto coords = pyfiction::def_submodule(m, "coords", "Layout coordinates and their area and volume functions.");
+    auto coords = pyfiction::def_submodule(m, "coords", "Immutable layout coordinates.");
     pyfiction::register_layouts_coords(coords);
-    pyfiction::cartesian_layout(m);
-    pyfiction::shifted_cartesian_layout(m);
-    pyfiction::hexagonal_layout(m);
     pyfiction::gate_level_layout(m);
     pyfiction::obstructions(m);
     pyfiction::layout_utils(m);

@@ -12,69 +12,69 @@ from typing import overload
 
 import mnt.pyfiction._native.networks
 
-def read_technology_network(filename: str, format: str = "") -> mnt.pyfiction._native.networks.technology_network:
+def read_technology_network(filename: str, format: str = "") -> mnt.pyfiction._native.networks.TechnologyNetwork:
     """
     Reads a logic network from a Verilog (`.v`), AIGER (`.aig`), or BLIF (`.blif`) file, or the first network from a directory of such files. Preserves output signals without adding output buffers. Raises `RuntimeError` with the parser's diagnostics when no network can be read.
     """
 
-def read_aig_network(filename: str, format: str = "") -> mnt.pyfiction._native.networks.aig_network:
+def read_aig_network(filename: str, format: str = "") -> mnt.pyfiction._native.networks.AigNetwork:
     """
     Reads a logic network from a Verilog (`.v`), AIGER (`.aig`), or BLIF (`.blif`) file, or the first network from a directory of such files. Preserves output signals without adding output buffers. Raises `RuntimeError` with the parser's diagnostics when no network can be read.
     """
 
-def read_xag_network(filename: str, format: str = "") -> mnt.pyfiction._native.networks.xag_network:
+def read_xag_network(filename: str, format: str = "") -> mnt.pyfiction._native.networks.XagNetwork:
     """
     Reads a logic network from a Verilog (`.v`), AIGER (`.aig`), or BLIF (`.blif`) file, or the first network from a directory of such files. Preserves output signals without adding output buffers. Raises `RuntimeError` with the parser's diagnostics when no network can be read.
     """
 
-def read_mig_network(filename: str, format: str = "") -> mnt.pyfiction._native.networks.mig_network:
+def read_mig_network(filename: str, format: str = "") -> mnt.pyfiction._native.networks.MigNetwork:
     """
     Reads a logic network from a Verilog (`.v`), AIGER (`.aig`), or BLIF (`.blif`) file, or the first network from a directory of such files. Preserves output signals without adding output buffers. Raises `RuntimeError` with the parser's diagnostics when no network can be read.
     """
 
 @overload
-def write_verilog(network: mnt.pyfiction._native.networks.technology_network, filename: str) -> None: ...
+def write_verilog(network: mnt.pyfiction._native.networks.TechnologyNetwork, filename: str) -> None: ...
 @overload
-def write_verilog(network: mnt.pyfiction._native.networks.aig_network, filename: str) -> None: ...
+def write_verilog(network: mnt.pyfiction._native.networks.AigNetwork, filename: str) -> None: ...
 @overload
-def write_verilog(network: mnt.pyfiction._native.networks.xag_network, filename: str) -> None: ...
+def write_verilog(network: mnt.pyfiction._native.networks.XagNetwork, filename: str) -> None: ...
 @overload
-def write_verilog(network: mnt.pyfiction._native.networks.mig_network, filename: str) -> None:
+def write_verilog(network: mnt.pyfiction._native.networks.MigNetwork, filename: str) -> None:
     """
     Writes the network as a gate-level Verilog file whose module is named `top`, as the readers expect. A technology network is written as an equivalent XAG, because gate-level Verilog has no buffers or fan-out nodes. A file that cannot be written raises a `RuntimeError`.
     """
 
 @overload
-def write_blif(network: mnt.pyfiction._native.networks.technology_network, filename: str) -> None: ...
+def write_blif(network: mnt.pyfiction._native.networks.TechnologyNetwork, filename: str) -> None: ...
 @overload
-def write_blif(network: mnt.pyfiction._native.networks.aig_network, filename: str) -> None: ...
+def write_blif(network: mnt.pyfiction._native.networks.AigNetwork, filename: str) -> None: ...
 @overload
-def write_blif(network: mnt.pyfiction._native.networks.xag_network, filename: str) -> None: ...
+def write_blif(network: mnt.pyfiction._native.networks.XagNetwork, filename: str) -> None: ...
 @overload
-def write_blif(network: mnt.pyfiction._native.networks.mig_network, filename: str) -> None:
+def write_blif(network: mnt.pyfiction._native.networks.MigNetwork, filename: str) -> None:
     """
     Writes the network as a BLIF file. A file that cannot be written raises a `RuntimeError`.
     """
 
-def write_aiger(network: mnt.pyfiction._native.networks.aig_network, filename: str) -> None:
+def write_aiger(network: mnt.pyfiction._native.networks.AigNetwork, filename: str) -> None:
     """
     Writes the AIG as a binary AIGER file, including its input, output, and network names. A file that cannot be written raises a `RuntimeError`.
     """
 
 @overload
 def write_dot_network(
-    network: mnt.pyfiction._native.networks.technology_network, filename: str, indexes: bool = True
+    network: mnt.pyfiction._native.networks.TechnologyNetwork, filename: str, indexes: bool = True
 ) -> None: ...
 @overload
 def write_dot_network(
-    network: mnt.pyfiction._native.networks.aig_network, filename: str, indexes: bool = True
+    network: mnt.pyfiction._native.networks.AigNetwork, filename: str, indexes: bool = True
 ) -> None: ...
 @overload
 def write_dot_network(
-    network: mnt.pyfiction._native.networks.xag_network, filename: str, indexes: bool = True
+    network: mnt.pyfiction._native.networks.XagNetwork, filename: str, indexes: bool = True
 ) -> None: ...
 @overload
-def write_dot_network(network: mnt.pyfiction._native.networks.mig_network, filename: str, indexes: bool = True) -> None:
+def write_dot_network(network: mnt.pyfiction._native.networks.MigNetwork, filename: str, indexes: bool = True) -> None:
     """
     Writes a logic network in DOT format into an output stream, using one
     of the drawers above.

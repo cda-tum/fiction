@@ -38,7 +38,7 @@ from rich.progress import (
 from rich.table import Column
 from rich.text import Text
 
-from mnt.pyfiction.networks import technology_network
+from mnt.pyfiction.networks import TechnologyNetwork
 from mnt.pyfiction.synthesis import convert_network
 
 from .errors import CommandError, HelpRequested
@@ -50,7 +50,7 @@ from .stores import CellEntry, GateLayout, Network, Store, describe, element_nam
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from mnt.pyfiction.synthesis import dynamic_truth_table
+    from mnt.pyfiction.synthesis import TruthTable
 
     from .registry import Result
 
@@ -239,7 +239,7 @@ class Session:
         self.console = console if console is not None else Console(highlight=False)
         self.errors = errors if errors is not None else Console(highlight=False, stderr=True)
         self.quiet = False
-        self.truth_tables: Store[dynamic_truth_table] = Store("truth table")
+        self.truth_tables: Store[TruthTable] = Store("truth table")
         self.networks: Store[Network] = Store("network")
         self.gate_layouts: Store[GateLayout] = Store("gate-level layout")
         self.cell_layouts: Store[CellEntry] = Store("cell-level layout")
@@ -579,7 +579,7 @@ class Session:
         return text.plain
 
     @staticmethod
-    def as_technology_network(network: Network) -> technology_network:
+    def as_technology_network(network: Network) -> TechnologyNetwork:
         """Return a network as a technology network, converting any other type.
 
         Args:
@@ -588,6 +588,6 @@ class Session:
         Returns:
             The network itself when it is a technology network, otherwise an equivalent one.
         """
-        if isinstance(network, technology_network):
+        if isinstance(network, TechnologyNetwork):
             return network
         return convert_network(network)

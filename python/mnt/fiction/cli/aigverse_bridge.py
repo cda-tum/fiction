@@ -8,7 +8,7 @@
 
 """The bridge between ``mnt.pyfiction``'s AIGs and ``aigverse``'s.
 
-The two packages bind ``mockturtle``'s ``aig_network`` in separate nanobind domains, so an AIG of
+The two packages bind ``mockturtle``'s ``AigNetwork`` in separate nanobind domains, so an AIG of
 one is not an AIG of the other and no cast between them exists. The functions here hand a network
 across through files in the session's temporary directory: AIGER on the way out, gate-level Verilog
 on the way back, because binary AIGER written through a text stream is corrupt on Windows.
@@ -28,12 +28,12 @@ from mnt.pyfiction.networks.io import read_aig_network, write_aiger
 if TYPE_CHECKING:
     from aigverse.networks import Aig
 
-    from mnt.pyfiction.networks import aig_network
+    from mnt.pyfiction.networks import AigNetwork
 
     from .session import Session
 
 
-def to_aigverse(session: Session, network: aig_network) -> Aig:
+def to_aigverse(session: Session, network: AigNetwork) -> Aig:
     """Hand an AIG to ``aigverse``.
 
     Args:
@@ -51,7 +51,7 @@ def to_aigverse(session: Session, network: aig_network) -> Aig:
         path.unlink(missing_ok=True)
 
 
-def from_aigverse(session: Session, aig: Aig, name: str, like: aig_network | None = None) -> aig_network:
+def from_aigverse(session: Session, aig: Aig, name: str, like: AigNetwork | None = None) -> AigNetwork:
     """Take an AIG back from ``aigverse``.
 
     Verilog carries no input or output names, so they are copied from ``like`` when given.
@@ -72,7 +72,7 @@ def from_aigverse(session: Session, aig: Aig, name: str, like: aig_network | Non
     finally:
         path.unlink(missing_ok=True)
     set_name(network, name)
-    names: aig_network | NamedAig | None = like
+    names: AigNetwork | NamedAig | None = like
     if names is None and isinstance(aig, NamedAig):
         names = aig
     if names is not None:

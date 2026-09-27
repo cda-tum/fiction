@@ -11,16 +11,16 @@
 from __future__ import annotations
 
 from mnt.pyfiction._native.qca import (
-    qca_cell_mode,
-    qca_cell_type,
-    qca_layout,
+    QcaCellMode,
+    QcaCellType,
+    QCALayout,
 )
 
 from . import io
 
 __all__ = [
+    "QCALayout",
+    "QcaCellMode",
+    "QcaCellType",
     "io",
-    "qca_cell_mode",
-    "qca_cell_type",
-    "qca_layout",
 ]

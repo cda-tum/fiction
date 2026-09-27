@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
     from mnt.fiction.cli.stores import GateLayout
-    from mnt.pyfiction.networks import technology_network
+    from mnt.pyfiction.networks import TechnologyNetwork
 
 T = TypeVar("T")
 
@@ -52,8 +52,8 @@ def equiv(session: Session, args: argparse.Namespace) -> Result:
     means the same function at full throughput; weak equivalence means the same function with a
     delay, reported in clock cycles.
     """
-    specification: technology_network | GateLayout
-    implementation: technology_network | GateLayout
+    specification: TechnologyNetwork | GateLayout
+    implementation: TechnologyNetwork | GateLayout
     if args.network and args.gate_layout:
         specification = session.as_technology_network(session.networks.current())
         implementation = session.gate_layouts.current()

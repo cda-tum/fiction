@@ -22,18 +22,15 @@ namespace pyfiction
 void offset_coordinate(nanobind::module_& m);
 /** @brief Registers cube coordinates. @param m Python coordinate submodule. */
 void cube_coordinate(nanobind::module_& m);
-/** @brief Registers coordinate area and volume functions. @param m Python coordinate submodule. */
-void coordinate_utility(nanobind::module_& m);
 
 /**
- * @brief Registers coordinate types and their area and volume functions.
+ * @brief Registers immutable coordinate types.
  * @param m Python coordinate submodule.
  */
 void register_layouts_coords(nanobind::module_& m)
 {
     offset_coordinate(m);
     cube_coordinate(m);
-    coordinate_utility(m);
 }
 
 }  // namespace pyfiction

@@ -50,7 +50,9 @@ from mnt.pyfiction.sidb.simulation.logic import (
     operational_input_patterns,
     parameter_point,
 )
-from mnt.pyfiction.synthesis import create_and_tt
+from mnt.pyfiction.synthesis import (
+    standard_functions,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -74,7 +76,7 @@ def test_timeout_parameter(
 def test_zero_budgets(resources_dir: Path) -> None:
     """All existing simulation-application entry points expose the built-in TimeoutError."""
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
-    spec = [create_and_tt()]
+    spec = [standard_functions("and")[0]]
     operational = is_operational_params()
     operational.timeout = 0
     domain = operational_domain_params()
@@ -131,5 +133,5 @@ def test_domain_timeout_preserves_statistics(resources_dir: Path) -> None:
 
     params.on_progress = report
     with pytest.raises(TimeoutError):
-        operational_domain_grid_search(layout, [create_and_tt()], params, stats)
+        operational_domain_grid_search(layout, [standard_functions("and")[0]], params, stats)
     assert stats.num_evaluated_parameter_combinations == initial_count

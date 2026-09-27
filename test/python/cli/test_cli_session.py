@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from rich.console import RenderableType
     from rich.progress import Task, TaskID
 
-    from mnt.pyfiction.networks import technology_network
+    from mnt.pyfiction.networks import TechnologyNetwork
 
     from .conftest import Shell
 
@@ -165,7 +165,7 @@ def test_status_line_fits_terminal(shell: Shell, width: int) -> None:
     assert cell_len(shell.session.status_line()) <= width
 
 
-def test_stats_to_dict(mux21: technology_network) -> None:
+def test_stats_to_dict(mux21: TechnologyNetwork) -> None:
     stats = orthogonal_stats()
     orthogonal(mux21, statistics=stats)
     result = stats_to_dict(stats)

@@ -38,7 +38,7 @@ void qca_layout(nanobind::module_& m)
     using fiction::qca::cell_type;
     using fiction::qca::layout;
 
-    py::enum_<cell_type>(m, "qca_cell_type", DOC(fiction_qca_cell_type))
+    py::enum_<cell_type>(m, "QcaCellType", DOC(fiction_qca_cell_type))
         .value("EMPTY", cell_type::EMPTY, DOC(fiction_qca_cell_type_EMPTY))
         .value("NORMAL", cell_type::NORMAL, DOC(fiction_qca_cell_type_NORMAL))
         .value("INPUT", cell_type::INPUT, DOC(fiction_qca_cell_type_INPUT))
@@ -46,13 +46,13 @@ void qca_layout(nanobind::module_& m)
         .value("CONST_0", cell_type::CONST_0, DOC(fiction_qca_cell_type_CONST_0))
         .value("CONST_1", cell_type::CONST_1, DOC(fiction_qca_cell_type_CONST_1));
 
-    py::enum_<cell_mode>(m, "qca_cell_mode", DOC(fiction_qca_cell_mode))
+    py::enum_<cell_mode>(m, "QcaCellMode", DOC(fiction_qca_cell_mode))
         .value("NORMAL", cell_mode::NORMAL, DOC(fiction_qca_cell_mode_NORMAL))
         .value("ROTATED", cell_mode::ROTATED, DOC(fiction_qca_cell_mode_ROTATED))
         .value("VERTICAL", cell_mode::VERTICAL, DOC(fiction_qca_cell_mode_VERTICAL))
         .value("CROSSOVER", cell_mode::CROSSOVER, DOC(fiction_qca_cell_mode_CROSSOVER));
 
-    py::class_<layout, py_cartesian_layout> cls(m, "qca_layout", DOC(fiction_qca_layout));
+    py::class_<layout> cls(m, "QCALayout", DOC(fiction_qca_layout));
 
     detail::bind_clocked_constructors(cls);
     detail::bind_cell_grid(cls);

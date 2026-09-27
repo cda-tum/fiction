@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.registry import Category, command, one_store, store_flags
 from mnt.fiction.cli.stores import describe
 from mnt.pyfiction.networks import simulate_outputs
-from mnt.pyfiction.synthesis import dynamic_truth_table
+from mnt.pyfiction.synthesis import TruthTable
 
 if TYPE_CHECKING:
     import argparse
@@ -50,7 +50,7 @@ def simulate_command(session: Session, args: argparse.Namespace) -> Result:
     tables: list[dict[str, object]] = []
     for output, bits in simulate_outputs(element):
         binary = "".join("1" if bit else "0" for bit in bits)
-        table = dynamic_truth_table(len(bits).bit_length() - 1)
+        table = TruthTable(len(bits).bit_length() - 1)
         table.create_from_binary_string(binary)
         if args.store:
             session.truth_tables.add(table)

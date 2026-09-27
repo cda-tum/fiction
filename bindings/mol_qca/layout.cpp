@@ -40,7 +40,7 @@ void mol_qca_layout(nanobind::module_& m)
     using fiction::mol_qca::cell_type;
     using fiction::mol_qca::layout;
 
-    py::enum_<cell_type>(m, "mol_qca_cell_type", DOC(fiction_mol_qca_cell_type))
+    py::enum_<cell_type>(m, "MolQcaCellType", DOC(fiction_mol_qca_cell_type))
         .value("EMPTY", cell_type::EMPTY, DOC(fiction_mol_qca_cell_type_EMPTY))
         .value("NORMAL1", cell_type::NORMAL1, DOC(fiction_mol_qca_cell_type_NORMAL1))
         .value("NORMAL2", cell_type::NORMAL2, DOC(fiction_mol_qca_cell_type_NORMAL2))
@@ -53,7 +53,7 @@ void mol_qca_layout(nanobind::module_& m)
 
     m.def("mol_qca_clock_number", &fiction::mol_qca::clock_number, py::arg("ct"), DOC(fiction_mol_qca_clock_number));
 
-    py::class_<layout, py_cartesian_layout> cls(m, "mol_qca_layout", DOC(fiction_mol_qca_layout));
+    py::class_<layout> cls(m, "MolecularQCALayout", DOC(fiction_mol_qca_layout));
 
     cls.def(py::init<>())
         .def(py::init<const layout::aspect_ratio&, std::string>(), py::arg("dimension"), py::arg("layout_name") = "",

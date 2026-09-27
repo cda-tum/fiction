@@ -57,7 +57,7 @@ def test_root_exposes_only_submodules() -> None:
     """The package root lists the submodules and the version, and no bound names."""
     assert sorted(pyfiction.__all__) == sorted(["__version__", *SUBMODULES])
     assert set(SUBMODULES) <= set(dir(pyfiction))
-    assert not hasattr(pyfiction, "cartesian_layout")
+    assert not hasattr(pyfiction, "CartesianGateLayout")
 
 
 @pytest.mark.parametrize("name", SUBMODULES + NESTED_SUBMODULES)
@@ -88,20 +88,13 @@ def test_submodules_load_lazily() -> None:
 
 
 def test_coordinate_namespace_in_fresh_interpreter() -> None:
-    """Coordinate imports expose types and utilities that layout APIs accept."""
+    """Immutable coordinate keys and tuple inputs work on domain layouts."""
     script = (
-        "from mnt.pyfiction.layouts import cartesian_layout\n"
-        "from mnt.pyfiction.layouts.coords import (\n"
-        "    offset_coordinate, cube_coordinate, offset_area, cube_area, offset_volume, cube_volume\n"
-        ")\n"
-        "for coordinate, area, volume in (\n"
-        "    (offset_coordinate, offset_area, offset_volume),\n"
-        "    (cube_coordinate, cube_area, cube_volume),\n"
-        "):\n"
-        "    assert coordinate.__module__ == 'mnt.pyfiction._native.layouts.coords'\n"
-        "    assert area(coordinate(2, 3, 1)) == 12\n"
-        "    assert volume(coordinate(2, 3, 1)) == 24\n"
-        "assert cartesian_layout(offset_coordinate(2, 3)).x() == 2\n"
+        "from mnt.pyfiction.layouts import CartesianGateLayout\n"
+        "from mnt.pyfiction.layouts.coords import OffsetCoordinate, CubeCoordinate\n"
+        "for coordinate in (OffsetCoordinate, CubeCoordinate):\n"
+        "    assert {coordinate(1, 2): 3}[coordinate(1, 2)] == 3\n"
+        "assert CartesianGateLayout((2, 3)).x() == 2\n"
     )
     subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
 
@@ -109,8 +102,8 @@ def test_coordinate_namespace_in_fresh_interpreter() -> None:
 def test_public_types_share_native_identity() -> None:
     """Public objects pass between separately compiled native modules."""
     native_layouts = importlib.import_module("mnt.pyfiction._native.layouts")
-    assert pyfiction.layouts.cartesian_gate_layout is native_layouts.cartesian_gate_layout
-    layout = pyfiction.layouts.cartesian_gate_layout((2, 2))
+    assert pyfiction.layouts.CartesianGateLayout is native_layouts.CartesianGateLayout
+    layout = pyfiction.layouts.CartesianGateLayout((2, 2))
     layout.create_pi("a", (0, 0))
     assert pyfiction.verification.count_gate_types(layout) is not None
 

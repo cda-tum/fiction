@@ -23,7 +23,9 @@ from mnt.pyfiction.sidb.simulation.analysis import (
 )
 from mnt.pyfiction.sidb.simulation.engines import quickexact
 from mnt.pyfiction.sidb.simulation.logic import bdl_input_iterator, detect_bdl_pairs
-from mnt.pyfiction.synthesis import create_and_tt
+from mnt.pyfiction.synthesis import (
+    standard_functions,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -66,7 +68,7 @@ def test_calculate_energy_and_state_type(resources_dir: Path) -> None:
         distribution,
         charge_distributions,
         output_bdl_pairs,
-        [create_and_tt()],
+        [standard_functions("and")[0]],
         1,
     )
 

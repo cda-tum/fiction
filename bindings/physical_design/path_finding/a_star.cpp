@@ -82,11 +82,8 @@ void a_star(nanobind::module_& m)
                 DOC(fiction_physical_design_path_finding_a_star_params_crossings));
 
     detail::a_star_impl<py_cartesian_gate_layout>(m);
-    detail::a_star_impl<py_cartesian_layout>(m);
     detail::a_star_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::a_star_impl<py_shifted_cartesian_layout>(m);
     detail::a_star_impl<py_hexagonal_gate_layout>(m);
-    detail::a_star_impl<py_hexagonal_layout>(m);
 }
 
 }  // namespace pyfiction

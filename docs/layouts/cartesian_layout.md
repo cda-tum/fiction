@@ -19,10 +19,8 @@ Coordinate system that represents a Cartesian grid of compile-time coordinate ty
 :::{tab-item} Python
 :sync: python
 
-```{eval-rst}
-.. autoclass:: mnt.pyfiction.layouts.cartesian_layout
-   :members:
-```
+Use `mnt.pyfiction.layouts.CartesianGateLayout` for geometry and gate placement.
+See {doc}`gate_level_layout`.
 
 :::
 

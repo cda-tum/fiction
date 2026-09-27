@@ -11,47 +11,42 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction.layouts import (
-    cartesian_gate_layout,
-    cartesian_layout,
-    hexagonal_gate_layout,
-    hexagonal_layout,
-    shifted_cartesian_gate_layout,
-    shifted_cartesian_layout,
+    CartesianGateLayout,
+    HexagonalGateLayout,
+    ShiftedCartesianGateLayout,
 )
-from mnt.pyfiction.layouts.coords import offset_coordinate
+from mnt.pyfiction.layouts.coords import OffsetCoordinate
 from mnt.pyfiction.physical_design.path_finding import enumerate_all_paths
 
 
 @pytest.mark.parametrize(
     "make_lyt",
     [
-        pytest.param(lambda: cartesian_layout((4, 4)), id="cartesian_layout"),
-        pytest.param(lambda: shifted_cartesian_layout((4, 4)), id="shifted_cartesian_layout"),
-        pytest.param(lambda: hexagonal_layout((4, 4)), id="hexagonal_layout"),
+        pytest.param(lambda: CartesianGateLayout((4, 4)), id="CartesianGateLayout"),
+        pytest.param(lambda: ShiftedCartesianGateLayout((4, 4)), id="ShiftedCartesianGateLayout"),
+        pytest.param(lambda: HexagonalGateLayout((4, 4)), id="HexagonalGateLayout"),
     ],
 )
 def test_non_clocked_paths(make_lyt):
     lyt = make_lyt()
-    assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [[(0, 0)]]
+    assert enumerate_all_paths(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(0, 0)) == [[(0, 0)]]
 
 
 @pytest.mark.parametrize(
     "make_lyt",
     [
-        pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
-        pytest.param(
-            lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
-        ),
-        pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+        pytest.param(lambda: CartesianGateLayout((4, 4), "2DDWave", "Layout"), id="CartesianGateLayout"),
+        pytest.param(lambda: ShiftedCartesianGateLayout((4, 4), "2DDWave", "Layout"), id="ShiftedCartesianGateLayout"),
+        pytest.param(lambda: HexagonalGateLayout((4, 4), "2DDWave", "Layout"), id="HexagonalGateLayout"),
     ],
 )
 def test_clocking_paths(make_lyt):
     lyt = make_lyt()
-    assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [[(0, 0)]]
-    assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)) == [[(0, 0), (1, 0)]]
-    assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)) == [[(0, 0), (0, 1)]]
+    assert enumerate_all_paths(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(0, 0)) == [[(0, 0)]]
+    assert enumerate_all_paths(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(1, 0)) == [[(0, 0), (1, 0)]]
+    assert enumerate_all_paths(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(0, 1)) == [[(0, 0), (0, 1)]]
 
-    paths = enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))
+    paths = enumerate_all_paths(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(1, 1))
 
     assert [(0, 0), (0, 1), (1, 1)] in paths
     assert [(0, 0), (1, 0), (1, 1)] in paths

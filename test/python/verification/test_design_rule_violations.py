@@ -8,14 +8,14 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.layouts import cartesian_gate_layout
+from mnt.pyfiction.layouts import CartesianGateLayout
 from mnt.pyfiction.physical_design import color_routing
 from mnt.pyfiction.verification import gate_level_drvs
 
 
 def test_drvs():
     # Create empty layout
-    layout = cartesian_gate_layout((2, 5, 0), "2DDWave")
+    layout = CartesianGateLayout((2, 5, 0), "2DDWave")
 
     # Create 2:1 MUX
 

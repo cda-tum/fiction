@@ -73,41 +73,37 @@ class count_gate_types_stats:
     def num_other(self) -> int: ...
 
 @overload
-def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.networks.technology_network) -> count_gate_types_stats: ...
+def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.networks.TechnologyNetwork) -> count_gate_types_stats: ...
 @overload
-def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.networks.aig_network) -> count_gate_types_stats: ...
+def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.networks.AigNetwork) -> count_gate_types_stats: ...
 @overload
-def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.networks.xag_network) -> count_gate_types_stats: ...
+def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.networks.XagNetwork) -> count_gate_types_stats: ...
 @overload
-def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.networks.mig_network) -> count_gate_types_stats: ...
+def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.networks.MigNetwork) -> count_gate_types_stats: ...
 @overload
-def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.layouts.cartesian_gate_layout) -> count_gate_types_stats: ...
+def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.layouts.CartesianGateLayout) -> count_gate_types_stats: ...
 @overload
 def count_gate_types(
-    ntk_or_lyt: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    ntk_or_lyt: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
 ) -> count_gate_types_stats: ...
 @overload
-def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.layouts.hexagonal_gate_layout) -> count_gate_types_stats: ...
+def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.layouts.HexagonalGateLayout) -> count_gate_types_stats: ...
+@overload
+def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout) -> count_gate_types_stats: ...
 @overload
 def count_gate_types(
-    ntk_or_lyt: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
-) -> count_gate_types_stats: ...
-@overload
-def count_gate_types(
-    ntk_or_lyt: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    ntk_or_lyt: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
 ) -> count_gate_types_stats: ...
 @overload
 def count_gate_types(
-    ntk_or_lyt: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    ntk_or_lyt: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
 ) -> count_gate_types_stats: ...
 @overload
-def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout) -> count_gate_types_stats: ...
+def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.layouts.OddRowHexGateLayout) -> count_gate_types_stats: ...
 @overload
-def count_gate_types(
-    ntk_or_lyt: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
-) -> count_gate_types_stats: ...
+def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.layouts.OddColumnHexGateLayout) -> count_gate_types_stats: ...
 @overload
-def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.layouts.even_column_hex_gate_layout) -> count_gate_types_stats:
+def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout) -> count_gate_types_stats:
     """
     Gives a detailed listing of all gate types present in the provided
     network (or layout). This function can distinguish most gate types
@@ -126,39 +122,39 @@ def count_gate_types(ntk_or_lyt: mnt.pyfiction._native.layouts.even_column_hex_g
 
 @overload
 def critical_path_length_and_throughput(
-    layout: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
 ) -> tuple[int, int]: ...
 @overload
 def critical_path_length_and_throughput(
-    layout: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
 ) -> tuple[int, int]: ...
 @overload
 def critical_path_length_and_throughput(
-    layout: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    layout: mnt.pyfiction._native.layouts.HexagonalGateLayout,
 ) -> tuple[int, int]: ...
 @overload
 def critical_path_length_and_throughput(
-    layout: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
 ) -> tuple[int, int]: ...
 @overload
 def critical_path_length_and_throughput(
-    layout: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
 ) -> tuple[int, int]: ...
 @overload
 def critical_path_length_and_throughput(
-    layout: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
 ) -> tuple[int, int]: ...
 @overload
 def critical_path_length_and_throughput(
-    layout: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    layout: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
 ) -> tuple[int, int]: ...
 @overload
 def critical_path_length_and_throughput(
-    layout: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    layout: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
 ) -> tuple[int, int]: ...
 @overload
 def critical_path_length_and_throughput(
-    layout: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    layout: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
 ) -> tuple[int, int]:
     """
     Computes the critical path length (CP) length and the throughput (TP)
@@ -292,63 +288,63 @@ class gate_level_drv_stats:
 
 @overload
 def gate_level_drvs(
-    layout: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
     params: gate_level_drv_params = ...,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]: ...
 @overload
 def gate_level_drvs(
-    layout: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     params: gate_level_drv_params = ...,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]: ...
 @overload
 def gate_level_drvs(
-    layout: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    layout: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     params: gate_level_drv_params = ...,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]: ...
 @overload
 def gate_level_drvs(
-    layout: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     params: gate_level_drv_params = ...,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]: ...
 @overload
 def gate_level_drvs(
-    layout: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     params: gate_level_drv_params = ...,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]: ...
 @overload
 def gate_level_drvs(
-    layout: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     params: gate_level_drv_params = ...,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]: ...
 @overload
 def gate_level_drvs(
-    layout: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    layout: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     params: gate_level_drv_params = ...,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]: ...
 @overload
 def gate_level_drvs(
-    layout: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    layout: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     params: gate_level_drv_params = ...,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]: ...
 @overload
 def gate_level_drvs(
-    layout: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    layout: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     params: gate_level_drv_params = ...,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
@@ -436,602 +432,602 @@ class equivalence_checking_stats:
 
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.networks.technology_network,
-    implementation: mnt.pyfiction._native.networks.technology_network,
+    specification: mnt.pyfiction._native.networks.TechnologyNetwork,
+    implementation: mnt.pyfiction._native.networks.TechnologyNetwork,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.networks.technology_network,
-    implementation: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    specification: mnt.pyfiction._native.networks.TechnologyNetwork,
+    implementation: mnt.pyfiction._native.layouts.CartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.networks.technology_network,
-    implementation: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.networks.TechnologyNetwork,
+    implementation: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.networks.technology_network,
-    implementation: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    specification: mnt.pyfiction._native.networks.TechnologyNetwork,
+    implementation: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.networks.technology_network,
-    implementation: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.networks.TechnologyNetwork,
+    implementation: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.networks.technology_network,
-    implementation: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.networks.TechnologyNetwork,
+    implementation: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.networks.technology_network,
-    implementation: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.networks.TechnologyNetwork,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.networks.technology_network,
-    implementation: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    specification: mnt.pyfiction._native.networks.TechnologyNetwork,
+    implementation: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.networks.technology_network,
-    implementation: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.networks.TechnologyNetwork,
+    implementation: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.networks.technology_network,
-    implementation: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.networks.TechnologyNetwork,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.networks.technology_network,
+    specification: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    implementation: mnt.pyfiction._native.networks.TechnologyNetwork,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.CartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    specification: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.CartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.networks.technology_network,
+    specification: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    implementation: mnt.pyfiction._native.networks.TechnologyNetwork,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.CartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    specification: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    implementation: mnt.pyfiction._native.networks.technology_network,
+    specification: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    implementation: mnt.pyfiction._native.networks.TechnologyNetwork,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    implementation: mnt.pyfiction._native.layouts.CartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    implementation: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    specification: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    implementation: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.HexagonalGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.networks.technology_network,
+    specification: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.networks.TechnologyNetwork,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.CartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.networks.technology_network,
+    specification: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.networks.TechnologyNetwork,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.CartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.networks.technology_network,
+    specification: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
+    implementation: mnt.pyfiction._native.networks.TechnologyNetwork,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.CartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
-    implementation: mnt.pyfiction._native.networks.technology_network,
+    specification: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
+    implementation: mnt.pyfiction._native.networks.TechnologyNetwork,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.CartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.networks.technology_network,
+    specification: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.networks.TechnologyNetwork,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.CartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.networks.technology_network,
+    specification: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.networks.TechnologyNetwork,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.CartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
-    specification: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
-    implementation: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    specification: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
+    implementation: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     statistics: equivalence_checking_stats | None = None,
 ) -> eq_type:
     """

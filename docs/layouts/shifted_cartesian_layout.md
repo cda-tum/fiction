@@ -50,10 +50,8 @@ The shifted Cartesian layout supports all of them via template parameters. It sh
 :::{tab-item} Python
 :sync: python
 
-```{eval-rst}
-.. autoclass:: mnt.pyfiction.layouts.shifted_cartesian_layout
-   :members:
-```
+Use `mnt.pyfiction.layouts.ShiftedCartesianGateLayout` for geometry and gate placement.
+See {doc}`gate_level_layout`.
 
 :::
 

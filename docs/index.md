@@ -27,6 +27,7 @@ API pages provide C++ and Python tabs where both interfaces exist.
 
 about
 getting_started
+python
 cli
 publications
 changelog

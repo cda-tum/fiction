@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction.inml import inml_layout
+from mnt.pyfiction.inml import INMLLayout
 from mnt.pyfiction.inml.io import write_qcc_layout, write_qcc_layout_params
 
 from ._write import output_argument, output_path, require_cell_type, written
@@ -46,7 +46,7 @@ def write_qcc_command(session: Session, args: argparse.Namespace) -> Result:
     Without a filename, use the active element's name and ``.qcc``.
     """
     entry = session.cell_layouts.current()
-    element = require_cell_type(entry.layout, (inml_layout,), ".qcc")
+    element = require_cell_type(entry.layout, (INMLLayout,), ".qcc")
     path = output_path(element, args.file, ".qcc")
     params = write_qcc_layout_params()
     params.on_progress = session.report_progress

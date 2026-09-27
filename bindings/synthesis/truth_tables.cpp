@@ -14,47 +14,74 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
+#include "pyfiction/types.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
 
+#include <map>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
-
+/**
+ * @brief Binds named single-output and multi-output Boolean specifications.
+ * @param m Python synthesis module.
+ */
 void truth_tables(nanobind::module_& m)
 {
-    m.def("create_id_tt", &fiction::synthesis::create_id_tt, DOC(fiction_synthesis_create_id_tt));
-    m.def("create_not_tt", &fiction::synthesis::create_not_tt, DOC(fiction_synthesis_create_not_tt));
-    m.def("create_and_tt", &fiction::synthesis::create_and_tt, DOC(fiction_synthesis_create_and_tt));
-    m.def("create_or_tt", &fiction::synthesis::create_or_tt, DOC(fiction_synthesis_create_or_tt));
-    m.def("create_nand_tt", &fiction::synthesis::create_nand_tt, DOC(fiction_synthesis_create_nand_tt));
-    m.def("create_nor_tt", &fiction::synthesis::create_nor_tt, DOC(fiction_synthesis_create_nor_tt));
-    m.def("create_xor_tt", &fiction::synthesis::create_xor_tt, DOC(fiction_synthesis_create_xor_tt));
-    m.def("create_xnor_tt", &fiction::synthesis::create_xnor_tt, DOC(fiction_synthesis_create_xnor_tt));
-    m.def("create_lt_tt", &fiction::synthesis::create_lt_tt, DOC(fiction_synthesis_create_lt_tt));
-    m.def("create_gt_tt", &fiction::synthesis::create_gt_tt, DOC(fiction_synthesis_create_gt_tt));
-    m.def("create_le_tt", &fiction::synthesis::create_le_tt, DOC(fiction_synthesis_create_le_tt));
-    m.def("create_ge_tt", &fiction::synthesis::create_ge_tt, DOC(fiction_synthesis_create_ge_tt));
-    m.def("create_and3_tt", &fiction::synthesis::create_and3_tt, DOC(fiction_synthesis_create_and3_tt));
-    m.def("create_xor_and_tt", &fiction::synthesis::create_xor_and_tt, DOC(fiction_synthesis_create_xor_and_tt));
-    m.def("create_or_and_tt", &fiction::synthesis::create_or_and_tt, DOC(fiction_synthesis_create_or_and_tt));
-    m.def("create_onehot_tt", &fiction::synthesis::create_onehot_tt, DOC(fiction_synthesis_create_onehot_tt));
-    m.def("create_maj_tt", &fiction::synthesis::create_maj_tt, DOC(fiction_synthesis_create_maj_tt));
-    m.def("create_gamble_tt", &fiction::synthesis::create_gamble_tt, DOC(fiction_synthesis_create_gamble_tt));
-    m.def("create_dot_tt", &fiction::synthesis::create_dot_tt, DOC(fiction_synthesis_create_dot_tt));
-    m.def("create_ite_tt", &fiction::synthesis::create_ite_tt, DOC(fiction_synthesis_create_ite_tt));
-    m.def("create_and_xor_tt", &fiction::synthesis::create_and_xor_tt, DOC(fiction_synthesis_create_and_xor_tt));
-    m.def("create_xor3_tt", &fiction::synthesis::create_xor3_tt, DOC(fiction_synthesis_create_xor3_tt));
-    m.def("create_double_wire_tt", &fiction::synthesis::create_double_wire_tt,
-          DOC(fiction_synthesis_create_double_wire_tt));
-    m.def("create_crossing_wire_tt", &fiction::synthesis::create_crossing_wire_tt,
-          DOC(fiction_synthesis_create_crossing_wire_tt));
-    m.def("create_fan_out_tt", &fiction::synthesis::create_fan_out_tt, DOC(fiction_synthesis_create_fan_out_tt));
-    m.def("create_half_adder_tt", &fiction::synthesis::create_half_adder_tt,
-          DOC(fiction_synthesis_create_half_adder_tt));
+    std::map<std::string, std::vector<py_tt>> functions{
+        {"id", {fiction::synthesis::create_id_tt()}},
+        {"not", {fiction::synthesis::create_not_tt()}},
+        {"and", {fiction::synthesis::create_and_tt()}},
+        {"or", {fiction::synthesis::create_or_tt()}},
+        {"nand", {fiction::synthesis::create_nand_tt()}},
+        {"nor", {fiction::synthesis::create_nor_tt()}},
+        {"xor", {fiction::synthesis::create_xor_tt()}},
+        {"xnor", {fiction::synthesis::create_xnor_tt()}},
+        {"lt", {fiction::synthesis::create_lt_tt()}},
+        {"gt", {fiction::synthesis::create_gt_tt()}},
+        {"le", {fiction::synthesis::create_le_tt()}},
+        {"ge", {fiction::synthesis::create_ge_tt()}},
+        {"and3", {fiction::synthesis::create_and3_tt()}},
+        {"xor_and", {fiction::synthesis::create_xor_and_tt()}},
+        {"or_and", {fiction::synthesis::create_or_and_tt()}},
+        {"onehot", {fiction::synthesis::create_onehot_tt()}},
+        {"maj", {fiction::synthesis::create_maj_tt()}},
+        {"gamble", {fiction::synthesis::create_gamble_tt()}},
+        {"dot", {fiction::synthesis::create_dot_tt()}},
+        {"ite", {fiction::synthesis::create_ite_tt()}},
+        {"and_xor", {fiction::synthesis::create_and_xor_tt()}},
+        {"xor3", {fiction::synthesis::create_xor3_tt()}},
+        {"double_wire", fiction::synthesis::create_double_wire_tt()},
+        {"crossing_wire", fiction::synthesis::create_crossing_wire_tt()},
+        {"fan_out", fiction::synthesis::create_fan_out_tt()},
+        {"half_adder", fiction::synthesis::create_half_adder_tt()},
+    };
+    m.def(
+        "standard_functions", [functions]() { return functions; },
+        "Returns fresh truth tables for every named standard function. Each value lists the outputs in specification "
+        "order.");
+    m.def(
+        "standard_functions",
+        [functions = std::move(functions)](const std::string& name)
+        {
+            const auto found = functions.find(name);
+            if (found == functions.end())
+            {
+                throw std::invalid_argument("unknown standard function: " + name);
+            }
+            return found->second;
+        },
+        nanobind::arg("name"),
+        "Returns fresh truth tables for the named function, in specification output order. Unknown names raise "
+        "ValueError.");
 }
-
 }  // namespace pyfiction

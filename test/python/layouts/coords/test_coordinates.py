@@ -12,11 +12,11 @@ import operator
 
 import pytest
 
-from mnt.pyfiction.layouts.coords import cube_coordinate, offset_coordinate
+from mnt.pyfiction.layouts.coords import CubeCoordinate, OffsetCoordinate
 
 COORDINATE_TYPES = [
-    pytest.param(offset_coordinate, id="offset"),
-    pytest.param(cube_coordinate, id="cube"),
+    pytest.param(OffsetCoordinate, id="offset"),
+    pytest.param(CubeCoordinate, id="cube"),
 ]
 
 
@@ -70,3 +70,12 @@ def test_equality_disregards_an_omitted_z(coordinate):
 @pytest.mark.parametrize("coordinate", COORDINATE_TYPES)
 def test_repr(coordinate):
     assert repr(coordinate(3, 2, 1)) == "(3,2,1)"
+
+
+@pytest.mark.parametrize("coordinate", COORDINATE_TYPES)
+def test_coordinate_keys_are_immutable(coordinate):
+    site = coordinate(3, 2, 1)
+    values = {site: "site"}
+    with pytest.raises(AttributeError):
+        site.x = 4
+    assert values[coordinate(3, 2, 1)] == "site"

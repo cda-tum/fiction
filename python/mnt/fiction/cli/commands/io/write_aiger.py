@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction.networks import aig_network
+from mnt.pyfiction.networks import AigNetwork
 from mnt.pyfiction.networks.io import write_aiger
 
 from ._write import output_argument, output_path, written
@@ -40,7 +40,7 @@ def write_aiger_command(session: Session, args: argparse.Namespace) -> Result:
     Without a filename, use the active element's name and ``.aig``.
     """
     element = session.networks.current()
-    if not isinstance(element, aig_network):
+    if not isinstance(element, AigNetwork):
         msg = "only an AIG can be written as AIGER; read the network with --type aig"
         raise CommandError(msg)
     path = output_path(element, args.file, ".aig")

@@ -16,7 +16,7 @@ from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import integer
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe
-from mnt.pyfiction.synthesis import dynamic_truth_table
+from mnt.pyfiction.synthesis import TruthTable
 
 if TYPE_CHECKING:
     import argparse
@@ -48,11 +48,11 @@ def tt(session: Session, args: argparse.Namespace) -> Result:
     first, so 'tt -t 1000' is the two-input AND.
     """
     if args.random is not None:
-        table = dynamic_truth_table(args.random)
+        table = TruthTable(args.random)
         table.create_random()
     elif args.expression is not None:
         variables = [ord(char) - ord("a") + 1 for char in args.expression if "a" <= char <= "p"]
-        table = dynamic_truth_table(max(variables, default=0))
+        table = TruthTable(max(variables, default=0))
         table.create_from_expression(args.expression)
     else:
         table = _table_from_string(args.table)
@@ -60,16 +60,16 @@ def tt(session: Session, args: argparse.Namespace) -> Result:
     return {"truth_table": describe(table)}
 
 
-def _table_from_string(text: str) -> dynamic_truth_table:
+def _table_from_string(text: str) -> TruthTable:
     """Create a truth table from binary bits or hexadecimal digits."""
     if text.lower().startswith("0x"):
         digits = text[2:]
         bits = len(digits) * 4
         num_vars = _log2(bits, what="hex digits times four")
-        table = dynamic_truth_table(num_vars)
+        table = TruthTable(num_vars)
         table.create_from_hex_string(digits)
         return table
-    table = dynamic_truth_table(_log2(len(text), what="bits"))
+    table = TruthTable(_log2(len(text), what="bits"))
     table.create_from_binary_string(text)
     return table
 

@@ -16,7 +16,7 @@ import pytest
 
 from mnt.fiction.cli.topologies import FGL_READERS
 from mnt.pyfiction import physical_design
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout, ShiftedCartesianGateLayout
 from mnt.pyfiction.networks import simulate_outputs
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 def test_ortho(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho -v")
     layout = mux21_shell.session.gate_layouts.current()
-    assert isinstance(layout, cartesian_gate_layout)
+    assert isinstance(layout, CartesianGateLayout)
     assert layout.get_clocking_scheme_name() == "2DDWAVE"
     assert "Num gates" in mux21_shell.output
 
@@ -46,18 +46,18 @@ def test_ortho_three_clock_phases(mux21_shell: Shell) -> None:
 
 def test_ortho_converts_other_network_types(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("mux21.v")}" --type aig; ortho')
-    assert isinstance(shell.session.gate_layouts.current(), cartesian_gate_layout)
+    assert isinstance(shell.session.gate_layouts.current(), CartesianGateLayout)
 
 
 def test_gold(mux21_shell: Shell) -> None:
     mux21_shell.ok("gold -r -e high_efficiency -c wires --seed 1")
-    assert isinstance(mux21_shell.session.gate_layouts.current(), cartesian_gate_layout)
+    assert isinstance(mux21_shell.session.gate_layouts.current(), CartesianGateLayout)
     assert "at least 1" in mux21_shell.fails("gold -n 0")
 
 
 def test_hex(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho; hex -i -o -p")
-    assert isinstance(mux21_shell.session.gate_layouts.current(), hexagonal_gate_layout)
+    assert isinstance(mux21_shell.session.gate_layouts.current(), HexagonalGateLayout)
     assert "Cartesian layout is needed" in mux21_shell.fails("hex")
 
 
@@ -81,7 +81,7 @@ def test_optimize_needs_2ddwave(mux21_shell: Shell) -> None:
 def test_exact(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("xor2.v")}"; exact -x -b -s 2ddwave -t 60')
     layout = shell.session.gate_layouts.current()
-    assert isinstance(layout, cartesian_gate_layout)
+    assert isinstance(layout, CartesianGateLayout)
     assert layout.get_clocking_scheme_name() == "2DDWAVE"
     assert "not a clocking scheme" in shell.fails("exact -s nope")
 
@@ -89,7 +89,7 @@ def test_exact(shell: Shell, resource: Callable[[str], str]) -> None:
 @pytest.mark.skipif(not hasattr(physical_design, "exact_cartesian"), reason="pyfiction was built without Z3")
 def test_exact_topolinano(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("xor2.v")}"; exact -x -b -s columnar --topolinano -t 60')
-    assert isinstance(shell.session.gate_layouts.current(), shifted_cartesian_gate_layout)
+    assert isinstance(shell.session.gate_layouts.current(), ShiftedCartesianGateLayout)
     assert shell.session.log[-1]["result"]["gate_layout"]["topology"] == "odd_column_cartesian"
 
 

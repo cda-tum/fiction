@@ -11,15 +11,12 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction.layouts import (
-    cartesian_gate_layout,
-    cartesian_layout,
-    hexagonal_gate_layout,
-    hexagonal_layout,
-    obstructions,
-    shifted_cartesian_gate_layout,
-    shifted_cartesian_layout,
+    CartesianGateLayout,
+    HexagonalGateLayout,
+    Obstructions,
+    ShiftedCartesianGateLayout,
 )
-from mnt.pyfiction.layouts.coords import offset_coordinate
+from mnt.pyfiction.layouts.coords import OffsetCoordinate
 from mnt.pyfiction.physical_design.path_finding import (
     a_star,
     a_star_distance,
@@ -31,9 +28,9 @@ from mnt.pyfiction.physical_design.path_finding import (
 
 def test_search_constraints_are_local() -> None:
     """Searches combine persistent constraints with independent routing data."""
-    layout = cartesian_gate_layout((2, 2), "2DDWave")
+    layout = CartesianGateLayout((2, 2), "2DDWave")
     layout.obstruct_coordinate((1, 0))
-    blocked = obstructions()
+    blocked = Obstructions()
     blocked.obstruct_connection((0, 1), (1, 1))
     expected = [(0, 0), (0, 1), (0, 2), (1, 2), (2, 2)]
     for _ in range(2):
@@ -46,99 +43,97 @@ def test_search_constraints_are_local() -> None:
         assert blocked.is_obstructed_connection((0, 1), (1, 1))
         assert not blocked.is_obstructed_coordinate((1, 0))
 
-    grid = cartesian_layout((1, 1))
+    grid = CartesianGateLayout((1, 1))
     blocked.obstruct_coordinate((1, 0))
     assert a_star(grid, (0, 0), (1, 1), obstructions=blocked) == []
 
 
 CLOCKED_LAYOUTS = [
-    pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
-    pytest.param(
-        lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
-    ),
-    pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+    pytest.param(lambda: CartesianGateLayout((4, 4), "2DDWave", "Layout"), id="CartesianGateLayout"),
+    pytest.param(lambda: ShiftedCartesianGateLayout((4, 4), "2DDWave", "Layout"), id="ShiftedCartesianGateLayout"),
+    pytest.param(lambda: HexagonalGateLayout((4, 4), "2DDWave", "Layout"), id="HexagonalGateLayout"),
 ]
 
 
 @pytest.mark.parametrize(
     "make_lyt",
     [
-        pytest.param(lambda: cartesian_layout((4, 4)), id="cartesian_layout"),
-        pytest.param(lambda: shifted_cartesian_layout((4, 4)), id="shifted_cartesian_layout"),
-        pytest.param(lambda: hexagonal_layout((4, 4)), id="hexagonal_layout"),
+        pytest.param(lambda: CartesianGateLayout((4, 4)), id="CartesianGateLayout"),
+        pytest.param(lambda: ShiftedCartesianGateLayout((4, 4)), id="ShiftedCartesianGateLayout"),
+        pytest.param(lambda: HexagonalGateLayout((4, 4)), id="HexagonalGateLayout"),
     ],
 )
 def test_non_clocked_path_finding(make_lyt):
     lyt = make_lyt()
-    assert a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [(0, 0)]
+    assert a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(0, 0)) == [(0, 0)]
 
 
 @pytest.mark.parametrize("make_lyt", CLOCKED_LAYOUTS)
 def test_clocked_path_finding(make_lyt):
     lyt = make_lyt()
-    assert a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [(0, 0)]
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))) == 3
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2))) == 5
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3))) == 7
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4))) == 9
-    assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(0, 0))) == 0
-    assert len(a_star(lyt, offset_coordinate(2, 2), offset_coordinate(1, 1))) == 0
+    assert a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(0, 0)) == [(0, 0)]
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(1, 1))) == 3
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(2, 2))) == 5
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(3, 3))) == 7
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(4, 4))) == 9
+    assert len(a_star(lyt, OffsetCoordinate(1, 1), OffsetCoordinate(0, 0))) == 0
+    assert len(a_star(lyt, OffsetCoordinate(2, 2), OffsetCoordinate(1, 1))) == 0
 
 
 @pytest.mark.parametrize(
     "make_lyt",
     [
         pytest.param(
-            lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
-            id="cartesian_gate_layout",
+            lambda: CartesianGateLayout((4, 4), "2DDWave", "Layout"),
+            id="CartesianGateLayout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
-            id="shifted_cartesian_gate_layout",
+            lambda: ShiftedCartesianGateLayout((4, 4), "2DDWave", "Layout"),
+            id="ShiftedCartesianGateLayout",
         ),
         pytest.param(
-            lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"),
-            id="hexagonal_gate_layout",
+            lambda: HexagonalGateLayout((4, 4), "2DDWave", "Layout"),
+            id="HexagonalGateLayout",
         ),
     ],
 )
 def test_path_finding_with_obstructions(make_lyt):
     lyt = make_lyt()
-    lyt.obstruct_coordinate(offset_coordinate(1, 0))
-    lyt.obstruct_coordinate(offset_coordinate(1, 1))
-    lyt.obstruct_coordinate(offset_coordinate(1, 2))
-    lyt.obstruct_coordinate(offset_coordinate(1, 3))
-    lyt.obstruct_coordinate(offset_coordinate(1, 4))
+    lyt.obstruct_coordinate(OffsetCoordinate(1, 0))
+    lyt.obstruct_coordinate(OffsetCoordinate(1, 1))
+    lyt.obstruct_coordinate(OffsetCoordinate(1, 2))
+    lyt.obstruct_coordinate(OffsetCoordinate(1, 3))
+    lyt.obstruct_coordinate(OffsetCoordinate(1, 4))
 
-    assert lyt.is_obstructed_coordinate(offset_coordinate(1, 0))
-    assert lyt.is_obstructed_coordinate(offset_coordinate(1, 1))
-    assert lyt.is_obstructed_coordinate(offset_coordinate(1, 2))
-    assert lyt.is_obstructed_coordinate(offset_coordinate(1, 3))
-    assert lyt.is_obstructed_coordinate(offset_coordinate(1, 4))
+    assert lyt.is_obstructed_coordinate(OffsetCoordinate(1, 0))
+    assert lyt.is_obstructed_coordinate(OffsetCoordinate(1, 1))
+    assert lyt.is_obstructed_coordinate(OffsetCoordinate(1, 2))
+    assert lyt.is_obstructed_coordinate(OffsetCoordinate(1, 3))
+    assert lyt.is_obstructed_coordinate(OffsetCoordinate(1, 4))
 
-    assert a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [(0, 0)]
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))) == 3
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2))) == 0
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3))) == 0
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4))) == 0
-    assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(0, 0))) == 0
-    assert len(a_star(lyt, offset_coordinate(2, 2), offset_coordinate(1, 1))) == 0
+    assert a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(0, 0)) == [(0, 0)]
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(1, 1))) == 3
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(2, 2))) == 0
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(3, 3))) == 0
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(4, 4))) == 0
+    assert len(a_star(lyt, OffsetCoordinate(1, 1), OffsetCoordinate(0, 0))) == 0
+    assert len(a_star(lyt, OffsetCoordinate(2, 2), OffsetCoordinate(1, 1))) == 0
 
 
 @pytest.mark.parametrize(
     "make_lyt",
     [
         pytest.param(
-            lambda: cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout"),
-            id="cartesian_gate_layout",
+            lambda: CartesianGateLayout((2, 1, 1), "2DDWave", "Layout"),
+            id="CartesianGateLayout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout"),
-            id="shifted_cartesian_gate_layout",
+            lambda: ShiftedCartesianGateLayout((2, 1, 1), "2DDWave", "Layout"),
+            id="ShiftedCartesianGateLayout",
         ),
         pytest.param(
-            lambda: hexagonal_gate_layout((2, 1, 1), "2DDWave", "Layout"),
-            id="hexagonal_gate_layout",
+            lambda: HexagonalGateLayout((2, 1, 1), "2DDWave", "Layout"),
+            id="HexagonalGateLayout",
         ),
     ],
 )
@@ -162,58 +157,58 @@ def test_path_finding_with_obstructions_and_crossings(make_lyt):
     params = a_star_params()
     params.crossings = True
 
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0), params)) == 1
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1), params)) == 2
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(2, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(2, 1), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(0, 0), params)) == 1
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(1, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(0, 1), params)) == 2
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(1, 1), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(2, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(2, 1), params)) == 0
 
-    assert len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(0, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(1, 0), params)) == 1
-    assert len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(0, 1), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(1, 1), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(2, 0), params)) == 2
-    assert len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(2, 1), params)) == 3
+    assert len(a_star(lyt, OffsetCoordinate(1, 0), OffsetCoordinate(0, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(1, 0), OffsetCoordinate(1, 0), params)) == 1
+    assert len(a_star(lyt, OffsetCoordinate(1, 0), OffsetCoordinate(0, 1), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(1, 0), OffsetCoordinate(1, 1), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(1, 0), OffsetCoordinate(2, 0), params)) == 2
+    assert len(a_star(lyt, OffsetCoordinate(1, 0), OffsetCoordinate(2, 1), params)) == 3
 
-    assert len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(0, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(1, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(0, 1), params)) == 1
-    assert len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(1, 1), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(2, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(2, 1), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(0, 1), OffsetCoordinate(0, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(0, 1), OffsetCoordinate(1, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(0, 1), OffsetCoordinate(0, 1), params)) == 1
+    assert len(a_star(lyt, OffsetCoordinate(0, 1), OffsetCoordinate(1, 1), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(0, 1), OffsetCoordinate(2, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(0, 1), OffsetCoordinate(2, 1), params)) == 0
 
-    assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(0, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(1, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(0, 1), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(1, 1), params)) == 1
-    assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(2, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(2, 1), params)) == 2
+    assert len(a_star(lyt, OffsetCoordinate(1, 1), OffsetCoordinate(0, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(1, 1), OffsetCoordinate(1, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(1, 1), OffsetCoordinate(0, 1), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(1, 1), OffsetCoordinate(1, 1), params)) == 1
+    assert len(a_star(lyt, OffsetCoordinate(1, 1), OffsetCoordinate(2, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(1, 1), OffsetCoordinate(2, 1), params)) == 2
 
-    assert len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(0, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(1, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(0, 1), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(1, 1), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(2, 0), params)) == 1
-    assert len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(2, 1), params)) == 2
+    assert len(a_star(lyt, OffsetCoordinate(2, 0), OffsetCoordinate(0, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(2, 0), OffsetCoordinate(1, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(2, 0), OffsetCoordinate(0, 1), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(2, 0), OffsetCoordinate(1, 1), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(2, 0), OffsetCoordinate(2, 0), params)) == 1
+    assert len(a_star(lyt, OffsetCoordinate(2, 0), OffsetCoordinate(2, 1), params)) == 2
 
-    assert len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(0, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(1, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(0, 1), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(1, 1), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(2, 0), params)) == 0
-    assert len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(2, 1), params)) == 1
+    assert len(a_star(lyt, OffsetCoordinate(2, 1), OffsetCoordinate(0, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(2, 1), OffsetCoordinate(1, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(2, 1), OffsetCoordinate(0, 1), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(2, 1), OffsetCoordinate(1, 1), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(2, 1), OffsetCoordinate(2, 0), params)) == 0
+    assert len(a_star(lyt, OffsetCoordinate(2, 1), OffsetCoordinate(2, 1), params)) == 1
 
 
 @pytest.mark.parametrize("make_lyt", CLOCKED_LAYOUTS)
 def test_distance(make_lyt):
     lyt = make_lyt()
-    assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == 0
-    assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)) == 1
-    assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)) == 1
-    assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1)) == 2
-    assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2)) == 4
-    assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3)) == 6
-    assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4)) == 8
-    assert a_star_distance(lyt, offset_coordinate(1, 1), offset_coordinate(0, 0)) == float("inf")
-    assert a_star_distance(lyt, offset_coordinate(2, 2), offset_coordinate(1, 1)) == float("inf")
+    assert a_star_distance(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(0, 0)) == 0
+    assert a_star_distance(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(1, 0)) == 1
+    assert a_star_distance(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(0, 1)) == 1
+    assert a_star_distance(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(1, 1)) == 2
+    assert a_star_distance(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(2, 2)) == 4
+    assert a_star_distance(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(3, 3)) == 6
+    assert a_star_distance(lyt, OffsetCoordinate(0, 0), OffsetCoordinate(4, 4)) == 8
+    assert a_star_distance(lyt, OffsetCoordinate(1, 1), OffsetCoordinate(0, 0)) == float("inf")
+    assert a_star_distance(lyt, OffsetCoordinate(2, 2), OffsetCoordinate(1, 1)) == float("inf")

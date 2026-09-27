@@ -30,7 +30,7 @@ void obstructions(nanobind::module_& m)
     namespace py = nanobind;
     using data   = fiction::layouts::obstructions<py_offset_coordinate>;
 
-    py::class_<data>(m, "obstructions", DOC(fiction_layouts_obstructions))
+    py::class_<data>(m, "Obstructions", DOC(fiction_layouts_obstructions))
         .def(py::init<>(), "Creates empty routing constraints.")
         .def("obstruct_coordinate", &data::obstruct_coordinate, py::arg("c"),
              DOC(fiction_layouts_obstructions_obstruct_coordinate))

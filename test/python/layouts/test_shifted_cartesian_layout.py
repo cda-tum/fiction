@@ -8,11 +8,11 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.layouts import shifted_cartesian_layout
+from mnt.pyfiction.layouts import ShiftedCartesianGateLayout
 
 
 def test_coordinate_iteration():
-    layout = shifted_cartesian_layout((9, 9, 1))
+    layout = ShiftedCartesianGateLayout((9, 9, 1))
 
     for t in layout.coordinates():
         assert t <= (9, 9, 1)

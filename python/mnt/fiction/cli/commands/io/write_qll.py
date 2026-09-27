@@ -14,9 +14,9 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
 from mnt.pyfiction.fcn.io import write_qll_layout
-from mnt.pyfiction.inml import inml_layout
-from mnt.pyfiction.mol_qca import mol_qca_layout
-from mnt.pyfiction.qca import qca_layout
+from mnt.pyfiction.inml import INMLLayout
+from mnt.pyfiction.mol_qca import MolecularQCALayout
+from mnt.pyfiction.qca import QCALayout
 
 from ._write import output_argument, output_path, require_cell_type, written
 
@@ -41,7 +41,7 @@ def write_qll_command(session: Session, args: argparse.Namespace) -> Result:
     Without a filename, use the active element's name and ``.qll``.
     """
     entry = session.cell_layouts.current()
-    element = require_cell_type(entry.layout, (qca_layout, mol_qca_layout, inml_layout), ".qll")
+    element = require_cell_type(entry.layout, (QCALayout, MolecularQCALayout, INMLLayout), ".qll")
     path = output_path(element, args.file, ".qll")
     write_qll_layout(element, str(path), on_progress=session.report_progress)
     return written(session, path)

@@ -379,6 +379,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** Domain layouts, networks, and coordinates use PascalCase names. Coordinates are immutable, and network connectivity returns signals with inversion polarity.
+
+  - **Breaking:** Use `TruthTable.from_binary`, `from_hex`, and `from_expression` for specifications, and `standard_functions` for the standard-function catalog. Geometry operations live directly on gate and cell layouts.
+
   - Native extensions now live under the private `_native` package; public Python modules
     explicitly export the supported tools and preserve native type identity.
 

@@ -15,7 +15,7 @@ from typing import Literal, overload
 
 import mnt.pyfiction._native.networks
 
-class dynamic_truth_table:
+class TruthTable:
     @overload
     def __init__(self) -> None:
         """Constructs the constant-zero truth table."""
@@ -55,257 +55,32 @@ class dynamic_truth_table:
         Returns the bits as a hexadecimal string, most significant digit first.
         """
 
-def create_id_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the identity
-    function in one variable.
+    @staticmethod
+    def from_binary(binary: str) -> TruthTable:
+        """Constructs a truth table from most-significant-bit-first binary text."""
 
-    Returns:
-        Identity function in one variable.
-    """
+    @staticmethod
+    def from_hex(hex: str, *, num_vars: int) -> TruthTable:
+        """
+        Constructs a truth table from hexadecimal text and an explicit variable count.
+        """
 
-def create_not_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the negation in one
-    variable.
+    @staticmethod
+    def from_expression(expression: str, *, num_vars: int) -> TruthTable:
+        """
+        Constructs a truth table from a kitty Boolean expression and variable count.
+        """
 
-    Returns:
-        Negation in one variable.
+@overload
+def standard_functions() -> dict[str, list[TruthTable]]:
     """
-
-def create_and_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the conjunction in
-    two variables.
-
-    Returns:
-        Conjunction in two variables.
+    Returns fresh truth tables for every named standard function. Each value lists the outputs in specification order.
     """
 
-def create_or_tt() -> dynamic_truth_table:
+@overload
+def standard_functions(name: str) -> list[TruthTable]:
     """
-    Creates and returns a truth table that implements the disjunction in
-    two variables.
-
-    Returns:
-        Disjunction in two variables.
-    """
-
-def create_nand_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the negated
-    conjunction in two variables.
-
-    Returns:
-        Negated conjunction in two variables.
-    """
-
-def create_nor_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the negated
-    disjunction in two variables.
-
-    Returns:
-        Negated disjunction in two variables.
-    """
-
-def create_xor_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the exclusive
-    disjunction in two variables.
-
-    Returns:
-        Exclusive disjunction in two variables.
-    """
-
-def create_xnor_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the negated
-    exclusive disjunction in two variables.
-
-    Returns:
-        Negated exclusive disjunction in two variables.
-    """
-
-def create_lt_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the less-than
-    function in two variables.
-
-    Returns:
-        Less-than function in two variables.
-    """
-
-def create_gt_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the greater-than
-    function in two variables.
-
-    Returns:
-        Greater-than function in two variables.
-    """
-
-def create_le_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the less-than-or-
-    equal function in two variables.
-
-    Returns:
-        Less-than-or-equal function in two variables.
-    """
-
-def create_ge_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the greater-than-or-
-    equal function in two variables.
-
-    Returns:
-        Greater-than-or-equal function in two variables.
-    """
-
-def create_and3_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the conjunction in
-    three variables.
-
-    Returns:
-        Conjunction in three variables.
-    """
-
-def create_xor_and_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the XOR-AND function
-    (a and (b xor c)) in three variables.
-
-    Returns:
-        XOR-AND in three variables.
-    """
-
-def create_or_and_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the OR-AND function
-    (a and (b or c)) in three variables.
-
-    Returns:
-        OR-AND in three variables.
-    """
-
-def create_onehot_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the Onehot function
-    (exactly one of a,b,c) in three variables.
-
-    Returns:
-        Onehot in three variables.
-    """
-
-def create_maj_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the majority
-    function in three variables.
-
-    Returns:
-        Majority function in three variables.
-    """
-
-def create_gamble_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the Gamble function
-    (all or none of a,b,c) in three variables.
-
-    Returns:
-        Gamble in three variables.
-    """
-
-def create_dot_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the Dot function (a
-    xor (c or a and b)) in three variables.
-
-    Returns:
-        Dot function in three variables.
-    """
-
-def create_ite_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the ITE (MUX)
-    function (if a then b else c) in three variables.
-
-    Returns:
-        ITE (MUX) in three variables.
-    """
-
-def create_and_xor_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the AND-XOR function
-    (a xor b and c) in three variables.
-
-    Returns:
-        AND-XOR in three variables.
-    """
-
-def create_xor3_tt() -> dynamic_truth_table:
-    """
-    Creates and returns a truth table that implements the exclusive
-    disjunction in three variables.
-
-    Returns:
-        Exclusive disjunction in three variables.
-    """
-
-def create_double_wire_tt() -> list[dynamic_truth_table]:
-    """
-    Creates and returns a vector of truth tables for a double wire multi-
-    output function.
-
-    This function generates a vector of truth tables, each representing
-    one of the outputs of a double wire multi-output function in two
-    variables. The function returns a vector containing two truth tables.
-
-    Returns:
-        Vector of truth tables, each representing an output of the double
-        wire function.
-    """
-
-def create_crossing_wire_tt() -> list[dynamic_truth_table]:
-    """
-    Creates and returns a vector of truth tables for a crossing wire
-    multi-output function.
-
-    This function generates a vector of truth tables, each representing
-    one of the outputs of a crossing wire multi-output function in two
-    variables. The function returns a vector containing two truth tables.
-
-    Returns:
-        Vector of truth tables, each representing an output of the
-        crossing wire function.
-    """
-
-def create_fan_out_tt() -> list[dynamic_truth_table]:
-    """
-    Creates and returns a vector of truth tables for a multi-output
-    function with two variables.
-
-    This function generates a vector of truth tables, each representing
-    one of the outputs of a multi-output function in two variables.
-
-    Returns:
-        Vector of truth tables, each representing an output of the
-        identity function.
-    """
-
-def create_half_adder_tt() -> list[dynamic_truth_table]:
-    """
-    Creates and returns a vector of truth tables for a half adder multi-
-    output function.
-
-    This function generates a vector of truth tables, each representing
-    one of the outputs of a half adder multi-output function in two
-    variables. The function returns a vector containing two truth tables.
-
-    Returns:
-        Vector of truth tables, each representing an output of the half
-        adder function.
+    Returns fresh truth tables for the named function, in specification output order. Unknown names raise ValueError.
     """
 
 class substitution_strategy(enum.Enum):
@@ -370,8 +145,8 @@ class fanout_substitution_params:
     def seed(self, arg: int | None, /) -> None: ...
 
 def fanout_substitution(
-    network: mnt.pyfiction._native.networks.technology_network, params: fanout_substitution_params = ...
-) -> mnt.pyfiction._native.networks.technology_network:
+    network: mnt.pyfiction._native.networks.TechnologyNetwork, params: fanout_substitution_params = ...
+) -> mnt.pyfiction._native.networks.TechnologyNetwork:
     """
     Substitutes high-output degrees in a logic network with fanout nodes
     that compute the identity function. For this purpose, `create_buf` is
@@ -409,7 +184,7 @@ def fanout_substitution(
     """
 
 def is_fanout_substituted(
-    network: mnt.pyfiction._native.networks.technology_network, params: fanout_substitution_params = ...
+    network: mnt.pyfiction._native.networks.TechnologyNetwork, params: fanout_substitution_params = ...
 ) -> bool:
     """
     Checks if a logic network is properly fanout-substituted with regard
@@ -448,8 +223,8 @@ class network_balancing_params:
     def unify_outputs(self, arg: bool, /) -> None: ...
 
 def network_balancing(
-    network: mnt.pyfiction._native.networks.technology_network, params: network_balancing_params = ...
-) -> mnt.pyfiction._native.networks.technology_network:
+    network: mnt.pyfiction._native.networks.TechnologyNetwork, params: network_balancing_params = ...
+) -> mnt.pyfiction._native.networks.TechnologyNetwork:
     """
     Balances a logic network with buffer nodes that compute the identity
     function. For this purpose, `create_buf` is utilized. Therefore,
@@ -483,7 +258,7 @@ def network_balancing(
     """
 
 def is_balanced(
-    network: mnt.pyfiction._native.networks.technology_network, params: network_balancing_params = ...
+    network: mnt.pyfiction._native.networks.TechnologyNetwork, params: network_balancing_params = ...
 ) -> bool:
     """
     Checks if a logic network is properly path-balanced with regard to the
@@ -718,28 +493,28 @@ def all_supported_standard_functions() -> technology_mapping_params:
 
 @overload
 def technology_mapping(
-    network: mnt.pyfiction._native.networks.technology_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork,
     params: technology_mapping_params = ...,
     stats: technology_mapping_stats | None = None,
-) -> mnt.pyfiction._native.networks.technology_network: ...
+) -> mnt.pyfiction._native.networks.TechnologyNetwork: ...
 @overload
 def technology_mapping(
-    network: mnt.pyfiction._native.networks.aig_network,
+    network: mnt.pyfiction._native.networks.AigNetwork,
     params: technology_mapping_params = ...,
     stats: technology_mapping_stats | None = None,
-) -> mnt.pyfiction._native.networks.technology_network: ...
+) -> mnt.pyfiction._native.networks.TechnologyNetwork: ...
 @overload
 def technology_mapping(
-    network: mnt.pyfiction._native.networks.xag_network,
+    network: mnt.pyfiction._native.networks.XagNetwork,
     params: technology_mapping_params = ...,
     stats: technology_mapping_stats | None = None,
-) -> mnt.pyfiction._native.networks.technology_network: ...
+) -> mnt.pyfiction._native.networks.TechnologyNetwork: ...
 @overload
 def technology_mapping(
-    network: mnt.pyfiction._native.networks.mig_network,
+    network: mnt.pyfiction._native.networks.MigNetwork,
     params: technology_mapping_params = ...,
     stats: technology_mapping_stats | None = None,
-) -> mnt.pyfiction._native.networks.technology_network:
+) -> mnt.pyfiction._native.networks.TechnologyNetwork:
     """
     Performs technology mapping on the given network. Technology mapping
     is the process of replacing the gates in a network with gates from a
@@ -784,12 +559,12 @@ class network_target(enum.Enum):
 
 @overload
 def convert_network(
-    network: mnt.pyfiction._native.networks.technology_network
-    | mnt.pyfiction._native.networks.aig_network
-    | mnt.pyfiction._native.networks.xag_network
-    | mnt.pyfiction._native.networks.mig_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork
+    | mnt.pyfiction._native.networks.AigNetwork
+    | mnt.pyfiction._native.networks.XagNetwork
+    | mnt.pyfiction._native.networks.MigNetwork,
     target: Literal[network_target.TEC] = ...,
-) -> mnt.pyfiction._native.networks.technology_network:
+) -> mnt.pyfiction._native.networks.TechnologyNetwork:
     """
     Converts a logic network into an equivalent one of another type.
     Thereby, this function is very similar to
@@ -814,38 +589,38 @@ def convert_network(
 
 @overload
 def convert_network(
-    network: mnt.pyfiction._native.networks.technology_network
-    | mnt.pyfiction._native.networks.aig_network
-    | mnt.pyfiction._native.networks.xag_network
-    | mnt.pyfiction._native.networks.mig_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork
+    | mnt.pyfiction._native.networks.AigNetwork
+    | mnt.pyfiction._native.networks.XagNetwork
+    | mnt.pyfiction._native.networks.MigNetwork,
     target: Literal[network_target.AIG],
-) -> mnt.pyfiction._native.networks.aig_network: ...
+) -> mnt.pyfiction._native.networks.AigNetwork: ...
 @overload
 def convert_network(
-    network: mnt.pyfiction._native.networks.technology_network
-    | mnt.pyfiction._native.networks.aig_network
-    | mnt.pyfiction._native.networks.xag_network
-    | mnt.pyfiction._native.networks.mig_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork
+    | mnt.pyfiction._native.networks.AigNetwork
+    | mnt.pyfiction._native.networks.XagNetwork
+    | mnt.pyfiction._native.networks.MigNetwork,
     target: Literal[network_target.XAG],
-) -> mnt.pyfiction._native.networks.xag_network: ...
+) -> mnt.pyfiction._native.networks.XagNetwork: ...
 @overload
 def convert_network(
-    network: mnt.pyfiction._native.networks.technology_network
-    | mnt.pyfiction._native.networks.aig_network
-    | mnt.pyfiction._native.networks.xag_network
-    | mnt.pyfiction._native.networks.mig_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork
+    | mnt.pyfiction._native.networks.AigNetwork
+    | mnt.pyfiction._native.networks.XagNetwork
+    | mnt.pyfiction._native.networks.MigNetwork,
     target: Literal[network_target.MIG],
-) -> mnt.pyfiction._native.networks.mig_network: ...
+) -> mnt.pyfiction._native.networks.MigNetwork: ...
 @overload
 def convert_network(
-    network: mnt.pyfiction._native.networks.technology_network
-    | mnt.pyfiction._native.networks.aig_network
-    | mnt.pyfiction._native.networks.xag_network
-    | mnt.pyfiction._native.networks.mig_network,
+    network: mnt.pyfiction._native.networks.TechnologyNetwork
+    | mnt.pyfiction._native.networks.AigNetwork
+    | mnt.pyfiction._native.networks.XagNetwork
+    | mnt.pyfiction._native.networks.MigNetwork,
     target: network_target,
 ) -> (
-    mnt.pyfiction._native.networks.technology_network
-    | mnt.pyfiction._native.networks.aig_network
-    | mnt.pyfiction._native.networks.xag_network
-    | mnt.pyfiction._native.networks.mig_network
+    mnt.pyfiction._native.networks.TechnologyNetwork
+    | mnt.pyfiction._native.networks.AigNetwork
+    | mnt.pyfiction._native.networks.XagNetwork
+    | mnt.pyfiction._native.networks.MigNetwork
 ): ...

@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import CartesianGateLayout, ShiftedCartesianGateLayout
 from mnt.pyfiction.layouts.io import (
     fgl_parsing_error,
     read_cartesian_fgl_layout,
@@ -39,7 +39,7 @@ def test_read_write(mux21, tmp_path):
     write_fgl_layout(hex_layout, hex_file)
     assert equivalence_checking(read_hexagonal_fgl_layout(hex_file), hex_layout) == eq_type.STRONG
 
-    shifted_layout = shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")
+    shifted_layout = ShiftedCartesianGateLayout((3, 3, 1), "2DDWave", "Layout")
     shifted_file = str(tmp_path / "empty_shifted_cartesian.fgl")
     write_fgl_layout(shifted_layout, shifted_file)
     assert equivalence_checking(read_shifted_cartesian_fgl_layout(shifted_file), shifted_layout) == eq_type.STRONG
@@ -47,7 +47,7 @@ def test_read_write(mux21, tmp_path):
 
 @pytest.mark.parametrize("value", ["2", "-1", "18446744073709551616", "1garbage"])
 def test_fgl_rejects_unrepresentable_layers(tmp_path: Path, value: str) -> None:
-    layout = cartesian_gate_layout((1, 0), "2DDWave", "wire")
+    layout = CartesianGateLayout((1, 0), "2DDWave", "wire")
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (1, 0))
     path = tmp_path / "invalid.fgl"
@@ -58,7 +58,7 @@ def test_fgl_rejects_unrepresentable_layers(tmp_path: Path, value: str) -> None:
 
 
 def test_fgl_preserves_labels_and_synchronization(tmp_path: Path) -> None:
-    layout = cartesian_gate_layout((2, 0), "2DDWave", "A & B < C")
+    layout = CartesianGateLayout((2, 0), "2DDWave", "A & B < C")
     source = layout.create_pi("a&b", (0, 0))
     wire = layout.create_buf(source, (1, 0))
     layout.create_po(wire, "f<g", (2, 0))

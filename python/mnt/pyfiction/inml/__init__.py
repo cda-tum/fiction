@@ -11,14 +11,14 @@
 from __future__ import annotations
 
 from mnt.pyfiction._native.inml import (
-    inml_layout,
-    inml_magnet_type,
+    INMLLayout,
+    InmlMagnetType,
 )
 
 from . import io
 
 __all__ = [
-    "inml_layout",
-    "inml_magnet_type",
+    "INMLLayout",
+    "InmlMagnetType",
     "io",
 ]

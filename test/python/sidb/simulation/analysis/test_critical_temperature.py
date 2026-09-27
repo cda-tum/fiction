@@ -31,7 +31,9 @@ from mnt.pyfiction.sidb.simulation.logic import (
     detect_bdl_wires_params,
     generate_bdl_input_pattern_layouts,
 )
-from mnt.pyfiction.synthesis import create_and_tt, create_not_tt, create_xor_tt
+from mnt.pyfiction.synthesis import (
+    standard_functions,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -78,7 +80,7 @@ def test_gate_based_simulation(resources_dir: Path) -> None:
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
     stats = critical_temperature_stats()
-    spec = [create_xor_tt()]
+    spec = [standard_functions("xor")[0]]
 
     assert critical_temperature_gate_based(layout, spec, params, stats) <= 200
 
@@ -102,7 +104,7 @@ def test_bestagon_inv(resources_dir: Path) -> None:
     params.operational_params.simulation_parameters.base = 2  # QuickSim simulates two charge states only
 
     stats = critical_temperature_stats()
-    spec = [create_not_tt()]
+    spec = [standard_functions("not")[0]]
 
     assert critical_temperature_gate_based(layout, spec, params, stats) <= 400
 
@@ -128,7 +130,7 @@ def test_bestagon_inv_with_different_mu(resources_dir: Path) -> None:
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
     stats = critical_temperature_stats()
-    spec = [create_not_tt()]
+    spec = [standard_functions("not")[0]]
 
     assert critical_temperature_gate_based(layout, spec, params, stats) <= 5
 
@@ -174,12 +176,12 @@ def test_critical_temperature_with_input_pattern_layouts() -> None:
     assert len(input_pattern_layouts) == 4
 
     reference_stats = critical_temperature_stats()
-    reference_ct = critical_temperature_gate_based(lyt, [create_and_tt()], params, reference_stats)
+    reference_ct = critical_temperature_gate_based(lyt, [standard_functions("and")[0]], params, reference_stats)
 
     stats = critical_temperature_stats()
     ct = critical_temperature_gate_based(
         input_pattern_layouts,
-        [create_and_tt()],
+        [standard_functions("and")[0]],
         params,
         output_bdl_pairs,
         input_bdl_wires,
@@ -196,7 +198,7 @@ def test_critical_temperature_with_input_pattern_layouts() -> None:
     with pytest.raises(ValueError, match="expected 4 input pattern layouts"):
         critical_temperature_gate_based(
             input_pattern_layouts[:1],
-            [create_and_tt()],
+            [standard_functions("and")[0]],
             params,
             output_bdl_pairs,
             input_bdl_wires,
@@ -207,7 +209,7 @@ def test_critical_temperature_with_input_pattern_layouts() -> None:
     with pytest.raises(ValueError, match="expected 1 output BDL pairs"):
         critical_temperature_gate_based(
             input_pattern_layouts,
-            [create_and_tt()],
+            [standard_functions("and")[0]],
             params,
             [*output_bdl_pairs, output_bdl_pairs[0]],
             input_bdl_wires,

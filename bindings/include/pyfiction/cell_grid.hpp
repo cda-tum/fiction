@@ -18,6 +18,7 @@
 #pragma once
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/geometry.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>
@@ -50,11 +51,13 @@ namespace pyfiction::detail
  * @param cls Python class of `Lyt`.
  */
 template <typename Lyt>
-void bind_cell_grid(nanobind::class_<Lyt, py_cartesian_layout>& cls)
+void bind_cell_grid(nanobind::class_<Lyt>& cls)
 {
     namespace py = nanobind;
 
     using cell = typename Lyt::cell;
+
+    bind_geometry(cls);
 
     cls.def("get_cell_type", &Lyt::get_cell_type, py::arg("c"), DOC(fiction_layouts_cell_grid_get_cell_type))
         .def("is_empty_cell", &Lyt::is_empty_cell, py::arg("c"), DOC(fiction_layouts_cell_grid_is_empty_cell))
@@ -62,6 +65,7 @@ void bind_cell_grid(nanobind::class_<Lyt, py_cartesian_layout>& cls)
              DOC(fiction_layouts_cell_grid_assign_cell_name))
         .def("get_cell_name", &Lyt::get_cell_name, py::arg("c"), DOC(fiction_layouts_cell_grid_get_cell_name))
         .def("set_layout_name", &Lyt::set_layout_name, py::arg("name"), DOC(fiction_layouts_cell_grid_set_layout_name))
+        .def_prop_rw("name", &Lyt::get_layout_name, &Lyt::set_layout_name, "The layout name.")
         .def("get_layout_name", &Lyt::get_layout_name, DOC(fiction_layouts_cell_grid_get_layout_name))
         .def("num_cells", &Lyt::num_cells, DOC(fiction_layouts_cell_grid_num_cells))
         .def("is_empty", &Lyt::is_empty, DOC(fiction_layouts_cell_grid_is_empty))
@@ -131,7 +135,7 @@ void bind_cell_grid(nanobind::class_<Lyt, py_cartesian_layout>& cls)
  * @param cls Python class of `Lyt`.
  */
 template <typename Lyt>
-void bind_tile_clocking(nanobind::class_<Lyt, py_cartesian_layout>& cls)
+void bind_tile_clocking(nanobind::class_<Lyt>& cls)
 {
     namespace py = nanobind;
 
@@ -179,7 +183,7 @@ void bind_tile_clocking(nanobind::class_<Lyt, py_cartesian_layout>& cls)
  * @param cls Python class of `Lyt`.
  */
 template <typename Lyt>
-void bind_clocked_constructors(nanobind::class_<Lyt, py_cartesian_layout>& cls)
+void bind_clocked_constructors(nanobind::class_<Lyt>& cls)
 {
     namespace py = nanobind;
 

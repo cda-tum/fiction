@@ -11,19 +11,11 @@
 from __future__ import annotations
 
 from mnt.pyfiction._native.layouts.coords import (
-    cube_area,
-    cube_coordinate,
-    cube_volume,
-    offset_area,
-    offset_coordinate,
-    offset_volume,
+    CubeCoordinate,
+    OffsetCoordinate,
 )
 
 __all__ = [
-    "cube_area",
-    "cube_coordinate",
-    "cube_volume",
-    "offset_area",
-    "offset_coordinate",
-    "offset_volume",
+    "CubeCoordinate",
+    "OffsetCoordinate",
 ]

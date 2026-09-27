@@ -8,13 +8,13 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.layouts import cartesian_gate_layout
+from mnt.pyfiction.layouts import CartesianGateLayout
 from mnt.pyfiction.physical_design import route_path
 from mnt.pyfiction.physical_design.path_finding import a_star
 
 
 def test_empty_layout():
-    lyt = cartesian_gate_layout((4, 2), "2DDWave")
+    lyt = CartesianGateLayout((4, 2), "2DDWave")
 
     x1 = lyt.create_pi("x1", (0, 1))
     lyt.create_po(x1, "f1", (4, 1))
@@ -26,7 +26,7 @@ def test_empty_layout():
 
 
 def test_empty_layout_a_star():
-    lyt = cartesian_gate_layout((4, 2), "2DDWave")
+    lyt = CartesianGateLayout((4, 2), "2DDWave")
 
     x1 = lyt.create_pi("x1", (0, 1))
     lyt.create_po(x1, "f1", (4, 1))

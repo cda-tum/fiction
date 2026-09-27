@@ -17,7 +17,9 @@ from mnt.pyfiction.sidb.simulation.defects import (
     displacement_robustness_domain_params,
     displacement_robustness_domain_stats,
 )
-from mnt.pyfiction.synthesis import create_and_tt
+from mnt.pyfiction.synthesis import (
+    standard_functions,
+)
 
 
 def test_siqad_and_gate_100_lattice():
@@ -67,6 +69,6 @@ def test_siqad_and_gate_100_lattice():
 
     stats = displacement_robustness_domain_stats()
 
-    _ = determine_displacement_robustness_domain(layout, [create_and_tt()], params, stats)
+    _ = determine_displacement_robustness_domain(layout, [standard_functions("and")[0]], params, stats)
 
     assert stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements == 8

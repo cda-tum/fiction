@@ -25,11 +25,13 @@ from mnt.fiction.cli.registry import REGISTRY
 from mnt.fiction.cli.render import table_rows
 from mnt.fiction.cli.stores import CellEntry, element_name
 from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
-from mnt.pyfiction.inml import inml_layout
-from mnt.pyfiction.mol_qca import mol_qca_cell_type, mol_qca_layout
+from mnt.pyfiction.inml import INMLLayout
+from mnt.pyfiction.mol_qca import MolecularQCALayout, MolQcaCellType
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from mnt.fiction.cli.stores import GateLayout
 
     from .conftest import Shell
 
@@ -115,7 +117,7 @@ def test_layout_summaries_do_not_compute_timing(mux21_shell: Shell, monkeypatch:
 
 
 @pytest.mark.parametrize("layout_type", TOPOLOGIES)
-def test_layout_topology_display_names(shell: Shell, layout_type: type) -> None:
+def test_layout_topology_display_names(shell: Shell, layout_type: type[GateLayout]) -> None:
     """Store and statistics use readable names while JSON retains the canonical topology."""
     shell.session.gate_layouts.add(layout_type())
     topology = TOPOLOGIES[layout_type]
@@ -185,10 +187,10 @@ def test_show_sidb_svg(shell: Shell, resource: Callable[[str], str], tmp_path: P
 
 
 def test_show_molecular_qca_svg(shell: Shell, tmp_path: Path) -> None:
-    layout = mol_qca_layout((2, 0), "wire")
-    layout.assign_cell_type((0, 0), mol_qca_cell_type.INPUT)
-    layout.assign_cell_type((1, 0), mol_qca_cell_type.NORMAL1)
-    layout.assign_cell_type((2, 0), mol_qca_cell_type.OUTPUT)
+    layout = MolecularQCALayout((2, 0), "wire")
+    layout.assign_cell_type((0, 0), MolQcaCellType.INPUT)
+    layout.assign_cell_type((1, 0), MolQcaCellType.NORMAL1)
+    layout.assign_cell_type((2, 0), MolQcaCellType.OUTPUT)
     shell.session.cell_layouts.add(CellEntry(layout))
     # molQCA cells name their own clock phase, so the layout has no clock zones
     assert "clock zone" not in shell.ok("ps -c")
@@ -198,7 +200,7 @@ def test_show_molecular_qca_svg(shell: Shell, tmp_path: Path) -> None:
 
 
 def test_show_rejects_inml_svg(shell: Shell, tmp_path: Path) -> None:
-    shell.session.cell_layouts.add(CellEntry(inml_layout()))
+    shell.session.cell_layouts.add(CellEntry(INMLLayout()))
     assert "no SVG drawer" in shell.fails(f'show -c --silent -o "{tmp_path / "inml.svg"}"')
 
 

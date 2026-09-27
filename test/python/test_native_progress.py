@@ -20,7 +20,7 @@ import pytest
 from mnt.pyfiction import layouts, physical_design
 from mnt.pyfiction.fcn.io import write_qll_layout
 from mnt.pyfiction.inml.io import write_qcc_layout, write_qcc_layout_params
-from mnt.pyfiction.layouts import cartesian_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import CartesianGateLayout, ShiftedCartesianGateLayout
 from mnt.pyfiction.layouts.io import write_dot_layout, write_fgl_layout
 from mnt.pyfiction.physical_design import (
     apply_qca_one_library,
@@ -41,11 +41,11 @@ from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
 from mnt.pyfiction.sidb.simulation.analysis import critical_temperature_gate_based, critical_temperature_params
 from mnt.pyfiction.sidb.simulation.engines import clustercomplete, clustercomplete_params
 from mnt.pyfiction.synthesis import (
-    create_not_tt,
     fanout_substitution,
     fanout_substitution_params,
     network_balancing,
     network_balancing_params,
+    standard_functions,
 )
 from mnt.pyfiction.verification import (
     critical_path_length_and_throughput,
@@ -58,13 +58,13 @@ from mnt.pyfiction.verification import (
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from mnt.pyfiction.networks import technology_network
+    from mnt.pyfiction.networks import TechnologyNetwork
 
 
 def test_long_route_statistics_release_the_gil() -> None:
     """Deep layout summaries finish while Python display threads can run."""
     length = 200_000
-    layout = cartesian_gate_layout((length, 0), "2DDWave")
+    layout = CartesianGateLayout((length, 0), "2DDWave")
     signal = layout.create_pi("in", (0, 0))
     for x in range(1, length):
         signal = layout.create_buf(signal, (x, 0))
@@ -95,7 +95,7 @@ def test_long_route_statistics_release_the_gil() -> None:
 
 
 @pytest.mark.parametrize("threads", [1, 4])
-def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> None:
+def test_exact_candidate_lifecycle(mux21: TechnologyNetwork, threads: int) -> None:
     """Solver candidates use tile dimensions and leave no active worker after success."""
     params = exact_params()
     params.num_threads = threads
@@ -117,7 +117,7 @@ def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> N
 
 
 @pytest.mark.parametrize("parallel", [False, True])
-def test_gold_graph_expansions(mux21: technology_network, *, parallel: bool) -> None:
+def test_gold_graph_expansions(mux21: TechnologyNetwork, *, parallel: bool) -> None:
     """Stable graphs report expansions, accepted solutions, and their final inactive state."""
     params = graph_oriented_layout_design_params()
     params.enable_multithreading = parallel
@@ -147,7 +147,7 @@ def test_gold_graph_expansions(mux21: technology_network, *, parallel: bool) -> 
 
 
 @pytest.mark.parametrize("command", ["balance", "fanouts", "check"])
-def test_counted_native_phases(mux21: technology_network, command: str) -> None:
+def test_counted_native_phases(mux21: TechnologyNetwork, command: str) -> None:
     """Source-gate passes and enabled checks finish at their declared totals."""
     reports: list[tuple[str, int, int]] = []
 
@@ -174,7 +174,7 @@ def test_counted_native_phases(mux21: technology_network, command: str) -> None:
 
 
 @pytest.mark.parametrize("kind", ["fgl", "dot", "qll", "qca", "svg", "sqd", "sidb_svg"])
-def test_writer_counts_and_output(mux21: technology_network, tmp_path: Path, kind: str) -> None:
+def test_writer_counts_and_output(mux21: TechnologyNetwork, tmp_path: Path, kind: str) -> None:
     """Callbacks leave writer output unchanged and count every completed phase."""
     gate_layout = orthogonal(mux21)
     reports: list[tuple[str, int, int]] = []
@@ -200,12 +200,12 @@ def test_writer_counts_and_output(mux21: technology_network, tmp_path: Path, kin
                     params.on_progress = callback
                 write_sidb_layout_svg(layout, str(path), params)
         else:
-            qca_layout = apply_qca_one_library(gate_layout)
+            cell_layout = apply_qca_one_library(gate_layout)
             params = getattr(qca_io, f"write_{'qca_layout_svg' if kind == 'svg' else kind + '_layout'}_params")()
             if callback:
                 params.on_progress = callback
             getattr(qca_io, f"write_{'qca_layout_svg' if kind == 'svg' else kind + '_layout'}")(
-                qca_layout, str(path), params
+                cell_layout, str(path), params
             )
     if kind == "sqd":
         assert read_sqd_layout(str(paths[0])) == read_sqd_layout(str(paths[1]))
@@ -238,7 +238,7 @@ def test_clustercomplete_worker_counts(resources_dir: Path, threads: int) -> Non
     assert sum(final.values()) == next(done for task, done, _ in reversed(counts) if task == "compositions")
 
 
-def test_exact_skips_candidates_outside_area_bound(mux21: technology_network) -> None:
+def test_exact_skips_candidates_outside_area_bound(mux21: TechnologyNetwork) -> None:
     """Candidates rejected by the area bound never appear as active solvers."""
     params = exact_params()
     params.upper_bound_area = 1
@@ -248,7 +248,7 @@ def test_exact_skips_candidates_outside_area_bound(mux21: technology_network) ->
     assert not reports
 
 
-def test_exact_clears_candidates_on_timeout(mux21: technology_network) -> None:
+def test_exact_clears_candidates_on_timeout(mux21: TechnologyNetwork) -> None:
     """A timeout leaves no active candidate, whether it interrupts a solver or prevents its start."""
     params = exact_params()
     params.num_threads = 4
@@ -270,7 +270,7 @@ def test_temperature_forwards_simulation_workers(resources_dir: Path) -> None:
     phases: list[tuple[str, int, int]] = []
     params.on_worker_progress = lambda *report: workers.append(report)
     params.on_progress = lambda *report: phases.append(report)
-    critical_temperature_gate_based(layout, [create_not_tt()], params)
+    critical_temperature_gate_based(layout, [standard_functions("not")[0]], params)
     assert workers
     assert phases
     active = {worker: running for worker, count, description, done, total, running in workers}
@@ -288,7 +288,7 @@ def test_temperature_forwards_simulation_workers(resources_dir: Path) -> None:
 )
 def test_empty_mapping_has_no_completed_gates(library: str, topology: str) -> None:
     """Empty source layouts report no gate mappings for every cell library."""
-    layout = getattr(layouts, f"{topology}_gate_layout")()
+    layout = getattr(layouts, "".join(part.title() for part in topology.split("_")) + "GateLayout")()
     reports: list[tuple[str, int, int]] = []
     result = getattr(physical_design, f"apply_{library}_library")(
         layout, lambda task, done, total: reports.append((task, done, total))
@@ -300,7 +300,7 @@ def test_empty_mapping_has_no_completed_gates(library: str, topology: str) -> No
 
 def test_failed_mapping_retains_completed_count() -> None:
     """Unsupported routing leaves the last completed count below the mapping total."""
-    layout = shifted_cartesian_gate_layout((1, 1), "2DDWave", "unsupported routing")
+    layout = ShiftedCartesianGateLayout((1, 1), "2DDWave", "unsupported routing")
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (0, 1))
     reports: list[tuple[str, int, int]] = []
@@ -310,7 +310,7 @@ def test_failed_mapping_retains_completed_count() -> None:
     assert reports[-1][1] < reports[-1][2]
 
 
-def test_qcc_writer_counts_and_output(mux21: technology_network, tmp_path: Path) -> None:
+def test_qcc_writer_counts_and_output(mux21: TechnologyNetwork, tmp_path: Path) -> None:
     """QCC callbacks count rows without changing the serialized layout."""
     placement = exact_params()
     placement.scheme = "COLUMNAR3"

@@ -24,7 +24,7 @@ An offset coordinate is a coordinate that defines a location via an offset from 
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.layouts.coords.offset_coordinate
+.. autoclass:: mnt.pyfiction.layouts.coords.OffsetCoordinate
    :members:
 ```
 
@@ -53,7 +53,7 @@ At the same time, they can be used to address 3-dimensional grids.
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.layouts.coords.cube_coordinate
+.. autoclass:: mnt.pyfiction.layouts.coords.CubeCoordinate
    :members:
 ```
 

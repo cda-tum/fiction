@@ -18,7 +18,7 @@ from mnt.pyfiction._native.fcn import io as io
 
 @overload
 def area(
-    layout: mnt.pyfiction._native.qca.qca_layout,
+    layout: mnt.pyfiction._native.qca.QCALayout,
     width: float = 18.0,
     height: float = 18.0,
     hspace: float = 2.0,
@@ -26,7 +26,7 @@ def area(
 ) -> float: ...
 @overload
 def area(
-    layout: mnt.pyfiction._native.mol_qca.mol_qca_layout,
+    layout: mnt.pyfiction._native.mol_qca.MolecularQCALayout,
     width: float = 2.0,
     height: float = 2.0,
     hspace: float = 0.0,
@@ -34,7 +34,7 @@ def area(
 ) -> float: ...
 @overload
 def area(
-    layout: mnt.pyfiction._native.inml.inml_layout,
+    layout: mnt.pyfiction._native.inml.INMLLayout,
     width: float = 50.0,
     height: float = 100.0,
     hspace: float = 10.0,

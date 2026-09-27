@@ -12,11 +12,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.inml import inml_layout
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.inml import INMLLayout
+from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout, ShiftedCartesianGateLayout
 from mnt.pyfiction.networks.io import read_technology_network
 from mnt.pyfiction.physical_design import orthogonal, orthogonal_params
-from mnt.pyfiction.qca import qca_layout
+from mnt.pyfiction.qca import QCALayout
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -25,11 +25,11 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize(
     "make_layout",
     [
-        pytest.param(lambda: cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="cartesian_gate_layout"),
+        pytest.param(lambda: CartesianGateLayout((2, 2, 0), "2DDWave", "Layout"), id="CartesianGateLayout"),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
+            lambda: ShiftedCartesianGateLayout((2, 2, 0), "2DDWave", "Layout"), id="ShiftedCartesianGateLayout"
         ),
-        pytest.param(lambda: hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+        pytest.param(lambda: HexagonalGateLayout((2, 2, 0), "2DDWave", "Layout"), id="HexagonalGateLayout"),
     ],
 )
 def test_bounding_box_around_an_empty_gate_level_layout(make_layout):
@@ -54,7 +54,7 @@ def test_initialize_gate_level_with_ortho_bounding_box(resources_dir: Path, veri
 
 def test_update_gate_level_bounding_box() -> None:
     """Clearing and moving occupied boundary tiles updates both bounding-box axes."""
-    layout = cartesian_gate_layout((8, 8), "2DDWave")
+    layout = CartesianGateLayout((8, 8), "2DDWave")
     source = layout.create_pi("a", (0, 0))
     wire = layout.create_buf(source, (4, 6))
     edge = layout.create_buf(wire, (4, 7))
@@ -78,8 +78,8 @@ def test_update_gate_level_bounding_box() -> None:
 @pytest.mark.parametrize(
     "make_layout",
     [
-        pytest.param(lambda: qca_layout((2, 2, 0), "2DDWave", "Layout"), id="qca_layout"),
-        pytest.param(lambda: inml_layout((2, 2, 0), "2DDWave", "Layout"), id="inml_layout"),
+        pytest.param(lambda: QCALayout((2, 2, 0), "2DDWave", "Layout"), id="QCALayout"),
+        pytest.param(lambda: INMLLayout((2, 2, 0), "2DDWave", "Layout"), id="INMLLayout"),
     ],
 )
 def test_bounding_box_around_cell_level_layout(make_layout):

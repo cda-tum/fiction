@@ -14,8 +14,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, cartesian_layout, stacked_cartesian_layout
-from mnt.pyfiction.layouts.coords import cube_coordinate, offset_coordinate
+from mnt.pyfiction.layouts import CartesianGateLayout
+from mnt.pyfiction.layouts.coords import CubeCoordinate, OffsetCoordinate
 from mnt.pyfiction.physical_design import post_layout_optimization_params, reserve_input_nodes
 from mnt.pyfiction.sidb.simulation import sidb_simulation_result
 from mnt.pyfiction.sidb.simulation.logic import (
@@ -29,25 +29,28 @@ from mnt.pyfiction.sidb.simulation.logic import (
 if TYPE_CHECKING:
     from typing_extensions import assert_type
 
-    from mnt.pyfiction.networks import technology_network
+    from mnt.pyfiction.networks import TechnologyNetwork
 
 
 def test_coordinate_input_and_output_types() -> None:
     """Tuple inputs convert to coordinates, while outputs retain their class."""
-    coordinate = offset_coordinate(tuple_repr=(1, 2))
-    assert offset_coordinate(c=coordinate) == coordinate
-    cube = cube_coordinate(tuple_repr=(1, 2, 3))
-    assert cube_coordinate(c=cube) == cube
-    layout = cartesian_layout((2, 2))
+    coordinate = OffsetCoordinate(tuple_repr=(1, 2))
+    assert OffsetCoordinate(c=coordinate) == coordinate
+    cube = CubeCoordinate(tuple_repr=(1, 2, 3))
+    assert CubeCoordinate(c=cube) == cube
+    layout = CartesianGateLayout((2, 2))
     layout.resize((3, 3, 1))
     east = layout.east((0, 0))
-    assert east == offset_coordinate(1, 0)
-    stacked = stacked_cartesian_layout((2, 2, 3))
-    above = stacked.above((0, 0, 0))
-    assert above == cube_coordinate(0, 0, 1)
+    assert east == OffsetCoordinate(1, 0)
+    source = layout.create_pi("a", (0, 0))
+    output = layout.create_po(source, "y", (1, 0))
+    assert output == east
+    layout.name = "coordinates"
+    assert layout.name == "coordinates"
     if TYPE_CHECKING:
-        assert_type(east, offset_coordinate)
-        assert_type(above, cube_coordinate)
+        assert_type(source, OffsetCoordinate)
+        assert_type(output, OffsetCoordinate)
+        assert_type(east, OffsetCoordinate)
 
 
 def test_optional_relocation_limit() -> None:
@@ -63,10 +66,10 @@ def test_optional_relocation_limit() -> None:
         params.max_gate_relocations = "not a count"  # ty: ignore[invalid-assignment]
 
 
-def test_reserved_input_node_mapping(mux21: technology_network) -> None:
+def test_reserved_input_node_mapping(mux21: TechnologyNetwork) -> None:
     """Each primary input maps to a reserved layout node."""
     network = mux21
-    layout = cartesian_gate_layout()
+    layout = CartesianGateLayout()
     mapping = reserve_input_nodes(layout, network)
     if TYPE_CHECKING:
         assert_type(mapping, dict[int, int])

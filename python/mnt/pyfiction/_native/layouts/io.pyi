@@ -15,7 +15,7 @@ import mnt.pyfiction._native.layouts
 
 @overload
 def write_dot_layout(
-    layout: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
     filename: str,
     clock_colors: bool = False,
     indexes: bool = False,
@@ -23,7 +23,7 @@ def write_dot_layout(
 ) -> None: ...
 @overload
 def write_dot_layout(
-    layout: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     filename: str,
     clock_colors: bool = False,
     indexes: bool = False,
@@ -31,7 +31,7 @@ def write_dot_layout(
 ) -> None: ...
 @overload
 def write_dot_layout(
-    layout: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    layout: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     filename: str,
     clock_colors: bool = False,
     indexes: bool = False,
@@ -39,7 +39,7 @@ def write_dot_layout(
 ) -> None: ...
 @overload
 def write_dot_layout(
-    layout: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     filename: str,
     clock_colors: bool = False,
     indexes: bool = False,
@@ -47,7 +47,7 @@ def write_dot_layout(
 ) -> None: ...
 @overload
 def write_dot_layout(
-    layout: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     filename: str,
     clock_colors: bool = False,
     indexes: bool = False,
@@ -55,7 +55,7 @@ def write_dot_layout(
 ) -> None: ...
 @overload
 def write_dot_layout(
-    layout: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     filename: str,
     clock_colors: bool = False,
     indexes: bool = False,
@@ -63,7 +63,7 @@ def write_dot_layout(
 ) -> None: ...
 @overload
 def write_dot_layout(
-    layout: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    layout: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     filename: str,
     clock_colors: bool = False,
     indexes: bool = False,
@@ -71,7 +71,7 @@ def write_dot_layout(
 ) -> None: ...
 @overload
 def write_dot_layout(
-    layout: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    layout: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     filename: str,
     clock_colors: bool = False,
     indexes: bool = False,
@@ -79,7 +79,7 @@ def write_dot_layout(
 ) -> None: ...
 @overload
 def write_dot_layout(
-    layout: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    layout: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     filename: str,
     clock_colors: bool = False,
     indexes: bool = False,
@@ -101,55 +101,55 @@ def write_dot_layout(
 
 @overload
 def write_fgl_layout(
-    layout: mnt.pyfiction._native.layouts.cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.CartesianGateLayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None: ...
 @overload
 def write_fgl_layout(
-    layout: mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None: ...
 @overload
 def write_fgl_layout(
-    layout: mnt.pyfiction._native.layouts.hexagonal_gate_layout,
+    layout: mnt.pyfiction._native.layouts.HexagonalGateLayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None: ...
 @overload
 def write_fgl_layout(
-    layout: mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.OddRowCartesianGateLayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None: ...
 @overload
 def write_fgl_layout(
-    layout: mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None: ...
 @overload
 def write_fgl_layout(
-    layout: mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout,
+    layout: mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None: ...
 @overload
 def write_fgl_layout(
-    layout: mnt.pyfiction._native.layouts.odd_row_hex_gate_layout,
+    layout: mnt.pyfiction._native.layouts.OddRowHexGateLayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None: ...
 @overload
 def write_fgl_layout(
-    layout: mnt.pyfiction._native.layouts.odd_column_hex_gate_layout,
+    layout: mnt.pyfiction._native.layouts.OddColumnHexGateLayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None: ...
 @overload
 def write_fgl_layout(
-    layout: mnt.pyfiction._native.layouts.even_column_hex_gate_layout,
+    layout: mnt.pyfiction._native.layouts.EvenColumnHexGateLayout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None:
@@ -172,7 +172,7 @@ class fgl_parsing_error(RuntimeError): ...
 
 def read_cartesian_fgl_layout(
     filename: str, layout_name: str = ""
-) -> mnt.pyfiction._native.layouts.cartesian_gate_layout:
+) -> mnt.pyfiction._native.layouts.CartesianGateLayout:
     """
     Reads a gate-level layout from an FGL file provided as a file name.
 
@@ -188,7 +188,7 @@ def read_cartesian_fgl_layout(
 
 def read_shifted_cartesian_fgl_layout(
     filename: str, layout_name: str = ""
-) -> mnt.pyfiction._native.layouts.shifted_cartesian_gate_layout:
+) -> mnt.pyfiction._native.layouts.ShiftedCartesianGateLayout:
     """
     Reads a gate-level layout from an FGL file provided as a file name.
 
@@ -204,7 +204,7 @@ def read_shifted_cartesian_fgl_layout(
 
 def read_hexagonal_fgl_layout(
     filename: str, layout_name: str = ""
-) -> mnt.pyfiction._native.layouts.hexagonal_gate_layout:
+) -> mnt.pyfiction._native.layouts.HexagonalGateLayout:
     """
     Reads a gate-level layout from an FGL file provided as a file name.
 
@@ -220,7 +220,7 @@ def read_hexagonal_fgl_layout(
 
 def read_odd_row_cartesian_fgl_layout(
     filename: str, layout_name: str = ""
-) -> mnt.pyfiction._native.layouts.odd_row_cartesian_gate_layout:
+) -> mnt.pyfiction._native.layouts.OddRowCartesianGateLayout:
     """
     Reads a gate-level layout from an FGL file provided as a file name.
 
@@ -236,7 +236,7 @@ def read_odd_row_cartesian_fgl_layout(
 
 def read_even_row_cartesian_fgl_layout(
     filename: str, layout_name: str = ""
-) -> mnt.pyfiction._native.layouts.even_row_cartesian_gate_layout:
+) -> mnt.pyfiction._native.layouts.EvenRowCartesianGateLayout:
     """
     Reads a gate-level layout from an FGL file provided as a file name.
 
@@ -252,7 +252,7 @@ def read_even_row_cartesian_fgl_layout(
 
 def read_even_column_cartesian_fgl_layout(
     filename: str, layout_name: str = ""
-) -> mnt.pyfiction._native.layouts.even_column_cartesian_gate_layout:
+) -> mnt.pyfiction._native.layouts.EvenColumnCartesianGateLayout:
     """
     Reads a gate-level layout from an FGL file provided as a file name.
 
@@ -268,7 +268,7 @@ def read_even_column_cartesian_fgl_layout(
 
 def read_odd_row_hex_fgl_layout(
     filename: str, layout_name: str = ""
-) -> mnt.pyfiction._native.layouts.odd_row_hex_gate_layout:
+) -> mnt.pyfiction._native.layouts.OddRowHexGateLayout:
     """
     Reads a gate-level layout from an FGL file provided as a file name.
 
@@ -284,7 +284,7 @@ def read_odd_row_hex_fgl_layout(
 
 def read_odd_column_hex_fgl_layout(
     filename: str, layout_name: str = ""
-) -> mnt.pyfiction._native.layouts.odd_column_hex_gate_layout:
+) -> mnt.pyfiction._native.layouts.OddColumnHexGateLayout:
     """
     Reads a gate-level layout from an FGL file provided as a file name.
 
@@ -300,7 +300,7 @@ def read_odd_column_hex_fgl_layout(
 
 def read_even_column_hex_fgl_layout(
     filename: str, layout_name: str = ""
-) -> mnt.pyfiction._native.layouts.even_column_hex_gate_layout:
+) -> mnt.pyfiction._native.layouts.EvenColumnHexGateLayout:
     """
     Reads a gate-level layout from an FGL file provided as a file name.
 

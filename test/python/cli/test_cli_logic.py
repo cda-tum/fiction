@@ -22,7 +22,7 @@ from aigverse.algorithms import equivalence_checking as aig_equivalent
 from mnt.fiction.cli.aigverse_bridge import from_aigverse, to_aigverse
 from mnt.fiction.cli.stores import size_and_depth
 from mnt.pyfiction import networks
-from mnt.pyfiction.networks import aig_network, simulate_outputs, technology_network
+from mnt.pyfiction.networks import AigNetwork, TechnologyNetwork, simulate_outputs
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -34,13 +34,13 @@ if TYPE_CHECKING:
 def test_map_on_a_technology_network(mux21_shell: Shell) -> None:
     mux21_shell.ok("map --and --or --inv")
     mapped = mux21_shell.session.networks.current()
-    assert isinstance(mapped, technology_network)
+    assert isinstance(mapped, TechnologyNetwork)
     assert "stats" in mux21_shell.session.log[-1]["result"]
 
 
 def test_map_on_an_aig(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("mux21.v")}" --type aig; map --all2')
-    assert isinstance(shell.session.networks.current(), technology_network)
+    assert isinstance(shell.session.networks.current(), TechnologyNetwork)
     assert len(shell.session.networks) == 2
 
 
@@ -91,7 +91,7 @@ def test_simulate(shell: Shell, resource: Callable[[str], str]) -> None:
 def test_random_and_generate(shell: Shell) -> None:
     shell.ok("random -n 4 -g 10 --seed 7")
     network = shell.session.networks.current()
-    assert isinstance(network, aig_network)
+    assert isinstance(network, AigNetwork)
     assert network.num_pis() == 4
     assert shell.session.log[-1]["result"]["network"]["name"] == "7"
     shell.ok("generate rca -b 4")
@@ -104,8 +104,8 @@ def test_aig_passes_preserve_the_function(shell: Shell, resource: Callable[[str]
     original = shell.session.networks.current()
     shell.ok("aig rewrite resub refactor balance cleanup")
     optimized = shell.session.networks.current()
-    assert isinstance(original, aig_network)
-    assert isinstance(optimized, aig_network)
+    assert isinstance(original, AigNetwork)
+    assert isinstance(optimized, AigNetwork)
     assert aig_equivalent(to_aigverse(shell.session, original), to_aigverse(shell.session, optimized))
     assert shell.session.log[-1]["result"]["passes"] == ["rewrite", "resub", "refactor", "balance", "cleanup"]
 
@@ -139,7 +139,7 @@ def test_aig_needs_an_aig(mux21_shell: Shell) -> None:
 def test_bridge_round_trip(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
     mux21_shell.ok(f'read "{resource("mux21.v")}" --type aig')
     aig = mux21_shell.session.networks.current()
-    assert isinstance(aig, aig_network)
+    assert isinstance(aig, AigNetwork)
     back = from_aigverse(mux21_shell.session, to_aigverse(mux21_shell.session, aig), "back", like=aig)
     assert back.num_gates() == aig.num_gates()
     assert back.num_pis() == aig.num_pis()
@@ -154,7 +154,7 @@ def test_abc(shell: Shell, resource: Callable[[str], str]) -> None:
         assert "AIGVERSE_ABC" in shell.fails("abc -s resyn2")
         pytest.skip("ABC is not installed")
     shell.ok("abc -s resyn2; abc -c 'balance; rewrite'")
-    assert isinstance(shell.session.networks.current(), aig_network)
+    assert isinstance(shell.session.networks.current(), AigNetwork)
 
 
 def test_abc_xag_and_custom_flow(
@@ -218,6 +218,6 @@ def test_seeded_random_networks(shell: Shell, kind: str) -> None:
     shell.ok(f"random --type {kind} -n 4 -g 30 --seed 17")
     network = shell.session.networks.current()
     assert network.num_pis() == 4
-    assert isinstance(network, getattr(networks, "technology_network" if kind == "tec" else f"{kind}_network"))
+    assert isinstance(network, getattr(networks, "TechnologyNetwork" if kind == "tec" else f"{kind.title()}Network"))
     shell.ok(f"random --type {kind} -n 4 -g 30 --seed 17")
     assert simulate_outputs(network) == simulate_outputs(shell.session.networks.current())

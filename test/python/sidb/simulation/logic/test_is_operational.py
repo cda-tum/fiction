@@ -28,7 +28,9 @@ from mnt.pyfiction.sidb.simulation.logic import (
     operational_input_patterns,
     operational_status,
 )
-from mnt.pyfiction.synthesis import create_and_tt
+from mnt.pyfiction.synthesis import (
+    standard_functions,
+)
 
 
 def test_is_operational():
@@ -54,13 +56,13 @@ def test_is_operational():
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
 
-    [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+    [op_status, _evaluated_input_combinations] = is_operational(lyt, [standard_functions("and")[0]], params)
 
     assert op_status == operational_status.OPERATIONAL
 
     params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
 
-    [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+    [op_status, _evaluated_input_combinations] = is_operational(lyt, [standard_functions("and")[0]], params)
 
     assert op_status == operational_status.NON_OPERATIONAL
 
@@ -69,7 +71,7 @@ def test_is_operational():
     input_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
     [op_status, _evaluated_input_combinations] = is_operational(
         lyt,
-        [create_and_tt()],
+        [standard_functions("and")[0]],
         params,
         input_bdl_wires,
         output_bdl_wires,
@@ -82,7 +84,7 @@ def test_is_operational():
     canvas_lyt.assign_sidb(lattice_site(6, 3, 1), sidb_dot_tag.LOGIC)
     [op_status, _evaluated_input_combinations] = is_operational(
         lyt,
-        [create_and_tt()],
+        [standard_functions("and")[0]],
         params,
         input_bdl_wires,
         output_bdl_wires,
@@ -149,14 +151,14 @@ def test_input_pattern_layouts_yield_the_same_verdict(and_gate_with_bdl_wires, m
 
     [reference_status, reference_calls] = is_operational(
         lyt,
-        [create_and_tt()],
+        [standard_functions("and")[0]],
         params,
         input_bdl_wires,
         output_bdl_wires,
     )
     [op_status, evaluated_input_combinations] = is_operational(
         input_pattern_layouts,
-        [create_and_tt()],
+        [standard_functions("and")[0]],
         params,
         input_bdl_wires,
         output_bdl_wires,
@@ -175,7 +177,7 @@ def test_a_layout_list_that_does_not_match_the_specification_is_rejected(and_gat
     with pytest.raises(ValueError, match="expected 4 input pattern layouts"):
         is_operational(
             input_pattern_layouts[:2],
-            [create_and_tt()],
+            [standard_functions("and")[0]],
             is_operational_params(),
             input_bdl_wires,
             output_bdl_wires,
@@ -188,13 +190,13 @@ def test_and_gate_kinks(resources_dir):
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
 
-    [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+    [op_status, _evaluated_input_combinations] = is_operational(lyt, [standard_functions("and")[0]], params)
 
     assert op_status == operational_status.OPERATIONAL
 
     params.op_condition = operational_condition.REJECT_KINKS
 
-    [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+    [op_status, _evaluated_input_combinations] = is_operational(lyt, [standard_functions("and")[0]], params)
 
     assert op_status == operational_status.NON_OPERATIONAL
 
@@ -205,7 +207,7 @@ def test_and_gate_non_operational_due_to_kinks(resources_dir):
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
 
-    result = is_kink_induced_non_operational(lyt, [create_and_tt()], params)
+    result = is_kink_induced_non_operational(lyt, [standard_functions("and")[0]], params)
 
     assert result
 
@@ -216,7 +218,9 @@ def test_and_gate_non_operational_input_patterns_due_to_kinks(resources_dir):
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
 
-    non_operational_pattern_kinks = kink_induced_non_operational_input_patterns(lyt, [create_and_tt()], params)
+    non_operational_pattern_kinks = kink_induced_non_operational_input_patterns(
+        lyt, [standard_functions("and")[0]], params
+    )
 
     assert non_operational_pattern_kinks == {1, 2}
 
@@ -227,7 +231,7 @@ def test_and_gate_111_lattice_11_input_pattern(resources_dir):
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
 
-    [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+    [op_status, _evaluated_input_combinations] = is_operational(lyt, [standard_functions("and")[0]], params)
 
     assert op_status == operational_status.OPERATIONAL
 
@@ -235,20 +239,20 @@ def test_and_gate_111_lattice_11_input_pattern(resources_dir):
 
     assert params.simulation_parameters.mu_minus == -0.1
 
-    [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+    [op_status, _evaluated_input_combinations] = is_operational(lyt, [standard_functions("and")[0]], params)
 
     assert op_status == operational_status.NON_OPERATIONAL
 
     # filer only
     params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
     assert params.strategy_to_analyze_operational_status == operational_analysis_strategy.FILTER_ONLY
-    [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+    [op_status, _evaluated_input_combinations] = is_operational(lyt, [standard_functions("and")[0]], params)
     assert op_status == operational_status.NON_OPERATIONAL
 
     # filer then simulation
     params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_THEN_SIMULATION
     assert params.strategy_to_analyze_operational_status == operational_analysis_strategy.FILTER_THEN_SIMULATION
-    [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+    [op_status, _evaluated_input_combinations] = is_operational(lyt, [standard_functions("and")[0]], params)
     assert op_status == operational_status.NON_OPERATIONAL
 
 
@@ -258,7 +262,7 @@ def test_and_gate_111_lattice_operational_input_pattern(resources_dir):
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.30)
 
-    operational_patterns = operational_input_patterns(lyt, [create_and_tt()], params)
+    operational_patterns = operational_input_patterns(lyt, [standard_functions("and")[0]], params)
 
     print(operational_patterns)
     assert len(operational_patterns) == 2
