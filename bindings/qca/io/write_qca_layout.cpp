@@ -35,7 +35,7 @@ void write_qca_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<fiction::qca::io::write_qca_layout_params>(m, "write_qca_layout_params",
+    py::class_<fiction::qca::io::write_qca_layout_params>(m, "QcaWriterParams",
                                                           DOC(fiction_qca_io_write_qca_layout_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::qca::io::write_qca_layout_params::on_progress, pyfiction::ON_PROGRESS_GETTER,

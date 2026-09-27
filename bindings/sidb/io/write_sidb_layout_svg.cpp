@@ -48,20 +48,20 @@ void write_sidb_layout_svg(nanobind::module_& m)
     namespace py = nanobind;
 
     py::enum_<fiction::sidb::io::write_sidb_layout_svg_params::color_mode>(
-        m, "color_mode", DOC(fiction_sidb_io_write_sidb_layout_svg_params_color_mode))
+        m, "ColorMode", DOC(fiction_sidb_io_write_sidb_layout_svg_params_color_mode))
         .value("LIGHT", fiction::sidb::io::write_sidb_layout_svg_params::color_mode::LIGHT,
                DOC(fiction_sidb_io_write_sidb_layout_svg_params_color_mode_LIGHT))
         .value("DARK", fiction::sidb::io::write_sidb_layout_svg_params::color_mode::DARK,
                DOC(fiction_sidb_io_write_sidb_layout_svg_params_color_mode_DARK));
 
     py::enum_<fiction::sidb::io::write_sidb_layout_svg_params::sidb_lattice_mode>(
-        m, "sidb_lattice_mode", DOC(fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode))
+        m, "LatticeMode", DOC(fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode))
         .value("SHOW_LATTICE", fiction::sidb::io::write_sidb_layout_svg_params::sidb_lattice_mode::SHOW_LATTICE,
                DOC(fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode_SHOW_LATTICE))
         .value("HIDE_LATTICE", fiction::sidb::io::write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE,
                DOC(fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode_HIDE_LATTICE));
 
-    py::class_<fiction::sidb::io::write_sidb_layout_svg_params>(m, "write_sidb_layout_svg_params",
+    py::class_<fiction::sidb::io::write_sidb_layout_svg_params>(m, "SvgParams",
                                                                 DOC(fiction_sidb_io_write_sidb_layout_svg_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::sidb::io::write_sidb_layout_svg_params::on_progress,

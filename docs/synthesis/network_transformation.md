@@ -30,7 +30,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.synthesis.network_balancing_params
+.. autoclass:: mnt.pyfiction.synthesis.NetworkBalancingParams
    :members:
 
 .. autofunction:: mnt.pyfiction.synthesis.network_balancing
@@ -66,10 +66,10 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.synthesis.fanout_substitution_params
+.. autoclass:: mnt.pyfiction.synthesis.FanoutSubstitutionParams
    :members:
 
-.. autoclass:: mnt.pyfiction.synthesis.substitution_strategy
+.. autoclass:: mnt.pyfiction.synthesis.SubstitutionStrategy
    :members:
 
 .. autofunction:: mnt.pyfiction.synthesis.fanout_substitution
@@ -133,10 +133,10 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.synthesis.missing_required_gates_exception
+.. autoclass:: mnt.pyfiction.synthesis.MissingRequiredGatesError
    :members:
 
-.. autoclass:: mnt.pyfiction.synthesis.technology_mapping_params
+.. autoclass:: mnt.pyfiction.synthesis.TechnologyMappingParams
    :members:
 
 .. autofunction:: mnt.pyfiction.synthesis.and_or_not_maj
@@ -147,7 +147,7 @@
 
 .. autofunction:: mnt.pyfiction.synthesis.all_supported_standard_functions
 
-.. autoclass:: mnt.pyfiction.synthesis.technology_mapping_stats
+.. autoclass:: mnt.pyfiction.synthesis.TechnologyMappingStats
    :members:
 
 .. autofunction:: mnt.pyfiction.synthesis.technology_mapping

@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
 from mnt.pyfiction.inml import INMLLayout
-from mnt.pyfiction.inml.io import write_qcc_layout, write_qcc_layout_params
+from mnt.pyfiction.inml.io import WriteQccLayoutParams, write_qcc_layout
 
 from ._write import output_argument, output_path, require_cell_type, written
 
@@ -48,8 +48,8 @@ def write_qcc_command(session: Session, args: argparse.Namespace) -> Result:
     entry = session.cell_layouts.current()
     element = require_cell_type(entry.layout, (INMLLayout,), ".qcc")
     path = output_path(element, args.file, ".qcc")
-    params = write_qcc_layout_params()
+    params = WriteQccLayoutParams()
     params.on_progress = session.report_progress
     params.use_filename_as_component_name = args.component_name
-    write_qcc_layout(element, str(path), params)
+    write_qcc_layout(element, str(path), params=params)
     return written(session, path)

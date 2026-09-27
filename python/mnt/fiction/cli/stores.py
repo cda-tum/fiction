@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Generic, TypeAlias, TypeVar
 
 from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
-from mnt.pyfiction.fcn import area
+from mnt.pyfiction import inml, mol_qca, qca, sidb
 from mnt.pyfiction.inml import INMLLayout
 from mnt.pyfiction.layouts import (
     CartesianGateLayout,
@@ -32,7 +32,7 @@ from mnt.pyfiction.layouts import (
     ShiftedCartesianGateLayout,
 )
 from mnt.pyfiction.mol_qca import MolecularQCALayout
-from mnt.pyfiction.networks import AigNetwork, MigNetwork, TechnologyNetwork, XagNetwork, get_name
+from mnt.pyfiction.networks import AigNetwork, MigNetwork, TechnologyNetwork, XagNetwork
 from mnt.pyfiction.qca import QCALayout
 from mnt.pyfiction.sidb import ChargeDistribution, SiDBLayout, row_of
 from mnt.pyfiction.synthesis import TruthTable
@@ -219,9 +219,9 @@ def element_name(element: object) -> str:
     if isinstance(element, CellEntry):
         element = element.layout
     if isinstance(element, Network):
-        return str(get_name(element))
+        return str(element.name)
     if isinstance(element, GateLayout | CellLayout):
-        return str(element.get_layout_name())
+        return str(element.name)
     return ""
 
 
@@ -304,10 +304,10 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
     description: dict[str, object] = {
         "name": element_name(entry),
         "technology": TECHNOLOGIES[type(layout)],
-        "area_nm2": area(layout),
+        "area_nm2": physical_area(layout),
     }
     if isinstance(layout, SiDBLayout):
-        description["lattice"] = layout.get_lattice().name
+        description["lattice"] = layout.lattice.name
         if layout.is_empty():
             description["size"] = {"x": 0, "y": 0}
         else:
@@ -440,3 +440,22 @@ def one_line(description: dict[str, object]) -> str:
         parts.append(f"simulated with {simulation['engine']}: {simulation['stable_states']} stable states")
     body = ", ".join(parts)
     return f"{head} - {body}" if head and body else head or body
+
+
+def physical_area(layout: CellLayout, **dimensions: float) -> float:
+    """Compute a stored layout's physical area in nm².
+
+    Args:
+        layout: The stored cell layout.
+        **dimensions: Cell dimensions and spacing in nm.
+
+    Returns:
+        The physical area in nm².
+    """
+    if isinstance(layout, QCALayout):
+        return qca.area(layout, **dimensions)
+    if isinstance(layout, MolecularQCALayout):
+        return mol_qca.area(layout, **dimensions)
+    if isinstance(layout, INMLLayout):
+        return inml.area(layout, **dimensions)
+    return sidb.area(layout, **dimensions)

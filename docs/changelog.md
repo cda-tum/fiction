@@ -380,6 +380,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** Network I/O and conversion now select concrete types; mapping and verification
+    return results. I/O accepts paths and keyword options. Use technology modules for area and QLL,
+    `.name` and `.lattice` properties, and the root `__version__`; public `fcn` and `utils` are removed.
+
   - **Breaking:** SiDB analysis, design, and writers now live in `sidb.analysis`, `sidb.design`,
     and `sidb.io`. Workflows return named results with statistics; use `input_patterns` for
     independent BDL layout snapshots. Internal energy-labeling helpers are not exposed.

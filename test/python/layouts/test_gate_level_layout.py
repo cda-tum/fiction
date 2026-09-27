@@ -12,7 +12,7 @@ import pytest
 
 from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout, ShiftedCartesianGateLayout
 from mnt.pyfiction.layouts.coords import OffsetCoordinate
-from mnt.pyfiction.verification import critical_path_length_and_throughput, gate_level_drv_params, gate_level_drvs
+from mnt.pyfiction.verification import DesignRuleParams, critical_path_length_and_throughput, gate_level_drvs
 
 
 @pytest.mark.parametrize(
@@ -86,10 +86,10 @@ def test_gate_level_layout_iteration(make_layout):
     assert layout.get_tile(3) == OffsetCoordinate(x2)
     assert layout.get_tile(4) == OffsetCoordinate(x3)
     assert layout.get_tile(5) == OffsetCoordinate(x4)
-    assert layout.make_signal(2) == x1
-    assert layout.make_signal(3) == x2
-    assert layout.make_signal(4) == x3
-    assert layout.make_signal(5) == x4
+    assert layout.get_tile(2) == x1
+    assert layout.get_tile(3) == x2
+    assert layout.get_tile(4) == x3
+    assert layout.get_tile(5) == x4
     assert layout.get_name(x1) == "x1"
     assert layout.get_name(x2) == "x2"
     assert layout.get_name(x3) == "x3"
@@ -104,8 +104,8 @@ def test_gate_level_layout_iteration(make_layout):
     assert layout.get_node(OffsetCoordinate(f2)) == 12
     assert layout.get_tile(11) == OffsetCoordinate(f1)
     assert layout.get_tile(12) == OffsetCoordinate(f2)
-    assert layout.make_signal(11) == f1
-    assert layout.make_signal(12) == f2
+    assert layout.get_tile(11) == f1
+    assert layout.get_tile(12) == f2
     assert layout.get_name(f1) == "f1"
     assert layout.get_name(f2) == "f2"
 
@@ -129,11 +129,11 @@ def test_gate_level_layout_iteration(make_layout):
     assert layout.get_tile(8) == OffsetCoordinate(b2)
     assert layout.get_tile(9) == OffsetCoordinate(a2)
     assert layout.get_tile(10) == OffsetCoordinate(c)
-    assert layout.make_signal(6) == a1
-    assert layout.make_signal(7) == b1
-    assert layout.make_signal(8) == b2
-    assert layout.make_signal(9) == a2
-    assert layout.make_signal(10) == c
+    assert layout.get_tile(6) == a1
+    assert layout.get_tile(7) == b1
+    assert layout.get_tile(8) == b2
+    assert layout.get_tile(9) == a2
+    assert layout.get_tile(10) == c
 
     # wires
     wires = layout.wires()
@@ -177,8 +177,9 @@ def test_gate_level_layout_iteration(make_layout):
     assert cp == 4
     assert tp == 1
 
-    drv_params = gate_level_drv_params()
-    assert gate_level_drvs(layout, drv_params) == (0, 0)
+    drv_params = DesignRuleParams()
+    result = gate_level_drvs(layout, params=drv_params)
+    assert (result.warnings, result.drvs) == (0, 0)
 
 
 def test_gate_level_layout_gate_types():

@@ -12,7 +12,7 @@ from collections.abc import Callable
 
 import mnt.pyfiction._native.mol_qca
 
-class write_mol_qca_layout_svg_params:
+class WriteMolQcaLayoutSvgParams:
     """Parameters for writing SVG molQCA layouts."""
 
     def __init__(self) -> None:
@@ -32,9 +32,7 @@ class write_mol_qca_layout_svg_params:
     def simple(self, arg: bool, /) -> None: ...
 
 def write_mol_qca_layout_svg(
-    layout: mnt.pyfiction._native.mol_qca.MolecularQCALayout,
-    filename: str,
-    params: write_mol_qca_layout_svg_params = ...,
+    layout: mnt.pyfiction._native.mol_qca.MolecularQCALayout, filename: str, params: WriteMolQcaLayoutSvgParams = ...
 ) -> None:
     """
     Writes an SVG representation of a molQCA layout to an output stream.

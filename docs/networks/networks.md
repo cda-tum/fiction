@@ -85,7 +85,7 @@ views/views
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.networks.high_degree_fanin_exception
+.. autoclass:: mnt.pyfiction.networks.HighDegreeFaninError
    :members:
 
 .. autofunction:: mnt.pyfiction.networks.has_high_degree_fanin_nodes
@@ -146,11 +146,8 @@ views/views
 :::{tab-item} Python
 :sync: python
 
-```{eval-rst}
-.. autofunction:: mnt.pyfiction.networks.get_name
-
-.. autofunction:: mnt.pyfiction.networks.set_name
-```
+Read or set the network's `.name` property. Node and interface names are available
+through the network's inspection methods.
 
 :::
 

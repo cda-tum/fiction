@@ -54,7 +54,7 @@ void count_gate_types(nanobind::module_& m)
 
     using stats = fiction::verification::count_gate_types_stats;
 
-    py::class_<stats>(m, "count_gate_types_stats", "The number of nodes of each gate type in a network or layout.")
+    py::class_<stats>(m, "GateCounts", "The number of nodes of each gate type in a network or layout.")
         .def(py::init<>(), "Default constructor.")
         .def(
             "report",

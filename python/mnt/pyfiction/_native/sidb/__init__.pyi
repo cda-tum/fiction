@@ -349,39 +349,18 @@ class SiDBLayout:
             name: Layout name.
         """
 
-    def get_lattice(self) -> Lattice:
-        """
-        The lattice of the surface.
+    @property
+    def lattice(self) -> Lattice:
+        """The layout lattice. The getter returns an independent copy."""
 
-        Returns:
-            The lattice.
-        """
+    @lattice.setter
+    def lattice(self, arg: Lattice, /) -> None: ...
+    @property
+    def name(self) -> str:
+        """The layout name."""
 
-    def set_lattice(self, lattice: Lattice) -> None:
-        """
-        Reassigns the lattice. Sites are kept as they are; only their physical
-        positions change.
-
-        Args:
-            lat: New lattice.
-        """
-
-    def get_layout_name(self) -> str:
-        """
-        The layout name.
-
-        Returns:
-            Layout name.
-        """
-
-    def set_layout_name(self, name: str) -> None:
-        """
-        Sets the layout name.
-
-        Args:
-            name: New layout name.
-        """
-
+    @name.setter
+    def name(self, arg: str, /) -> None: ...
     def assign_sidb(self, site: LatticeSite, dot_tag: DotTag = ...) -> None:
         """
         Assigns an SiDB to a lattice site with the given tag, or

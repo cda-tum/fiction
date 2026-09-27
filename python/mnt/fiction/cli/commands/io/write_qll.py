@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction.fcn.io import write_qll_layout
+from mnt.pyfiction import inml, mol_qca, qca
 from mnt.pyfiction.inml import INMLLayout
 from mnt.pyfiction.mol_qca import MolecularQCALayout
 from mnt.pyfiction.qca import QCALayout
@@ -43,5 +43,10 @@ def write_qll_command(session: Session, args: argparse.Namespace) -> Result:
     entry = session.cell_layouts.current()
     element = require_cell_type(entry.layout, (QCALayout, MolecularQCALayout, INMLLayout), ".qll")
     path = output_path(element, args.file, ".qll")
-    write_qll_layout(element, str(path), on_progress=session.report_progress)
+    if isinstance(element, QCALayout):
+        qca.io.write_qll_layout(element, path, on_progress=session.report_progress)
+    elif isinstance(element, MolecularQCALayout):
+        mol_qca.io.write_qll_layout(element, path, on_progress=session.report_progress)
+    else:
+        inml.io.write_qll_layout(element, path, on_progress=session.report_progress)
     return written(session, path)

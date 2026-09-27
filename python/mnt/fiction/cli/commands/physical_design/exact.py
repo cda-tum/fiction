@@ -19,7 +19,6 @@ from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.topologies import FGL_READERS, GATE_LAYOUTS
 from mnt.pyfiction import physical_design
-from mnt.pyfiction.networks import get_name
 
 if TYPE_CHECKING:
     import argparse
@@ -122,7 +121,7 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
     result = physical_design.exact(network, params=params, layout_type=GATE_LAYOUTS[topology])
     layout, stats = result.layout, result.stats
     if layout is None:
-        msg = f"no layout found for '{get_name(network)}' within the search bounds or timeout"
+        msg = f"no layout found for '{network.name}' within the search bounds or timeout"
         error = CommandError(msg)
         error.stats = stats_to_dict(stats)
         raise error

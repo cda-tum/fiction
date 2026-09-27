@@ -83,7 +83,7 @@ def standard_functions(name: str) -> list[TruthTable]:
     Returns fresh truth tables for the named function, in specification output order. Unknown names raise ValueError.
     """
 
-class substitution_strategy(enum.Enum):
+class SubstitutionStrategy(enum.Enum):
     """Breadth-first vs. depth-first fanout-tree substitution strategies."""
 
     BREADTH = 0
@@ -98,7 +98,7 @@ class substitution_strategy(enum.Enum):
     fanout tree.
     """
 
-class fanout_substitution_params:
+class FanoutSubstitutionParams:
     """Parameters for the fanout substitution algorithm."""
 
     def __init__(self) -> None:
@@ -111,14 +111,14 @@ class fanout_substitution_params:
     @on_progress.setter
     def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
     @property
-    def strategy(self) -> substitution_strategy:
+    def strategy(self) -> SubstitutionStrategy:
         """
         Substitution strategy of high-degree fanout networks (depth-first vs.
         breadth-first).
         """
 
     @strategy.setter
-    def strategy(self, arg: substitution_strategy, /) -> None: ...
+    def strategy(self, arg: SubstitutionStrategy, /) -> None: ...
     @property
     def degree(self) -> int:
         """Maximum output degree of each fan-out node."""
@@ -145,7 +145,7 @@ class fanout_substitution_params:
     def seed(self, arg: int | None, /) -> None: ...
 
 def fanout_substitution(
-    network: mnt.pyfiction._native.networks.TechnologyNetwork, params: fanout_substitution_params = ...
+    network: mnt.pyfiction._native.networks.TechnologyNetwork, params: FanoutSubstitutionParams = ...
 ) -> mnt.pyfiction._native.networks.TechnologyNetwork:
     """
     Substitutes high-output degrees in a logic network with fanout nodes
@@ -184,7 +184,7 @@ def fanout_substitution(
     """
 
 def is_fanout_substituted(
-    network: mnt.pyfiction._native.networks.TechnologyNetwork, params: fanout_substitution_params = ...
+    network: mnt.pyfiction._native.networks.TechnologyNetwork, params: FanoutSubstitutionParams = ...
 ) -> bool:
     """
     Checks if a logic network is properly fanout-substituted with regard
@@ -203,7 +203,7 @@ def is_fanout_substituted(
         `ps`.
     """
 
-class network_balancing_params:
+class NetworkBalancingParams:
     """Parameters for the network balancing algorithm."""
 
     def __init__(self) -> None:
@@ -223,7 +223,7 @@ class network_balancing_params:
     def unify_outputs(self, arg: bool, /) -> None: ...
 
 def network_balancing(
-    network: mnt.pyfiction._native.networks.TechnologyNetwork, params: network_balancing_params = ...
+    network: mnt.pyfiction._native.networks.TechnologyNetwork, params: NetworkBalancingParams = ...
 ) -> mnt.pyfiction._native.networks.TechnologyNetwork:
     """
     Balances a logic network with buffer nodes that compute the identity
@@ -258,7 +258,7 @@ def network_balancing(
     """
 
 def is_balanced(
-    network: mnt.pyfiction._native.networks.TechnologyNetwork, params: network_balancing_params = ...
+    network: mnt.pyfiction._native.networks.TechnologyNetwork, params: NetworkBalancingParams = ...
 ) -> bool:
     """
     Checks if a logic network is properly path-balanced with regard to the
@@ -275,9 +275,9 @@ def is_balanced(
         `true` iff `ntk` is properly path-balanced with regard to `ps`.
     """
 
-class missing_required_gates_exception(RuntimeError): ...
+class MissingRequiredGatesError(RuntimeError): ...
 
-class technology_mapping_params:
+class TechnologyMappingParams:
     def __init__(self) -> None:
         """Default constructor."""
 
@@ -411,7 +411,7 @@ class technology_mapping_params:
     @and_xor.setter
     def and_xor(self, arg: bool, /) -> None: ...
 
-class mapper_stats:
+class MapperStats:
     """Technology mapper results, including failure status."""
 
     @property
@@ -433,7 +433,7 @@ class mapper_stats:
     @property
     def round_stats(self) -> list[str]: ...
 
-class technology_mapping_stats:
+class TechnologyMappingStats:
     """Statistics for technology mapping."""
 
     def __init__(self) -> None:
@@ -443,10 +443,10 @@ class technology_mapping_stats:
         """Report statistics."""
 
     @property
-    def mapper_stats(self) -> mnt.pyfiction._native.synthesis.mapper_stats:
+    def mapper_stats(self) -> MapperStats:
         """Statistics for mockturtle's mapper."""
 
-def and_or_not() -> technology_mapping_params:
+def and_or_not() -> TechnologyMappingParams:
     """
     Auxiliary function to create technology mapping parameters for AND,
     OR, and NOT gates.
@@ -455,7 +455,7 @@ def and_or_not() -> technology_mapping_params:
         Technology mapping parameters.
     """
 
-def and_or_not_maj() -> technology_mapping_params:
+def and_or_not_maj() -> TechnologyMappingParams:
     """
     Auxiliary function to create technology mapping parameters for AND,
     OR, NOT, and MAJ gates.
@@ -464,7 +464,7 @@ def and_or_not_maj() -> technology_mapping_params:
         Technology mapping parameters.
     """
 
-def all_standard_2_input_functions() -> technology_mapping_params:
+def all_standard_2_input_functions() -> TechnologyMappingParams:
     """
     Auxiliary function to create technology mapping parameters for AND,
     OR, NAND, NOR, XOR, XNOR, and NOT gates.
@@ -473,7 +473,7 @@ def all_standard_2_input_functions() -> technology_mapping_params:
         Technology mapping parameters.
     """
 
-def all_standard_3_input_functions() -> technology_mapping_params:
+def all_standard_3_input_functions() -> TechnologyMappingParams:
     """
     Auxiliary function to create technology mapping parameters for AND3,
     XOR_AND, OR_AND, ONEHOT, MAJ3, GAMBLE, DOT, MUX, and AND_XOR gates.
@@ -482,7 +482,7 @@ def all_standard_3_input_functions() -> technology_mapping_params:
         Technology mapping parameters.
     """
 
-def all_supported_standard_functions() -> technology_mapping_params:
+def all_supported_standard_functions() -> TechnologyMappingParams:
     """
     Auxiliary function to create technology mapping parameters for all
     supported standard functions.
@@ -494,26 +494,26 @@ def all_supported_standard_functions() -> technology_mapping_params:
 @overload
 def technology_mapping(
     network: mnt.pyfiction._native.networks.TechnologyNetwork,
-    params: technology_mapping_params = ...,
-    stats: technology_mapping_stats | None = None,
+    params: TechnologyMappingParams = ...,
+    stats: TechnologyMappingStats | None = None,
 ) -> mnt.pyfiction._native.networks.TechnologyNetwork: ...
 @overload
 def technology_mapping(
     network: mnt.pyfiction._native.networks.AigNetwork,
-    params: technology_mapping_params = ...,
-    stats: technology_mapping_stats | None = None,
+    params: TechnologyMappingParams = ...,
+    stats: TechnologyMappingStats | None = None,
 ) -> mnt.pyfiction._native.networks.TechnologyNetwork: ...
 @overload
 def technology_mapping(
     network: mnt.pyfiction._native.networks.XagNetwork,
-    params: technology_mapping_params = ...,
-    stats: technology_mapping_stats | None = None,
+    params: TechnologyMappingParams = ...,
+    stats: TechnologyMappingStats | None = None,
 ) -> mnt.pyfiction._native.networks.TechnologyNetwork: ...
 @overload
 def technology_mapping(
     network: mnt.pyfiction._native.networks.MigNetwork,
-    params: technology_mapping_params = ...,
-    stats: technology_mapping_stats | None = None,
+    params: TechnologyMappingParams = ...,
+    stats: TechnologyMappingStats | None = None,
 ) -> mnt.pyfiction._native.networks.TechnologyNetwork:
     """
     Performs technology mapping on the given network. Technology mapping
@@ -542,7 +542,7 @@ def technology_mapping(
                                           requires INV and MAJ).
     """
 
-class network_target(enum.Enum):
+class NetworkTarget(enum.Enum):
     """The network types `convert_network` produces."""
 
     TEC = 0
@@ -563,7 +563,7 @@ def convert_network(
     | mnt.pyfiction._native.networks.AigNetwork
     | mnt.pyfiction._native.networks.XagNetwork
     | mnt.pyfiction._native.networks.MigNetwork,
-    target: Literal[network_target.TEC] = ...,
+    target: Literal[NetworkTarget.TEC] = ...,
 ) -> mnt.pyfiction._native.networks.TechnologyNetwork:
     """
     Converts a logic network into an equivalent one of another type.
@@ -593,7 +593,7 @@ def convert_network(
     | mnt.pyfiction._native.networks.AigNetwork
     | mnt.pyfiction._native.networks.XagNetwork
     | mnt.pyfiction._native.networks.MigNetwork,
-    target: Literal[network_target.AIG],
+    target: Literal[NetworkTarget.AIG],
 ) -> mnt.pyfiction._native.networks.AigNetwork: ...
 @overload
 def convert_network(
@@ -601,7 +601,7 @@ def convert_network(
     | mnt.pyfiction._native.networks.AigNetwork
     | mnt.pyfiction._native.networks.XagNetwork
     | mnt.pyfiction._native.networks.MigNetwork,
-    target: Literal[network_target.XAG],
+    target: Literal[NetworkTarget.XAG],
 ) -> mnt.pyfiction._native.networks.XagNetwork: ...
 @overload
 def convert_network(
@@ -609,7 +609,7 @@ def convert_network(
     | mnt.pyfiction._native.networks.AigNetwork
     | mnt.pyfiction._native.networks.XagNetwork
     | mnt.pyfiction._native.networks.MigNetwork,
-    target: Literal[network_target.MIG],
+    target: Literal[NetworkTarget.MIG],
 ) -> mnt.pyfiction._native.networks.MigNetwork: ...
 @overload
 def convert_network(
@@ -617,7 +617,7 @@ def convert_network(
     | mnt.pyfiction._native.networks.AigNetwork
     | mnt.pyfiction._native.networks.XagNetwork
     | mnt.pyfiction._native.networks.MigNetwork,
-    target: network_target,
+    target: NetworkTarget,
 ) -> (
     mnt.pyfiction._native.networks.TechnologyNetwork
     | mnt.pyfiction._native.networks.AigNetwork

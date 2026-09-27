@@ -32,7 +32,7 @@ def write_sqd_layout(
         std::ofstream::failure: if the file cannot be opened.
     """
 
-class sqd_parsing_error(RuntimeError): ...
+class SqdParsingError(RuntimeError): ...
 
 def read_sqd_layout(filename: str, layout_name: str = "") -> mnt.pyfiction._native.sidb.SiDBLayout:
     """
@@ -52,8 +52,8 @@ def read_sqd_layout(filename: str, layout_name: str = "") -> mnt.pyfiction._nati
         std::ifstream::failure: if the file cannot be opened.
     """
 
-class unsupported_defect_index_exception(ValueError): ...
-class missing_position_exception(ValueError): ...
+class UnsupportedDefectIndexError(ValueError): ...
+class MissingPositionError(ValueError): ...
 
 def read_surface_defects(filename: str, layout_name: str = "") -> mnt.pyfiction._native.sidb.SiDBLayout:
     """
@@ -71,7 +71,7 @@ def read_surface_defects(filename: str, layout_name: str = "") -> mnt.pyfiction.
         std::ifstream::failure: if the file cannot be opened.
     """
 
-class color_mode(enum.Enum):
+class ColorMode(enum.Enum):
     """Enumeration to specify the color mode for the SVG output."""
 
     LIGHT = 1
@@ -80,7 +80,7 @@ class color_mode(enum.Enum):
     DARK = 0
     """Dark mode."""
 
-class sidb_lattice_mode(enum.Enum):
+class LatticeMode(enum.Enum):
     """
     Enumeration to specify if the H-Si lattice is plotted in addition to
     SiDBs.
@@ -92,7 +92,7 @@ class sidb_lattice_mode(enum.Enum):
     HIDE_LATTICE = 0
     """Lattice is hidden. Only SiDBs are shown."""
 
-class write_sidb_layout_svg_params:
+class SvgParams:
     """Parameters for writing SiDB layouts to SVG format."""
 
     def __init__(self) -> None:
@@ -123,22 +123,20 @@ class write_sidb_layout_svg_params:
     @sidb_border_width.setter
     def sidb_border_width(self, arg: float, /) -> None: ...
     @property
-    def color_background(self) -> color_mode:
+    def color_background(self) -> ColorMode:
         """The color mode of the background for the SVG output."""
 
     @color_background.setter
-    def color_background(self, arg: color_mode, /) -> None: ...
+    def color_background(self, arg: ColorMode, /) -> None: ...
     @property
-    def lattice_mode(self) -> sidb_lattice_mode:
+    def lattice_mode(self) -> LatticeMode:
         """The lattice mode of the SiDB layout."""
 
     @lattice_mode.setter
-    def lattice_mode(self, arg: sidb_lattice_mode, /) -> None: ...
+    def lattice_mode(self, arg: LatticeMode, /) -> None: ...
 
 @overload
-def write_sidb_layout_svg(
-    layout: mnt.pyfiction._native.sidb.SiDBLayout, filename: str, ps: write_sidb_layout_svg_params = ...
-) -> None:
+def write_sidb_layout_svg(layout: mnt.pyfiction._native.sidb.SiDBLayout, filename: str, ps: SvgParams = ...) -> None:
     """
     Writes an `sidb::layout` as an SVG image. See the stream overload for
     the image's content.
@@ -159,7 +157,7 @@ def write_sidb_layout_svg(
     layout: mnt.pyfiction._native.sidb.SiDBLayout,
     charge_distribution: mnt.pyfiction._native.sidb.ChargeDistribution,
     filename: str,
-    ps: write_sidb_layout_svg_params = ...,
+    ps: SvgParams = ...,
 ) -> None:
     """
     Writes an `sidb::layout` with a charge distribution as an SVG image.
@@ -178,9 +176,7 @@ def write_sidb_layout_svg(
     """
 
 @overload
-def write_sidb_layout_svg_to_string(
-    layout: mnt.pyfiction._native.sidb.SiDBLayout, ps: write_sidb_layout_svg_params = ...
-) -> str:
+def write_sidb_layout_svg_to_string(layout: mnt.pyfiction._native.sidb.SiDBLayout, ps: SvgParams = ...) -> str:
     """
     Writes an `sidb::layout` as an SVG image to a stream: the lattice
     points of the layout's bounding box, if the parameters ask for them,
@@ -201,7 +197,7 @@ def write_sidb_layout_svg_to_string(
 def write_sidb_layout_svg_to_string(
     layout: mnt.pyfiction._native.sidb.SiDBLayout,
     charge_distribution: mnt.pyfiction._native.sidb.ChargeDistribution,
-    ps: write_sidb_layout_svg_params = ...,
+    ps: SvgParams = ...,
 ) -> str:
     """
     Writes an `sidb::layout` with a charge distribution as an SVG image to

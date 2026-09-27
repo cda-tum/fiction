@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+from mnt.pyfiction._area import mol_qca_area as area
 from mnt.pyfiction._native.mol_qca import (
     MolecularQCALayout,
     MolQcaCellType,
@@ -21,6 +22,7 @@ from . import io
 __all__ = [
     "MolQcaCellType",
     "MolecularQCALayout",
+    "area",
     "io",
     "mol_qca_clock_number",
 ]

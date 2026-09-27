@@ -14,7 +14,7 @@ import pytest
 
 from mnt.pyfiction.layouts import CartesianGateLayout
 from mnt.pyfiction.layouts.coords import OffsetCoordinate
-from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design.routing import a_star, place, route_path
 
 if TYPE_CHECKING:
@@ -59,7 +59,7 @@ def test_route_path_rejects_invalid_paths(path: list[tuple[int, int]]) -> None:
 def test_place_uses_coordinates_and_validates_inputs(tmp_path: Path) -> None:
     path = tmp_path / "and.v"
     path.write_text("module top(a, b, y);\ninput a, b;\noutput y;\nassign y = a & b;\nendmodule\n")
-    network = read_technology_network(str(path))
+    network = read_network(str(path))
     layout = CartesianGateLayout((2, 1))
     a, b = network.pis()
     left = place(layout, (0, 0), network, a)
@@ -100,7 +100,7 @@ def test_place_majority_inputs(tmp_path: Path, *, constant: bool | None) -> None
     path.write_text(
         "module top(a, b, c, y);\ninput a, b, c;\noutput y;\nassign y = (a & b) | (a & c) | (b & c);\nendmodule\n"
     )
-    network = read_technology_network(str(path))
+    network = read_network(str(path))
     layout = CartesianGateLayout((2, 2))
     inputs = [place(layout, (0, i), network, node) for i, node in enumerate(network.pis())]
     gate = next(node for node in network.gates() if network.is_maj(node))

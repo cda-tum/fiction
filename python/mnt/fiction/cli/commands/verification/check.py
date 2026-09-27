@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.render import table as render_table
-from mnt.pyfiction.verification import gate_level_drv_params, gate_level_drv_stats, gate_level_drvs
+from mnt.pyfiction.verification import DesignRuleParams, gate_level_drvs
 
 if TYPE_CHECKING:
     import argparse
@@ -35,10 +35,9 @@ def check(session: Session, args: argparse.Namespace) -> Result:
     """Check the active gate-level layout and print violations and warnings."""
     del args
     layout = session.gate_layouts.current()
-    stats = gate_level_drv_stats()
-    params = gate_level_drv_params()
+    params = DesignRuleParams()
     params.on_progress = session.report_progress
-    gate_level_drvs(layout, params, statistics=stats)
+    stats = gate_level_drvs(layout, params=params)
     report: dict[str, object] = json.loads(stats.report)
     session.output(f"{stats.drvs} violations, {stats.warnings} warnings")
     issues = {key: value for key, value in report.items() if value}

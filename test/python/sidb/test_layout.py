@@ -17,12 +17,12 @@ def test_empty_layout() -> None:
     assert lyt.is_empty()
     assert lyt.num_dots() == 0
     assert lyt.num_defects() == 0
-    assert lyt.get_lattice() == Lattice.si_100_2x1()
+    assert lyt.lattice == Lattice.si_100_2x1()
     assert lyt.get_dot_tag(LatticeSite(0, 0, 0)) == DotTag.EMPTY
 
     named = SiDBLayout(Lattice.si_111_1x1(), "named")
-    assert named.get_lattice() == Lattice.si_111_1x1()
-    assert named.get_layout_name() == "named"
+    assert named.lattice == Lattice.si_111_1x1()
+    assert named.name == "named"
 
 
 def test_dot_tags() -> None:
@@ -47,7 +47,7 @@ def test_dot_tags() -> None:
     assert lyt.num_dots() == 2
     assert lyt.is_empty_site(LatticeSite(1, 0, 0))
 
-    copy = SiDBLayout(lyt.get_lattice())
+    copy = SiDBLayout(lyt.lattice)
     for site in lyt.sidbs():
         copy.assign_sidb(site, lyt.get_dot_tag(site))
     assert copy == lyt

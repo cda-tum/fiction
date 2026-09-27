@@ -74,7 +74,7 @@ NB_MODULE(physical_design, m)
             catch (const fiction::networks::high_degree_fanin_exception& error)
             {
                 const auto python_class =
-                    nanobind::module_::import_("mnt.pyfiction._native.networks").attr("high_degree_fanin_exception");
+                    nanobind::module_::import_("mnt.pyfiction._native.networks").attr("HighDegreeFaninError");
                 PyErr_SetString(python_class.ptr(), error.what());
             }
         });

@@ -58,7 +58,7 @@ void network_utils(nanobind::module_& m)
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
     py::exception<fiction::networks::high_degree_fanin_exception>(
-        m, "high_degree_fanin_exception",
+        m, "HighDegreeFaninError",
         PyExc_ValueError);  // NOLINT(misc-include-cleaner): included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 

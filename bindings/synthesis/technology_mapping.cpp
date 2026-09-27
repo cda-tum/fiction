@@ -54,11 +54,11 @@ void technology_mapping(nanobind::module_& m)
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
     py::exception<fiction::synthesis::missing_required_gates_exception>(
-        m, "missing_required_gates_exception",
+        m, "MissingRequiredGatesError",
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    py::class_<fiction::synthesis::technology_mapping_params>(m, "technology_mapping_params",
+    py::class_<fiction::synthesis::technology_mapping_params>(m, "TechnologyMappingParams",
                                                               DOC(fiction_synthesis_technology_mapping_params))
         .def(py::init<>(), "Default constructor.")
 
@@ -110,7 +110,7 @@ void technology_mapping(nanobind::module_& m)
 
         ;
 
-    py::class_<mockturtle::emap_stats>(m, "mapper_stats", "Technology mapper results, including failure status.")
+    py::class_<mockturtle::emap_stats>(m, "MapperStats", "Technology mapper results, including failure status.")
         .def_ro("mapping_error", &mockturtle::emap_stats::mapping_error)
         .def_ro("area", &mockturtle::emap_stats::area)
         .def_ro("delay", &mockturtle::emap_stats::delay)
@@ -121,7 +121,7 @@ void technology_mapping(nanobind::module_& m)
         .def_ro("time_total", &mockturtle::emap_stats::time_total)
         .def_ro("round_stats", &mockturtle::emap_stats::round_stats);
 
-    py::class_<fiction::synthesis::technology_mapping_stats>(m, "technology_mapping_stats",
+    py::class_<fiction::synthesis::technology_mapping_stats>(m, "TechnologyMappingStats",
                                                              DOC(fiction_synthesis_technology_mapping_stats))
         .def(py::init<>(), "Default constructor.")
         .def("report", &fiction::synthesis::technology_mapping_stats::report,

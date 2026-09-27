@@ -35,7 +35,7 @@ void read_sqd_layout(nanobind::module_& m)
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
     py::exception<fiction::sidb::io::sqd_parsing_error>(
-        m, "sqd_parsing_error",
+        m, "SqdParsingError",
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 

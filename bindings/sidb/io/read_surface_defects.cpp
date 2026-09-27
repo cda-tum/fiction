@@ -39,10 +39,10 @@ void read_surface_defects(nanobind::module_& m)
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translators with the module; they are not meant to be thrown here
     py::exception<fiction::sidb::io::unsupported_defect_index_exception>(
-        m, "unsupported_defect_index_exception",
+        m, "UnsupportedDefectIndexError",
         PyExc_ValueError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     py::exception<fiction::sidb::io::missing_position_exception>(
-        m, "missing_position_exception",
+        m, "MissingPositionError",
         PyExc_ValueError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 

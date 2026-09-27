@@ -17,7 +17,7 @@ from mnt.pyfiction.physical_design import (
     orthogonal,
     post_layout_optimization,
 )
-from mnt.pyfiction.verification import eq_type, equivalence_checking
+from mnt.pyfiction.verification import EquivalenceType, equivalence_checking
 
 if TYPE_CHECKING:
     from mnt.pyfiction.networks import TechnologyNetwork
@@ -26,29 +26,29 @@ if TYPE_CHECKING:
 def test_post_layout_optimization_default(mux21):
     layout = orthogonal(mux21).layout
 
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
 
     layout = post_layout_optimization(layout).layout
 
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
 
 
 def test_post_layout_optimization_with_parameters(mux21):
     layout = orthogonal(mux21).layout
 
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
 
     params = PostLayoutOptimizationParams()
     layout = post_layout_optimization(layout, params=params).layout
 
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
 
 
 def test_post_layout_optimization_with_stats(mux21: TechnologyNetwork) -> None:
     """Statistics describe the actual input and result, which remain logically equivalent."""
     layout = orthogonal(mux21).layout
 
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
 
     original = layout
     before = layout.clone()
@@ -57,7 +57,7 @@ def test_post_layout_optimization_with_stats(mux21: TechnologyNetwork) -> None:
     layout = result.layout
     assert original.area() == before.area()
 
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
     assert stats.time_total.total_seconds() > 0
     assert stats.x_size_before == before.x() + 1
     assert stats.y_size_before == before.y() + 1
@@ -71,7 +71,7 @@ def test_post_layout_optimization_with_stats_and_parameters(mux21: TechnologyNet
     """Statistics describe the actual input and result, which remain logically equivalent."""
     layout = orthogonal(mux21).layout
 
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
 
     params = PostLayoutOptimizationParams()
     params.max_gate_relocations = 1
@@ -84,7 +84,7 @@ def test_post_layout_optimization_with_stats_and_parameters(mux21: TechnologyNet
     layout = result.layout
     assert original.area() == before.area()
 
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
     assert stats.time_total.total_seconds() > 0
     assert stats.x_size_before == before.x() + 1
     assert stats.y_size_before == before.y() + 1

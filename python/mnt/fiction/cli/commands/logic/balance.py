@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe
-from mnt.pyfiction.synthesis import network_balancing, network_balancing_params
+from mnt.pyfiction.synthesis import NetworkBalancingParams, network_balancing
 
 if TYPE_CHECKING:
     import argparse
@@ -42,9 +42,9 @@ def balance(session: Session, args: argparse.Namespace) -> Result:
 
     Physical design does not need this and balanced networks produce much larger layouts.
     """
-    params = network_balancing_params()
+    params = NetworkBalancingParams()
     params.on_progress = session.report_progress
     params.unify_outputs = args.unify_outputs
-    network = network_balancing(session.as_technology_network(session.networks.current()), params)
+    network = network_balancing(session.as_technology_network(session.networks.current()), params=params)
     session.networks.add(network)
     return {"network": describe(network)}

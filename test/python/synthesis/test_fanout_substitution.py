@@ -11,10 +11,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.pyfiction.synthesis import (
+    FanoutSubstitutionParams,
+    SubstitutionStrategy,
     fanout_substitution,
-    fanout_substitution_params,
     is_fanout_substituted,
-    substitution_strategy,
 )
 
 if TYPE_CHECKING:
@@ -31,35 +31,35 @@ def test_substitution(mux21: TechnologyNetwork) -> None:
     assert substituted_default.num_gates() == 5
     assert is_fanout_substituted(substituted_default)
 
-    depth_params = fanout_substitution_params()
-    depth_params.strategy = substitution_strategy.DEPTH
-    substituted_depth = fanout_substitution(mux21, depth_params)
+    depth_params = FanoutSubstitutionParams()
+    depth_params.strategy = SubstitutionStrategy.DEPTH
+    substituted_depth = fanout_substitution(mux21, params=depth_params)
     assert substituted_depth.num_gates() == 5
-    assert is_fanout_substituted(substituted_depth, depth_params)
+    assert is_fanout_substituted(substituted_depth, params=depth_params)
 
-    breadth_params = fanout_substitution_params()
-    breadth_params.strategy = substitution_strategy.BREADTH
-    substituted_breadth = fanout_substitution(mux21, breadth_params)
+    breadth_params = FanoutSubstitutionParams()
+    breadth_params.strategy = SubstitutionStrategy.BREADTH
+    substituted_breadth = fanout_substitution(mux21, params=breadth_params)
     assert substituted_breadth.num_gates() == 5
-    assert is_fanout_substituted(substituted_breadth, breadth_params)
+    assert is_fanout_substituted(substituted_breadth, params=breadth_params)
 
-    random_params = fanout_substitution_params()
-    random_params.strategy = substitution_strategy.RANDOM
-    substituted_random = fanout_substitution(mux21, random_params)
+    random_params = FanoutSubstitutionParams()
+    random_params.strategy = SubstitutionStrategy.RANDOM
+    substituted_random = fanout_substitution(mux21, params=random_params)
     assert substituted_random.num_gates() == 5
-    assert is_fanout_substituted(substituted_random, random_params)
+    assert is_fanout_substituted(substituted_random, params=random_params)
 
-    random_seed_params = fanout_substitution_params()
-    random_seed_params.strategy = substitution_strategy.RANDOM
+    random_seed_params = FanoutSubstitutionParams()
+    random_seed_params.strategy = SubstitutionStrategy.RANDOM
     random_seed_params.seed = 42
-    substituted_random_seed = fanout_substitution(mux21, random_seed_params)
+    substituted_random_seed = fanout_substitution(mux21, params=random_seed_params)
     assert substituted_random_seed.num_gates() == 5
-    assert is_fanout_substituted(substituted_random_seed, random_seed_params)
+    assert is_fanout_substituted(substituted_random_seed, params=random_seed_params)
 
-    threshold_params = fanout_substitution_params()
+    threshold_params = FanoutSubstitutionParams()
     threshold_params.threshold = 2
-    substituted_threshold = fanout_substitution(mux21, threshold_params)
+    substituted_threshold = fanout_substitution(mux21, params=threshold_params)
     assert substituted_threshold.num_gates() == 4
-    assert is_fanout_substituted(substituted_threshold, threshold_params)
-    assert not is_fanout_substituted(substituted_threshold, depth_params)
-    assert not is_fanout_substituted(substituted_threshold, breadth_params)
+    assert is_fanout_substituted(substituted_threshold, params=threshold_params)
+    assert not is_fanout_substituted(substituted_threshold, params=depth_params)
+    assert not is_fanout_substituted(substituted_threshold, params=breadth_params)

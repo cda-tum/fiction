@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 from mnt.pyfiction.layouts import CartesianGateLayout
 from mnt.pyfiction.networks import simulate, simulate_outputs
-from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import ExactParams, exact
 
 if TYPE_CHECKING:
@@ -20,8 +20,8 @@ if TYPE_CHECKING:
 
 
 def test_logic_simulation(resources_dir):
-    xor2_net = read_technology_network(str(resources_dir / "xor2.v"))
-    xnor2_net = read_technology_network(str(resources_dir / "xnor2.v"))
+    xor2_net = read_network(str(resources_dir / "xor2.v"))
+    xnor2_net = read_network(str(resources_dir / "xnor2.v"))
 
     xor_sim = simulate(xor2_net)
     assert xor_sim["out"] == [False, True, True, False]
@@ -42,7 +42,7 @@ def test_duplicate_output_names_preserve_order(tmp_path: Path) -> None:
     path.write_text(
         "module top(a, f, g);\ninput a;\noutput f, g;\nassign f = a;\nassign g = ~a;\nendmodule\n", encoding="utf-8"
     )
-    network = read_technology_network(str(path))
+    network = read_network(str(path))
     network.set_output_name(0, "same")
     network.set_output_name(1, "same")
     outputs = simulate_outputs(network)

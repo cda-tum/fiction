@@ -18,7 +18,7 @@ from mnt.fiction.cli.aigverse_bridge import from_aigverse, to_aigverse
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe, size_and_depth
-from mnt.pyfiction.networks import AigNetwork, TechnologyNetwork, get_name
+from mnt.pyfiction.networks import AigNetwork, TechnologyNetwork
 
 if TYPE_CHECKING:
     import argparse
@@ -69,7 +69,7 @@ def aig_command(session: Session, args: argparse.Namespace) -> Result:
             msg = f"pass '{name}' produced no network"
             raise CommandError(msg)
         optimized = result
-    network = from_aigverse(session, optimized, get_name(aig), like=aig)
+    network = from_aigverse(session, optimized, aig.name, like=aig)
     session.networks.add(network)
     session.info(size_and_depth(aig, network))
     return {

@@ -70,7 +70,13 @@ io/io
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.fcn.area
+.. autofunction:: mnt.pyfiction.qca.area
+
+.. autofunction:: mnt.pyfiction.mol_qca.area
+
+.. autofunction:: mnt.pyfiction.inml.area
+
+.. autofunction:: mnt.pyfiction.sidb.area
 ```
 
 :::

@@ -25,12 +25,14 @@ from typing import TYPE_CHECKING
 
 from mnt.pyfiction.layouts.io import write_dot_layout
 from mnt.pyfiction.mol_qca import MolecularQCALayout
-from mnt.pyfiction.mol_qca.io import write_mol_qca_layout_svg, write_mol_qca_layout_svg_params
+from mnt.pyfiction.mol_qca.io import WriteMolQcaLayoutSvgParams, write_mol_qca_layout_svg
 from mnt.pyfiction.networks.io import write_dot_network
 from mnt.pyfiction.qca import QCALayout
-from mnt.pyfiction.qca.io import write_qca_layout_svg, write_qca_layout_svg_params
+from mnt.pyfiction.qca.io import SvgParams as QcaSvgParams
+from mnt.pyfiction.qca.io import write_qca_layout_svg
 from mnt.pyfiction.sidb import SiDBLayout
-from mnt.pyfiction.sidb.io import write_sidb_layout_svg, write_sidb_layout_svg_params
+from mnt.pyfiction.sidb.io import SvgParams as SidbSvgParams
+from mnt.pyfiction.sidb.io import write_sidb_layout_svg
 
 from .errors import CommandError
 from .parsing import tokenize
@@ -117,23 +119,23 @@ def write_svg(entry: CellEntry, path: Path, *, simple: bool, on_progress: Progre
     """
     layout = entry.layout
     if isinstance(layout, QCALayout):
-        params = write_qca_layout_svg_params()
+        params = QcaSvgParams()
         params.simple = simple
         params.on_progress = on_progress
-        write_qca_layout_svg(layout, str(path), params)
+        write_qca_layout_svg(layout, str(path), params=params)
     elif isinstance(layout, MolecularQCALayout):
-        mol_params = write_mol_qca_layout_svg_params()
+        mol_params = WriteMolQcaLayoutSvgParams()
         mol_params.simple = simple
         mol_params.on_progress = on_progress
-        write_mol_qca_layout_svg(layout, str(path), mol_params)
+        write_mol_qca_layout_svg(layout, str(path), params=mol_params)
     elif isinstance(layout, SiDBLayout):
-        sidb_params = write_sidb_layout_svg_params()
+        sidb_params = SidbSvgParams()
         sidb_params.on_progress = on_progress
         state = ground_state(entry)
         if state is not None:
-            write_sidb_layout_svg(layout, state, str(path), sidb_params)
+            write_sidb_layout_svg(layout, str(path), charges=state, params=sidb_params)
         else:
-            write_sidb_layout_svg(layout, str(path), sidb_params)
+            write_sidb_layout_svg(layout, str(path), params=sidb_params)
     else:
         msg = f"no SVG drawer for {type(layout).__name__} layouts"
         raise CommandError(msg)

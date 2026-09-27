@@ -17,14 +17,12 @@ from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.render import table as render_table
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import describe
-from mnt.pyfiction.networks import get_name, set_name
 from mnt.pyfiction.synthesis import (
+    TechnologyMappingParams,
     all_standard_2_input_functions,
     all_standard_3_input_functions,
     all_supported_standard_functions,
     technology_mapping,
-    technology_mapping_params,
-    technology_mapping_stats,
 )
 
 if TYPE_CHECKING:
@@ -95,7 +93,7 @@ def map_command(session: Session, args: argparse.Namespace) -> Result:
 
     Select at least one gate type, e.g. 'map --and --or --inv' for AND-OR-inverter networks.
     """
-    params = technology_mapping_params()
+    params = TechnologyMappingParams()
     if args.all:
         params = all_supported_standard_functions()
     elif args.all3:
@@ -111,15 +109,15 @@ def map_command(session: Session, args: argparse.Namespace) -> Result:
     params.decay = args.decay
 
     network = session.networks.current()
-    stats = technology_mapping_stats()
-    mapped = technology_mapping(network, params, stats)
+    result = technology_mapping(network, params=params)
+    mapped, stats = result.network, result.stats
     if stats.mapper_stats.mapping_error:
         msg_0 = "mapping failed: the selected gate library cannot cover this network; the store is unchanged"
         error = CommandError(msg_0)
         error.stats = stats_to_dict(stats)
         raise error
-    if not get_name(mapped):
-        set_name(mapped, get_name(network))
+    if not mapped.name:
+        mapped.name = network.name
     session.networks.add(mapped)
     statistics = stats_to_dict(stats)
     if args.verbose:

@@ -75,6 +75,33 @@ source, and `complemented` records whether the edge inverts the Boolean value.
 Use both fields when interpreting an AIG, XAG, or MIG. `len(network)` returns the
 node count, and `network.name` reads or sets the network name.
 
+`networks.io.read_network(path, network_type=AigNetwork)` selects the representation;
+omitting `network_type` selects `TechnologyNetwork`. `convert_network` uses the same
+selector and returns an independent network. `technology_mapping(network, params=...)`
+returns a `MappingResult` with `.network` and `.stats`; inspect
+`.stats.mapper_stats.mapping_error` before using a mapping with a restricted gate library.
+Fanout substitution and balancing also take keyword-only `params`.
+
+```python
+from pathlib import Path
+
+from mnt.pyfiction.networks.io import read_network
+from mnt.pyfiction.synthesis import and_or_not, technology_mapping
+from mnt.pyfiction.verification import EquivalenceType, equivalence_checking
+
+network = read_network(Path("circuit.v"))
+mapped = technology_mapping(network, params=and_or_not())
+check = equivalence_checking(network, mapped.network)
+assert check.eq == EquivalenceType.STRONG
+```
+
+`equivalence_checking` returns `.eq`, throughput information, a counterexample, and
+design-rule reports. Violations in `.spec_drv_stats` or `.impl_drv_stats` prevent the
+equivalence check. `gate_level_drvs(layout, params=...)` returns `.drvs`, `.warnings`,
+and a JSON `.report` without printing. `critical_path_length_and_throughput` returns
+named `.critical_path_length` and `.throughput` fields; throughput is the clock-cycle
+interval between outputs.
+
 ## Migrating data objects
 
 Replace snake_case class imports with the corresponding PascalCase type. The
@@ -121,6 +148,24 @@ separate topology-specific readers. The file must match the selected topology.
 Readers and writers accept strings and `pathlib.Path` values. `write_fgl_layout`
 and `write_dot_layout` retain progress callbacks; DOT output also accepts
 `clock_colors` and `indexes` as keyword options.
+
+Technology readers and writers live in `qca.io`, `mol_qca.io`, `inml.io`, and `sidb.io`.
+They also accept `str` and `Path` inputs. Pass writer options with `params`;
+`sidb.io.write_sidb_layout_svg(layout, path, charges=..., params=...)` colors SiDBs
+with an optional charge distribution. Simulation and domain writers live in `sidb.io`.
+
+Physical area belongs to the technology: `qca.area`, `mol_qca.area`, `inml.area`, and
+`sidb.area` return nm² and accept keyword cell dimensions in nm. Dimensions must be
+finite and nonnegative. SiDB area covers the bounding box of dots and defects;
+the other technologies use the layout extent. QLL writers are available from
+`qca.io`, `mol_qca.io`, and `inml.io`.
+
+The package root exports `__version__` and domain modules. There are no public
+`utils` or `fcn` modules. Use `.name` on networks and layouts and `.lattice` on
+SiDB layouts; the lattice getter returns a copy, which can be assigned back after editing.
+Replace network-target enums and topology-specific readers with concrete type selectors.
+Retrieve verification and mapping statistics from returned results instead of supplying
+output parameters. These API changes have no compatibility aliases.
 
 ## SiDB simulation
 

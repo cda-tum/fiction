@@ -156,7 +156,7 @@ even without a suffix. Names containing path components require an explicit outp
 Only `write_dot` takes store flags: `-n` selects the network, while `-g` selects the gate-level layout,
 which is the default. Conflicting store flags and unsupported options fail before writing.
 `write_aiger` requires an AIG: load one with `read_verilog circuit.v --type aig`, or explicitly convert a
-network with the Python binding `convert_network(network, network_target.AIG)` before writing it.
+network with the Python binding `convert_network(network, network_type=AigNetwork)` before writing it.
 
 ### Truth tables
 

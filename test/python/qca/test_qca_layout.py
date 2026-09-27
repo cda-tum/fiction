@@ -38,7 +38,7 @@ def test_cell_type_and_mode_assignment() -> None:
     layout = QCALayout((4, 4, 1), "OPEN", "crossing")
 
     assert layout.is_empty()
-    assert layout.get_layout_name() == "crossing"
+    assert layout.name == "crossing"
 
     layout.assign_cell_type((0, 2), QcaCellType.INPUT)
     layout.assign_cell_type((2, 2), QcaCellType.NORMAL)

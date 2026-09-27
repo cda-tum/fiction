@@ -90,15 +90,8 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 :::{tab-item} Python
 :sync: python
 
-```{eval-rst}
-.. autofunction:: mnt.pyfiction.layouts.coords.offset_area
-
-.. autofunction:: mnt.pyfiction.layouts.coords.cube_area
-
-.. autofunction:: mnt.pyfiction.layouts.coords.offset_volume
-
-.. autofunction:: mnt.pyfiction.layouts.coords.cube_volume
-```
+Coordinates identify positions. Use `layout.area()` for the grid area, or the
+technology's `area(layout)` for physical area in nm².
 
 :::
 

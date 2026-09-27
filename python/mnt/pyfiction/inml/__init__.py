@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+from mnt.pyfiction._area import inml_area as area
 from mnt.pyfiction._native.inml import (
     INMLLayout,
     InmlMagnetType,
@@ -20,5 +21,6 @@ from . import io
 __all__ = [
     "INMLLayout",
     "InmlMagnetType",
+    "area",
     "io",
 ]

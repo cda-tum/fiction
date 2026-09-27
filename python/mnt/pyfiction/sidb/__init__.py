@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+from mnt.pyfiction._area import sidb_area as area
 from mnt.pyfiction._native.sidb import (
     ChargeDistribution,
     DotTag,
@@ -55,6 +56,7 @@ __all__ = [
     "SiDBLayout",
     "SimulationParams",
     "analysis",
+    "area",
     "charge_configuration_to_string",
     "charge_state_to_sign",
     "defect_extent",

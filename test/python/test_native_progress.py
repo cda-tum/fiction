@@ -18,10 +18,10 @@ from typing import TYPE_CHECKING, Any
 import pytest
 
 from mnt.pyfiction import layouts, physical_design
-from mnt.pyfiction.fcn.io import write_qll_layout
-from mnt.pyfiction.inml.io import write_qcc_layout, write_qcc_layout_params
+from mnt.pyfiction.inml.io import WriteQccLayoutParams, write_qcc_layout
 from mnt.pyfiction.layouts import CartesianGateLayout, ShiftedCartesianGateLayout
 from mnt.pyfiction.layouts.io import write_dot_layout, write_fgl_layout
+from mnt.pyfiction.mol_qca.io import write_qll_layout
 from mnt.pyfiction.physical_design import (
     ExactParams,
     GraphOrientedLayoutDesignParams,
@@ -36,20 +36,20 @@ from mnt.pyfiction.physical_design import (
 from mnt.pyfiction.qca import io as qca_io
 from mnt.pyfiction.sidb import DotTag, LatticeSite, SiDBLayout
 from mnt.pyfiction.sidb.analysis import CriticalTemperatureParams, critical_temperature_gate_based
-from mnt.pyfiction.sidb.io import read_sqd_layout, write_sidb_layout_svg, write_sidb_layout_svg_params, write_sqd_layout
+from mnt.pyfiction.sidb.io import SvgParams, read_sqd_layout, write_sidb_layout_svg, write_sqd_layout
 from mnt.pyfiction.sidb.simulation import ClusterCompleteParams, SimulationEngine, clustercomplete
 from mnt.pyfiction.synthesis import (
+    FanoutSubstitutionParams,
+    NetworkBalancingParams,
     fanout_substitution,
-    fanout_substitution_params,
     network_balancing,
-    network_balancing_params,
     standard_functions,
 )
 from mnt.pyfiction.verification import (
+    DesignRuleParams,
+    EquivalenceType,
     critical_path_length_and_throughput,
-    eq_type,
     equivalence_checking,
-    gate_level_drv_params,
     gate_level_drvs,
 )
 
@@ -101,7 +101,7 @@ def test_exact_candidate_lifecycle(mux21: TechnologyNetwork, threads: int) -> No
     params.on_worker_progress = lambda *report: reports.append(report)
     layout = exact(mux21, params=params, layout_type=CartesianGateLayout).layout
     assert layout is not None
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
     assert reports
     active = {}
     for worker, count, description, done, total, running in reports:
@@ -127,7 +127,7 @@ def test_gold_graph_expansions(mux21: TechnologyNetwork, *, parallel: bool) -> N
     params.on_progress = lambda *report: counts.append(report)
     layout = graph_oriented_layout_design(mux21, params=params).layout
     assert layout is not None
-    assert equivalence_checking(mux21, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout).eq != EquivalenceType.NO
     assert any("; best " in description for _, _, description, _, _, _ in reports)
     previous: dict[int, int] = {}
     active: dict[int, bool] = {}
@@ -153,19 +153,19 @@ def test_counted_native_phases(mux21: TechnologyNetwork, command: str) -> None:
         return reports.append(report)
 
     if command == "balance":
-        balancing_params = network_balancing_params()
+        balancing_params = NetworkBalancingParams()
         balancing_params.on_progress = callback
-        result = network_balancing(mux21, balancing_params)
-        assert equivalence_checking(mux21, result) != eq_type.NO
+        result = network_balancing(mux21, params=balancing_params)
+        assert equivalence_checking(mux21, result).eq != EquivalenceType.NO
     elif command == "fanouts":
-        substitution_params = fanout_substitution_params()
+        substitution_params = FanoutSubstitutionParams()
         substitution_params.on_progress = callback
-        result = fanout_substitution(mux21, substitution_params)
-        assert equivalence_checking(mux21, result) != eq_type.NO
+        result = fanout_substitution(mux21, params=substitution_params)
+        assert equivalence_checking(mux21, result).eq != EquivalenceType.NO
     else:
-        drv_params = gate_level_drv_params()
+        drv_params = DesignRuleParams()
         drv_params.on_progress = callback
-        gate_level_drvs(orthogonal(mux21).layout, drv_params)
+        gate_level_drvs(orthogonal(mux21).layout, params=drv_params)
     final = {task: (done, total) for task, done, total in reports}
     assert final
     assert all(done == total for done, total in final.values())
@@ -193,17 +193,17 @@ def test_writer_counts_and_output(mux21: TechnologyNetwork, tmp_path: Path, kind
             if kind == "sqd":
                 write_sqd_layout(layout, str(path), **kwargs)
             else:
-                params = write_sidb_layout_svg_params()
+                params = SvgParams()
                 if callback:
                     params.on_progress = callback
-                write_sidb_layout_svg(layout, str(path), params)
+                write_sidb_layout_svg(layout, str(path), params=params)
         else:
             cell_layout = apply_qca_one_library(gate_layout)
-            params = getattr(qca_io, f"write_{'qca_layout_svg' if kind == 'svg' else kind + '_layout'}_params")()
+            writer_params = qca_io.SvgParams() if kind == "svg" else qca_io.QcaWriterParams()
             if callback:
-                params.on_progress = callback
+                writer_params.on_progress = callback
             getattr(qca_io, f"write_{'qca_layout_svg' if kind == 'svg' else kind + '_layout'}")(
-                cell_layout, str(path), params
+                cell_layout, path, params=writer_params
             )
     if kind == "sqd":
         assert read_sqd_layout(str(paths[0])) == read_sqd_layout(str(paths[1]))
@@ -323,9 +323,9 @@ def test_qcc_writer_counts_and_output(mux21: TechnologyNetwork, tmp_path: Path) 
     before = tmp_path / "before.qcc"
     after = tmp_path / "after.qcc"
     write_qcc_layout(layout, str(before))
-    params = write_qcc_layout_params()
+    params = WriteQccLayoutParams()
     reports: list[tuple[str, int, int]] = []
     params.on_progress = lambda *report: reports.append(report)
-    write_qcc_layout(layout, str(after), params)
+    write_qcc_layout(layout, str(after), params=params)
     assert before.read_bytes() == after.read_bytes()
     assert reports[-1][1] == reports[-1][2] > 0

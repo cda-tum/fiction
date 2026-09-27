@@ -521,28 +521,12 @@ class QCALayout:
             Name of the cell at `c`, or the empty string if it has none.
         """
 
-    def set_layout_name(self, name: str) -> None:
-        """
-        Sets the layout name.
-
-        Args:
-            name: Layout name.
-        """
-
     @property
     def name(self) -> str:
         """The layout name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
-    def get_layout_name(self) -> str:
-        """
-        The layout name.
-
-        Returns:
-            Layout name.
-        """
-
     def num_cells(self) -> int:
         """
         Number of cells.

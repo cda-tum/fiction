@@ -19,27 +19,25 @@ from mnt.fiction.cli.aigverse_bridge import from_aigverse
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.stores import CellEntry, describe
 from mnt.fiction.cli.topologies import FGL_READERS
-from mnt.pyfiction.networks import set_name
-from mnt.pyfiction.networks.io import read_aig_network, read_mig_network, read_technology_network, read_xag_network
+from mnt.pyfiction.networks import AigNetwork, MigNetwork, TechnologyNetwork, XagNetwork
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.sidb.io import read_sqd_layout
-from mnt.pyfiction.synthesis import convert_network, network_target
+from mnt.pyfiction.synthesis import convert_network
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
     from mnt.fiction.cli.stores import Network
 
 
-NETWORK_READERS: dict[str, Callable[..., Network]] = {
-    "aig": read_aig_network,
-    "xag": read_xag_network,
-    "mig": read_mig_network,
-    "tec": read_technology_network,
+NETWORK_TYPES: dict[str, type[Network]] = {
+    "aig": AigNetwork,
+    "xag": XagNetwork,
+    "mig": MigNetwork,
+    "tec": TechnologyNetwork,
 }
-"""The ``--type`` names and the readers that produce them."""
+"""The concrete representations selected by ``--type``."""
 
 
 READ_SUFFIXES = (".v", ".aig", ".blif", ".aag", ".pla", ".fgl", ".sqd")
@@ -50,10 +48,6 @@ AIGVERSE_NETWORK_SUFFIXES = {".aag", ".pla"}
 """Formats read as AIGs through aigverse."""
 
 
-AIGVERSE_TARGETS = {"xag": network_target.XAG, "mig": network_target.MIG, "tec": network_target.TEC}
-"""What ``--type`` converts an AIG read through ``aigverse`` into."""
-
-
 def _type_argument(parser: Parser) -> None:
     """Add the network type option shared by every network reader.
 
@@ -62,7 +56,7 @@ def _type_argument(parser: Parser) -> None:
     """
     parser.add_argument(
         "--type",
-        choices=list(NETWORK_READERS),
+        choices=list(NETWORK_TYPES),
         default="tec",
         help="the network type to build",
     )
@@ -126,13 +120,13 @@ def _read_network(session: Session, path: Path, network_type: str, file_format: 
         )
         if network_type == "aig":
             return network
-        converted = convert_network(network, AIGVERSE_TARGETS[network_type])
-        set_name(converted, path.stem)
+        converted = convert_network(network, network_type=NETWORK_TYPES[network_type])
+        converted.name = path.stem
         return converted
     if suffix == ".blif" and network_type != "tec":
         msg = "BLIF files are read as technology networks only; drop --type"
         raise CommandError(msg)
-    return NETWORK_READERS[network_type](str(path), format=suffix[1:])
+    return read_network(path, network_type=NETWORK_TYPES[network_type], file_format=suffix[1:])
 
 
 def _read_pla(session: Session, path: Path) -> Network:
@@ -221,7 +215,7 @@ def read_file(
         session.gate_layouts.add(layout)
         return {"gate_layout": describe(layout)}
     if suffix == ".sqd":
-        entry = CellEntry(read_sqd_layout(str(path), path.stem))
+        entry = CellEntry(read_sqd_layout(str(path), name=path.stem))
     else:
         msg = f"cannot read '{path.suffix}' files"
         raise CommandError(msg)

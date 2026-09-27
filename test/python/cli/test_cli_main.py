@@ -29,7 +29,7 @@ from prompt_toolkit.output import DummyOutput
 from mnt.fiction.cli import Session, main
 from mnt.fiction.cli import app as cli_app
 from mnt.fiction.cli.app import CommandCompleter
-from mnt.pyfiction.utils import __version__
+from mnt.pyfiction import __version__
 
 
 def test_commands_succeed() -> None:
@@ -161,7 +161,7 @@ def test_interactive_is_not_entered_after_quit(tmp_path: Path, monkeypatch: pyte
 def test_quiet_keeps_errors_but_drops_informational_output(capsys: pytest.CaptureFixture[str]) -> None:
     """--quiet is for scripted runs: requested results and errors remain visible."""
     assert main(["-q", "-c", "version"]) == 0
-    assert "compiled" in capsys.readouterr().out
+    assert __version__ in capsys.readouterr().out
     assert main(["-q", "-c", "frobnicate"]) == 1
     assert "unknown command" in capsys.readouterr().err
 
@@ -218,7 +218,7 @@ def test_piped_entry_point() -> None:
         check=False,
     )
     assert result.returncode == 0, result.stderr
-    assert "compiled" in result.stdout
+    assert __version__ in result.stdout
     assert "fiction>" not in result.stdout
 
 
@@ -229,7 +229,7 @@ def test_installed_console_script() -> None:
         [str(binary), "--quiet", "-c", "version"], capture_output=True, text=True, timeout=20, check=False
     )
     assert result.returncode == 0, result.stderr
-    assert "compiled" in result.stdout
+    assert __version__ in result.stdout
 
 
 def test_completion_respects_path_context(tmp_path: Path) -> None:

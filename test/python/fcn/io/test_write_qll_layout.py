@@ -11,8 +11,8 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
-from mnt.pyfiction.fcn.io import write_qll_layout
 from mnt.pyfiction.mol_qca import MolecularQCALayout, MolQcaCellType
+from mnt.pyfiction.mol_qca.io import write_qll_layout
 
 
 def test_write_mol_qca_layout() -> None:

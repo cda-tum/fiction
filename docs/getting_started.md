@@ -194,23 +194,20 @@ Install the library from PyPI:
 $ pip install mnt.pyfiction
 ```
 
-Import what you need from the submodule that mirrors its C++ namespace:
+Import tools from their public FCN domain module:
 
 ```python
 from mnt.pyfiction.layouts import CartesianGateLayout
 ```
 
-The Python synopsis is modeled after the C++ API to make it feel as familiar as possible. However, all available Python
-bindings are additionally documented together with the C++ code on this site to make it easier to get started. For each
-module, you can toggle between the two languages using the tabs.
+`pyfiction` provides FCN workflows, concrete layout types, routing primitives, and SiDB
+simulation and analysis tools. Python functions accept keyword options and paths and return
+results with statistics. The C++ core supplies the algorithms; its internal helpers and
+template structure are not part of the public Python interface.
 
-:::{note}
-The _fiction_ framework is primarily developed for C++ as a header-only library. The Python bindings are a thin
-wrapper around the C++ code. We try our best to keep the bindings in sync with the C++ code, and to expose most of
-_fiction_'s functionality in both C++ and Python. This is, unfortunately, not always possible. Should you encounter
-features that are not (yet) available in _pyfiction_, please open
-an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
-:::
+Start with the {doc}`Python workflows and migration guide <python>`. Reference pages
+provide synchronized C++ and Python tabs for tools available in both languages. Request
+missing FCN workflows in an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
 
 ### Virtual Environment Setup
 

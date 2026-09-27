@@ -13,16 +13,15 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.synthesis import (
+    MissingRequiredGatesError,
     all_standard_2_input_functions,
     all_standard_3_input_functions,
     all_supported_standard_functions,
     and_or_not,
     and_or_not_maj,
-    missing_required_gates_exception,
     technology_mapping,
-    technology_mapping_stats,
 )
-from mnt.pyfiction.verification import eq_type, equivalence_checking
+from mnt.pyfiction.verification import EquivalenceType, equivalence_checking
 
 if TYPE_CHECKING:
     from mnt.pyfiction.networks import TechnologyNetwork
@@ -38,25 +37,26 @@ GATE_LIBRARIES = [
 
 def test_missing_gate_exception_export():
     """Users can catch the exception exposed by the technology mapper."""
-    assert issubclass(missing_required_gates_exception, RuntimeError)
+    assert issubclass(MissingRequiredGatesError, RuntimeError)
 
 
 def test_mapping_default(mux21: TechnologyNetwork) -> None:
     """An empty gate library is rejected before native mapping."""
-    with pytest.raises(missing_required_gates_exception, match="missing required gates"):
+    with pytest.raises(MissingRequiredGatesError, match="missing required gates"):
         technology_mapping(mux21)
 
 
 @pytest.mark.parametrize("make_params", GATE_LIBRARIES)
 def test_mapping_with_parameters(mux21, make_params):
-    mapped_network = technology_mapping(mux21, make_params())
+    mapped_network = technology_mapping(mux21, params=make_params()).network
 
-    assert equivalence_checking(mux21, mapped_network) == eq_type.STRONG
+    assert equivalence_checking(mux21, mapped_network).eq == EquivalenceType.STRONG
 
 
 @pytest.mark.parametrize("make_params", GATE_LIBRARIES)
 def test_mapping_with_stats(mux21, make_params):
-    stats = technology_mapping_stats()
-    mapped_network = technology_mapping(mux21, params=make_params(), stats=stats)
+    result = technology_mapping(mux21, params=make_params())
+    mapped_network = result.network
+    assert not result.stats.mapper_stats.mapping_error
 
-    assert equivalence_checking(mux21, mapped_network) == eq_type.STRONG
+    assert equivalence_checking(mux21, mapped_network).eq == EquivalenceType.STRONG

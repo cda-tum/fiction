@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import orthogonal
 
 if TYPE_CHECKING:
@@ -175,7 +175,7 @@ def mux21(resources_dir: Path) -> TechnologyNetwork:
     Returns:
         The ``mux21.v`` network as a ``TechnologyNetwork``.
     """
-    return read_technology_network(str(resources_dir / "mux21.v"))
+    return read_network(str(resources_dir / "mux21.v"))
 
 
 @pytest.fixture
@@ -185,7 +185,7 @@ def interface_network(resources_dir: Path) -> TechnologyNetwork:
     Returns:
         The network used to check conversion and file round trips.
     """
-    return read_technology_network(str(resources_dir / "network_interfaces.blif"))
+    return read_network(str(resources_dir / "network_interfaces.blif"))
 
 
 @pytest.fixture

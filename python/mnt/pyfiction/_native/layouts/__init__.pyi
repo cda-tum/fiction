@@ -769,14 +769,12 @@ class CartesianGateLayout:
     def is_wire(self, arg: int, /) -> bool:
         """Equivalent to `is_buf`."""
 
-    def set_layout_name(self, name: str) -> None: ...
     @property
     def name(self) -> str:
         """The layout name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
-    def get_layout_name(self) -> str: ...
     def clone(self) -> CartesianGateLayout:
         """
         Clones the layout returning a deep copy.
@@ -962,19 +960,6 @@ class CartesianGateLayout:
         Returns:
             Tile at which `n` is placed or a default dead tile if `n` is not
             placed.
-        """
-
-    def make_signal(self, n: int) -> coords.OffsetCoordinate:
-        """
-        Invokes the same behavior as `get_tile(n)` but additionally casts the
-        return value to a signal. That is, this function returns the signal
-        representation of the tile that the node `n` is assigned to.
-
-        Args:
-            n: Node whose signal is desired.
-
-        Returns:
-            Signal that points to `n`.
         """
 
     def move_node(
@@ -2230,14 +2215,12 @@ class ShiftedCartesianGateLayout:
     def is_wire(self, arg: int, /) -> bool:
         """Equivalent to `is_buf`."""
 
-    def set_layout_name(self, name: str) -> None: ...
     @property
     def name(self) -> str:
         """The layout name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
-    def get_layout_name(self) -> str: ...
     def clone(self) -> ShiftedCartesianGateLayout:
         """
         Clones the layout returning a deep copy.
@@ -2423,19 +2406,6 @@ class ShiftedCartesianGateLayout:
         Returns:
             Tile at which `n` is placed or a default dead tile if `n` is not
             placed.
-        """
-
-    def make_signal(self, n: int) -> coords.OffsetCoordinate:
-        """
-        Invokes the same behavior as `get_tile(n)` but additionally casts the
-        return value to a signal. That is, this function returns the signal
-        representation of the tile that the node `n` is assigned to.
-
-        Args:
-            n: Node whose signal is desired.
-
-        Returns:
-            Signal that points to `n`.
         """
 
     def move_node(
@@ -3691,14 +3661,12 @@ class HexagonalGateLayout:
     def is_wire(self, arg: int, /) -> bool:
         """Equivalent to `is_buf`."""
 
-    def set_layout_name(self, name: str) -> None: ...
     @property
     def name(self) -> str:
         """The layout name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
-    def get_layout_name(self) -> str: ...
     def clone(self) -> HexagonalGateLayout:
         """
         Clones the layout returning a deep copy.
@@ -3884,19 +3852,6 @@ class HexagonalGateLayout:
         Returns:
             Tile at which `n` is placed or a default dead tile if `n` is not
             placed.
-        """
-
-    def make_signal(self, n: int) -> coords.OffsetCoordinate:
-        """
-        Invokes the same behavior as `get_tile(n)` but additionally casts the
-        return value to a signal. That is, this function returns the signal
-        representation of the tile that the node `n` is assigned to.
-
-        Args:
-            n: Node whose signal is desired.
-
-        Returns:
-            Signal that points to `n`.
         """
 
     def move_node(
@@ -5152,14 +5107,12 @@ class OddRowCartesianGateLayout:
     def is_wire(self, arg: int, /) -> bool:
         """Equivalent to `is_buf`."""
 
-    def set_layout_name(self, name: str) -> None: ...
     @property
     def name(self) -> str:
         """The layout name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
-    def get_layout_name(self) -> str: ...
     def clone(self) -> OddRowCartesianGateLayout:
         """
         Clones the layout returning a deep copy.
@@ -5345,19 +5298,6 @@ class OddRowCartesianGateLayout:
         Returns:
             Tile at which `n` is placed or a default dead tile if `n` is not
             placed.
-        """
-
-    def make_signal(self, n: int) -> coords.OffsetCoordinate:
-        """
-        Invokes the same behavior as `get_tile(n)` but additionally casts the
-        return value to a signal. That is, this function returns the signal
-        representation of the tile that the node `n` is assigned to.
-
-        Args:
-            n: Node whose signal is desired.
-
-        Returns:
-            Signal that points to `n`.
         """
 
     def move_node(
@@ -6613,14 +6553,12 @@ class EvenRowCartesianGateLayout:
     def is_wire(self, arg: int, /) -> bool:
         """Equivalent to `is_buf`."""
 
-    def set_layout_name(self, name: str) -> None: ...
     @property
     def name(self) -> str:
         """The layout name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
-    def get_layout_name(self) -> str: ...
     def clone(self) -> EvenRowCartesianGateLayout:
         """
         Clones the layout returning a deep copy.
@@ -6806,19 +6744,6 @@ class EvenRowCartesianGateLayout:
         Returns:
             Tile at which `n` is placed or a default dead tile if `n` is not
             placed.
-        """
-
-    def make_signal(self, n: int) -> coords.OffsetCoordinate:
-        """
-        Invokes the same behavior as `get_tile(n)` but additionally casts the
-        return value to a signal. That is, this function returns the signal
-        representation of the tile that the node `n` is assigned to.
-
-        Args:
-            n: Node whose signal is desired.
-
-        Returns:
-            Signal that points to `n`.
         """
 
     def move_node(
@@ -8074,14 +7999,12 @@ class EvenColumnCartesianGateLayout:
     def is_wire(self, arg: int, /) -> bool:
         """Equivalent to `is_buf`."""
 
-    def set_layout_name(self, name: str) -> None: ...
     @property
     def name(self) -> str:
         """The layout name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
-    def get_layout_name(self) -> str: ...
     def clone(self) -> EvenColumnCartesianGateLayout:
         """
         Clones the layout returning a deep copy.
@@ -8267,19 +8190,6 @@ class EvenColumnCartesianGateLayout:
         Returns:
             Tile at which `n` is placed or a default dead tile if `n` is not
             placed.
-        """
-
-    def make_signal(self, n: int) -> coords.OffsetCoordinate:
-        """
-        Invokes the same behavior as `get_tile(n)` but additionally casts the
-        return value to a signal. That is, this function returns the signal
-        representation of the tile that the node `n` is assigned to.
-
-        Args:
-            n: Node whose signal is desired.
-
-        Returns:
-            Signal that points to `n`.
         """
 
     def move_node(
@@ -9535,14 +9445,12 @@ class OddRowHexGateLayout:
     def is_wire(self, arg: int, /) -> bool:
         """Equivalent to `is_buf`."""
 
-    def set_layout_name(self, name: str) -> None: ...
     @property
     def name(self) -> str:
         """The layout name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
-    def get_layout_name(self) -> str: ...
     def clone(self) -> OddRowHexGateLayout:
         """
         Clones the layout returning a deep copy.
@@ -9728,19 +9636,6 @@ class OddRowHexGateLayout:
         Returns:
             Tile at which `n` is placed or a default dead tile if `n` is not
             placed.
-        """
-
-    def make_signal(self, n: int) -> coords.OffsetCoordinate:
-        """
-        Invokes the same behavior as `get_tile(n)` but additionally casts the
-        return value to a signal. That is, this function returns the signal
-        representation of the tile that the node `n` is assigned to.
-
-        Args:
-            n: Node whose signal is desired.
-
-        Returns:
-            Signal that points to `n`.
         """
 
     def move_node(
@@ -10996,14 +10891,12 @@ class OddColumnHexGateLayout:
     def is_wire(self, arg: int, /) -> bool:
         """Equivalent to `is_buf`."""
 
-    def set_layout_name(self, name: str) -> None: ...
     @property
     def name(self) -> str:
         """The layout name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
-    def get_layout_name(self) -> str: ...
     def clone(self) -> OddColumnHexGateLayout:
         """
         Clones the layout returning a deep copy.
@@ -11189,19 +11082,6 @@ class OddColumnHexGateLayout:
         Returns:
             Tile at which `n` is placed or a default dead tile if `n` is not
             placed.
-        """
-
-    def make_signal(self, n: int) -> coords.OffsetCoordinate:
-        """
-        Invokes the same behavior as `get_tile(n)` but additionally casts the
-        return value to a signal. That is, this function returns the signal
-        representation of the tile that the node `n` is assigned to.
-
-        Args:
-            n: Node whose signal is desired.
-
-        Returns:
-            Signal that points to `n`.
         """
 
     def move_node(
@@ -12457,14 +12337,12 @@ class EvenColumnHexGateLayout:
     def is_wire(self, arg: int, /) -> bool:
         """Equivalent to `is_buf`."""
 
-    def set_layout_name(self, name: str) -> None: ...
     @property
     def name(self) -> str:
         """The layout name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
-    def get_layout_name(self) -> str: ...
     def clone(self) -> EvenColumnHexGateLayout:
         """
         Clones the layout returning a deep copy.
@@ -12650,19 +12528,6 @@ class EvenColumnHexGateLayout:
         Returns:
             Tile at which `n` is placed or a default dead tile if `n` is not
             placed.
-        """
-
-    def make_signal(self, n: int) -> coords.OffsetCoordinate:
-        """
-        Invokes the same behavior as `get_tile(n)` but additionally casts the
-        return value to a signal. That is, this function returns the signal
-        representation of the tile that the node `n` is assigned to.
-
-        Args:
-            n: Node whose signal is desired.
-
-        Returns:
-            Signal that points to `n`.
         """
 
     def move_node(

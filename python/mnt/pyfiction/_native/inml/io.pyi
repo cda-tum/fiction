@@ -12,7 +12,7 @@ from collections.abc import Callable
 
 import mnt.pyfiction._native.inml
 
-class write_qcc_layout_params:
+class WriteQccLayoutParams:
     """Parameters for writing QCC layouts."""
 
     def __init__(self) -> None:
@@ -32,7 +32,7 @@ class write_qcc_layout_params:
     def use_filename_as_component_name(self, arg: bool, /) -> None: ...
 
 def write_qcc_layout(
-    layout: mnt.pyfiction._native.inml.INMLLayout, filename: str, params: write_qcc_layout_params = ...
+    layout: mnt.pyfiction._native.inml.INMLLayout, filename: str, params: WriteQccLayoutParams = ...
 ) -> None:
     """
     Writes a cell-level iNML layout to a qcc file that is used by

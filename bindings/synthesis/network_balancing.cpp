@@ -52,7 +52,7 @@ void network_balancing(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::class_<fiction::synthesis::network_balancing_params>(m, "network_balancing_params",
+    py::class_<fiction::synthesis::network_balancing_params>(m, "NetworkBalancingParams",
                                                              DOC(fiction_synthesis_network_balancing_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::synthesis::network_balancing_params::on_progress,

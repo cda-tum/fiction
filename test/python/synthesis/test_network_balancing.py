@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction.synthesis import is_balanced, network_balancing, network_balancing_params
+from mnt.pyfiction.synthesis import NetworkBalancingParams, is_balanced, network_balancing
 
 if TYPE_CHECKING:
     from mnt.pyfiction.networks import TechnologyNetwork
@@ -26,8 +26,8 @@ def test_balancing(mux21: TechnologyNetwork) -> None:
     assert balanced_default.num_gates() == 6
     assert is_balanced(balanced_default)
 
-    unify_params = network_balancing_params()
+    unify_params = NetworkBalancingParams()
     unify_params.unify_outputs = True
-    balanced_unify = network_balancing(mux21, unify_params)
+    balanced_unify = network_balancing(mux21, params=unify_params)
     assert balanced_unify.num_gates() == 6
-    assert is_balanced(balanced_unify, unify_params)
+    assert is_balanced(balanced_unify, params=unify_params)

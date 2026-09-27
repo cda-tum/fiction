@@ -94,14 +94,14 @@ void equivalence_checking(nanobind::module_& m)
     /**
      * Result type for equivalence checking.
      */
-    py::enum_<fiction::verification::eq_type>(m, "eq_type", DOC(fiction_verification_eq_type))
+    py::enum_<fiction::verification::eq_type>(m, "EquivalenceType", DOC(fiction_verification_eq_type))
         .value("NO", fiction::verification::eq_type::NO, DOC(fiction_verification_eq_type_NO))
         .value("WEAK", fiction::verification::eq_type::WEAK, DOC(fiction_verification_eq_type_WEAK))
         .value("STRONG", fiction::verification::eq_type::STRONG, DOC(fiction_verification_eq_type_STRONG))
 
         ;
 
-    py::class_<fiction::verification::equivalence_checking_stats>(m, "equivalence_checking_stats",
+    py::class_<fiction::verification::equivalence_checking_stats>(m, "EquivalenceResult",
                                                                   DOC(fiction_verification_equivalence_checking_stats))
         .def(py::init<>(), "Default constructor.")
         .def_ro("eq", &fiction::verification::equivalence_checking_stats::eq,

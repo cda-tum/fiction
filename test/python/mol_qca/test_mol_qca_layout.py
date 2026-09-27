@@ -24,7 +24,7 @@ def test_planar_layout() -> None:
     layout = MolecularQCALayout((3, 0, 1), "wire")
 
     assert layout.z() == 0
-    assert layout.get_layout_name() == "wire"
+    assert layout.name == "wire"
 
     layout.assign_cell_type((0, 0), MolQcaCellType.INPUT)
     layout.assign_cell_type((1, 0), MolQcaCellType.NORMAL1)

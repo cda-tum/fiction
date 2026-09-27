@@ -12,8 +12,8 @@ from pathlib import Path
 
 import pytest
 
-from mnt.pyfiction.networks import Signal
-from mnt.pyfiction.networks.io import read_aig_network, read_technology_network
+from mnt.pyfiction.networks import AigNetwork, Signal
+from mnt.pyfiction.networks.io import read_network
 
 DIR_PATH = Path(__file__).resolve().parent
 
@@ -23,7 +23,7 @@ def test_connectivity_preserves_complemented_edges(tmp_path: Path) -> None:
     path.write_text(
         "module top(a, b, y);\ninput a, b;\noutput y;\nwire n;\nassign n = a & ~b;\nassign y = ~n;\nendmodule\n"
     )
-    network = read_aig_network(str(path))
+    network = read_network(str(path), network_type=AigNetwork)
     output = network.pos()[0]
     assert output.complemented
     assert sorted(signal.complemented for signal in network.fanins(output.node)) == [False, True]
@@ -36,7 +36,7 @@ def test_connectivity_preserves_complemented_edges(tmp_path: Path) -> None:
 
 def test_read_technology_network(resources_dir: Path) -> None:
     """The parsed output remains driven by the OR gate without a synthesized buffer."""
-    network = read_technology_network(str(resources_dir / "mux21.v"))
+    network = read_network(str(resources_dir / "mux21.v"))
 
     assert network.size() == 9
     assert network.nodes() == list(range(9))
@@ -81,11 +81,11 @@ def test_read_technology_network(resources_dir: Path) -> None:
     assert network.fanins(8) == [Signal(6), Signal(7)]
 
     with pytest.raises(RuntimeError):
-        read_technology_network(str(DIR_PATH / "mux41.v"))
+        read_network(str(DIR_PATH / "mux41.v"))
 
 
 def test_is_gate_functions(resources_dir):
-    network = read_technology_network(str(resources_dir / "mux21.v"))
+    network = read_network(str(resources_dir / "mux21.v"))
 
     for i in network.nodes():
         assert not network.is_maj(i)
@@ -94,7 +94,7 @@ def test_is_gate_functions(resources_dir):
         assert not network.is_nand(i)
         assert not network.is_nor(i)
 
-    network = read_technology_network(str(resources_dir / "FA.v"))
+    network = read_network(str(resources_dir / "FA.v"))
 
     assert network.is_xor(6)
 

@@ -29,8 +29,8 @@ from mnt.fiction.cli.registry import REGISTRY, STORE_FLAGS, Category
 from mnt.fiction.cli.session import Session, ignore_progress, ignore_worker_progress
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import Store
-from mnt.pyfiction.networks import set_name
-from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction import __version__
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import orthogonal
 
 if TYPE_CHECKING:
@@ -85,7 +85,7 @@ def test_help_flag_prints_help(shell: Shell) -> None:
 
 def test_line_stops_at_first_failure(shell: Shell) -> None:
     assert not shell.run("version; frobnicate; version")
-    assert shell.output.count("compiled") == 1
+    assert shell.output.count(__version__) == 1
 
 
 def test_empty_store_is_an_error(shell: Shell) -> None:
@@ -157,7 +157,7 @@ def test_status_line_fits_terminal(shell: Shell, width: int) -> None:
     shell.session.console.width = width
     assert cell_len(shell.session.status_line()) <= width
     shell.ok("generate mux -b 1")
-    set_name(shell.session.networks.current(), "长名称 e\u0301\n" * 10)
+    shell.session.networks.current().name = "长名称 e\u0301\n" * 10
     status = shell.session.status_line()
     assert "\n" not in status
     assert cell_len(status) <= width
@@ -528,7 +528,7 @@ def test_spinner_refreshes_during_native_read(tmp_path: Path, monkeypatch: pytes
         sys.setswitchinterval(10)
         with session.progress("read"):
             reading = True
-            read_technology_network(str(path))
+            read_network(str(path))
             reading = False
     finally:
         sys.setswitchinterval(interval)

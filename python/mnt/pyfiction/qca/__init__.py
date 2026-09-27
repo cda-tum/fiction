@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+from mnt.pyfiction._area import qca_area as area
 from mnt.pyfiction._native.qca import (
     QcaCellMode,
     QcaCellType,
@@ -22,5 +23,6 @@ __all__ = [
     "QCALayout",
     "QcaCellMode",
     "QcaCellType",
+    "area",
     "io",
 ]

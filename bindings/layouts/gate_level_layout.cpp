@@ -176,10 +176,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         .def("is_fanout", &GateLyt::is_fanout, DOC(fiction_layouts_gate_level_layout_is_fanout))
         .def("is_wire", &GateLyt::is_wire, DOC(fiction_layouts_gate_level_layout_is_wire))
 
-        .def("set_layout_name", &GateLyt::set_layout_name, py::arg("name"),
-             DOC(fiction_layouts_gate_level_layout_set_layout_name))
         .def_prop_rw("name", &GateLyt::get_layout_name, &GateLyt::set_layout_name, "The layout name.")
-        .def("get_layout_name", &GateLyt::get_layout_name, DOC(fiction_layouts_gate_level_layout_get_layout_name))
         .def("clone", &GateLyt::clone, DOC(fiction_layouts_gate_level_layout_clone))
         .def("set_input_name", &GateLyt::set_input_name, py::arg("index"), py::arg("name"),
              DOC(fiction_layouts_gate_level_layout_set_input_name))
@@ -335,7 +332,6 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             "get_node", [](const GateLyt& layout, const py_offset_coordinate& coordinate)
             { return layout.get_node(coordinate); }, py::arg("t"), DOC(fiction_layouts_gate_level_layout_get_node))
         .def("get_tile", &GateLyt::get_tile, py::arg("n"), DOC(fiction_layouts_gate_level_layout_get_tile))
-        .def("make_signal", &GateLyt::get_tile, py::arg("n"), DOC(fiction_layouts_gate_level_layout_make_signal))
 
         .def(
             "move_node",

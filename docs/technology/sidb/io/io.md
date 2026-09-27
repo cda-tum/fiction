@@ -26,7 +26,7 @@
 
 .. autofunction:: mnt.pyfiction.sidb.io.read_sqd_layout
 
-.. autoclass:: mnt.pyfiction.sidb.io.sqd_parsing_error
+.. autoclass:: mnt.pyfiction.sidb.io.SqdParsingError
     :members:
 
 ```
@@ -64,10 +64,10 @@
 
 .. autofunction:: mnt.pyfiction.sidb.io.read_surface_defects
 
-.. autoclass:: mnt.pyfiction.sidb.io.unsupported_defect_index_exception
+.. autoclass:: mnt.pyfiction.sidb.io.UnsupportedDefectIndexError
     :members:
 
-.. autoclass:: mnt.pyfiction.sidb.io.missing_position_exception
+.. autoclass:: mnt.pyfiction.sidb.io.MissingPositionError
     :members:
 
 ```
@@ -140,13 +140,13 @@
 
 ```{eval-rst}
 
-.. autoclass:: mnt.pyfiction.sidb.io.write_sidb_layout_svg_params
+.. autoclass:: mnt.pyfiction.sidb.io.SvgParams
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.io.sidb_lattice_mode
+.. autoclass:: mnt.pyfiction.sidb.io.LatticeMode
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.io.color_mode
+.. autoclass:: mnt.pyfiction.sidb.io.ColorMode
    :members:
 
 .. autofunction:: mnt.pyfiction.sidb.io.write_sidb_layout_svg_to_string

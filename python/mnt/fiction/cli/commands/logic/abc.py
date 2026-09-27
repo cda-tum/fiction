@@ -18,9 +18,9 @@ from aigverse import abc
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe, size_and_depth
-from mnt.pyfiction.networks import AigNetwork, XagNetwork, get_name, set_name
-from mnt.pyfiction.networks.io import read_aig_network, write_aiger
-from mnt.pyfiction.synthesis import convert_network, network_target
+from mnt.pyfiction.networks import AigNetwork, XagNetwork
+from mnt.pyfiction.networks.io import read_network, write_aiger
+from mnt.pyfiction.synthesis import convert_network
 
 if TYPE_CHECKING:
     import argparse
@@ -65,7 +65,7 @@ def abc_command(session: Session, args: argparse.Namespace) -> Result:
     if network is not None and not isinstance(network, (AigNetwork, XagNetwork)):
         msg_0 = "ABC requires an AIG or XAG; use read --type aig or --type xag"
         raise CommandError(msg_0)
-    aig = convert_network(network, network_target.AIG) if isinstance(network, XagNetwork) else network
+    aig = convert_network(network, network_type=AigNetwork) if isinstance(network, XagNetwork) else network
     input_path = session.temp_file(".aig")
     output_path = session.temp_file(".aig")
     flow: list[str] = []
@@ -85,9 +85,9 @@ def abc_command(session: Session, args: argparse.Namespace) -> Result:
         if not output_path.is_file() or not output_path.stat().st_size:
             msg_0 = "ABC produced no output network; the store is unchanged"
             raise CommandError(msg_0)
-        result = read_aig_network(str(output_path))
+        result = read_network(str(output_path), network_type=AigNetwork)
         if aig is not None:
-            set_name(result, get_name(aig))
+            result.name = aig.name
         session.networks.add(result)
         session.info(size_and_depth(aig, result))
         log: dict[str, object] = {"network": describe(result), "output": output}

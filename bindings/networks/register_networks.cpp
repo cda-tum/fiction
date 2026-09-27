@@ -22,7 +22,6 @@ namespace pyfiction
 {
 
 void logic_networks(nanobind::module_& m);
-void name_utils(nanobind::module_& m);
 void network_utils(nanobind::module_& m);
 void logic_simulation(nanobind::module_& m);
 
@@ -49,7 +48,6 @@ NB_MODULE(networks, m)
     // modules come later in the import chain, and an argument of their type implies that they are loaded.
 
     pyfiction::logic_networks(m);
-    pyfiction::name_utils(m);
     pyfiction::network_utils(m);
     pyfiction::logic_simulation(m);
     auto io = pyfiction::def_submodule(m, "io", "Readers, writers, and drawers of logic networks.");

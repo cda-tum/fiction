@@ -56,7 +56,7 @@ void fanout_substitution(nanobind::module_& m)
     namespace py = nanobind;
 
     py::enum_<fiction::synthesis::fanout_substitution_params::substitution_strategy>(
-        m, "substitution_strategy", DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy))
+        m, "SubstitutionStrategy", DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy))
         .value("BREADTH", fiction::synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
                DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy_BREADTH))
         .value("DEPTH", fiction::synthesis::fanout_substitution_params::substitution_strategy::DEPTH,
@@ -66,7 +66,7 @@ void fanout_substitution(nanobind::module_& m)
 
         ;
 
-    py::class_<fiction::synthesis::fanout_substitution_params>(m, "fanout_substitution_params",
+    py::class_<fiction::synthesis::fanout_substitution_params>(m, "FanoutSubstitutionParams",
                                                                DOC(fiction_synthesis_fanout_substitution_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::synthesis::fanout_substitution_params::on_progress,

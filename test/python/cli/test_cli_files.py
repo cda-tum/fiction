@@ -21,7 +21,7 @@ from mnt.pyfiction import layouts, physical_design
 from mnt.pyfiction.inml import INMLLayout, InmlMagnetType
 from mnt.pyfiction.layouts import ShiftedCartesianGateLayout
 from mnt.pyfiction.layouts.io import write_fgl_layout
-from mnt.pyfiction.networks import AigNetwork, MigNetwork, TechnologyNetwork, XagNetwork, set_name, simulate_outputs
+from mnt.pyfiction.networks import AigNetwork, MigNetwork, TechnologyNetwork, XagNetwork, simulate_outputs
 from mnt.pyfiction.qca import QCALayout
 from mnt.pyfiction.sidb import SiDBLayout
 from mnt.pyfiction.sidb.io import read_sqd_layout
@@ -279,7 +279,7 @@ def test_write_more_cell_formats(shell: Shell, resource: Callable[[str], str], t
 def test_write_qcc_component_name(shell: Shell, tmp_path: Path) -> None:
     """--component-name names the QCC component after the file, as the C++ `qcc -c` did."""
     layout = INMLLayout((3, 0))
-    layout.set_layout_name("mygate")
+    layout.name = "mygate"
     cell = InmlMagnetType
     layout.assign_cell_type((0, 0), cell.INPUT)
     layout.assign_cell_type((1, 0), cell.NORMAL)
@@ -321,7 +321,7 @@ def test_implicit_output_requires_a_simple_name(
     """An embedded name cannot choose an output directory."""
     monkeypatch.chdir(tmp_path)
     network = TechnologyNetwork()
-    set_name(network, name)
+    network.name = name
     shell.session.networks.add(network)
     message = "explicit output path" if name else "no name"
     assert message in shell.fails("write_verilog")

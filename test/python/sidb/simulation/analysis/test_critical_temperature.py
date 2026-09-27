@@ -68,7 +68,7 @@ def test_gate_based_simulation(resources_dir: Path) -> None:
     Args:
         resources_dir: Directory that contains the test layout.
     """
-    layout = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"), "xor_gate")
+    layout = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"), name="xor_gate")
     params = CriticalTemperatureParams()
 
     params.operational_params.simulation_parameters.base = 2
@@ -92,7 +92,7 @@ def test_bestagon_inv(resources_dir: Path) -> None:
     """
     layout = read_sqd_layout(
         str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"),
-        "inverter_input_0",
+        name="inverter_input_0",
     )
 
     params = CriticalTemperatureParams()
@@ -118,7 +118,7 @@ def test_bestagon_inv_with_different_mu(resources_dir: Path) -> None:
     """
     layout = read_sqd_layout(
         str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"),
-        "inverter_input_0",
+        name="inverter_input_0",
     )
 
     params = CriticalTemperatureParams()

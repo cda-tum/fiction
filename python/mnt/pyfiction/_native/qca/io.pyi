@@ -12,7 +12,7 @@ from collections.abc import Callable
 
 import mnt.pyfiction._native.qca
 
-class write_qca_layout_params:
+class QcaWriterParams:
     """Parameters for writing QCADesigner layouts."""
 
     def __init__(self) -> None:
@@ -31,9 +31,7 @@ class write_qca_layout_params:
     @create_inter_layer_via_cells.setter
     def create_inter_layer_via_cells(self, arg: bool, /) -> None: ...
 
-def write_qca_layout(
-    layout: mnt.pyfiction._native.qca.QCALayout, filename: str, params: write_qca_layout_params = ...
-) -> None:
+def write_qca_layout(layout: mnt.pyfiction._native.qca.QCALayout, filename: str, params: QcaWriterParams = ...) -> None:
     """
     Writes a QCA layout to a qca file that is used by QCADesigner
     (https://waluslab.ece.ubc.ca/qcadesigner/), a physical simulator for
@@ -47,7 +45,7 @@ def write_qca_layout(
         ps: Parameters.
     """
 
-class write_qca_layout_svg_params:
+class SvgParams:
     """Parameters for writing SVG QCA layouts."""
 
     def __init__(self) -> None:
@@ -66,9 +64,7 @@ class write_qca_layout_svg_params:
     @simple.setter
     def simple(self, arg: bool, /) -> None: ...
 
-def write_qca_layout_svg(
-    layout: mnt.pyfiction._native.qca.QCALayout, filename: str, params: write_qca_layout_svg_params = ...
-) -> None:
+def write_qca_layout_svg(layout: mnt.pyfiction._native.qca.QCALayout, filename: str, params: SvgParams = ...) -> None:
     """
     Writes an SVG representation of a QCA layout into an output stream.
     Both tile- and cell-based layouts are supported. For tile-based

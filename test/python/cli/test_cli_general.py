@@ -25,6 +25,7 @@ from mnt.fiction.cli.registry import REGISTRY
 from mnt.fiction.cli.render import table_rows
 from mnt.fiction.cli.stores import CellEntry, element_name
 from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
+from mnt.pyfiction import __version__
 from mnt.pyfiction.inml import INMLLayout
 from mnt.pyfiction.mol_qca import MolecularQCALayout, MolQcaCellType
 
@@ -368,7 +369,7 @@ def test_render_table_shows_missing_and_plain_values() -> None:
 @pytest.mark.parametrize(
     ("command", "expected"),
     [
-        ("version", "compiled"),
+        ("version", __version__),
         ("print -t", "hex:"),
         ("store -n", "Index"),
         ("simulate -n", "(0x"),

@@ -25,15 +25,15 @@ if TYPE_CHECKING:
     from mnt.pyfiction.layouts._types import GateLayout
     from mnt.pyfiction.networks import TechnologyNetwork
 
-from mnt.pyfiction.networks import high_degree_fanin_exception
-from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.networks import HighDegreeFaninError
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import OrthogonalParams, orthogonal
-from mnt.pyfiction.verification import eq_type, equivalence_checking
+from mnt.pyfiction.verification import EquivalenceType, equivalence_checking
 
 
 def test_orthogonal_default(mux21):
     layout = orthogonal(mux21).layout
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
 
 
 def test_orthogonal_with_parameters(mux21):
@@ -41,7 +41,7 @@ def test_orthogonal_with_parameters(mux21):
 
     layout = orthogonal(mux21, params=params).layout
 
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
 
 
 def test_orthogonal_with_stats(mux21):
@@ -49,7 +49,7 @@ def test_orthogonal_with_stats(mux21):
     result = orthogonal(mux21)
     layout = result.layout
 
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
 
 
 def test_orthogonal_reports_progress(mux21):
@@ -61,7 +61,7 @@ def test_orthogonal_reports_progress(mux21):
 
     layout = orthogonal(mux21, params=params).layout
 
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, layout).eq == EquivalenceType.STRONG
     assert params.on_progress is not None
 
     placements = [(done, total) for task, done, total in reports if task == "placing gates"]
@@ -80,8 +80,8 @@ def test_orthogonal_rejects_high_degree_fanin(tmp_path):
         encoding="utf-8",
     )
 
-    with pytest.raises(high_degree_fanin_exception):
-        orthogonal(read_technology_network(str(path)))
+    with pytest.raises(HighDegreeFaninError):
+        orthogonal(read_network(str(path)))
 
 
 @pytest.mark.parametrize(
@@ -92,7 +92,7 @@ def test_orthogonal_explicit_topology(mux21: TechnologyNetwork, layout_type: typ
     result = orthogonal(mux21, layout_type=layout_type)
     assert isinstance(result.layout, layout_type)
     assert result.stats.num_gates == result.layout.num_gates()
-    assert equivalence_checking(mux21, result.layout) == eq_type.STRONG
+    assert equivalence_checking(mux21, result.layout).eq == EquivalenceType.STRONG
 
 
 def test_orthogonal_rejects_unsupported_topology(mux21: TechnologyNetwork) -> None:

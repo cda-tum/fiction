@@ -58,10 +58,10 @@ void layout(nanobind::module_& m)
         .def(py::init<>(), DOC(fiction_sidb_layout_layout))
         .def(py::init<const fiction::sidb::lattice&, std::string>(), py::arg("lattice"), py::arg("name") = "",
              DOC(fiction_sidb_layout_layout_2))
-        .def("get_lattice", &layout::get_lattice, DOC(fiction_sidb_layout_get_lattice))
-        .def("set_lattice", &layout::set_lattice, py::arg("lattice"), DOC(fiction_sidb_layout_set_lattice))
-        .def("get_layout_name", &layout::get_layout_name, DOC(fiction_sidb_layout_get_layout_name))
-        .def("set_layout_name", &layout::set_layout_name, py::arg("name"), DOC(fiction_sidb_layout_set_layout_name))
+        .def_prop_rw(
+            "lattice", [](const layout& self) { return self.get_lattice(); }, &layout::set_lattice,
+            "The layout lattice. The getter returns an independent copy.")
+        .def_prop_rw("name", &layout::get_layout_name, &layout::set_layout_name, "The layout name.")
 
         .def("assign_sidb", &layout::assign_sidb, py::arg("site"), py::arg("dot_tag") = fiction::sidb::dot_tag::NORMAL,
              DOC(fiction_sidb_layout_assign_sidb))

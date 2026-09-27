@@ -68,7 +68,7 @@ def test_crop_layout_pads_the_bounding_box(two_sidb_layout: SiDBLayout) -> None:
 def test_a_charge_distribution_replaces_the_dots(two_sidb_layout: SiDBLayout) -> None:
     """A charge-annotated picture is one picture, with the charge symbols where the dots were."""
     charges = PotentialLandscape(two_sidb_layout).evaluate([ChargeState.NEUTRAL, ChargeState.POSITIVE])
-    picture = print_sidb_layout(two_sidb_layout, charges, lat_color=False)
+    picture = print_sidb_layout(two_sidb_layout, charges=charges, lat_color=False)
     assert picture.count(UNCHARGED) == 1, picture
     assert picture.count(CHARGED) == 1, picture
 

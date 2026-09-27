@@ -14,9 +14,9 @@ import pytest
 
 from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout, ShiftedCartesianGateLayout
 from mnt.pyfiction.layouts.io import FGLParsingError, read_fgl_layout, write_fgl_layout
-from mnt.pyfiction.networks import get_name, simulate_outputs
+from mnt.pyfiction.networks import simulate_outputs
 from mnt.pyfiction.physical_design import hexagonalization, orthogonal
-from mnt.pyfiction.verification import eq_type, equivalence_checking
+from mnt.pyfiction.verification import EquivalenceType, equivalence_checking
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -34,22 +34,24 @@ def test_read_write(mux21, tmp_path):
     cart_file = str(tmp_path / "mux21_cartesian.fgl")
     write_fgl_layout(cart_layout, cart_file)
     assert (
-        equivalence_checking(read_fgl_layout(cart_file, layout_type=CartesianGateLayout), cart_layout) == eq_type.STRONG
+        equivalence_checking(read_fgl_layout(cart_file, layout_type=CartesianGateLayout), cart_layout).eq
+        == EquivalenceType.STRONG
     )
 
     hex_layout = hexagonalization(cart_layout).layout
     hex_file = str(tmp_path / "mux21_hexagonal.fgl")
     write_fgl_layout(hex_layout, hex_file)
     assert (
-        equivalence_checking(read_fgl_layout(hex_file, layout_type=HexagonalGateLayout), hex_layout) == eq_type.STRONG
+        equivalence_checking(read_fgl_layout(hex_file, layout_type=HexagonalGateLayout), hex_layout).eq
+        == EquivalenceType.STRONG
     )
 
     shifted_layout = ShiftedCartesianGateLayout((3, 3, 1), "2DDWave", "Layout")
     shifted_file = str(tmp_path / "empty_shifted_cartesian.fgl")
     write_fgl_layout(shifted_layout, shifted_file)
     assert (
-        equivalence_checking(read_fgl_layout(shifted_file, layout_type=ShiftedCartesianGateLayout), shifted_layout)
-        == eq_type.STRONG
+        equivalence_checking(read_fgl_layout(shifted_file, layout_type=ShiftedCartesianGateLayout), shifted_layout).eq
+        == EquivalenceType.STRONG
     )
 
 
@@ -74,7 +76,7 @@ def test_fgl_preserves_labels_and_synchronization(tmp_path: Path) -> None:
     path = tmp_path / "sync.fgl"
     write_fgl_layout(layout, str(path))
     restored = read_fgl_layout(str(path), layout_type=CartesianGateLayout)
-    assert get_name(restored) == "A & B < C"
+    assert restored.name == "A & B < C"
     assert restored.num_se() == 1
     assert restored.get_synchronization_element((1, 0)) == 2
     assert simulate_outputs(restored) == simulate_outputs(layout)

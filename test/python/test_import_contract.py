@@ -19,7 +19,6 @@ import pytest
 from mnt import pyfiction
 
 SUBMODULES = [
-    "fcn",
     "inml",
     "layouts",
     "mol_qca",
@@ -28,12 +27,10 @@ SUBMODULES = [
     "qca",
     "sidb",
     "synthesis",
-    "utils",
     "verification",
 ]
 
 NESTED_SUBMODULES = [
-    "fcn.io",
     "inml.io",
     "layouts.coords",
     "layouts.io",

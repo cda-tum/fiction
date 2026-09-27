@@ -28,7 +28,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.qca.io.write_qca_layout_params
+.. autoclass:: mnt.pyfiction.qca.io.QcaWriterParams
    :members:
 
 .. autofunction:: mnt.pyfiction.qca.io.write_qca_layout
@@ -70,7 +70,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.qca.io.write_qca_layout_svg_params
+.. autoclass:: mnt.pyfiction.qca.io.SvgParams
    :members:
 
 .. autofunction:: mnt.pyfiction.qca.io.write_qca_layout_svg

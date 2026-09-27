@@ -15,8 +15,7 @@ from typing import TYPE_CHECKING, TypeVar
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command, store_flags
 from mnt.fiction.cli.statistics import stats_to_dict
-from mnt.pyfiction.networks import get_name
-from mnt.pyfiction.verification import eq_type, equivalence_checking, equivalence_checking_stats
+from mnt.pyfiction.verification import EquivalenceType, equivalence_checking
 
 if TYPE_CHECKING:
     import argparse
@@ -67,9 +66,9 @@ def equiv(session: Session, args: argparse.Namespace) -> Result:
         msg = "select the stores to compare: -n, -g, or both"
         raise CommandError(msg)
 
-    stats = equivalence_checking_stats()
-    result = equivalence_checking(specification, implementation, stats)
-    spec_name, impl_name = get_name(specification), get_name(implementation)
+    stats = equivalence_checking(specification, implementation)
+    result = stats.eq
+    spec_name, impl_name = specification.name, implementation.name
     blocked = [
         operand
         for operand, report in (("specification", stats.spec_drv_stats), ("implementation", stats.impl_drv_stats))
@@ -85,9 +84,9 @@ def equiv(session: Session, args: argparse.Namespace) -> Result:
             "eq": "NOT_CHECKED",
             "reason": reason,
         }
-    if result == eq_type.NO:
+    if result == EquivalenceType.NO:
         session.output(f"{spec_name} and {impl_name} are not equivalent")
-    elif result == eq_type.WEAK:
+    elif result == EquivalenceType.WEAK:
         session.output(
             f"{spec_name} and {impl_name} are weakly equivalent with a delay of {stats.tp_diff} clock cycles"
         )

@@ -19,8 +19,7 @@ from rich.console import Console
 
 from mnt.fiction.cli.session import Session
 from mnt.fiction.cli.statistics import json_value
-from mnt.pyfiction.fcn import area
-from mnt.pyfiction.sidb import SiDBLayout
+from mnt.pyfiction.sidb import SiDBLayout, area
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -136,5 +135,7 @@ def test_sidb_statistics_use_lattice_area(shell: Shell, resource: Callable[[str]
     description = shell.session.log[-1]["result"]
     assert isinstance(description, dict)
     assert isinstance(description["cell_layout"], dict)
-    assert description["cell_layout"]["area_nm2"] == area(shell.session.cell_layouts.current().layout)
+    layout = shell.session.cell_layouts.current().layout
+    assert isinstance(layout, SiDBLayout)
+    assert description["cell_layout"]["area_nm2"] == area(layout)
     assert "Area (nm²)" in shell.output

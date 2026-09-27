@@ -32,7 +32,7 @@ def test_write_simple_operational_domain():
     expected = "epsilon_r,lambda_tf,operational status\n0,0,1\n0,1,0"
 
     # Get the result from the function that returns a string
-    operational_domain_as_string = write_operational_domain_to_string(opdom, WriteOperationalDomainParams())
+    operational_domain_as_string = write_operational_domain_to_string(opdom, params=WriteOperationalDomainParams())
 
     # Sort both expected and result to handle order variations
     assert sorted(operational_domain_as_string.strip().split("\n")) == sorted(expected.strip().split("\n"))
@@ -43,7 +43,7 @@ def test_write_simple_operational_domain():
     params.operational_tag = "True"
     params.non_operational_tag = "False"
 
-    result_custom = write_operational_domain_to_string(opdom, params)
+    result_custom = write_operational_domain_to_string(opdom, params=params)
 
     assert sorted(result_custom.strip().split("\n")) == sorted(expected_custom.strip().split("\n"))
 
@@ -68,7 +68,7 @@ def test_write_operational_domain_with_floating_point_values():
     params.operational_tag = "operational"
     params.non_operational_tag = "non-operational"
 
-    operational_domain_custom_as_string = write_operational_domain_to_string(opdom, params)
+    operational_domain_custom_as_string = write_operational_domain_to_string(opdom, params=params)
 
     assert sorted(operational_domain_custom_as_string.strip().split("\n")) == sorted(
         expected_custom.strip().split("\n")
@@ -99,7 +99,7 @@ def test_write_operational_domain_with_metric_values():
     params.operational_tag = "operational"
     params.non_operational_tag = "non-operational"
 
-    temperature_operational_domain_custom_as_string = write_critical_temperature_domain_to_string(opdom, params)
+    temperature_operational_domain_custom_as_string = write_critical_temperature_domain_to_string(opdom, params=params)
 
     assert sorted(temperature_operational_domain_custom_as_string.strip().split("\n")) == sorted(
         expected_custom.strip().split("\n")
@@ -118,6 +118,6 @@ def test_skip_non_operational_samples():
 
     expected = "epsilon_r,lambda_tf,operational status\n0.1,0.2,1"
 
-    operational_domain_as_string = write_operational_domain_to_string(opdom, params)
+    operational_domain_as_string = write_operational_domain_to_string(opdom, params=params)
 
     assert sorted(operational_domain_as_string.strip().split("\n")) == sorted(expected.strip().split("\n"))

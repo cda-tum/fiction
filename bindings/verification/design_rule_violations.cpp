@@ -80,7 +80,7 @@ void design_rule_violations(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<fiction::verification::gate_level_drv_params>(m, "gate_level_drv_params",
+    py::class_<fiction::verification::gate_level_drv_params>(m, "DesignRuleParams",
                                                              DOC(fiction_verification_gate_level_drv_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::verification::gate_level_drv_params::on_progress,
@@ -109,7 +109,7 @@ void design_rule_violations(nanobind::module_& m)
 
         ;
 
-    py::class_<fiction::verification::gate_level_drv_stats>(m, "gate_level_drv_stats",
+    py::class_<fiction::verification::gate_level_drv_stats>(m, "DesignRuleResult",
                                                             DOC(fiction_verification_gate_level_drv_stats))
         .def(py::init<>(), "Default constructor.")
         .def_ro("drvs", &fiction::verification::gate_level_drv_stats::drvs,

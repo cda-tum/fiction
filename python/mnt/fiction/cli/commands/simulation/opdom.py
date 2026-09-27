@@ -138,7 +138,7 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
     writing.writing_mode = (
         SampleWritingMode.OPERATIONAL_ONLY if args.operational_only else SampleWritingMode.ALL_SAMPLES
     )
-    write_operational_domain(domain, str(args.file), writing)
+    write_operational_domain(domain, str(args.file), params=writing)
     session.info(
         f"{stats.num_operational_parameter_combinations} of {stats.num_evaluated_parameter_combinations} "
         f"evaluated points are operational; wrote {args.file}"

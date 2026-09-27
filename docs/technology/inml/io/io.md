@@ -28,7 +28,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.inml.io.write_qcc_layout_params
+.. autoclass:: mnt.pyfiction.inml.io.WriteQccLayoutParams
    :members:
 
 .. autofunction:: mnt.pyfiction.inml.io.write_qcc_layout

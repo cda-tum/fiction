@@ -12,7 +12,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction.networks.io import read_aig_network
+from mnt.pyfiction.networks import AigNetwork
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import orthogonal
 from mnt.pyfiction.verification import count_gate_types
 
@@ -38,7 +39,7 @@ def test_count_gate_types_of_a_network(mux21: TechnologyNetwork) -> None:
 
 
 def test_count_gate_types_of_an_aig(resources_dir: Path) -> None:
-    aig = read_aig_network(str(resources_dir / "mux21.v"))
+    aig = read_network(str(resources_dir / "mux21.v"), network_type=AigNetwork)
     assert count_gate_types(aig).num_and2 == aig.num_gates()
 
 

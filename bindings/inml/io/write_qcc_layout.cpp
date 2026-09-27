@@ -39,7 +39,7 @@ void write_qcc_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::class_<fiction::inml::io::write_qcc_layout_params>(m, "write_qcc_layout_params",
+    py::class_<fiction::inml::io::write_qcc_layout_params>(m, "WriteQccLayoutParams",
                                                            DOC(fiction_inml_io_write_qcc_layout_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::inml::io::write_qcc_layout_params::on_progress, pyfiction::ON_PROGRESS_GETTER,

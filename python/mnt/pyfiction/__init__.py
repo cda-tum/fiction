@@ -20,7 +20,6 @@ from ._native.utils import __version__
 
 if TYPE_CHECKING:
     from . import (
-        fcn,
         inml,
         layouts,
         mol_qca,
@@ -29,12 +28,10 @@ if TYPE_CHECKING:
         qca,
         sidb,
         synthesis,
-        utils,
         verification,
     )
 
 _LAZY_SUBMODULES = {
-    "fcn",
     "inml",
     "layouts",
     "mol_qca",
@@ -43,13 +40,11 @@ _LAZY_SUBMODULES = {
     "qca",
     "sidb",
     "synthesis",
-    "utils",
     "verification",
 }
 
 __all__ = [
     "__version__",
-    "fcn",
     "inml",
     "layouts",
     "mol_qca",
@@ -58,7 +53,6 @@ __all__ = [
     "qca",
     "sidb",
     "synthesis",
-    "utils",
     "verification",
 ]
 

@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.parsing import nonnegative_float
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction.fcn import area
+from mnt.fiction.cli.stores import physical_area
 
 if TYPE_CHECKING:
     import argparse
@@ -49,6 +49,6 @@ def area_command(session: Session, args: argparse.Namespace) -> Result:
     layout = session.cell_layouts.current().layout
     # the binding defaults every dimension to the layout's own technology, so only pass overrides
     overrides = {name: getattr(args, name) for name in AREA_OVERRIDES if getattr(args, name) is not None}
-    result = area(layout, **overrides)
+    result = physical_area(layout, **overrides)
     session.output(f"Area: {result:.2f} nm²")
     return {"area_nm2": result, **{f"{name}_nm": value for name, value in overrides.items()}}

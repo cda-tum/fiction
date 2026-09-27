@@ -14,14 +14,14 @@ from mnt.pyfiction.physical_design import (
     GraphOrientedLayoutDesignParams,
     graph_oriented_layout_design,
 )
-from mnt.pyfiction.verification import eq_type, equivalence_checking
+from mnt.pyfiction.verification import EquivalenceType, equivalence_checking
 
 
 def test_graph_oriented_layout_design(mux21):
     layout = graph_oriented_layout_design(mux21).layout
     assert layout is not None
 
-    assert equivalence_checking(mux21, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout).eq != EquivalenceType.NO
 
 
 def test_graph_oriented_layout_design_with_parameters(mux21):
@@ -31,7 +31,7 @@ def test_graph_oriented_layout_design_with_parameters(mux21):
     layout = graph_oriented_layout_design(mux21, params=params).layout
     assert layout is not None
 
-    assert equivalence_checking(mux21, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout).eq != EquivalenceType.NO
 
 
 def test_graph_oriented_layout_design_with_stats(mux21):
@@ -40,7 +40,7 @@ def test_graph_oriented_layout_design_with_stats(mux21):
     layout = result.layout
     assert layout is not None
 
-    assert equivalence_checking(mux21, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout).eq != EquivalenceType.NO
 
 
 def test_graph_oriented_layout_design_with_stats_and_parameters(mux21):
@@ -51,7 +51,7 @@ def test_graph_oriented_layout_design_with_stats_and_parameters(mux21):
     layout = result.layout
     assert layout is not None
 
-    assert equivalence_checking(mux21, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout).eq != EquivalenceType.NO
 
 
 def test_graph_oriented_layout_design_with_different_parameters(mux21):
@@ -71,21 +71,21 @@ def test_graph_oriented_layout_design_with_different_parameters(mux21):
     layout = graph_oriented_layout_design(mux21, params=params).layout
     assert layout is not None
 
-    assert equivalence_checking(mux21, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout).eq != EquivalenceType.NO
 
     params.mode = GoldEffortMode.MAXIMUM_EFFORT
 
     layout = graph_oriented_layout_design(mux21, params=params).layout
     assert layout is not None
 
-    assert equivalence_checking(mux21, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout).eq != EquivalenceType.NO
 
     params.seed = 42
 
     layout = graph_oriented_layout_design(mux21, params=params).layout
     assert layout is not None
 
-    assert equivalence_checking(mux21, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout).eq != EquivalenceType.NO
 
 
 def test_graph_oriented_layout_design_with_custom_cost_function(mux21):
@@ -100,7 +100,7 @@ def test_graph_oriented_layout_design_with_custom_cost_function(mux21):
     layout = graph_oriented_layout_design(mux21, params=params, custom_cost_objective=custom_cost_objective).layout
     assert layout is not None
 
-    assert equivalence_checking(mux21, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout).eq != EquivalenceType.NO
 
 
 def test_graph_oriented_layout_design_with_multithreading(mux21):
@@ -112,4 +112,4 @@ def test_graph_oriented_layout_design_with_multithreading(mux21):
     layout = graph_oriented_layout_design(mux21, params=params).layout
     assert layout is not None
 
-    assert equivalence_checking(mux21, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout).eq != EquivalenceType.NO

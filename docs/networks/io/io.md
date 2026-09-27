@@ -20,7 +20,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.networks.io.read_technology_network
+.. autofunction:: mnt.pyfiction.networks.io.read_network
 ```
 
 :::

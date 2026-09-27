@@ -83,10 +83,10 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
     gap = energy_gap if math.isfinite(energy_gap) else None
 
     if stats.num_valid_lyt == 0:
-        session.info(f"the ground state of '{layout.get_layout_name()}' could not be determined")
+        session.info(f"the ground state of '{layout.name}' could not be determined")
     else:
         bound = "> " if temperature >= args.max_temperature else ""
-        session.info(f"critical temperature of '{layout.get_layout_name()}': {bound}{temperature:.2f} K")
+        session.info(f"critical temperature of '{layout.name}': {bound}{temperature:.2f} K")
         if stats.num_valid_lyt > 1 and gap is not None:
             session.info(f"energy between the ground state and the first erroneous state: {gap:.2f} meV")
     return {

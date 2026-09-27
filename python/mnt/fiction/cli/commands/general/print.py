@@ -55,7 +55,7 @@ def print_command(session: Session, args: argparse.Namespace) -> Result:
         return None
     state = ground_state(entry)
     picture = print_sidb_layout(
-        entry.layout, state, lat_color=session.console.is_terminal and not session.console.no_color
+        entry.layout, charges=state, lat_color=session.console.is_terminal and not session.console.no_color
     )
     session.output(picture.rstrip())
     if state is not None:

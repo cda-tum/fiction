@@ -22,13 +22,11 @@ from aigverse.io import read_aiger_into_aig
 from aigverse.io import write_verilog as aigverse_write_verilog
 from aigverse.networks import NamedAig
 
-from mnt.pyfiction.networks import set_name
-from mnt.pyfiction.networks.io import read_aig_network, write_aiger
+from mnt.pyfiction.networks import AigNetwork
+from mnt.pyfiction.networks.io import read_network, write_aiger
 
 if TYPE_CHECKING:
     from aigverse.networks import Aig
-
-    from mnt.pyfiction.networks import AigNetwork
 
     from .session import Session
 
@@ -68,10 +66,10 @@ def from_aigverse(session: Session, aig: Aig, name: str, like: AigNetwork | None
     path = session.temp_file(".v")
     try:
         aigverse_write_verilog(aig, str(path))
-        network = read_aig_network(str(path))
+        network = read_network(str(path), network_type=AigNetwork)
     finally:
         path.unlink(missing_ok=True)
-    set_name(network, name)
+    network.name = name
     names: AigNetwork | NamedAig | None = like
     if names is None and isinstance(aig, NamedAig):
         names = aig

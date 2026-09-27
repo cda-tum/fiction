@@ -25,9 +25,9 @@ def test_read_write(resources_dir: Path) -> None:
 
 def test_read_write_sidb_layout(resources_dir: Path, tmp_path: Path) -> None:
     """SQD export and import preserve the lattice, name, and dot tags."""
-    lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"), "and")
-    assert lyt.get_layout_name() == "and"
-    assert lyt.get_lattice() == Lattice.si_111_1x1()
+    lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"), name="and")
+    assert lyt.name == "and"
+    assert lyt.lattice == Lattice.si_111_1x1()
     assert lyt.num_dots() > 0
 
     lyt.assign_sidb(LatticeSite(-3, 2, 1), DotTag.LOGIC)
@@ -35,4 +35,4 @@ def test_read_write_sidb_layout(resources_dir: Path, tmp_path: Path) -> None:
     path = tmp_path / "and.sqd"
     write_sqd_layout(lyt, str(path))
 
-    assert read_sqd_layout(str(path), "and") == lyt
+    assert read_sqd_layout(str(path), name="and") == lyt

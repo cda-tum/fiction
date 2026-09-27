@@ -8,17 +8,14 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.networks.io import read_technology_network
-from mnt.pyfiction.verification import eq_type, equivalence_checking, equivalence_checking_stats
+from mnt.pyfiction.networks.io import read_network
+from mnt.pyfiction.verification import EquivalenceType, equivalence_checking
 
 
 def test_non_eq(resources_dir):
-    xor2_net = read_technology_network(str(resources_dir / "xor2.v"))
-    xnor2_net = read_technology_network(str(resources_dir / "xnor2.v"))
+    xor2_net = read_network(str(resources_dir / "xor2.v"))
+    xnor2_net = read_network(str(resources_dir / "xnor2.v"))
 
-    stats = equivalence_checking_stats()
-    assert stats.counter_example == []
-
-    eq = equivalence_checking(xor2_net, xnor2_net, stats)
-    assert eq == eq_type.NO
-    assert stats.counter_example == [True, False]
+    result = equivalence_checking(xor2_net, xnor2_net)
+    assert result.eq == EquivalenceType.NO
+    assert result.counter_example == [True, False]
