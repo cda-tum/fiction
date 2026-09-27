@@ -29,7 +29,7 @@ def test_cell_qca_one_and_sim7(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho; cell; cell -l SIM7-MOL")
     assert isinstance(mux21_shell.session.cell_layouts.items[0].layout, qca_layout)
     assert isinstance(mux21_shell.session.cell_layouts.items[1].layout, mol_qca_layout)
-    assert mux21_shell.session.log[-1]["result"]["cell_layout"]["technology"] == "molQCA"  # type: ignore[index]
+    assert mux21_shell.session.log[-1]["result"]["cell_layout"]["technology"] == "molQCA"
 
 
 def test_cell_bestagon(mux21_shell: Shell) -> None:

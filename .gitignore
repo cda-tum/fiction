@@ -76,7 +76,6 @@ venv/
 dist/
 .tox/
 .nox/
-.mypy_cache/
 .pytest_cache/
 .ruff_cache/
 *.egg-info

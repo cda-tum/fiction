@@ -40,7 +40,7 @@ def test_read_verilog_as_every_type(shell: Shell, resource: Callable[[str], str]
     network = shell.session.networks.current()
     assert type(network).__name__ == cls.__name__
     assert network.num_pis() == 3
-    assert shell.session.log[-1]["result"]["network"]["type"] == network_type.upper()  # type: ignore[index]
+    assert shell.session.log[-1]["result"]["network"]["type"] == network_type.upper()
 
 
 def test_read_defaults_to_a_technology_network(mux21_shell: Shell) -> None:
@@ -125,7 +125,7 @@ def test_read_sqd(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
     entry = shell.session.cell_layouts.current()
     assert entry.layout.num_dots() > 0
-    assert shell.session.log[-1]["result"]["cell_layout"]["technology"] == "SiDB"  # type: ignore[index]
+    assert shell.session.log[-1]["result"]["cell_layout"]["technology"] == "SiDB"
 
 
 def test_sqd_shell_round_trip(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:

@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from rich.markup import escape
 from rich.table import Table
@@ -109,7 +109,7 @@ def store(session: Session, args: argparse.Namespace) -> Result:
     return listed
 
 
-def _pop(session: Session, stores: dict[str, Store], names: list[str]) -> Result:  # type: ignore[type-arg]
+def _pop(session: Session, stores: dict[str, Store[Any]], names: list[str]) -> Result:
     """Remove the active element of every named store.
 
     Every store is checked before any is touched, so a command that cannot run leaves the session

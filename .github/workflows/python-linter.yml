@@ -14,17 +14,16 @@ defaults:
     shell: bash
 
 jobs:
-  mypy:
+  ty:
     name: 🐍 Type check
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     permissions:
       contents: read # required to check out the repository
 
-    # `mypy` is the one hook `.pre-commit-config.yaml` lists under `ci: skip`. Its environment
-    # needs `numpy`, `matplotlib`, and `sphinx` to resolve the imports of the files it checks,
-    # which puts it over the 250 MiB pre-commit.ci allows a hook. It runs here instead, so the
-    # dependencies it needs cost nothing and `prek run -a` stays complete locally.
+    # `ty` is the one hook `.pre-commit-config.yaml` lists under `ci: skip`. It resolves imports
+    # against a project environment that `uv` builds from the network, which pre-commit.ci does
+    # not allow. It runs here instead, so `prek run -a` stays complete locally.
     steps:
       - name: Clone repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -37,5 +36,5 @@ jobs:
           version: "latest"
           enable-cache: false
 
-      - name: Run mypy
-        run: uvx prek run mypy --all-files
+      - name: Run ty
+        run: uvx prek run ty --all-files

@@ -353,22 +353,13 @@ max_supported_python = "3.14"
 table_format = "long"
 sub_table_spacing = "\n"
 
-[tool.mypy]
-mypy_path = [ "$MYPY_CONFIG_FILE_DIR/python" ]
-# Every Python file the repository owns, so a new one is checked without anyone remembering to
-# add it here
-files = [ "docs", "experiments", "noxfile.py", "python/mnt", "scripts", "test/python" ]
-explicit_package_bases = true
-disallow_untyped_defs = false
-warn_unreachable = true
-enable_error_code = [ "ignore-without-code", "redundant-expr", "truthy-bool" ]
-strict = true
-warn_unused_configs = true
+[tool.ty.terminal]
+# Error if ty emits any warning-level diagnostics.
+error-on-warning = true
 
-# The extension modules ship no stubs, so the bindings are `Any` to the type checker
-[[tool.mypy.overrides]]
-module = [ "mnt.pyfiction.*" ]
-ignore_missing_imports = true
+[tool.ty.analysis]
+# The extension modules ship no stubs
+allowed-unresolved-imports = [ "mnt.pyfiction.**" ]
 
 [tool.pytest]
 addopts = [
