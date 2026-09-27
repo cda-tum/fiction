@@ -21,13 +21,12 @@
 #include <map>
 #include <stdexcept>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/map.h>
-#include <nanobind/stl/string.h>
-#include <nanobind/stl/vector.h>
+#include <nanobind/stl/map.h>     // IWYU pragma: keep; converts the returned catalog.
+#include <nanobind/stl/string.h>  // IWYU pragma: keep; converts catalog names.
+#include <nanobind/stl/vector.h>  // IWYU pragma: keep; converts each function's outputs.
 
 namespace pyfiction
 {
@@ -37,7 +36,11 @@ namespace pyfiction
  */
 void truth_tables(nanobind::module_& m)
 {
-    std::map<std::string, std::vector<py_tt>> functions{
+    /**
+     * @brief Immutable prototypes copied for each caller.
+     * nanobind relocates small captures; libc++ maps contain pointers to their own storage.
+     */
+    static const std::map<std::string, std::vector<py_tt>> functions{
         {"id", {fiction::synthesis::create_id_tt()}},
         {"not", {fiction::synthesis::create_not_tt()}},
         {"and", {fiction::synthesis::create_and_tt()}},
@@ -66,12 +69,12 @@ void truth_tables(nanobind::module_& m)
         {"half_adder", fiction::synthesis::create_half_adder_tt()},
     };
     m.def(
-        "standard_functions", [functions]() { return functions; },
+        "standard_functions", []() { return functions; },
         "Returns fresh truth tables for every named standard function. Each value lists the outputs in specification "
         "order.");
     m.def(
         "standard_functions",
-        [functions = std::move(functions)](const std::string& name)
+        [](const std::string& name)
         {
             const auto found = functions.find(name);
             if (found == functions.end())
