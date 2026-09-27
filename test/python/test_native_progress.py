@@ -35,9 +35,9 @@ from mnt.pyfiction.physical_design import (
 )
 from mnt.pyfiction.qca import io as qca_io
 from mnt.pyfiction.sidb import DotTag, LatticeSite, SiDBLayout
+from mnt.pyfiction.sidb.analysis import CriticalTemperatureParams, critical_temperature_gate_based
 from mnt.pyfiction.sidb.io import read_sqd_layout, write_sidb_layout_svg, write_sidb_layout_svg_params, write_sqd_layout
 from mnt.pyfiction.sidb.simulation import ClusterCompleteParams, SimulationEngine, clustercomplete
-from mnt.pyfiction.sidb.simulation.analysis import critical_temperature_gate_based, critical_temperature_params
 from mnt.pyfiction.synthesis import (
     fanout_substitution,
     fanout_substitution_params,
@@ -263,14 +263,14 @@ def test_exact_clears_candidates_on_timeout(mux21: TechnologyNetwork) -> None:
 def test_temperature_forwards_simulation_workers(resources_dir: Path) -> None:
     """Temperature analysis keeps outer phases and forwards the active simulation's workers."""
     layout = read_sqd_layout(str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"))
-    params = critical_temperature_params()
+    params = CriticalTemperatureParams()
     params.operational_params.sim_engine = SimulationEngine.CLUSTERCOMPLETE
     params.operational_params.simulation_parameters.base = 2
     workers: list[tuple[int, int, str, int, int, bool]] = []
     phases: list[tuple[str, int, int]] = []
     params.on_worker_progress = lambda *report: workers.append(report)
     params.on_progress = lambda *report: phases.append(report)
-    critical_temperature_gate_based(layout, [standard_functions("not")[0]], params)
+    critical_temperature_gate_based(layout, [standard_functions("not")[0]], params=params)
     assert workers
     assert phases
     active = {worker: running for worker, count, description, done, total, running in workers}

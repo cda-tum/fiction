@@ -48,7 +48,7 @@ void design_gates(nanobind::module_& m)
     using fiction::sidb::generators::design_gates_params;
     using fiction::sidb::generators::design_gates_stats;
 
-    py::class_<design_gates_stats>(m, "design_sidb_gates_stats", DOC(fiction_sidb_generators_design_gates_stats))
+    py::class_<design_gates_stats>(m, "GateDesignStats", DOC(fiction_sidb_generators_design_gates_stats))
         .def(py::init<>(), "Default constructor.")
         .def(
             "__repr__",
@@ -64,7 +64,7 @@ void design_gates(nanobind::module_& m)
      * Design approach selector type.
      */
     py::enum_<design_gates_params::design_gates_mode>(
-        m, "design_sidb_gates_mode", DOC(fiction_sidb_generators_design_gates_params_design_gates_mode))
+        m, "GateDesignMode", DOC(fiction_sidb_generators_design_gates_params_design_gates_mode))
         .value("QUICKCELL", design_gates_params::design_gates_mode::QUICKCELL,
                DOC(fiction_sidb_generators_design_gates_params_design_gates_mode_QUICKCELL))
         .value("AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER",
@@ -78,14 +78,14 @@ void design_gates(nanobind::module_& m)
     /**
      * Termination condition selector type.
      */
-    py::enum_<design_gates_params::termination_condition>(m, "termination_condition")
+    py::enum_<design_gates_params::termination_condition>(m, "TerminationCondition")
         .value("AFTER_FIRST_SOLUTION", design_gates_params::termination_condition::AFTER_FIRST_SOLUTION)
         .value("ALL_COMBINATIONS_ENUMERATED", design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED);
 
     /**
      * Parameters.
      */
-    py::class_<design_gates_params>(m, "design_sidb_gates_params", DOC(fiction_sidb_generators_design_gates_params))
+    py::class_<design_gates_params>(m, "GateDesignParams", DOC(fiction_sidb_generators_design_gates_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("operational_params", &design_gates_params::operational_params,
                 DOC(fiction_sidb_generators_design_gates_params_operational_params))

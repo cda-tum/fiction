@@ -47,7 +47,7 @@ The `PRUNING_ONLY` mode skips operational simulation, so it does not verify the 
 
 ```python
 from mnt.pyfiction.layouts import HexagonalGateLayout
-from mnt.pyfiction.sidb.generators import (
+from mnt.pyfiction.sidb.design import (
     design_sidb_gates_mode,
     on_the_fly_sidb_circuit_design,
     on_the_fly_sidb_circuit_design_params,
@@ -70,16 +70,16 @@ write_sqd_layout(circuit, "and.sqd")
 ```
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.generators.sidb_complex_gate_design_policy
+.. autoclass:: mnt.pyfiction.sidb.design.ComplexGateDesignPolicy
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.generators.sidb_on_the_fly_gate_library_params
+.. autoclass:: mnt.pyfiction.sidb.design.OnTheFlyGateLibraryParams
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.generators.on_the_fly_sidb_circuit_design_params
+.. autoclass:: mnt.pyfiction.sidb.design.CircuitDesignParams
    :members:
 
-.. autofunction:: mnt.pyfiction.sidb.generators.on_the_fly_sidb_circuit_design
+.. autofunction:: mnt.pyfiction.sidb.design.on_the_fly_sidb_circuit_design
 ```
 
 :::

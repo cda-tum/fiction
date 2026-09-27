@@ -103,7 +103,7 @@ void write_operational_domain(nanobind::module_& m)
     namespace py = nanobind;
 
     py::enum_<fiction::sidb::simulation::io::write_operational_domain_params::sample_writing_mode>(
-        m, "sample_writing_mode", DOC(fiction_sidb_simulation_io_write_operational_domain_params_sample_writing_mode))
+        m, "SampleWritingMode", DOC(fiction_sidb_simulation_io_write_operational_domain_params_sample_writing_mode))
         .value("ALL_SAMPLES",
                fiction::sidb::simulation::io::write_operational_domain_params::sample_writing_mode::ALL_SAMPLES,
                DOC(fiction_sidb_simulation_io_write_operational_domain_params_sample_writing_mode_ALL_SAMPLES))
@@ -114,7 +114,7 @@ void write_operational_domain(nanobind::module_& m)
         ;
 
     py::class_<fiction::sidb::simulation::io::write_operational_domain_params>(
-        m, "write_operational_domain_params", DOC(fiction_sidb_simulation_io_write_operational_domain_params))
+        m, "WriteOperationalDomainParams", DOC(fiction_sidb_simulation_io_write_operational_domain_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("operational_tag", &fiction::sidb::simulation::io::write_operational_domain_params::operational_tag,
                 DOC(fiction_sidb_simulation_io_write_operational_domain_params_operational_tag))

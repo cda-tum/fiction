@@ -46,7 +46,7 @@ void time_to_solution(nanobind::module_& m)
      * Parameters.
      */
     py::class_<fiction::sidb::simulation::analysis::time_to_solution_params>(
-        m, "time_to_solution_params", DOC(fiction_sidb_simulation_analysis_time_to_solution_params))
+        m, "TimeToSolutionParams", DOC(fiction_sidb_simulation_analysis_time_to_solution_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("timeout", &fiction::sidb::simulation::analysis::time_to_solution_params::timeout,
                 DOC(fiction_sidb_simulation_analysis_time_to_solution_params_timeout))
@@ -63,7 +63,7 @@ void time_to_solution(nanobind::module_& m)
      * Statistics.
      */
     py::class_<fiction::sidb::simulation::analysis::time_to_solution_stats>(
-        m, "time_to_solution_stats", DOC(fiction_sidb_simulation_analysis_time_to_solution_stats))
+        m, "TimeToSolutionStats", DOC(fiction_sidb_simulation_analysis_time_to_solution_stats))
         .def(py::init<>(), "Default constructor.")
         .def(
             "__repr__",

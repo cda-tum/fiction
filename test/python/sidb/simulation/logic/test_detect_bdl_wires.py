@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from mnt.pyfiction.sidb import DotTag, LatticeSite, SiDBLayout
-from mnt.pyfiction.sidb.simulation.logic import bdl_wire_selection, detect_bdl_wires, detect_bdl_wires_params
+from mnt.pyfiction.sidb.analysis import BdlWireDetectionParams, BdlWireSelection, detect_bdl_wires
 
 
 def test_detect_bdl_wires_100_lattice():
@@ -39,11 +39,11 @@ def test_detect_bdl_wires_100_lattice():
     lyt.assign_sidb(LatticeSite(30, 17, 0), DotTag.INPUT)
     lyt.assign_sidb(LatticeSite(32, 18, 0), DotTag.INPUT)
 
-    params = detect_bdl_wires_params()
+    params = BdlWireDetectionParams()
 
-    all_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection.ALL)
-    output_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection.OUTPUT)
-    input_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection.INPUT)
+    all_bdl_wires = detect_bdl_wires(lyt, params, BdlWireSelection.ALL)
+    output_bdl_wires = detect_bdl_wires(lyt, params, BdlWireSelection.OUTPUT)
+    input_bdl_wires = detect_bdl_wires(lyt, params, BdlWireSelection.INPUT)
 
     assert len(all_bdl_wires) == 3
     assert len(output_bdl_wires) == 2

@@ -16,13 +16,13 @@ import pytest
 
 from mnt.pyfiction.layouts import CartesianGateLayout, HexagonalGateLayout
 from mnt.pyfiction.sidb import SiDBLayout, site_at_row
-from mnt.pyfiction.sidb.generators import (
-    design_sidb_gates_mode,
+from mnt.pyfiction.sidb.design import (
+    CircuitDesignParams,
+    ComplexGateDesignPolicy,
+    GateDesignMode,
+    OnTheFlyGateLibraryParams,
+    TerminationCondition,
     on_the_fly_sidb_circuit_design,
-    on_the_fly_sidb_circuit_design_params,
-    sidb_complex_gate_design_policy,
-    sidb_on_the_fly_gate_library_params,
-    termination_condition,
 )
 from mnt.pyfiction.sidb.io import read_sqd_layout, write_sidb_layout_svg_to_string, write_sqd_layout
 
@@ -43,40 +43,34 @@ def and_circuit() -> HexagonalGateLayout:
 
 def test_parameters() -> None:
     """Circuit parameters retain the native defaults and writable nested fields."""
-    params = on_the_fly_sidb_circuit_design_params()
+    params = CircuitDesignParams()
     library = params.sidb_on_the_fly_gate_library_parameters
     assert params.timeout == 2**64 - 1
     assert library.design_gate_params.operational_params.timeout == 2**64 - 1
-    assert isinstance(library, sidb_on_the_fly_gate_library_params)
-    assert library.design_gate_params.design_mode == design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+    assert isinstance(library, OnTheFlyGateLibraryParams)
+    assert library.design_gate_params.design_mode == GateDesignMode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
     assert library.design_gate_params.number_of_canvas_sidbs == 1
-    assert library.design_gate_params.termination_cond == termination_condition.AFTER_FIRST_SOLUTION
+    assert library.design_gate_params.termination_cond == TerminationCondition.AFTER_FIRST_SOLUTION
     assert library.canvas_sidb_complex_gates == 3
-    assert (
-        library.using_predefined_crossing_and_double_wire_if_possible
-        == sidb_complex_gate_design_policy.USING_PREDEFINED
-    )
+    assert library.using_predefined_crossing_and_double_wire_if_possible == ComplexGateDesignPolicy.USING_PREDEFINED
     assert library.influence_radius_charged_defects == 15
 
     library.design_gate_params.number_of_canvas_sidbs = 2
     library.canvas_sidb_complex_gates = 4
-    library.using_predefined_crossing_and_double_wire_if_possible = sidb_complex_gate_design_policy.DESIGN_ON_THE_FLY
+    library.using_predefined_crossing_and_double_wire_if_possible = ComplexGateDesignPolicy.DESIGN_ON_THE_FLY
     library.influence_radius_charged_defects = 10
     assert params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs == 2
     assert library.canvas_sidb_complex_gates == 4
-    assert (
-        library.using_predefined_crossing_and_double_wire_if_possible
-        == sidb_complex_gate_design_policy.DESIGN_ON_THE_FLY
-    )
+    assert library.using_predefined_crossing_and_double_wire_if_possible == ComplexGateDesignPolicy.DESIGN_ON_THE_FLY
     assert library.influence_radius_charged_defects == 10
 
 
 @pytest.mark.parametrize("per_gate", [False, True])
 def test_circuit_timeout(and_circuit: HexagonalGateLayout, *, per_gate: bool) -> None:
     """Circuit and nested gate budgets raise TimeoutError instead of returning a partial circuit."""
-    params = on_the_fly_sidb_circuit_design_params()
+    params = CircuitDesignParams()
     gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params
-    gates.design_mode = design_sidb_gates_mode.QUICKCELL
+    gates.design_mode = GateDesignMode.QUICKCELL
     gates.number_of_canvas_sidbs = 3
     if per_gate:
         gates.operational_params.timeout = 0
@@ -95,7 +89,7 @@ def test_circuit_timeout(and_circuit: HexagonalGateLayout, *, per_gate: bool) ->
 @pytest.mark.parametrize("timeout", [-1, 2**64, 1.5])
 def test_invalid_timeout(timeout: float) -> None:
     """The Python API accepts only unsigned 64-bit millisecond budgets."""
-    params = on_the_fly_sidb_circuit_design_params()
+    params = CircuitDesignParams()
     with pytest.raises(TypeError):
         params.timeout = timeout  # ty: ignore[invalid-assignment]  # deliberately invalid
     with pytest.raises(TypeError):
@@ -105,9 +99,9 @@ def test_invalid_timeout(timeout: float) -> None:
 @pytest.mark.slow
 def test_design_and_export(and_circuit: HexagonalGateLayout, tmp_path: Path) -> None:
     """A real circuit produces SiDBs without modifying its gate-level input."""
-    params = on_the_fly_sidb_circuit_design_params()
+    params = CircuitDesignParams()
     gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params
-    gates.design_mode = design_sidb_gates_mode.QUICKCELL
+    gates.design_mode = GateDesignMode.QUICKCELL
     gates.number_of_canvas_sidbs = 3
     result = on_the_fly_sidb_circuit_design(and_circuit, params)
     assert isinstance(result, SiDBLayout)
@@ -125,7 +119,7 @@ def test_design_and_export(and_circuit: HexagonalGateLayout, tmp_path: Path) -> 
 
 def test_unsuccessful_design(and_circuit: HexagonalGateLayout) -> None:
     """An insufficient canvas raises a useful error instead of returning a partial circuit."""
-    params = on_the_fly_sidb_circuit_design_params()
+    params = CircuitDesignParams()
     gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params
     gates.canvas = (site_at_row(24, 17), site_at_row(24, 17))
     gates.number_of_canvas_sidbs = 2

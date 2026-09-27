@@ -137,14 +137,14 @@ void is_operational(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::enum_<fiction::sidb::simulation::logic::operational_status>(
-        m, "operational_status", DOC(fiction_sidb_simulation_logic_operational_status))
+        m, "OperationalStatus", DOC(fiction_sidb_simulation_logic_operational_status))
         .value("OPERATIONAL", fiction::sidb::simulation::logic::operational_status::OPERATIONAL,
                DOC(fiction_sidb_simulation_logic_operational_status_OPERATIONAL))
         .value("NON_OPERATIONAL", fiction::sidb::simulation::logic::operational_status::NON_OPERATIONAL,
                DOC(fiction_sidb_simulation_logic_operational_status_NON_OPERATIONAL));
 
     py::enum_<fiction::sidb::simulation::logic::is_operational_params::operational_condition>(
-        m, "operational_condition", DOC(fiction_sidb_simulation_logic_is_operational_params_operational_condition))
+        m, "OperationalCondition", DOC(fiction_sidb_simulation_logic_is_operational_params_operational_condition))
         .value("TOLERATE_KINKS",
                fiction::sidb::simulation::logic::is_operational_params::operational_condition::TOLERATE_KINKS,
                DOC(fiction_sidb_simulation_logic_is_operational_params_operational_condition_TOLERATE_KINKS))
@@ -153,7 +153,7 @@ void is_operational(nanobind::module_& m)
                DOC(fiction_sidb_simulation_logic_is_operational_params_operational_condition_REJECT_KINKS));
 
     py::enum_<fiction::sidb::simulation::logic::is_operational_params::operational_analysis_strategy>(
-        m, "operational_analysis_strategy",
+        m, "OperationalAnalysisStrategy",
         DOC(fiction_sidb_simulation_logic_is_operational_params_operational_analysis_strategy))
         .value("SIMULATION_ONLY",
                fiction::sidb::simulation::logic::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY,
@@ -168,7 +168,7 @@ void is_operational(nanobind::module_& m)
             DOC(fiction_sidb_simulation_logic_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION));
 
     py::class_<fiction::sidb::simulation::logic::is_operational_params>(
-        m, "is_operational_params", DOC(fiction_sidb_simulation_logic_is_operational_params))
+        m, "OperationalParams", DOC(fiction_sidb_simulation_logic_is_operational_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("timeout", &fiction::sidb::simulation::logic::is_operational_params::timeout,
                 DOC(fiction_sidb_simulation_logic_is_operational_params_timeout))

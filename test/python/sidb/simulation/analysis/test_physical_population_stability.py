@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from mnt.pyfiction.sidb import DotTag, Lattice, LatticeSite, SiDBLayout
-from mnt.pyfiction.sidb.simulation.analysis import physical_population_stability, physical_population_stability_params
+from mnt.pyfiction.sidb.analysis import PhysicalPopulationStabilityParams, physical_population_stability
 
 
 def test_three_sidbs_100_lattice() -> None:
@@ -18,7 +18,7 @@ def test_three_sidbs_100_lattice() -> None:
     layout.assign_sidb(LatticeSite(0, 0, 1), DotTag.NORMAL)
     layout.assign_sidb(LatticeSite(0, 1, 1), DotTag.NORMAL)
     layout.assign_sidb(LatticeSite(1, 0, 1), DotTag.NORMAL)
-    params = physical_population_stability_params()
+    params = PhysicalPopulationStabilityParams()
     params.simulation_parameters.mu_minus = -0.25
     result = physical_population_stability(layout, params)
     assert len(result) == 5
@@ -37,7 +37,7 @@ def test_three_sidbs_111_lattice() -> None:
     layout.assign_sidb(LatticeSite(0, 0, 1), DotTag.NORMAL)
     layout.assign_sidb(LatticeSite(0, 1, 1), DotTag.NORMAL)
     layout.assign_sidb(LatticeSite(1, 0, 1), DotTag.NORMAL)
-    params = physical_population_stability_params()
+    params = PhysicalPopulationStabilityParams()
     params.simulation_parameters.mu_minus = -0.25
     result = physical_population_stability(layout, params)
     assert len(result) == 5

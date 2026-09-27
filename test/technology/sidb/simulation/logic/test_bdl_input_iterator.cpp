@@ -26,12 +26,24 @@
 
 #include <cstdint>
 #include <iterator>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb;
 using namespace fiction::sidb::simulation::logic;
+
+TEST_CASE("BDL input patterns fit the counter", "[bdl-input-iterator]")
+{
+    layout lyt{};
+    for (int32_t row = 0; row < 64; ++row)
+    {
+        lyt.assign_sidb(lattice_site{0, row * 10}, dot_tag::INPUT);
+        lyt.assign_sidb(lattice_site{2, row * 10}, dot_tag::INPUT);
+    }
+    CHECK_THROWS_AS((bdl_input_iterator{lyt, {}, std::vector<bdl_wire>{}}), std::invalid_argument);
+}
 
 TEST_CASE("BDL Input Iterator Traits", "[bdl-input-iterator]")
 {

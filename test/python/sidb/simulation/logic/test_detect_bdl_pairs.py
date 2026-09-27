@@ -11,7 +11,7 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction.sidb import DotTag, Lattice, LatticeSite, SiDBLayout
-from mnt.pyfiction.sidb.simulation.logic import detect_bdl_pairs, detect_bdl_pairs_params
+from mnt.pyfiction.sidb.analysis import BdlPairDetectionParams, detect_bdl_pairs
 
 
 @pytest.mark.parametrize(
@@ -32,7 +32,7 @@ def test_detect_bdl_pairs(lat):
     lyt.assign_sidb(LatticeSite(6, 0, 0), DotTag.OUTPUT)
     lyt.assign_sidb(LatticeSite(7, 0, 0), DotTag.OUTPUT)
 
-    params = detect_bdl_pairs_params()
+    params = BdlPairDetectionParams()
 
     input_bdl_pairs = detect_bdl_pairs(lyt, DotTag.INPUT, params)
     output_bdl_pairs = detect_bdl_pairs(lyt, DotTag.OUTPUT, params)

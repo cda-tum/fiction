@@ -102,7 +102,7 @@ void critical_temperature(nanobind::module_& m)
      * Critical temperature statistics.
      */
     py::class_<fiction::sidb::simulation::analysis::critical_temperature_stats>(
-        m, "critical_temperature_stats", DOC(fiction_sidb_simulation_analysis_critical_temperature_stats))
+        m, "CriticalTemperatureStats", DOC(fiction_sidb_simulation_analysis_critical_temperature_stats))
         .def(py::init<>(), "Default constructor.")
         .def(
             "__repr__",
@@ -129,7 +129,7 @@ void critical_temperature(nanobind::module_& m)
      * Critical temperature parameters.
      */
     py::class_<fiction::sidb::simulation::analysis::critical_temperature_params>(
-        m, "critical_temperature_params", DOC(fiction_sidb_simulation_analysis_critical_temperature_params))
+        m, "CriticalTemperatureParams", DOC(fiction_sidb_simulation_analysis_critical_temperature_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("operational_params",
                 &fiction::sidb::simulation::analysis::critical_temperature_params::operational_params,

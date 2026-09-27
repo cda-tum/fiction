@@ -11,11 +11,11 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction.sidb import DotTag, Lattice, LatticeSite, SiDBLayout
-from mnt.pyfiction.sidb.simulation.logic import bdl_input_iterator
+from mnt.pyfiction.sidb.analysis import InputEncoding, InputPatternParams, input_patterns
 
 
 @pytest.fixture
-def bdl_wire() -> SiDBLayout:
+def wire_layout() -> SiDBLayout:
     """A BDL wire of one input pair, two normal pairs, and one output pair.
 
     Returns:
@@ -38,97 +38,60 @@ def bdl_wire() -> SiDBLayout:
 
 
 def test_empty_layout() -> None:
-    """Check comparisons for an iterator over an empty layout."""
+    """A zero-input layout has one pattern, and exhaustion is stable."""
+    patterns = input_patterns(SiDBLayout())
+    assert next(patterns).num_dots() == 0
+    for _ in range(2):
+        with pytest.raises(StopIteration):
+            next(patterns)
+
+
+def test_independent_patterns(wire_layout: SiDBLayout) -> None:
+    """Advancing the iterator and editing one snapshot preserve the other layouts."""
+    patterns = input_patterns(wire_layout)
+    first = next(patterns)
+    second = next(patterns)
+    assert first.get_dot_tag(LatticeSite()) == DotTag.INPUT
+    assert second.get_dot_tag(LatticeSite()) == DotTag.EMPTY
+    first.assign_sidb(LatticeSite(6, 0), DotTag.EMPTY)
+    assert second.get_dot_tag(LatticeSite(6, 0)) == DotTag.NORMAL
+    assert wire_layout.num_dots() == 8
+
+
+def test_invalid_input_wires(wire_layout: SiDBLayout) -> None:
+    """An explicit empty wire list cannot encode an input pair."""
+    with pytest.raises(ValueError, match="complete input wire"):
+        input_patterns(wire_layout, input_wires=[])
+
+
+def test_absence_encoding(wire_layout: SiDBLayout) -> None:
+    """Absence encoding removes the input perturber for pattern zero."""
+    params = InputPatternParams()
+    params.input_bdl_config = InputEncoding.PERTURBER_ABSENCE_ENCODED
+    zero, one = input_patterns(wire_layout, params=params)
+    assert zero.num_pis() == 0
+    assert one.num_pis() == 1
+    assert wire_layout.num_pis() == 2
+
+
+def test_input_pattern_bound() -> None:
+    """Reject a pattern space that does not fit the native 64-bit counter."""
     layout = SiDBLayout()
-
-    bii = bdl_input_iterator(layout)
-
-    assert bii.num_input_pairs() == 0
-    assert bii == 0
-    assert bii != 1
-    assert bii < 1
-    assert bii <= 1
-    assert bii >= 0
+    for row in range(64):
+        layout.assign_sidb(LatticeSite(0, row * 10), DotTag.INPUT)
+        layout.assign_sidb(LatticeSite(2, row * 10), DotTag.INPUT)
+    with pytest.raises(ValueError, match="63 input BDL pairs"):
+        input_patterns(layout, input_wires=[])
 
 
-def test_iteration_empty_layout() -> None:
-    """Check manual iterator operations on an empty layout."""
-    layout = SiDBLayout()
-
-    bii = bdl_input_iterator(layout)
-
-    assert bii.num_input_pairs() == 0
-    assert bii == 0
-    assert bii.get_layout().num_dots() == 0
-
-    bii += 1
-
-    assert bii.num_input_pairs() == 0
-    assert bii == 1
-    assert bii.get_layout().num_dots() == 0
-
-    bii -= 1
-
-    assert bii.num_input_pairs() == 0
-    assert bii == 0
-    assert bii.get_layout().num_dots() == 0
-
-
-def test_manual_bdl_wire_iteration(bdl_wire: SiDBLayout) -> None:
-    """Check manual input-pattern iteration over a BDL wire.
-
-    Args:
-        bdl_wire: BDL wire layout.
-    """
-    layout = bdl_wire
-    bii = bdl_input_iterator(layout)
-
-    assert bii.get_layout().num_dots() == 7  # 2 inputs (1 already deleted for input pattern 0), 4 normal, 2 outputs
-    assert bii.num_input_pairs() == 1
-    assert bii == 0
-
-    lyt0 = bii.get_layout()
-
-    assert lyt0.get_dot_tag(LatticeSite(0, 0, 0)) == DotTag.INPUT
-    assert lyt0.get_dot_tag(LatticeSite(2, 0, 0)) == DotTag.EMPTY
-
-    bii += 1
-
-    lyt1 = bii.get_layout()
-
-    assert lyt1.get_dot_tag(LatticeSite(0, 0, 0)) == DotTag.EMPTY
-    assert lyt1.get_dot_tag(LatticeSite(2, 0, 0)) == DotTag.INPUT
-
-    bii += 1
-
-    lyt2 = bii.get_layout()
-
-    assert lyt2.get_dot_tag(LatticeSite(0, 0, 0)) == DotTag.INPUT
-    assert lyt2.get_dot_tag(LatticeSite(2, 0, 0)) == DotTag.EMPTY
-
-    bii -= 1
-
-    lyt1 = bii.get_layout()
-
-    assert lyt1.get_dot_tag(LatticeSite(0, 0, 0)) == DotTag.EMPTY
-    assert lyt1.get_dot_tag(LatticeSite(2, 0, 0)) == DotTag.INPUT
-
-    bii -= 1
-
-    lyt0 = bii.get_layout()
-
-    assert lyt0.get_dot_tag(LatticeSite(0, 0, 0)) == DotTag.INPUT
-    assert lyt0.get_dot_tag(LatticeSite(2, 0, 0)) == DotTag.EMPTY
-
-
-def test_automatic_bdl_wire_iteration(bdl_wire: SiDBLayout) -> None:
+def test_automatic_wire_layout_iteration(wire_layout: SiDBLayout) -> None:
     """Check automatic input-pattern iteration over a BDL wire.
 
     Args:
-        bdl_wire: BDL wire layout.
+        wire_layout: BDL wire layout.
     """
-    layout = bdl_wire
-    bii = bdl_input_iterator(layout)
+    layout = wire_layout
+    bii = input_patterns(layout)
 
     assert iter(bii) is bii
 
@@ -165,7 +128,7 @@ def test_automatic_siqad_and_gate_iteration() -> None:
 
     layout.assign_sidb(LatticeSite(10, 9, 1), DotTag.NORMAL)
 
-    bii = bdl_input_iterator(layout)
+    bii = input_patterns(layout)
 
     input_pattern_layouts = list(bii)
     assert len(input_pattern_layouts) == 4

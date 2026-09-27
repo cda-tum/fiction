@@ -41,13 +41,10 @@ NESTED_SUBMODULES = [
     "networks.io",
     "physical_design.routing",
     "qca.io",
-    "sidb.generators",
+    "sidb.design",
+    "sidb.analysis",
     "sidb.io",
     "sidb.simulation",
-    "sidb.simulation.analysis",
-    "sidb.simulation.defects",
-    "sidb.simulation.io",
-    "sidb.simulation.logic",
 ]
 
 

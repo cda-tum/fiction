@@ -9,12 +9,11 @@
 from __future__ import annotations
 
 from mnt.pyfiction.sidb import DotTag, LatticeSite, SiDBLayout, SimulationParams
-from mnt.pyfiction.sidb.simulation.defects import (
+from mnt.pyfiction.sidb.analysis import (
+    DimerDisplacementPolicy,
+    DisplacementAnalysisMode,
+    DisplacementRobustnessDomainParams,
     determine_displacement_robustness_domain,
-    dimer_displacement_policy,
-    displacement_analysis_mode,
-    displacement_robustness_domain_params,
-    displacement_robustness_domain_stats,
 )
 from mnt.pyfiction.synthesis import (
     standard_functions,
@@ -41,7 +40,7 @@ def test_siqad_and_gate_100_lattice():
 
     layout.assign_sidb(LatticeSite(10, 9, 1), DotTag.NORMAL)
 
-    params = displacement_robustness_domain_params()
+    params = DisplacementRobustnessDomainParams()
 
     params.displacement_variations = (1, 1)
     params.operational_params.simulation_parameters = SimulationParams(2, -0.28)
@@ -63,11 +62,11 @@ def test_siqad_and_gate_100_lattice():
     }
 
     params.percentage_of_analyzed_displaced_layouts = 0.1
-    params.dimer_policy = dimer_displacement_policy.ALLOW_OTHER_DIMER
-    params.analysis_mode = displacement_analysis_mode.RANDOM
+    params.dimer_policy = DimerDisplacementPolicy.ALLOW_OTHER_DIMER
+    params.analysis_mode = DisplacementAnalysisMode.RANDOM
 
-    stats = displacement_robustness_domain_stats()
-
-    _ = determine_displacement_robustness_domain(layout, [standard_functions("and")[0]], params, stats)
+    result = determine_displacement_robustness_domain(layout, [standard_functions("and")[0]], params=params)
+    _ = result.domain
+    stats = result.stats
 
     assert stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements == 8

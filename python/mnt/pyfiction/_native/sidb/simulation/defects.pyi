@@ -17,7 +17,7 @@ import mnt.pyfiction._native.sidb
 import mnt.pyfiction._native.sidb.simulation.logic
 import mnt.pyfiction._native.synthesis
 
-class dimer_displacement_policy(enum.Enum):
+class DimerDisplacementPolicy(enum.Enum):
     """Whether a displaced SiDB may leave its dimer."""
 
     STAY_ON_ORIGINAL_DIMER = 0
@@ -29,7 +29,7 @@ class dimer_displacement_policy(enum.Enum):
     ALLOW_OTHER_DIMER = 1
     """The SiDB may be displaced across dimers."""
 
-class displacement_analysis_mode(enum.Enum):
+class DisplacementAnalysisMode(enum.Enum):
     """Whether every displaced layout is analyzed or only a random share."""
 
     EXHAUSTIVE = 0
@@ -38,18 +38,18 @@ class displacement_analysis_mode(enum.Enum):
     RANDOM = 1
     """A random share of the displaced layouts is analyzed."""
 
-class displacement_robustness_domain_params:
+class DisplacementRobustnessDomainParams:
     """Parameters of the displacement robustness analysis."""
 
     def __init__(self) -> None:
         """Default constructor."""
 
     @property
-    def analysis_mode(self) -> displacement_analysis_mode:
+    def analysis_mode(self) -> DisplacementAnalysisMode:
         """The analysis mode."""
 
     @analysis_mode.setter
-    def analysis_mode(self, arg: displacement_analysis_mode, /) -> None: ...
+    def analysis_mode(self, arg: DisplacementAnalysisMode, /) -> None: ...
     @property
     def percentage_of_analyzed_displaced_layouts(self) -> float:
         """Share of the displaced layouts to analyze in `RANDOM` mode."""
@@ -66,7 +66,7 @@ class displacement_robustness_domain_params:
     @displacement_variations.setter
     def displacement_variations(self, arg: tuple[int, int], /) -> None: ...
     @property
-    def operational_params(self) -> mnt.pyfiction._native.sidb.simulation.logic.is_operational_params:
+    def operational_params(self) -> mnt.pyfiction._native.sidb.simulation.logic.OperationalParams:
         """
         Operational parameters. Their timeout bounds the entire displacement
         analysis across all layouts and workers. Finite budgets reject
@@ -74,7 +74,7 @@ class displacement_robustness_domain_params:
         """
 
     @operational_params.setter
-    def operational_params(self, arg: mnt.pyfiction._native.sidb.simulation.logic.is_operational_params, /) -> None: ...
+    def operational_params(self, arg: mnt.pyfiction._native.sidb.simulation.logic.OperationalParams, /) -> None: ...
     @property
     def fixed_sidbs(self) -> set[mnt.pyfiction._native.sidb.LatticeSite]:
         """SiDBs that are not displaced."""
@@ -82,11 +82,11 @@ class displacement_robustness_domain_params:
     @fixed_sidbs.setter
     def fixed_sidbs(self, arg: AbstractSet[mnt.pyfiction._native.sidb.LatticeSite], /) -> None: ...
     @property
-    def dimer_policy(self) -> dimer_displacement_policy:
+    def dimer_policy(self) -> DimerDisplacementPolicy:
         """The dimer policy."""
 
     @dimer_policy.setter
-    def dimer_policy(self, arg: dimer_displacement_policy, /) -> None: ...
+    def dimer_policy(self, arg: DimerDisplacementPolicy, /) -> None: ...
     @property
     def number_of_threads(self) -> int:
         """Number of threads to use."""
@@ -100,7 +100,7 @@ class displacement_robustness_domain_params:
     @on_progress.setter
     def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
-class displacement_robustness_domain_stats:
+class DisplacementRobustnessDomainStats:
     """Statistics of the displacement robustness analysis."""
 
     def __init__(self) -> None:
@@ -125,7 +125,7 @@ class displacement_robustness_domain_stats:
     @num_non_operational_sidb_displacements.setter
     def num_non_operational_sidb_displacements(self, arg: int, /) -> None: ...
 
-class displacement_robustness_domain:
+class DisplacementRobustnessDomain:
     """
     The displacement robustness domain of an SiDB gate: every analyzed
     displaced layout together with its operational status.
@@ -138,7 +138,7 @@ class displacement_robustness_domain:
     def influence_information(
         self,
     ) -> list[
-        tuple[mnt.pyfiction._native.sidb.SiDBLayout, mnt.pyfiction._native.sidb.simulation.logic.operational_status]
+        tuple[mnt.pyfiction._native.sidb.SiDBLayout, mnt.pyfiction._native.sidb.simulation.logic.OperationalStatus]
     ]:
         """The displaced layouts and their operational status."""
 
@@ -146,7 +146,7 @@ class displacement_robustness_domain:
     def influence_information(
         self,
         arg: Sequence[
-            tuple[mnt.pyfiction._native.sidb.SiDBLayout, mnt.pyfiction._native.sidb.simulation.logic.operational_status]
+            tuple[mnt.pyfiction._native.sidb.SiDBLayout, mnt.pyfiction._native.sidb.simulation.logic.OperationalStatus]
         ],
         /,
     ) -> None: ...
@@ -154,9 +154,9 @@ class displacement_robustness_domain:
 def determine_displacement_robustness_domain(
     layout: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: displacement_robustness_domain_params = ...,
-    stats: displacement_robustness_domain_stats | None = None,
-) -> displacement_robustness_domain:
+    params: DisplacementRobustnessDomainParams = ...,
+    stats: DisplacementRobustnessDomainStats | None = None,
+) -> DisplacementRobustnessDomain:
     """
     During fabrication, SiDBs may not align precisely with their intended
     atomic positions, resulting in displacement. This means that an SiDB

@@ -30,8 +30,6 @@ from mnt.pyfiction._native.sidb.simulation.engines import (
     quicksim,
 )
 
-from . import analysis, defects, io, logic
-
 __all__ = [
     "AutomaticBaseNumberDetection",
     "ChargeTransitionThresholdBounds",
@@ -42,13 +40,9 @@ __all__ = [
     "QuickSimParams",
     "SimulationEngine",
     "SimulationResult",
-    "analysis",
     "check_simulation_results_for_equivalence",
-    "defects",
     "exhaustive_ground_state_simulation",
-    "io",
     "is_ground_state",
-    "logic",
     "quickexact",
     "quicksim",
     "sidb_simulation_engine_name",

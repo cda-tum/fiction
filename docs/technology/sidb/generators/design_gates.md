@@ -39,19 +39,19 @@ gates = design_sidb_gates(skeleton, specification, params)
 ```
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.generators.design_sidb_gates_stats
+.. autoclass:: mnt.pyfiction.sidb.design.GateDesignStats
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.generators.design_sidb_gates_params
+.. autoclass:: mnt.pyfiction.sidb.design.GateDesignParams
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.generators.design_sidb_gates_mode
+.. autoclass:: mnt.pyfiction.sidb.design.GateDesignMode
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.generators.termination_condition
+.. autoclass:: mnt.pyfiction.sidb.design.TerminationCondition
    :members:
 
-.. autofunction:: mnt.pyfiction.sidb.generators.design_sidb_gates
+.. autofunction:: mnt.pyfiction.sidb.design.design_sidb_gates
 ```
 
 :::

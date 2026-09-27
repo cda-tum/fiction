@@ -45,7 +45,7 @@ void operational_domain_ratio(nanobind::module_& m)
     using fiction::sidb::simulation::logic::operational_domain_ratio_params;
     using fiction::sidb::simulation::logic::parameter_point;
 
-    py::class_<operational_domain_ratio_params>(m, "operational_domain_ratio_params",
+    py::class_<operational_domain_ratio_params>(m, "OperationalDomainRatioParams",
                                                 DOC(fiction_sidb_simulation_logic_operational_domain_ratio_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("op_domain_params", &operational_domain_ratio_params::op_domain_params,

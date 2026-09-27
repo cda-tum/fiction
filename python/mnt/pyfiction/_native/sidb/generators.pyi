@@ -17,7 +17,7 @@ import mnt.pyfiction._native.sidb.model
 import mnt.pyfiction._native.sidb.simulation.logic
 import mnt.pyfiction._native.synthesis
 
-class positive_charges(enum.Enum):
+class PositiveCharges(enum.Enum):
     """Whether positively charged SiDBs may occur in the generated layout."""
 
     ALLOWED = 0
@@ -35,7 +35,7 @@ class positive_charges(enum.Enum):
     they are.
     """
 
-class generate_random_sidb_layout_params:
+class RandomLayoutParams:
     """Parameters of the random layout generator."""
 
     def __init__(self) -> None:
@@ -56,11 +56,11 @@ class generate_random_sidb_layout_params:
     @number_of_sidbs.setter
     def number_of_sidbs(self, arg: int, /) -> None: ...
     @property
-    def positive_sidbs(self) -> positive_charges:
+    def positive_sidbs(self) -> PositiveCharges:
         """Positive charge policy."""
 
     @positive_sidbs.setter
-    def positive_sidbs(self, arg: positive_charges, /) -> None: ...
+    def positive_sidbs(self, arg: PositiveCharges, /) -> None: ...
     @property
     def simulation_parameters(self) -> mnt.pyfiction._native.sidb.model.SimulationParams:
         """Physical parameters for the positive charge check."""
@@ -99,7 +99,7 @@ class generate_random_sidb_layout_params:
     def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 def generate_random_sidb_layout(
-    params: generate_random_sidb_layout_params, lyt_skeleton: mnt.pyfiction._native.sidb.SiDBLayout | None = None
+    params: RandomLayoutParams, lyt_skeleton: mnt.pyfiction._native.sidb.SiDBLayout | None = None
 ) -> mnt.pyfiction._native.sidb.SiDBLayout | None:
     """
     Generates a random SiDB layout by placing SiDBs at random sites of an
@@ -119,7 +119,7 @@ def generate_random_sidb_layout(
     """
 
 def generate_multiple_random_sidb_layouts(
-    params: generate_random_sidb_layout_params, lyt_skeleton: mnt.pyfiction._native.sidb.SiDBLayout | None = None
+    params: RandomLayoutParams, lyt_skeleton: mnt.pyfiction._native.sidb.SiDBLayout | None = None
 ) -> list[mnt.pyfiction._native.sidb.SiDBLayout] | None:
     """
     Generates several unique random SiDB layouts with
@@ -135,13 +135,13 @@ def generate_multiple_random_sidb_layouts(
         the attempt limit.
     """
 
-class design_sidb_gates_stats:
+class GateDesignStats:
     """Statistics of the gate designers."""
 
     def __init__(self) -> None:
         """Default constructor."""
 
-class design_sidb_gates_mode(enum.Enum):
+class GateDesignMode(enum.Enum):
     """The design mode."""
 
     QUICKCELL = 0
@@ -165,29 +165,29 @@ class design_sidb_gates_mode(enum.Enum):
     candidates.
     """
 
-class termination_condition(enum.Enum):
+class TerminationCondition(enum.Enum):
     AFTER_FIRST_SOLUTION = 0
 
     ALL_COMBINATIONS_ENUMERATED = 1
 
-class design_sidb_gates_params:
+class GateDesignParams:
     """Parameters of the gate designers."""
 
     def __init__(self) -> None:
         """Default constructor."""
 
     @property
-    def operational_params(self) -> mnt.pyfiction._native.sidb.simulation.logic.is_operational_params:
+    def operational_params(self) -> mnt.pyfiction._native.sidb.simulation.logic.OperationalParams:
         """Parameters of the operational check."""
 
     @operational_params.setter
-    def operational_params(self, arg: mnt.pyfiction._native.sidb.simulation.logic.is_operational_params, /) -> None: ...
+    def operational_params(self, arg: mnt.pyfiction._native.sidb.simulation.logic.OperationalParams, /) -> None: ...
     @property
-    def design_mode(self) -> design_sidb_gates_mode:
+    def design_mode(self) -> GateDesignMode:
         """The design mode."""
 
     @design_mode.setter
-    def design_mode(self, arg: design_sidb_gates_mode, /) -> None: ...
+    def design_mode(self, arg: GateDesignMode, /) -> None: ...
     @property
     def canvas(self) -> tuple[mnt.pyfiction._native.sidb.LatticeSite, mnt.pyfiction._native.sidb.LatticeSite]:
         """
@@ -215,11 +215,11 @@ class design_sidb_gates_params:
     @maximal_random_design_attempts.setter
     def maximal_random_design_attempts(self, arg: int, /) -> None: ...
     @property
-    def termination_cond(self) -> termination_condition:
+    def termination_cond(self) -> TerminationCondition:
         """When to stop."""
 
     @termination_cond.setter
-    def termination_cond(self, arg: termination_condition, /) -> None: ...
+    def termination_cond(self, arg: TerminationCondition, /) -> None: ...
     @property
     def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Callback that receives the progress of the design mode's main loop."""
@@ -230,8 +230,8 @@ class design_sidb_gates_params:
 def design_sidb_gates(
     skeleton: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: design_sidb_gates_params = ...,
-    stats: design_sidb_gates_stats | None = None,
+    params: GateDesignParams = ...,
+    stats: GateDesignStats | None = None,
 ) -> list[mnt.pyfiction._native.sidb.SiDBLayout]:
     """
     Designs SiDB gates on a skeleton: canvas SiDBs are placed in the
@@ -277,7 +277,7 @@ def design_sidb_gates(
         utils::timeout_error: if the gate-design deadline is reached.
     """
 
-class sidb_complex_gate_design_policy(enum.Enum):
+class ComplexGateDesignPolicy(enum.Enum):
     """
     This struct represents the policy for complex (i.e., crossing, double
     wire, half-adder) gate design.
@@ -289,7 +289,7 @@ class sidb_complex_gate_design_policy(enum.Enum):
     DESIGN_ON_THE_FLY = 1
     """Design complex gates on-the-fly."""
 
-class sidb_on_the_fly_gate_library_params:
+class OnTheFlyGateLibraryParams:
     """
     This struct encapsulates parameters for the parameterized SiDB gate
     library.
@@ -299,11 +299,11 @@ class sidb_on_the_fly_gate_library_params:
         """Default constructor."""
 
     @property
-    def design_gate_params(self) -> design_sidb_gates_params:
+    def design_gate_params(self) -> GateDesignParams:
         """This struct holds parameters to design SiDB gates."""
 
     @design_gate_params.setter
-    def design_gate_params(self, arg: design_sidb_gates_params, /) -> None: ...
+    def design_gate_params(self, arg: GateDesignParams, /) -> None: ...
     @property
     def canvas_sidb_complex_gates(self) -> int:
         """
@@ -314,13 +314,11 @@ class sidb_on_the_fly_gate_library_params:
     @canvas_sidb_complex_gates.setter
     def canvas_sidb_complex_gates(self, arg: int, /) -> None: ...
     @property
-    def using_predefined_crossing_and_double_wire_if_possible(self) -> sidb_complex_gate_design_policy:
+    def using_predefined_crossing_and_double_wire_if_possible(self) -> ComplexGateDesignPolicy:
         """This variable specifies the policy for complex gate design."""
 
     @using_predefined_crossing_and_double_wire_if_possible.setter
-    def using_predefined_crossing_and_double_wire_if_possible(
-        self, arg: sidb_complex_gate_design_policy, /
-    ) -> None: ...
+    def using_predefined_crossing_and_double_wire_if_possible(self, arg: ComplexGateDesignPolicy, /) -> None: ...
     @property
     def influence_radius_charged_defects(self) -> float:
         """
@@ -332,7 +330,7 @@ class sidb_on_the_fly_gate_library_params:
     @influence_radius_charged_defects.setter
     def influence_radius_charged_defects(self, arg: float, /) -> None: ...
 
-class on_the_fly_sidb_circuit_design_params:
+class CircuitDesignParams:
     """This struct stores the parameters to design an SiDB circuit."""
 
     def __init__(self) -> None:
@@ -351,14 +349,14 @@ class on_the_fly_sidb_circuit_design_params:
     @timeout.setter
     def timeout(self, arg: int, /) -> None: ...
     @property
-    def sidb_on_the_fly_gate_library_parameters(self) -> sidb_on_the_fly_gate_library_params:
+    def sidb_on_the_fly_gate_library_parameters(self) -> OnTheFlyGateLibraryParams:
         """Parameters for the SiDB on-the-fly gate library."""
 
     @sidb_on_the_fly_gate_library_parameters.setter
-    def sidb_on_the_fly_gate_library_parameters(self, arg: sidb_on_the_fly_gate_library_params, /) -> None: ...
+    def sidb_on_the_fly_gate_library_parameters(self, arg: OnTheFlyGateLibraryParams, /) -> None: ...
 
 def on_the_fly_sidb_circuit_design(
-    layout: mnt.pyfiction._native.layouts.HexagonalGateLayout, params: on_the_fly_sidb_circuit_design_params = ...
+    layout: mnt.pyfiction._native.layouts.HexagonalGateLayout, params: CircuitDesignParams = ...
 ) -> mnt.pyfiction._native.sidb.SiDBLayout:
     """
     Design an SiDB circuit from a placed and routed hexagonal gate-level layout.

@@ -37,6 +37,10 @@
 namespace pyfiction
 {
 
+/**
+ * @brief Registers input encoding options and a private Python iterator.
+ * @param m Python module.
+ */
 void bdl_input_iterator(nanobind::module_& m)
 {
     namespace py = nanobind;
@@ -46,7 +50,7 @@ void bdl_input_iterator(nanobind::module_& m)
     using fiction::sidb::simulation::logic::bdl_input_iterator_params;
     using fiction::sidb::simulation::logic::bdl_wire;
 
-    py::enum_<bdl_input_iterator_params::input_bdl_configuration>(m, "input_bdl_configuration")
+    py::enum_<bdl_input_iterator_params::input_bdl_configuration>(m, "InputEncoding")
         .value(
             "PERTURBER_ABSENCE_ENCODED", bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED,
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_params_input_bdl_configuration_PERTURBER_ABSENCE_ENCODED))
@@ -55,7 +59,7 @@ void bdl_input_iterator(nanobind::module_& m)
             bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED,
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_params_input_bdl_configuration_PERTURBER_DISTANCE_ENCODED));
 
-    py::class_<bdl_input_iterator_params>(m, "bdl_input_iterator_params",
+    py::class_<bdl_input_iterator_params>(m, "InputPatternParams",
                                           DOC(fiction_sidb_simulation_logic_bdl_input_iterator_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("bdl_wire_params", &bdl_input_iterator_params::bdl_wire_params,
@@ -63,7 +67,7 @@ void bdl_input_iterator(nanobind::module_& m)
         .def_rw("input_bdl_config", &bdl_input_iterator_params::input_bdl_config,
                 DOC(fiction_sidb_simulation_logic_bdl_input_iterator_params_input_bdl_config));
 
-    py::class_<bdl_input_iterator>(m, "bdl_input_iterator", DOC(fiction_sidb_simulation_logic_bdl_input_iterator))
+    py::class_<bdl_input_iterator>(m, "_InputPatterns", DOC(fiction_sidb_simulation_logic_bdl_input_iterator))
         .def(py::init<const layout&, const bdl_input_iterator_params&>(), py::arg("lyt"),
              py::arg("params") = bdl_input_iterator_params{},
              DOC(fiction_sidb_simulation_logic_bdl_input_iterator_bdl_input_iterator))
@@ -88,63 +92,7 @@ void bdl_input_iterator(nanobind::module_& m)
                 return result;
             },
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_mul))
-        .def(
-            "__eq__", [](const bdl_input_iterator& self, const uint64_t n) { return self == n; }, py::arg("m"),
-            DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_eq))
-        .def(
-            "__ne__", [](const bdl_input_iterator& self, const uint64_t n) { return self != n; }, py::arg("m"))
-        .def(
-            "__lt__", [](const bdl_input_iterator& self, const uint64_t n) { return self < n; }, py::arg("m"))
-        .def(
-            "__le__", [](const bdl_input_iterator& self, const uint64_t n) { return self <= n; }, py::arg("m"))
-        .def(
-            "__gt__", [](const bdl_input_iterator& self, const uint64_t n) { return self > n; }, py::arg("m"))
-        .def(
-            "__ge__", [](const bdl_input_iterator& self, const uint64_t n) { return self >= n; }, py::arg("m"))
-        .def(
-            "__add__", [](const bdl_input_iterator& self, const int n) { return self + n; }, py::arg("m"),
-            DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_add))
-        .def(
-            "__iadd__",
-            [](bdl_input_iterator& self, const int n) -> bdl_input_iterator&
-            {
-                self += n;
-                return self;
-            },
-            py::arg("m"), DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_iadd))
-        .def(
-            "__sub__", [](const bdl_input_iterator& self, const int n) { return self - n; }, py::arg("m"),
-            DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_sub))
-        .def(
-            "__isub__",
-            [](bdl_input_iterator& self, const int n) -> bdl_input_iterator&
-            {
-                self -= n;
-                return self;
-            },
-            py::arg("m"), DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_isub))
-        .def(
-            "__getitem__", [](const bdl_input_iterator& self, const int n) { return self[n]; }, py::arg("m"),
-            DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_array))
-        .def("num_input_pairs", &bdl_input_iterator::num_input_pairs,
-             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_num_input_pairs))
-        .def("get_current_input_index", &bdl_input_iterator::get_current_input_index,
-             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_get_current_input_index))
-        .def(
-            "get_layout", [](const bdl_input_iterator& self) -> const layout& { return *self; },
-            "Returns the layout that represents the current input state, equivalent to dereferencing the iterator.");
-
-    m.def(
-        "generate_bdl_input_pattern_layouts", [](const layout& lyt, const bdl_input_iterator_params& params)
-        { return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params); }, py::arg("lyt"),
-        py::arg("params") = bdl_input_iterator_params{},
-        DOC(fiction_sidb_simulation_logic_generate_bdl_input_pattern_layouts_2));
-    m.def(
-        "generate_bdl_input_pattern_layouts",
-        [](const layout& lyt, const bdl_input_iterator_params& params, const std::vector<bdl_wire>& input_wires)
-        { return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params, input_wires); },
-        py::arg("lyt"), py::arg("params"), py::arg("input_wires"),
-        DOC(fiction_sidb_simulation_logic_generate_bdl_input_pattern_layouts));
+        .def("is_valid", &bdl_input_iterator::is_valid, DOC(fiction_sidb_simulation_logic_bdl_input_iterator_is_valid));
 }
 
 }  // namespace pyfiction

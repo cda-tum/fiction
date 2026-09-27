@@ -162,3 +162,42 @@ Replace imports from `sidb.model` with `sidb`, and imports from
 `sidb.simulation.engines` with `sidb.simulation`. Replace direct distribution
 construction and mutation with `PotentialLandscape.evaluate(states)`, `energy()`
 with `.energy`, and `groundstates()` with `ground_states()`.
+
+## SiDB analysis and design
+
+`sidb.analysis` provides operational checks, parameter sweeps, critical temperatures,
+energy and population analysis, displacement robustness, and BDL inspection.
+`sidb.design` provides gate search, random layouts, and on-the-fly circuit design.
+Options and result types use PascalCase. Use `BdlWireSelection.INPUT` when selecting
+input wires and `InputEncoding` to choose perturber-distance or perturber-absence encoding.
+
+`input_patterns(layout, params=..., input_wires=...)` returns an iterator of independent
+layout snapshots in input-pattern order, starting at zero. A layout without inputs
+has one pattern. Each input BDL pair must belong to a complete wire; at most 63 pairs
+are supported by the native pattern counter. Retain snapshots with `list(input_patterns(layout))`
+when passing custom patterns to operational or critical-temperature analysis.
+
+Workflow results carry the computed value and its statistics:
+
+| Workflow | Result fields |
+| --- | --- |
+| `is_operational` | `.status`, `.simulator_invocations` |
+| `critical_temperature_gate_based`, `critical_temperature_non_gate_based` | `.temperature` in kelvin, `.stats` |
+| Operational and critical-temperature domain searches | `.domain`, `.stats` |
+| `determine_displacement_robustness_domain` | `.domain`, `.stats` |
+| `design_sidb_gates` | `.layouts`, `.stats` |
+| `time_to_solution`, `time_to_solution_for_given_simulation_results` | The statistics object itself |
+
+Pass workflow options by keyword. An exception, including a timeout or callback failure,
+returns no partial result. Custom input-pattern layouts for `is_operational` require
+both input and output wires. Gate-based critical-temperature analysis also requires
+the output BDL pairs. The internal energy-labeling helpers are not public Python tools;
+use critical-temperature analysis for logic-aware thermal behavior.
+
+`bool(is_operational(...))` reflects the logical status; use `.simulator_invocations`
+when inspecting the cost of that check.
+
+Replace imports from `sidb.generators` with `sidb.design`, and imports from
+`sidb.simulation.analysis`, `.logic`, or `.defects` with `sidb.analysis`. Simulation
+writers live in `sidb.io`. Replace manual BDL iterator arithmetic with iteration over
+`input_patterns`, and retrieve statistics from the workflow result.

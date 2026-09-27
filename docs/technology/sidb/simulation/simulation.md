@@ -58,7 +58,7 @@ const auto domain = fiction::sidb::simulation::logic::operational_domain_grid_se
 :sync: python
 
 ```python
-from mnt.pyfiction.sidb.simulation.logic import operational_domain_grid_search, operational_domain_params
+from mnt.pyfiction.sidb.analysis import operational_domain_grid_search, operational_domain_params
 
 params = operational_domain_params()
 params.operational_params.timeout = 5_000

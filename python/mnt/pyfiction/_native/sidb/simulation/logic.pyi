@@ -13,14 +13,12 @@ import enum
 from collections.abc import Callable, Iterator, Sequence
 from typing import overload
 
-from typing_extensions import Self
-
 import mnt.pyfiction._native.sidb
 import mnt.pyfiction._native.sidb.model
 import mnt.pyfiction._native.sidb.simulation
 import mnt.pyfiction._native.synthesis
 
-class input_bdl_configuration(enum.Enum):
+class InputEncoding(enum.Enum):
     PERTURBER_ABSENCE_ENCODED = 1
     """
     A perturber is used to set the input to `1`, while the absence of a
@@ -35,29 +33,29 @@ class input_bdl_configuration(enum.Enum):
     away (as described in https://dl.acm.org/doi/10.1145/3489517.3530525).
     """
 
-class bdl_input_iterator_params:
+class InputPatternParams:
     """Parameters for the BDL input iterator."""
 
     def __init__(self) -> None:
         """Default constructor."""
 
     @property
-    def bdl_wire_params(self) -> detect_bdl_wires_params:
+    def bdl_wire_params(self) -> BdlWireDetectionParams:
         """Parameters to detect BDL wires."""
 
     @bdl_wire_params.setter
-    def bdl_wire_params(self, arg: detect_bdl_wires_params, /) -> None: ...
+    def bdl_wire_params(self, arg: BdlWireDetectionParams, /) -> None: ...
     @property
-    def input_bdl_config(self) -> input_bdl_configuration:
+    def input_bdl_config(self) -> InputEncoding:
         """
         The `input_bdl_config` member allows selection between different modes
         for handling input BDLs.
         """
 
     @input_bdl_config.setter
-    def input_bdl_config(self, arg: input_bdl_configuration, /) -> None: ...
+    def input_bdl_config(self, arg: InputEncoding, /) -> None: ...
 
-class bdl_input_iterator:
+class _InputPatterns:
     """
     Iterator that assigns the input patterns to the input BDL pairs of an
     SiDB layout. Incrementing the iterator advances the input pattern;
@@ -70,7 +68,7 @@ class bdl_input_iterator:
     """
 
     @overload
-    def __init__(self, lyt: mnt.pyfiction._native.sidb.SiDBLayout, params: bdl_input_iterator_params = ...) -> None:
+    def __init__(self, lyt: mnt.pyfiction._native.sidb.SiDBLayout, params: InputPatternParams = ...) -> None:
         """
         Detects the input BDL pairs and wires of `source_layout` and applies
         input pattern `0`.
@@ -79,14 +77,15 @@ class bdl_input_iterator:
             source_layout: The layout to iterate over.
             ps: Parameters for the BDL pair and wire detection and the input
                 encoding.
+
+        Raises:
+            std::invalid_argument: if the layout has more than 63 input BDL
+                                   pairs.
         """
 
     @overload
     def __init__(
-        self,
-        lyt: mnt.pyfiction._native.sidb.SiDBLayout,
-        params: bdl_input_iterator_params,
-        input_wires: Sequence[bdl_wire],
+        self, lyt: mnt.pyfiction._native.sidb.SiDBLayout, params: InputPatternParams, input_wires: Sequence[BdlWire]
     ) -> None:
         """
         Like the constructor above but with input wires that are already
@@ -96,9 +95,13 @@ class bdl_input_iterator:
             source_layout: The layout to iterate over.
             ps: Parameters for the BDL pair detection and the input encoding.
             source_input_wires: The input wires of `source_layout`.
+
+        Raises:
+            std::invalid_argument: if the layout has more than 63 input BDL
+                                   pairs.
         """
 
-    def __iter__(self) -> bdl_input_iterator: ...
+    def __iter__(self) -> _InputPatterns: ...
     def __next__(self) -> mnt.pyfiction._native.sidb.SiDBLayout:
         """
         The layout with the current input pattern applied.
@@ -107,134 +110,15 @@ class bdl_input_iterator:
             The layout.
         """
 
-    def __eq__(self, m: int) -> bool:
+    def is_valid(self) -> bool:
         """
-        Whether the current input pattern is `m`.
-
-        Args:
-            m: The pattern to compare with.
+        Whether every input BDL pair belongs to a complete detected wire.
 
         Returns:
-            `true` if the patterns are equal.
+            `true` if input patterns can be applied.
         """
 
-    def __ne__(self, m: int) -> bool: ...
-    def __lt__(self, m: int) -> bool: ...
-    def __le__(self, m: int) -> bool: ...
-    def __gt__(self, m: int) -> bool: ...
-    def __ge__(self, m: int) -> bool: ...
-    def __add__(self, m: int) -> bdl_input_iterator:
-        """
-        Returns an iterator `m` patterns ahead.
-
-        Args:
-            m: The number of patterns to advance.
-
-        Returns:
-            The advanced iterator.
-        """
-
-    def __iadd__(self, m: int) -> Self:
-        """
-        Advances by `m` patterns.
-
-        Args:
-            m: The number of patterns to advance.
-
-        Returns:
-            Reference to `this`.
-        """
-
-    def __sub__(self, m: int) -> bdl_input_iterator:
-        """
-        Returns an iterator `m` patterns behind.
-
-        Args:
-            m: The number of patterns to go back.
-
-        Returns:
-            The iterator.
-        """
-
-    def __isub__(self, m: int) -> Self:
-        """
-        Goes back by `m` patterns.
-
-        Args:
-            m: The number of patterns to go back.
-
-        Returns:
-            Reference to `this`.
-        """
-
-    def __getitem__(self, m: int) -> bdl_input_iterator:
-        """
-        Returns an iterator `m` patterns ahead.
-
-        Args:
-            m: The number of patterns to advance.
-
-        Returns:
-            The advanced iterator.
-        """
-
-    def num_input_pairs(self) -> int:
-        """
-        Number of input BDL pairs.
-
-        Returns:
-            The number of input pairs.
-        """
-
-    def get_current_input_index(self) -> int:
-        """
-        The current input pattern.
-
-        Returns:
-            The pattern.
-        """
-
-    def get_layout(self) -> mnt.pyfiction._native.sidb.SiDBLayout:
-        """
-        Returns the layout that represents the current input state, equivalent to dereferencing the iterator.
-        """
-
-@overload
-def generate_bdl_input_pattern_layouts(
-    lyt: mnt.pyfiction._native.sidb.SiDBLayout, params: bdl_input_iterator_params = ...
-) -> list[mnt.pyfiction._native.sidb.SiDBLayout]:
-    """
-    Applies every input pattern to the input BDL pairs of a layout and
-    returns the resulting layouts, pattern `0` first; the input wires are
-    detected first.
-
-    Args:
-        lyt: The layout.
-        ps: Parameters for the BDL detection and the input encoding.
-
-    Returns:
-        One layout per input pattern.
-    """
-
-@overload
-def generate_bdl_input_pattern_layouts(
-    lyt: mnt.pyfiction._native.sidb.SiDBLayout, params: bdl_input_iterator_params, input_wires: Sequence[bdl_wire]
-) -> list[mnt.pyfiction._native.sidb.SiDBLayout]:
-    """
-    Applies every input pattern to the input BDL pairs of a layout and
-    returns the resulting layouts, pattern `0` first, with the input wires
-    given by the caller.
-
-    Args:
-        lyt: The layout.
-        ps: Parameters for the BDL pair detection and the input encoding.
-        input_wires: The input wires of `lyt`.
-
-    Returns:
-        One layout per input pattern.
-    """
-
-class bdl_pair:
+class BdlPair:
     """
     A Binary-dot Logic (BDL) pair is a pair of SiDBs that are close to
     each other and, thus, most likely share a charge.
@@ -281,7 +165,7 @@ class bdl_pair:
         each other via the `operator<` overload.
         """
 
-    def __eq__(self, arg: bdl_pair, /) -> bool:
+    def __eq__(self, arg: BdlPair, /) -> bool:
         """
         Equality operator. Also provides `operator!=` via `= default`.
 
@@ -292,8 +176,8 @@ class bdl_pair:
             `true` if this BDL pair is equal to the other, `false` otherwise.
         """
 
-    def __ne__(self, arg: bdl_pair, /) -> bool: ...
-    def __lt__(self, arg: bdl_pair, /) -> bool:
+    def __ne__(self, arg: BdlPair, /) -> bool: ...
+    def __lt__(self, arg: BdlPair, /) -> bool:
         """
         Less than operator.
 
@@ -306,7 +190,7 @@ class bdl_pair:
 
     def __hash__(self) -> int: ...
 
-class detect_bdl_pairs_params:
+class BdlPairDetectionParams:
     """Parameters for the BDL pair detection algorithms."""
 
     def __init__(self) -> None:
@@ -337,8 +221,8 @@ class detect_bdl_pairs_params:
 def detect_bdl_pairs(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     type: mnt.pyfiction._native.sidb.DotTag | None = None,
-    params: detect_bdl_pairs_params = ...,
-) -> list[bdl_pair]:
+    params: BdlPairDetectionParams = ...,
+) -> list[BdlPair]:
     """
     Detects the BDL pairs of an SiDB layout. Dots with the given tag are
     uniquely paired in increasing distance. The closest unpaired dots
@@ -360,7 +244,7 @@ def detect_bdl_pairs(
         The detected BDL pairs.
     """
 
-class bdl_wire_selection(enum.Enum):
+class BdlWireSelection(enum.Enum):
     """An enumeration of the selection of different types of wires."""
 
     ALL = 0
@@ -372,13 +256,13 @@ class bdl_wire_selection(enum.Enum):
     OUTPUT = 2
     """Select only BDL wires that end with output dots."""
 
-ALL: bdl_wire_selection = ...
+ALL: BdlWireSelection = ...
 
-INPUT: bdl_wire_selection = ...
+INPUT: BdlWireSelection = ...
 
-OUTPUT: bdl_wire_selection = ...
+OUTPUT: BdlWireSelection = ...
 
-class detect_bdl_wires_params:
+class BdlWireDetectionParams:
     """This struct encapsulates parameters used for detecting BDL wires."""
 
     def __init__(self) -> None:
@@ -394,13 +278,13 @@ class detect_bdl_wires_params:
     @threshold_bdl_interdistance.setter
     def threshold_bdl_interdistance(self, arg: float, /) -> None: ...
     @property
-    def bdl_pairs_params(self) -> detect_bdl_pairs_params:
+    def bdl_pairs_params(self) -> BdlPairDetectionParams:
         """Parameters for the `detect_bdl_pairs` algorithm."""
 
     @bdl_pairs_params.setter
-    def bdl_pairs_params(self, arg: detect_bdl_pairs_params, /) -> None: ...
+    def bdl_pairs_params(self, arg: BdlPairDetectionParams, /) -> None: ...
 
-class bdl_wire:
+class BdlWire:
     """
     A BDL wire is a chain of BDL pairs. Wires with fewer than two pairs or
     only NORMAL pairs have no port; direction updates leave their end
@@ -418,7 +302,7 @@ class bdl_wire:
         """Constructs an empty wire."""
 
     @overload
-    def __init__(self, p: Sequence[bdl_pair]) -> None:
+    def __init__(self, p: Sequence[BdlPair]) -> None:
         """
         Constructs a wire from BDL pairs and determines its direction.
 
@@ -430,7 +314,10 @@ class bdl_wire:
         """Direction and I/O flags of a BDL wire port."""
 
         def __init__(
-            self, direction: bdl_wire.port_direction.cardinal = ..., pi: bool = False, po: bool = False
+            self,
+            direction: BdlWire.port_direction.cardinal = ...,
+            pi: bool = False,
+            po: bool = False,
         ) -> None:
             """Constructs a port with a cardinal direction and input/output flags."""
 
@@ -475,30 +362,30 @@ class bdl_wire:
         def po(self, arg: bool, /) -> None: ...
 
     @property
-    def pairs(self) -> list[bdl_pair]:
+    def pairs(self) -> list[BdlPair]:
         """The BDL pairs of the wire."""
 
     @pairs.setter
-    def pairs(self, arg: Sequence[bdl_pair], /) -> None: ...
+    def pairs(self, arg: Sequence[BdlPair], /) -> None: ...
     @property
-    def direction(self) -> bdl_wire.port_direction:
+    def direction(self) -> BdlWire.port_direction:
         """Port direction of the wire."""
 
     @direction.setter
-    def direction(self, arg: bdl_wire.port_direction, /) -> None: ...
+    def direction(self, arg: BdlWire.port_direction, /) -> None: ...
     @property
-    def first_bdl_pair(self) -> bdl_pair | None:
+    def first_bdl_pair(self) -> BdlPair | None:
         """First BDL pair of the wire."""
 
     @first_bdl_pair.setter
-    def first_bdl_pair(self, arg: bdl_pair | None, /) -> None: ...
+    def first_bdl_pair(self, arg: BdlPair | None, /) -> None: ...
     @property
-    def last_bdl_pair(self) -> bdl_pair | None:
+    def last_bdl_pair(self) -> BdlPair | None:
         """Last BDL pair of the wire."""
 
     @last_bdl_pair.setter
-    def last_bdl_pair(self, arg: bdl_pair | None, /) -> None: ...
-    def add_bdl_pair(self, pair: bdl_pair) -> None:
+    def last_bdl_pair(self, arg: BdlPair | None, /) -> None: ...
+    def add_bdl_pair(self, pair: BdlPair) -> None:
         """
         Adds a BDL pair to the wire, keeps the pairs sorted, and updates the
         direction.
@@ -507,7 +394,7 @@ class bdl_wire:
             pair: The BDL pair to add.
         """
 
-    def erase_bdl_pair(self, pair: bdl_pair) -> None:
+    def erase_bdl_pair(self, pair: BdlPair) -> None:
         """
         Removes a BDL pair from the wire and updates the direction if it was
         present.
@@ -516,7 +403,7 @@ class bdl_wire:
             pair: The BDL pair to remove.
         """
 
-    def find_bdl_pair_by_type(self, t: mnt.pyfiction._native.sidb.DotTag) -> bdl_pair | None:
+    def find_bdl_pair_by_type(self, t: mnt.pyfiction._native.sidb.DotTag) -> BdlPair | None:
         """
         Finds the first BDL pair of the given type.
 
@@ -528,7 +415,7 @@ class bdl_wire:
             none.
         """
 
-    def __eq__(self, arg: bdl_wire, /) -> bool:
+    def __eq__(self, arg: BdlWire, /) -> bool:
         """
         Equality operator. Also provides `operator!=` via `= default`.
 
@@ -539,13 +426,13 @@ class bdl_wire:
             `true` if both wires hold the same pairs, port, and end pairs.
         """
 
-    def __ne__(self, arg: bdl_wire, /) -> bool: ...
+    def __ne__(self, arg: BdlWire, /) -> bool: ...
 
 def detect_bdl_wires(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
-    params: detect_bdl_wires_params = ...,
-    wire_selection: bdl_wire_selection = ...,
-) -> list[bdl_wire]:
+    params: BdlWireDetectionParams = ...,
+    wire_selection: BdlWireSelection = ...,
+) -> list[BdlWire]:
     """
     Detects the BDL wires of an SiDB layout: the BDL pairs of all types
     are chained into wires along the layout's lattice whenever two pairs
@@ -561,7 +448,7 @@ def detect_bdl_wires(
         The detected wires.
     """
 
-class operational_status(enum.Enum):
+class OperationalStatus(enum.Enum):
     """Possible operational status of a layout."""
 
     OPERATIONAL = 0
@@ -570,7 +457,7 @@ class operational_status(enum.Enum):
     NON_OPERATIONAL = 1
     """The layout is non-operational."""
 
-class operational_condition(enum.Enum):
+class OperationalCondition(enum.Enum):
     """
     Condition to decide whether a layout is operational or non-
     operational.
@@ -588,7 +475,7 @@ class operational_condition(enum.Enum):
     is considered non-operational.
     """
 
-class operational_analysis_strategy(enum.Enum):
+class OperationalAnalysisStrategy(enum.Enum):
     """
     Simulation method to determine if the layout is operational or non-
     operational. There are three possible
@@ -641,7 +528,7 @@ class operational_analysis_strategy(enum.Enum):
     This only provides any runtime benefits if kinks are rejected.
     """
 
-class is_operational_params:
+class OperationalParams:
     """Parameters for the `is_operational` algorithm."""
 
     def __init__(self) -> None:
@@ -678,36 +565,36 @@ class is_operational_params:
     @sim_engine.setter
     def sim_engine(self, arg: mnt.pyfiction._native.sidb.simulation.SimulationEngine, /) -> None: ...
     @property
-    def input_bdl_iterator_params(self) -> bdl_input_iterator_params:
+    def input_bdl_iterator_params(self) -> InputPatternParams:
         """Parameters for the BDL input iterator."""
 
     @input_bdl_iterator_params.setter
-    def input_bdl_iterator_params(self, arg: bdl_input_iterator_params, /) -> None: ...
+    def input_bdl_iterator_params(self, arg: InputPatternParams, /) -> None: ...
     @property
-    def op_condition(self) -> operational_condition:
+    def op_condition(self) -> OperationalCondition:
         """
         Condition to decide whether a layout is operational or non-
         operational.
         """
 
     @op_condition.setter
-    def op_condition(self, arg: operational_condition, /) -> None: ...
+    def op_condition(self, arg: OperationalCondition, /) -> None: ...
     @property
-    def strategy_to_analyze_operational_status(self) -> operational_analysis_strategy:
+    def strategy_to_analyze_operational_status(self) -> OperationalAnalysisStrategy:
         """
         Strategy to determine whether a layout is operational or non-
         operational.
         """
 
     @strategy_to_analyze_operational_status.setter
-    def strategy_to_analyze_operational_status(self, arg: operational_analysis_strategy, /) -> None: ...
+    def strategy_to_analyze_operational_status(self, arg: OperationalAnalysisStrategy, /) -> None: ...
 
 @overload
 def is_operational(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: is_operational_params = ...,
-) -> tuple[operational_status, int]:
+    params: OperationalParams = ...,
+) -> tuple[OperationalStatus, int]:
     """
     Determines whether an SiDB layout implements the given Boolean
     function(s). Every input pattern is applied to the input BDL pairs,
@@ -730,11 +617,11 @@ def is_operational(
 def is_operational(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: is_operational_params,
-    input_bdl_wire: Sequence[bdl_wire],
-    output_bdl_wire: Sequence[bdl_wire],
+    params: OperationalParams,
+    input_bdl_wire: Sequence[BdlWire],
+    output_bdl_wire: Sequence[BdlWire],
     canvas_lyt: mnt.pyfiction._native.sidb.SiDBLayout | None = None,
-) -> tuple[operational_status, int]:
+) -> tuple[OperationalStatus, int]:
     """
     Like the overload above, with the BDL wires and, optionally, the
     canvas given by the caller.
@@ -755,11 +642,11 @@ def is_operational(
 def is_operational(
     input_pattern_layouts: Sequence[mnt.pyfiction._native.sidb.SiDBLayout],
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: is_operational_params,
-    input_bdl_wire: Sequence[bdl_wire],
-    output_bdl_wire: Sequence[bdl_wire],
+    params: OperationalParams,
+    input_bdl_wire: Sequence[BdlWire],
+    output_bdl_wire: Sequence[BdlWire],
     canvas_lyt: mnt.pyfiction._native.sidb.SiDBLayout | None = None,
-) -> tuple[operational_status, int]:
+) -> tuple[OperationalStatus, int]:
     """
     Like the overloads above, but with one layout per input pattern given
     by the caller instead of applying the patterns to the input BDL pairs.
@@ -786,7 +673,7 @@ def is_operational(
 def operational_input_patterns(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: is_operational_params = ...,
+    params: OperationalParams = ...,
 ) -> set[int]:
     """
     Determines the input patterns for which the layout is operational.
@@ -804,9 +691,9 @@ def operational_input_patterns(
 def operational_input_patterns(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: is_operational_params,
-    input_bdl_wire: Sequence[bdl_wire],
-    output_bdl_wire: Sequence[bdl_wire],
+    params: OperationalParams,
+    input_bdl_wire: Sequence[BdlWire],
+    output_bdl_wire: Sequence[BdlWire],
     canvas_lyt: mnt.pyfiction._native.sidb.SiDBLayout | None = None,
 ) -> set[int]:
     """
@@ -829,7 +716,7 @@ def operational_input_patterns(
 def kink_induced_non_operational_input_patterns(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: is_operational_params = ...,
+    params: OperationalParams = ...,
 ) -> set[int]:
     """
     Determines the input patterns for which kinks render the layout non-
@@ -849,9 +736,9 @@ def kink_induced_non_operational_input_patterns(
 def kink_induced_non_operational_input_patterns(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: is_operational_params,
-    input_bdl_wire: Sequence[bdl_wire],
-    output_bdl_wire: Sequence[bdl_wire],
+    params: OperationalParams,
+    input_bdl_wire: Sequence[BdlWire],
+    output_bdl_wire: Sequence[BdlWire],
     canvas_lyt: mnt.pyfiction._native.sidb.SiDBLayout | None = None,
 ) -> set[int]:
     """
@@ -875,7 +762,7 @@ def kink_induced_non_operational_input_patterns(
 def is_kink_induced_non_operational(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: is_operational_params = ...,
+    params: OperationalParams = ...,
 ) -> bool:
     """
     Determines whether kinks are the reason the layout is non-operational.
@@ -894,9 +781,9 @@ def is_kink_induced_non_operational(
 def is_kink_induced_non_operational(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: is_operational_params,
-    input_bdl_wire: Sequence[bdl_wire],
-    output_bdl_wire: Sequence[bdl_wire],
+    params: OperationalParams,
+    input_bdl_wire: Sequence[BdlWire],
+    output_bdl_wire: Sequence[BdlWire],
     canvas_lyt: mnt.pyfiction._native.sidb.SiDBLayout | None = None,
 ) -> bool:
     """
@@ -916,7 +803,7 @@ def is_kink_induced_non_operational(
         `true` if the layout is non-operational because of kinks.
     """
 
-class parameter_point:
+class ParameterPoint:
     """The parameter point holds one parameter value per sweep dimension."""
 
     @overload
@@ -940,7 +827,7 @@ class parameter_point:
             The parameter values for each dimension.
         """
 
-    def __eq__(self, other: parameter_point) -> bool:
+    def __eq__(self, other: ParameterPoint) -> bool:
         """
         Equality operator. Checks if this parameter point is equal to another
         point within a specified tolerance. The tolerance is defined by
@@ -953,7 +840,7 @@ class parameter_point:
             `true` iff the parameter points are equal.
         """
 
-    def __ne__(self, other: parameter_point) -> bool:
+    def __ne__(self, other: ParameterPoint) -> bool:
         """
         Inequality operator. Checks if this parameter point is not equal to another point within the tolerance defined by `constants::ERROR_MARGIN`.
 
@@ -969,7 +856,7 @@ class parameter_point:
         Returns the value of the parameter at the given index. Raises `IndexError` if the index is out of range.
         """
 
-class sweep_parameter(enum.Enum):
+class SweepParameter(enum.Enum):
     """Possible sweep parameters for the operational domain computation."""
 
     EPSILON_R = 0
@@ -981,7 +868,7 @@ class sweep_parameter(enum.Enum):
     MU_MINUS = 2
     """The energy transition level."""
 
-class critical_temperature_domain:
+class CriticalTemperatureDomain:
     """
     The `critical_temperature_domain` class collects the critical
     temperature and the operational status for a range of different
@@ -1003,12 +890,12 @@ class critical_temperature_domain:
         """Default constructor."""
 
     @overload
-    def __init__(self, dims: Sequence[sweep_parameter]) -> None:
+    def __init__(self, dims: Sequence[SweepParameter]) -> None:
         """
         Constructs a critical temperature domain with the given sweep dimensions.
         """
 
-    def get_dimension(self, index: int) -> sweep_parameter:
+    def get_dimension(self, index: int) -> SweepParameter:
         """
         Returns a specific dimension by index.
 
@@ -1046,28 +933,28 @@ class critical_temperature_domain:
             The maximum critical temperature.
         """
 
-    def __getitem__(self, arg: parameter_point, /) -> tuple[operational_status, float]:
+    def __getitem__(self, arg: ParameterPoint, /) -> tuple[OperationalStatus, float]:
         """
         Returns the value stored for the given parameter point, raising a KeyError if it does not exist.
         """
 
-    def __setitem__(self, arg0: parameter_point, arg1: tuple[operational_status, float], /) -> None:
+    def __setitem__(self, arg0: ParameterPoint, arg1: tuple[OperationalStatus, float], /) -> None:
         """Sets the value stored for the given parameter point."""
 
-    def __contains__(self, arg: parameter_point, /) -> bool:
+    def __contains__(self, arg: ParameterPoint, /) -> bool:
         """Checks whether the given parameter point is contained in the domain."""
 
     def __len__(self) -> int:
         """Returns the number of parameter points stored in the domain."""
 
-    def __iter__(self) -> Iterator[parameter_point]:
+    def __iter__(self) -> Iterator[ParameterPoint]:
         """Returns an iterator over the parameter points stored in the domain."""
 
-    def keys(self) -> list[parameter_point]: ...
-    def values(self) -> list[tuple[operational_status, float]]: ...
-    def items(self) -> list[tuple[parameter_point, tuple[operational_status, float]]]: ...
+    def keys(self) -> list[ParameterPoint]: ...
+    def values(self) -> list[tuple[OperationalStatus, float]]: ...
+    def items(self) -> list[tuple[ParameterPoint, tuple[OperationalStatus, float]]]: ...
 
-class operational_domain:
+class OperationalDomain:
     """
     An operational domain is a set of simulation parameter values for
     which a given SiDB layout is logically operational. This means that a
@@ -1093,7 +980,7 @@ class operational_domain:
         """Default constructor."""
 
     @overload
-    def __init__(self, dims: Sequence[sweep_parameter]) -> None:
+    def __init__(self, dims: Sequence[SweepParameter]) -> None:
         """
         Standard constructor.
 
@@ -1101,7 +988,7 @@ class operational_domain:
             dims: Dimensions.
         """
 
-    def add_dimension(self, dim: sweep_parameter) -> None:
+    def add_dimension(self, dim: SweepParameter) -> None:
         """
         Adds a dimension to sweep over. The first dimension is the x
         dimension, the second dimension is the y dimension, etc.
@@ -1110,7 +997,7 @@ class operational_domain:
             dim: The dimension to add.
         """
 
-    def get_dimension(self, index: int) -> sweep_parameter:
+    def get_dimension(self, index: int) -> SweepParameter:
         """
         Returns a specific dimension by index.
 
@@ -1132,43 +1019,43 @@ class operational_domain:
             The number of dimensions to sweep over.
         """
 
-    def __getitem__(self, arg: parameter_point, /) -> operational_status:
+    def __getitem__(self, arg: ParameterPoint, /) -> OperationalStatus:
         """
         Returns the operational status stored for the given parameter point, raising a KeyError if it does not exist.
         """
 
-    def __setitem__(self, arg0: parameter_point, arg1: operational_status, /) -> None:
+    def __setitem__(self, arg0: ParameterPoint, arg1: OperationalStatus, /) -> None:
         """Sets the operational status stored for the given parameter point."""
 
-    def __contains__(self, arg: parameter_point, /) -> bool:
+    def __contains__(self, arg: ParameterPoint, /) -> bool:
         """Checks whether the given parameter point is contained in the domain."""
 
     def __len__(self) -> int:
         """Returns the number of parameter points stored in the domain."""
 
-    def __iter__(self) -> Iterator[parameter_point]:
+    def __iter__(self) -> Iterator[ParameterPoint]:
         """Returns an iterator over the parameter points stored in the domain."""
 
-    def keys(self) -> list[parameter_point]: ...
-    def values(self) -> list[operational_status]: ...
-    def items(self) -> list[tuple[parameter_point, operational_status]]: ...
+    def keys(self) -> list[ParameterPoint]: ...
+    def values(self) -> list[OperationalStatus]: ...
+    def items(self) -> list[tuple[ParameterPoint, OperationalStatus]]: ...
 
-class operational_domain_value_range:
+class SweepRange:
     """
     A range of values for a dimension sweep. The range is defined by a
     minimum value, a maximum value and a step size.
     """
 
     @overload
-    def __init__(self, dimension: sweep_parameter) -> None: ...
+    def __init__(self, dimension: SweepParameter) -> None: ...
     @overload
-    def __init__(self, dimension: sweep_parameter, min: float, max: float, step: float) -> None: ...
+    def __init__(self, dimension: SweepParameter, min: float, max: float, step: float) -> None: ...
     @property
-    def dimension(self) -> sweep_parameter:
+    def dimension(self) -> SweepParameter:
         """The sweep parameter of the dimension."""
 
     @dimension.setter
-    def dimension(self, arg: sweep_parameter, /) -> None: ...
+    def dimension(self, arg: SweepParameter, /) -> None: ...
     @property
     def min(self) -> float:
         """The minimum value of the dimension sweep."""
@@ -1188,7 +1075,7 @@ class operational_domain_value_range:
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
-class operational_domain_params:
+class OperationalDomainParams:
     """
     Parameters for the operational domain computation. The parameters are
     used across the different operational domain computation algorithms.
@@ -1198,7 +1085,7 @@ class operational_domain_params:
         """Default constructor."""
 
     @property
-    def operational_params(self) -> is_operational_params:
+    def operational_params(self) -> OperationalParams:
         """
         Operational parameters. Their timeout bounds the entire domain
         calculation across all parameter points and workers. Finite budgets
@@ -1206,9 +1093,9 @@ class operational_domain_params:
         """
 
     @operational_params.setter
-    def operational_params(self, arg: is_operational_params, /) -> None: ...
+    def operational_params(self, arg: OperationalParams, /) -> None: ...
     @property
-    def sweep_dimensions(self) -> list[operational_domain_value_range]:
+    def sweep_dimensions(self) -> list[SweepRange]:
         """
         Dimensions to sweep over together with their value ranges, ordered by
         priority.
@@ -1219,7 +1106,7 @@ class operational_domain_params:
         """
 
     @sweep_dimensions.setter
-    def sweep_dimensions(self, arg: Sequence[operational_domain_value_range], /) -> None: ...
+    def sweep_dimensions(self, arg: Sequence[SweepRange], /) -> None: ...
     @property
     def number_of_threads(self) -> int:
         """
@@ -1254,7 +1141,7 @@ class operational_domain_params:
     @on_worker_progress.setter
     def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
 
-class operational_domain_stats:
+class OperationalDomainStats:
     """
     Statistics for the operational domain computation. The statistics are
     used across the different operational domain computation algorithms.
@@ -1293,9 +1180,9 @@ class operational_domain_stats:
 def operational_domain_grid_search(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: operational_domain_params = ...,
-    stats: operational_domain_stats | None = None,
-) -> operational_domain:
+    params: OperationalDomainParams = ...,
+    stats: OperationalDomainStats | None = None,
+) -> OperationalDomain:
     """
     Computes the operational domain of the given SiDB layout. The
     operational domain is the set of all parameter combinations for which
@@ -1338,9 +1225,9 @@ def operational_domain_random_sampling(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
-    params: operational_domain_params = ...,
-    stats: operational_domain_stats | None = None,
-) -> operational_domain:
+    params: OperationalDomainParams = ...,
+    stats: OperationalDomainStats | None = None,
+) -> OperationalDomain:
     """
     Computes the operational domain of the given SiDB layout. The
     operational domain is the set of all parameter combinations for which
@@ -1382,9 +1269,9 @@ def operational_domain_flood_fill(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
-    params: operational_domain_params = ...,
-    stats: operational_domain_stats | None = None,
-) -> operational_domain:
+    params: OperationalDomainParams = ...,
+    stats: OperationalDomainStats | None = None,
+) -> OperationalDomain:
     """
     Computes the operational domain of the given SiDB layout. The
     operational domain is the set of all parameter combinations for which
@@ -1442,9 +1329,9 @@ def operational_domain_contour_tracing(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
-    params: operational_domain_params = ...,
-    stats: operational_domain_stats | None = None,
-) -> operational_domain:
+    params: OperationalDomainParams = ...,
+    stats: OperationalDomainStats | None = None,
+) -> OperationalDomain:
     """
     Computes the operational domain of the given SiDB layout. The
     operational domain is the set of all parameter combinations for which
@@ -1499,9 +1386,9 @@ def operational_domain_contour_tracing(
 def critical_temperature_domain_grid_search(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    params: operational_domain_params = ...,
-    stats: operational_domain_stats | None = None,
-) -> critical_temperature_domain:
+    params: OperationalDomainParams = ...,
+    stats: OperationalDomainStats | None = None,
+) -> CriticalTemperatureDomain:
     """
     Computes the critical temperature domain of the given SiDB layout. The
     critical temperature domain consists of all parameter combinations for
@@ -1542,9 +1429,9 @@ def critical_temperature_domain_random_sampling(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
-    params: operational_domain_params = ...,
-    stats: operational_domain_stats | None = None,
-) -> critical_temperature_domain:
+    params: OperationalDomainParams = ...,
+    stats: OperationalDomainStats | None = None,
+) -> CriticalTemperatureDomain:
     """
     Computes the critical temperature domain of the given SiDB layout. The
     critical temperature domain consists of all parameter combinations for
@@ -1584,9 +1471,9 @@ def critical_temperature_domain_flood_fill(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
-    params: operational_domain_params = ...,
-    stats: operational_domain_stats | None = None,
-) -> critical_temperature_domain:
+    params: OperationalDomainParams = ...,
+    stats: OperationalDomainStats | None = None,
+) -> CriticalTemperatureDomain:
     """
     Computes the critical temperature domain of the given SiDB layout. The
     critical temperature domain consists of all parameter combinations for
@@ -1637,9 +1524,9 @@ def critical_temperature_domain_contour_tracing(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
     samples: int,
-    params: operational_domain_params = ...,
-    stats: operational_domain_stats | None = None,
-) -> critical_temperature_domain:
+    params: OperationalDomainParams = ...,
+    stats: OperationalDomainStats | None = None,
+) -> CriticalTemperatureDomain:
     """
     Computes the critical temperature domain of the given SiDB layout. The
     critical temperature domain consists of all parameter combinations for
@@ -1690,7 +1577,7 @@ def critical_temperature_domain_contour_tracing(
                                random sampling accept any number.
     """
 
-class operational_domain_ratio_params:
+class OperationalDomainRatioParams:
     """
     Parameters for computing the ratio of operational parameter points
     around a specified parameter point to the total number of parameter
@@ -1701,17 +1588,17 @@ class operational_domain_ratio_params:
         """Default constructor."""
 
     @property
-    def op_domain_params(self) -> operational_domain_params:
+    def op_domain_params(self) -> OperationalDomainParams:
         """Parameters for the operational domain computation."""
 
     @op_domain_params.setter
-    def op_domain_params(self, arg: operational_domain_params, /) -> None: ...
+    def op_domain_params(self, arg: OperationalDomainParams, /) -> None: ...
 
 def operational_domain_ratio(
     lyt: mnt.pyfiction._native.sidb.SiDBLayout,
     spec: Sequence[mnt.pyfiction._native.synthesis.TruthTable],
-    pp: parameter_point,
-    params: operational_domain_ratio_params = ...,
+    pp: ParameterPoint,
+    params: OperationalDomainRatioParams = ...,
 ) -> float:
     """
     Calculates the ratio of operational parameter points surrounding a

@@ -15,11 +15,21 @@ from typing import overload
 
 import mnt.pyfiction._native.sidb
 import mnt.pyfiction._native.sidb.model
-from mnt.pyfiction._native.sidb.simulation import analysis as analysis
-from mnt.pyfiction._native.sidb.simulation import defects as defects
-from mnt.pyfiction._native.sidb.simulation import engines as engines
-from mnt.pyfiction._native.sidb.simulation import io as io
-from mnt.pyfiction._native.sidb.simulation import logic as logic
+from mnt.pyfiction._native.sidb.simulation import (
+    analysis as analysis,
+)
+from mnt.pyfiction._native.sidb.simulation import (
+    defects as defects,
+)
+from mnt.pyfiction._native.sidb.simulation import (
+    engines as engines,
+)
+from mnt.pyfiction._native.sidb.simulation import (
+    io as io,
+)
+from mnt.pyfiction._native.sidb.simulation import (
+    logic as logic,
+)
 
 class SimulationEngine(enum.Enum):
     """Selector for the available SiDB simulation engines."""

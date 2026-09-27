@@ -38,15 +38,15 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.energy_state
+.. autoclass:: mnt.pyfiction.sidb.analysis.EnergyState
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.energy_distribution
+.. autoclass:: mnt.pyfiction.sidb.analysis.EnergyDistribution
    :members:
 
-.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.calculate_energy_distribution
+.. autofunction:: mnt.pyfiction.sidb.analysis.calculate_energy_distribution
 
-.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.minimum_energy
+.. autofunction:: mnt.pyfiction.sidb.analysis.minimum_energy
 ```
 
 :::
@@ -105,40 +105,29 @@
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::analysis::calculate_energy_and_state_type_with_kinks_accepted
-
-```
-
-```{doxygenfunction} fiction::sidb::simulation::analysis::calculate_energy_and_state_type_with_kinks_rejected
-
-```
-
 :::
 
 :::{tab-item} Python
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.critical_temperature_stats
+.. autoclass:: mnt.pyfiction.sidb.analysis.CriticalTemperatureStats
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.critical_temperature_params
+.. autoclass:: mnt.pyfiction.sidb.analysis.CriticalTemperatureParams
    :members:
 
-.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.critical_temperature_gate_based
+.. autofunction:: mnt.pyfiction.sidb.analysis.critical_temperature_gate_based
 
-.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.critical_temperature_non_gate_based
+.. autofunction:: mnt.pyfiction.sidb.analysis.critical_temperature_non_gate_based
 
-.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.occupation_probability_gate_based
+.. autofunction:: mnt.pyfiction.sidb.analysis.occupation_probability_gate_based
 
-.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.occupation_probability_non_gate_based
+.. autofunction:: mnt.pyfiction.sidb.analysis.occupation_probability_non_gate_based
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.state_type
+.. autoclass:: mnt.pyfiction.sidb.analysis.StateType
    :members:
 
-.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.calculate_energy_and_state_type_with_kinks_accepted
-
-.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.calculate_energy_and_state_type_with_kinks_rejected
 ```
 
 :::
@@ -177,13 +166,13 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.time_to_solution_params
+.. autoclass:: mnt.pyfiction.sidb.analysis.TimeToSolutionParams
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.time_to_solution_stats
+.. autoclass:: mnt.pyfiction.sidb.analysis.TimeToSolutionStats
    :members:
 
-.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.time_to_solution_for_given_simulation_results
+.. autofunction:: mnt.pyfiction.sidb.analysis.time_to_solution_for_given_simulation_results
 ```
 
 :::
@@ -210,10 +199,10 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.physically_valid_parameters_domain
+.. autoclass:: mnt.pyfiction.sidb.analysis.PhysicallyValidParametersDomain
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.physically_valid_parameters
+.. autoclass:: mnt.pyfiction.sidb.analysis.physically_valid_parameters
    :members:
 ```
 
@@ -245,7 +234,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.can_positive_charges_occur
+.. autofunction:: mnt.pyfiction.sidb.analysis.can_positive_charges_occur
 ```
 
 :::
@@ -284,16 +273,16 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.transition_type
+.. autoclass:: mnt.pyfiction.sidb.analysis.TransitionType
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.population_stability_information
+.. autoclass:: mnt.pyfiction.sidb.analysis.PopulationStabilityInformation
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.physical_population_stability_params
+.. autoclass:: mnt.pyfiction.sidb.analysis.PhysicalPopulationStabilityParams
    :members:
 
-.. autofunction:: mnt.pyfiction.sidb.simulation.analysis.physical_population_stability
+.. autofunction:: mnt.pyfiction.sidb.analysis.physical_population_stability
 ```
 
 :::

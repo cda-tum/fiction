@@ -40,7 +40,7 @@ from mnt.pyfiction._native.sidb.model import (
     sign_to_charge_state,
 )
 
-from . import generators, io, simulation
+from . import analysis, design, io, simulation
 
 __all__ = [
     "SIDB_CHARGE_STATES_BASE_2",
@@ -54,10 +54,11 @@ __all__ = [
     "LatticeSite",
     "SiDBLayout",
     "SimulationParams",
+    "analysis",
     "charge_configuration_to_string",
     "charge_state_to_sign",
     "defect_extent",
-    "generators",
+    "design",
     "io",
     "is_charged_defect_type",
     "is_negatively_charged_defect",

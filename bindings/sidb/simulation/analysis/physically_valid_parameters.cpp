@@ -43,7 +43,7 @@ void physically_valid_parameters(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::sidb::simulation::domain<fiction::sidb::simulation::logic::parameter_point, uint64_t>>(
-        m, "physically_valid_parameters_domain")
+        m, "PhysicallyValidParametersDomain")
         .def(py::init<>(), "Default constructor.")
         .def(
             "get_excited_state_number_for_parameter",

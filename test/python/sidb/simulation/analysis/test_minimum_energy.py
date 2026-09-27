@@ -20,8 +20,8 @@ from mnt.pyfiction.sidb import (
     SiDBLayout,
     SimulationParams,
 )
+from mnt.pyfiction.sidb.analysis import minimum_energy
 from mnt.pyfiction.sidb.simulation import PotentialLandscape
-from mnt.pyfiction.sidb.simulation.analysis import minimum_energy
 
 
 @pytest.mark.parametrize(

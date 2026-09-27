@@ -40,7 +40,7 @@ void energy_distribution(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<fiction::sidb::simulation::analysis::energy_state>(m, "energy_state")
+    py::class_<fiction::sidb::simulation::analysis::energy_state>(m, "EnergyState")
         .def(py::init<double, uint64_t>(), py::arg("electrostatic_potential_energy"), py::arg("degeneracy"),
              DOC(fiction_sidb_simulation_analysis_energy_state))
         .def_rw("electrostatic_potential_energy",
@@ -49,7 +49,7 @@ void energy_distribution(nanobind::module_& m)
         .def_rw("degeneracy", &fiction::sidb::simulation::analysis::energy_state::degeneracy,
                 DOC(fiction_sidb_simulation_analysis_energy_state_degeneracy));
 
-    py::class_<fiction::sidb::simulation::analysis::energy_distribution>(m, "energy_distribution")
+    py::class_<fiction::sidb::simulation::analysis::energy_distribution>(m, "EnergyDistribution")
         .def(py::init<>(), "Default constructor.")
         .def("get_nth_state", &fiction::sidb::simulation::analysis::energy_distribution::get_nth_state,
              py::arg("state_index"), DOC(fiction_sidb_simulation_analysis_energy_distribution_get_nth_state))

@@ -17,22 +17,21 @@ from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import finite_float, positive_int
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.statistics import stats_to_dict
-from mnt.pyfiction.sidb.simulation.io import (
-    sample_writing_mode,
-    write_operational_domain,
-    write_operational_domain_params,
-)
-from mnt.pyfiction.sidb.simulation.logic import (
-    operational_analysis_strategy,
-    operational_condition,
+from mnt.pyfiction.sidb.analysis import (
+    OperationalAnalysisStrategy,
+    OperationalCondition,
+    OperationalDomainParams,
+    SweepParameter,
+    SweepRange,
     operational_domain_contour_tracing,
     operational_domain_flood_fill,
     operational_domain_grid_search,
-    operational_domain_params,
     operational_domain_random_sampling,
-    operational_domain_stats,
-    operational_domain_value_range,
-    sweep_parameter,
+)
+from mnt.pyfiction.sidb.io import (
+    SampleWritingMode,
+    WriteOperationalDomainParams,
+    write_operational_domain,
 )
 
 if TYPE_CHECKING:
@@ -44,9 +43,9 @@ if TYPE_CHECKING:
 from ._common import ENGINES, _active_sidb_layout, _apply_physical, _engine_argument, _physical_arguments
 
 SWEEPS = {
-    "epsilon_r": sweep_parameter.EPSILON_R,
-    "lambda_tf": sweep_parameter.LAMBDA_TF,
-    "mu_minus": sweep_parameter.MU_MINUS,
+    "epsilon_r": SweepParameter.EPSILON_R,
+    "lambda_tf": SweepParameter.LAMBDA_TF,
+    "mu_minus": SweepParameter.MU_MINUS,
 }
 """The ``--x-sweep`` names and the parameters they sweep."""
 
@@ -114,29 +113,30 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
     spec = [session.truth_tables.current()]
     samples = next((n for n in (args.random_sampling, args.flood_fill, args.contour_tracing) if n is not None), None)
 
-    params = operational_domain_params()
+    params = OperationalDomainParams()
     params.on_progress = session.report_progress
     params.on_worker_progress = session.report_worker_progress
     params.operational_params.sim_engine = ENGINES[args.engine]
     parameters = _apply_physical(params.operational_params.simulation_parameters, args)
     if args.sketch:
-        params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
-        params.operational_params.op_condition = operational_condition.REJECT_KINKS
+        params.operational_params.strategy_to_analyze_operational_status = OperationalAnalysisStrategy.FILTER_ONLY
+        params.operational_params.op_condition = OperationalCondition.REJECT_KINKS
     params.sweep_dimensions = _sweep_dimensions(args)
 
-    stats = operational_domain_stats()
     if args.random_sampling is not None:
-        domain = operational_domain_random_sampling(layout, spec, args.random_sampling, params, stats)
+        result = operational_domain_random_sampling(layout, spec, args.random_sampling, params=params)
     elif args.flood_fill is not None:
-        domain = operational_domain_flood_fill(layout, spec, args.flood_fill, params, stats)
+        result = operational_domain_flood_fill(layout, spec, args.flood_fill, params=params)
     elif args.contour_tracing is not None:
-        domain = operational_domain_contour_tracing(layout, spec, args.contour_tracing, params, stats)
+        result = operational_domain_contour_tracing(layout, spec, args.contour_tracing, params=params)
     else:
-        domain = operational_domain_grid_search(layout, spec, params, stats)
+        result = operational_domain_grid_search(layout, spec, params=params)
+    domain = result.domain
+    stats = result.stats
 
-    writing = write_operational_domain_params()
+    writing = WriteOperationalDomainParams()
     writing.writing_mode = (
-        sample_writing_mode.OPERATIONAL_ONLY if args.operational_only else sample_writing_mode.ALL_SAMPLES
+        SampleWritingMode.OPERATIONAL_ONLY if args.operational_only else SampleWritingMode.ALL_SAMPLES
     )
     write_operational_domain(domain, str(args.file), writing)
     session.info(
@@ -156,7 +156,7 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
     }
 
 
-def _sweep_dimensions(args: argparse.Namespace) -> list[operational_domain_value_range]:
+def _sweep_dimensions(args: argparse.Namespace) -> list[SweepRange]:
     """Validate and construct the physical parameter sweeps.
 
     Args:
@@ -185,5 +185,5 @@ def _sweep_dimensions(args: argparse.Namespace) -> list[operational_domain_value
         if step <= 0 or low > high:
             msg = f"the {axis} axis needs min <= max and a positive step"
             raise CommandError(msg)
-        sweeps.append(operational_domain_value_range(SWEEPS[name], low, high, step))
+        sweeps.append(SweepRange(SWEEPS[name], low, high, step))
     return sweeps

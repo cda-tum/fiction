@@ -45,7 +45,7 @@ void detect_bdl_pairs(nanobind::module_& m)
     using fiction::sidb::layout;
     using bdl_pair_t = fiction::sidb::simulation::logic::bdl_pair;
 
-    py::class_<bdl_pair_t>(m, "bdl_pair", DOC(fiction_sidb_simulation_logic_bdl_pair))
+    py::class_<bdl_pair_t>(m, "BdlPair", DOC(fiction_sidb_simulation_logic_bdl_pair))
         .def(py::init<>(), DOC(fiction_sidb_simulation_logic_bdl_pair_bdl_pair))
         .def(py::init<fiction::sidb::dot_tag, lattice_site, lattice_site>(), py::arg("t"), py::arg("u"), py::arg("l"),
              DOC(fiction_sidb_simulation_logic_bdl_pair_bdl_pair_2))
@@ -64,7 +64,7 @@ void detect_bdl_pairs(nanobind::module_& m)
         .def("__repr__", [](const bdl_pair_t& p) { return "bdl_pair(" + p.upper.str() + ", " + p.lower.str() + ")"; });
 
     py::class_<fiction::sidb::simulation::logic::detect_bdl_pairs_params>(
-        m, "detect_bdl_pairs_params", DOC(fiction_sidb_simulation_logic_detect_bdl_pairs_params))
+        m, "BdlPairDetectionParams", DOC(fiction_sidb_simulation_logic_detect_bdl_pairs_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("minimum_distance", &fiction::sidb::simulation::logic::detect_bdl_pairs_params::minimum_distance,
                 DOC(fiction_sidb_simulation_logic_detect_bdl_pairs_params_minimum_distance))

@@ -45,7 +45,7 @@ void detect_bdl_wires(nanobind::module_& m)
     using fiction::sidb::simulation::logic::bdl_wire;
 
     py::enum_<fiction::sidb::simulation::logic::bdl_wire_selection>(
-        m, "bdl_wire_selection", DOC(fiction_sidb_simulation_logic_bdl_wire_selection))
+        m, "BdlWireSelection", DOC(fiction_sidb_simulation_logic_bdl_wire_selection))
         .value("ALL", fiction::sidb::simulation::logic::bdl_wire_selection::ALL,
                DOC(fiction_sidb_simulation_logic_bdl_wire_selection_ALL))
         .value("INPUT", fiction::sidb::simulation::logic::bdl_wire_selection::INPUT,
@@ -55,7 +55,7 @@ void detect_bdl_wires(nanobind::module_& m)
         .export_values();
 
     py::class_<fiction::sidb::simulation::logic::detect_bdl_wires_params>(
-        m, "detect_bdl_wires_params", DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params))
+        m, "BdlWireDetectionParams", DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params))
         .def(py::init<>(), DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params))
         .def_rw("threshold_bdl_interdistance",
                 &fiction::sidb::simulation::logic::detect_bdl_wires_params::threshold_bdl_interdistance,
@@ -63,7 +63,7 @@ void detect_bdl_wires(nanobind::module_& m)
         .def_rw("bdl_pairs_params", &fiction::sidb::simulation::logic::detect_bdl_wires_params::bdl_pairs_params,
                 DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params_bdl_pairs_params));
 
-    auto wire = py::class_<bdl_wire>(m, "bdl_wire", DOC(fiction_sidb_simulation_logic_bdl_wire));
+    auto wire = py::class_<bdl_wire>(m, "BdlWire", DOC(fiction_sidb_simulation_logic_bdl_wire));
     // The port belongs to the wire's Python API; importing fcn here would cycle through sidb.
     auto port =
         py::class_<fiction::fcn::port_direction>(wire, "port_direction", "Direction and I/O flags of a BDL wire port.");

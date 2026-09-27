@@ -16,11 +16,10 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import positive_float, probability
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction.sidb.simulation.analysis import (
+from mnt.pyfiction.sidb.analysis import (
+    CriticalTemperatureParams,
     critical_temperature_gate_based,
     critical_temperature_non_gate_based,
-    critical_temperature_params,
-    critical_temperature_stats,
 )
 
 if TYPE_CHECKING:
@@ -61,22 +60,23 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
     the erroneous states are those with a wrong output.
     """
     layout = _active_sidb_layout(session)
-    params = critical_temperature_params()
+    params = CriticalTemperatureParams()
     params.on_progress = session.report_progress
     params.on_worker_progress = session.report_worker_progress
     params.confidence_level = args.confidence
     params.max_temperature = args.max_temperature
     params.operational_params.sim_engine = ENGINES[args.engine]
     parameters = _apply_physical(params.operational_params.simulation_parameters, args)
-    stats = critical_temperature_stats()
     if args.gate_based:
         if layout.num_pis() == 0 or layout.num_pos() == 0:
             msg = "gate-based simulation needs a layout with input and output dots"
             raise CommandError(msg)
         spec = [session.truth_tables.current()]
-        temperature = critical_temperature_gate_based(layout, spec, params, stats)
+        result = critical_temperature_gate_based(layout, spec, params=params)
     else:
-        temperature = critical_temperature_non_gate_based(layout, params, stats)
+        result = critical_temperature_non_gate_based(layout, params=params)
+    temperature = result.temperature
+    stats = result.stats
 
     # the statistics leave the energy gap at infinity when no erroneous state exists, and JSON has no infinity
     energy_gap = stats.energy_between_ground_state_and_first_erroneous

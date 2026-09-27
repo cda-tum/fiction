@@ -15,16 +15,16 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from mnt.pyfiction.sidb.analysis import (
+    OperationalDomainParams,
+    OperationalDomainRatioParams,
+    ParameterPoint,
+    SweepParameter,
+    SweepRange,
+    operational_domain_ratio,
+)
 from mnt.pyfiction.sidb.io import read_sqd_layout
 from mnt.pyfiction.sidb.simulation import SimulationEngine
-from mnt.pyfiction.sidb.simulation.logic import (
-    operational_domain_params,
-    operational_domain_ratio,
-    operational_domain_ratio_params,
-    operational_domain_value_range,
-    parameter_point,
-    sweep_parameter,
-)
 from mnt.pyfiction.synthesis import (
     standard_functions,
 )
@@ -36,16 +36,16 @@ if TYPE_CHECKING:
 def test_and_gate_100_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
-    params = operational_domain_params()
+    params = OperationalDomainParams()
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
 
     params.sweep_dimensions = [
-        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.00, 6.00, 0.1),
-        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 6.00, 0.1),
+        SweepRange(SweepParameter.EPSILON_R, 5.00, 6.00, 0.1),
+        SweepRange(SweepParameter.LAMBDA_TF, 5.00, 6.00, 0.1),
     ]
 
-    ratio_params = operational_domain_ratio_params()
+    ratio_params = OperationalDomainRatioParams()
     ratio_params.op_domain_params = params
 
     assert ratio_params.op_domain_params.operational_params.simulation_parameters.base == 2
@@ -53,7 +53,7 @@ def test_and_gate_100_lattice(resources_dir):
     operational_domain_ratio_result = operational_domain_ratio(
         lyt,
         [standard_functions("and")[0]],
-        parameter_point([5.6, 5.0]),
+        ParameterPoint([5.6, 5.0]),
         ratio_params,
     )
 
@@ -72,24 +72,24 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
                 import time
                 from mnt.pyfiction.sidb.io import read_sqd_layout
                 from mnt.pyfiction.sidb.simulation import SimulationEngine
-                from mnt.pyfiction.sidb.simulation.logic import (
-                    operational_domain_params,
+                from mnt.pyfiction.sidb.analysis import (
+                    OperationalDomainParams,
                     operational_domain_ratio,
-                    operational_domain_ratio_params,
-                    operational_domain_value_range,
-                    parameter_point,
-                    sweep_parameter,
+                    OperationalDomainRatioParams,
+                    SweepRange,
+                    ParameterPoint,
+                    SweepParameter,
                 )
                 from mnt.pyfiction.synthesis import standard_functions
 
                 layout = read_sqd_layout(sys.argv[1])
-                params = operational_domain_params()
+                params = OperationalDomainParams()
                 params.number_of_threads = 2
                 params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
                 params.operational_params.simulation_parameters.base = 2
                 params.sweep_dimensions = [
-                    operational_domain_value_range(sweep_parameter.EPSILON_R, 5.5, 5.7, 0.02),
-                    operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5, 5.2, 0.02),
+                    SweepRange(SweepParameter.EPSILON_R, 5.5, 5.7, 0.02),
+                    SweepRange(SweepParameter.LAMBDA_TF, 5, 5.2, 0.02),
                 ]
                 reports = []
                 threads = set()
@@ -102,10 +102,10 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
                         time.sleep(0.2)
 
                 params.on_progress = report
-                ratio_params = operational_domain_ratio_params()
+                ratio_params = OperationalDomainRatioParams()
                 ratio_params.op_domain_params = params
                 ratio = operational_domain_ratio(
-                    layout, [standard_functions("and")[0]], parameter_point([5.6, 5]), ratio_params
+                    layout, [standard_functions("and")[0]], ParameterPoint([5.6, 5]), ratio_params
                 )
                 assert 0 <= ratio <= 1, ratio
                 assert reports[-1][1] > 0, reports

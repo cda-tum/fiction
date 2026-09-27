@@ -53,15 +53,14 @@ void on_the_fly_circuit_design(nanobind::module_& m)
      */
     using circuit_params = fiction::sidb::generators::on_the_fly_circuit_design_params;
 
-    py::enum_<complex_policy>(m, "sidb_complex_gate_design_policy",
+    py::enum_<complex_policy>(m, "ComplexGateDesignPolicy",
                               DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy))
         .value("USING_PREDEFINED", complex_policy::USING_PREDEFINED,
                DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_USING_PREDEFINED))
         .value("DESIGN_ON_THE_FLY", complex_policy::DESIGN_ON_THE_FLY,
                DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_DESIGN_ON_THE_FLY));
 
-    py::class_<library_params>(m, "sidb_on_the_fly_gate_library_params",
-                               DOC(fiction_sidb_on_the_fly_gate_library_params))
+    py::class_<library_params>(m, "OnTheFlyGateLibraryParams", DOC(fiction_sidb_on_the_fly_gate_library_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("design_gate_params", &library_params::design_gate_params,
                 DOC(fiction_sidb_on_the_fly_gate_library_params_design_gate_params))
@@ -73,8 +72,7 @@ void on_the_fly_circuit_design(nanobind::module_& m)
         .def_rw("influence_radius_charged_defects", &library_params::influence_radius_charged_defects,
                 DOC(fiction_sidb_on_the_fly_gate_library_params_influence_radius_charged_defects));
 
-    py::class_<circuit_params>(m, "on_the_fly_sidb_circuit_design_params",
-                               DOC(fiction_sidb_generators_on_the_fly_circuit_design_params))
+    py::class_<circuit_params>(m, "CircuitDesignParams", DOC(fiction_sidb_generators_on_the_fly_circuit_design_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("timeout", &circuit_params::timeout,
                 DOC(fiction_sidb_generators_on_the_fly_circuit_design_params_timeout))

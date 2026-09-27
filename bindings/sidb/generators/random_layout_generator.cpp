@@ -41,7 +41,7 @@ void random_layout_generator(nanobind::module_& m)
     using fiction::sidb::generators::generate_random_layout_params;
 
     py::enum_<generate_random_layout_params::positive_charges>(
-        m, "positive_charges", DOC(fiction_sidb_generators_generate_random_layout_params_positive_charges))
+        m, "PositiveCharges", DOC(fiction_sidb_generators_generate_random_layout_params_positive_charges))
         .value("ALLOWED", generate_random_layout_params::positive_charges::ALLOWED,
                DOC(fiction_sidb_generators_generate_random_layout_params_positive_charges_ALLOWED))
         .value("FORBIDDEN", generate_random_layout_params::positive_charges::FORBIDDEN,
@@ -52,7 +52,7 @@ void random_layout_generator(nanobind::module_& m)
     /**
      * Parameters.
      */
-    py::class_<generate_random_layout_params>(m, "generate_random_sidb_layout_params",
+    py::class_<generate_random_layout_params>(m, "RandomLayoutParams",
                                               DOC(fiction_sidb_generators_generate_random_layout_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("coordinate_pair", &generate_random_layout_params::coordinate_pair,

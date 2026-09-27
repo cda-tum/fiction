@@ -3058,7 +3058,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long =
+static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long_long =
 R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
 integer into four parts (from MSB to LSB):
  - 1 bit for the dead indicator - 1 bit for the z position - 31 bit
@@ -16175,53 +16175,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_accepted =
-R"doc(Labels every energy level of an energy distribution by whether the
-physically valid charge distributions at that level encode the
-expected output for the given input pattern (`ACCEPTED`) or not
-(`REJECTED`). Kinks in the wires are tolerated: only the output BDL
-pairs are inspected.
-
-Args:
-    energy_dist: The energy distribution of the charge distributions.
-    valid_charge_distributions: The physically valid charge
-                                distributions.
-    output_bdl_pairs: The output BDL pairs of the layout.
-    spec: The Boolean function(s) to implement.
-    input_index: The input pattern the charge distributions were
-                 simulated for.
-
-Returns:
-    The energies with their state types, ascending by energy.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_rejected =
-R"doc(Like `calculate_energy_and_state_type_with_kinks_accepted`, but a
-charge distribution with kinks in its wires is `REJECTED` as well:
-every energy level is `ACCEPTED`, and additionally `REJECTED` if any
-of its charge distributions fails the logic match with kinks rejected.
-
-Args:
-    lyt: The layout the charge distributions belong to.
-    energy_dist: The energy distribution of the charge distributions.
-    valid_charge_distributions: The physically valid charge
-                                distributions.
-    spec: The Boolean function(s) to implement.
-    input_index: The input pattern the charge distributions were
-                 simulated for.
-    input_bdl_wires: The input BDL wires of `lyt`.
-    output_bdl_wires: The output BDL wires of `lyt`.
-
-Returns:
-    The energies with their state types.
-
-Raises:
-    std::out_of_range: if logic validation encounters an invalid
-                       lattice basis index.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_analysis_calculate_energy_distribution =
 R"doc(The energy distribution of a set of charge distributions: every
 distinct energy with the number of distinct charge distributions that
@@ -16412,6 +16365,53 @@ Args:
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_stats_sim_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_stats_time_total = R"doc(The total runtime of the critical temperature computation.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_calculate_energy_and_state_type_with_kinks_accepted =
+R"doc(Labels every energy level of an energy distribution by whether the
+physically valid charge distributions at that level encode the
+expected output for the given input pattern (`ACCEPTED`) or not
+(`REJECTED`). Kinks in the wires are tolerated: only the output BDL
+pairs are inspected.
+
+Args:
+    energy_dist: The energy distribution of the charge distributions.
+    valid_charge_distributions: The physically valid charge
+                                distributions.
+    output_bdl_pairs: The output BDL pairs of the layout.
+    spec: The Boolean function(s) to implement.
+    input_index: The input pattern the charge distributions were
+                 simulated for.
+
+Returns:
+    The energies with their state types, ascending by energy.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_calculate_energy_and_state_type_with_kinks_rejected =
+R"doc(Like `calculate_energy_and_state_type_with_kinks_accepted`, but a
+charge distribution with kinks in its wires is `REJECTED` as well:
+every energy level is `ACCEPTED`, and additionally `REJECTED` if any
+of its charge distributions fails the logic match with kinks rejected.
+
+Args:
+    lyt: The layout the charge distributions belong to.
+    energy_dist: The energy distribution of the charge distributions.
+    valid_charge_distributions: The physically valid charge
+                                distributions.
+    spec: The Boolean function(s) to implement.
+    input_index: The input pattern the charge distributions were
+                 simulated for.
+    input_bdl_wires: The input BDL wires of `lyt`.
+    output_bdl_wires: The output BDL wires of `lyt`.
+
+Returns:
+    The energies with their state types.
+
+Raises:
+    std::out_of_range: if logic validation encounters an invalid
+                       lattice basis index.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl =
 R"doc(Computes the temperature limit for SiDB ground-state occupation or
@@ -18652,7 +18652,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
 state to an 64-bit unsigned integer.
 
@@ -21255,6 +21255,10 @@ Args:
     ps: Parameters for the BDL pair and wire detection and the input
         encoding.
 
+Raises:
+    std::invalid_argument: if the layout has more than 63 input BDL
+                           pairs.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_bdl_input_iterator_2 =
@@ -21265,6 +21269,10 @@ Args:
     source_layout: The layout to iterate over.
     ps: Parameters for the BDL pair detection and the input encoding.
     source_input_wires: The input wires of `source_layout`.
+
+Raises:
+    std::invalid_argument: if the layout has more than 63 input BDL
+                           pairs.
 
 )doc";
 

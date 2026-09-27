@@ -13,6 +13,11 @@ import math
 import pytest
 
 from mnt.pyfiction.sidb import DotTag, Lattice, LatticeSite, SiDBLayout, SimulationParams
+from mnt.pyfiction.sidb.analysis import (
+    TimeToSolutionParams,
+    time_to_solution,
+    time_to_solution_for_given_simulation_results,
+)
 from mnt.pyfiction.sidb.simulation import (
     AutomaticBaseNumberDetection,
     ExactSimulationEngine,
@@ -20,12 +25,6 @@ from mnt.pyfiction.sidb.simulation import (
     QuickSimParams,
     quickexact,
     quicksim,
-)
-from mnt.pyfiction.sidb.simulation.analysis import (
-    time_to_solution,
-    time_to_solution_for_given_simulation_results,
-    time_to_solution_params,
-    time_to_solution_stats,
 )
 
 
@@ -37,11 +36,10 @@ def test_one_sidb_100_lattice() -> None:
     quicksim_parameter = QuickSimParams()
     quicksim_parameter.simulation_parameters = SimulationParams(3, -0.3)
 
-    tts_params = time_to_solution_params()
+    tts_params = TimeToSolutionParams()
     tts_params.engine = ExactSimulationEngine.QUICKEXACT
-    stats = time_to_solution_stats()
 
-    time_to_solution(layout, quicksim_parameter, tts_params, stats)
+    stats = time_to_solution(layout, quicksim_params=quicksim_parameter, params=tts_params)
 
     assert stats.acc == 100
     assert stats.time_to_solution > 0.0
@@ -56,11 +54,10 @@ def test_one_sidb_111_lattice() -> None:
     quicksim_parameter = QuickSimParams()
     quicksim_parameter.simulation_parameters = SimulationParams(3, -0.3)
 
-    tts_params = time_to_solution_params()
+    tts_params = TimeToSolutionParams()
     tts_params.engine = ExactSimulationEngine.QUICKEXACT
-    stats = time_to_solution_stats()
 
-    time_to_solution(layout, quicksim_parameter, tts_params, stats)
+    stats = time_to_solution(layout, quicksim_params=quicksim_parameter, params=tts_params)
 
     assert stats.acc == 100
     assert stats.time_to_solution > 0.0
@@ -103,12 +100,8 @@ def test_time_to_solution_with_simulation_results() -> None:
     simulation_results_quickexact = quickexact(layout, params=quickexact_params_inst)
 
     # Calculate time-to-solution using the simulation results
-    st = time_to_solution_stats()
-    time_to_solution_for_given_simulation_results(
-        simulation_results_quickexact,
-        simulation_results_quicksim,
-        0.997,
-        st,
+    st = time_to_solution_for_given_simulation_results(
+        simulation_results_quickexact, simulation_results_quicksim, confidence_level=0.997
     )
 
     assert st.time_to_solution > 0.0

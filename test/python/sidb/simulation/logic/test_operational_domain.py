@@ -13,29 +13,28 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.sidb import DotTag, LatticeSite, SiDBLayout
-from mnt.pyfiction.sidb.io import read_sqd_layout
-from mnt.pyfiction.sidb.simulation import SimulationEngine
-from mnt.pyfiction.sidb.simulation.logic import (
-    critical_temperature_domain,
+from mnt.pyfiction.sidb.analysis import (
+    CriticalTemperatureDomain,
+    InputEncoding,
+    OperationalAnalysisStrategy,
+    OperationalCondition,
+    OperationalDomain,
+    OperationalDomainParams,
+    OperationalStatus,
+    ParameterPoint,
+    SweepParameter,
+    SweepRange,
     critical_temperature_domain_contour_tracing,
     critical_temperature_domain_flood_fill,
     critical_temperature_domain_grid_search,
     critical_temperature_domain_random_sampling,
-    input_bdl_configuration,
-    operational_analysis_strategy,
-    operational_condition,
-    operational_domain,
     operational_domain_contour_tracing,
     operational_domain_flood_fill,
     operational_domain_grid_search,
-    operational_domain_params,
     operational_domain_random_sampling,
-    operational_domain_stats,
-    operational_domain_value_range,
-    operational_status,
-    parameter_point,
-    sweep_parameter,
 )
+from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.sidb.simulation import SimulationEngine
 from mnt.pyfiction.synthesis import (
     standard_functions,
 )
@@ -78,22 +77,22 @@ def wire_with_canvas() -> SiDBLayout:
 def test_operational_domain_siqad_or_100_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
-    params = operational_domain_params()
+    params = OperationalDomainParams()
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
 
     params.operational_params.simulation_parameters.mu_minus = -0.28
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5
 
-    params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
+    params.operational_params.op_condition = OperationalCondition.TOLERATE_KINKS
 
     params.sweep_dimensions = [
-        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.70, 6.70, 0.01),
-        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 3.00, 4.00, 0.01),
+        SweepRange(SweepParameter.EPSILON_R, 5.70, 6.70, 0.01),
+        SweepRange(SweepParameter.LAMBDA_TF, 3.00, 4.00, 0.01),
     ]
 
-    stats_grid = operational_domain_stats()
-    operational_domain_grid_search(lyt, [standard_functions("or")[0]], params, stats_grid)
+    result = operational_domain_grid_search(lyt, [standard_functions("or")[0]], params=params)
+    stats_grid = result.stats
     assert stats_grid.num_operational_parameter_combinations == 10201
 
 
@@ -101,28 +100,28 @@ def test_number_of_threads(resources_dir):
     """The thread count is configurable and does not change the resulting operational domain."""
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
-    params = operational_domain_params()
+    params = OperationalDomainParams()
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
     params.operational_params.simulation_parameters.mu_minus = -0.28
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5
-    params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
+    params.operational_params.op_condition = OperationalCondition.TOLERATE_KINKS
 
     params.sweep_dimensions = [
-        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.70, 5.80, 0.01),
-        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 3.00, 3.10, 0.01),
+        SweepRange(SweepParameter.EPSILON_R, 5.70, 5.80, 0.01),
+        SweepRange(SweepParameter.LAMBDA_TF, 3.00, 3.10, 0.01),
     ]
 
     # defaults to the number of hardware threads
     assert params.number_of_threads >= 1
 
-    stats_default = operational_domain_stats()
-    operational_domain_grid_search(lyt, [standard_functions("or")[0]], params, stats_default)
+    result = operational_domain_grid_search(lyt, [standard_functions("or")[0]], params=params)
+    stats_default = result.stats
 
     params.number_of_threads = 1
 
-    stats_single = operational_domain_stats()
-    operational_domain_grid_search(lyt, [standard_functions("or")[0]], params, stats_single)
+    result = operational_domain_grid_search(lyt, [standard_functions("or")[0]], params=params)
+    stats_single = result.stats
 
     assert stats_single.num_operational_parameter_combinations == stats_default.num_operational_parameter_combinations
     assert stats_single.num_evaluated_parameter_combinations == stats_default.num_evaluated_parameter_combinations
@@ -132,28 +131,29 @@ def test_three_dimensional_operational_domain_sketch(wire_with_canvas):
     """The sketch and the boundary-following strategies work over three sweep dimensions."""
     lyt = wire_with_canvas
 
-    params = operational_domain_params()
+    params = OperationalDomainParams()
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
-    params.operational_params.op_condition = operational_condition.REJECT_KINKS
-    params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
+    params.operational_params.op_condition = OperationalCondition.REJECT_KINKS
+    params.operational_params.strategy_to_analyze_operational_status = OperationalAnalysisStrategy.FILTER_ONLY
 
     params.sweep_dimensions = [
-        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.5, 5.7, 0.1),
-        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.2, 0.1),
-        operational_domain_value_range(sweep_parameter.MU_MINUS, -0.32, -0.30, 0.02),
+        SweepRange(SweepParameter.EPSILON_R, 5.5, 5.7, 0.1),
+        SweepRange(SweepParameter.LAMBDA_TF, 5.0, 5.2, 0.1),
+        SweepRange(SweepParameter.MU_MINUS, -0.32, -0.30, 0.02),
     ]
 
     # 3 x 3 x 2 parameter points
-    stats_grid = operational_domain_stats()
-    grid_domain = operational_domain_grid_search(lyt, [standard_functions("id")[0]], params, stats_grid)
+    result = operational_domain_grid_search(lyt, [standard_functions("id")[0]], params=params)
+    grid_domain = result.domain
+    stats_grid = result.stats
     assert stats_grid.num_evaluated_parameter_combinations == 18
     assert len(grid_domain) == 18
 
     # flood fill and contour tracing both accept three dimensions. They sample the same grid, so every point they
     # report must carry the status the exhaustive search determined for it
-    flood_domain = operational_domain_flood_fill(lyt, [standard_functions("id")[0]], 4, params)
-    contour_domain = operational_domain_contour_tracing(lyt, [standard_functions("id")[0]], 4, params)
+    flood_domain = operational_domain_flood_fill(lyt, [standard_functions("id")[0]], 4, params=params).domain
+    contour_domain = operational_domain_contour_tracing(lyt, [standard_functions("id")[0]], 4, params=params).domain
 
     for domain in (flood_domain, contour_domain):
         assert len(domain) > 0
@@ -168,58 +168,58 @@ def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir
     """The sketch is rejected when it cannot filter anything."""
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
-    params = operational_domain_params()
+    params = OperationalDomainParams()
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
-    params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
-    params.operational_params.op_condition = operational_condition.REJECT_KINKS
+    params.operational_params.strategy_to_analyze_operational_status = OperationalAnalysisStrategy.FILTER_ONLY
+    params.operational_params.op_condition = OperationalCondition.REJECT_KINKS
     params.sweep_dimensions = [
-        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.5, 5.6, 0.1),
-        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.1, 0.1),
+        SweepRange(SweepParameter.EPSILON_R, 5.5, 5.6, 0.1),
+        SweepRange(SweepParameter.LAMBDA_TF, 5.0, 5.1, 0.1),
     ]
 
     # the layout has no LOGIC dots, so there is no canvas for the filtering steps to enumerate
     with pytest.raises(ValueError, match="requires a canvas"):
-        operational_domain_grid_search(lyt, [standard_functions("or")[0]], params)
+        operational_domain_grid_search(lyt, [standard_functions("or")[0]], params=params)
 
     # tolerating kinks leaves the filtering steps undefined. This uses a layout that does have a canvas, so that
     # the rejection can only come from the kink condition
     canvas_lyt = wire_with_canvas
 
-    params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
+    params.operational_params.op_condition = OperationalCondition.TOLERATE_KINKS
     with pytest.raises(ValueError, match="requires that kinks are rejected"):
-        operational_domain_grid_search(canvas_lyt, [standard_functions("id")[0]], params)
+        operational_domain_grid_search(canvas_lyt, [standard_functions("id")[0]], params=params)
 
     # the same layout is accepted once kinks are rejected again
-    params.operational_params.op_condition = operational_condition.REJECT_KINKS
-    operational_domain_grid_search(canvas_lyt, [standard_functions("id")[0]], params)
+    params.operational_params.op_condition = OperationalCondition.REJECT_KINKS
+    operational_domain_grid_search(canvas_lyt, [standard_functions("id")[0]], params=params)
 
 
 def test_operational_domain_xor_gate_100_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
-    params = operational_domain_params()
+    params = OperationalDomainParams()
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
 
     params.sweep_dimensions = [
-        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.55, 5.65, 0.01),
-        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 4.95, 5.05, 0.01),
+        SweepRange(SweepParameter.EPSILON_R, 5.55, 5.65, 0.01),
+        SweepRange(SweepParameter.LAMBDA_TF, 4.95, 5.05, 0.01),
     ]
 
-    stats_grid = operational_domain_stats()
-    operational_domain_grid_search(lyt, [standard_functions("xor")[0]], params, stats_grid)
+    result = operational_domain_grid_search(lyt, [standard_functions("xor")[0]], params=params)
+    stats_grid = result.stats
     assert stats_grid.num_operational_parameter_combinations > 0
 
-    stats_flood_fill = operational_domain_stats()
-    operational_domain_flood_fill(lyt, [standard_functions("xor")[0]], 100, params, stats_flood_fill)
+    result = operational_domain_flood_fill(lyt, [standard_functions("xor")[0]], 100, params=params)
+    stats_flood_fill = result.stats
     assert stats_flood_fill.num_operational_parameter_combinations > 0
 
-    stats_random_sampling = operational_domain_stats()
-    operational_domain_random_sampling(lyt, [standard_functions("xor")[0]], 100, params, stats_random_sampling)
+    result = operational_domain_random_sampling(lyt, [standard_functions("xor")[0]], 100, params=params)
+    stats_random_sampling = result.stats
     assert stats_random_sampling.num_operational_parameter_combinations > 0
 
-    stats_contour_tracing = operational_domain_stats()
-    operational_domain_contour_tracing(lyt, [standard_functions("xor")[0]], 100, params, stats_contour_tracing)
+    result = operational_domain_contour_tracing(lyt, [standard_functions("xor")[0]], 100, params=params)
+    stats_contour_tracing = result.stats
     assert stats_contour_tracing.num_operational_parameter_combinations > 0
 
 
@@ -227,39 +227,34 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir: Path) -
     """Critical-temperature searches agree on every evaluated XOR parameter point."""
     lyt = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
-    params = operational_domain_params()
+    params = OperationalDomainParams()
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
 
     params.sweep_dimensions = [
-        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.55, 5.65, 0.01),
-        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 4.95, 5.05, 0.01),
+        SweepRange(SweepParameter.EPSILON_R, 5.55, 5.65, 0.01),
+        SweepRange(SweepParameter.LAMBDA_TF, 4.95, 5.05, 0.01),
     ]
 
-    stats_grid = operational_domain_stats()
-    ct_domain_grid = critical_temperature_domain_grid_search(lyt, [standard_functions("xor")[0]], params, stats_grid)
-    assert ct_domain_grid[parameter_point([5.6, 5.0])][0] == operational_status.OPERATIONAL
-    assert ct_domain_grid[parameter_point([5.6, 5.0])][1] > 30
+    result = critical_temperature_domain_grid_search(lyt, [standard_functions("xor")[0]], params=params)
+    ct_domain_grid = result.domain
+    stats_grid = result.stats
+    assert ct_domain_grid[ParameterPoint([5.6, 5.0])][0] == OperationalStatus.OPERATIONAL
+    assert ct_domain_grid[ParameterPoint([5.6, 5.0])][1] > 30
     assert stats_grid.num_operational_parameter_combinations > 0
     assert ct_domain_grid.minimum_ct() > 23
     assert ct_domain_grid.maximum_ct() < 38
 
-    stats_flood_fill = operational_domain_stats()
-    ct_domain_flood = critical_temperature_domain_flood_fill(
-        lyt, [standard_functions("xor")[0]], 100, params, stats_flood_fill
-    )
-    assert ct_domain_flood[parameter_point([5.6, 5.0])][0] == operational_status.OPERATIONAL
-    assert ct_domain_flood[parameter_point([5.6, 5.0])][1] > 30
+    result = critical_temperature_domain_flood_fill(lyt, [standard_functions("xor")[0]], 100, params=params)
+    ct_domain_flood = result.domain
+    stats_flood_fill = result.stats
+    assert ct_domain_flood[ParameterPoint([5.6, 5.0])][0] == OperationalStatus.OPERATIONAL
+    assert ct_domain_flood[ParameterPoint([5.6, 5.0])][1] > 30
     assert stats_flood_fill.num_operational_parameter_combinations > 0
 
-    stats_contour_tracing = operational_domain_stats()
-    ct_domain_contour = critical_temperature_domain_contour_tracing(
-        lyt,
-        [standard_functions("xor")[0]],
-        1000,
-        params,
-        stats_contour_tracing,
-    )
+    result = critical_temperature_domain_contour_tracing(lyt, [standard_functions("xor")[0]], 1000, params=params)
+    ct_domain_contour = result.domain
+    stats_contour_tracing = result.stats
     assert len(ct_domain_contour) > 0
     for point, (status, temperature) in ct_domain_contour.items():
         expected_status, expected_temperature = ct_domain_grid[point]
@@ -268,59 +263,54 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir: Path) -
     assert stats_contour_tracing.num_operational_parameter_combinations > 0
 
     params.sweep_dimensions = [
-        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.60, 5.60, 0.01),
-        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 5.00, 0.01),
+        SweepRange(SweepParameter.EPSILON_R, 5.60, 5.60, 0.01),
+        SweepRange(SweepParameter.LAMBDA_TF, 5.00, 5.00, 0.01),
     ]
 
-    stats_random_sampling = operational_domain_stats()
-    ct_domain_random = critical_temperature_domain_random_sampling(
-        lyt,
-        [standard_functions("xor")[0]],
-        1000,
-        params,
-        stats_random_sampling,
-    )
-    assert ct_domain_random[parameter_point([5.6, 5.0])][0] == operational_status.OPERATIONAL
-    assert ct_domain_random[parameter_point([5.6, 5.0])][1] > 30
+    result = critical_temperature_domain_random_sampling(lyt, [standard_functions("xor")[0]], 1000, params=params)
+    ct_domain_random = result.domain
+    stats_random_sampling = result.stats
+    assert ct_domain_random[ParameterPoint([5.6, 5.0])][0] == OperationalStatus.OPERATIONAL
+    assert ct_domain_random[ParameterPoint([5.6, 5.0])][1] > 30
     assert stats_random_sampling.num_operational_parameter_combinations > 0
 
 
 def test_operational_domain_and_gate_111_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
-    params = operational_domain_params()
+    params = OperationalDomainParams()
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
 
     params.sweep_dimensions = [
-        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.60, 5.64, 0.01),
-        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 5.01, 0.01),
+        SweepRange(SweepParameter.EPSILON_R, 5.60, 5.64, 0.01),
+        SweepRange(SweepParameter.LAMBDA_TF, 5.00, 5.01, 0.01),
     ]
 
-    stats_grid = operational_domain_stats()
-    operational_domain_grid_search(lyt, [standard_functions("and")[0]], params, stats_grid)
+    result = operational_domain_grid_search(lyt, [standard_functions("and")[0]], params=params)
+    stats_grid = result.stats
     assert stats_grid.num_operational_parameter_combinations > 0
 
-    stats_flood_fill = operational_domain_stats()
-    operational_domain_flood_fill(lyt, [standard_functions("and")[0]], 100, params, stats_flood_fill)
+    result = operational_domain_flood_fill(lyt, [standard_functions("and")[0]], 100, params=params)
+    stats_flood_fill = result.stats
     assert stats_flood_fill.num_operational_parameter_combinations > 0
 
-    stats_random_sampling = operational_domain_stats()
-    operational_domain_random_sampling(lyt, [standard_functions("and")[0]], 100, params, stats_random_sampling)
+    result = operational_domain_random_sampling(lyt, [standard_functions("and")[0]], 100, params=params)
+    stats_random_sampling = result.stats
     assert stats_random_sampling.num_operational_parameter_combinations > 0
 
-    stats_contour_tracing = operational_domain_stats()
-    operational_domain_contour_tracing(lyt, [standard_functions("and")[0]], 1000, params, stats_contour_tracing)
+    result = operational_domain_contour_tracing(lyt, [standard_functions("and")[0]], 1000, params=params)
+    stats_contour_tracing = result.stats
     assert stats_contour_tracing.num_operational_parameter_combinations > 0
 
 
 def test_temperature_operational_domain():
     # Create an instance of critical_temperature_domain
-    temp_domain = critical_temperature_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+    temp_domain = CriticalTemperatureDomain([SweepParameter.EPSILON_R, SweepParameter.LAMBDA_TF])
 
     # Create test key and value
-    key = parameter_point([1.0, 2.0])
-    value = (operational_status.OPERATIONAL, 0.1)
+    key = ParameterPoint([1.0, 2.0])
+    value = (OperationalStatus.OPERATIONAL, 0.1)
 
     # Add a value to the domain using __setitem__
     temp_domain[key] = value
@@ -329,13 +319,13 @@ def test_temperature_operational_domain():
     assert temp_domain[key] == value
 
     # __getitem__ should raise KeyError for missing key
-    missing_key = parameter_point([4.0, 5.0])
+    missing_key = ParameterPoint([4.0, 5.0])
     with pytest.raises(KeyError):
         _ = temp_domain[missing_key]
 
     # __setitem__ should add or update a value
-    new_key = parameter_point([3.3, 4.4])
-    new_value = (operational_status.NON_OPERATIONAL, 0.0)
+    new_key = ParameterPoint([3.3, 4.4])
+    new_value = (OperationalStatus.NON_OPERATIONAL, 0.0)
     temp_domain[new_key] = new_value
     assert temp_domain[new_key] == new_value
 
@@ -373,28 +363,28 @@ def test_temperature_operational_domain():
     assert missing_key not in temp_domain
 
     # Modify dimensions and verify
-    assert temp_domain.get_dimension(0) == sweep_parameter.EPSILON_R
-    assert temp_domain.get_dimension(1) == sweep_parameter.LAMBDA_TF
+    assert temp_domain.get_dimension(0) == SweepParameter.EPSILON_R
+    assert temp_domain.get_dimension(1) == SweepParameter.LAMBDA_TF
 
 
 def test_operational_domain():
     # Create an instance of operational_domain
-    op_domain = operational_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+    op_domain = OperationalDomain([SweepParameter.EPSILON_R, SweepParameter.LAMBDA_TF])
 
     # Create test key and value
-    key = parameter_point([10.0, 20.0])
-    value = operational_status.NON_OPERATIONAL
+    key = ParameterPoint([10.0, 20.0])
+    value = OperationalStatus.NON_OPERATIONAL
 
     # Add a value to the domain
     op_domain[key] = value
 
     # Test retrieving a value that doesn't exist
-    missing_key = parameter_point([7.0, 8.0])
+    missing_key = ParameterPoint([7.0, 8.0])
     assert missing_key not in op_domain
 
     # Modify dimensions and verify
-    assert op_domain.get_dimension(0) == sweep_parameter.EPSILON_R
-    assert op_domain.get_dimension(1) == sweep_parameter.LAMBDA_TF
+    assert op_domain.get_dimension(0) == SweepParameter.EPSILON_R
+    assert op_domain.get_dimension(1) == SweepParameter.LAMBDA_TF
 
     # __getitem__ should return the value for an existing key
     assert op_domain[key] == value
@@ -404,9 +394,9 @@ def test_operational_domain():
         _ = op_domain[missing_key]
 
     # __setitem__ should add or update a value
-    new_key = parameter_point([1.1, 2.2])
-    new_value = operational_status.OPERATIONAL
-    op_domain[new_key] = operational_status.OPERATIONAL
+    new_key = ParameterPoint([1.1, 2.2])
+    new_value = OperationalStatus.OPERATIONAL
+    op_domain[new_key] = OperationalStatus.OPERATIONAL
     assert op_domain[new_key] == new_value
 
     # __contains__ should work for present and missing keys
@@ -441,33 +431,32 @@ def test_operational_domain():
 
 
 def test_operational_domain_two_bdl_pair_wire():
-    bdl_wire = SiDBLayout()
+    wire_layout = SiDBLayout()
 
-    bdl_wire.assign_sidb(LatticeSite(0, 0, 0), DotTag.INPUT)
-    bdl_wire.assign_sidb(LatticeSite(2, 0, 0), DotTag.INPUT)
+    wire_layout.assign_sidb(LatticeSite(0, 0, 0), DotTag.INPUT)
+    wire_layout.assign_sidb(LatticeSite(2, 0, 0), DotTag.INPUT)
 
-    bdl_wire.assign_sidb(LatticeSite(6, 0, 0), DotTag.NORMAL)
-    bdl_wire.assign_sidb(LatticeSite(8, 0, 0), DotTag.NORMAL)
+    wire_layout.assign_sidb(LatticeSite(6, 0, 0), DotTag.NORMAL)
+    wire_layout.assign_sidb(LatticeSite(8, 0, 0), DotTag.NORMAL)
 
-    bdl_wire.assign_sidb(LatticeSite(12, 0, 0), DotTag.OUTPUT)
-    bdl_wire.assign_sidb(LatticeSite(14, 0, 0), DotTag.OUTPUT)
+    wire_layout.assign_sidb(LatticeSite(12, 0, 0), DotTag.OUTPUT)
+    wire_layout.assign_sidb(LatticeSite(14, 0, 0), DotTag.OUTPUT)
 
-    bdl_wire.assign_sidb(LatticeSite(18, 0, 0), DotTag.NORMAL)
+    wire_layout.assign_sidb(LatticeSite(18, 0, 0), DotTag.NORMAL)
 
-    params = operational_domain_params()
+    params = OperationalDomainParams()
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
-    params.operational_params.input_bdl_iterator_params.input_bdl_config = (
-        input_bdl_configuration.PERTURBER_DISTANCE_ENCODED
-    )
+    params.operational_params.input_bdl_iterator_params.input_bdl_config = InputEncoding.PERTURBER_DISTANCE_ENCODED
 
     params.sweep_dimensions = [
-        operational_domain_value_range(sweep_parameter.EPSILON_R, 1.0, 10.0, 0.1),
-        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 1.0, 10.0, 0.1),
+        SweepRange(SweepParameter.EPSILON_R, 1.0, 10.0, 0.1),
+        SweepRange(SweepParameter.LAMBDA_TF, 1.0, 10.0, 0.1),
     ]
 
-    stats_grid = operational_domain_stats()
-    op_domain = operational_domain_grid_search(bdl_wire, [standard_functions("id")[0]], params, stats_grid)
+    result = operational_domain_grid_search(wire_layout, [standard_functions("id")[0]], params=params)
+    op_domain = result.domain
+    stats_grid = result.stats
 
     assert len(op_domain) == 8281
 
@@ -482,15 +471,15 @@ def test_domain_reports_progress(resources_dir: Path, strategy: str) -> None:
     """The parameter points are reported as they are evaluated, ending at the grid size."""
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
-    params = operational_domain_params()
+    params = OperationalDomainParams()
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters.base = 2
     params.operational_params.simulation_parameters.mu_minus = -0.28
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5
-    params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
+    params.operational_params.op_condition = OperationalCondition.TOLERATE_KINKS
     params.sweep_dimensions = [
-        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.70, 5.80, 0.01),
-        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 3.00, 3.10, 0.01),
+        SweepRange(SweepParameter.EPSILON_R, 5.70, 5.80, 0.01),
+        SweepRange(SweepParameter.LAMBDA_TF, 3.00, 3.10, 0.01),
     ]
     params.number_of_threads = 2
 
@@ -499,11 +488,12 @@ def test_domain_reports_progress(resources_dir: Path, strategy: str) -> None:
     workers = []
     params.on_worker_progress = lambda *report: workers.append(report)
 
-    stats = operational_domain_stats()
     if strategy == "grid":
-        operational_domain_grid_search(lyt, [standard_functions("or")[0]], params, stats)
+        result = operational_domain_grid_search(lyt, [standard_functions("or")[0]], params=params)
+        stats = result.stats
     else:
-        operational_domain_flood_fill(lyt, [standard_functions("or")[0]], 1, params, stats)
+        result = operational_domain_flood_fill(lyt, [standard_functions("or")[0]], 1, params=params)
+        stats = result.stats
 
     points = [(done, total) for task, done, total in reports if task == "parameter points"]
     assert points[0] == (0, 0)  # the total is unknown until the grid is set up

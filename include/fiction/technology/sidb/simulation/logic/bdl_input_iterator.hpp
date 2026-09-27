@@ -27,6 +27,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <limits>
+#include <stdexcept>
 #include <vector>
 
 namespace fiction::sidb::simulation::logic
@@ -85,6 +87,7 @@ class bdl_input_iterator
      *
      * @param source_layout The layout to iterate over.
      * @param ps Parameters for the BDL pair and wire detection and the input encoding.
+     * @throws std::invalid_argument if the layout has more than 63 input BDL pairs.
      */
     explicit bdl_input_iterator(const layout& source_layout, const bdl_input_iterator_params& ps = {}) :
             bdl_input_iterator{source_layout, ps,
@@ -96,6 +99,7 @@ class bdl_input_iterator
      * @param source_layout The layout to iterate over.
      * @param ps Parameters for the BDL pair detection and the input encoding.
      * @param source_input_wires The input wires of `source_layout`.
+     * @throws std::invalid_argument if the layout has more than 63 input BDL pairs.
      */
     bdl_input_iterator(const layout& source_layout, const bdl_input_iterator_params& ps,
                        const std::vector<bdl_wire>& source_input_wires) :
@@ -106,6 +110,10 @@ class bdl_input_iterator
             upper_input_closer_to_wire_end{determine_upper_input_closer_to_wire_end()},
             params{ps}
     {
+        if (input_pairs.size() >= std::numeric_limits<uint64_t>::digits)
+        {
+            throw std::invalid_argument("At most 63 input BDL pairs are supported");
+        }
         set_all_inputs();
     }
     /**

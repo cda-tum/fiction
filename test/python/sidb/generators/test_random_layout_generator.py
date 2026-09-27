@@ -9,16 +9,16 @@
 from __future__ import annotations
 
 from mnt.pyfiction.sidb import Lattice, LatticeSite, SiDBLayout
-from mnt.pyfiction.sidb.generators import (
+from mnt.pyfiction.sidb.design import (
+    RandomLayoutParams,
     generate_multiple_random_sidb_layouts,
     generate_random_sidb_layout,
-    generate_random_sidb_layout_params,
 )
 
 
 def test_area_with_one_sidb_100_lattice() -> None:
     """A one-site H-Si(100)-2x1 area fixes the generated SiDB position."""
-    params = generate_random_sidb_layout_params()
+    params = RandomLayoutParams()
     params.number_of_sidbs = 1
     params.coordinate_pair = (LatticeSite(10, 5, 0), LatticeSite(10, 5, 0))
     result_lyt = generate_random_sidb_layout(params, SiDBLayout())
@@ -29,7 +29,7 @@ def test_area_with_one_sidb_100_lattice() -> None:
 
 def test_area_with_five_sidb_100_lattice() -> None:
     """The generator places five SiDBs on an H-Si(100)-2x1 lattice."""
-    params = generate_random_sidb_layout_params()
+    params = RandomLayoutParams()
     params.number_of_sidbs = 5
     params.coordinate_pair = (LatticeSite(0, 0, 0), LatticeSite(10, 5, 0))
     result_lyt = generate_random_sidb_layout(params, SiDBLayout())
@@ -39,7 +39,7 @@ def test_area_with_five_sidb_100_lattice() -> None:
 
 def test_area_with_one_coordinate_111_lattice() -> None:
     """A one-site H-Si(111)-1x1 area fixes the generated SiDB position."""
-    params = generate_random_sidb_layout_params()
+    params = RandomLayoutParams()
     params.number_of_sidbs = 1
     params.coordinate_pair = (LatticeSite(10, 5, 0), LatticeSite(10, 5, 0))
     result_lyt = generate_random_sidb_layout(params, SiDBLayout(Lattice.si_111_1x1()))
@@ -50,7 +50,7 @@ def test_area_with_one_coordinate_111_lattice() -> None:
 
 def test_impossible_design_of_single_layout() -> None:
     """The generator returns None when the requested SiDBs do not fit."""
-    params = generate_random_sidb_layout_params()
+    params = RandomLayoutParams()
     params.number_of_sidbs = 2
     result_lyt = generate_random_sidb_layout(params, SiDBLayout())
     assert result_lyt is None
@@ -58,7 +58,7 @@ def test_impossible_design_of_single_layout() -> None:
 
 def test_impossible_design_of_multiple_layouts() -> None:
     """Repeated generation returns None when the requested SiDBs do not fit."""
-    params = generate_random_sidb_layout_params()
+    params = RandomLayoutParams()
     params.maximal_attempts_for_multiple_layouts = 5
     params.number_of_sidbs = 2
     result_lyt = generate_multiple_random_sidb_layouts(params, SiDBLayout())

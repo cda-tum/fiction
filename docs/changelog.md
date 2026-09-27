@@ -122,6 +122,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - SiDB energy-labeling implementation helpers now live in `analysis::detail`.
   - **Breaking:** A*, path enumeration, and Yen's algorithm route around the gates and wires of every gate-level
     layout and take temporary constraints as a separate `obstructions` argument, leaving the caller's data unchanged.
     `&a_star_distance<Lyt, Dist>` no longer converts to a `distance_functor`; use `a_star_distance_functor`.
@@ -379,6 +380,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** SiDB analysis, design, and writers now live in `sidb.analysis`, `sidb.design`,
+    and `sidb.io`. Workflows return named results with statistics; use `input_patterns` for
+    independent BDL layout snapshots. Internal energy-labeling helpers are not exposed.
+
   - **Breaking:** SiDB types use PascalCase; model data live in `sidb` and engines in
     `sidb.simulation`. Results and lattice sites are read-only; evaluate custom charge states
     with `PotentialLandscape.evaluate(states)` and read their `.energy` property.
@@ -573,6 +578,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+
+  - The BDL input iterator now rejects more than 63 input pairs before bit-shift overflow.
   - Cell layouts reject zero clock-zone dimensions in constructors and setters.
   - Gate layouts constructed from coordinate layouts initialize their logic functions.
   - Clocked degree counts each eligible neighbor once, including neighbors enabled by synchronization.

@@ -13,23 +13,20 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.sidb import DotTag, Lattice, LatticeSite, SiDBLayout, SimulationParams
-from mnt.pyfiction.sidb.io import read_sqd_layout
-from mnt.pyfiction.sidb.simulation import SimulationEngine
-from mnt.pyfiction.sidb.simulation.analysis import (
+from mnt.pyfiction.sidb.analysis import (
+    BdlPairDetectionParams,
+    BdlWireDetectionParams,
+    BdlWireSelection,
+    CriticalTemperatureParams,
+    InputPatternParams,
     critical_temperature_gate_based,
     critical_temperature_non_gate_based,
-    critical_temperature_params,
-    critical_temperature_stats,
-)
-from mnt.pyfiction.sidb.simulation.logic import (
-    bdl_input_iterator_params,
-    bdl_wire_selection,
     detect_bdl_pairs,
-    detect_bdl_pairs_params,
     detect_bdl_wires,
-    detect_bdl_wires_params,
-    generate_bdl_input_pattern_layouts,
+    input_patterns,
 )
+from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.sidb.simulation import SimulationEngine
 from mnt.pyfiction.synthesis import (
     standard_functions,
 )
@@ -53,13 +50,13 @@ def test_perturber_and_sidb_pair(lat: Lattice) -> None:
     layout.assign_sidb(LatticeSite(4, 0, 1), DotTag.NORMAL)
     layout.assign_sidb(LatticeSite(6, 0, 1), DotTag.NORMAL)
 
-    params = critical_temperature_params()
+    params = CriticalTemperatureParams()
 
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
 
-    stats = critical_temperature_stats()
-
-    assert critical_temperature_non_gate_based(layout, params, stats) == 400
+    result = critical_temperature_non_gate_based(layout, params=params)
+    assert (result).temperature == 400
+    stats = result.stats
 
     assert stats.algorithm_name == "QuickExact"
     assert stats.num_valid_lyt == 1
@@ -72,16 +69,17 @@ def test_gate_based_simulation(resources_dir: Path) -> None:
         resources_dir: Directory that contains the test layout.
     """
     layout = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"), "xor_gate")
-    params = critical_temperature_params()
+    params = CriticalTemperatureParams()
 
     params.operational_params.simulation_parameters.base = 2
 
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
 
-    stats = critical_temperature_stats()
     spec = [standard_functions("xor")[0]]
 
-    assert critical_temperature_gate_based(layout, spec, params, stats) <= 200
+    result = critical_temperature_gate_based(layout, spec, params=params)
+    assert (result).temperature <= 200
+    stats = result.stats
 
     assert stats.algorithm_name == "QuickExact"
 
@@ -97,15 +95,16 @@ def test_bestagon_inv(resources_dir: Path) -> None:
         "inverter_input_0",
     )
 
-    params = critical_temperature_params()
+    params = CriticalTemperatureParams()
 
     params.operational_params.sim_engine = SimulationEngine.QUICKSIM
     params.operational_params.simulation_parameters.base = 2  # QuickSim simulates two charge states only
 
-    stats = critical_temperature_stats()
     spec = [standard_functions("not")[0]]
 
-    assert critical_temperature_gate_based(layout, spec, params, stats) <= 400
+    result = critical_temperature_gate_based(layout, spec, params=params)
+    assert (result).temperature <= 400
+    stats = result.stats
 
     assert stats.algorithm_name == "QuickSim"
     assert stats.num_valid_lyt > 1
@@ -122,16 +121,17 @@ def test_bestagon_inv_with_different_mu(resources_dir: Path) -> None:
         "inverter_input_0",
     )
 
-    params = critical_temperature_params()
+    params = CriticalTemperatureParams()
     params.operational_params.simulation_parameters.base = 2
     params.operational_params.simulation_parameters.mu_minus = -0.2
 
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
 
-    stats = critical_temperature_stats()
     spec = [standard_functions("not")[0]]
 
-    assert critical_temperature_gate_based(layout, spec, params, stats) <= 5
+    result = critical_temperature_gate_based(layout, spec, params=params)
+    assert (result).temperature <= 5
+    stats = result.stats
 
     assert stats.algorithm_name == "QuickExact"
 
@@ -157,36 +157,33 @@ def test_critical_temperature_with_input_pattern_layouts() -> None:
 
     lyt.assign_sidb(LatticeSite(10, 9, 1), DotTag.NORMAL)
 
-    params = critical_temperature_params()
+    params = CriticalTemperatureParams()
     params.operational_params.sim_engine = SimulationEngine.QUICKEXACT
     params.operational_params.simulation_parameters = SimulationParams(2, -0.28)
 
-    input_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
-    output_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
-    output_bdl_pairs = detect_bdl_pairs(lyt, DotTag.OUTPUT, detect_bdl_pairs_params())
+    input_bdl_wires = detect_bdl_wires(lyt, BdlWireDetectionParams(), BdlWireSelection.INPUT)
+    output_bdl_wires = detect_bdl_wires(lyt, BdlWireDetectionParams(), BdlWireSelection.OUTPUT)
+    output_bdl_pairs = detect_bdl_pairs(lyt, DotTag.OUTPUT, BdlPairDetectionParams())
 
-    input_pattern_layouts = generate_bdl_input_pattern_layouts(
-        lyt,
-        bdl_input_iterator_params(),
-        input_bdl_wires,
-    )
+    input_pattern_layouts = list(input_patterns(lyt, params=InputPatternParams(), input_wires=input_bdl_wires))
 
     # a 2-input gate has 4 input patterns
     assert len(input_pattern_layouts) == 4
 
-    reference_stats = critical_temperature_stats()
-    reference_ct = critical_temperature_gate_based(lyt, [standard_functions("and")[0]], params, reference_stats)
+    result = critical_temperature_gate_based(lyt, [standard_functions("and")[0]], params=params)
+    reference_ct = result.temperature
+    reference_stats = result.stats
 
-    stats = critical_temperature_stats()
-    ct = critical_temperature_gate_based(
+    result = critical_temperature_gate_based(
         input_pattern_layouts,
         [standard_functions("and")[0]],
-        params,
-        output_bdl_pairs,
-        input_bdl_wires,
-        output_bdl_wires,
-        stats,
+        params=params,
+        output_bdl_pairs=output_bdl_pairs,
+        input_bdl_wires=input_bdl_wires,
+        output_bdl_wires=output_bdl_wires,
     )
+    ct = result.temperature
+    stats = result.stats
 
     # the two overloads run the same computation, so the results must be identical
     assert ct == reference_ct
@@ -198,10 +195,10 @@ def test_critical_temperature_with_input_pattern_layouts() -> None:
         critical_temperature_gate_based(
             input_pattern_layouts[:1],
             [standard_functions("and")[0]],
-            params,
-            output_bdl_pairs,
-            input_bdl_wires,
-            output_bdl_wires,
+            params=params,
+            output_bdl_pairs=output_bdl_pairs,
+            input_bdl_wires=input_bdl_wires,
+            output_bdl_wires=output_bdl_wires,
         )
 
     # more output BDL pairs than truth tables is rejected
@@ -209,8 +206,8 @@ def test_critical_temperature_with_input_pattern_layouts() -> None:
         critical_temperature_gate_based(
             input_pattern_layouts,
             [standard_functions("and")[0]],
-            params,
-            [*output_bdl_pairs, output_bdl_pairs[0]],
-            input_bdl_wires,
-            output_bdl_wires,
+            params=params,
+            output_bdl_pairs=[*output_bdl_pairs, output_bdl_pairs[0]],
+            input_bdl_wires=input_bdl_wires,
+            output_bdl_wires=output_bdl_wires,
         )

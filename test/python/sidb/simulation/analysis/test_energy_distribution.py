@@ -22,8 +22,8 @@ from mnt.pyfiction.sidb import (
     SiDBLayout,
     SimulationParams,
 )
+from mnt.pyfiction.sidb.analysis import calculate_energy_distribution
 from mnt.pyfiction.sidb.simulation import PotentialLandscape
-from mnt.pyfiction.sidb.simulation.analysis import calculate_energy_distribution
 
 
 @pytest.mark.parametrize(

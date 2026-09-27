@@ -62,6 +62,9 @@ enum class state_type : uint8_t
  */
 using energy_and_state_type = std::vector<std::pair<double, state_type>>;
 
+namespace detail
+{
+
 /**
  * Labels every energy level of an energy distribution by whether the physically valid charge distributions at that
  * level encode the expected output for the given input pattern (`ACCEPTED`) or not (`REJECTED`). Kinks in the
@@ -165,5 +168,7 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
 
     return est;
 }
+
+}  // namespace detail
 
 }  // namespace fiction::sidb::simulation::analysis

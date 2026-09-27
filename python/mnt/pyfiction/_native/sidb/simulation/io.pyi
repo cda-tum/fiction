@@ -27,7 +27,7 @@ def write_sqd_sim_result(sim_result: mnt.pyfiction._native.sidb.simulation.Simul
         std::ofstream::failure: if the file cannot be opened.
     """
 
-class sample_writing_mode(enum.Enum):
+class SampleWritingMode(enum.Enum):
     """Mode selector for writing samples to file."""
 
     ALL_SAMPLES = 0
@@ -42,7 +42,7 @@ class sample_writing_mode(enum.Enum):
     and help with visibility in 3D plots.
     """
 
-class write_operational_domain_params:
+class WriteOperationalDomainParams:
     """Parameters for writing an operational domain to a CSV file."""
 
     def __init__(self) -> None:
@@ -64,7 +64,7 @@ class write_operational_domain_params:
     @non_operational_tag.setter
     def non_operational_tag(self, arg: str, /) -> None: ...
     @property
-    def writing_mode(self) -> sample_writing_mode:
+    def writing_mode(self) -> SampleWritingMode:
         """
         Whether to write non-operational samples to the CSV file. If set to
         `OPERATIONAL_ONLY`, operational samples are written exclusively. This
@@ -74,12 +74,12 @@ class write_operational_domain_params:
         """
 
     @writing_mode.setter
-    def writing_mode(self, arg: sample_writing_mode, /) -> None: ...
+    def writing_mode(self, arg: SampleWritingMode, /) -> None: ...
 
 def write_operational_domain(
-    opdom: mnt.pyfiction._native.sidb.simulation.logic.operational_domain,
+    opdom: mnt.pyfiction._native.sidb.simulation.logic.OperationalDomain,
     filename: str,
-    params: write_operational_domain_params,
+    params: WriteOperationalDomainParams,
 ) -> None:
     """
     Writes a CSV representation of an operational domain to the specified
@@ -130,12 +130,12 @@ def write_operational_domain(
     """
 
 def write_operational_domain_to_string(
-    opdom: mnt.pyfiction._native.sidb.simulation.logic.operational_domain, params: write_operational_domain_params = ...
+    opdom: mnt.pyfiction._native.sidb.simulation.logic.OperationalDomain, params: WriteOperationalDomainParams = ...
 ) -> str: ...
 def write_critical_temperature_domain(
-    opdom: mnt.pyfiction._native.sidb.simulation.logic.critical_temperature_domain,
+    opdom: mnt.pyfiction._native.sidb.simulation.logic.CriticalTemperatureDomain,
     filename: str,
-    params: write_operational_domain_params,
+    params: WriteOperationalDomainParams,
 ) -> None:
     """
     The `critical_temperature_domain` class collects the critical
@@ -154,8 +154,8 @@ def write_critical_temperature_domain(
     """
 
 def write_critical_temperature_domain_to_string(
-    opdom: mnt.pyfiction._native.sidb.simulation.logic.critical_temperature_domain,
-    params: write_operational_domain_params = ...,
+    opdom: mnt.pyfiction._native.sidb.simulation.logic.CriticalTemperatureDomain,
+    params: WriteOperationalDomainParams = ...,
 ) -> str: ...
 def write_location_and_ground_state(
     sim_result: mnt.pyfiction._native.sidb.simulation.SimulationResult, filename: str
