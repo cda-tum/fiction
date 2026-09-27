@@ -84,7 +84,7 @@ def test_place_uses_coordinates_and_validates_inputs(tmp_path: Path) -> None:
 def test_place_inverter(tmp_path: Path) -> None:
     path = tmp_path / "not.v"
     path.write_text("module top(a, y);\ninput a;\noutput y;\nassign y = ~a;\nendmodule\n", encoding="utf-8")
-    network = read_technology_network(str(path))
+    network = read_network(str(path))
     layout = CartesianGateLayout((1, 0), "2DDWave")
     source = place(layout, (0, 0), network, network.pis()[0])
     gate = next(node for node in network.gates() if network.is_inv(node))
