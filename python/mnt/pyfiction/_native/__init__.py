@@ -10,3 +10,11 @@
 
 This package has no public API compatibility guarantee.
 """
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from . import physical_design as physical_design
+    from . import synthesis as synthesis
