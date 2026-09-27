@@ -50,7 +50,7 @@ _LAYOUT_TYPES = {
     "even_column_hex": layouts.EvenColumnHexGateLayout,
 }
 
-TOPOLOGIES = {_LAYOUT_TYPES[native]: name for name, native in NATIVE_NAMES.items()}
+TOPOLOGIES: dict[type[object], str] = {_LAYOUT_TYPES[native]: name for name, native in NATIVE_NAMES.items()}
 """Gate-level layout classes mapped to canonical names for descriptions."""
 
 NAMES = {**NATIVE_NAMES, "shifted_cartesian": "shifted_cartesian", "hexagonal": "hexagonal"}
