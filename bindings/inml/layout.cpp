@@ -16,7 +16,6 @@
 
 #include "pyfiction/cell_grid.hpp"
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/inml/layout.hpp>
 

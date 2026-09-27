@@ -169,7 +169,7 @@ void dynamic_truth_table(nanobind::module_& m)
                 throw std::invalid_argument("binary truth table length must be a power of two");
             }
             uint32_t variables{};
-            for (auto size = bits; size > 1; size >>= 1)
+            for (auto size = bits; size > 1; size >>= 1u)
             {
                 ++variables;
             }

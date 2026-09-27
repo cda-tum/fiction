@@ -17,6 +17,7 @@
 #pragma once
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/types.hpp"  // IWYU pragma: keep; supplies coordinate tuple input casters.
 
 #include <fiction/traits.hpp>
 
@@ -24,7 +25,7 @@
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/vector.h>
+#include <nanobind/stl/vector.h>  // IWYU pragma: keep; converts coordinate collections returned by layout methods.
 
 namespace pyfiction::detail
 {

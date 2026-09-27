@@ -38,9 +38,7 @@ namespace detail
 template <typename Lyt>
 void normalize_layout_coordinates(nanobind::module_& m)
 {
-    namespace py = nanobind;
-
-    m.def("normalize_layout_coordinates", &fiction::layouts::normalize_layout_coordinates<Lyt>, py::arg("lyt"),
+    m.def("normalize_layout_coordinates", &fiction::layouts::normalize_layout_coordinates<Lyt>, nanobind::arg("lyt"),
           DOC(fiction_layouts_normalize_layout_coordinates));
 }
 

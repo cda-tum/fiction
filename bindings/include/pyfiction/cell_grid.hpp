@@ -19,7 +19,6 @@
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/geometry.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
