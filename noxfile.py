@@ -202,8 +202,8 @@ def cpp_lint(session: nox.Session) -> None:
     session.install(
         "clang-tools==1.2.0",
         "cpp-linter==1.13.0",
-        "nanobind~=3.0.0",
-        "z3-solver==4.14.1",
+        "nanobind~=3.1.0",
+        "z3-solver==5.1.0",
     )
     session.run("clang-tools", "install", "clang-tidy", "--version", "21")
     installed_z3_output = session.run(
