@@ -12,10 +12,7 @@ ci:
   autoupdate_commit_msg: "⬆️ Bump pre-commit hooks"
   autofix_commit_msg: "🎨 Incorporated pre-commit fixes"
   autoupdate_schedule: quarterly
-  # `mypy` needs `numpy` and `matplotlib` to resolve the imports of the files it
-  # checks, which puts its environment over the 250 MiB pre-commit.ci allows a hook. The
-  # 🐍 Lint workflow runs it instead
-  skip: [mypy]
+  skip: [ty]
 
 # The fourth copy of this list. The others are `path_filters:` in `.coderabbit.yaml`, the
 # `ignore:` input of cpp-linter-action in `.github/workflows/cpp-linter.yml`, and `exclude`
@@ -55,6 +52,8 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-added-large-files
+        # the generated stubs are text and grow with the bindings
+        exclude: ^python/mnt/pyfiction/.*\.pyi$
         priority: 0
       - id: check-case-conflict
         priority: 0
@@ -156,7 +155,7 @@ repos:
 
   # Python linting using ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.8
+    rev: v0.16.9
     hooks:
       - id: ruff-format
         priority: 6
@@ -189,24 +188,14 @@ repos:
         types_or: [python, pyi, c++]
         priority: 7
 
-  # Check static types with mypy
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.3.1
+  # Check Python types with ty. `--no-install-project` installs the runtime dependencies the
+  # shell imports without compiling the extension, and the `docs` group resolves the imports of
+  # `docs/conf.py` and its Sphinx extension
+  - repo: https://github.com/astral-sh/ty-pre-commit
+    rev: v0.0.84
     hooks:
-      - id: mypy
-        files: ^(python/mnt/|test/python/|docs/.*\.py|experiments|noxfile\.py|scripts)
-        args: []
-        additional_dependencies:
-          - nox
-          - pytest
-          - sphinx>=8.2.3
-          # `experiments/` plots with `matplotlib` and holds its surfaces in `numpy` arrays
-          - matplotlib
-          - numpy
-          # the `fiction` shell in `python/mnt/fiction/cli`
-          - aigverse
-          - prompt_toolkit
-          - rich
+      - id: ty
+        args: [--no-install-project, --group, docs]
         priority: 9
 
   # Format configuration files with prettier
@@ -234,7 +223,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.09.19
+    rev: 2026.09.24
     hooks:
       - id: validate-pyproject
         priority: 0

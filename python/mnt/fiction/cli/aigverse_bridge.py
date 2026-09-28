@@ -72,14 +72,18 @@ def from_aigverse(session: Session, aig: Aig, name: str, like: aig_network | Non
     finally:
         path.unlink(missing_ok=True)
     set_name(network, name)
-    if like is None and hasattr(aig, "has_name"):
-        like = aig
-    if like is not None:
-        for source, target in zip(like.pis(), network.pis(), strict=True):
-            source_signal = like.make_signal(source) if isinstance(like, NamedAig) else source
-            if like.has_name(source_signal):
-                network.set_name(target, like.get_name(source_signal))
+    names: aig_network | NamedAig | None = like
+    if names is None and isinstance(aig, NamedAig):
+        names = aig
+    if names is not None:
+        for source, target in zip(names.pis(), network.pis(), strict=True):
+            if isinstance(names, NamedAig):
+                signal = names.make_signal(source)
+                if names.has_name(signal):
+                    network.set_name(target, names.get_name(signal))
+            elif names.has_name(source):
+                network.set_name(target, names.get_name(source))
         for index in range(network.num_pos()):
-            if like.has_output_name(index):
-                network.set_output_name(index, like.get_output_name(index))
+            if names.has_output_name(index):
+                network.set_output_name(index, names.get_output_name(index))
     return network

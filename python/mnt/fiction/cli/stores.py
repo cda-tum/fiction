@@ -15,7 +15,7 @@ so the three never disagree.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Generic, TypeAlias, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeAlias, TypeVar
 
 from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
 from mnt.pyfiction.fcn import area
@@ -62,7 +62,7 @@ GateLayout: TypeAlias = (
 CellLayout: TypeAlias = qca_layout | inml_layout | mol_qca_layout | sidb_layout
 """Cell-level layout types held by the shell."""
 
-NETWORK_TYPES: dict[type, str] = {
+NETWORK_TYPES: dict[type[Network], str] = {
     aig_network: "AIG",
     xag_network: "XAG",
     mig_network: "MIG",
@@ -71,7 +71,7 @@ NETWORK_TYPES: dict[type, str] = {
 """The network classes and the type names ``read --type`` accepts, lowercased."""
 
 
-TECHNOLOGIES: dict[type, str] = {
+TECHNOLOGIES: dict[type[CellLayout], str] = {
     qca_layout: "QCA",
     inml_layout: "iNML",
     mol_qca_layout: "molQCA",
@@ -218,17 +218,11 @@ def element_name(element: object) -> str:
     """
     if isinstance(element, CellEntry):
         element = element.layout
-    if isinstance(element, NETWORK_TYPES_TUPLE):
+    if isinstance(element, Network):
         return str(get_name(element))
-    if isinstance(element, GATE_LAYOUT_TYPES_TUPLE + CELL_LAYOUT_TYPES_TUPLE):
-        layout: Any = element
-        return str(layout.get_layout_name())
+    if isinstance(element, GateLayout | CellLayout):
+        return str(element.get_layout_name())
     return ""
-
-
-NETWORK_TYPES_TUPLE = tuple(NETWORK_TYPES)
-GATE_LAYOUT_TYPES_TUPLE = tuple(TOPOLOGIES)
-CELL_LAYOUT_TYPES_TUPLE = tuple(TECHNOLOGIES)
 
 
 def describe_truth_table(tt: dynamic_truth_table) -> dict[str, object]:
@@ -391,9 +385,9 @@ def describe(element: object, *, timing: bool = False) -> dict[str, object]:
     """
     if isinstance(element, dynamic_truth_table):
         return describe_truth_table(element)
-    if isinstance(element, NETWORK_TYPES_TUPLE):
+    if isinstance(element, Network):
         return describe_network(element)
-    if isinstance(element, GATE_LAYOUT_TYPES_TUPLE):
+    if isinstance(element, GateLayout):
         return describe_gate_layout(element, timing=timing)
     if isinstance(element, CellEntry):
         return describe_cell_layout(element)

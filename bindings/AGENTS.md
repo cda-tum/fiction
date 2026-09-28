@@ -8,8 +8,8 @@ Three trees make up `mnt.pyfiction`:
 
 - `bindings/` holds the C++ sources. Each top-level C++ namespace (`layouts`, `sidb`, …)
   is one extension module, built from `bindings/<namespace>/`.
-- `python/mnt/` holds the Python package: the lazy `mnt/pyfiction/__init__.py` and the
-  pure-Python CLI in `mnt/fiction/cli/`.
+- `python/mnt/` holds the Python package: the lazy `mnt/pyfiction/__init__.py`, the
+  generated `.pyi` stubs, and the pure-Python CLI in `mnt/fiction/cli/`.
 - `test/python/` holds the Python tests, laid out like the Python module tree.
 
 **The Python module tree mirrors the C++ namespaces.** `fiction::sidb::simulation::engines`
@@ -27,7 +27,7 @@ A new binding:
 3. Needs nothing else if its directory already exists. A new nested namespace also gets a
    `pyfiction::def_submodule` call in the `NB_MODULE` block of its top-level
    `register_<namespace>.cpp`. A new top-level namespace also goes into the module list
-   of `bindings/CMakeLists.txt` and `python/mnt/pyfiction/__init__.py`.
+   of `bindings/CMakeLists.txt`, `python/mnt/pyfiction/__init__.py`, and `nox -s stubs`.
 4. Names types of other modules only if its `NB_MODULE` block imports them with
    `nanobind::module_::import_("mnt.pyfiction.<module>")`. Keep the imports acyclic: the
    modules form the chain in the list of `bindings/CMakeLists.txt`, and a module imports
@@ -37,11 +37,18 @@ A new binding:
    copy of the exception's type information, and macOS does not match the copies. An
    exception whose Python class lives in another module is raised through that class, as
    `physical_design` does for `high_degree_fanin_exception`.
+6. Comes with regenerated stubs: run `nox -s stubs` and commit the `.pyi` changes. CI
+   fails when the committed stubs differ from the generated ones. Where stubgen cannot infer a
+   type, state it at the binding with `nanobind::sig`, or `nanobind::for_getter` and
+   `nanobind::for_setter` on a property; `pyfiction/progress.hpp` does so for the progress
+   callbacks.
 
 Never:
 
 - Add source files to a manual list in `CMakeLists.txt`. `file(GLOB_RECURSE ...)` picks
   them up.
+- Edit the `.pyi` files by hand, or rewrite them in `nox -s stubs`. Fix the binding, or its
+  docstring, and regenerate.
 - Edit `include/pyfiction/pybind11_mkdoc_docstrings.hpp` by hand. It is generated from the
   Doxygen comments in `include/fiction/`, and keeps its historical name. CI's
   `🐍 Docstrings` job regenerates it and fails when the committed file differs; take the

@@ -94,7 +94,7 @@ def show(session: Session, args: argparse.Namespace) -> Result:
             dot_path = (
                 session.viewer_file(".dot", delete=args.delete) if args.output is None else path.with_suffix(".dot")
             )
-        write_dot(element, dot_path, network=name == "network", indexes=args.indexes, clock_colors=args.clock_colors)
+        write_dot(element, dot_path, indexes=args.indexes, clock_colors=args.clock_colors)
         if suffix == ".svg":
             render_dot(dot_path, path)
         elif args.output is None and not shutil.which("dot"):

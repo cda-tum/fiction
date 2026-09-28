@@ -82,8 +82,6 @@ void layout_utils(nanobind::module_& m)
     detail::normalize_layout_coordinates<fiction::inml::layout>(m);
 
     detail::random_coordinate<py_cartesian_gate_layout>(m);
-    detail::random_coordinate<py_shifted_cartesian_gate_layout>(m);
-    detail::random_coordinate<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

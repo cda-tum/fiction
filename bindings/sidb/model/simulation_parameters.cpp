@@ -36,7 +36,6 @@ void simulation_parameters(nanobind::module_& m)
         .def(py::init<const uint8_t, const double, const double, const double>(), py::arg("base_number") = 3,
              py::arg("mu_minus") = -0.32, py::arg("relative_permittivity") = 5.6, py::arg("screening_distance") = 5.0,
              DOC(fiction_sidb_model_simulation_parameters_simulation_parameters))
-        .def(py::init<>(), DOC(fiction_sidb_model_simulation_parameters_simulation_parameters))
         .def_rw("epsilon_r", &fiction::sidb::model::simulation_parameters::epsilon_r,
                 DOC(fiction_sidb_model_simulation_parameters_epsilon_r))
         .def_rw("lambda_tf", &fiction::sidb::model::simulation_parameters::lambda_tf,

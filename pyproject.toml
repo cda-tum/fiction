@@ -283,7 +283,20 @@ docstring-code-format = true
 "docs/**" = [ "A", "implicit-namespace-package", "T20" ]
 "noxfile.py" = [ "banned-api", "T20" ]
 "scripts/**" = [ "T20" ]  # maintenance scripts report progress on stdout
-"*.pyi" = [ "docstring-in-stub", "overload-with-docstring" ]  # pydocstyle
+# `nox -s stubs` generates the stubs: their docstrings come from the Doxygen comments in
+# `include/fiction/`, and their names and signatures from the C++ API
+"*.pyi" = [
+    "ambiguous-unicode-character-docstring",
+    "builtin-argument-shadowing",
+    "builtin-attribute-shadowing",
+    "D",
+    "docstring-in-stub",
+    "error-suffix-on-exception-name",
+    "forward-annotation-syntax-error",       # C++ type names of types without a binding
+    "invalid-class-name",
+    "line-too-long",
+    "overload-with-docstring",
+]
 # `mnt/__init__.py` registers the Windows DLL search path before any extension is imported, and
 # `mnt/pyfiction/__init__.py` loads the submodules lazily. A re-export-only `__init__` cannot do either
 "python/mnt/__init__.py" = [ "non-empty-init-module" ]
@@ -353,22 +366,22 @@ max_supported_python = "3.14"
 table_format = "long"
 sub_table_spacing = "\n"
 
-[tool.mypy]
-mypy_path = [ "$MYPY_CONFIG_FILE_DIR/python" ]
-# Every Python file the repository owns, so a new one is checked without anyone remembering to
-# add it here
-files = [ "docs", "experiments", "noxfile.py", "python/mnt", "scripts", "test/python" ]
-explicit_package_bases = true
-disallow_untyped_defs = false
-warn_unreachable = true
-enable_error_code = [ "ignore-without-code", "redundant-expr", "truthy-bool" ]
-strict = true
-warn_unused_configs = true
+[tool.ty.terminal]
+# Error if ty emits any warning-level diagnostics.
+error-on-warning = true
 
-# The extension modules ship no stubs, so the bindings are `Any` to the type checker
-[[tool.mypy.overrides]]
-module = [ "mnt.pyfiction.*" ]
-ignore_missing_imports = true
+# nanobind generates comparison operands narrower than object.__eq__/__ne__.
+[[tool.ty.overrides]]
+include = [
+    "python/mnt/pyfiction/inml/__init__.pyi",
+    "python/mnt/pyfiction/layouts/coords.pyi",
+    "python/mnt/pyfiction/mol_qca/__init__.pyi",
+    "python/mnt/pyfiction/qca/__init__.pyi",
+    "python/mnt/pyfiction/sidb/__init__.pyi",
+    "python/mnt/pyfiction/sidb/model.pyi",
+    "python/mnt/pyfiction/sidb/simulation/logic.pyi",
+]
+rules = { invalid-method-override = "ignore" }
 
 [tool.pytest]
 addopts = [

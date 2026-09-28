@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 def test_equiv_network_against_layout(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho; equiv -n -g")
     assert "strongly equivalent" in mux21_shell.output
-    assert mux21_shell.session.log[-1]["result"]["eq"] == "STRONG"  # type: ignore[index]
+    assert mux21_shell.session.log[-1]["result"]["eq"] == "STRONG"
 
 
 def test_equiv_two_networks(shell: Shell, resource: Callable[[str], str]) -> None:

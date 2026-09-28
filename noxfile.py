@@ -250,6 +250,68 @@ def cpp_lint(session: nox.Session) -> None:
         session.run("cpp-linter", *linter_args)
 
 
+@nox.session(reuse_venv=True)
+def stubs(session: nox.Session) -> None:
+    """Generate the type stubs of the `mnt.pyfiction` extension modules with nanobind.
+
+    The stubs cover the optional bindings only when the build finds Z3 and ALGLIB, which is what
+    `pyproject.toml` requests.
+    """
+    env = {"UV_PROJECT_ENVIRONMENT": session.virtualenv.location}
+    _install_build_tools(session)
+    session.run("uv", "sync", "--inexact", "--only-group", "build", env=env)
+    session.run("uv", "sync", "--inexact", "--no-dev", "--no-build-isolation-package", "mnt-pyfiction", env=env)
+
+    package_root = Path(__file__).parent / "python" / "mnt" / "pyfiction"
+    # every `.pyi` file in the package is generated; removing them first drops the stubs of removed modules
+    for stub in package_root.glob("**/*.pyi"):
+        stub.unlink()
+    modules = [
+        "fcn",
+        "inml",
+        "layouts",
+        "mol_qca",
+        "networks",
+        "physical_design",
+        "qca",
+        "sidb",
+        "synthesis",
+        "utils",
+        "verification",
+    ]
+    session.run(
+        "uv",
+        "run",
+        "--no-sync",
+        "python",
+        "-m",
+        "nanobind.stubgen",
+        "--recursive",
+        "--include-private",
+        "--output-dir",
+        str(package_root),
+        "--pattern-file",
+        str(package_root / "stubgen.pattern"),
+        *(argument for module in modules for argument in ("--module", f"mnt.pyfiction.{module}")),
+        env=env,
+    )
+
+    # nanobind names a stub after the extension's file, which carries the `.abi3` tag of the
+    # Stable ABI build
+    for abi3_stub in package_root.glob("*.abi3.pyi"):
+        abi3_stub.replace(package_root / abi3_stub.name.replace(".abi3.pyi", ".pyi"))
+
+    pyi_files = [str(path) for path in package_root.glob("**/*.pyi")]
+    if shutil.which("prek") is None:
+        session.install("prek")
+
+    # the first passes fix what they can and exit with 1 when they changed a file
+    success_codes = [0, 1]
+    for hook in ("license-tools", "ruff-check", "ruff-format"):
+        session.run("prek", "run", hook, "--files", *pyi_files, external=True, success_codes=success_codes)
+    session.run("prek", "run", "ruff-check", "--files", *pyi_files, external=True)
+
+
 @nox.session(python="3.12", reuse_venv=True)
 def docs(session: nox.Session) -> None:
     """Build documentation, serving interactive HTML builds with live reload.

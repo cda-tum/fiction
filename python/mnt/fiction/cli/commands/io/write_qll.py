@@ -41,8 +41,7 @@ def write_qll_command(session: Session, args: argparse.Namespace) -> Result:
     Without a filename, use the active element's name and ``.qll``.
     """
     entry = session.cell_layouts.current()
-    element = entry.layout
-    require_cell_type(element, (qca_layout, mol_qca_layout, inml_layout), ".qll")
+    element = require_cell_type(entry.layout, (qca_layout, mol_qca_layout, inml_layout), ".qll")
     path = output_path(element, args.file, ".qll")
     write_qll_layout(element, str(path), on_progress=session.report_progress)
     return written(session, path)

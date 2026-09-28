@@ -80,10 +80,10 @@ void layout(nanobind::module_& m)
         .def("is_po", &layout::is_po, py::arg("site"), DOC(fiction_sidb_layout_is_po))
         .def(
             "pis", [](const layout& lyt) { return lyt.dots_with_tag(fiction::sidb::dot_tag::INPUT); },
-            DOC(fiction_sidb_layout_foreach_pi))
+            "Returns the sites of all input SiDBs.")
         .def(
             "pos", [](const layout& lyt) { return lyt.dots_with_tag(fiction::sidb::dot_tag::OUTPUT); },
-            DOC(fiction_sidb_layout_foreach_po))
+            "Returns the sites of all output SiDBs.")
 
         .def("assign_defect", &layout::assign_defect, py::arg("site"), py::arg("defect"),
              DOC(fiction_sidb_layout_assign_defect))

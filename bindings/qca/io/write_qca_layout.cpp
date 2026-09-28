@@ -15,6 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
@@ -37,8 +38,8 @@ void write_qca_layout(nanobind::module_& m)
     py::class_<fiction::qca::io::write_qca_layout_params>(m, "write_qca_layout_params",
                                                           DOC(fiction_qca_io_write_qca_layout_params))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("on_progress", &fiction::qca::io::write_qca_layout_params::on_progress,
-                "Receives serialization progress.")
+        .def_rw("on_progress", &fiction::qca::io::write_qca_layout_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
+                pyfiction::CALLBACK_SETTER, "Receives serialization progress.")
         .def_rw("create_inter_layer_via_cells",
                 &fiction::qca::io::write_qca_layout_params::create_inter_layer_via_cells,
                 DOC(fiction_qca_io_write_qca_layout_params_create_inter_layer_via_cells))

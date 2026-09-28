@@ -88,7 +88,11 @@ def test_time_to_solution_with_simulation_results() -> None:
 
     number_of_repetitions = 100
     # Run the QuickSim simulations
-    simulation_results_quicksim = [quicksim(layout, quicksim_params_inst) for _ in range(number_of_repetitions)]
+    simulation_results_quicksim = []
+    for _ in range(number_of_repetitions):
+        result = quicksim(layout, quicksim_params_inst)
+        assert result is not None
+        simulation_results_quicksim.append(result)
 
     quickexact_params_inst = quickexact_params()
     quickexact_params_inst.simulation_parameters = params

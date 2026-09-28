@@ -17,6 +17,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -260,6 +261,8 @@ void operational_domain(nanobind::module_& m)
                 const py::object py_keys = py::cast(keys);
                 return py::iter(py_keys);
             },
+            py::sig(
+                "def __iter__(self) -> collections.abc.Iterator[mnt.pyfiction.sidb.simulation.logic.parameter_point]"),
             "Returns an iterator over the parameter points stored in the domain.")
         .def("keys",
              [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
@@ -344,6 +347,8 @@ void operational_domain(nanobind::module_& m)
                 const py::object py_keys = py::cast(keys);
                 return py::iter(py_keys);
             },
+            py::sig(
+                "def __iter__(self) -> collections.abc.Iterator[mnt.pyfiction.sidb.simulation.logic.parameter_point]"),
             "Returns an iterator over the parameter points stored in the domain.")
         .def("keys",
              [](const fiction::sidb::simulation::logic::operational_domain& self)
@@ -401,8 +406,10 @@ void operational_domain(nanobind::module_& m)
         .def_rw("number_of_threads", &fiction::sidb::simulation::logic::operational_domain_params::number_of_threads,
                 DOC(fiction_sidb_simulation_logic_operational_domain_params_number_of_threads))
         .def_rw("on_progress", &fiction::sidb::simulation::logic::operational_domain_params::on_progress,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_sidb_simulation_logic_operational_domain_params_on_progress))
         .def_rw("on_worker_progress", &fiction::sidb::simulation::logic::operational_domain_params::on_worker_progress,
+                pyfiction::ON_WORKER_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_sidb_simulation_logic_operational_domain_params_on_worker_progress));
 
     py::class_<fiction::sidb::simulation::logic::operational_domain_stats>(

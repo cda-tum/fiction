@@ -213,7 +213,7 @@ automatically, open the file yourself** — several do not.
 
 | Touching               | Read                    | Why it matters                                                      |
 | ---------------------- | ----------------------- | ------------------------------------------------------------------- |
-| `bindings/`, `python/` | `bindings/AGENTS.md`    | nanobind wiring; five steps, no compiler reminder                   |
+| `bindings/`, `python/` | `bindings/AGENTS.md`    | nanobind wiring; six steps, no compiler reminder                    |
 | `test/`                | `test/AGENTS.md`        | test file base names must be globally unique                        |
 | `docs/`                | `docs/AGENTS.md`        | a page missing from a `toctree` builds silently and is unreachable  |
 | `experiments/`         | `experiments/AGENTS.md` | published-paper reproductions; the code may change, the results not |
@@ -240,7 +240,7 @@ Use these commands to validate your work.
 - **Test (Quick)**: `pytest` (Use if only Python code changed to avoid C++ rebuilds)
 - **Test (Floors)**: `nox -s minimums` (Runs pytest on Python 3.10 against the lowest declared
   dependency versions)
-- **Lint**: `nox -s lint` (Runs prek hooks including ruff and mypy)
+- **Lint**: `nox -s lint` (Runs prek hooks including ruff and ty)
 - **C++ Lint**: `nox -s cpp_lint -- --all` (Runs the CI Clang-Tidy configuration on all eligible C++ files)
 
 ### General
@@ -302,7 +302,7 @@ imitate.
 ## Code Style
 
 `clang-format` and `clang-tidy` enforce C++ formatting and identifier naming; `ruff` and
-`mypy` cover Python. The rules below are the ones no tool checks.
+`ty` cover Python. The rules below are the ones no tool checks.
 
 ### C++
 

@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 
 #include <fiction/technology/sidb/generators/random_layout_generator.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -70,8 +71,8 @@ void random_layout_generator(nanobind::module_& m)
         .def_rw("maximal_attempts_for_multiple_layouts",
                 &generate_random_layout_params::maximal_attempts_for_multiple_layouts,
                 DOC(fiction_sidb_generators_generate_random_layout_params_maximal_attempts_for_multiple_layouts))
-        .def_rw("on_progress", &generate_random_layout_params::on_progress,
-                DOC(fiction_sidb_generators_generate_random_layout_params_on_progress));
+        .def_rw("on_progress", &generate_random_layout_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
+                pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_generators_generate_random_layout_params_on_progress));
 
     m.def(
         "generate_random_sidb_layout",

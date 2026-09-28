@@ -252,7 +252,9 @@ bindings/
 │       └── register_sidb_simulation_engines.cpp   # calls quickexact(m), quicksim(m), ...
 └── ...
 python/mnt/pyfiction/
-└── __init__.py                                    # loads the submodules lazily
+├── __init__.py                                    # loads the submodules lazily
+├── physical_design/__init__.pyi, path_finding.pyi # generated stubs
+└── ...
 ```
 
 The Python module tree mirrors the C++ namespaces: `fiction::sidb::simulation::engines::quickexact` is
@@ -271,7 +273,8 @@ binding functions of its directory, and creates each nested submodule with `pyfi
 the submodule's registry.
 
 New source files do not need to be added anywhere manually: `bindings/CMakeLists.txt` collects each module's
-sources with `file(GLOB_RECURSE ...)`. Wire the new function into the directory's `register_<path>.cpp`.
+sources with `file(GLOB_RECURSE ...)`. Wire the new function into the directory's `register_<path>.cpp`, then run
+`nox -s stubs` to regenerate the `.pyi` files under `python/mnt/pyfiction/` and commit them.
 
 :::{note}
 The bindings are built with [nanobind](https://github.com/wjakob/nanobind), which (unlike the previous

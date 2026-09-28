@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/wiring_reduction.hpp>
@@ -47,6 +48,7 @@ void wiring_reduction(nanobind::module_& m)
         .def_rw("timeout", &fiction::physical_design::wiring_reduction_params::timeout,
                 DOC(fiction_physical_design_wiring_reduction_params_timeout))
         .def_rw("on_progress", &fiction::physical_design::wiring_reduction_params::on_progress,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_wiring_reduction_params_on_progress));
 
     py::class_<fiction::physical_design::wiring_reduction_stats>(m, "wiring_reduction_stats",
@@ -61,8 +63,6 @@ void wiring_reduction(nanobind::module_& m)
                 return stream.str();
             },
             "Returns a string representation of the statistics.")
-        .def("report", &fiction::physical_design::wiring_reduction_stats::report,
-             DOC(fiction_physical_design_wiring_reduction_stats_report))
         .def_ro("time_total", &fiction::physical_design::wiring_reduction_stats::time_total,
                 DOC(fiction_physical_design_wiring_reduction_stats_time_total))
         .def_ro("x_size_before", &fiction::physical_design::wiring_reduction_stats::x_size_before,

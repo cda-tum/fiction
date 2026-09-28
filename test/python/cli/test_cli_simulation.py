@@ -56,7 +56,7 @@ def test_ground_state_engines(or_gate: Shell, engine: str) -> None:
     entry = or_gate.session.cell_layouts.current()
     assert entry.result is not None
     assert entry.engine
-    simulation = or_gate.session.log[-1]["result"]["cell_layout"]["simulation"]  # type: ignore[index]
+    simulation = or_gate.session.log[-1]["result"]["cell_layout"]["simulation"]
     assert simulation["stable_states"] >= 1
     assert simulation["ground_state_energy_ev"] is not None
     assert "Ground state" in or_gate.ok("print -c")
@@ -89,7 +89,7 @@ def test_simulation_rejects_invalid_physical_parameters(or_gate: Shell, command:
 def test_simulation_reports_an_empty_result(shell: Shell) -> None:
     shell.session.cell_layouts.add(CellEntry(sidb_layout()))
     assert "no physically valid charge distribution" in shell.ok("quickexact")
-    simulation = shell.session.log[-1]["result"]["cell_layout"]["simulation"]  # type: ignore[index]
+    simulation = shell.session.log[-1]["result"]["cell_layout"]["simulation"]
     assert simulation["stable_states"] == 0
     assert simulation["ground_state_energy_ev"] is None
 
@@ -103,8 +103,8 @@ def test_temp_rejects_missing_gate_ports_and_invalid_temperature(shell: Shell) -
 def test_temp(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("hex_21_inputsdbp_xor_v1.sqd")}"; tt -t 0110; temp -g --engine quickexact')
     result = shell.session.log[-1]["result"]
-    assert 0 < result["critical_temperature_k"] <= 400  # type: ignore[index]
-    assert result["gate_based"] is True  # type: ignore[index]
+    assert 0 < result["critical_temperature_k"] <= 400
+    assert result["gate_based"] is True
     assert "critical temperature" in shell.output
     shell.ok("current -c 1; temp -t 50")
     assert "in (0, 1]" in shell.fails("temp -c 2")
