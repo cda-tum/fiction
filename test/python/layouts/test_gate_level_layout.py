@@ -182,11 +182,12 @@ def test_gate_level_layout_iteration(make_layout):
 
 
 def test_gate_level_layout_gate_types():
-    for layout in [
+    layouts: list[cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout] = [
         cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
         shifted_cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
         hexagonal_gate_layout((2, 8, 0), "2DDWave", "Layout"),
-    ]:
+    ]
+    for layout in layouts:
         assert layout.is_empty()
 
         # layout creation
@@ -239,11 +240,12 @@ def test_gate_level_layout_gate_types():
         assert layout.is_po(layout.get_node((1, 8)))
         assert layout.is_po(layout.get_node((2, 8)))
 
-    for layout in [
+    layouts = [
         cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
         shifted_cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
         hexagonal_gate_layout((2, 2, 0), "RES", "Layout"),
-    ]:
+    ]
+    for layout in layouts:
         assert layout.is_empty()
 
         # pis

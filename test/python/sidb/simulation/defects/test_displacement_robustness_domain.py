@@ -42,7 +42,7 @@ def test_siqad_and_gate_100_lattice():
 
     params = displacement_robustness_domain_params()
 
-    params.displacement_variations = [1, 1]
+    params.displacement_variations = (1, 1)
     params.operational_params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
 
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0

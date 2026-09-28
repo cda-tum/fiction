@@ -17,6 +17,7 @@
 
 #include "pyfiction/documentation.hpp"
 
+#include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
@@ -62,8 +63,27 @@ void detect_bdl_wires(nanobind::module_& m)
         .def_rw("bdl_pairs_params", &fiction::sidb::simulation::logic::detect_bdl_wires_params::bdl_pairs_params,
                 DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params_bdl_pairs_params));
 
-    py::class_<bdl_wire>(m, "bdl_wire", DOC(fiction_sidb_simulation_logic_bdl_wire))
-        .def(py::init<>(), DOC(fiction_sidb_simulation_logic_bdl_wire_bdl_wire))
+    auto wire = py::class_<bdl_wire>(m, "bdl_wire", DOC(fiction_sidb_simulation_logic_bdl_wire));
+    // The port belongs to the wire's Python API; importing fcn here would cycle through sidb.
+    auto port =
+        py::class_<fiction::fcn::port_direction>(wire, "port_direction", "Direction and I/O flags of a BDL wire port.");
+    py::enum_<fiction::fcn::port_direction::cardinal>(port, "cardinal", "Cardinal port direction.")
+        .value("NORTH", fiction::fcn::port_direction::NORTH)
+        .value("NORTH_EAST", fiction::fcn::port_direction::NORTH_EAST)
+        .value("EAST", fiction::fcn::port_direction::EAST)
+        .value("SOUTH_EAST", fiction::fcn::port_direction::SOUTH_EAST)
+        .value("SOUTH", fiction::fcn::port_direction::SOUTH)
+        .value("SOUTH_WEST", fiction::fcn::port_direction::SOUTH_WEST)
+        .value("WEST", fiction::fcn::port_direction::WEST)
+        .value("NORTH_WEST", fiction::fcn::port_direction::NORTH_WEST)
+        .value("NONE", fiction::fcn::port_direction::NONE);
+    port.def(py::init<fiction::fcn::port_direction::cardinal, bool, bool>(),
+             py::arg("direction") = fiction::fcn::port_direction::NORTH, py::arg("pi") = false, py::arg("po") = false,
+             "Constructs a port with a cardinal direction and input/output flags.")
+        .def_rw("dir", &fiction::fcn::port_direction::dir, "Cardinal direction as an integer.")
+        .def_rw("pi", &fiction::fcn::port_direction::pi, "Whether the port is a primary input.")
+        .def_rw("po", &fiction::fcn::port_direction::po, "Whether the port is a primary output.");
+    wire.def(py::init<>(), DOC(fiction_sidb_simulation_logic_bdl_wire_bdl_wire))
         .def(py::init<std::vector<fiction::sidb::simulation::logic::bdl_pair>>(), py::arg("p"),
              DOC(fiction_sidb_simulation_logic_bdl_wire_bdl_wire_2))
         .def_rw("pairs", &bdl_wire::pairs, DOC(fiction_sidb_simulation_logic_bdl_wire_pairs))

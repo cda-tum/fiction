@@ -46,8 +46,7 @@ def write_qcc_command(session: Session, args: argparse.Namespace) -> Result:
     Without a filename, use the active element's name and ``.qcc``.
     """
     entry = session.cell_layouts.current()
-    element = entry.layout
-    require_cell_type(element, (inml_layout,), ".qcc")
+    element = require_cell_type(entry.layout, (inml_layout,), ".qcc")
     path = output_path(element, args.file, ".qcc")
     params = write_qcc_layout_params()
     params.on_progress = session.report_progress

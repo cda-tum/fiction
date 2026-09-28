@@ -47,8 +47,7 @@ def write_qca_command(session: Session, args: argparse.Namespace) -> Result:
     Without a filename, use the active element's name and ``.qca``.
     """
     entry = session.cell_layouts.current()
-    element = entry.layout
-    require_cell_type(element, (qca_layout,), ".qca")
+    element = require_cell_type(entry.layout, (qca_layout,), ".qca")
     path = output_path(element, args.file, ".qca")
     params = write_qca_layout_params()
     params.on_progress = session.report_progress

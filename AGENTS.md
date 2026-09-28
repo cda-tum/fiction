@@ -213,7 +213,7 @@ automatically, open the file yourself** — several do not.
 
 | Touching               | Read                    | Why it matters                                                      |
 | ---------------------- | ----------------------- | ------------------------------------------------------------------- |
-| `bindings/`, `python/` | `bindings/AGENTS.md`    | nanobind wiring; five steps, no compiler reminder                   |
+| `bindings/`, `python/` | `bindings/AGENTS.md`    | nanobind wiring; six steps, no compiler reminder                    |
 | `test/`                | `test/AGENTS.md`        | test file base names must be globally unique                        |
 | `docs/`                | `docs/AGENTS.md`        | a page missing from a `toctree` builds silently and is unreachable  |
 | `experiments/`         | `experiments/AGENTS.md` | published-paper reproductions; the code may change, the results not |

@@ -283,7 +283,20 @@ docstring-code-format = true
 "docs/**" = [ "A", "implicit-namespace-package", "T20" ]
 "noxfile.py" = [ "banned-api", "T20" ]
 "scripts/**" = [ "T20" ]  # maintenance scripts report progress on stdout
-"*.pyi" = [ "docstring-in-stub", "overload-with-docstring" ]  # pydocstyle
+# `nox -s stubs` generates the stubs: their docstrings come from the Doxygen comments in
+# `include/fiction/`, and their names and signatures from the C++ API
+"*.pyi" = [
+    "ambiguous-unicode-character-docstring",
+    "builtin-argument-shadowing",
+    "builtin-attribute-shadowing",
+    "D",
+    "docstring-in-stub",
+    "error-suffix-on-exception-name",
+    "forward-annotation-syntax-error",       # C++ type names of types without a binding
+    "invalid-class-name",
+    "line-too-long",
+    "overload-with-docstring",
+]
 # `mnt/__init__.py` registers the Windows DLL search path before any extension is imported, and
 # `mnt/pyfiction/__init__.py` loads the submodules lazily. A re-export-only `__init__` cannot do either
 "python/mnt/__init__.py" = [ "non-empty-init-module" ]
@@ -357,9 +370,18 @@ sub_table_spacing = "\n"
 # Error if ty emits any warning-level diagnostics.
 error-on-warning = true
 
-[tool.ty.analysis]
-# The extension modules ship no stubs
-allowed-unresolved-imports = [ "mnt.pyfiction.**" ]
+# nanobind generates comparison operands narrower than object.__eq__/__ne__.
+[[tool.ty.overrides]]
+include = [
+    "python/mnt/pyfiction/inml/__init__.pyi",
+    "python/mnt/pyfiction/layouts/coords.pyi",
+    "python/mnt/pyfiction/mol_qca/__init__.pyi",
+    "python/mnt/pyfiction/qca/__init__.pyi",
+    "python/mnt/pyfiction/sidb/__init__.pyi",
+    "python/mnt/pyfiction/sidb/model.pyi",
+    "python/mnt/pyfiction/sidb/simulation/logic.pyi",
+]
+rules = { invalid-method-override = "ignore" }
 
 [tool.pytest]
 addopts = [

@@ -54,6 +54,7 @@ def test_apply_bestagon_library(mux21: technology_network) -> None:
     params.border_io = True
 
     layout = exact_hexagonal(mux21, params)
+    assert layout is not None
 
     reports: list[tuple[str, int, int]] = []
     apply_bestagon_library(layout, lambda task, done, total: reports.append((task, done, total)))
@@ -69,6 +70,7 @@ def test_apply_topolinano_library(mux21: technology_network) -> None:
     params.technology_specifics = technology_constraints.TOPOLINANO
 
     layout = exact_shifted_cartesian(mux21, params)
+    assert layout is not None
 
     reports: list[tuple[str, int, int]] = []
     apply_topolinano_library(layout, lambda task, done, total: reports.append((task, done, total)))

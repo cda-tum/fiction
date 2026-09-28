@@ -79,8 +79,8 @@ def test_write_operational_domain_with_metric_values():
     opdom = critical_temperature_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
     # Adding metric values
-    opdom[parameter_point([0.1, 0.2])] = [operational_status.OPERATIONAL, 50.3]
-    opdom[parameter_point([0.3, 0.4])] = [operational_status.NON_OPERATIONAL, 0.0]
+    opdom[parameter_point([0.1, 0.2])] = (operational_status.OPERATIONAL, 50.3)
+    opdom[parameter_point([0.3, 0.4])] = (operational_status.NON_OPERATIONAL, 0.0)
 
     expected = "epsilon_r,lambda_tf,operational status,critical temperature\n0.1,0.2,1,50.3\n0.3,0.4,0,0"
 

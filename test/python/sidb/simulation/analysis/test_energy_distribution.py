@@ -58,7 +58,11 @@ def test_three_sidbs(lat, all_negative_energy):
     assert distribution.min_energy() == pytest.approx(cd4.energy(), abs=1e-7)
     assert distribution.max_energy() == pytest.approx(cd1.energy(), abs=1e-7)
 
-    states = [distribution.get_nth_state(i) for i in range(distribution.size())]
+    states = []
+    for i in range(distribution.size()):
+        state = distribution.get_nth_state(i)
+        assert state is not None
+        states.append(state)
     assert all(s.degeneracy == 1 for s in states)
     assert all(
         lower.electrostatic_potential_energy < higher.electrostatic_potential_energy
@@ -83,6 +87,10 @@ def test_degenerate_states():
     distribution = calculate_energy_distribution([excited, left, right])
 
     assert distribution.size() == 2
-    assert distribution.get_nth_state(0).electrostatic_potential_energy == pytest.approx(0.5)
-    assert distribution.get_nth_state(0).degeneracy == 2
-    assert distribution.get_nth_state(1).degeneracy == 1
+    first = distribution.get_nth_state(0)
+    second = distribution.get_nth_state(1)
+    assert first is not None
+    assert second is not None
+    assert first.electrostatic_potential_energy == pytest.approx(0.5)
+    assert first.degeneracy == 2
+    assert second.degeneracy == 1

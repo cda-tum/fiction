@@ -34,9 +34,7 @@ function(add_pyfiction_python_binding target_name)
     ${target_name} PROPERTIES OUTPUT_NAME ${ARG_MODULE_NAME}
                               INTERPROCEDURAL_OPTIMIZATION OFF)
 
-  target_link_libraries(${target_name} PRIVATE libfiction)
-  target_include_directories(${target_name}
-                             PRIVATE ${PROJECT_SOURCE_DIR}/bindings/include)
+  target_link_libraries(${target_name} PRIVATE pyfiction_headers)
   target_compile_features(${target_name} PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
 
   # `CMAKE_INSTALL_RPATH_USE_LINK_PATH` skips link directories inside the source
@@ -90,6 +88,25 @@ function(add_pyfiction_python_binding target_name)
     TARGETS ${target_name}
     DESTINATION .
     COMPONENT fiction_Python)
+
+  # Install the committed stubs next to the extension in editable mode, so IDEs
+  # and type checkers find them. A module with submodules has a stub package.
+  if(SKBUILD_STATE STREQUAL "editable")
+    set(stub_root ${PROJECT_SOURCE_DIR}/python/mnt/pyfiction)
+    if(IS_DIRECTORY ${stub_root}/${ARG_MODULE_NAME})
+      install(
+        DIRECTORY ${stub_root}/${ARG_MODULE_NAME}
+        DESTINATION .
+        COMPONENT fiction_Python
+        FILES_MATCHING
+        PATTERN "*.pyi")
+    elseif(EXISTS ${stub_root}/${ARG_MODULE_NAME}.pyi)
+      install(
+        FILES ${stub_root}/${ARG_MODULE_NAME}.pyi
+        DESTINATION .
+        COMPONENT fiction_Python)
+    endif()
+  endif()
 
   add_dependencies(pyfiction ${target_name})
 endfunction()

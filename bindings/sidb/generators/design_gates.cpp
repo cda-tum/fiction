@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/generators/design_gates.hpp>
@@ -97,8 +98,8 @@ void design_gates(nanobind::module_& m)
                 DOC(fiction_sidb_generators_design_gates_params_maximal_random_design_attempts))
         .def_rw("termination_cond", &design_gates_params::termination_cond,
                 DOC(fiction_sidb_generators_design_gates_params_termination_condition))
-        .def_rw("on_progress", &design_gates_params::on_progress,
-                DOC(fiction_sidb_generators_design_gates_params_on_progress));
+        .def_rw("on_progress", &design_gates_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
+                pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_generators_design_gates_params_on_progress));
 
     m.def(
         "design_sidb_gates",
