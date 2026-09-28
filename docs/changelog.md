@@ -161,6 +161,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
 
+  - Direct CMake builds of the Python bindings now require nanobind 3.1 or newer.
   - The Docker image uses `uv` to install the `mnt.pyfiction` wheel and starts the Python `fiction` shell.
 
 - CLI:
