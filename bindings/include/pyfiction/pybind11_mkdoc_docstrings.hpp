@@ -21255,6 +21255,10 @@ Args:
     ps: Parameters for the BDL pair and wire detection and the input
         encoding.
 
+Raises:
+    std::invalid_argument: if the layout has more than 63 input BDL
+                           pairs.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_bdl_input_iterator_2 =
@@ -21265,6 +21269,10 @@ Args:
     source_layout: The layout to iterate over.
     ps: Parameters for the BDL pair detection and the input encoding.
     source_input_wires: The input wires of `source_layout`.
+
+Raises:
+    std::invalid_argument: if the layout has more than 63 input BDL
+                           pairs.
 
 )doc";
 
@@ -23131,6 +23139,10 @@ Args:
 Returns:
     One layout per input pattern.
 
+Raises:
+    std::invalid_argument: if the layout has more than 63 input BDL
+                           pairs.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_generate_bdl_input_pattern_layouts_2 =
@@ -23144,6 +23156,10 @@ Args:
 
 Returns:
     One layout per input pattern.
+
+Raises:
+    std::invalid_argument: if the layout has more than 63 input BDL
+                           pairs.
 
 )doc";
 
