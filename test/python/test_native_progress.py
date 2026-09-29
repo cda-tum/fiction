@@ -173,6 +173,21 @@ def test_counted_native_phases(mux21: technology_network, command: str) -> None:
     assert all(done == total for done, total in final.values())
 
 
+def test_progress_callback_exception_propagates(mux21: technology_network) -> None:
+    """A Python exception survives the native callback and split backend unchanged."""
+    error = RuntimeError("callback failed")
+
+    def fail(*_report: object) -> None:
+        """Raise the original Python exception from inside a native algorithm."""
+        raise error
+
+    params = network_balancing_params()
+    params.on_progress = fail
+    with pytest.raises(RuntimeError, match="callback failed") as caught:
+        network_balancing(mux21, params)
+    assert caught.value is error
+
+
 @pytest.mark.parametrize("kind", ["fgl", "dot", "qll", "qca", "svg", "sqd", "sidb_svg"])
 def test_writer_counts_and_output(mux21: technology_network, tmp_path: Path, kind: str) -> None:
     """Callbacks leave writer output unchanged and count every completed phase."""
