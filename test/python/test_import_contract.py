@@ -12,8 +12,10 @@ from __future__ import annotations
 
 import importlib
 import inspect
+import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- runs the lazy-loading check in a fresh interpreter
 import sys
+from fnmatch import fnmatchcase
 
 import pytest
 
@@ -86,6 +88,40 @@ def test_submodules_load_lazily() -> None:
         "assert 'mnt.pyfiction.sidb' in sys.modules\n"
     )
     subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
+
+
+@pytest.mark.skipif(sys.platform != "linux", reason="Inspect ELF exports with GNU nm")
+@pytest.mark.parametrize("name", SUBMODULES)
+def test_extension_exports(name: str) -> None:
+    """Extensions expose their initializer and nanobind's shared exception ABI.
+
+    Args:
+        name: Top-level extension module below ``mnt.pyfiction._native``.
+    """
+    nm = shutil.which("nm")
+    assert nm is not None, "nm is required to check Linux extension exports"
+    module = importlib.import_module(f"mnt.pyfiction._native.{name}")
+    assert module.__file__ is not None
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- resolved nm and an imported extension path
+        [nm, "-D", "--defined-only", "--format=just-symbols", "--demangle", module.__file__],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    exports = result.stdout.splitlines()
+    entry_point = f"PyInit_{name}"
+    assert entry_point in exports
+    exceptions = ("python_error", "builtin_exception")
+    unexpected = [
+        symbol
+        for symbol in exports
+        if symbol != entry_point
+        and not any(fnmatchcase(symbol, f"*nanobind::abi*::{exception}*") for exception in exceptions)
+    ]
+    assert not unexpected, f"Unexpected exports from {name}: {unexpected}"
+    assert any(fnmatchcase(symbol, "typeinfo for nanobind::abi*::python_error") for symbol in exports)
+    if name in {"sidb", "synthesis"}:
+        assert any(fnmatchcase(symbol, "typeinfo for nanobind::abi*::builtin_exception") for symbol in exports)
 
 
 def test_coordinate_namespace_in_fresh_interpreter() -> None:

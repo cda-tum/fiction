@@ -67,6 +67,18 @@ function(add_pyfiction_python_binding target_name)
                         "LINKER:-exported_symbol,_PyInit_${ARG_MODULE_NAME}")
   elseif(UNIX)
     target_link_options(${target_name} PRIVATE "LINKER:--exclude-libs,ALL")
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+      # Archive hiding does not cover the module's own C++ instantiations.
+      # nanobind's exception ABI remains shared with the split backend.
+      set(export_map "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/pyfiction.exports.map")
+      target_link_options(${target_name} PRIVATE
+                          "LINKER:--version-script,${export_map}")
+      set_property(
+        TARGET ${target_name}
+        APPEND
+        PROPERTY LINK_DEPENDS "${export_map}")
+    endif()
   endif()
 
   install(
