@@ -37,9 +37,6 @@ try:
 except ImportError:
     pass
 else:
-    # CodeQL does not follow `__all__ +=` into this branch and reports the imports as unused. Reading
-    # the names here marks them as used; ClusterComplete needs ALGLIB, so the names exist only in builds with it.
-    _clustercomplete_exports = (clustercomplete, clustercomplete_params, ground_state_space_reporting)
     __all__ += [
         "clustercomplete",
         "clustercomplete_params",
