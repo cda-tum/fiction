@@ -105,7 +105,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `on_progress`, and `exhaustive_ground_state_simulation` takes it as an argument. These
     algorithms release the GIL while they run.
   - `mnt.pyfiction` ships `.pyi` stubs and a `py.typed` marker, so type checkers and IDEs see the
-    signatures of the bindings.
+    signatures of the bindings. The package declares the `Typing :: Typed` classifier.
   - Coordinate stubs accept two- and three-element tuples. Domain iterators and simulation
     parameter dictionaries preserve their element types.
   - `bdl_wire.port_direction` exposes wire directions and I/O flags; `reserve_input_nodes`
@@ -161,6 +161,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
 
+  - Direct CMake builds of the Python bindings now require nanobind 3.1 or newer.
   - The Docker image uses `uv` to install the `mnt.pyfiction` wheel and starts the Python `fiction` shell.
 
 - CLI:

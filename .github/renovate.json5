@@ -21,6 +21,20 @@
   ],
   customManagers: [
     {
+      customType: "regex",
+      description: "Update nanobind requirements in C++ lint entry points",
+      managerFilePatterns: [
+        "/^noxfile\\.py$/",
+        "/^\\.github/workflows/cpp-linter\\.yml$/"
+      ],
+      matchStrings: [
+        "\"nanobind(?<currentValue>~=[0-9.]+)\""
+      ],
+      depNameTemplate: "nanobind",
+      datasourceTemplate: "pypi",
+      versioningTemplate: "pep440",
+    },
+    {
       // Renovate has no native manager for CMake FetchContent, so the pinned
       // versions in cmake/Dependencies.cmake are tracked via regex managers
       // instead, one per dependency, matching the `set(<DEP>_VERSION ...)`
@@ -152,7 +166,11 @@
     },
     {
       matchManagers: [
-        "pep621"
+        "pep621",
+        "custom.regex"
+      ],
+      matchDatasources: [
+        "pypi"
       ],
       addLabels: [
         "dependencies",
@@ -181,10 +199,13 @@
     {
       // This rule is intentionally last: packageRules are applied in order and
       // later rules override earlier ones, so this re-asserts automerge: false
-      // for custom.regex after the "patch versions" rule above would otherwise
+      // for CMake dependencies after the "patch versions" rule above would otherwise
       // auto-merge patch-level CMake tag bumps unattended.
       matchManagers: [
         "custom.regex"
+      ],
+      matchFileNames: [
+        "cmake/Dependencies.cmake"
       ],
       addLabels: [
         "dependencies",

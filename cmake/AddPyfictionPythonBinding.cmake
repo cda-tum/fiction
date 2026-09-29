@@ -67,21 +67,6 @@ function(add_pyfiction_python_binding target_name)
                         "LINKER:-exported_symbol,_PyInit_${ARG_MODULE_NAME}")
   elseif(UNIX)
     target_link_options(${target_name} PRIVATE "LINKER:--exclude-libs,ALL")
-
-    # `--gc-sections` collects nothing that was not compiled per-function and
-    # per-data, and nanobind's own size tuning stops at `-Os`. These cover the
-    # bindings; `vendors/CMakeLists.txt` covers the static archives, which is
-    # where most of the collectable code turns out to be.
-    target_compile_options(
-      ${target_name}
-      PRIVATE
-        "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>,$<CONFIG:RelWithDebInfo>>:-ffunction-sections;-fdata-sections>"
-    )
-    target_link_options(
-      ${target_name}
-      PRIVATE
-      "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>,$<CONFIG:RelWithDebInfo>>:LINKER:--gc-sections>"
-    )
   endif()
 
   install(

@@ -155,7 +155,7 @@ repos:
 
   # Python linting using ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.8
+    rev: v0.16.9
     hooks:
       - id: ruff-format
         priority: 6
@@ -192,7 +192,7 @@ repos:
   # shell imports without compiling the extension, and the `docs` group resolves the imports of
   # `docs/conf.py` and its Sphinx extension
   - repo: https://github.com/astral-sh/ty-pre-commit
-    rev: v0.0.83
+    rev: v0.0.84
     hooks:
       - id: ty
         args: [--no-install-project, --group, docs]
@@ -223,7 +223,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.09.19
+    rev: 2026.09.24
     hooks:
       - id: validate-pyproject
         priority: 0

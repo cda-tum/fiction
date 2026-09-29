@@ -35,7 +35,14 @@ if(NOT nanobind_exec_result EQUAL 0)
       "Failed to query nanobind CMake directory via '${Python_EXECUTABLE} -m nanobind --cmake_dir': ${nanobind_exec_err}"
   )
 endif()
-find_package(nanobind CONFIG REQUIRED PATHS "${nanobind_ROOT}" NO_DEFAULT_PATH)
+find_package(
+  nanobind
+  3.1
+  CONFIG
+  REQUIRED
+  PATHS
+  "${nanobind_ROOT}"
+  NO_DEFAULT_PATH)
 
 include(${PROJECT_SOURCE_DIR}/cmake/AddPyfictionPythonBinding.cmake)
 
