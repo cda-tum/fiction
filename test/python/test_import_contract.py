@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import importlib
+import inspect
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- runs the lazy-loading check in a fresh interpreter
 import sys
 
@@ -125,3 +126,20 @@ def test_public_exports_are_explicit(name: str) -> None:
     module = importlib.import_module(f"mnt.pyfiction.{name}")
     assert all(hasattr(module, member) for member in module.__all__)
     assert "_native" not in module.__all__
+
+
+@pytest.mark.parametrize("name", SUBMODULES + NESTED_SUBMODULES)
+def test_public_exports_are_the_native_objects(name: str) -> None:
+    """Every export that a native module also defines is that module's own object.
+
+    A wrapper or copy would not convert between the separately compiled extensions.
+
+    Args:
+        name: Public module path.
+    """
+    module = importlib.import_module(f"mnt.pyfiction.{name}")
+    native = importlib.import_module(f"mnt.pyfiction._native.{name}")
+    for member in module.__all__:
+        exported = getattr(module, member)
+        if hasattr(native, member) and not inspect.ismodule(exported):
+            assert exported is getattr(native, member), member
