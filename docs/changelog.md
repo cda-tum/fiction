@@ -622,6 +622,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Linux extensions hide C++ implementation symbols while preserving nanobind's shared exception ABI.
   - `physically_valid_parameters` and `operational_domain_ratio` now release the GIL so
     worker progress callbacks can execute without deadlocking.
   - Added ordered `simulate_outputs`, exposed mapper statistics, and validated truth-table sizes and expressions before native operations. Gate-library errors identify unsupported gates and their coordinates.

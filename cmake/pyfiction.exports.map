@@ -1,0 +1,10 @@
+{
+  global:
+    PyInit_*;
+    extern "C++" {
+      *nanobind::abi*::python_error*;
+      *nanobind::abi*::builtin_exception*;
+    };
+  local:
+    *;
+};
