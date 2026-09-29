@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Entry point of the `mnt.pyfiction.sidb` extension module.
+ * @brief Entry point of the `mnt.pyfiction._native.sidb` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -42,55 +42,55 @@ void layout(nanobind::module_& m);
 void charge_distribution(nanobind::module_& m);
 
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.sidb.model` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.sidb.model` submodule.
  *
  * @param m Python submodule.
  */
 void register_sidb_model(nanobind::module_& m);
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.sidb.simulation` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.sidb.simulation` submodule.
  *
  * @param m Python submodule.
  */
 void register_sidb_simulation(nanobind::module_& m);
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.sidb.io` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.sidb.io` submodule.
  *
  * @param m Python submodule.
  */
 void register_sidb_io(nanobind::module_& m);
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.sidb.simulation.io` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.sidb.simulation.io` submodule.
  *
  * @param m Python submodule.
  */
 void register_sidb_simulation_io(nanobind::module_& m);
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.sidb.simulation.engines` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.sidb.simulation.engines` submodule.
  *
  * @param m Python submodule.
  */
 void register_sidb_simulation_engines(nanobind::module_& m);
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.sidb.simulation.logic` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.sidb.simulation.logic` submodule.
  *
  * @param m Python submodule.
  */
 void register_sidb_simulation_logic(nanobind::module_& m);
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.sidb.simulation.analysis` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.sidb.simulation.analysis` submodule.
  *
  * @param m Python submodule.
  */
 void register_sidb_simulation_analysis(nanobind::module_& m);
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.sidb.simulation.defects` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.sidb.simulation.defects` submodule.
  *
  * @param m Python submodule.
  */
 void register_sidb_simulation_defects(nanobind::module_& m);
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.sidb.generators` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.sidb.generators` submodule.
  *
  * @param m Python submodule.
  */
@@ -108,8 +108,8 @@ NB_MODULE(sidb, m)
     pyfiction::register_execution_timeout();
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.layouts");
-    nanobind::module_::import_("mnt.pyfiction.synthesis");
+    nanobind::module_::import_("mnt.pyfiction._native.layouts");
+    nanobind::module_::import_("mnt.pyfiction._native.synthesis");
 
     auto model = pyfiction::def_submodule(m, "model", "Physical models and parameters of SiDB systems.");
     pyfiction::register_sidb_model(model);

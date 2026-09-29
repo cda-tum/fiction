@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Entry point of the `mnt.pyfiction.qca` extension module.
+ * @brief Entry point of the `mnt.pyfiction._native.qca` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -24,7 +24,7 @@ namespace pyfiction
 void qca_layout(nanobind::module_& m);
 
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.qca.io` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.qca.io` submodule.
  *
  * @param m Python submodule.
  */
@@ -40,7 +40,7 @@ NB_MODULE(qca, m)
     m.doc() = "Quantum-dot Cellular Automata (QCA) cell-level layouts.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.layouts");
+    nanobind::module_::import_("mnt.pyfiction._native.layouts");
 
     pyfiction::qca_layout(m);
     auto io = pyfiction::def_submodule(m, "io", "Readers and writers of QCA cell-level layouts.");

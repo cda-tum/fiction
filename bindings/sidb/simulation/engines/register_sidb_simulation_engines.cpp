@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the bindings of the `mnt.pyfiction.sidb.simulation.engines` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.sidb.simulation.engines` submodule.
  * @author Marcel Walter (marcelwa)
  */
 

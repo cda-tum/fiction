@@ -8,7 +8,7 @@
 
 """Python bindings for fiction, a framework for Design Automation for Field-coupled Nanotechnologies.
 
-Each submodule mirrors one C++ namespace and loads on first access.
+Domain modules load on first access and expose the supported FCN tools.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ from __future__ import annotations
 from importlib import import_module
 from typing import TYPE_CHECKING
 
-from .utils import __version__
+from ._native.utils import __version__
 
 if TYPE_CHECKING:
     from . import (

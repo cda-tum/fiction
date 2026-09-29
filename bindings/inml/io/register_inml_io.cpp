@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the bindings of the `mnt.pyfiction.inml.io` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.inml.io` submodule.
  * @author Marcel Walter (marcelwa)
  */
 

@@ -380,6 +380,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Native extensions now live under the private `_native` package; public Python modules
+    explicitly export the supported tools and preserve native type identity.
+
   - Coordinate types and area/volume functions now live in `mnt.pyfiction.layouts.coords`.
 
   - **Breaking:** `mnt.pyfiction` has one submodule per C++ namespace, such as `mnt.pyfiction.layouts` and

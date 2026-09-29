@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Entry point of the `mnt.pyfiction.verification` extension module.
+ * @brief Entry point of the `mnt.pyfiction._native.verification` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -34,8 +34,8 @@ NB_MODULE(verification, m)
     m.doc() = "Design rule, equivalence, and performance checks of gate-level layouts.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.layouts");
-    nanobind::module_::import_("mnt.pyfiction.networks");
+    nanobind::module_::import_("mnt.pyfiction._native.layouts");
+    nanobind::module_::import_("mnt.pyfiction._native.networks");
 
     pyfiction::count_gate_types(m);
     pyfiction::critical_path_length_and_throughput(m);

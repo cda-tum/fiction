@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the bindings of the `mnt.pyfiction.layouts.coords` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.layouts.coords` submodule.
  */
 
 #include <nanobind/nanobind.h>

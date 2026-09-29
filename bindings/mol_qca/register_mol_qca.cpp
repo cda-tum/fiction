@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Entry point of the `mnt.pyfiction.mol_qca` extension module.
+ * @brief Entry point of the `mnt.pyfiction._native.mol_qca` extension module.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -24,7 +24,7 @@ namespace pyfiction
 void mol_qca_layout(nanobind::module_& m);
 
 /**
- * @brief Registers the bindings of the `mnt.pyfiction.mol_qca.io` submodule.
+ * @brief Registers the bindings of the `mnt.pyfiction._native.mol_qca.io` submodule.
  *
  * @param m Python submodule.
  */
@@ -40,7 +40,7 @@ NB_MODULE(mol_qca, m)
     m.doc() = "Molecular QCA cell-level layouts.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.layouts");
+    nanobind::module_::import_("mnt.pyfiction._native.layouts");
 
     pyfiction::mol_qca_layout(m);
     auto io = pyfiction::def_submodule(m, "io", "Writers of molecular QCA cell-level layouts.");

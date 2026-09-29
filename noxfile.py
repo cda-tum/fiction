@@ -262,7 +262,7 @@ def stubs(session: nox.Session) -> None:
     session.run("uv", "sync", "--inexact", "--only-group", "build", env=env)
     session.run("uv", "sync", "--inexact", "--no-dev", "--no-build-isolation-package", "mnt-pyfiction", env=env)
 
-    package_root = Path(__file__).parent / "python" / "mnt" / "pyfiction"
+    package_root = Path(__file__).parent / "python" / "mnt" / "pyfiction" / "_native"
     # every `.pyi` file in the package is generated; removing them first drops the stubs of removed modules
     for stub in package_root.glob("**/*.pyi"):
         stub.unlink()
@@ -291,8 +291,8 @@ def stubs(session: nox.Session) -> None:
         "--output-dir",
         str(package_root),
         "--pattern-file",
-        str(package_root / "stubgen.pattern"),
-        *(argument for module in modules for argument in ("--module", f"mnt.pyfiction.{module}")),
+        str(package_root.parent / "stubgen.pattern"),
+        *(argument for module in modules for argument in ("--module", f"mnt.pyfiction._native.{module}")),
         env=env,
     )
 

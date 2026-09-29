@@ -298,10 +298,15 @@ docstring-code-format = true
     "line-too-long",
     "overload-with-docstring",
 ]
+# Native signatures reference types from other private extension modules.
+"python/mnt/pyfiction/_native/**/*.pyi" = [ "import-private-name", "private-member-access" ]
 # `mnt/__init__.py` registers the Windows DLL search path before any extension is imported, and
 # `mnt/pyfiction/__init__.py` loads the submodules lazily. A re-export-only `__init__` cannot do either
 "python/mnt/__init__.py" = [ "non-empty-init-module" ]
 "python/mnt/pyfiction/__init__.py" = [ "non-empty-init-module" ]
+# Optional Z3 and ALGLIB exports depend on the capabilities of the installed native extension.
+"python/mnt/pyfiction/physical_design/__init__.py" = [ "non-empty-init-module" ]
+"python/mnt/pyfiction/sidb/simulation/engines/__init__.py" = [ "non-empty-init-module" ]
 # standalone scripts run by path, not modules anything imports, so an `__init__.py` would be wrong
 ".github/scripts/**" = [ "implicit-namespace-package" ]
 "experiments/**" = [
@@ -374,13 +379,13 @@ error-on-warning = true
 # nanobind generates comparison operands narrower than object.__eq__/__ne__.
 [[tool.ty.overrides]]
 include = [
-    "python/mnt/pyfiction/inml/__init__.pyi",
-    "python/mnt/pyfiction/layouts/coords.pyi",
-    "python/mnt/pyfiction/mol_qca/__init__.pyi",
-    "python/mnt/pyfiction/qca/__init__.pyi",
-    "python/mnt/pyfiction/sidb/__init__.pyi",
-    "python/mnt/pyfiction/sidb/model.pyi",
-    "python/mnt/pyfiction/sidb/simulation/logic.pyi",
+    "python/mnt/pyfiction/_native/inml/__init__.pyi",
+    "python/mnt/pyfiction/_native/layouts/coords.pyi",
+    "python/mnt/pyfiction/_native/mol_qca/__init__.pyi",
+    "python/mnt/pyfiction/_native/qca/__init__.pyi",
+    "python/mnt/pyfiction/_native/sidb/__init__.pyi",
+    "python/mnt/pyfiction/_native/sidb/model.pyi",
+    "python/mnt/pyfiction/_native/sidb/simulation/logic.pyi",
 ]
 rules = { invalid-method-override = "ignore" }
 
