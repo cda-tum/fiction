@@ -79,6 +79,10 @@ class bdl_input_iterator:
             source_layout: The layout to iterate over.
             ps: Parameters for the BDL pair and wire detection and the input
                 encoding.
+
+        Raises:
+            std::invalid_argument: if the layout has more than 63 input BDL
+                                   pairs.
         """
 
     @overload
@@ -93,6 +97,10 @@ class bdl_input_iterator:
             source_layout: The layout to iterate over.
             ps: Parameters for the BDL pair detection and the input encoding.
             source_input_wires: The input wires of `source_layout`.
+
+        Raises:
+            std::invalid_argument: if the layout has more than 63 input BDL
+                                   pairs.
         """
 
     def __iter__(self) -> bdl_input_iterator: ...
@@ -211,6 +219,10 @@ def generate_bdl_input_pattern_layouts(
 
     Returns:
         One layout per input pattern.
+
+    Raises:
+        std::invalid_argument: if the layout has more than 63 input BDL
+                               pairs.
     """
 
 @overload
@@ -229,6 +241,10 @@ def generate_bdl_input_pattern_layouts(
 
     Returns:
         One layout per input pattern.
+
+    Raises:
+        std::invalid_argument: if the layout has more than 63 input BDL
+                               pairs.
     """
 
 class bdl_pair:
