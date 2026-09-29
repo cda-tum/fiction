@@ -569,6 +569,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
     Potential landscapes validate basis indices even for isolated SiDBs and defects.
   - SiDB cell conversion now rejects coordinates outside the target coordinate range.
+  - The BDL input iterator now rejects layouts with more than 63 input pairs instead of overflowing its pattern counter.
   - Lattice sites now reject invalid basis indices in construction, geometry queries, and cube conversion.
   - SiDB row conversion and area iteration now handle coordinate limits without signed overflow;
     defect influence clips to representable sites, and cube conversion rejects rows outside its range
