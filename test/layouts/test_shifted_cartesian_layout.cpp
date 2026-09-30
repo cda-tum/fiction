@@ -19,7 +19,6 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/layouts/arrangement.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/traits.hpp>
 

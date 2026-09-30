@@ -25,6 +25,7 @@
 #include "utils/equivalence_checking_utils.hpp"
 #include "utils/progress_recorder.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
@@ -337,7 +338,7 @@ Lyt generate_layout(const Ntk& ntk, exact_physical_design_params ps, const std::
 }
 template <typename Lyt, typename Ntk>
 Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list,
-                                    exact_physical_design_params ps)
+                                    const exact_physical_design_params& ps)
 {
     exact_physical_design_stats stats{};
 

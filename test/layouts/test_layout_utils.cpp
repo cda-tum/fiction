@@ -42,7 +42,7 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
     const auto a =
         GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-    const auto lyt = [&a]()
+    const auto lyt = [](const arrangement layout_arrangement)
     {
         if constexpr (is_cartesian_layout_v<TestType>)
         {
@@ -50,9 +50,9 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
         }
         else
         {
-            return TestType{a, {4, 4}};
+            return TestType{layout_arrangement, {4, 4}};
         }
-    }();
+    }(a);
 
     lyt.foreach_coordinate(
         [&lyt](const auto& c)

@@ -23,7 +23,6 @@
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
@@ -540,8 +539,8 @@ TEST_CASE("Read FGL layout without topology", "[read-fgl-layout]")
                                               "  </layout>\n"
                                               "</fgl>\n";
 
-    const auto  topology = GENERATE("", "<topology/>");
-    std::string document{fgl_layout};
+    const auto* const topology = GENERATE("", "<topology/>");
+    std::string       document{fgl_layout};
     document.insert(document.find("<size>"), topology);
 
     SECTION("Cartesian layouts default to Cartesian topology")

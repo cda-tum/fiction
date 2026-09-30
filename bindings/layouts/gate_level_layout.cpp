@@ -147,17 +147,17 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             {
                 if (const auto scheme = fiction::layouts::clocking::get_scheme(
                         name,
-                        [&lyt]() -> std::optional<fiction::layouts::arrangement>
+                        [](const GateLyt& layout) -> std::optional<fiction::layouts::arrangement>
                         {
                             if constexpr (fiction::is_hexagonal_layout_v<GateLyt>)
                             {
-                                return lyt.get_arrangement();
+                                return layout.get_arrangement();
                             }
                             else
                             {
                                 return std::nullopt;
                             }
-                        }());
+                        }(lyt));
                     scheme)
                 {
                     lyt.replace_clocking_scheme(*scheme);

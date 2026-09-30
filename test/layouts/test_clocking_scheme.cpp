@@ -18,11 +18,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
 
 #include <array>
 #include <cstdint>
