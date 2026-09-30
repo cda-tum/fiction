@@ -991,6 +991,9 @@ Returns:
     ToPoliNano gate representation of `t` including I/Os, rotation,
     etc.
 
+Raises:
+    std::invalid_argument: If `lyt` shifts rows instead of columns.
+
 )doc";
 
 static const char *mkd_doc_fiction_inml_topolinano_library_topolinano_library = R"doc()doc";
@@ -5711,9 +5714,23 @@ static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_is = R
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_layout_name = R"doc(The name of a newly created layout.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_fgl_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_fgl_layout_impl =
+R"doc(Create a reader that constructs a layout from the stream.
 
-static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_fgl_layout_impl_2 = R"doc()doc";
+Args:
+    s: Input stream.
+    name: Name of the new layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_fgl_layout_impl_2 =
+R"doc(Create a reader for an existing layout.
+
+Args:
+    tgt: Target layout.
+    s: Input stream.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_number =
 R"doc(Read a nonnegative integer without truncation or trailing characters.
@@ -5750,10 +5767,7 @@ Raises:
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_run = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_target =
-R"doc(The layout which will be altered based on the parsed information.
-
-
-The layout to read into. It holds the target layout given by the
+R"doc(The layout to read into. It holds the target layout given by the
 caller or is created from the file.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl = R"doc()doc";
