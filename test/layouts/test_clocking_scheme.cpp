@@ -534,7 +534,7 @@ TEST_CASE("4-phase 2DDWave", "[clocking-scheme]")
 
 TEST_CASE("3-phase 2DDWaveHex: odd row", "[clocking-scheme]")
 {
-    const auto twoddwave_hex_3 = clocking::twoddwave_hex(clocking::hex_arrangement::ODD_ROW, clocking::num_clks::THREE);
+    const auto twoddwave_hex_3 = clocking::twoddwave_hex(arrangement::ODD_ROW, clocking::num_clks::THREE);
 
     CHECK(twoddwave_hex_3.num_clocks() == 3u);
     CHECK(twoddwave_hex_3.max_in_degree() == 2u);
@@ -620,8 +620,7 @@ TEST_CASE("3-phase 2DDWaveHex: odd row", "[clocking-scheme]")
 
 TEST_CASE("3-phase 2DDWaveHex: even row", "[clocking-scheme]")
 {
-    const auto twoddwave_hex_3 =
-        clocking::twoddwave_hex(clocking::hex_arrangement::EVEN_ROW, clocking::num_clks::THREE);
+    const auto twoddwave_hex_3 = clocking::twoddwave_hex(arrangement::EVEN_ROW, clocking::num_clks::THREE);
 
     CHECK(twoddwave_hex_3.num_clocks() == 3u);
     CHECK(twoddwave_hex_3.max_in_degree() == 2u);
@@ -707,8 +706,7 @@ TEST_CASE("3-phase 2DDWaveHex: even row", "[clocking-scheme]")
 
 TEST_CASE("3-phase 2DDWaveHex: odd column", "[clocking-scheme]")
 {
-    const auto twoddwave_hex_3 =
-        clocking::twoddwave_hex(clocking::hex_arrangement::ODD_COLUMN, clocking::num_clks::THREE);
+    const auto twoddwave_hex_3 = clocking::twoddwave_hex(arrangement::ODD_COLUMN, clocking::num_clks::THREE);
 
     CHECK(twoddwave_hex_3.num_clocks() == 3u);
     CHECK(twoddwave_hex_3.max_in_degree() == 2u);
@@ -794,8 +792,7 @@ TEST_CASE("3-phase 2DDWaveHex: odd column", "[clocking-scheme]")
 
 TEST_CASE("3-phase 2DDWaveHex: even column", "[clocking-scheme]")
 {
-    const auto twoddwave_hex_3 =
-        clocking::twoddwave_hex(clocking::hex_arrangement::EVEN_COLUMN, clocking::num_clks::THREE);
+    const auto twoddwave_hex_3 = clocking::twoddwave_hex(arrangement::EVEN_COLUMN, clocking::num_clks::THREE);
 
     CHECK(twoddwave_hex_3.num_clocks() == 3u);
     CHECK(twoddwave_hex_3.max_in_degree() == 2u);
@@ -881,7 +878,7 @@ TEST_CASE("3-phase 2DDWaveHex: even column", "[clocking-scheme]")
 
 TEST_CASE("4-phase 2DDWaveHex: odd row", "[clocking-scheme]")
 {
-    const auto twoddwave_hex_4 = clocking::twoddwave_hex(clocking::hex_arrangement::ODD_ROW, clocking::num_clks::FOUR);
+    const auto twoddwave_hex_4 = clocking::twoddwave_hex(arrangement::ODD_ROW, clocking::num_clks::FOUR);
 
     CHECK(twoddwave_hex_4.num_clocks() == 4u);
     CHECK(twoddwave_hex_4.max_in_degree() == 2u);
@@ -908,7 +905,7 @@ TEST_CASE("4-phase 2DDWaveHex: odd row", "[clocking-scheme]")
 
 TEST_CASE("4-phase 2DDWaveHex: even row", "[clocking-scheme]")
 {
-    const auto twoddwave_hex_4 = clocking::twoddwave_hex(clocking::hex_arrangement::EVEN_ROW, clocking::num_clks::FOUR);
+    const auto twoddwave_hex_4 = clocking::twoddwave_hex(arrangement::EVEN_ROW, clocking::num_clks::FOUR);
 
     CHECK(twoddwave_hex_4.num_clocks() == 4u);
     CHECK(twoddwave_hex_4.max_in_degree() == 2u);
@@ -935,8 +932,7 @@ TEST_CASE("4-phase 2DDWaveHex: even row", "[clocking-scheme]")
 
 TEST_CASE("4-phase 2DDWaveHex: odd column", "[clocking-scheme]")
 {
-    const auto twoddwave_hex_4 =
-        clocking::twoddwave_hex(clocking::hex_arrangement::ODD_COLUMN, clocking::num_clks::FOUR);
+    const auto twoddwave_hex_4 = clocking::twoddwave_hex(arrangement::ODD_COLUMN, clocking::num_clks::FOUR);
 
     CHECK(twoddwave_hex_4.num_clocks() == 4u);
     CHECK(twoddwave_hex_4.max_in_degree() == 2u);
@@ -967,8 +963,7 @@ TEST_CASE("4-phase 2DDWaveHex: odd column", "[clocking-scheme]")
 
 TEST_CASE("4-phase 2DDWaveHex: even column", "[clocking-scheme]")
 {
-    const auto twoddwave_hex_4 =
-        clocking::twoddwave_hex(clocking::hex_arrangement::EVEN_COLUMN, clocking::num_clks::FOUR);
+    const auto twoddwave_hex_4 = clocking::twoddwave_hex(arrangement::EVEN_COLUMN, clocking::num_clks::FOUR);
 
     CHECK(twoddwave_hex_4.num_clocks() == 4u);
     CHECK(twoddwave_hex_4.max_in_degree() == 2u);
@@ -1709,8 +1704,7 @@ TEST_CASE("Clocking schemes are copyable, assignable, and comparable", "[clockin
     CHECK(copy.name() == clocking::USE_NAME);
     CHECK(copy != clocking::twoddwave());
     CHECK(clocking::twoddwave(clocking::num_clks::THREE) != clocking::twoddwave());
-    CHECK(clocking::twoddwave_hex(clocking::hex_arrangement::ODD_ROW) !=
-          clocking::twoddwave_hex(clocking::hex_arrangement::EVEN_ROW));
+    CHECK(clocking::twoddwave_hex(arrangement::ODD_ROW) != clocking::twoddwave_hex(arrangement::EVEN_ROW));
     CHECK(clocking::res() != clocking::esr());
 }
 
@@ -1765,8 +1759,8 @@ TEST_CASE("Clocking lookup by phase count and hexagonal arrangement", "[clocking
     CHECK(!clocking::get_scheme("3").has_value());
 
     CHECK(clocking::get_scheme("2DDWaveHex3") == clocking::twoddwave(clocking::num_clks::THREE));
-    CHECK(clocking::get_scheme("2DDWaveHex", clocking::hex_arrangement::EVEN_COLUMN) ==
-          clocking::twoddwave_hex(clocking::hex_arrangement::EVEN_COLUMN));
+    CHECK(clocking::get_scheme("2DDWaveHex", arrangement::EVEN_COLUMN) ==
+          clocking::twoddwave_hex(arrangement::EVEN_COLUMN));
     CHECK(clocking::get_scheme<gate_level_layout<hexagonal_layout<coords::offset, odd_column_hex>>>("2DDWaveHex3") ==
-          clocking::twoddwave_hex(clocking::hex_arrangement::ODD_COLUMN, clocking::num_clks::THREE));
+          clocking::twoddwave_hex(arrangement::ODD_COLUMN, clocking::num_clks::THREE));
 }
