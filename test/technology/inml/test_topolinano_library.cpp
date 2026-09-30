@@ -55,6 +55,44 @@ TEST_CASE("ToPoliNano rejects row-shifted layouts", "[inml-topolinano-library]")
     CHECK_THROWS_AS(topolinano_library::set_up_gate(lyt, {0, 0}), std::invalid_argument);
 }
 
+TEST_CASE("ToPoliNano straightens two-cell wire segments", "[inml-topolinano-library]")
+{
+    const auto   row = GENERATE(0u, 2u);
+    inml::layout lyt{{2, 3}};
+    lyt.assign_cell_type({0, row}, magnet_type::INPUT);
+    lyt.assign_cell_name({0, row}, "x");
+    lyt.assign_cell_type({1, row}, magnet_type::NORMAL);
+    lyt.assign_cell_type({1, 1}, magnet_type::NORMAL);
+
+    topolinano_library::post_layout_optimization(lyt);
+
+    CHECK(lyt.get_cell_type({0, 1}) == magnet_type::INPUT);
+    CHECK(lyt.get_cell_name({0, 1}) == "x");
+    CHECK(lyt.get_cell_type({1, 1}) == magnet_type::NORMAL);
+    CHECK(lyt.is_empty_cell({0, row}));
+    CHECK(lyt.is_empty_cell({1, row}));
+}
+
+TEST_CASE("ToPoliNano preserves obstructed wire segments", "[inml-topolinano-library]")
+{
+    const auto   row = GENERATE(0u, 4u);
+    inml::layout lyt{{3, 5}};
+    for (const auto column : {0u, 1u, 2u})
+    {
+        lyt.assign_cell_type({column, row}, magnet_type::NORMAL);
+    }
+    const auto adjacent_row = row == 0 ? 1u : 3u;
+    lyt.assign_cell_type({0, adjacent_row}, magnet_type::NORMAL);
+    lyt.assign_cell_type({2, adjacent_row}, magnet_type::NORMAL);
+    lyt.assign_cell_type({1, 2}, magnet_type::SLANTED_EDGE_UP_MAGNET);
+
+    topolinano_library::post_layout_optimization(lyt);
+
+    CHECK(lyt.get_cell_type({1, row}) == magnet_type::NORMAL);
+    CHECK(lyt.is_empty_cell({1, adjacent_row}));
+    CHECK(lyt.get_cell_type({1, 2}) == magnet_type::SLANTED_EDGE_UP_MAGNET);
+}
+
 TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]")
 {
     const auto layout =

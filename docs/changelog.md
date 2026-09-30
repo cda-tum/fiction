@@ -616,6 +616,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Gate libraries:
 
   - Gate-library application assigns the synchronization delay of each tile to its clock zone.
+  - ToPoliNano wire optimization now handles two-cell segments and checks every interior cell for obstructions.
 
 - I/O:
 

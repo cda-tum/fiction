@@ -183,7 +183,7 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
                      bts == inml::magnet_type::INVERTER_MAGNET))
                 {
                     // hump found, check if there is enough space below for merging
-                    if (std::all_of(hump.begin() + 1, hump.end() - 2,
+                    if (std::all_of(hump.begin() + 1, hump.end() - 1,
                                     [&lyt](const auto hc) { return lyt.is_empty_cell(lyt.south(lyt.south(hc))); }))
                     {
                         // merge it down
@@ -209,7 +209,7 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
                          (btn == inml::magnet_type::NORMAL || out == inml::magnet_type::OUTPUT))
                 {
                     // hump found, check if there is enough space above for merging
-                    if (std::all_of(hump.begin() + 1, hump.end() - 2,
+                    if (std::all_of(hump.begin() + 1, hump.end() - 1,
                                     [&lyt](const auto hc) { return lyt.is_empty_cell(lyt.north(lyt.north(hc))); }))
                     {
                         // merge it up
