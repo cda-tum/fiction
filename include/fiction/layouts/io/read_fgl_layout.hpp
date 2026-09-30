@@ -77,9 +77,19 @@ template <typename Lyt>
 class read_fgl_layout_impl
 {
   public:
-    read_fgl_layout_impl(std::istream& s, const std::string_view& name) : is{s}, layout_name{name} {}
+    /**
+     * @brief Create a reader that constructs a layout from the stream.
+     * @param s Input stream.
+     * @param name Name of the new layout.
+     */
+    read_fgl_layout_impl(std::istream& s, const std::string_view& name) : layout_name{name}, is{s} {}
 
-    read_fgl_layout_impl(Lyt& tgt, std::istream& s) : is{s}, target{tgt} {}
+    /**
+     * @brief Create a reader for an existing layout.
+     * @param tgt Target layout.
+     * @param s Input stream.
+     */
+    read_fgl_layout_impl(Lyt& tgt, std::istream& s) : target{tgt}, is{s} {}
 
     Lyt run()
     {
@@ -557,9 +567,6 @@ class read_fgl_layout_impl
     }
 
   private:
-    /**
-     * The layout which will be altered based on the parsed information.
-     */
     /**
      * The layout to read into. It holds the target layout given by the caller or is created from the file.
      */

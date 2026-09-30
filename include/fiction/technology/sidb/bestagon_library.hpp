@@ -12,6 +12,7 @@
  * @file
  * @brief Bestagon SiDB gate library of Y-shaped gates on hexagonal tiles.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)
  */
@@ -67,13 +68,8 @@ class bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>  // widt
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
         static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt must be a hexagonal layout");
 
-        if (!layouts::is_row_arrangement(lyt.get_arrangement()))
-        {
-            throw std::invalid_argument("GateLyt must be a pointy-top hexagonal layout");
-        }
-
-        const auto n = lyt.get_node(t);
         const auto p = determine_port_routing(lyt, t);
+        const auto n = lyt.get_node(t);
 
         try
         {
