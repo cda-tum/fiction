@@ -21,8 +21,8 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
 
@@ -38,7 +38,7 @@ TEST_CASE("Manhattan distance", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::offset>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -56,7 +56,7 @@ TEST_CASE("Manhattan distance", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::cube>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -83,7 +83,7 @@ TEST_CASE("Manhattan distance functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::offset>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -103,7 +103,7 @@ TEST_CASE("Manhattan distance functor", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::cube>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -134,7 +134,7 @@ TEST_CASE("Euclidean distance", "[distance]")
 
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::offset>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -153,7 +153,7 @@ TEST_CASE("Euclidean distance", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::cube>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -183,7 +183,7 @@ TEST_CASE("Euclidean distance functor", "[distance]")
 
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::offset>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -204,7 +204,7 @@ TEST_CASE("Euclidean distance functor", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::cube>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -234,7 +234,7 @@ TEST_CASE("Squared Euclidean distance", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::offset>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -253,7 +253,7 @@ TEST_CASE("Squared Euclidean distance", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::cube>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -271,7 +271,7 @@ TEST_CASE("Squared Euclidean distance functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::offset>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -292,7 +292,7 @@ TEST_CASE("Squared Euclidean distance functor", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::cube>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -312,7 +312,7 @@ TEST_CASE("2DDWave distance", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::offset>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -332,7 +332,7 @@ TEST_CASE("2DDWave distance", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::cube>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -362,7 +362,7 @@ TEST_CASE("2DDWave distance functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::offset>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -382,7 +382,7 @@ TEST_CASE("2DDWave distance functor", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::cube>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -412,7 +412,7 @@ TEST_CASE("Chebyshev distance", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::offset>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -432,7 +432,7 @@ TEST_CASE("Chebyshev distance", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::cube>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -452,7 +452,7 @@ TEST_CASE("Chebyshev distance functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::offset>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -474,7 +474,7 @@ TEST_CASE("Chebyshev distance functor", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = cartesian_layout<coords::cube>;
+        using cart_lyt = cartesian_layout;
 
         const cart_lyt layout{};
 
@@ -496,7 +496,7 @@ TEST_CASE("A* distance", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using lyt = cartesian_layout<coords::offset>;
+        using lyt = cartesian_layout;
 
         SECTION("coordinate path distance")
         {
@@ -568,7 +568,7 @@ TEST_CASE("A* distance functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using lyt = cartesian_layout<coords::offset>;
+        using lyt = cartesian_layout;
 
         SECTION("coordinate path distance")
         {

@@ -20,8 +20,8 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/color_routing.hpp>  // routing based on graph coloring
 #include <fiction/physical_design/exact.hpp>          // SMT-based physical design of FCN layouts
 #include <fiction/physical_design/orthogonal.hpp>     // OGD-based physical design of FCN layouts
@@ -47,7 +47,7 @@ using namespace fiction::physical_design;
 using namespace fiction::utils::graph;
 using namespace fiction::verification;
 
-using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+using gate_lyt = gate_level_layout<cartesian_layout>;
 
 using color_routing_experiment =
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, std::string_view, uint64_t, uint64_t, uint64_t,
@@ -98,9 +98,10 @@ void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt
     }
 
     // log results
-    exp(benchmark, ntk.num_pis(), ntk.num_pos(), ntk.num_gates(), lyt.get_clocking_scheme().name(), lyt.x() + 1,
-        lyt.y() + 1, (lyt.x() + 1) * (lyt.y() + 1), lyt.num_gates(), lyt.num_wires(), objectives.size(),
-        routing_stats.number_of_unsatisfied_objectives, routing_stats.epg_stats.num_vertices,
+    exp(benchmark, ntk.num_pis(), ntk.num_pos(), ntk.num_gates(), lyt.get_clocking_scheme().name(),
+        static_cast<uint64_t>(lyt.x() + 1), static_cast<uint64_t>(lyt.y() + 1),
+        static_cast<uint64_t>(lyt.x() + 1) * static_cast<uint64_t>(lyt.y() + 1), lyt.num_gates(), lyt.num_wires(),
+        objectives.size(), routing_stats.number_of_unsatisfied_objectives, routing_stats.epg_stats.num_vertices,
         routing_stats.epg_stats.num_edges, mockturtle::to_seconds(stats.time_total),
         mockturtle::to_seconds(routing_stats.time_total), mockturtle::to_seconds(routing_stats.epg_stats.time_total),
         mockturtle::to_seconds(routing_stats.color_stats.time_total), equiv_stats.eq != eq_type::NO);

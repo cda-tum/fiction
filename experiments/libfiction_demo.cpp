@@ -18,9 +18,9 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grid layouts
 #include <fiction/layouts/clocking_scheme.hpp>   // clocking schemes
-#include <fiction/layouts/coordinates.hpp>       // coordinate systems
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>               // DOT drawers and writer for layouts
+#include <fiction/layouts/layout_base.hpp>                     // coordinate systems
 #include <fiction/networks/io/dot_drawers.hpp>                 // DOT drawers and writer for logic networks
 #include <fiction/physical_design/apply_gate_library.hpp>      // layout conversion to cell-level
 #include <fiction/physical_design/exact.hpp>                   // SMT-based physical design of FCN layouts
@@ -215,7 +215,7 @@ int main(int argc, char* argv[])  // NOLINT
     /**************************************************************/
 
     // defining the type of gate-level layout to use (also already pre-defined in fiction/types.hpp as cart_gate_clk_lyt
-    using fcn_gate_level_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using fcn_gate_level_layout = gate_level_layout<cartesian_layout>;
 
     std::cout << "[i] orthogonal physical design\n";
 

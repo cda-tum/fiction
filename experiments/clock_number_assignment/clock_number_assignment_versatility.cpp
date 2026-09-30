@@ -51,7 +51,7 @@ int main()  // NOLINT
     const std::string layout_folder =
         fmt::format("{}/clock_number_assignment/versatility_benchmarks/", EXPERIMENTS_PATH);
 
-    using gate_lyt = gate_level_layout<cartesian_layout<>>;
+    using gate_lyt = gate_level_layout<cartesian_layout>;
 
     experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, bool>
         clock_number_assignment_exp{"clock number assignment",
@@ -83,8 +83,8 @@ int main()  // NOLINT
                 fmt::print("[i] processing {}\n", benchmark);
 
                 // obtain layout characteristics
-                const auto width  = original_layout.x() + 1;
-                const auto height = original_layout.y() + 1;
+                const auto width  = static_cast<uint64_t>(original_layout.x() + 1);
+                const auto height = static_cast<uint64_t>(original_layout.y() + 1);
                 const auto area   = width * height;
 
                 // deep-copy the original layout

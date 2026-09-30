@@ -15,7 +15,6 @@ from typing import overload
 
 import mnt.pyfiction.inml
 import mnt.pyfiction.layouts
-import mnt.pyfiction.layouts.coords
 import mnt.pyfiction.mol_qca
 import mnt.pyfiction.networks
 import mnt.pyfiction.qca
@@ -1205,8 +1204,8 @@ def color_routing(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
     objectives: Sequence[
         tuple[
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
         ]
     ],
     params: color_routing_params = ...,
@@ -1216,8 +1215,8 @@ def color_routing(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     objectives: Sequence[
         tuple[
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
         ]
     ],
     params: color_routing_params = ...,
@@ -1227,8 +1226,8 @@ def color_routing(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
     objectives: Sequence[
         tuple[
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
         ]
     ],
     params: color_routing_params = ...,
@@ -1652,20 +1651,20 @@ def wiring_reduction(
 @overload
 def is_crossable_wire(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    src: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    successor: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    src: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+    successor: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> bool: ...
 @overload
 def is_crossable_wire(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    src: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    successor: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    src: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+    successor: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> bool: ...
 @overload
 def is_crossable_wire(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    src: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    successor: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    src: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+    successor: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> bool:
     """
     Checks whether a given coordinate `successor` hosts a crossable wire
@@ -1698,17 +1697,17 @@ def is_crossable_wire(
 @overload
 def route_path(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-    path: Sequence[mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]],
+    path: Sequence[mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]],
 ) -> None: ...
 @overload
 def route_path(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    path: Sequence[mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]],
+    path: Sequence[mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]],
 ) -> None: ...
 @overload
 def route_path(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    path: Sequence[mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]],
+    path: Sequence[mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]],
 ) -> None:
     """
     Establishes a wire routing along the given path in the given layout.
@@ -1732,15 +1731,15 @@ def route_path(
 @overload
 def extract_routing_objectives(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-) -> list[tuple[mnt.pyfiction.layouts.coords.offset_coordinate, mnt.pyfiction.layouts.coords.offset_coordinate]]: ...
+) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def extract_routing_objectives(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-) -> list[tuple[mnt.pyfiction.layouts.coords.offset_coordinate, mnt.pyfiction.layouts.coords.offset_coordinate]]: ...
+) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def extract_routing_objectives(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
-) -> list[tuple[mnt.pyfiction.layouts.coords.offset_coordinate, mnt.pyfiction.layouts.coords.offset_coordinate]]:
+) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]]:
     """
     Extracts all routing objectives from the given layout. To this end,
     all routing paths in the layout are traversed, starting at each PI.
@@ -1803,14 +1802,14 @@ def reserve_input_nodes(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
 ) -> int: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -1818,7 +1817,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -1828,7 +1827,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -1838,14 +1837,14 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
 ) -> int: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -1853,7 +1852,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -1863,7 +1862,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -1873,14 +1872,14 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
 ) -> int: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -1888,7 +1887,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -1898,7 +1897,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,

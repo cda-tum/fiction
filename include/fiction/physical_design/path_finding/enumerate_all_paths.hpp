@@ -46,7 +46,7 @@ class enumerate_all_paths_impl
 {
   public:
     enumerate_all_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const enumerate_all_paths_params& p,
-                             const layouts::obstructions<coordinate<Lyt>>& extra) :
+                             const layouts::obstructions& extra) :
             layout{lyt},
             search_obstructions{extra},
             objective{obj},
@@ -60,7 +60,7 @@ class enumerate_all_paths_impl
      */
     [[nodiscard]] path_collection<Path> run() noexcept
     {
-        assert(!objective.source.is_dead() && !objective.target.is_dead() &&
+        assert(objective.source.is_valid() && objective.target.is_valid() &&
                "Neither source nor target coordinate can be dead");
 
         assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
@@ -77,7 +77,7 @@ class enumerate_all_paths_impl
      */
     const Lyt& layout;
     /** @brief Additional constraints owned by the caller. */
-    const layouts::obstructions<coordinate<Lyt>>& search_obstructions;
+    const layouts::obstructions& search_obstructions;
     /**
      * The source-target coordinate pair.
      */
@@ -203,10 +203,10 @@ class enumerate_all_paths_impl
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = gate_level_layout<cartesian_layout<>>;
- * using path = layout_coordinate_path<cartesian_layout<>>;
+ * using clk_lyt = gate_level_layout<cartesian_layout>;
+ * using path = layout_coordinate_path<cartesian_layout>;
  * clk_lyt layout = ...;
- * auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target});
+ * auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout>(layout), {source, target});
  * @endcode
  *
  * @tparam Path Type of the returned individual paths.
@@ -218,10 +218,9 @@ class enumerate_all_paths_impl
  * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
  */
 template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path>
-enumerate_all_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
-                    const enumerate_all_paths_params&             params       = {},
-                    const layouts::obstructions<coordinate<Lyt>>& obstructions = {}) noexcept
+[[nodiscard]] path_collection<Path> enumerate_all_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
+                                                        const enumerate_all_paths_params& params       = {},
+                                                        const layouts::obstructions&      obstructions = {}) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 

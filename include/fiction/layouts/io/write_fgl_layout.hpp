@@ -169,9 +169,9 @@ class write_fgl_layout_impl
             os << fgl::OPEN_CLOCK_ZONES;
             utils::progress_reporter clocks{on_progress, "writing clock columns",
                                             static_cast<std::size_t>(lyt.x()) + 1};
-            for (uint64_t x = 0; x <= lyt.x(); ++x)
+            for (int32_t x = 0; x <= lyt.x(); ++x)
             {
-                for (uint64_t y = 0; y <= lyt.y(); ++y)
+                for (int32_t y = 0; y <= lyt.y(); ++y)
                 {
                     const int clock{clocking_scheme(static_cast<int64_t>(x), static_cast<int64_t>(y))};
                     os << fmt::format(fgl::CLOCK_ZONE, x, y, clock);

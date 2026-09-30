@@ -49,7 +49,7 @@ void yen_k_shortest_paths_impl(nanobind::module_& m)
         "yen_k_shortest_paths",
         [](const Lyt& lyt, const fiction::coordinate<Lyt>& source, const fiction::coordinate<Lyt>& target,
            const uint32_t k, const fiction::physical_design::path_finding::yen_k_shortest_paths_params& params,
-           const fiction::layouts::obstructions<fiction::coordinate<Lyt>>& obstructions)
+           const fiction::layouts::obstructions& obstructions)
         {
             const auto k_paths = fiction::physical_design::path_finding::yen_k_shortest_paths<
                 fiction::physical_design::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, k, params,
@@ -67,7 +67,7 @@ void yen_k_shortest_paths_impl(nanobind::module_& m)
         },
         py::arg("layout"), py::arg("source"), py::arg("target"), py::arg("k"),
         py::arg("params")       = fiction::physical_design::path_finding::yen_k_shortest_paths_params{},
-        py::arg("obstructions") = fiction::layouts::obstructions<fiction::coordinate<Lyt>>{},
+        py::arg("obstructions") = fiction::layouts::obstructions{},
         DOC(fiction_physical_design_path_finding_yen_k_shortest_paths));
 }
 

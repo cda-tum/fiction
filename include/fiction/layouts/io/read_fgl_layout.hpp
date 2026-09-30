@@ -624,7 +624,7 @@ class read_fgl_layout_impl
         const auto      z = with_z ? read_number(element, "z") : 0u;
         const tile<Lyt> position{x, y, z};
         if (static_cast<uint64_t>(position.x) != x || static_cast<uint64_t>(position.y) != y ||
-            static_cast<uint64_t>(position.z) != z)
+            static_cast<uint64_t>(position.z) != z || !position.fits_signal())
         {
             throw fgl_parsing_error("Error parsing FGL file: coordinate exceeds the target layout's range");
         }

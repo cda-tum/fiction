@@ -20,7 +20,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
@@ -39,17 +39,18 @@ using namespace fiction::layouts;
 #endif
 #pragma GCC diagnostic ignored "-Wconversion"
 
-TEST_CASE("Unsigned offset coordinates", "[coordinates]")
+TEST_CASE("Signed offset coordinates", "[coordinates]")
 {
-    using coordinate = coords::offset;
+    using coordinate = layout_base::coordinate;
 
     auto td = coordinate{};
-    CHECK(td.is_dead());
+    CHECK(!td.is_valid());
 
     auto t0 = coordinate{0, 0, 0};
-    CHECK(!t0.is_dead());
+    CHECK(t0.is_valid());
 
     CHECK(t0 != td);
+    CHECK(td == coordinate{});
 
     auto t1 = coordinate{1, 2, 0};
     auto t2 = coordinate{1, 2};
@@ -60,18 +61,6 @@ TEST_CASE("Unsigned offset coordinates", "[coordinates]")
     CHECK(t0 <= t1);
     CHECK(t1 == t2);
     CHECK(t2 == t1);
-
-    t1.z += uint64_t{4ul};
-
-    CHECK(t1 == t2);
-
-    t1.y += uint64_t{2147483648ul};
-
-    CHECK(t1 == t2);
-
-    t1.x += uint64_t{2147483648ul};
-
-    CHECK(t1 == t2);
 
     t1.x++;
 
@@ -86,28 +75,66 @@ TEST_CASE("Unsigned offset coordinates", "[coordinates]")
     CHECK(t1 < t3);
     CHECK(t2 < t3);
 
-    const std::map<uint64_t, coordinate> coordinate_repr{
-        {0x8000000000000000, coordinate{}},        {0x0000000000000000, coordinate{0, 0, 0}},
-        {0x4000000000000000, coordinate{0, 0, 1}}, {0x4000000080000001, coordinate{1, 1, 1}},
-        {0x0000000000000002, coordinate{2, 0, 0}}, {0x3fffffffffffffff, coordinate{2147483647, 2147483647, 0}}};
-
-    for (auto [repr, coord] : coordinate_repr)
+    SECTION("Negative axes")
     {
-        CHECK(static_cast<coordinate>(repr) == coord);
-        CHECK(repr == static_cast<uint64_t>(coord));
-        CHECK(coordinate{repr} == coord);
-        CHECK(coordinate{coord} == coord);
-        CHECK(coordinate{static_cast<uint64_t>(coord)} == coord);
+        const coordinate n{-1, -2, 0};
+
+        CHECK(n.is_valid());
+        CHECK(n.x == -1);
+        CHECK(n.y == -2);
+        CHECK(n < t0);
+        CHECK(coordinate{-3, 0, 0} < coordinate{-2, 0, 0});
+        CHECK(coordinate{5, -1, 0} < coordinate{-5, 0, 0});
+        CHECK(coordinate{5, 5, -1} < coordinate{-5, -5, 0});
+    }
+    SECTION("Signal encoding")
+    {
+        const std::map<uint64_t, coordinate> coordinate_repr{
+            {0x8000000000000000, coordinate{}},          {0x0000000000000000, coordinate{0, 0, 0}},
+            {0x4000000000000000, coordinate{0, 0, 1}},   {0x4000000080000001, coordinate{1, 1, 1}},
+            {0x0000000000000002, coordinate{2, 0, 0}},   {0x1fffffffbfffffff, coordinate{1073741823, 1073741823, 0}},
+            {0x3fffffffffffffff, coordinate{-1, -1, 0}}, {0x5fffffffc0000000, coordinate{-1073741824, 1073741823, 1}}};
+
+        for (auto [repr, coord] : coordinate_repr)
+        {
+            CHECK(static_cast<coordinate>(repr) == coord);
+            CHECK(repr == static_cast<uint64_t>(coord));
+            CHECK(coordinate{repr} == coord);
+            CHECK(coordinate{coord} == coord);
+            CHECK(coordinate{static_cast<uint64_t>(coord)} == coord);
+        }
+
+        // the invalid coordinate ignores all further bits of its encoding
+        CHECK(coordinate{0xffffffffffffffff} == coordinate{});
+    }
+    SECTION("Range of the signal encoding")
+    {
+        CHECK(coordinate{0, 0, 0}.fits_signal());
+        CHECK(coordinate{1073741823, 1073741823, 1}.fits_signal());
+        CHECK(coordinate{-1073741824, -1073741824, 0}.fits_signal());
+
+        CHECK(!coordinate{1073741824, 0, 0}.fits_signal());
+        CHECK(!coordinate{0, 1073741824, 0}.fits_signal());
+        CHECK(!coordinate{-1073741825, 0, 0}.fits_signal());
+        CHECK(!coordinate{0, 0, 2}.fits_signal());
+        CHECK(!coordinate{0, 0, -1}.fits_signal());
+    }
+    SECTION("Hash")
+    {
+        CHECK(std::hash<coordinate>{}(coordinate{5, 7, 1}) == std::hash<uint64_t>{}(0x4000000380000005));
+        CHECK(std::hash<coordinate>{}(coordinate{}) == std::hash<uint64_t>{}(0x8000000000000000));
     }
 
     std::ostringstream os{};
     os << coordinate{3, 2, 1};
     CHECK(os.str() == "(3,2,1)");
+    CHECK(coordinate{-3, 2, 1}.str() == "(-3,2,1)");
 }
 
-TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", coords::offset, coords::cube)
+TEST_CASE("Coordinate iteration", "[coordinates]")
 {
-    using lyt_t = cartesian_layout<TestType>;
+    using TestType = layout_base::coordinate;
+    using lyt_t    = cartesian_layout;
 
     std::vector<TestType> coord_vector{};
     coord_vector.reserve(7);
@@ -167,10 +194,7 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", coords::offset, coor
         test_bounds_equal(lyt, {9, 9, 9}, {});
         test_bounds_equal(lyt, {0, 2, 1}, {});
 
-        if constexpr (std::is_same_v<TestType, coords::cube>)
-        {
-            test_bounds_equal(lyt, {0, 0, 9}, {});
-        }
+        test_bounds_equal(lyt, {0, 0, 9}, {});
 
         test_bounds_equal(lyt, {2, 0, 0}, {0, 1, 0});
         test_bounds_equal(lyt, {2, 0, 1}, {0, 1, 1});
@@ -185,25 +209,11 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", coords::offset, coor
 
 TEST_CASE("Computing area and volume of offset coordinates", "[coordinates]")
 {
-    CHECK(coords::area_of(coords::offset{1, 1, 1}) == 4);
-    CHECK(coords::volume_of(coords::offset{1, 1, 1}) == 8);
-}
+    CHECK(area_of(layout_base::coordinate{1, 1, 1}) == 4);
+    CHECK(volume_of(layout_base::coordinate{1, 1, 1}) == 8);
 
-TEST_CASE("Computing area and volume of cube coordinates", "[coordinates]")
-{
-    CHECK(coords::area_of(coords::cube{1, 1, 1}) == 4);
-    CHECK(coords::area_of(coords::cube{-1, -1, -1}) == 4);
-
-    CHECK(coords::volume_of(coords::cube{-1, -1, -1}) == 8);
-    CHECK(coords::volume_of(coords::cube{1, 1, 1}) == 8);
-}
-
-TEST_CASE("Addition / subtraction of cube coordinates", "[coordinates]")
-{
-    using coord = coords::cube;
-
-    CHECK(coord{-4, 4, -43} + coord{1, -7, 27} == coord{-3, -3, -16});
-    CHECK(coord{-4, 4, 42} - coord{1, -7, 24} == coord{-5, 11, 18});
+    CHECK(area_of(layout_base::coordinate{-1, -1, -1}) == 4);
+    CHECK(volume_of(layout_base::coordinate{-1, -1, -1}) == 8);
 }
 
 #pragma GCC diagnostic pop

@@ -49,8 +49,8 @@ void a_star_impl(nanobind::module_& m)
     m.def(
         "a_star",
         [](const Lyt& lyt, const fiction::coordinate<Lyt>& source, const fiction::coordinate<Lyt>& target,
-           const fiction::physical_design::path_finding::a_star_params&    params,
-           const fiction::layouts::obstructions<fiction::coordinate<Lyt>>& obstructions)
+           const fiction::physical_design::path_finding::a_star_params& params,
+           const fiction::layouts::obstructions&                        obstructions)
         {
             return static_cast<std::vector<fiction::coordinate<Lyt>>>(
                 fiction::physical_design::path_finding::a_star<fiction::physical_design::layout_coordinate_path<Lyt>,
@@ -60,12 +60,10 @@ void a_star_impl(nanobind::module_& m)
         },
         py::arg("layout"), py::arg("source"), py::arg("target"),
         py::arg("params")       = fiction::physical_design::path_finding::a_star_params{},
-        py::arg("obstructions") = fiction::layouts::obstructions<fiction::coordinate<Lyt>>{},
-        DOC(fiction_physical_design_path_finding_a_star));
+        py::arg("obstructions") = fiction::layouts::obstructions{}, DOC(fiction_physical_design_path_finding_a_star));
 
     m.def("a_star_distance", &fiction::physical_design::path_finding::a_star_distance<Lyt, double>, py::arg("layout"),
-          py::arg("source"), py::arg("target"),
-          py::arg("obstructions") = fiction::layouts::obstructions<fiction::coordinate<Lyt>>{},
+          py::arg("source"), py::arg("target"), py::arg("obstructions") = fiction::layouts::obstructions{},
           DOC(fiction_physical_design_path_finding_a_star_distance));
 }
 

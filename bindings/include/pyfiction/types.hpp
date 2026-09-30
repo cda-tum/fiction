@@ -18,9 +18,9 @@
 #pragma once
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 
@@ -60,24 +60,19 @@ using py_mig_network = mockturtle::names_view<mockturtle::mig_network>;
 /**
  * Coordinates.
  */
-using py_offset_coordinate = fiction::layouts::coords::offset;
-using py_cube_coordinate   = fiction::layouts::coords::cube;
+using py_coordinate = fiction::layouts::layout_base::coordinate;
 /**
  * Cartesian layout.
  */
-using py_cartesian_layout = fiction::layouts::cartesian_layout<py_offset_coordinate>;
+using py_cartesian_layout = fiction::layouts::cartesian_layout;
 /**
  * Shifted Cartesian layout.
  */
-using py_shifted_cartesian_layout = fiction::layouts::shifted_cartesian_layout<py_offset_coordinate>;
+using py_shifted_cartesian_layout = fiction::layouts::shifted_cartesian_layout;
 /**
  * Hexagonal layout.
  */
-using py_hexagonal_layout = fiction::layouts::hexagonal_layout<py_offset_coordinate>;
-/**
- * Cartesian layout with unrestricted stacked coordinates.
- */
-using py_stacked_cartesian_layout = fiction::layouts::cartesian_layout<py_cube_coordinate>;
+using py_hexagonal_layout = fiction::layouts::hexagonal_layout;
 /**
  * Cartesian gate layout.
  */
@@ -96,31 +91,17 @@ namespace nanobind::detail
 {
 
 /**
- * @brief Describes offset coordinate tuple inputs while retaining the registered class caster.
+ * @brief Describes coordinate tuple inputs while retaining the registered class caster.
  */
 template <>
-struct type_caster<pyfiction::py_offset_coordinate> : type_caster_base<pyfiction::py_offset_coordinate>
+struct type_caster<pyfiction::py_coordinate> : type_caster_base<pyfiction::py_coordinate>
 {
     /**
      * @brief Accepted Python inputs and the concrete Python return type.
      */
     // NOLINTNEXTLINE(readability-identifier-naming): nanobind requires the member name Name.
     static constexpr auto Name =
-        const_name<pyfiction::py_offset_coordinate>() + io_name(" | tuple[int, int] | tuple[int, int, int]", "");
-};
-
-/**
- * @brief Describes cube coordinate tuple inputs while retaining the registered class caster.
- */
-template <>
-struct type_caster<pyfiction::py_cube_coordinate> : type_caster_base<pyfiction::py_cube_coordinate>
-{
-    /**
-     * @brief Accepted Python inputs and the concrete Python return type.
-     */
-    // NOLINTNEXTLINE(readability-identifier-naming): nanobind requires the member name Name.
-    static constexpr auto Name =
-        const_name<pyfiction::py_cube_coordinate>() + io_name(" | tuple[int, int] | tuple[int, int, int]", "");
+        const_name<pyfiction::py_coordinate>() + io_name(" | tuple[int, int] | tuple[int, int, int]", "");
 };
 
 /**
@@ -154,19 +135,11 @@ struct coordinate_constructor_caster
 };
 
 /**
- * @brief Preserves offset coordinate constructor dispatch.
+ * @brief Preserves coordinate constructor dispatch.
  */
 template <>
-struct type_caster<nanobind::pointer_and_handle<pyfiction::py_offset_coordinate>>
-        : coordinate_constructor_caster<pyfiction::py_offset_coordinate>
-{};
-
-/**
- * @brief Preserves cube coordinate constructor dispatch.
- */
-template <>
-struct type_caster<nanobind::pointer_and_handle<pyfiction::py_cube_coordinate>>
-        : coordinate_constructor_caster<pyfiction::py_cube_coordinate>
+struct type_caster<nanobind::pointer_and_handle<pyfiction::py_coordinate>>
+        : coordinate_constructor_caster<pyfiction::py_coordinate>
 {};
 
 }  // namespace nanobind::detail

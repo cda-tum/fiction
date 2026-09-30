@@ -22,10 +22,10 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/io/dot_drawers.hpp>
 
 #include <fmt/format.h>
@@ -87,7 +87,7 @@ void compare_dot_layout(const Lyt& lyt, const std::string_view& layout_print)
 
 TEST_CASE("Draw empty Cartesian layout", "[dot-drawers]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     const gate_layout layout{gate_layout::aspect_ratio{2, 2}};
 
@@ -126,7 +126,7 @@ TEST_CASE("Draw empty Cartesian layout", "[dot-drawers]")
 
 TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     SECTION("AND-OR Layout")
     {
@@ -271,7 +271,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
 {
     SECTION("odd row")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout<coords::offset>>;
+        using gate_layout  = gate_level_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::ODD_ROW;
 
         const gate_layout layout{arr, gate_layout::aspect_ratio{2, 2}};
@@ -321,7 +321,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
     }
     SECTION("even row")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout<coords::offset>>;
+        using gate_layout  = gate_level_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::EVEN_ROW;
 
         const gate_layout layout{arr, gate_layout::aspect_ratio{2, 2}};
@@ -372,7 +372,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
     }
     SECTION("odd column")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout<coords::offset>>;
+        using gate_layout  = gate_level_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::ODD_COLUMN;
 
         const gate_layout layout{arr, gate_layout::aspect_ratio{2, 2}};
@@ -422,7 +422,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
     }
     SECTION("even column")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout<coords::offset>>;
+        using gate_layout  = gate_level_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::EVEN_COLUMN;
 
         const gate_layout layout{arr, gate_layout::aspect_ratio{2, 2}};
@@ -477,7 +477,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
 {
     SECTION("odd row")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout<coords::offset>>;
+        using gate_layout  = gate_level_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::ODD_ROW;
 
         SECTION("AND-OR Layout")
@@ -595,7 +595,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
     }
     SECTION("even row")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout<coords::offset>>;
+        using gate_layout  = gate_level_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::EVEN_ROW;
 
         SECTION("AND-OR Layout")
@@ -714,7 +714,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
     }
     SECTION("odd column")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout<coords::offset>>;
+        using gate_layout  = gate_level_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::ODD_COLUMN;
 
         SECTION("AND-OR Layout")
@@ -843,7 +843,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
     }
     SECTION("even column")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout<coords::offset>>;
+        using gate_layout  = gate_level_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::EVEN_COLUMN;
 
         SECTION("AND-OR Layout")

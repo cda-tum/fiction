@@ -17,7 +17,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/path_finding/cost.hpp>
 
 #include <cmath>
@@ -30,7 +30,7 @@ TEST_CASE("Unit cost", "[cost]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using layout = cartesian_layout<coords::offset>;
+        using layout = cartesian_layout;
 
         CHECK(unit_cost<layout>({0, 0}, {0, 0}) == 1);
         CHECK(unit_cost<layout>({1, 1}, {1, 1}) == 1);
@@ -46,7 +46,7 @@ TEST_CASE("Unit cost", "[cost]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using layout = cartesian_layout<coords::cube>;
+        using layout = cartesian_layout;
 
         CHECK(unit_cost<layout>({0, 0}, {0, 0}) == 1);
         CHECK(unit_cost<layout>({1, 1}, {1, 1}) == 1);
@@ -71,7 +71,7 @@ TEST_CASE("Unit cost functor", "[cost]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using layout = cartesian_layout<coords::offset>;
+        using layout = cartesian_layout;
 
         unit_cost_functor<layout> cost{};
 
@@ -89,7 +89,7 @@ TEST_CASE("Unit cost functor", "[cost]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using layout = cartesian_layout<coords::cube>;
+        using layout = cartesian_layout;
 
         unit_cost_functor<layout> cost{};
 
@@ -116,7 +116,7 @@ TEST_CASE("Random cost", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using layout = cartesian_layout<coords::offset>;
+        using layout = cartesian_layout;
 
         auto r = random_cost<layout>({0, 0}, {0, 0});
         CHECK((r >= 0 && r <= 1));
@@ -143,7 +143,7 @@ TEST_CASE("Random cost", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using layout = cartesian_layout<coords::cube>;
+        using layout = cartesian_layout;
 
         auto r = random_cost<layout>({0, 0}, {0, 0});
         CHECK((r >= 0 && r <= 1));
@@ -182,7 +182,7 @@ TEST_CASE("Random cost functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using layout = cartesian_layout<coords::offset>;
+        using layout = cartesian_layout;
 
         random_cost_functor<layout> cost{};
 
@@ -211,7 +211,7 @@ TEST_CASE("Random cost functor", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using layout = cartesian_layout<coords::cube>;
+        using layout = cartesian_layout;
 
         random_cost_functor<layout> cost{};
 

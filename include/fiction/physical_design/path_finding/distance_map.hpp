@@ -168,7 +168,7 @@ class distance_map_functor : public distance_functor<Lyt, Dist>
      */
     [[nodiscard]] static constexpr std::size_t coordinate_index(const Lyt& lyt, const coordinate<Lyt>& c) noexcept
     {
-        return (c.y * (lyt.x() + 1)) + c.x;
+        return static_cast<std::size_t>((static_cast<int64_t>(c.y) * (lyt.x() + 1)) + c.x);
     }
 };
 /**

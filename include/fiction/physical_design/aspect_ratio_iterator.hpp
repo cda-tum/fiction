@@ -39,11 +39,11 @@ class aspect_ratio_iterator
     /**
      * Standard constructor. Takes a starting value and computes an initial factorization.
      * The value `n` represents the amount of faces in the desired aspect ratios. For example, \f$n = 1\f$ will
-     * yield aspect ratios with exactly \f$1\f$ face, i.e. \f$1 \times 1\f$ which is equal to `coords::offset{0,
-     * 0}`. If
+     * yield aspect ratios with exactly \f$1\f$ face, i.e. \f$1 \times 1\f$ which is equal to
+     * `layout_base::coordinate{0, 0}`. If
      * \f$n = 2\f$, the aspect ratios \f$1 \times 2\f$ and \f$2 \times 1\f$ will result, which are equal to
-     * `coords::offset{0, 1}` and `coords::offset{1, 0}`. Both examples with `AspectRatio ==
-     * coords::offset`.
+     * `layout_base::coordinate{0, 1}` and `layout_base::coordinate{1, 0}`. Both examples with `AspectRatio ==
+     * layout_base::coordinate`.
      *
      * @param n Starting value of the aspect ratio iteration.
      */

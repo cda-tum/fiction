@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
@@ -56,11 +56,11 @@ namespace fiction::physical_design
  * @return Highest cell position of the grid, including the layer count of `gate_lyt`.
  */
 template <typename GateLibrary, typename GateLyt>
-[[nodiscard]] layouts::coords::offset cell_grid_extent(const GateLyt& gate_lyt) noexcept
+[[nodiscard]] layouts::layout_base::coordinate cell_grid_extent(const GateLyt& gate_lyt) noexcept
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
 
-    using cell_t = layouts::coords::offset;
+    using cell_t = layouts::layout_base::coordinate;
 
     const auto rel_to_abs_cell_pos = [](const GateLyt& g, const tile<GateLyt>& t, const cell_t& rel)
     {
@@ -94,10 +94,9 @@ class apply_gate_library_impl
     // NOLINTNEXTLINE(readability-identifier-naming): static class member, not a global constant
     static constexpr bool places_sidbs = std::is_same_v<cell_lyt_t, sidb::layout>;
     /**
-     * @brief Grid coordinate of a gate cell. SiDB gates on hexagonal tiles reach negative rows, so they are placed via
-     * cube coordinates.
+     * @brief Grid coordinate of a gate cell. SiDB gates on hexagonal tiles reach negative rows.
      */
-    using cell_t = std::conditional_t<places_sidbs, layouts::coords::cube, layouts::coords::offset>;
+    using cell_t = layouts::layout_base::coordinate;
     /**
      * @brief Prepares cell mapping with optional gate counts.
      * @param lyt Gate-level source layout.

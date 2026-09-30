@@ -28,7 +28,7 @@ namespace pyfiction
 void obstructions(nanobind::module_& m)
 {
     namespace py = nanobind;
-    using data   = fiction::layouts::obstructions<py_offset_coordinate>;
+    using data   = fiction::layouts::obstructions;
 
     py::class_<data>(m, "obstructions", DOC(fiction_layouts_obstructions))
         .def(py::init<>(), "Creates empty routing constraints.")

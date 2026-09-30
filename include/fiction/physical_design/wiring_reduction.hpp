@@ -20,7 +20,7 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
@@ -143,12 +143,8 @@ enum class search_direction : uint8_t
  *
  * This class provides functionality for a wiring reduction layout based on a Cartesian coordinate system.
  * It inherits from the `cartesian_layout` class and extends it with specific behavior for finding excess wiring.
- *
- * @tparam OffsetCoordinateType The type of coordinates used in the layout. Defaults to `coords::offset` if not
- * explicitly provided.
  */
-template <typename OffsetCoordinateType = layouts::coords::offset>
-class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinateType>
+class wiring_reduction_layout : public layouts::cartesian_layout
 {
   public:
     /**
@@ -157,10 +153,9 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
      * @param ar The aspect ratio for the layout. Defaults to an empty aspect ratio if not provided.
      * @param direction The search direction to be used. Defaults to HORIZONTAL if not provided.
      */
-    explicit wiring_reduction_layout(
-        const typename layouts::cartesian_layout<OffsetCoordinateType>::aspect_ratio& ar = {},
-        search_direction direction = search_direction::HORIZONTAL) :
-            layouts::cartesian_layout<OffsetCoordinateType>(ar),
+    explicit wiring_reduction_layout(const layouts::cartesian_layout::aspect_ratio& ar = {},
+                                     search_direction direction                        = search_direction::HORIZONTAL) :
+            layouts::cartesian_layout(ar),
             search_dir(direction)
     {}
     /**
@@ -183,42 +178,36 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
      * @param fn The functor to apply to each of `c`'s adjacent coordinates.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate(const OffsetCoordinateType& c, Fn&& fn) const
+    void foreach_adjacent_coordinate(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
         if (search_dir == search_direction::HORIZONTAL)
         {
             if (c.x == 0)
             {
-                wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_first_column(
-                    c, std::forward<Fn>(fn));
+                wiring_reduction_layout::foreach_adjacent_coordinate_first_column(c, std::forward<Fn>(fn));
             }
-            else if (c.x == layouts::cartesian_layout<OffsetCoordinateType>::x())
+            else if (c.x == layouts::cartesian_layout::x())
             {
-                wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_last_column(
-                    c, std::forward<Fn>(fn));
+                wiring_reduction_layout::foreach_adjacent_coordinate_last_column(c, std::forward<Fn>(fn));
             }
             else
             {
-                wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_middle_columns(
-                    c, std::forward<Fn>(fn));
+                wiring_reduction_layout::foreach_adjacent_coordinate_middle_columns(c, std::forward<Fn>(fn));
             }
         }
         else
         {
             if (c.y == 0)
             {
-                wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_first_row(
-                    c, std::forward<Fn>(fn));
+                wiring_reduction_layout::foreach_adjacent_coordinate_first_row(c, std::forward<Fn>(fn));
             }
-            else if (c.y == layouts::cartesian_layout<OffsetCoordinateType>::y())
+            else if (c.y == layouts::cartesian_layout::y())
             {
-                wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_last_row(
-                    c, std::forward<Fn>(fn));
+                wiring_reduction_layout::foreach_adjacent_coordinate_last_row(c, std::forward<Fn>(fn));
             }
             else
             {
-                wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_middle_rows(
-                    c, std::forward<Fn>(fn));
+                wiring_reduction_layout::foreach_adjacent_coordinate_middle_rows(c, std::forward<Fn>(fn));
             }
         }
     }
@@ -233,7 +222,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
      * @param fn The functor to apply to each adjacent coordinate.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate_first_column(const OffsetCoordinateType& c, Fn&& fn) const
+    void foreach_adjacent_coordinate_first_column(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
         const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
         {
@@ -243,12 +232,10 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
             }
         };
 
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(
-            layouts::cartesian_layout<OffsetCoordinateType>::north(c)));
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(c));
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(
-            layouts::cartesian_layout<OffsetCoordinateType>::south(c)));
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(c));
+        apply_if_not_c(layouts::cartesian_layout::east(layouts::cartesian_layout::north(c)));
+        apply_if_not_c(layouts::cartesian_layout::east(c));
+        apply_if_not_c(layouts::cartesian_layout::east(layouts::cartesian_layout::south(c)));
+        apply_if_not_c(layouts::cartesian_layout::south(c));
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the middle columns.
@@ -261,7 +248,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
      * @param fn The functor to apply to each adjacent coordinate.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate_middle_columns(const OffsetCoordinateType& c, Fn&& fn) const
+    void foreach_adjacent_coordinate_middle_columns(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
         const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
         {
@@ -271,11 +258,9 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
             }
         };
 
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(
-            layouts::cartesian_layout<OffsetCoordinateType>::north(c)));
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(c));
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(
-            layouts::cartesian_layout<OffsetCoordinateType>::south(c)));
+        apply_if_not_c(layouts::cartesian_layout::east(layouts::cartesian_layout::north(c)));
+        apply_if_not_c(layouts::cartesian_layout::east(c));
+        apply_if_not_c(layouts::cartesian_layout::east(layouts::cartesian_layout::south(c)));
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the last column.
@@ -288,7 +273,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
      * @param fn The functor to apply to each adjacent coordinate.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate_last_column(const OffsetCoordinateType& c, Fn&& fn) const
+    void foreach_adjacent_coordinate_last_column(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
         const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
         {
@@ -298,7 +283,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
             }
         };
 
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(c));
+        apply_if_not_c(layouts::cartesian_layout::south(c));
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the first row.
@@ -311,7 +296,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
      * @param fn The functor to apply to each adjacent coordinate.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate_first_row(const OffsetCoordinateType& c, Fn&& fn) const
+    void foreach_adjacent_coordinate_first_row(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
         const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
         {
@@ -321,12 +306,10 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
             }
         };
 
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(
-            layouts::cartesian_layout<OffsetCoordinateType>::east(c)));
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(c));
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(
-            layouts::cartesian_layout<OffsetCoordinateType>::west(c)));
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(c));
+        apply_if_not_c(layouts::cartesian_layout::south(layouts::cartesian_layout::east(c)));
+        apply_if_not_c(layouts::cartesian_layout::south(c));
+        apply_if_not_c(layouts::cartesian_layout::south(layouts::cartesian_layout::west(c)));
+        apply_if_not_c(layouts::cartesian_layout::east(c));
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the middle rows.
@@ -339,7 +322,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
      * @param fn The functor to apply to each adjacent coordinate.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate_middle_rows(const OffsetCoordinateType& c, Fn&& fn) const
+    void foreach_adjacent_coordinate_middle_rows(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
         const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
         {
@@ -349,11 +332,9 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
             }
         };
 
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(
-            layouts::cartesian_layout<OffsetCoordinateType>::east(c)));
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(c));
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(
-            layouts::cartesian_layout<OffsetCoordinateType>::west(c)));
+        apply_if_not_c(layouts::cartesian_layout::south(layouts::cartesian_layout::east(c)));
+        apply_if_not_c(layouts::cartesian_layout::south(c));
+        apply_if_not_c(layouts::cartesian_layout::south(layouts::cartesian_layout::west(c)));
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the last row.
@@ -366,7 +347,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
      * @param fn The functor to apply to each adjacent coordinate.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate_last_row(const OffsetCoordinateType& c, Fn&& fn) const
+    void foreach_adjacent_coordinate_last_row(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
         const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
         {
@@ -376,11 +357,11 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
             }
         };
 
-        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(c));
+        apply_if_not_c(layouts::cartesian_layout::east(c));
     }
 
     /** @brief Constraints of this wiring-cut search, passed to path searches on this layout. */
-    layouts::obstructions<OffsetCoordinateType> search_obstructions{};
+    layouts::obstructions search_obstructions{};
 
   private:
     /**
@@ -404,17 +385,15 @@ class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinat
  * @return wiring_reduction_layout suitable for finding excess wiring via A*.
  */
 template <typename Lyt>
-wiring_reduction_layout<coordinate<Lyt>>
-create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_t y_offset = 0,
+wiring_reduction_layout
+create_wiring_reduction_layout(const Lyt& lyt, const int32_t x_offset = 0, const int32_t y_offset = 0,
                                search_direction direction = search_direction::HORIZONTAL) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
     // create a wiring_reduction_layout with specified offsets
-    wiring_reduction_layout<coordinate<Lyt>> wiring_reduction_lyt{
-        {lyt.x() + x_offset + 1, lyt.y() + y_offset + 1, lyt.z()},
-        direction};
+    wiring_reduction_layout wiring_reduction_lyt{{lyt.x() + x_offset + 1, lyt.y() + y_offset + 1, lyt.z()}, direction};
 
     // iterate through nodes in the layout
     lyt.foreach_node(
@@ -439,7 +418,7 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
             // crossing:
             //
             // =
-            auto is_single_wire = [&lyt, &old_coord](const uint64_t add_x_offset, const uint64_t add_y_offset)
+            auto is_single_wire = [&lyt, &old_coord](const int32_t add_x_offset, const int32_t add_y_offset)
             {
                 return lyt.is_wire_tile({old_coord.x - add_x_offset, old_coord.y - add_y_offset, 0}) &&
                        !lyt.is_fanout(lyt.get_node({old_coord.x - add_x_offset, old_coord.y - add_y_offset, 0}) &&
@@ -451,7 +430,7 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
             // +→=
             // ↓
             // =
-            auto is_crossing = [&lyt, &old_coord](const uint64_t add_x_offset, const uint64_t add_y_offset)
+            auto is_crossing = [&lyt, &old_coord](const int32_t add_x_offset, const int32_t add_y_offset)
             {
                 return lyt.has_northern_incoming_signal(
                            {old_coord.x - add_x_offset, old_coord.y - add_y_offset + 1, 0}) &&
@@ -460,7 +439,7 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
 
             // utility function to fully obstruct a coordinate
             auto obstruct_coordinate =
-                [&wiring_reduction_lyt, &new_coord](const uint64_t add_x_offset, const uint64_t add_y_offset)
+                [&wiring_reduction_lyt, &new_coord](const int32_t add_x_offset, const int32_t add_y_offset)
             {
                 wiring_reduction_lyt.search_obstructions.obstruct_coordinate(
                     {new_coord.x - add_x_offset, new_coord.y - add_y_offset, 0});
@@ -504,7 +483,7 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                             // ...
                             //  ↓
                             //  =→
-                            for (uint64_t i = 1; is_single_wire(0, i); ++i)
+                            for (int32_t i = 1; is_single_wire(0, i); ++i)
                             {
                                 if (lyt.has_western_incoming_signal({old_coord.x, old_coord.y - i, old_coord.z}))
                                 {
@@ -540,7 +519,7 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                         // ↓
                         // =→...→=
                         //       ↓
-                        for (uint64_t i = 1; is_single_wire(i, 0); ++i)
+                        for (int32_t i = 1; is_single_wire(i, 0); ++i)
                         {
                             if (lyt.has_northern_incoming_signal({old_coord.x - i, old_coord.y, old_coord.z}))
                             {
@@ -583,7 +562,7 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                 {
                     bool obstruct = false;
 
-                    for (uint64_t i = 1; true; ++i)
+                    for (int32_t i = 1; true; ++i)
                     {
                         if (is_crossing(1, 1))
                         {
@@ -653,14 +632,14 @@ void add_obstructions(WiringReductionLyt& lyt) noexcept
     if (lyt.get_search_direction() == search_direction::HORIZONTAL)
     {
         // add obstructions to the top edge of the layout
-        for (uint64_t x = 1; x <= lyt.x(); x++)
+        for (int32_t x = 1; x <= lyt.x(); x++)
         {
             lyt.search_obstructions.obstruct_coordinate({x, 0, 0});
             lyt.search_obstructions.obstruct_coordinate({x, 0, 1});
         }
 
         // add obstructions to the bottom edge of the layout
-        for (uint64_t x = 0; x < lyt.x(); x++)
+        for (int32_t x = 0; x < lyt.x(); x++)
         {
             lyt.search_obstructions.obstruct_coordinate({x, lyt.y(), 0});
             lyt.search_obstructions.obstruct_coordinate({x, lyt.y(), 1});
@@ -669,14 +648,14 @@ void add_obstructions(WiringReductionLyt& lyt) noexcept
     else
     {
         // add obstructions to the left edge of the layout
-        for (uint64_t y = 1; y <= lyt.y(); y++)
+        for (int32_t y = 1; y <= lyt.y(); y++)
         {
             lyt.search_obstructions.obstruct_coordinate({0, y, 0});
             lyt.search_obstructions.obstruct_coordinate({0, y, 1});
         }
 
         // add obstructions to the right edge of the layout
-        for (uint64_t y = 0; y < lyt.y(); y++)
+        for (int32_t y = 0; y < lyt.y(); y++)
         {
             lyt.search_obstructions.obstruct_coordinate({lyt.x(), y, 0});
             lyt.search_obstructions.obstruct_coordinate({lyt.x(), y, 1});
@@ -744,7 +723,21 @@ void update_to_delete_list(WiringReductionLyt& lyt, const layout_coordinate_path
 /**
  * Offset matrix type alias.
  */
-using offset_matrix = std::vector<std::vector<uint64_t>>;
+using offset_matrix = std::vector<std::vector<int32_t>>;
+/**
+ * Accesses the entry of an offset matrix at a tile position.
+ *
+ * @tparam Matrix Offset matrix type, possibly `const`.
+ * @param matrix Offset matrix.
+ * @param y Row index, i.e., the y-coordinate.
+ * @param x Column index, i.e., the x-coordinate.
+ * @return The entry at row `y` and column `x`.
+ */
+template <typename Matrix>
+[[nodiscard]] auto& offset_at(Matrix& matrix, const int32_t y, const int32_t x) noexcept
+{
+    return matrix[static_cast<std::size_t>(y)][static_cast<std::size_t>(x)];
+}
 /**
  * Calculate an offset matrix based on a to-delete list in a `wiring_reduction_layout`.
  *
@@ -765,7 +758,8 @@ calculate_offset_matrix(const WiringReductionLyt&                         lyt,
                         const layout_coordinate_path<WiringReductionLyt>& to_delete) noexcept
 {
     // initialize matrix with zeros
-    offset_matrix matrix(lyt.y() + 1, std::vector<uint64_t>(lyt.x() + 1, 0));
+    offset_matrix matrix(static_cast<std::size_t>(lyt.y()) + 1,
+                         std::vector<int32_t>(static_cast<std::size_t>(lyt.x()) + 1, 0));
 
     // update matrix based on coordinates
     for (const auto& coord : to_delete)
@@ -775,16 +769,16 @@ calculate_offset_matrix(const WiringReductionLyt&                         lyt,
 
         if (lyt.get_search_direction() == search_direction::HORIZONTAL)
         {
-            for (uint64_t i = lyt.y(); i > y; --i)
+            for (int32_t i = lyt.y(); i > y; --i)
             {
-                matrix[i][x] += 1;
+                offset_at(matrix, i, x) += 1;
             }
         }
         else
         {
-            for (uint64_t i = lyt.x(); i > x; --i)
+            for (int32_t i = lyt.x(); i > x; --i)
             {
-                matrix[y][i] += 1;
+                offset_at(matrix, y, i) += 1;
             }
         }
     }
@@ -805,8 +799,8 @@ calculate_offset_matrix(const WiringReductionLyt&                         lyt,
  * @return The new coordinates of the tile after adjustment.
  */
 template <typename Lyt, typename WiringReductionLyt>
-[[nodiscard]] tile<Lyt> determine_new_coord(const WiringReductionLyt& wiring_reduction_lyt, uint64_t& x,
-                                            const uint64_t& y, uint64_t& z, const uint64_t& offset) noexcept
+[[nodiscard]] tile<Lyt> determine_new_coord(const WiringReductionLyt& wiring_reduction_lyt, const int32_t x,
+                                            const int32_t y, const int32_t z, const int32_t offset) noexcept
 {
     tile<Lyt> new_coord{};
     if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
@@ -836,7 +830,7 @@ template <typename Lyt, typename WiringReductionLyt>
 template <typename Lyt, typename LytCpy>
 void adjust_tile_horizontal_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile<Lyt>& fanin,
                                        const offset_matrix& offset_mtrx, const tile<Lyt>& old_coord,
-                                       const uint64_t& offset, std::vector<mockturtle::signal<Lyt>>& signals) noexcept
+                                       const int32_t offset, std::vector<mockturtle::signal<Lyt>>& signals) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -850,21 +844,22 @@ void adjust_tile_horizontal_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile
         bool traversing_deleted_wires = false;
 
         // check if traversing through deleted wires
-        if (offset_mtrx[fanin.y + 1][fanin.x] != offset_mtrx[fanin.y][fanin.x])
+        if (offset_at(offset_mtrx, fanin.y + 1, fanin.x) != offset_at(offset_mtrx, fanin.y, fanin.x))
         {
             fanin                    = {fanin.x, fanin.y, 0};
             traversing_deleted_wires = true;
         }
 
-        uint64_t offset_offset = 0;
+        int32_t offset_offset = 0;
 
         // if traversing through deleted wires, update the offset
         if (traversing_deleted_wires)
         {
-            for (uint64_t o = 0; o < offset; ++o)
+            for (int32_t o = 0; o < offset; ++o)
             {
                 offset_offset++;
-                if ((fanin.y > 0) && (offset_mtrx[fanin.y][fanin.x] != offset_mtrx[fanin.y - 1][fanin.x]) &&
+                if ((fanin.y > 0) &&
+                    (offset_at(offset_mtrx, fanin.y, fanin.x) != offset_at(offset_mtrx, fanin.y - 1, fanin.x)) &&
                     (layout_copy.incoming_data_flow(fanin)[0].y != fanin.y))
                 {
                     fanin = {fanin.x, fanin.y - 1, fanin.z};
@@ -897,8 +892,8 @@ void adjust_tile_horizontal_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile
  */
 template <typename Lyt, typename LytCpy>
 void adjust_tile_vertical_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile<Lyt>& fanin,
-                                     const offset_matrix& offset_mtrx, const tile<Lyt>& old_coord,
-                                     const uint64_t offset, std::vector<mockturtle::signal<Lyt>>& signals) noexcept
+                                     const offset_matrix& offset_mtrx, const tile<Lyt>& old_coord, const int32_t offset,
+                                     std::vector<mockturtle::signal<Lyt>>& signals) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -912,21 +907,22 @@ void adjust_tile_vertical_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile<L
         bool traversing_deleted_wires = false;
 
         // check if traversing through deleted wires
-        if (offset_mtrx[fanin.y][fanin.x + 1] != offset_mtrx[fanin.y][fanin.x])
+        if (offset_at(offset_mtrx, fanin.y, fanin.x + 1) != offset_at(offset_mtrx, fanin.y, fanin.x))
         {
             fanin                    = {fanin.x, fanin.y, 0};
             traversing_deleted_wires = true;
         }
 
-        uint64_t excess_offset = 0;
+        int32_t excess_offset = 0;
 
         // if traversing through deleted wires, update the offset
         if (traversing_deleted_wires)
         {
-            for (uint64_t o = 0; o < offset; ++o)
+            for (int32_t o = 0; o < offset; ++o)
             {
                 excess_offset++;
-                if ((fanin.x > 0) && (offset_mtrx[fanin.y][fanin.x] != offset_mtrx[fanin.y][fanin.x - 1]) &&
+                if ((fanin.x > 0) &&
+                    (offset_at(offset_mtrx, fanin.y, fanin.x) != offset_at(offset_mtrx, fanin.y, fanin.x - 1)) &&
                     (layout_copy.incoming_data_flow(fanin)[0].x != fanin.x))
                 {
                     fanin = {fanin.x - 1, fanin.y, fanin.z};
@@ -959,13 +955,13 @@ void adjust_tile_vertical_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile<L
  * @param offset_mtrx The offset matrix used for adjusting the layout.
  */
 template <typename Lyt, typename LytCpy, typename WiringReductionLyt>
-void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& wiring_reduction_lyt, uint64_t x,
-                 const uint64_t y, uint64_t z, const offset_matrix& offset_mtrx) noexcept
+void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& wiring_reduction_lyt, const int32_t x,
+                 const int32_t y, const int32_t z, const offset_matrix& offset_mtrx) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
-    const auto      offset    = offset_mtrx[y][x];
+    const auto      offset    = offset_at(offset_mtrx, y, x);
     const tile<Lyt> old_coord = {x, y, z};
 
     // check if the tile is not empty and has an offset
@@ -1057,14 +1053,14 @@ void delete_wires(Lyt& lyt, WiringReductionLyt& wiring_reduction_layout,
     }
 
     // iterate over the layout to delete wires and adjust the layout
-    for (uint64_t k = 0; k < lyt.x() + lyt.y() + 1; ++k)
+    for (int32_t k = 0; k < lyt.x() + lyt.y() + 1; ++k)
     {
-        for (uint64_t x = 0; x < k + 1; ++x)
+        for (int32_t x = 0; x < k + 1; ++x)
         {
-            const uint64_t y = k - x;
+            const int32_t y = k - x;
             if (x <= lyt.x() && y <= lyt.y())
             {
-                for (uint64_t z = 0; z <= lyt.z(); ++z)
+                for (int32_t z = 0; z <= lyt.z(); ++z)
                 {
                     adjust_tile(lyt, layout_copy, wiring_reduction_layout, x, y, z, off_mat);
                 }
@@ -1100,14 +1096,14 @@ class wiring_reduction_impl
 
         // record initial layout statistics
         pst.num_wires_before = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
-        pst.x_size_before    = plyt.x() + 1;
-        pst.y_size_before    = plyt.y() + 1;
+        pst.x_size_before    = static_cast<uint64_t>(plyt.x()) + 1;
+        pst.y_size_before    = static_cast<uint64_t>(plyt.y()) + 1;
 
         // share the layout storage while updating placement
         auto layout = plyt;
 
         // initialize the list of wires to delete
-        layout_coordinate_path<wiring_reduction_layout<coordinate<Lyt>>> to_delete = {};
+        layout_coordinate_path<wiring_reduction_layout> to_delete = {};
 
         bool found_wires = true;
 
@@ -1162,8 +1158,7 @@ class wiring_reduction_impl
                 while (!possible_path.empty() && !timeout_limit_reached)
                 {
                     // update the list of wires to delete based on the current path
-                    update_to_delete_list<Lyt, wiring_reduction_layout<coordinate<Lyt>>>(wiring_reduction_lyt,
-                                                                                         possible_path, to_delete);
+                    update_to_delete_list<Lyt, wiring_reduction_layout>(wiring_reduction_lyt, possible_path, to_delete);
 
                     progress.advance();
 
@@ -1192,8 +1187,8 @@ class wiring_reduction_impl
         layout.resize({bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
 
         // update final layout statistics
-        pst.x_size_after = layout.x() + 1;
-        pst.y_size_after = layout.y() + 1;
+        pst.x_size_after = static_cast<uint64_t>(layout.x()) + 1;
+        pst.y_size_after = static_cast<uint64_t>(layout.y()) + 1;
 
         const uint64_t area_before = pst.x_size_before * pst.y_size_before;
         const uint64_t area_after  = pst.x_size_after * pst.y_size_after;
