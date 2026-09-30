@@ -13,7 +13,6 @@
  * @brief Tests for `fiction/layouts/io/read_fgl_layout.hpp`.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #include <catch2/catch_test_macros.hpp>
