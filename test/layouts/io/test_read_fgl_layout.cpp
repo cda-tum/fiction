@@ -736,9 +736,9 @@ TEST_CASE("Parsing error: size exceeds the range of gate-level signals", "[read-
     const auto [axis, value] =
         GENERATE(std::pair{"x", "1073741824"}, std::pair{"y", "1073741824"}, std::pair{"z", "2"});
 
-    const auto x = std::string{axis} == "x" ? value : "2";
-    const auto y = std::string{axis} == "y" ? value : "1";
-    const auto z = std::string{axis} == "z" ? value : "0";
+    const char* const x = std::string{axis} == "x" ? value : "2";
+    const char* const y = std::string{axis} == "y" ? value : "1";
+    const char* const z = std::string{axis} == "z" ? value : "0";
 
     std::istringstream layout_stream{fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                                  "<fgl>\n"

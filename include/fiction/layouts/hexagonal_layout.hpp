@@ -146,12 +146,28 @@ class hexagonal_layout : public layout_base
          */
         int32_t z;
         /**
+         * Creates a cube coordinate at the origin.
+         */
+        constexpr cube_coordinate() noexcept : x{0}, y{0}, z{0} {}
+        /**
+         * Creates a cube coordinate from its three axes.
+         *
+         * @param x_ x coordinate.
+         * @param y_ y coordinate.
+         * @param z_ z coordinate.
+         */
+        constexpr cube_coordinate(const int32_t x_, const int32_t y_, const int32_t z_) noexcept : x{x_}, y{y_}, z{z_}
+        {}
+        /**
          * Compares against another cube coordinate for equality.
          *
          * @param other Right-hand side coordinate.
          * @return `true` iff all axes are equal.
          */
-        constexpr bool operator==(const cube_coordinate& other) const noexcept = default;
+        constexpr bool operator==(const cube_coordinate& other) const noexcept
+        {
+            return x == other.x && y == other.y && z == other.z;
+        }
         /**
          * Adds another cube coordinate axis by axis.
          *
@@ -306,6 +322,9 @@ class hexagonal_layout : public layout_base
 #pragma endregion
 
 #pragma region row / column detection
+    // The neighbor and border queries below do not read the layout, but every layout type exposes them as members: the
+    // generic algorithms and `is_coordinate_layout_v` call them on a layout instance.
+    // NOLINTBEGIN(readability-convert-member-functions-to-static)
     /**
      * Checks if the given coordinate is located in a row with an odd index.
      *
@@ -314,7 +333,7 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] bool is_in_odd_row(const coordinate& c) const noexcept
     {
-        return (c.y & 1) == 1;
+        return c.y % 2 != 0;
     }
     /**
      * Checks if the given coordinate is located in a row with an even index.
@@ -324,7 +343,7 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] bool is_in_even_row(const coordinate& c) const noexcept
     {
-        return (c.y & 1) == 0;
+        return c.y % 2 == 0;
     }
     /**
      * Checks if the given coordinate is located in a column with an odd index.
@@ -334,7 +353,7 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] bool is_in_odd_column(const coordinate& c) const noexcept
     {
-        return (c.x & 1) == 1;
+        return c.x % 2 != 0;
     }
     /**
      * Checks if the given coordinate is located in a column with an even index.
@@ -344,7 +363,7 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] bool is_in_even_column(const coordinate& c) const noexcept
     {
-        return (c.x & 1) == 0;
+        return c.x % 2 == 0;
     }
 
 #pragma endregion
@@ -824,6 +843,7 @@ class hexagonal_layout : public layout_base
     {
         return c.z > 0;
     }
+    // NOLINTEND(readability-convert-member-functions-to-static)
     /**
      * Returns whether the given coordinate is located within the layout bounds.
      *
@@ -920,7 +940,7 @@ class hexagonal_layout : public layout_base
      * @param c Coordinate whose adjacent ones are desired.
      * @return A container that contains all of `c`'s adjacent coordinates.
      */
-    auto adjacent_coordinates(const coordinate& c) const noexcept
+    [[nodiscard]] auto adjacent_coordinates(const coordinate& c) const noexcept
     {
         std::vector<coordinate> cnt{};
         cnt.reserve(max_fanin_size + 1);  // reserve memory
@@ -986,7 +1006,7 @@ class hexagonal_layout : public layout_base
      * @param c Coordinate whose opposite ones are desired.
      * @return A container that contains pairs of `c`'s opposing coordinates.
      */
-    auto adjacent_opposite_coordinates(const coordinate& c) const noexcept
+    [[nodiscard]] auto adjacent_opposite_coordinates(const coordinate& c) const noexcept
     {
         std::vector<std::pair<coordinate, coordinate>> cnt{};
         cnt.reserve((max_fanin_size + 1) / 2);  // reserve memory
@@ -1062,16 +1082,16 @@ class hexagonal_layout : public layout_base
 
         if (is_row_arrangement(get_arrangement()))
         {
-            cube_coord.x = offset_coord.x -
-                           static_cast<decltype(cube_coord.x)>((offset_coord.y + (offset * (offset_coord.y & 1))) / 2);
+            cube_coord.x = offset_coord.x - static_cast<decltype(cube_coord.x)>(
+                                                (offset_coord.y + (offset_coord.y % 2 != 0 ? offset : 0)) / 2);
             cube_coord.z = offset_coord.y;
             cube_coord.y = -cube_coord.x - cube_coord.z;
         }
         else
         {
             cube_coord.x = offset_coord.x;
-            cube_coord.z = offset_coord.y -
-                           static_cast<decltype(cube_coord.z)>((offset_coord.x + (offset * (offset_coord.x & 1))) / 2);
+            cube_coord.z = offset_coord.y - static_cast<decltype(cube_coord.z)>(
+                                                (offset_coord.x + (offset_coord.x % 2 != 0 ? offset : 0)) / 2);
             cube_coord.y = -cube_coord.x - cube_coord.z;
         }
 
@@ -1094,14 +1114,14 @@ class hexagonal_layout : public layout_base
         if (is_row_arrangement(get_arrangement()))
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(
-                cube_coord.x + static_cast<int64_t>((cube_coord.z + (offset * (cube_coord.z & 1))) / 2));
+                cube_coord.x + static_cast<int64_t>((cube_coord.z + (cube_coord.z % 2 != 0 ? offset : 0)) / 2));
             offset_coord.y = static_cast<decltype(offset_coord.y)>(cube_coord.z);
         }
         else
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(cube_coord.x);
             offset_coord.y = static_cast<decltype(offset_coord.y)>(
-                cube_coord.z + static_cast<int64_t>((cube_coord.x + (offset * (cube_coord.x & 1))) / 2));
+                cube_coord.z + static_cast<int64_t>((cube_coord.x + (cube_coord.x % 2 != 0 ? offset : 0)) / 2));
         }
 
         return offset_coord;

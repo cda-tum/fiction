@@ -830,8 +830,9 @@ class gate_level_layout : public CoordinateLayout
      * @param t Tile to move `n` to.
      * @param new_children New incoming signals to `n`.
      * @return Signal pointing to `n`'s new tile.
+     * @throws std::out_of_range If `t` has no signal encoding.
      */
-    signal move_node(const node n, const tile& t, const std::vector<signal>& new_children = {}) noexcept
+    signal move_node(const node n, const tile& t, const std::vector<signal>& new_children = {})
     {
         // n's current position
         const auto old_t = get_tile(n);
@@ -2241,10 +2242,9 @@ class gate_level_layout : public CoordinateLayout
      * @throws std::out_of_range If the x or y value of `ar` is larger than \f$2^{30} - 1\f$ or its z value is larger
      * than 1.
      */
-    static const typename CoordinateLayout::aspect_ratio&
-    checked_extent(const typename CoordinateLayout::aspect_ratio& ar)
+    static typename CoordinateLayout::aspect_ratio checked_extent(const typename CoordinateLayout::aspect_ratio& ar)
     {
-        constexpr int32_t max_axis = (1 << 30) - 1;
+        constexpr auto max_axis = static_cast<int32_t>((1ull << 30ull) - 1ull);
 
         if (ar.x > max_axis || ar.y > max_axis || ar.z > 1)
         {

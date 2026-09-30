@@ -24,7 +24,7 @@ class coordinate:
     An coordinate coordinate defines a location via an coordinate from a
     fixed point (origin). Each axis is a signed 32-bit integer. The
     default-constructed coordinate is invalid; it has all axes set to
-    `invalid_axis` and stands for "no coordinate", e.g., a neighbor
+    `INVALID_AXIS` and stands for "no coordinate", e.g., a neighbor
     outside of a layout or the tile of a node that is not placed.
 
     Gate-level layouts pack a coordinate into a 64-bit signal with
@@ -2857,6 +2857,9 @@ class cartesian_gate_layout(cartesian_layout):
 
         Returns:
             Signal pointing to `n`'s new tile.
+
+        Raises:
+            std::out_of_range: If `t` has no signal encoding.
         """
 
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
@@ -3904,6 +3907,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
         Returns:
             Signal pointing to `n`'s new tile.
+
+        Raises:
+            std::out_of_range: If `t` has no signal encoding.
         """
 
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
@@ -4951,6 +4957,9 @@ class hexagonal_gate_layout(hexagonal_layout):
 
         Returns:
             Signal pointing to `n`'s new tile.
+
+        Raises:
+            std::out_of_range: If `t` has no signal encoding.
         """
 
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:

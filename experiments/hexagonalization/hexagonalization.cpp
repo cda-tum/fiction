@@ -19,7 +19,6 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
 #include <fiction/physical_design/hexagonalization.hpp>      // layout conversion to hexagonal gird
 #include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
@@ -183,10 +182,10 @@ int main()  // NOLINT
         hexagonalization_exp(
             benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
             depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
-            static_cast<uint64_t>(gate_level_layout.x() + 1), static_cast<uint64_t>(gate_level_layout.y() + 1),
-            static_cast<uint64_t>(gate_level_layout.x() + 1) * static_cast<uint64_t>(gate_level_layout.y() + 1),
-            static_cast<uint64_t>(hex_layout.x() + 1), static_cast<uint64_t>(hex_layout.y() + 1),
-            static_cast<uint64_t>(hex_layout.x() + 1) * static_cast<uint64_t>(hex_layout.y() + 1),
+            static_cast<uint64_t>(gate_level_layout.x()) + 1, static_cast<uint64_t>(gate_level_layout.y()) + 1,
+            static_cast<uint64_t>(gate_level_layout.x()) + 1 * static_cast<uint64_t>(gate_level_layout.y()) + 1,
+            static_cast<uint64_t>(hex_layout.x()) + 1, static_cast<uint64_t>(hex_layout.y()) + 1,
+            static_cast<uint64_t>(hex_layout.x()) + 1 * static_cast<uint64_t>(hex_layout.y()) + 1,
             gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
             mockturtle::to_seconds(orthogonal_stats.time_total),
             mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result, cell_level_layout.num_dots(),

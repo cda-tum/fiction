@@ -111,9 +111,9 @@ int main()  // NOLINT
         const auto bounding_box_before_wiring_reduction = bounding_box_2d(gate_level_layout);
 
         const auto width_before_wiring_reduction =
-            static_cast<uint64_t>(bounding_box_before_wiring_reduction.get_x_size() + 1);
+            static_cast<uint64_t>(bounding_box_before_wiring_reduction.get_x_size()) + 1;
         const auto height_before_wiring_reduction =
-            static_cast<uint64_t>(bounding_box_before_wiring_reduction.get_y_size() + 1);
+            static_cast<uint64_t>(bounding_box_before_wiring_reduction.get_y_size()) + 1;
         const auto area_before_wiring_reduction = width_before_wiring_reduction * height_before_wiring_reduction;
 
         // perform post-layout optimization
@@ -147,9 +147,9 @@ int main()  // NOLINT
         const auto bounding_box_after_wiring_reduction = bounding_box_2d(gate_level_layout);
 
         const auto width_after_wiring_reduction =
-            static_cast<uint64_t>(bounding_box_after_wiring_reduction.get_x_size() + 1);
+            static_cast<uint64_t>(bounding_box_after_wiring_reduction.get_x_size()) + 1;
         const auto height_after_wiring_reduction =
-            static_cast<uint64_t>(bounding_box_after_wiring_reduction.get_y_size() + 1);
+            static_cast<uint64_t>(bounding_box_after_wiring_reduction.get_y_size()) + 1;
         const auto area_after_wiring_reduction = width_after_wiring_reduction * height_after_wiring_reduction;
 
         const float improv_wires =

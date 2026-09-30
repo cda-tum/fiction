@@ -23,7 +23,6 @@
 #include <fmt/format.h>
 
 #include <algorithm>
-#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -46,7 +45,7 @@ class layout_base
      * Signed coordinates.
      *
      * An coordinate coordinate defines a location via an coordinate from a fixed point (origin). Each axis is a signed
-     * 32-bit integer. The default-constructed coordinate is invalid; it has all axes set to `invalid_axis` and stands
+     * 32-bit integer. The default-constructed coordinate is invalid; it has all axes set to `INVALID_AXIS` and stands
      * for "no coordinate", e.g., a neighbor outside of a layout or the tile of a node that is not placed.
      *
      * Gate-level layouts pack a coordinate into a 64-bit signal with `explicit operator uint64_t`. This encoding holds
@@ -57,7 +56,7 @@ class layout_base
         /**
          * Value of every axis of the invalid coordinate.
          */
-        static constexpr int32_t invalid_axis = std::numeric_limits<int32_t>::min();
+        static constexpr int32_t INVALID_AXIS = std::numeric_limits<int32_t>::min();
         /**
          * x coordinate.
          */
@@ -76,7 +75,7 @@ class layout_base
         /**
          * Default constructor. Creates the invalid coordinate.
          */
-        constexpr coordinate() noexcept : x{invalid_axis}, y{invalid_axis}, z{invalid_axis} {}
+        constexpr coordinate() noexcept : x{INVALID_AXIS}, y{INVALID_AXIS}, z{INVALID_AXIS} {}
         /**
          * Standard constructor. Creates a coordinate at (x_, y_, z_).
          *
@@ -120,8 +119,8 @@ class layout_base
         {
             if ((t >> 63ull) == 0ull)
             {
-                x = sign_extend_31(t & axis_mask);
-                y = sign_extend_31((t >> 31ull) & axis_mask);
+                x = sign_extend_31(t & AXIS_MASK);
+                y = sign_extend_31((t >> 31ull) & AXIS_MASK);
                 z = static_cast<int32_t>((t >> 62ull) & 1ull);
             }
         }
@@ -139,11 +138,11 @@ class layout_base
         {
             if (!is_valid())
             {
-                return invalid_code;
+                return INVALID_CODE;
             }
 
-            return ((static_cast<uint64_t>(z) & 1ull) << 62ull) | ((static_cast<uint64_t>(y) & axis_mask) << 31ull) |
-                   (static_cast<uint64_t>(x) & axis_mask);
+            return ((static_cast<uint64_t>(z) & 1ull) << 62ull) | ((static_cast<uint64_t>(y) & AXIS_MASK) << 31ull) |
+                   (static_cast<uint64_t>(x) & AXIS_MASK);
         }
         /**
          * Returns whether the coordinate is valid, i.e., whether it differs from the default-constructed coordinate.
@@ -152,7 +151,7 @@ class layout_base
          */
         [[nodiscard]] constexpr bool is_valid() const noexcept
         {
-            return x != invalid_axis;
+            return x != INVALID_AXIS;
         }
         /**
          * Returns whether the coordinate fits the 64-bit signal encoding, i.e., x and y are 31-bit signed values and z
@@ -162,8 +161,8 @@ class layout_base
          */
         [[nodiscard]] constexpr bool fits_signal() const noexcept
         {
-            constexpr int32_t min_axis = -(1 << 30);
-            constexpr int32_t max_axis = (1 << 30) - 1;
+            constexpr auto max_axis = static_cast<int32_t>((1ull << 30ull) - 1ull);
+            constexpr auto min_axis = -max_axis - 1;
 
             return x >= min_axis && x <= max_axis && y >= min_axis && y <= max_axis && (z == 0 || z == 1);
         }
@@ -202,7 +201,12 @@ class layout_base
          * @param other Right-hand side coordinate.
          * @return `true` iff both coordinates are identical.
          */
-        constexpr bool operator==(const coordinate& other) const noexcept = default;
+        constexpr bool operator==(const coordinate& other) const noexcept
+        {
+            // a user-provided comparison keeps standard libraries from treating the 12-byte coordinate as bitwise
+            // comparable and vectorizing `std::find` for it, which MSVC's library rejects for this size
+            return x == other.x && y == other.y && z == other.z;
+        }
         /**
          * Compares against another coordinate for inequality.
          *
@@ -281,11 +285,11 @@ class layout_base
         /**
          * Mask of the 31 bits of one axis in the signal encoding.
          */
-        static constexpr uint64_t axis_mask = (1ull << 31ull) - 1ull;
+        static constexpr uint64_t AXIS_MASK = (1ull << 31ull) - 1ull;
         /**
          * Signal encoding of the invalid coordinate.
          */
-        static constexpr uint64_t invalid_code = 1ull << 63ull;
+        static constexpr uint64_t INVALID_CODE = 1ull << 63ull;
         /**
          * Sign-extends a 31-bit two's complement value.
          *

@@ -102,8 +102,8 @@ int main()  // NOLINT
         const auto original_layout = orthogonal<gate_lyt>(mapped_network);
 
         // obtain layout characteristics
-        const auto width  = static_cast<uint64_t>(original_layout.x() + 1);
-        const auto height = static_cast<uint64_t>(original_layout.y() + 1);
+        const auto width  = static_cast<uint64_t>(original_layout.x()) + 1;
+        const auto height = static_cast<uint64_t>(original_layout.y()) + 1;
         const auto area   = width * height;
 
         // deep-copy the original layout

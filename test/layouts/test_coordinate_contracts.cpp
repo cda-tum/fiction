@@ -14,7 +14,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
@@ -27,7 +26,6 @@
 #include <fiction/traits.hpp>
 
 #include <algorithm>
-#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <set>
@@ -155,7 +153,7 @@ TEST_CASE("Coordinates order by layer, then row, then column", "[coordinate-cont
     CHECK(coord{1, 2, 0} < coord{2, 2, 0});
     CHECK(!(coord{2, 2, 0} < coord{2, 2, 0}));
 
-    std::set<coord> ordered{{1, 1, 0}, {0, 0, 1}, {2, 0, 0}, {0, 1, 0}};
+    const std::set<coord> ordered{{1, 1, 0}, {0, 0, 1}, {2, 0, 0}, {0, 1, 0}};
 
     CHECK(*ordered.begin() == coord{2, 0, 0});
     CHECK(*ordered.rbegin() == coord{0, 0, 1});
@@ -167,7 +165,7 @@ TEST_CASE("Coordinates hash as their packed gate-level encoding", "[coordinate-c
 
     const auto hash_of = [](const coord& c) { return std::hash<coord>{}(c); };
     const auto packed  = [](const uint64_t x, const uint64_t y, const uint64_t z)
-    { return std::hash<uint64_t>{}((z << 62) | (y << 31) | x); };
+    { return std::hash<uint64_t>{}((z << 62ull) | (y << 31ull) | x); };
 
     CHECK(hash_of({0, 0, 0}) == packed(0, 0, 0));
     CHECK(hash_of({5, 7, 0}) == packed(5, 7, 0));

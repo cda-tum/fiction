@@ -89,7 +89,7 @@ TEST_CASE("Port lists", "[cell-ports]")
 {
     SECTION("Port positions")
     {
-        port_position p_02{0, 2}, p_24{2, 4};
+        const port_position p_02{0, 2}, p_24{2, 4};
 
         port_list<port_position> p_list_02_24{{p_02}, {p_24}};
         port_list<port_position> p_list_24_02{{p_24}, {p_02}};
@@ -103,7 +103,7 @@ TEST_CASE("Port lists", "[cell-ports]")
     }
     SECTION("Port directions")
     {
-        port_direction p_sw{port_direction::cardinal::SOUTH_WEST}, p_w{port_direction::cardinal::WEST};
+        const port_direction p_sw{port_direction::cardinal::SOUTH_WEST}, p_w{port_direction::cardinal::WEST};
 
         port_list<port_direction> p_list_sw_w{{p_sw}, {p_w}};
         port_list<port_direction> p_list_w_sw{{p_w}, {p_sw}};

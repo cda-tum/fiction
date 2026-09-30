@@ -20,7 +20,6 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
 #include <fiction/physical_design/path_finding/distance_map.hpp>

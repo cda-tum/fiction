@@ -175,6 +175,9 @@ class cartesian_layout : public layout_base
 #pragma endregion
 
 #pragma region Cardinal operations
+    // The neighbor and border queries below do not read the layout, but every layout type exposes them as members: the
+    // generic algorithms and `is_coordinate_layout_v` call them on a layout instance.
+    // NOLINTBEGIN(readability-convert-member-functions-to-static)
     /**
      * Returns the coordinate that is directly adjacent in northern direction of a given coordinate `c`, i.e., the face
      * whose y-dimension is lower by 1. If `c`'s y-dimension is already at minimum, `c` is returned instead.
@@ -642,6 +645,7 @@ class cartesian_layout : public layout_base
     {
         return c.z > decltype(c.z){0};
     }
+    // NOLINTEND(readability-convert-member-functions-to-static)
     /**
      * Returns whether the given coordinate is located within the layout bounds.
      *
@@ -738,7 +742,7 @@ class cartesian_layout : public layout_base
      * @param c Coordinate whose adjacent ones are desired.
      * @return A container that contains all of `c`'s adjacent coordinates.
      */
-    auto adjacent_coordinates(const coordinate& c) const noexcept
+    [[nodiscard]] auto adjacent_coordinates(const coordinate& c) const noexcept
     {
         std::vector<coordinate> cnt{};
         cnt.reserve(max_fanin_size + 1);  // reserve memory
@@ -784,7 +788,7 @@ class cartesian_layout : public layout_base
      * @param c Coordinate whose opposite ones are desired.
      * @return A container that contains pairs of `c`'s opposing coordinates.
      */
-    auto adjacent_opposite_coordinates(const coordinate& c) const noexcept
+    [[nodiscard]] auto adjacent_opposite_coordinates(const coordinate& c) const noexcept
     {
         std::vector<std::pair<coordinate, coordinate>> cnt{};
         cnt.reserve((max_fanin_size + 1) / 2);  // reserve memory

@@ -20,7 +20,6 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/layout_base.hpp"
 #include "fiction/technology/mol_qca/layout.hpp"
 #include "fiction/technology/qca/layout.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"

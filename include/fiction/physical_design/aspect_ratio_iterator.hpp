@@ -160,7 +160,7 @@ class aspect_ratio_iterator
             if (num % i == 0)
             {
                 const auto x = i - 1;
-                const auto y = num / i - 1;
+                const auto y = (num / i) - 1;
 
                 factors.emplace_back(x, y);
                 if (x != y)
@@ -178,11 +178,14 @@ class aspect_ratio_iterator
      */
     void next() noexcept
     {
-        do
+        ++num;
+        factorize();
+
+        while (factors.empty())
         {
             ++num;
             factorize();
-        } while (factors.empty());
+        }
     }
 };
 

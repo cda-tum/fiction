@@ -16,7 +16,6 @@
  * @author Willem Lambooy (wlambooy)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -133,10 +132,10 @@ TEST_CASE("Signed offset coordinates", "[coordinates]")
 
 TEST_CASE("Coordinate iteration", "[coordinates]")
 {
-    using TestType = layout_base::coordinate;
-    using lyt_t    = cartesian_layout;
+    using coord_t = layout_base::coordinate;
+    using lyt_t   = cartesian_layout;
 
-    std::vector<TestType> coord_vector{};
+    std::vector<coord_t> coord_vector{};
     coord_vector.reserve(7);
 
     const lyt_t lyt{{1, 1, 1}};
@@ -149,14 +148,14 @@ TEST_CASE("Coordinate iteration", "[coordinates]")
 
         REQUIRE(coord_vector.size() == 6);
 
-        CHECK(coord_vector[0] == TestType{1, 0, 0});
+        CHECK(coord_vector[0] == coord_t{1, 0, 0});
 
-        CHECK(coord_vector[1] == TestType{0, 1, 0});
-        CHECK(coord_vector[2] == TestType{1, 1, 0});
-        CHECK(coord_vector[3] == TestType{0, 0, 1});
-        CHECK(coord_vector[4] == TestType{1, 0, 1});
+        CHECK(coord_vector[1] == coord_t{0, 1, 0});
+        CHECK(coord_vector[2] == coord_t{1, 1, 0});
+        CHECK(coord_vector[3] == coord_t{0, 0, 1});
+        CHECK(coord_vector[4] == coord_t{1, 0, 1});
 
-        CHECK(coord_vector[5] == TestType{0, 1, 1});
+        CHECK(coord_vector[5] == coord_t{0, 1, 1});
     }
     SECTION("Without bounds")
     {
@@ -167,16 +166,16 @@ TEST_CASE("Coordinate iteration", "[coordinates]")
 
         CHECK(coord_vector.size() == 8);
 
-        CHECK(coord_vector.front().str() == fmt::format("{}", TestType{0, 0, 0}));
-        CHECK(coord_vector.back().str() == fmt::format("{}", TestType{1, 1, 1}));
+        CHECK(coord_vector.front().str() == fmt::format("{}", coord_t{0, 0, 0}));
+        CHECK(coord_vector.back().str() == fmt::format("{}", coord_t{1, 1, 1}));
     }
     SECTION("With non-dead out of bounds end bound")
     {
-        std::vector<TestType> good_bound_coord_vector{};
+        std::vector<coord_t> good_bound_coord_vector{};
 
         const auto fill_good_bound_coord_vector = [&v = good_bound_coord_vector](const auto& c) { v.emplace_back(c); };
 
-        const auto test_bounds_equal = [&](const auto& c_lyt, const TestType& bad_bound, const TestType& good_bound)
+        const auto test_bounds_equal = [&](const auto& c_lyt, const coord_t& bad_bound, const coord_t& good_bound)
         {
             coord_vector.clear();
             coord_vector.reserve(8);

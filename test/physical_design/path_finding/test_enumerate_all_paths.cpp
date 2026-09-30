@@ -379,7 +379,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // 19 valid paths
             {
-                auto         obstr_lyt = layout;
+                const auto&  obstr_lyt = layout;
                 obstructions search_obstructions{};
 
                 // create a connection obstruction
@@ -397,7 +397,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // 1 valid path
             {
-                auto         obstr_lyt = layout;
+                const auto&  obstr_lyt = layout;
                 obstructions search_obstructions{};
 
                 // create a PI as obstruction

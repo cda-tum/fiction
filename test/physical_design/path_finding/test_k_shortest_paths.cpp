@@ -604,7 +604,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
             }
             SECTION("(0,0) to (3,3) with coordinate obstruction via declaration")  // path of length 7
             {
-                auto         obstr_lyt = layout;
+                const auto&  obstr_lyt = layout;
                 obstructions search_obstructions{};
 
                 // create some PIs as obstruction
@@ -659,7 +659,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
             }
             SECTION("(0,0) to (3,3) with coordinate obstruction via declaration")  // path of length 7
             {
-                auto         obstr_lyt = layout;
+                const auto&  obstr_lyt = layout;
                 obstructions search_obstructions{};
 
                 // create a PI as obstruction
@@ -856,7 +856,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
             {
-                auto         obstr_lyt = layout;
+                const auto&  obstr_lyt = layout;
                 obstructions search_obstructions{};
 
                 // create some connection obstructions
@@ -890,7 +890,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
             {
-                auto         obstr_lyt = layout;
+                const auto&  obstr_lyt = layout;
                 obstructions search_obstructions{};
 
                 search_obstructions.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths

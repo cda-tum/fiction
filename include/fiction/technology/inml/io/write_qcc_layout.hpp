@@ -27,6 +27,7 @@
 #include <fmt/format.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <functional>

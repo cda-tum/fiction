@@ -4092,6 +4092,9 @@ Args:
 Returns:
     Signal pointing to `n`'s new tile.
 
+Raises:
+    std::out_of_range: If `t` has no signal encoding.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_node_function = R"doc()doc";
@@ -4540,6 +4543,18 @@ R"doc(Cube coordinates identify faces of the hexagonal grid with three
 signed axes that sum to zero. The layout uses them internally for
 neighbor calculations. A wonderful resource on the topic is
 https://www.redblobgames.com/grids/hexagons/#coordinates-cube)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_cube_coordinate = R"doc(Creates a cube coordinate at the origin.)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_cube_coordinate_2 =
+R"doc(Creates a cube coordinate from its three axes.
+
+Args:
+    x_: x coordinate.
+    y_: y coordinate.
+    z_: z coordinate.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_operator_add =
 R"doc(Adds another cube coordinate axis by axis.
@@ -5729,7 +5744,7 @@ R"doc(Signed coordinates.
 An coordinate coordinate defines a location via an coordinate from a
 fixed point (origin). Each axis is a signed 32-bit integer. The
 default-constructed coordinate is invalid; it has all axes set to
-`invalid_axis` and stands for "no coordinate", e.g., a neighbor
+`INVALID_AXIS` and stands for "no coordinate", e.g., a neighbor
 outside of a layout or the tile of a node that is not placed.
 
 Gate-level layouts pack a coordinate into a 64-bit signal with

@@ -24,6 +24,7 @@
 #include <fmt/format.h>
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <ostream>
 #include <string>

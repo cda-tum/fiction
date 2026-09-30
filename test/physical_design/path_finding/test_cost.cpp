@@ -17,10 +17,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/path_finding/cost.hpp>
-
-#include <cmath>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -73,7 +70,7 @@ TEST_CASE("Unit cost functor", "[cost]")
     {
         using layout = cartesian_layout;
 
-        unit_cost_functor<layout> cost{};
+        const unit_cost_functor<layout> cost{};
 
         CHECK(cost({0, 0}, {0, 0}) == 1);
         CHECK(cost({1, 1}, {1, 1}) == 1);
@@ -91,7 +88,7 @@ TEST_CASE("Unit cost functor", "[cost]")
     {
         using layout = cartesian_layout;
 
-        unit_cost_functor<layout> cost{};
+        const unit_cost_functor<layout> cost{};
 
         CHECK(cost({0, 0}, {0, 0}) == 1);
         CHECK(cost({1, 1}, {1, 1}) == 1);
@@ -184,7 +181,7 @@ TEST_CASE("Random cost functor", "[distance]")
     {
         using layout = cartesian_layout;
 
-        random_cost_functor<layout> cost{};
+        const random_cost_functor<layout> cost{};
 
         auto r = cost({0, 0}, {0, 0});
         CHECK((r >= 0 && r <= 1));
@@ -213,7 +210,7 @@ TEST_CASE("Random cost functor", "[distance]")
     {
         using layout = cartesian_layout;
 
-        random_cost_functor<layout> cost{};
+        const random_cost_functor<layout> cost{};
 
         auto r = cost({0, 0}, {0, 0});
         CHECK((r >= 0 && r <= 1));
