@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/layouts/io/read_fgl_layout.hpp`.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -523,7 +524,7 @@ TEST_CASE("Parsing error: no element 'clock' in 'zone'", "[read-fgl-layout]")
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'topology' in 'layout'", "[read-fgl-layout]")
+TEST_CASE("Read FGL layout without topology", "[read-fgl-layout]")
 {
     static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fgl>\n"
@@ -540,10 +541,31 @@ TEST_CASE("Parsing error: no element 'topology' in 'layout'", "[read-fgl-layout]
                                               "  </layout>\n"
                                               "</fgl>\n";
 
-    std::istringstream layout_stream{fgl_layout};
+    const auto  topology = GENERATE("", "<topology/>");
+    std::string document{fgl_layout};
+    document.insert(document.find("<size>"), topology);
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
-    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+    SECTION("Cartesian layouts default to Cartesian topology")
+    {
+        std::istringstream layout_stream{document};
+        const auto         lyt = read_fgl_layout<cart_gate_clk_lyt>(layout_stream);
+        CHECK(lyt.x() == 0);
+        CHECK(lyt.y() == 0);
+        CHECK(get_name(lyt) == "Test");
+        CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
+    }
+
+    SECTION("Shifted Cartesian layouts require a topology")
+    {
+        std::istringstream layout_stream{document};
+        CHECK_THROWS_AS(read_fgl_layout<shifted_cart_gate_clk_lyt>(layout_stream), fgl_parsing_error);
+    }
+
+    SECTION("Hexagonal layouts require a topology")
+    {
+        std::istringstream layout_stream{document};
+        CHECK_THROWS_AS(read_fgl_layout<hex_gate_clk_lyt>(layout_stream), fgl_parsing_error);
+    }
 }
 
 TEST_CASE("Parsing error: unknown topology", "[read-fgl-layout]")

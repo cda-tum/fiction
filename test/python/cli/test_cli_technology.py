@@ -84,6 +84,14 @@ def test_cell_library_spellings(mux21_shell: Shell, spelling: str) -> None:
     assert len(mux21_shell.session.cell_layouts) == 1
 
 
+@pytest.mark.parametrize("shift", [arrangement.ODD_ROW, arrangement.EVEN_ROW])
+def test_topolinano_rejects_row_arrangements(shell: Shell, shift: arrangement) -> None:
+    """ToPoliNano requires column shifts and leaves the cell store empty on rejection."""
+    shell.session.gate_layouts.add(shifted_cartesian_gate_layout(shift, (1, 1), "2DDWave"))
+    assert "needs a column-shifted Cartesian layout" in shell.fails("cell -l topolinano")
+    assert len(shell.session.cell_layouts) == 0
+
+
 def test_gate_library_error_preserves_store(shell: Shell) -> None:
     layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (1, 1), "2DDWave", "unsupported routing")
     source = layout.create_pi("a", (0, 0))

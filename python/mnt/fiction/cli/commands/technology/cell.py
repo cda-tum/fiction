@@ -98,8 +98,9 @@ def _cell_arguments(parser: Parser) -> None:
 def cell(session: Session, args: argparse.Namespace) -> Result:
     """Compile the active gate-level layout into a cell-level layout with a gate library.
 
-    qca-one and sim7-mol take Cartesian layouts, topolinano takes shifted Cartesian ones (exact
-    --topolinano), and bestagon takes hexagonal ones (hex, or exact --topology hexagonal -s row).
+    qca-one and sim7-mol take Cartesian layouts, topolinano takes column-shifted Cartesian layouts
+    (exact --topolinano), and bestagon takes pointy-top hexagonal layouts (hex, or exact --topology
+    hexagonal -s row).
     """
     layout = session.gate_layouts.current()
     library = args.library
@@ -114,6 +115,16 @@ def cell(session: Session, args: argparse.Namespace) -> Result:
     ):
         msg = (
             f"bestagon needs a pointy-top hexagonal layout; the active layout is {DISPLAY_NAMES[topology_name(layout)]}"
+        )
+        raise CommandError(msg)
+    if (
+        library == "topolinano"
+        and isinstance(layout, shifted_cartesian_gate_layout)
+        and layout.get_arrangement() in ROW_ARRANGEMENTS
+    ):
+        msg = (
+            "topolinano needs a column-shifted Cartesian layout; "
+            f"the active layout is {DISPLAY_NAMES[topology_name(layout)]}"
         )
         raise CommandError(msg)
     entry = CellEntry(apply(layout, on_progress=session.report_progress))

@@ -225,9 +225,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Simulation results store charge states and energy beside one shared layout and potential
     landscape instead of copying a `charge_distribution_surface` for every configuration
   - **Breaking:** `hexagonal_layout` and `shifted_cartesian_layout` take their `layouts::arrangement` as a constructor
-    argument instead of a template parameter, and `get_arrangement()` returns it. The tag types such as `odd_row_hex` and
-    the `has_*_arrangement_v` and `has_*_orientation_v` traits are gone. `types.hpp` defines one gate-level layout
-    per family: `cart_gate_clk_lyt`, `shifted_cart_gate_clk_lyt`, and `hex_gate_clk_lyt`.
+    argument instead of a template parameter, and `get_arrangement()` returns it.
 
 - Dependencies:
 
@@ -257,6 +255,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     take the defective surface as a `sidb::layout` and return one that carries its defects.
     SiDB gate placement, surface analysis, and circuit design no longer take a cell-layout template argument.
   - The Bestagon library throws `std::invalid_argument` for layouts that shift columns instead of failing to compile.
+  - The ToPoliNano library and CLI reject row-shifted Cartesian layouts.
 
 - I/O:
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional

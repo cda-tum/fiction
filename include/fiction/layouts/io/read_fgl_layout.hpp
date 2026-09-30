@@ -13,6 +13,7 @@
  * @brief Reader for gate-level layouts stored in the FGL file format.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #pragma once
@@ -110,12 +111,13 @@ class read_fgl_layout_impl
 
         // the topology selects the arrangement of the layout to create
         auto* const topology = layout->FirstChildElement("topology");
-        if (topology == nullptr || topology->GetText() == nullptr)
+        if ((topology == nullptr || topology->GetText() == nullptr) && !is_cartesian_layout_v<Lyt>)
         {
             throw fgl_parsing_error("Error parsing FGL file: no element 'topology' in 'layout'");
         }
 
-        const std::string                            topology_name = topology->GetText();
+        const std::string topology_name =
+            topology != nullptr && topology->GetText() != nullptr ? topology->GetText() : "cartesian";
         std::optional<fiction::layouts::arrangement> file_arrangement{};
         const auto                                   find_arrangement = [&topology_name](const std::string_view family)
         {

@@ -12,9 +12,11 @@
  * @file
  * @brief Tests for `fiction/technology/inml/topolinano_library.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "fiction/layouts/io/print_layout.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -26,6 +28,7 @@
 #include <fiction/types.hpp>
 
 #include <iostream>
+#include <stdexcept>
 #include <type_traits>
 
 using namespace fiction;
@@ -38,6 +41,18 @@ TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
     CHECK(std::is_same_v<topolinano_library::layout, inml::layout>);
     CHECK(!has_get_functional_implementations_v<topolinano_library>);
     CHECK(!has_get_gate_ports_v<topolinano_library>);
+}
+
+TEST_CASE("ToPoliNano rejects row-shifted layouts", "[inml-topolinano-library]")
+{
+    const auto                a = GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW);
+    shifted_cart_gate_clk_lyt lyt{a, {1, 1}};
+    const auto                x = lyt.create_pi("x", {0, 0});
+    const auto                y = lyt.create_pi("y", {1, 0});
+    lyt.create_and(x, y, {1, 1});
+
+    CHECK_THROWS_AS(topolinano_library::set_up_gate(lyt, {1, 1}), std::invalid_argument);
+    CHECK_THROWS_AS(topolinano_library::set_up_gate(lyt, {0, 0}), std::invalid_argument);
 }
 
 TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]")

@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #include <catch2/benchmark/catch_benchmark.hpp>
@@ -32,6 +33,7 @@
 #include <cstdint>
 
 using namespace fiction;
+using namespace fiction::layouts;
 using namespace fiction::physical_design;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
