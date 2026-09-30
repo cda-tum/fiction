@@ -5109,13 +5109,20 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage = R"doc(State that all copies of a layout share.)doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_dimension = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_dimension = R"doc(Highest possible position in the layout.)doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_hexagonal_layout_storage = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_hexagonal_layout_storage =
+R"doc(Creates the storage of a layout.
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_shift = R"doc()doc";
+Args:
+    ar: Highest possible position in the layout.
+    a: Arrangement of the shifted rows or columns.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_shift = R"doc(Arrangement of the shifted rows or columns.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_is_above =
 R"doc(Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
@@ -5623,6 +5630,53 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer =
+R"doc(Base class of the gate-level layout DOT drawers for layouts with
+shifted rows or columns. It draws each row or column in one rank and
+shifts every other one by an invisible node. The derived class chooses
+the rank separation and the node shape.
+
+Template Args:
+    Lyt: Gate-level layout type with shifted rows or columns.
+    ClockColors: Flag to toggle the drawing of clock colors instead of
+                 gate type colors.
+    DrawIndexes: Flag to toggle the drawing of node indices.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_additional_graph_attributes = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_enforce_topology = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_invisible_node =
+R"doc(Returns the name of the invisible node that shifts a row or column.
+
+Args:
+    i: Index of the row or column.
+
+Returns:
+    Node name.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_rank_separation =
+R"doc(Returns the DOT value of the `ranksep` graph attribute.
+
+Returns:
+    Separation of the ranks.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_shift_line =
+R"doc(Shifts a row or column by placing an invisible node in its rank and
+connecting the node to the neighboring rows or columns.
+
+Args:
+    lyt: Layout to draw.
+    index: Index of the row or column.
+    is_row: Whether `index` names a row. Otherwise, it names a column.
+    stream: Stream to write the DOT statements to.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage =
@@ -5758,21 +5812,9 @@ Template Args:
                  gate type colors.
     DrawIndexes: Flag to toggle the drawing of node indices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_additional_graph_attributes = R"doc()doc";
-
 static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_additional_node_attributes = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_enforce_same_hexagonal_column = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_enforce_same_hexagonal_row = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_enforce_topology = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_invisible_node = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_shift_column = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_shift_row = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_rank_separation = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer =
 R"doc(An extended gate-level layout DOT drawer for shifted Cartesian
@@ -5784,21 +5826,9 @@ Template Args:
                  gate type colors.
     DrawIndexes: Flag to toggle the drawing of node indices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_additional_graph_attributes = R"doc()doc";
-
 static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_additional_node_attributes = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_enforce_same_shifted_column = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_enforce_same_shifted_row = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_enforce_topology = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_invisible_node = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_shift_column = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_shift_row = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_rank_separation = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_io_print_cell_level_layout =
 R"doc(Writes a simplified 2D representation of a cell grid layout, i.e., a

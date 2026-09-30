@@ -358,6 +358,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `include/fiction/`. CTest case names gain the `test_` prefix accordingly
   - `read_fgl_layout` creates shifted Cartesian and hexagonal layouts with the arrangement stored in the file; reading into
     a layout with another arrangement throws `fgl_parsing_error`.
+  - **Breaking:** `additional_graph_attributes` and `additional_node_attributes` of the gate-level layout DOT drawers take the
+    layout as an argument. The shifted Cartesian and hexagonal drawers share one base class.
 
 - The `pyfiction` binding sources under `bindings/` mirror the C++ namespaces: each binding sits
   in the directory of its namespace under the name of the header it wraps, and every directory
