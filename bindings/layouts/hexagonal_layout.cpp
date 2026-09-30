@@ -17,6 +17,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
 #include <fiction/traits.hpp>
 
@@ -40,7 +41,7 @@ namespace pyfiction
 namespace detail
 {
 /**
- * Register one concrete topology.
+ * Register the layout class.
  * @tparam Lyt Concrete layout.
  * @param m Python module.
  * @param name Python class name.
@@ -54,9 +55,13 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
      * Hexagonal layout.
      */
     py::class_<Lyt>(m, name, DOC(fiction_hexagonal_layout_overridden))
-        .def(py::init<>(), DOC(fiction_layouts_hexagonal_layout_hexagonal_layout))
-        .def(py::init<const fiction::aspect_ratio<Lyt>&>(), py::arg("dimension"),
+        .def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
              DOC(fiction_layouts_hexagonal_layout_hexagonal_layout))
+        .def(py::init<fiction::layouts::arrangement, const fiction::aspect_ratio<Lyt>&>(), py::arg("arrangement"),
+             py::arg("dimension"), DOC(fiction_layouts_hexagonal_layout_hexagonal_layout))
+        .def(
+            "get_arrangement", [](const Lyt& lyt) { return lyt.get_arrangement(); },
+            DOC(fiction_layouts_hexagonal_layout_get_arrangement))
         .def(
             "coord",
             [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z) { return layout.coord(x, y, z); },
@@ -170,15 +175,12 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
 }  // namespace detail
 
 /**
- * Register supported hexagonal topologies.
+ * Register the hexagonal layout.
  * @param m Python module.
  */
 void hexagonal_layout(nanobind::module_& m)
 {
     detail::hexagonal_layout<py_hexagonal_layout>(m, "hexagonal_layout");
-    detail::hexagonal_layout<py_odd_row_hex_layout>(m, "odd_row_hex_layout");
-    detail::hexagonal_layout<py_odd_column_hex_layout>(m, "odd_column_hex_layout");
-    detail::hexagonal_layout<py_even_column_hex_layout>(m, "even_column_hex_layout");
 }
 
 }  // namespace pyfiction

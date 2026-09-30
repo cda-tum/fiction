@@ -19,6 +19,7 @@
 #include "fiction/layouts/io/print_layout.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/traits.hpp>
@@ -29,6 +30,7 @@
 
 using namespace fiction;
 using namespace fiction::inml;
+using namespace fiction::layouts;
 using namespace fiction::layouts::io;
 
 TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
@@ -40,7 +42,8 @@ TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
 
 TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]")
 {
-    const auto layout = blueprints::shifted_cart_and_or_inv_gate_layout<cart_odd_col_gate_clk_lyt>();
+    const auto layout =
+        blueprints::shifted_cart_and_or_inv_gate_layout<shifted_cart_gate_clk_lyt>(arrangement::ODD_COLUMN);
 
     print_gate_level_layout(std::cout, layout);
 

@@ -17,7 +17,9 @@
 
 #pragma once
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/networks/technology_network.hpp"
@@ -56,6 +58,11 @@ struct orthogonal_physical_design_params
      * Number of clock phases to use. 3 and 4 are supported.
      */
     layouts::clocking::num_clks number_of_clock_phases = layouts::clocking::num_clks::FOUR;
+    /**
+     * Arrangement of the shifted rows or columns of the created layout. Shifted Cartesian and hexagonal layouts require
+     * it, Cartesian layouts ignore it.
+     */
+    std::optional<layouts::arrangement> layout_arrangement = std::nullopt;
     /**
      * Callback that receives the progress of the gate placement.
      */
@@ -482,8 +489,9 @@ class orthogonal_impl
             });
 
         // instantiate the layout
-        Lyt layout{determine_layout_size<Lyt>(ctn, num_multi_output_nodes),
-                   layouts::clocking::twoddwave(ps.number_of_clock_phases)};
+        auto layout = layouts::make_gate_level_layout<Lyt>(ps.layout_arrangement,
+                                                           determine_layout_size<Lyt>(ctn, num_multi_output_nodes),
+                                                           layouts::clocking::twoddwave(ps.number_of_clock_phases));
 
         // reserve PI nodes without positions
         auto pi2node = reserve_input_nodes(layout, ctn.color_ntk);
@@ -686,6 +694,8 @@ class orthogonal_impl
  * @param ps Parameters.
  * @param pst Statistics.
  * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit.
+ * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and `ps.layout_arrangement` is
+ * empty.
  */
 template <typename Lyt, typename Ntk>
 Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
@@ -695,6 +705,8 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
+
+    layouts::require_arrangement<Lyt>(ps.layout_arrangement);
 
     // check for input degree
     if (networks::has_high_degree_fanin_nodes(ntk, 2))

@@ -18,7 +18,6 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
-#include "fiction/traits.hpp"
 
 #include <phmap.h>
 
@@ -637,39 +636,6 @@ class unsupported_scheme_exception : public std::exception
     }
 
     return std::nullopt;
-}
-/**
- * Returns a clocking scheme by name for layouts of type `Lyt`. `2DDWAVEHEX` takes the hexagonal arrangement of `Lyt`.
- * See the non-template overload for the accepted names.
- *
- * @tparam Lyt Layout type.
- * @param scheme_name Name of the desired clocking scheme.
- * @return Clocking scheme that matches `scheme_name`, or `std::nullopt` if no clocking scheme by that name exists.
- */
-template <typename Lyt>
-[[nodiscard]] std::optional<scheme> get_scheme(const std::string_view scheme_name)
-{
-    if constexpr (is_hexagonal_layout_v<Lyt>)
-    {
-        if constexpr (has_odd_row_hex_arrangement_v<Lyt>)
-        {
-            return get_scheme(scheme_name, arrangement::ODD_ROW);
-        }
-        else if constexpr (has_even_row_hex_arrangement_v<Lyt>)
-        {
-            return get_scheme(scheme_name, arrangement::EVEN_ROW);
-        }
-        else if constexpr (has_odd_column_hex_arrangement_v<Lyt>)
-        {
-            return get_scheme(scheme_name, arrangement::ODD_COLUMN);
-        }
-        else if constexpr (has_even_column_hex_arrangement_v<Lyt>)
-        {
-            return get_scheme(scheme_name, arrangement::EVEN_COLUMN);
-        }
-    }
-
-    return get_scheme(scheme_name, std::nullopt);
 }
 
 }  // namespace fiction::layouts::clocking

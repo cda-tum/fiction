@@ -17,6 +17,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/physical_design/surface_analysis.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
@@ -32,6 +33,7 @@
 
 using namespace fiction;
 using namespace fiction::fcn;
+using namespace fiction::layouts;
 using namespace fiction::physical_design;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
@@ -225,9 +227,9 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 
 TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analysis]")
 {
-    static const hex_even_col_gate_clk_lyt gate_lyt{
-        aspect_ratio<hex_even_col_gate_clk_lyt>{0, 0}};  // 1 x 1 tiles of size 60 x 46 cells each
-    static const layout cell_lyt{};                      // makes for exactly one gate of the Bestagon library
+    static const hex_gate_clk_lyt gate_lyt{
+        arrangement::EVEN_COLUMN, aspect_ratio<hex_gate_clk_lyt>{0, 0}};  // 1 x 1 tiles of size 60 x 46 cells each
+    static const layout cell_lyt{};  // makes for exactly one gate of the Bestagon library
 
     layout defect_layout{cell_lyt};
 

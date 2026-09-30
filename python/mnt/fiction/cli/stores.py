@@ -17,20 +17,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Generic, TypeAlias, TypeVar
 
-from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
+from mnt.fiction.cli.topologies import DISPLAY_NAMES, topology_name
 from mnt.pyfiction.fcn import area
 from mnt.pyfiction.inml import inml_layout
-from mnt.pyfiction.layouts import (
-    cartesian_gate_layout,
-    even_column_cartesian_gate_layout,
-    even_column_hex_gate_layout,
-    even_row_cartesian_gate_layout,
-    hexagonal_gate_layout,
-    odd_column_hex_gate_layout,
-    odd_row_cartesian_gate_layout,
-    odd_row_hex_gate_layout,
-    shifted_cartesian_gate_layout,
-)
+from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
 from mnt.pyfiction.mol_qca import mol_qca_layout
 from mnt.pyfiction.networks import aig_network, get_name, mig_network, technology_network, xag_network
 from mnt.pyfiction.qca import qca_layout
@@ -47,18 +37,8 @@ if TYPE_CHECKING:
 
 Network: TypeAlias = aig_network | xag_network | mig_network | technology_network
 """Logic network types held by the shell."""
-GateLayout: TypeAlias = (
-    cartesian_gate_layout
-    | shifted_cartesian_gate_layout
-    | hexagonal_gate_layout
-    | odd_row_cartesian_gate_layout
-    | even_row_cartesian_gate_layout
-    | even_column_cartesian_gate_layout
-    | odd_row_hex_gate_layout
-    | odd_column_hex_gate_layout
-    | even_column_hex_gate_layout
-)
-"""The nine supported gate-level layout topologies."""
+GateLayout: TypeAlias = cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout
+"""The supported gate-level layout families; each holds one of four arrangements unless Cartesian."""
 CellLayout: TypeAlias = qca_layout | inml_layout | mol_qca_layout | sidb_layout
 """Cell-level layout types held by the shell."""
 
@@ -273,7 +253,7 @@ def describe_gate_layout(layout: GateLayout, *, timing: bool = False) -> dict[st
     """
     description: dict[str, object] = {
         "name": element_name(layout),
-        "topology": TOPOLOGIES[type(layout)],
+        "topology": topology_name(layout),
         "clocking": layout.get_clocking_scheme_name(),
         "size": {"x": layout.x() + 1, "y": layout.y() + 1, "area": layout.area()},
         "inputs": layout.num_pis(),

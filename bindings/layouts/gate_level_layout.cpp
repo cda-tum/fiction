@@ -18,6 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
@@ -26,6 +27,7 @@
 #include <fmt/format.h>
 
 #include <cstdint>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -60,30 +62,59 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout", topology).c_str(),
-                                 DOC(fiction_layouts_gate_level_layout))
-        .def(py::init<>(), DOC(fiction_layouts_gate_level_layout_gate_level_layout))
-        .def(py::init<const fiction::aspect_ratio<GateLyt>&>(), py::arg("dimension"),
-             DOC(fiction_layouts_gate_level_layout_gate_level_layout))
-        .def(
-            "__init__",
-            [](py::pointer_and_handle<GateLyt> self, const fiction::aspect_ratio<GateLyt>& dimension,
-               const std::string& scheme_name, const std::string& layout_name)
-            {
-                if (const auto scheme = fiction::layouts::clocking::get_scheme<GateLyt>(scheme_name);
-                    scheme.has_value())
+    py::class_<GateLyt, LytBase> cls(m, fmt::format("{}_gate_layout", topology).c_str(),
+                                     DOC(fiction_layouts_gate_level_layout));
+
+    if constexpr (fiction::is_cartesian_layout_v<GateLyt>)
+    {
+        cls.def(py::init<>(), DOC(fiction_layouts_gate_level_layout_gate_level_layout))
+            .def(py::init<const fiction::aspect_ratio<GateLyt>&>(), py::arg("dimension"),
+                 DOC(fiction_layouts_gate_level_layout_gate_level_layout))
+            .def(
+                "__init__",
+                [](py::pointer_and_handle<GateLyt> self, const fiction::aspect_ratio<GateLyt>& dimension,
+                   const std::string& scheme_name, const std::string& layout_name)
                 {
-                    new (self.p) GateLyt{dimension, *scheme, layout_name};
-                    return;
-                }
+                    if (const auto scheme = fiction::layouts::clocking::get_scheme(scheme_name); scheme.has_value())
+                    {
+                        new (self.p) GateLyt{dimension, *scheme, layout_name};
+                        return;
+                    }
 
-                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-            },
-            py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
-            DOC(fiction_layouts_gate_level_layout_gate_level_layout_2))
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                },
+                py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
+                DOC(fiction_layouts_gate_level_layout_gate_level_layout_2));
+    }
+    else
+    {
+        cls.def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
+                DOC(fiction_layouts_gate_level_layout_gate_level_layout))
+            .def(py::init<fiction::layouts::arrangement, const fiction::aspect_ratio<GateLyt>&>(),
+                 py::arg("arrangement"), py::arg("dimension"), DOC(fiction_layouts_gate_level_layout_gate_level_layout))
+            .def(
+                "__init__",
+                [](py::pointer_and_handle<GateLyt> self, const fiction::layouts::arrangement a,
+                   const fiction::aspect_ratio<GateLyt>& dimension, const std::string& scheme_name,
+                   const std::string& layout_name)
+                {
+                    // only hexagonal layouts take their arrangement into account for clocking scheme lookup
+                    if (const auto scheme = fiction::layouts::clocking::get_scheme(
+                            scheme_name, fiction::is_hexagonal_layout_v<GateLyt> ? std::optional{a} : std::nullopt);
+                        scheme.has_value())
+                    {
+                        new (self.p) GateLyt{a, dimension, *scheme, layout_name};
+                        return;
+                    }
 
-        .def("assign_clock_number", &GateLyt::assign_clock_number, py::arg("cz"), py::arg("cn"),
-             DOC(fiction_layouts_gate_level_layout_assign_clock_number))
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                },
+                py::arg("arrangement"), py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave",
+                py::arg("layout_name") = "", DOC(fiction_layouts_gate_level_layout_gate_level_layout_2));
+    }
+
+    cls.def("assign_clock_number", &GateLyt::assign_clock_number, py::arg("cz"), py::arg("cn"),
+            DOC(fiction_layouts_gate_level_layout_assign_clock_number))
         .def("get_clock_number", &GateLyt::get_clock_number, py::arg("cz"),
              DOC(fiction_layouts_gate_level_layout_get_clock_number))
         .def("num_clocks", &GateLyt::num_clocks, DOC(fiction_layouts_gate_level_layout_num_clocks))
@@ -93,8 +124,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         .def("is_clocking_scheme", &GateLyt::is_clocking_scheme, py::arg("name"),
              DOC(fiction_layouts_gate_level_layout_is_clocking_scheme))
         .def(
-            "get_clocking_scheme_name",
-            [](const GateLyt& lyt) { return lyt.get_clocking_scheme().name(); },
+            "get_clocking_scheme_name", [](const GateLyt& lyt) { return lyt.get_clocking_scheme().name(); },
             "Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.")
 
         .def("is_incoming_clocked", &GateLyt::is_incoming_clocked, py::arg("cz1"), py::arg("cz2"),
@@ -115,7 +145,20 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             "replace_clocking_scheme",
             [](GateLyt& lyt, const std::string& name)
             {
-                if (const auto scheme = fiction::layouts::clocking::get_scheme<GateLyt>(name); scheme)
+                if (const auto scheme = fiction::layouts::clocking::get_scheme(
+                        name,
+                        [&lyt]() -> std::optional<fiction::layouts::arrangement>
+                        {
+                            if constexpr (fiction::is_hexagonal_layout_v<GateLyt>)
+                            {
+                                return lyt.get_arrangement();
+                            }
+                            else
+                            {
+                                return std::nullopt;
+                            }
+                        }());
+                    scheme)
                 {
                     lyt.replace_clocking_scheme(*scheme);
                 }
@@ -125,7 +168,8 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
                 }
             },
             py::arg("name"),
-            "Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are discarded; synchronization elements are kept. Raises ValueError for an unknown name.")
+            "Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are "
+            "discarded; synchronization elements are kept. Raises ValueError for an unknown name.")
         .def("obstruct_coordinate", &GateLyt::obstruct_coordinate, py::arg("c"),
              DOC(fiction_layouts_gate_level_layout_obstruct_coordinate))
         .def("obstruct_connection", &GateLyt::obstruct_connection, py::arg("src"), py::arg("tgt"),
@@ -407,7 +451,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             "Returns a string representation of the layout.")
 
         .def("assign_synchronization_element", &GateLyt::assign_synchronization_element, py::arg("coordinate"),
-            py::arg("delay"), DOC(fiction_layouts_gate_level_layout_assign_synchronization_element))
+             py::arg("delay"), DOC(fiction_layouts_gate_level_layout_assign_synchronization_element))
         .def("is_synchronization_element", &GateLyt::is_synchronization_element, py::arg("coordinate"),
              DOC(fiction_layouts_gate_level_layout_is_synchronization_element))
         .def("get_synchronization_element", &GateLyt::get_synchronization_element, py::arg("coordinate"),
@@ -431,13 +475,6 @@ void gate_level_layout(nanobind::module_& m)
      * Gate-level clocked hexagonal layout.
      */
     detail::gate_level_layout<py_hexagonal_layout, py_hexagonal_gate_layout>(m, "hexagonal");
-    detail::gate_level_layout<py_odd_row_cartesian_layout, py_odd_row_cartesian_gate_layout>(m, "odd_row_cartesian");
-    detail::gate_level_layout<py_even_row_cartesian_layout, py_even_row_cartesian_gate_layout>(m, "even_row_cartesian");
-    detail::gate_level_layout<py_even_column_cartesian_layout, py_even_column_cartesian_gate_layout>(
-        m, "even_column_cartesian");
-    detail::gate_level_layout<py_odd_row_hex_layout, py_odd_row_hex_gate_layout>(m, "odd_row_hex");
-    detail::gate_level_layout<py_odd_column_hex_layout, py_odd_column_hex_gate_layout>(m, "odd_column_hex");
-    detail::gate_level_layout<py_even_column_hex_layout, py_even_column_hex_gate_layout>(m, "even_column_hex");
 }
 
 }  // namespace pyfiction

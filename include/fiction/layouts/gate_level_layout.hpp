@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/clocking_state.hpp"
 #include "fiction/layouts/obstructions.hpp"
@@ -37,6 +38,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -195,7 +197,9 @@ class gate_level_layout : public CoordinateLayout
      * @param ar Highest possible position in the layout.
      * @param name Layout name.
      */
-    explicit gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar = {}, const std::string& name = {}) :
+    explicit gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar = {}, const std::string& name = {})
+        requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::aspect_ratio&>
+            :
             CoordinateLayout(ar),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
@@ -214,7 +218,9 @@ class gate_level_layout : public CoordinateLayout
      * @param name Layout name.
      */
     gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking::scheme& scheme,
-                      const std::string& name = {}) :
+                      const std::string& name = {})
+        requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::aspect_ratio&>
+            :
             CoordinateLayout(ar),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
@@ -222,6 +228,49 @@ class gate_level_layout : public CoordinateLayout
         replace_clocking_scheme(scheme);
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
 
+        initialize_truth_table_cache();
+        strg->data.layout_name = name;
+    }
+    /**
+     * Standard constructor for coordinate layouts with shifted rows or columns. Creates a named gate-level layout of
+     * the given arrangement and aspect ratio. To this end, it calls `CoordinateLayout`'s standard constructor.
+     *
+     * @param a Arrangement of the shifted rows or columns.
+     * @param ar Highest possible position in the layout.
+     * @param name Layout name.
+     */
+    explicit gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::aspect_ratio& ar = {},
+                               const std::string& name = {})
+        requires std::constructible_from<CoordinateLayout, const layouts::arrangement,
+                                         const typename CoordinateLayout::aspect_ratio&>
+            :
+            CoordinateLayout(a, ar),
+            strg{std::make_shared<gate_level_layout_storage>()},
+            evnts{std::make_shared<typename event_storage::element_type>()}
+    {
+        initialize_truth_table_cache();
+        strg->data.layout_name = name;
+    }
+    /**
+     * Standard constructor for coordinate layouts with shifted rows or columns. Creates a gate-level layout of the
+     * given arrangement and aspect ratio and clocks it via the given clocking scheme. To this end, it calls
+     * `CoordinateLayout`'s standard constructor.
+     *
+     * @param a Arrangement of the shifted rows or columns.
+     * @param ar Highest possible position in the layout.
+     * @param scheme Clocking scheme to apply to this layout.
+     * @param name Layout name.
+     */
+    gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::aspect_ratio& ar,
+                      const clocking::scheme& scheme, const std::string& name = {})
+        requires std::constructible_from<CoordinateLayout, const layouts::arrangement,
+                                         const typename CoordinateLayout::aspect_ratio&>
+            :
+            CoordinateLayout(a, ar),
+            strg{std::make_shared<gate_level_layout_storage>()},
+            evnts{std::make_shared<typename event_storage::element_type>()}
+    {
+        replace_clocking_scheme(scheme);
         initialize_truth_table_cache();
         strg->data.layout_name = name;
     }

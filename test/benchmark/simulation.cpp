@@ -19,6 +19,7 @@
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
@@ -288,7 +289,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
     // number of non-terminating segments of a diagonal wire
     const auto create_diagonal_wire_with_n_non_terminating_segments = [](const uint64_t n)
     {
-        hex_odd_row_gate_clk_lyt lyt{{(n + 1) / 2, n + 1}};
+        hex_gate_clk_lyt lyt{arrangement::ODD_ROW, {(n + 1) / 2, n + 1}};
 
         uint64_t signal = lyt.create_pi("a", {0, 0});
 
@@ -302,7 +303,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
         return lyt;
     };
 
-    const auto cl_4_seg = (apply_gate_library<bestagon_library, hex_odd_row_gate_clk_lyt>(
+    const auto cl_4_seg = (apply_gate_library<bestagon_library, hex_gate_clk_lyt>(
         create_diagonal_wire_with_n_non_terminating_segments(2)));
 
     BENCHMARK("4 Segment Diagonal Bestagon Wire (multi-threaded)")
@@ -311,7 +312,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
         return clustercomplete(cl_4_seg, sim_params);
     };
 
-    const auto cl_3_seg = (apply_gate_library<bestagon_library, hex_odd_row_gate_clk_lyt>(
+    const auto cl_3_seg = (apply_gate_library<bestagon_library, hex_gate_clk_lyt>(
         create_diagonal_wire_with_n_non_terminating_segments(1)));
 
     BENCHMARK("3 Segment Diagonal Bestagon Wire (single-threaded)")

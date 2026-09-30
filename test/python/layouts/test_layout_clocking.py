@@ -8,19 +8,28 @@
 
 from __future__ import annotations
 
+from functools import partial
 from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import (
+    arrangement,
+    cartesian_gate_layout,
+    hexagonal_gate_layout,
+    shifted_cartesian_gate_layout,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
 CLOCKED_LAYOUTS = [
     pytest.param(lambda: cartesian_gate_layout((2, 2, 0), "2DDWave"), id="cartesian_gate_layout"),
-    pytest.param(lambda: shifted_cartesian_gate_layout((2, 2, 0), "2DDWave"), id="shifted_cartesian_gate_layout"),
-    pytest.param(lambda: hexagonal_gate_layout((2, 2, 0), "2DDWave"), id="hexagonal_gate_layout"),
+    pytest.param(
+        lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 2, 0), "2DDWave"),
+        id="shifted_cartesian_gate_layout",
+    ),
+    pytest.param(lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 0), "2DDWave"), id="hexagonal_gate_layout"),
 ]
 
 
@@ -57,8 +66,10 @@ def test_clock_zone_iteration(make_layout):
     "layout",
     [
         pytest.param(cartesian_gate_layout, id="cartesian_gate_layout"),
-        pytest.param(shifted_cartesian_gate_layout, id="shifted_cartesian_gate_layout"),
-        pytest.param(hexagonal_gate_layout, id="hexagonal_gate_layout"),
+        pytest.param(
+            partial(shifted_cartesian_gate_layout, arrangement.ODD_COLUMN), id="shifted_cartesian_gate_layout"
+        ),
+        pytest.param(partial(hexagonal_gate_layout, arrangement.EVEN_ROW), id="hexagonal_gate_layout"),
     ],
 )
 def test_fetch_clocking_scheme(layout):

@@ -18,24 +18,41 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_utils.hpp>
 #include <fiction/technology/qca/layout.hpp>
+#include <fiction/types.hpp>
+
+#include <optional>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
 
 TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesian_layout<coords::offset>),
-                   (hexagonal_layout<coords::offset, odd_row_hex>), (hexagonal_layout<coords::offset, even_row_hex>),
-                   (hexagonal_layout<coords::offset, odd_column_hex>),
-                   (hexagonal_layout<coords::offset, even_column_hex>))
+                   (hexagonal_layout<coords::offset>))
 {
-    TestType lyt{{4, 4}};
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+
+    const auto lyt = [&a]()
+    {
+        if constexpr (is_cartesian_layout_v<TestType>)
+        {
+            return TestType{{4, 4}};
+        }
+        else
+        {
+            return TestType{a, {4, 4}};
+        }
+    }();
 
     lyt.foreach_coordinate(
         [&lyt](const auto& c)
@@ -55,6 +72,31 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
             CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH_WEST}) ==
                   lyt.north_west(c));
         });
+}
+
+TEST_CASE("Gate-level layouts are created with the required arrangement", "[layout-utils]")
+{
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+
+    SECTION("Cartesian layouts ignore the arrangement")
+    {
+        CHECK_NOTHROW(make_gate_level_layout<cart_gate_clk_lyt>(std::nullopt, {2, 2}, clocking::twoddwave()));
+        CHECK_NOTHROW(make_gate_level_layout<cart_gate_clk_lyt>(a, {2, 2}, clocking::twoddwave()));
+    }
+    SECTION("shifted Cartesian and hexagonal layouts take the arrangement")
+    {
+        CHECK(make_gate_level_layout<shifted_cart_gate_clk_lyt>(a, {2, 2}, clocking::twoddwave()).get_arrangement() ==
+              a);
+        CHECK(make_gate_level_layout<hex_gate_clk_lyt>(a, {2, 2}, clocking::row()).get_arrangement() == a);
+    }
+    SECTION("shifted Cartesian and hexagonal layouts reject a missing arrangement")
+    {
+        CHECK_THROWS_AS(make_gate_level_layout<shifted_cart_gate_clk_lyt>(std::nullopt, {2, 2}, clocking::twoddwave()),
+                        std::invalid_argument);
+        CHECK_THROWS_AS(make_gate_level_layout<hex_gate_clk_lyt>(std::nullopt, {2, 2}, clocking::row()),
+                        std::invalid_argument);
+    }
 }
 
 TEST_CASE("Generate random coords::offset coordinate", "[layout-utils]")

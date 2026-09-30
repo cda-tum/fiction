@@ -26,6 +26,7 @@ namespace pyfiction
  * @param m Python coordinate submodule.
  */
 void register_layouts_coords(nanobind::module_& m);
+void arrangement(nanobind::module_& m);
 void cartesian_layout(nanobind::module_& m);
 void shifted_cartesian_layout(nanobind::module_& m);
 void hexagonal_layout(nanobind::module_& m);
@@ -54,6 +55,7 @@ NB_MODULE(layouts, m)
 
     auto coords = pyfiction::def_submodule(m, "coords", "Layout coordinates and their area and volume functions.");
     pyfiction::register_layouts_coords(coords);
+    pyfiction::arrangement(m);
     pyfiction::cartesian_layout(m);
     pyfiction::shifted_cartesian_layout(m);
     pyfiction::hexagonal_layout(m);

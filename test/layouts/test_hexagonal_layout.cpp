@@ -16,7 +16,9 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/traits.hpp>
@@ -54,63 +56,28 @@ void check_common_traits()
 
 TEST_CASE("Hexagonal layout traits", "[hexagonal-layout]")
 {
-    SECTION("odd row")
-    {
-        using layout = hexagonal_layout<coords::offset, odd_row_hex>;
+    using layout = hexagonal_layout<>;
 
-        CHECK(has_pointy_top_hex_orientation_v<layout>);
-        CHECK(!has_flat_top_hex_orientation_v<layout>);
-        CHECK(has_odd_row_hex_arrangement_v<layout>);
-        CHECK(!has_even_row_hex_arrangement_v<layout>);
-        CHECK(!has_odd_column_hex_arrangement_v<layout>);
-        CHECK(!has_even_column_hex_arrangement_v<layout>);
+    CHECK(!is_shifted_cartesian_layout_v<layout>);
 
-        check_common_traits<layout>();
-    }
-    SECTION("even row")
-    {
-        using layout = hexagonal_layout<coords::offset, even_row_hex>;
+    check_common_traits<layout>();
+}
 
-        CHECK(has_pointy_top_hex_orientation_v<layout>);
-        CHECK(!has_flat_top_hex_orientation_v<layout>);
-        CHECK(!has_odd_row_hex_arrangement_v<layout>);
-        CHECK(has_even_row_hex_arrangement_v<layout>);
-        CHECK(!has_odd_column_hex_arrangement_v<layout>);
-        CHECK(!has_even_column_hex_arrangement_v<layout>);
+TEST_CASE("Hexagonal layout arrangement", "[hexagonal-layout]")
+{
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-        check_common_traits<layout>();
-    }
-    SECTION("odd column")
-    {
-        using layout = hexagonal_layout<coords::offset, odd_column_hex>;
+    const hexagonal_layout<> lyt{a, {3, 3}};
 
-        CHECK(!has_pointy_top_hex_orientation_v<layout>);
-        CHECK(has_flat_top_hex_orientation_v<layout>);
-        CHECK(!has_odd_row_hex_arrangement_v<layout>);
-        CHECK(!has_even_row_hex_arrangement_v<layout>);
-        CHECK(has_odd_column_hex_arrangement_v<layout>);
-        CHECK(!has_even_column_hex_arrangement_v<layout>);
-
-        check_common_traits<layout>();
-    }
-    SECTION("even column")
-    {
-        using layout = hexagonal_layout<coords::offset, even_column_hex>;
-
-        CHECK(!has_pointy_top_hex_orientation_v<layout>);
-        CHECK(has_flat_top_hex_orientation_v<layout>);
-        CHECK(!has_odd_row_hex_arrangement_v<layout>);
-        CHECK(!has_even_row_hex_arrangement_v<layout>);
-        CHECK(!has_odd_column_hex_arrangement_v<layout>);
-        CHECK(has_even_column_hex_arrangement_v<layout>);
-
-        check_common_traits<layout>();
-    }
+    CHECK(lyt.get_arrangement() == a);
+    CHECK(lyt.clone().get_arrangement() == a);
+    CHECK(hexagonal_layout<>{lyt}.get_arrangement() == a);
 }
 
 TEST_CASE("Deep copy hexagonal layout", "[hexagonal-layout]")
 {
-    const hexagonal_layout original{{5, 5, 0}};
+    const hexagonal_layout<> original{arrangement::EVEN_ROW, {5, 5, 0}};
 
     auto copy = original.clone();
 
@@ -126,9 +93,9 @@ TEST_CASE("Deep copy hexagonal layout", "[hexagonal-layout]")
 }
 
 template <typename Lyt>
-void check_identity_conversion()
+void check_identity_conversion(const arrangement a)
 {
-    Lyt layout{aspect_ratio<Lyt>{10, 10}};
+    Lyt layout{a, aspect_ratio<Lyt>{10, 10}};
 
     layout.foreach_coordinate([&layout](const auto& coord)
                               { CHECK(layout.to_offset_coordinate(layout.to_cube_coordinate(coord)) == coord); });
@@ -138,9 +105,10 @@ TEST_CASE("Coordinate creation", "[hexagonal-layout]")
 {
     SECTION("odd row")
     {
-        using layout = hexagonal_layout<coords::offset, odd_row_hex>;
+        using layout       = hexagonal_layout<>;
+        constexpr auto arr = arrangement::ODD_ROW;
 
-        const layout lyt{{3, 3}};
+        const layout lyt{arr, {3, 3}};
 
         CHECK(lyt.coord(0, 0, 0) == coords::offset{0, 0, 0});
         CHECK(lyt.coord(0, 0, 1) == coords::offset{0, 0, 1});
@@ -152,9 +120,10 @@ TEST_CASE("Coordinate creation", "[hexagonal-layout]")
     }
     SECTION("even row")
     {
-        using layout = hexagonal_layout<coords::offset, even_row_hex>;
+        using layout       = hexagonal_layout<>;
+        constexpr auto arr = arrangement::EVEN_ROW;
 
-        const layout lyt{{3, 3}};
+        const layout lyt{arr, {3, 3}};
 
         CHECK(lyt.coord(0, 0, 0) == coords::offset{0, 0, 0});
         CHECK(lyt.coord(0, 0, 1) == coords::offset{0, 0, 1});
@@ -166,9 +135,10 @@ TEST_CASE("Coordinate creation", "[hexagonal-layout]")
     }
     SECTION("odd column")
     {
-        using layout = hexagonal_layout<coords::offset, odd_column_hex>;
+        using layout       = hexagonal_layout<>;
+        constexpr auto arr = arrangement::ODD_COLUMN;
 
-        const layout lyt{{3, 3}};
+        const layout lyt{arr, {3, 3}};
 
         CHECK(lyt.coord(0, 0, 0) == coords::offset{0, 0, 0});
         CHECK(lyt.coord(0, 0, 1) == coords::offset{0, 0, 1});
@@ -180,9 +150,10 @@ TEST_CASE("Coordinate creation", "[hexagonal-layout]")
     }
     SECTION("even column")
     {
-        using layout = hexagonal_layout<coords::offset, even_column_hex>;
+        using layout       = hexagonal_layout<>;
+        constexpr auto arr = arrangement::EVEN_COLUMN;
 
-        const layout lyt{{3, 3}};
+        const layout lyt{arr, {3, 3}};
 
         CHECK(lyt.coord(0, 0, 0) == coords::offset{0, 0, 0});
         CHECK(lyt.coord(0, 0, 1) == coords::offset{0, 0, 1});
@@ -198,10 +169,11 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
 {
     SECTION("odd row")
     {
-        using layout = hexagonal_layout<coords::offset, odd_row_hex>;
-        check_identity_conversion<layout>();
+        using layout       = hexagonal_layout<>;
+        constexpr auto arr = arrangement::ODD_ROW;
+        check_identity_conversion<layout>(arr);
 
-        const layout lyt{{3, 3}};
+        const layout lyt{arr, {3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
         CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
@@ -212,10 +184,11 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
     }
     SECTION("even row")
     {
-        using layout = hexagonal_layout<coords::offset, even_row_hex>;
-        check_identity_conversion<layout>();
+        using layout       = hexagonal_layout<>;
+        constexpr auto arr = arrangement::EVEN_ROW;
+        check_identity_conversion<layout>(arr);
 
-        const layout lyt{{3, 3}};
+        const layout lyt{arr, {3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
         CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
@@ -226,10 +199,11 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
     }
     SECTION("odd column")
     {
-        using layout = hexagonal_layout<coords::offset, odd_column_hex>;
-        check_identity_conversion<layout>();
+        using layout       = hexagonal_layout<>;
+        constexpr auto arr = arrangement::ODD_COLUMN;
+        check_identity_conversion<layout>(arr);
 
-        const layout lyt{{3, 3}};
+        const layout lyt{arr, {3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
         CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
@@ -240,10 +214,11 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
     }
     SECTION("even column")
     {
-        using layout = hexagonal_layout<coords::offset, even_column_hex>;
-        check_identity_conversion<layout>();
+        using layout       = hexagonal_layout<>;
+        constexpr auto arr = arrangement::EVEN_COLUMN;
+        check_identity_conversion<layout>(arr);
 
-        const layout lyt{{3, 3}};
+        const layout lyt{arr, {3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
         CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, 0, -1});
@@ -255,11 +230,11 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
 }
 
 template <typename Lyt>
-void check_visited_coordinates()
+void check_visited_coordinates(const arrangement a)
 {
     aspect_ratio<Lyt> ar{9, 9, 1};
 
-    Lyt layout{ar};
+    Lyt layout{a, ar};
 
     std::set<coordinate<Lyt>> visited{};
 
@@ -349,22 +324,18 @@ void check_visited_coordinates()
 
 TEST_CASE("Hexagonal coordinate iteration", "[hexagonal-layout]")
 {
-    using odd_row_layout     = hexagonal_layout<coords::offset, odd_row_hex>;
-    using even_row_layout    = hexagonal_layout<coords::offset, even_row_hex>;
-    using odd_column_layout  = hexagonal_layout<coords::offset, odd_column_hex>;
-    using even_column_layout = hexagonal_layout<coords::offset, even_column_hex>;
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-    check_visited_coordinates<odd_row_layout>();
-    check_visited_coordinates<even_row_layout>();
-    check_visited_coordinates<odd_column_layout>();
-    check_visited_coordinates<even_column_layout>();
+    check_visited_coordinates<hexagonal_layout<>>(a);
 }
 
 TEST_CASE("Cardinal and ordinal operations: odd row", "[hexagonal-layout]")
 {
-    using layout = hexagonal_layout<coords::offset, odd_row_hex>;
+    using layout       = hexagonal_layout<>;
+    constexpr auto arr = arrangement::ODD_ROW;
 
-    const layout lyt{{3, 3, 1}};
+    const layout lyt{arr, {3, 3, 1}};
 
     const coordinate<layout> c{2, 2};
     const coordinate<layout> ac{2, 2, 1};
@@ -433,9 +404,10 @@ TEST_CASE("Cardinal and ordinal operations: odd row", "[hexagonal-layout]")
 
 TEST_CASE("Cardinal and ordinal operations: even row", "[hexagonal-layout]")
 {
-    using layout = hexagonal_layout<coords::offset, even_row_hex>;
+    using layout       = hexagonal_layout<>;
+    constexpr auto arr = arrangement::EVEN_ROW;
 
-    const layout lyt{{3, 3, 1}};
+    const layout lyt{arr, {3, 3, 1}};
 
     const coordinate<layout> c{2, 2};
     const coordinate<layout> ac{2, 2, 1};
@@ -504,9 +476,10 @@ TEST_CASE("Cardinal and ordinal operations: even row", "[hexagonal-layout]")
 
 TEST_CASE("Cardinal and ordinal operations: odd column", "[hexagonal-layout]")
 {
-    using layout = hexagonal_layout<coords::offset, odd_column_hex>;
+    using layout       = hexagonal_layout<>;
+    constexpr auto arr = arrangement::ODD_COLUMN;
 
-    const layout lyt{{3, 3, 1}};
+    const layout lyt{arr, {3, 3, 1}};
 
     const coordinate<layout> c{2, 2};
     const coordinate<layout> ac{2, 2, 1};
@@ -575,9 +548,10 @@ TEST_CASE("Cardinal and ordinal operations: odd column", "[hexagonal-layout]")
 
 TEST_CASE("Cardinal and ordinal operations: even column", "[hexagonal-layout]")
 {
-    using layout = hexagonal_layout<coords::offset, even_column_hex>;
+    using layout       = hexagonal_layout<>;
+    constexpr auto arr = arrangement::EVEN_COLUMN;
 
-    const layout lyt{{3, 3, 1}};
+    const layout lyt{arr, {3, 3, 1}};
 
     const coordinate<layout> c{2, 2};
     const coordinate<layout> ac{2, 2, 1};
@@ -648,9 +622,10 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
 {
     SECTION("odd row")
     {
-        using layout = hexagonal_layout<coords::offset, odd_row_hex>;
+        using layout       = hexagonal_layout<>;
+        constexpr auto arr = arrangement::ODD_ROW;
 
-        const layout lyt{{2, 2}};
+        const layout lyt{arr, {2, 2}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
         const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
@@ -669,9 +644,10 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     }
     SECTION("even row")
     {
-        using layout = hexagonal_layout<coords::offset, even_row_hex>;
+        using layout       = hexagonal_layout<>;
+        constexpr auto arr = arrangement::EVEN_ROW;
 
-        const layout lyt{{2, 2}};
+        const layout lyt{arr, {2, 2}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
         const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
@@ -690,9 +666,10 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     }
     SECTION("odd column")
     {
-        using layout = hexagonal_layout<coords::offset, odd_column_hex>;
+        using layout       = hexagonal_layout<>;
+        constexpr auto arr = arrangement::ODD_COLUMN;
 
-        const layout lyt{{2, 2}};
+        const layout lyt{arr, {2, 2}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
         const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
@@ -711,9 +688,10 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     }
     SECTION("even column")
     {
-        using layout = hexagonal_layout<coords::offset, even_column_hex>;
+        using layout       = hexagonal_layout<>;
+        constexpr auto arr = arrangement::EVEN_COLUMN;
 
-        const layout lyt{{2, 2}};
+        const layout lyt{arr, {2, 2}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
         const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};

@@ -1586,13 +1586,11 @@ TEST_CASE("4-phase ESR", "[clocking-scheme]")
 
 TEST_CASE("Clocking lookup", "[clocking-scheme]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
-
     auto check = [](const std::vector<std::string>& vec, const auto& name)
     {
         for (const auto& n : vec)
         {
-            auto cs = clocking::get_scheme<clk_lyt>(n);
+            auto cs = clocking::get_scheme(n);
             REQUIRE(cs.has_value());
             CHECK(cs->name() == name);
         }
@@ -1613,30 +1611,28 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
 
     check({"bancs3", "BANCS3"}, clocking::BANCS_NAME);
 
-    CHECK(clocking::get_scheme<clk_lyt>("2DDWAVEHEX3") == clocking::twoddwave(clocking::num_clks::THREE));
-    CHECK(clocking::get_scheme<clk_lyt>("BANCS3") == clocking::bancs());
+    CHECK(clocking::get_scheme("2DDWAVEHEX3") == clocking::twoddwave(clocking::num_clks::THREE));
+    CHECK(clocking::get_scheme("BANCS3") == clocking::bancs());
 
-    CHECK(!clocking::get_scheme<clk_lyt>("").has_value());
-    CHECK(!clocking::get_scheme<clk_lyt>("Column").has_value());
-    CHECK(!clocking::get_scheme<clk_lyt>("Rows").has_value());
-    CHECK(!clocking::get_scheme<clk_lyt>("TwoDDWave").has_value());
-    CHECK(!clocking::get_scheme<clk_lyt>("2DDWave6").has_value());
-    CHECK(!clocking::get_scheme<clk_lyt>("SUE").has_value());
-    CHECK(!clocking::get_scheme<clk_lyt>("SER").has_value());
-    CHECK(!clocking::get_scheme<clk_lyt>("ERS").has_value());
-    CHECK(!clocking::get_scheme<clk_lyt>("CEF").has_value());
-    CHECK(!clocking::get_scheme<clk_lyt>("RPIPLE").has_value());
-    CHECK(!clocking::get_scheme<clk_lyt>("SSR").has_value());
-    CHECK(!clocking::get_scheme<clk_lyt>("BNCS").has_value());
+    CHECK(!clocking::get_scheme("").has_value());
+    CHECK(!clocking::get_scheme("Column").has_value());
+    CHECK(!clocking::get_scheme("Rows").has_value());
+    CHECK(!clocking::get_scheme("TwoDDWave").has_value());
+    CHECK(!clocking::get_scheme("2DDWave6").has_value());
+    CHECK(!clocking::get_scheme("SUE").has_value());
+    CHECK(!clocking::get_scheme("SER").has_value());
+    CHECK(!clocking::get_scheme("ERS").has_value());
+    CHECK(!clocking::get_scheme("CEF").has_value());
+    CHECK(!clocking::get_scheme("RPIPLE").has_value());
+    CHECK(!clocking::get_scheme("SSR").has_value());
+    CHECK(!clocking::get_scheme("BNCS").has_value());
 }
 
 TEST_CASE("Linear schemes", "[clocking-scheme]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
-
     auto check_linear_scheme = [](const auto& name, bool expected)
     {
-        auto cs = clocking::get_scheme<clk_lyt>(name);
+        auto cs = clocking::get_scheme(name);
         REQUIRE(cs.has_value());
         CHECK(clocking::is_linear(*cs) == expected);
     };
@@ -1761,6 +1757,6 @@ TEST_CASE("Clocking lookup by phase count and hexagonal arrangement", "[clocking
     CHECK(clocking::get_scheme("2DDWaveHex3") == clocking::twoddwave(clocking::num_clks::THREE));
     CHECK(clocking::get_scheme("2DDWaveHex", arrangement::EVEN_COLUMN) ==
           clocking::twoddwave_hex(arrangement::EVEN_COLUMN));
-    CHECK(clocking::get_scheme<gate_level_layout<hexagonal_layout<coords::offset, odd_column_hex>>>("2DDWaveHex3") ==
+    CHECK(clocking::get_scheme("2DDWaveHex3", arrangement::ODD_COLUMN) ==
           clocking::twoddwave_hex(arrangement::ODD_COLUMN, clocking::num_clks::THREE));
 }

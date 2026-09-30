@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import arrangement, cartesian_gate_layout, shifted_cartesian_gate_layout
 from mnt.pyfiction.layouts.io import (
     fgl_parsing_error,
     read_cartesian_fgl_layout,
@@ -39,7 +39,7 @@ def test_read_write(mux21, tmp_path):
     write_fgl_layout(hex_layout, hex_file)
     assert equivalence_checking(read_hexagonal_fgl_layout(hex_file), hex_layout) == eq_type.STRONG
 
-    shifted_layout = shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")
+    shifted_layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 3, 1), "2DDWave", "Layout")
     shifted_file = str(tmp_path / "empty_shifted_cartesian.fgl")
     write_fgl_layout(shifted_layout, shifted_file)
     assert equivalence_checking(read_shifted_cartesian_fgl_layout(shifted_file), shifted_layout) == eq_type.STRONG

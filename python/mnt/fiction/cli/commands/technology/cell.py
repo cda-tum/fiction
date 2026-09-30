@@ -15,8 +15,13 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import CellEntry, describe
-from mnt.fiction.cli.topologies import TOPOLOGIES
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.fiction.cli.topologies import DISPLAY_NAMES, topology_name
+from mnt.pyfiction.layouts import (
+    arrangement,
+    cartesian_gate_layout,
+    hexagonal_gate_layout,
+    shifted_cartesian_gate_layout,
+)
 from mnt.pyfiction.physical_design import (
     apply_bestagon_library,
     apply_qca_one_library,
@@ -40,7 +45,17 @@ GATE_LIBRARIES: dict[str, tuple[type[GateLayout], Callable[..., CellLayout]]] = 
     "topolinano": (shifted_cartesian_gate_layout, apply_topolinano_library),
     "bestagon": (hexagonal_gate_layout, apply_bestagon_library),
 }
-"""The gate libraries, each with the gate-level layout topology it maps."""
+"""The gate libraries, each with the gate-level layout family it maps."""
+
+FAMILY_NAMES: dict[type[GateLayout], str] = {
+    cartesian_gate_layout: "cartesian",
+    shifted_cartesian_gate_layout: "shifted_cartesian",
+    hexagonal_gate_layout: "hexagonal",
+}
+"""The name of each gate-level layout family."""
+
+ROW_ARRANGEMENTS = (arrangement.ODD_ROW, arrangement.EVEN_ROW)
+"""The arrangements of pointy-top hexagonal layouts."""
 
 
 def _library_key(name: str) -> str:
@@ -90,7 +105,16 @@ def cell(session: Session, args: argparse.Namespace) -> Result:
     library = args.library
     needed, apply = GATE_LIBRARIES[library]
     if not isinstance(layout, needed):
-        msg = f"{library} needs a {TOPOLOGIES[needed]} layout; the active layout is {TOPOLOGIES[type(layout)]}"
+        msg = f"{library} needs a {FAMILY_NAMES[needed]} layout; the active layout is {topology_name(layout)}"
+        raise CommandError(msg)
+    if (
+        library == "bestagon"
+        and isinstance(layout, hexagonal_gate_layout)
+        and layout.get_arrangement() not in ROW_ARRANGEMENTS
+    ):
+        msg = (
+            f"bestagon needs a pointy-top hexagonal layout; the active layout is {DISPLAY_NAMES[topology_name(layout)]}"
+        )
         raise CommandError(msg)
     entry = CellEntry(apply(layout, on_progress=session.report_progress))
     session.cell_layouts.add(entry)

@@ -93,7 +93,8 @@ struct on_the_fly_circuit_design_on_defective_surface_params
      */
     sidb::on_the_fly_gate_library_params sidb_on_the_fly_gate_library_parameters = {};
     /**
-     * Parameters for the *exact* placement and routing algorithm.
+     * Parameters for the *exact* placement and routing algorithm. The arrangement of the lattice tiling replaces
+     * `layout_arrangement`.
      */
     physical_design::exact_physical_design_params exact_design_parameters = {};
     /**
@@ -209,6 +210,8 @@ template <typename Ntk, typename GateLyt>
         while (!gate_level_layout.has_value())
         {
             auto exact_params = params.exact_design_parameters;
+            // the tiling fixes the arrangement of the layout to create
+            exact_params.layout_arrangement = lattice_tiling.get_arrangement();
             if (deadline != std::chrono::steady_clock::time_point::max())
             {
                 const auto remaining =

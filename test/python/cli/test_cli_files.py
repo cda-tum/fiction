@@ -16,10 +16,10 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.fiction.cli.stores import CellEntry, describe
-from mnt.fiction.cli.topologies import FGL_READERS
-from mnt.pyfiction import layouts, physical_design
+from mnt.fiction.cli.topologies import FGL_READERS, make_gate_layout
+from mnt.pyfiction import physical_design
 from mnt.pyfiction.inml import inml_layout, inml_magnet_type
-from mnt.pyfiction.layouts import shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import arrangement, shifted_cartesian_gate_layout
 from mnt.pyfiction.layouts.io import write_fgl_layout
 from mnt.pyfiction.networks import aig_network, mig_network, set_name, simulate_outputs, technology_network, xag_network
 from mnt.pyfiction.qca import qca_layout
@@ -151,7 +151,7 @@ def test_fgl_round_trip(shell: Shell, resource: Callable[[str], str], tmp_path: 
     if topology == "hexagonal":
         shell.ok("hex")
     if topology == "shifted_cartesian":
-        layout = shifted_cartesian_gate_layout((1, 0), "2DDWave", "wire")
+        layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (1, 0), "2DDWave", "wire")
         source = layout.create_pi("a", (0, 0))
         layout.create_po(source, "f", (1, 0))
         shell.session.gate_layouts.add(layout)
@@ -371,14 +371,8 @@ def test_conflicting_writer_options_do_not_touch_files(shell: Shell, tmp_path: P
 @pytest.mark.parametrize("topology", list(FGL_READERS))
 @pytest.mark.parametrize("phases", [3, 4])
 def test_all_topologies_round_trip_small_fixture(shell: Shell, tmp_path: Path, topology: str, phases: int) -> None:
-    native = {
-        "cartesian": "cartesian",
-        "shifted_cartesian": "shifted_cartesian",
-        "hexagonal": "hexagonal",
-        "odd_column_cartesian": "shifted_cartesian",
-        "even_row_hex": "hexagonal",
-    }.get(topology, topology)
-    layout = getattr(layouts, f"{native}_gate_layout")((2, 1), f"2DDWave{phases}", topology)
+    layout = make_gate_layout(topology, (2, 1), f"2DDWave{phases}")
+    layout.set_layout_name(topology)
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (1, 0))
     path = tmp_path / f"{topology}.fgl"

@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import arrangement, shifted_cartesian_gate_layout
 from mnt.pyfiction.mol_qca import mol_qca_layout
 from mnt.pyfiction.qca import qca_layout
 from mnt.pyfiction.sidb import sidb_layout
@@ -41,8 +41,8 @@ def test_cell_bestagon(mux21_shell: Shell) -> None:
 
 def test_cell_topology_mismatch(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho")
-    assert "needs a even_row_hex layout" in mux21_shell.fails("cell -l bestagon")
-    assert "needs a odd_column_cartesian layout" in mux21_shell.fails("cell -l topolinano")
+    assert "needs a hexagonal layout" in mux21_shell.fails("cell -l bestagon")
+    assert "needs a shifted_cartesian layout" in mux21_shell.fails("cell -l topolinano")
     mux21_shell.ok("hex")
     assert "needs a cartesian layout" in mux21_shell.fails("cell")
 
@@ -85,7 +85,7 @@ def test_cell_library_spellings(mux21_shell: Shell, spelling: str) -> None:
 
 
 def test_gate_library_error_preserves_store(shell: Shell) -> None:
-    layout = shifted_cartesian_gate_layout((1, 1), "2DDWave", "unsupported routing")
+    layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (1, 1), "2DDWave", "unsupported routing")
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (0, 1))
     shell.session.gate_layouts.add(layout)

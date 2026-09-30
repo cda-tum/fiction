@@ -16,14 +16,17 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -45,6 +48,23 @@ TEST_CASE("Gate-level layout traits", "[gate-level-layout]")
     CHECK(is_coordinate_layout_v<gate_layout>);
     CHECK(is_gate_level_layout_v<gate_layout>);
     CHECK(!is_cell_grid_v<gate_layout>);
+}
+
+TEST_CASE("Gate-level layouts keep the arrangement of their coordinate layout", "[gate-level-layout]")
+{
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+
+    const hex_gate_clk_lyt hex{a, {2, 2}, clocking::row(), "hex"};
+
+    CHECK(hex.get_arrangement() == a);
+    CHECK(hex.clone().get_arrangement() == a);
+    CHECK(hex.get_layout_name() == "hex");
+
+    const shifted_cart_gate_clk_lyt shifted{a, {2, 2}};
+
+    CHECK(shifted.get_arrangement() == a);
+    CHECK(shifted.clone().get_arrangement() == a);
 }
 
 TEST_CASE("Owned gate capabilities share copies and isolate clones", "[gate-level-layout]")
