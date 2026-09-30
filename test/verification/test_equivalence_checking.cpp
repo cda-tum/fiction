@@ -98,7 +98,7 @@ TEST_CASE("Network-layout equivalence", "[equiv]")
 {
     SECTION("Cartesian layout")
     {
-        using gate_lyt = gate_level_layout<cartesian_layout<>>;
+        using gate_lyt = gate_level_layout<cartesian_layout>;
 
         check_for_strong_equiv(mockturtle::aig_network{}, gate_lyt{});
         check_for_strong_equiv(mockturtle::mig_network{}, gate_lyt{});
@@ -114,7 +114,7 @@ TEST_CASE("Network-layout equivalence", "[equiv]")
     }
     SECTION("Hexagonal layout")
     {
-        using gate_layout = gate_level_layout<hexagonal_layout<>>;
+        using gate_layout = gate_level_layout<hexagonal_layout>;
 
         check_for_strong_equiv(mockturtle::aig_network{}, gate_layout{arrangement::EVEN_ROW});
         check_for_strong_equiv(mockturtle::mig_network{}, gate_layout{arrangement::EVEN_ROW});

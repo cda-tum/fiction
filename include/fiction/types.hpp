@@ -19,7 +19,6 @@
 #pragma once
 
 #include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
@@ -108,14 +107,13 @@ inline constexpr auto ntk_type_name = get_ntk_type_name<Ntk>();
 /**
  * FCN gate-level layouts.
  */
-using cart_gate_clk_lyt     = layouts::gate_level_layout<layouts::cartesian_layout<layouts::coords::offset>>;
+using cart_gate_clk_lyt     = layouts::gate_level_layout<layouts::cartesian_layout>;
 using cart_gate_clk_lyt_ptr = std::shared_ptr<cart_gate_clk_lyt>;
 
-using shifted_cart_gate_clk_lyt =
-    layouts::gate_level_layout<layouts::shifted_cartesian_layout<layouts::coords::offset>>;
+using shifted_cart_gate_clk_lyt     = layouts::gate_level_layout<layouts::shifted_cartesian_layout>;
 using shifted_cart_gate_clk_lyt_ptr = std::shared_ptr<shifted_cart_gate_clk_lyt>;
 
-using hex_gate_clk_lyt     = layouts::gate_level_layout<layouts::hexagonal_layout<layouts::coords::offset>>;
+using hex_gate_clk_lyt     = layouts::gate_level_layout<layouts::hexagonal_layout>;
 using hex_gate_clk_lyt_ptr = std::shared_ptr<hex_gate_clk_lyt>;
 
 using gate_layout_t = std::variant<cart_gate_clk_lyt_ptr, shifted_cart_gate_clk_lyt_ptr, hex_gate_clk_lyt_ptr>;

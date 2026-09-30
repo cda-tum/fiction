@@ -642,8 +642,8 @@ class orthogonal_impl
         networks::restore_names(ctn.color_ntk, layout, node2pos);
 
         // statistical information
-        pst.x_size        = layout.x() + 1;
-        pst.y_size        = layout.y() + 1;
+        pst.x_size        = static_cast<uint64_t>(layout.x()) + 1;
+        pst.y_size        = static_cast<uint64_t>(layout.y()) + 1;
         pst.num_gates     = layout.num_gates();
         pst.num_wires     = layout.num_wires();
         pst.num_crossings = layout.num_crossings();

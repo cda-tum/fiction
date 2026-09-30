@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "fiction/layouts/layout_base.hpp"
+
 #include <phmap.h>
 
 #include <utility>
@@ -25,9 +27,7 @@ namespace fiction::layouts
 /**
  * @brief Explicit obstructions stored by layouts or supplied to a routing search.
  * Copies are independent. This object contains no layout or occupancy information.
- * @tparam Coordinate Coordinate identifying a position.
  */
-template <typename Coordinate>
 class obstructions
 {
   public:
@@ -36,7 +36,7 @@ class obstructions
      *
      * @param c Coordinate to obstruct.
      */
-    void obstruct_coordinate(const Coordinate& c) noexcept
+    void obstruct_coordinate(const layout_base::coordinate& c) noexcept
     {
         obstructed_coordinates.insert(c);
     }
@@ -48,7 +48,7 @@ class obstructions
      * @param src Source coordinate.
      * @param tgt Target coordinate.
      */
-    void obstruct_connection(const Coordinate& src, const Coordinate& tgt) noexcept
+    void obstruct_connection(const layout_base::coordinate& src, const layout_base::coordinate& tgt) noexcept
     {
         obstructed_connections.insert({src, tgt});
     }
@@ -58,7 +58,7 @@ class obstructions
      *
      * @param c Coordinate to clear.
      */
-    void clear_obstructed_coordinate(const Coordinate& c) noexcept
+    void clear_obstructed_coordinate(const layout_base::coordinate& c) noexcept
     {
         obstructed_coordinates.erase(c);
     }
@@ -69,7 +69,7 @@ class obstructions
      * @param src Source coordinate.
      * @param tgt Target coordinate.
      */
-    void clear_obstructed_connection(const Coordinate& src, const Coordinate& tgt) noexcept
+    void clear_obstructed_connection(const layout_base::coordinate& src, const layout_base::coordinate& tgt) noexcept
     {
         obstructed_connections.erase({src, tgt});
     }
@@ -93,7 +93,7 @@ class obstructions
      * @param c Coordinate to check.
      * @return `true` iff `c` is obstructed.
      */
-    [[nodiscard]] bool is_obstructed_coordinate(const Coordinate& c) const noexcept
+    [[nodiscard]] bool is_obstructed_coordinate(const layout_base::coordinate& c) const noexcept
     {
         return obstructed_coordinates.contains(c);
     }
@@ -104,15 +104,16 @@ class obstructions
      * @param tgt Target coordinate.
      * @return `true` iff the connection from `src` to `tgt` is obstructed.
      */
-    [[nodiscard]] bool is_obstructed_connection(const Coordinate& src, const Coordinate& tgt) const noexcept
+    [[nodiscard]] bool is_obstructed_connection(const layout_base::coordinate& src,
+                                                const layout_base::coordinate& tgt) const noexcept
     {
         return obstructed_connections.contains({src, tgt});
     }
 
   private:
     /** @brief Explicitly blocked positions. */
-    phmap::parallel_flat_hash_set<Coordinate> obstructed_coordinates{};
+    phmap::parallel_flat_hash_set<layout_base::coordinate> obstructed_coordinates{};
     /** @brief Explicitly blocked directed connections. */
-    phmap::parallel_flat_hash_set<std::pair<Coordinate, Coordinate>> obstructed_connections{};
+    phmap::parallel_flat_hash_set<std::pair<layout_base::coordinate, layout_base::coordinate>> obstructed_connections{};
 };
 }  // namespace fiction::layouts

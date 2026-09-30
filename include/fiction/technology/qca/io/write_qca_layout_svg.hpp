@@ -442,7 +442,7 @@ class write_qca_layout_svg_impl
         std::stringstream cell_descriptions{};
 
         utils::progress_reporter progress{ps.on_progress, "rendering cell positions",
-                                          (lyt.x() + 1) * (lyt.y() + 1) * (lyt.z() + 1)};
+                                          lyt.area() * static_cast<std::size_t>(lyt.z() + 1)};
         lyt.foreach_cell_position(
             [this, &cell_descriptions, &progress](const auto& c)
             {
@@ -491,7 +491,7 @@ class write_qca_layout_svg_impl
             {svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_34_TEXT, svg::CLOCK_ZONE_34_TEXT}};
 
         utils::progress_reporter progress{ps.on_progress, "rendering cell positions",
-                                          (lyt.x() + 1) * (lyt.y() + 1) * (lyt.z() + 1)};
+                                          lyt.area() * static_cast<std::size_t>(lyt.z() + 1)};
         lyt.foreach_cell_position(
             [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_tile, &progress](const auto& c)
             {

@@ -387,9 +387,9 @@ struct nested_vector_hash
         std::size_t hash = 0ul;
         for (const auto& tile : vec)
         {
-            hash ^= std::hash<uint64_t>{}(tile.x) + prime + (hash << 6u) + (hash >> 2u);
-            hash ^= std::hash<uint64_t>{}(tile.y) + prime + (hash << 6u) + (hash >> 2u);
-            hash ^= std::hash<uint64_t>{}(tile.z) + prime + (hash << 6u) + (hash >> 2u);
+            hash ^= std::hash<uint64_t>{}(static_cast<uint64_t>(tile.x)) + prime + (hash << 6u) + (hash >> 2u);
+            hash ^= std::hash<uint64_t>{}(static_cast<uint64_t>(tile.y)) + prime + (hash << 6u) + (hash >> 2u);
+            hash ^= std::hash<uint64_t>{}(static_cast<uint64_t>(tile.z)) + prime + (hash << 6u) + (hash >> 2u);
         }
 
         return hash;
@@ -1196,8 +1196,8 @@ class graph_oriented_layout_design_impl
     void update_stats(const Lyt& best_lyt)
     {
         // Statistical information
-        pst.x_size        = best_lyt.x() + 1;
-        pst.y_size        = best_lyt.y() + 1;
+        pst.x_size        = static_cast<uint64_t>(best_lyt.x()) + 1;
+        pst.y_size        = static_cast<uint64_t>(best_lyt.y()) + 1;
         pst.num_gates     = best_lyt.num_gates();
         pst.num_wires     = best_lyt.num_wires();
         pst.num_crossings = best_lyt.num_crossings();
@@ -1289,37 +1289,37 @@ class graph_oriented_layout_design_impl
         auto skip_left = skip_tiles;
 
         // make sure we have enough margin in both directions.
-        const uint64_t resize = skip_tiles + 1;
+        const int32_t resize = static_cast<int32_t>(skip_tiles) + 1;
 
         layout.resize({layout.x() + resize, layout.y() + resize, layout.z()});
         const tile<Lyt> drain{layout.x(), layout.y(), 0};
 
-        uint64_t min_x = 0;
-        uint64_t min_y = 0;
+        int32_t min_x = 0;
+        int32_t min_y = 0;
 
         if (skip_tiles != 0)
         {
-            for (auto x = static_cast<int64_t>(layout.x()); x >= 0; --x)
+            for (int32_t x = layout.x(); x >= 0; --x)
             {
-                if (!layout.is_empty_tile({static_cast<uint64_t>(x), 0, 0}))
+                if (!layout.is_empty_tile({x, 0, 0}))
                 {
-                    min_x = static_cast<uint64_t>(x) + 1;
+                    min_x = x + 1;
                     break;  // first non-empty from the right
                 }
             }
 
-            for (auto y = static_cast<int64_t>(layout.y()); y >= 0; --y)
+            for (int32_t y = layout.y(); y >= 0; --y)
             {
-                if (!layout.is_empty_tile({0, static_cast<uint64_t>(y), 0}))
+                if (!layout.is_empty_tile({0, y, 0}))
                 {
-                    min_y = static_cast<uint64_t>(y) + 1;
+                    min_y = y + 1;
                     break;  // first non-empty from the bottom
                 }
             }
         }
 
         // check if a path from the input to the drain exists
-        const auto check_tile = [&](const uint64_t x, const uint64_t y) noexcept
+        const auto check_tile = [&](const int32_t x, const int32_t y) noexcept
         {
             const tile<Lyt> tile{x, y, 0};
             if (!check_path(layout, tile, drain, new_gate_location::SRC).empty())
@@ -1329,7 +1329,7 @@ class graph_oriented_layout_design_impl
             }
         };
 
-        uint64_t max_iterations = 0;
+        int32_t max_iterations = 0;
 
         if (ssg.pi_locs == pi_locations::TOP_AND_LEFT)
         {
@@ -1348,7 +1348,7 @@ class graph_oriented_layout_design_impl
             (ssg.pi_locs == pi_locations::TOP_AND_LEFT) ? 2 * num_expansions : num_expansions;
         possible_positions.reserve(expansion_limit);
 
-        for (uint64_t k = 0ul; k < max_iterations; k++)
+        for (int32_t k = 0; k < max_iterations; k++)
         {
             if (((ssg.pi_locs == pi_locations::TOP) || (ssg.pi_locs == pi_locations::TOP_AND_LEFT)) &&
                 min_x + k < layout.x())
@@ -1406,10 +1406,10 @@ class graph_oriented_layout_design_impl
         const auto  pre_t           = static_cast<tile<Lyt>>(place_info.node2pos[pre]);
         const auto  expansion_limit = std::max(layout.x() - pre_t.x, layout.y() - pre_t.y);
 
-        possible_positions.reserve(expansion_limit);
+        possible_positions.reserve(static_cast<std::size_t>(expansion_limit));
 
         // check if path from previous tile to PO exists
-        auto check_tile = [&](const uint64_t x, const uint64_t y)
+        auto check_tile = [&](const int32_t x, const int32_t y)
         {
             const tile<Lyt> tile{x, y, 0};
             const auto      check_straight_inverter = ps.straight_inverters && layout.is_inv(layout.get_node(pre_t));
@@ -1420,7 +1420,7 @@ class graph_oriented_layout_design_impl
             }
         };
 
-        for (uint64_t k = 0ul; k <= expansion_limit; ++k)
+        for (int32_t k = 0; k <= expansion_limit; ++k)
         {
             if (pre_t.x + k <= layout.x())
             {
@@ -1457,7 +1457,7 @@ class graph_oriented_layout_design_impl
         const auto  pre_t = static_cast<tile<Lyt>>(place_info.node2pos[pre]);
 
         // check if path from previous tile to new tile and from new tile to drain exist
-        const auto check_tile = [&](const uint64_t x, const uint64_t y) noexcept
+        const auto check_tile = [&](const int32_t x, const int32_t y) noexcept
         {
             const tile<Lyt> new_pos{pre_t.x + x, pre_t.y + y, 0};
             const auto      check_straight_inverter = ps.straight_inverters && layout.is_inv(layout.get_node(pre_t));
@@ -1478,9 +1478,9 @@ class graph_oriented_layout_design_impl
         };
 
         // iterate diagonally
-        for (uint64_t k = 0ul; k < layout.x() + layout.y() + 1; ++k)
+        for (int32_t k = 0; k < layout.x() + layout.y() + 1; ++k)
         {
-            for (uint64_t x = 0ul; x < k + 1; ++x)
+            for (int32_t x = 0; x < k + 1; ++x)
             {
                 const auto y = k - x;
                 if ((pre_t.y + y) <= layout.y() && (pre_t.x + x) <= layout.x())
@@ -1524,7 +1524,7 @@ class graph_oriented_layout_design_impl
         const auto min_y = std::max(pre1_t.y, pre2_t.y) + (pre1_t.y == pre2_t.y ? 1 : 0);
 
         // check if path from previous tiles to new tile and from new tile to drain exist
-        auto check_tile = [&](uint64_t x, uint64_t y)
+        auto check_tile = [&](int32_t x, int32_t y)
         {
             const tile<Lyt> new_pos{min_x + x, min_y + y, 0};
             auto            check_straight_inverter = ps.straight_inverters && layout.is_inv(layout.get_node(pre1_t));
@@ -1560,9 +1560,9 @@ class graph_oriented_layout_design_impl
         };
 
         // iterate diagonally
-        for (uint64_t k = 0ul; k < layout.x() + layout.y() + 1; ++k)
+        for (int32_t k = 0; k < layout.x() + layout.y() + 1; ++k)
         {
-            for (uint64_t x = 0ul; x < k + 1; ++x)
+            for (int32_t x = 0; x < k + 1; ++x)
             {
                 const auto y = k - x;
                 if ((min_y + y) <= layout.y() && (min_x + x) <= layout.x())
@@ -1899,7 +1899,7 @@ class graph_oriented_layout_design_impl
         if (cost_function == graph_oriented_layout_design_params::cost_objective::AREA)
         {
             const auto bb = layouts::bounding_box_2d(layout);
-            cost          = static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u);
+            cost          = (static_cast<uint64_t>(bb.get_max().x) + 1u) * (static_cast<uint64_t>(bb.get_max().y) + 1u);
         }
         else if (cost_function == graph_oriented_layout_design_params::cost_objective::WIRES)
         {
@@ -1912,8 +1912,8 @@ class graph_oriented_layout_design_impl
         else if (cost_function == graph_oriented_layout_design_params::cost_objective::ACP)
         {
             const auto bb = layouts::bounding_box_2d(layout);
-            cost          = (layout.num_crossings() + 1) *
-                            (static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u));
+            cost = (layout.num_crossings() + 1) *
+                   ((static_cast<uint64_t>(bb.get_max().x) + 1u) * (static_cast<uint64_t>(bb.get_max().y) + 1u));
         }
         else if (cost_function == graph_oriented_layout_design_params::cost_objective::CUSTOM)
         {

@@ -21,10 +21,10 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
 #include <fiction/types.hpp>
@@ -34,6 +34,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <utility>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -69,7 +70,7 @@ TEST_CASE("Read empty FGL layout", "[read-fgl-layout]")
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
     };
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     check(read_fgl_layout<gate_layout>(layout_stream));
 }
 
@@ -169,7 +170,7 @@ TEST_CASE("Read simple FGL layout", "[read-fgl-layout]")
         CHECK(lyt.get_name(lyt.get_node({2, 1})) == "po0");
     };
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     check(read_fgl_layout<gate_layout>(layout_stream));
 }
 
@@ -269,7 +270,7 @@ TEST_CASE("Read FGL layout with hexadecimal gate type", "[read-fgl-layout]")
         CHECK(lyt.get_name(lyt.get_node({2, 1})) == "po0");
     };
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     check(read_fgl_layout<gate_layout>(layout_stream));
 }
 
@@ -292,7 +293,7 @@ TEST_CASE("Parsing error: malformed xml", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -314,7 +315,7 @@ TEST_CASE("Parsing error: no root element 'fgl'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -336,7 +337,7 @@ TEST_CASE("Parsing error: no element 'layout' in 'fgl'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -357,7 +358,7 @@ TEST_CASE("Parsing error: no element 'clocking' in 'layout'", "[read-fgl-layout]
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -380,7 +381,7 @@ TEST_CASE("Parsing error: no element 'name' in 'clocking'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -404,7 +405,7 @@ TEST_CASE("Parsing error: unknown clocking scheme", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -428,7 +429,7 @@ TEST_CASE("Parsing error: no element 'zones' in 'clocking'", "[read-fgl-layout]"
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -458,7 +459,7 @@ TEST_CASE("Parsing error: no element 'x' in 'zone'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -488,7 +489,7 @@ TEST_CASE("Parsing error: no element 'y' in 'zone'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -518,7 +519,7 @@ TEST_CASE("Parsing error: no element 'clock' in 'zone'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -586,7 +587,7 @@ TEST_CASE("Parsing error: unknown topology", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -610,7 +611,7 @@ TEST_CASE("Parsing error: Lyt is not a cartesian layout", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<shifted_cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<shifted_cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -634,7 +635,7 @@ TEST_CASE("Parsing error: Lyt is not a shifted_cartesian layout", "[read-fgl-lay
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -658,7 +659,7 @@ TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<shifted_cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<shifted_cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -730,6 +731,35 @@ TEST_CASE("Parsing error: target layout has another arrangement than the file", 
     }
 }
 
+TEST_CASE("Parsing error: size exceeds the range of gate-level signals", "[read-fgl-layout]")
+{
+    const auto [axis, value] =
+        GENERATE(std::pair{"x", "1073741824"}, std::pair{"y", "1073741824"}, std::pair{"z", "2"});
+
+    const char* const x = std::string{axis} == "x" ? value : "2";
+    const char* const y = std::string{axis} == "y" ? value : "1";
+    const char* const z = std::string{axis} == "z" ? value : "0";
+
+    std::istringstream layout_stream{fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                                 "<fgl>\n"
+                                                 "  <layout>\n"
+                                                 "    <name>Test</name>\n"
+                                                 "    <topology>cartesian</topology>\n"
+                                                 "    <size>\n"
+                                                 "      <x>{}</x>\n"
+                                                 "      <y>{}</y>\n"
+                                                 "      <z>{}</z>\n"
+                                                 "    </size>\n"
+                                                 "    <clocking>\n"
+                                                 "      <name>2DDWave</name>\n"
+                                                 "    </clocking>\n"
+                                                 "  </layout>\n"
+                                                 "</fgl>\n",
+                                                 x, y, z)};
+
+    CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(layout_stream), fgl_parsing_error);
+}
+
 TEST_CASE("Parsing error: no element 'size' in 'layout'", "[read-fgl-layout]")
 {
     static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -748,7 +778,7 @@ TEST_CASE("Parsing error: no element 'size' in 'layout'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -771,7 +801,7 @@ TEST_CASE("Parsing error: no element 'x' in 'size'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -794,7 +824,7 @@ TEST_CASE("Parsing error: no element 'y' in 'size'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -817,7 +847,7 @@ TEST_CASE("Parsing error: no element 'z' in 'size'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -852,7 +882,7 @@ TEST_CASE("Parsing error: no element 'id' in 'gate", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -887,7 +917,7 @@ TEST_CASE("Parsing error: no element 'type' in 'gate", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -922,7 +952,7 @@ TEST_CASE("Parsing error: no element 'name' in 'gate", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -956,7 +986,7 @@ TEST_CASE("Parsing error: no element 'loc' in 'gate'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -991,7 +1021,7 @@ TEST_CASE("Parsing error: no element 'x' in 'loc'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -1026,7 +1056,7 @@ TEST_CASE("Parsing error: no element 'y' in 'loc'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -1061,7 +1091,7 @@ TEST_CASE("Parsing error: no element 'z' in 'loc'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -1145,7 +1175,7 @@ TEST_CASE("Parsing error: unknown gate type with 0 incoming signals", "[read-fgl
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -1228,7 +1258,7 @@ TEST_CASE("Parsing error: unknown gate type with 1 incoming signal", "[read-fgl-
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -1312,7 +1342,7 @@ TEST_CASE("Parsing error: unknown gate type with 2 incoming signals", "[read-fgl
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -1411,7 +1441,7 @@ TEST_CASE("Parsing error: unknown gate type with 3 incoming signals", "[read-fgl
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -1535,7 +1565,7 @@ TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", 
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -1618,7 +1648,7 @@ TEST_CASE("Parsing error: no element 'x' in 'signal'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -1701,7 +1731,7 @@ TEST_CASE("Parsing error: no element 'y' in 'signal'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -1784,13 +1814,13 @@ TEST_CASE("Parsing error: no element 'z' in 'signal'", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout]")
 {
-    using sync_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using sync_layout = gate_level_layout<cartesian_layout>;
     sync_layout original{{2, 0, 0}};
     original.set_layout_name("A & B < C");
     const auto input = original.create_pi("in<&>", {0, 0, 0});
@@ -1812,7 +1842,7 @@ TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout
 
 TEST_CASE("FGL rejects invalid numeric metadata", "[read-fgl-layout]")
 {
-    using sync_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using sync_layout = gate_level_layout<cartesian_layout>;
     std::string x{"0"};
     std::string clock{"0"};
     std::string delay{"0"};

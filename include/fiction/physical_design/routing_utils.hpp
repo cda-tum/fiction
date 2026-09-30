@@ -37,7 +37,7 @@ namespace detail
  */
 template <typename Lyt>
 [[nodiscard]] bool routing_coordinate_obstructed(const Lyt& lyt, const coordinate<Lyt>& c,
-                                                 const layouts::obstructions<coordinate<Lyt>>& extra) noexcept
+                                                 const layouts::obstructions& extra) noexcept
 {
     if constexpr (is_gate_level_layout_v<Lyt>)
     {
@@ -54,7 +54,7 @@ template <typename Lyt>
  */
 template <typename Lyt>
 [[nodiscard]] bool routing_connection_obstructed(const Lyt& lyt, const coordinate<Lyt>& src, const coordinate<Lyt>& tgt,
-                                                 const layouts::obstructions<coordinate<Lyt>>& extra) noexcept
+                                                 const layouts::obstructions& extra) noexcept
 {
     if constexpr (is_gate_level_layout_v<Lyt>)
     {
@@ -251,8 +251,7 @@ namespace detail
 template <typename Lyt>
 [[nodiscard]] std::optional<coordinate<Lyt>>
 routing_successor(const Lyt& lyt, const coordinate<Lyt>& current, coordinate<Lyt> successor,
-                  const coordinate<Lyt>& target, const bool crossings,
-                  const layouts::obstructions<coordinate<Lyt>>& extra) noexcept
+                  const coordinate<Lyt>& target, const bool crossings, const layouts::obstructions& extra) noexcept
 {
     // return to ground layer to avoid getting stuck in crossing layer
     successor = lyt.below(successor);

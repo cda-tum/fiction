@@ -17,7 +17,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cell_grid.hpp>
-#include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/traits.hpp>
 
 #include <cstdint>
@@ -78,13 +78,13 @@ TEST_CASE("Cell type and name assignment", "[cell-grid]")
     CHECK(g.get_cell_name({2, 4}) == "b");
     CHECK(g.get_cell_name({2, 2}).empty());
 
-    std::set<coords::offset> pis{};
+    std::set<layout_base::coordinate> pis{};
     g.foreach_pi([&pis](const auto& c) { pis.insert(c); });
-    CHECK(pis == std::set<coords::offset>{{0, 2}, {2, 4}});
+    CHECK(pis == std::set<layout_base::coordinate>{{0, 2}, {2, 4}});
 
-    std::set<coords::offset> pos{};
+    std::set<layout_base::coordinate> pos{};
     g.foreach_po([&pos](const auto& c) { pos.insert(c); });
-    CHECK(pos == std::set<coords::offset>{{4, 2}});
+    CHECK(pos == std::set<layout_base::coordinate>{{4, 2}});
 
     SECTION("empty type removes the cell and its name")
     {

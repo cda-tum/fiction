@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
@@ -102,7 +102,7 @@ surface_analysis(const GateLyt& gate_lyt, const sidb::layout& surface,
                         const auto sidb_pos = sidb::to_lattice_site(
                             layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
                                                                         GateLibrary::gate_y_size()>(
-                                gate_lyt, t, layouts::coords::cube{x, y, t.z}));
+                                gate_lyt, t, layouts::layout_base::coordinate{x, y, t.z}));
 
                         if (sidbs_affected_by_defects.contains(sidb_pos))
                         {

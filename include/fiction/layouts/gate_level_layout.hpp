@@ -42,6 +42,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -122,7 +123,7 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Number of clocked neighbors. */
     using degree_t = uint8_t;
     /** @brief Hold-phase extension in full clock cycles. */
-    using sync_elem_t = typename clocking::state<clock_zone>::sync_elem_t;
+    using sync_elem_t = clocking::state::sync_elem_t;
 
     /** @brief Coordinate identifying a gate position. */
     using tile = typename CoordinateLayout::coordinate;
@@ -132,9 +133,9 @@ class gate_level_layout : public CoordinateLayout
     {
 
         /** @brief Scheme, clock overrides, and synchronization delays. */
-        clocking::state<clock_zone> clocking{clocking::open()};
+        clocking::state clocking{clocking::open()};
         /** @brief Persistent manually assigned obstructions. */
-        layouts::obstructions<clock_zone>                         obstructions{};
+        layouts::obstructions                                     obstructions{};
         mockturtle::truth_table_cache<kitty::dynamic_truth_table> fn_cache;
 
         const Tile const0{0x8000000000000000ull};
@@ -197,10 +198,10 @@ class gate_level_layout : public CoordinateLayout
      * @param ar Highest possible position in the layout.
      * @param name Layout name.
      */
-    explicit gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar = {}, const std::string& name = {})
+    explicit gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar = {0, 0}, const std::string& name = {})
         requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::aspect_ratio&>
             :
-            CoordinateLayout(ar),
+            CoordinateLayout(checked_extent(ar)),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
@@ -221,7 +222,7 @@ class gate_level_layout : public CoordinateLayout
                       const std::string& name = {})
         requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::aspect_ratio&>
             :
-            CoordinateLayout(ar),
+            CoordinateLayout(checked_extent(ar)),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
@@ -239,12 +240,12 @@ class gate_level_layout : public CoordinateLayout
      * @param ar Highest possible position in the layout.
      * @param name Layout name.
      */
-    explicit gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::aspect_ratio& ar = {},
+    explicit gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::aspect_ratio& ar = {0, 0},
                                const std::string& name = {})
         requires std::constructible_from<CoordinateLayout, const layouts::arrangement,
                                          const typename CoordinateLayout::aspect_ratio&>
             :
-            CoordinateLayout(a, ar),
+            CoordinateLayout(a, checked_extent(ar)),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
@@ -266,7 +267,7 @@ class gate_level_layout : public CoordinateLayout
         requires std::constructible_from<CoordinateLayout, const layouts::arrangement,
                                          const typename CoordinateLayout::aspect_ratio&>
             :
-            CoordinateLayout(a, ar),
+            CoordinateLayout(a, checked_extent(ar)),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
@@ -321,6 +322,19 @@ class gate_level_layout : public CoordinateLayout
         copy.evnts                           = std::make_shared<mockturtle::network_events<base_type>>(*evnts);
 
         return copy;
+    }
+
+    /**
+     * Updates the layout's dimensions, effectively resizing it.
+     *
+     * @param ar New aspect ratio.
+     * @throws std::invalid_argument If an axis of `ar` is negative.
+     * @throws std::out_of_range If `ar` exceeds the range that gate-level signals can represent, i.e., if its x or y
+     * value is larger than \f$2^{30} - 1\f$ or its z value is larger than 1.
+     */
+    void resize(const typename CoordinateLayout::aspect_ratio& ar)
+    {
+        CoordinateLayout::resize(checked_extent(ar));
     }
 
 #pragma endregion
@@ -816,8 +830,9 @@ class gate_level_layout : public CoordinateLayout
      * @param t Tile to move `n` to.
      * @param new_children New incoming signals to `n`.
      * @return Signal pointing to `n`'s new tile.
+     * @throws std::out_of_range If `t` has no signal encoding.
      */
-    signal move_node(const node n, const tile& t, const std::vector<signal>& new_children = {}) noexcept
+    signal move_node(const node n, const tile& t, const std::vector<signal>& new_children = {})
     {
         // n's current position
         const auto old_t = get_tile(n);
@@ -831,7 +846,7 @@ class gate_level_layout : public CoordinateLayout
         // clear old_t only if it is different from t (this function can also be used to simply update n's children)
         if (t != old_t)
         {
-            if (!t.is_dead())
+            if (t.is_valid())
             {
                 // if n lived on a tile that was marked as PO, update it with the new tile t
                 std::ranges::replace(strg->outputs, static_cast<signal>(old_t), static_cast<signal>(t));
@@ -886,7 +901,7 @@ class gate_level_layout : public CoordinateLayout
         {
             const auto n = it->second;
 
-            if (!t.is_dead())
+            if (t.is_valid())
             {
                 // decrease wire count
                 if (is_wire(n))
@@ -1420,8 +1435,8 @@ class gate_level_layout : public CoordinateLayout
         bool incoming_signal   = false;
         auto in_signal_checker = [this, &s, &incoming_signal](const auto& i)
         {
-            if (const auto it = static_cast<tile>(i);
-                i == s || CoordinateLayout::above(it) == s || CoordinateLayout::below(it) == s)
+            if (const auto it = static_cast<tile>(i); i == s || static_cast<signal>(CoordinateLayout::above(it)) == s ||
+                                                      static_cast<signal>(CoordinateLayout::below(it)) == s)
             {
                 incoming_signal = true;
                 return false;  // abort iteration
@@ -1557,8 +1572,9 @@ class gate_level_layout : public CoordinateLayout
         bool outgoing_signal    = false;
         auto out_signal_checker = [this, &s, &outgoing_signal](const auto& o)
         {
-            if (const auto ot = get_tile(o);
-                ot == s || CoordinateLayout::above(ot) == s || CoordinateLayout::below(ot) == s)
+            if (const auto ot = get_tile(o); static_cast<signal>(ot) == s ||
+                                             static_cast<signal>(CoordinateLayout::above(ot)) == s ||
+                                             static_cast<signal>(CoordinateLayout::below(ot)) == s)
             {
                 outgoing_signal = true;
                 return false;  // abort iteration
@@ -2218,6 +2234,25 @@ class gate_level_layout : public CoordinateLayout
 
 #pragma endregion
   private:
+    /**
+     * Returns an aspect ratio after checking that all tiles within it have a signal.
+     *
+     * @param ar Aspect ratio to check.
+     * @return `ar`.
+     * @throws std::out_of_range If the x or y value of `ar` is larger than \f$2^{30} - 1\f$ or its z value is larger
+     * than 1.
+     */
+    static typename CoordinateLayout::aspect_ratio checked_extent(const typename CoordinateLayout::aspect_ratio& ar)
+    {
+        constexpr auto max_axis = static_cast<int32_t>((1ull << 30ull) - 1ull);
+
+        if (ar.x > max_axis || ar.y > max_axis || ar.z > 1)
+        {
+            throw std::out_of_range("The aspect ratio exceeds the range that gate-level signals can represent");
+        }
+
+        return ar;
+    }
     storage strg;
 
     event_storage evnts;
@@ -2262,8 +2297,13 @@ class gate_level_layout : public CoordinateLayout
 
     void assign_node(const tile& t, const node n)
     {
-        if (!t.is_dead())
+        if (t.is_valid())
         {
+            if (!t.fits_signal())
+            {
+                throw std::out_of_range("The tile is outside of the range that gate-level signals can represent");
+            }
+
             clear_tile(t);
 
             strg->data.tile_node_map[static_cast<signal>(t)] = n;

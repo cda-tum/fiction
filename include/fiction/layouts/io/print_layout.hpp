@@ -81,8 +81,8 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         return;
     }
 
-    const auto num_cols = layout.x() + 1;
-    const auto num_rows = layout.y() + 1;
+    const auto num_cols = static_cast<std::size_t>(layout.x()) + 1u;
+    const auto num_rows = static_cast<std::size_t>(layout.y()) + 1u;
 
     // cache operations and directions in a 2d-matrix-like object
     using s_matrix = std::vector<std::vector<std::string>>;
@@ -147,9 +147,9 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         return "?";
     };
 
-    for (auto i = 0ull; i < num_rows; ++i)
+    for (auto i = std::size_t{0}; i < num_rows; ++i)
     {
-        for (auto j = 0ull; j < num_cols; ++j)
+        for (auto j = std::size_t{0}; j < num_cols; ++j)
         {
             auto t1     = tile<Lyt>{j, i};
             auto t2     = layout.above(t1);

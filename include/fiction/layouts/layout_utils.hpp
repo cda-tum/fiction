@@ -102,7 +102,7 @@ template <typename Lyt>
  * @tparam GateSizeX Horizontal tile size.
  * @tparam GateSizeY Vertical tile size.
  * @tparam GateLyt Gate-level layout type.
- * @tparam Coordinate Cell coordinate type: `coords::offset`, or `coords::cube` where hexagonal tiles yield negative
+ * @tparam Coordinate Cell coordinate type, e.g., `layout_base::coordinate`. Hexagonal tiles can yield negative
  * positions.
  * @param gate_lyt The gate-level layout whose tiles are to be considered.
  * @param t Tile within gate_lyt.

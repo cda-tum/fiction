@@ -272,14 +272,13 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             DOC(fiction_layouts_gate_level_layout_fanout_size))
 
         .def(
-            "get_node", [](const GateLyt& layout, const py_offset_coordinate& coordinate)
+            "get_node", [](const GateLyt& layout, const py_coordinate& coordinate)
             { return layout.get_node(coordinate); }, py::arg("t"), DOC(fiction_layouts_gate_level_layout_get_node))
         .def("get_tile", &GateLyt::get_tile, py::arg("n"), DOC(fiction_layouts_gate_level_layout_get_tile))
         .def("make_signal", &GateLyt::make_signal, py::arg("n"), DOC(fiction_layouts_gate_level_layout_make_signal))
 
         .def("move_node", &GateLyt::move_node, py::arg("n"), py::arg("t"),
-             py::arg("new_children") = std::vector<py_offset_coordinate>{},
-             DOC(fiction_layouts_gate_level_layout_move_node))
+             py::arg("new_children") = std::vector<py_coordinate>{}, DOC(fiction_layouts_gate_level_layout_move_node))
 
         .def("clear_tile", &GateLyt::clear_tile, py::arg("t"), DOC(fiction_layouts_gate_level_layout_clear_tile))
 

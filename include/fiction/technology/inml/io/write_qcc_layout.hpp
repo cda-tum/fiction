@@ -27,6 +27,7 @@
 #include <fmt/format.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <functional>
@@ -281,7 +282,7 @@ class write_qcc_layout_impl
 
     void write_layout()
     {
-        utils::progress_reporter               progress{ps.on_progress, "writing rows", (lyt.y() + 1)};
+        utils::progress_reporter progress{ps.on_progress, "writing rows", static_cast<std::size_t>(lyt.y() + 1)};
         std::unordered_set<inml::layout::cell> skip{};
 
         os << qcc::OPEN_LAYOUT;

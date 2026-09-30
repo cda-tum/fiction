@@ -24,7 +24,6 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -118,13 +117,13 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
         check_ortho_equiv_all<gate_layout>();
     }
     SECTION("Hexagonal layouts")
     {
-        using gate_layout = gate_level_layout<hexagonal_layout<coords::offset>>;
+        using gate_layout = gate_level_layout<hexagonal_layout>;
 
         const auto a =
             GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
@@ -135,7 +134,7 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 
 TEST_CASE("Gate library application", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     const auto check = [](const auto& ntk)
     {
@@ -160,7 +159,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
 
 TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>();
     maj.set_network_name("maj");
@@ -181,7 +180,7 @@ TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
 
 TEST_CASE("Orthogonal physical design reports progress", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     const auto ntk = blueprints::mux21_network<technology_network>();
 
@@ -199,7 +198,7 @@ TEST_CASE("Orthogonal physical design reports progress", "[orthogonal]")
 
 TEST_CASE("Orthogonal physical design requires an arrangement for hexagonal layouts", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<hexagonal_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<hexagonal_layout>;
 
     CHECK_THROWS_AS(orthogonal<gate_layout>(blueprints::and_or_network<technology_network>()), std::invalid_argument);
 }

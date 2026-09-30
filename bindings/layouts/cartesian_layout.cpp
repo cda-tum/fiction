@@ -177,7 +177,8 @@ void cartesian_layout(nanobind::module_& m, const char* name)
 void cartesian_layout(nanobind::module_& m)
 {
     detail::cartesian_layout<py_cartesian_layout>(m, "cartesian_layout");
-    detail::cartesian_layout<py_stacked_cartesian_layout>(m, "stacked_cartesian_layout");
+    // Cartesian layouts have a signed z extent, so stacked layouts are ordinary Cartesian layouts.
+    m.attr("stacked_cartesian_layout") = m.attr("cartesian_layout");
 }
 
 }  // namespace pyfiction
