@@ -109,8 +109,8 @@ int main()  // NOLINT
             }
             else
             {
-                max_relocations =
-                    static_cast<uint64_t>(gate_level_layout.x()) + 1 * static_cast<uint64_t>(gate_level_layout.y()) + 1;
+                max_relocations = (static_cast<uint64_t>(gate_level_layout.x()) + 1) *
+                                  (static_cast<uint64_t>(gate_level_layout.y()) + 1);
             }
             // perform post-layout optimization
             post_layout_optimization<gate_lyt>(gate_level_layout, post_layout_optimization_params,

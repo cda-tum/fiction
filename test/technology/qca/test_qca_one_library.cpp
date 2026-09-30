@@ -21,7 +21,6 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/layout_base.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/traits.hpp>

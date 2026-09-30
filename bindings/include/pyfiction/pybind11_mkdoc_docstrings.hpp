@@ -4550,9 +4550,9 @@ static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_cube
 R"doc(Creates a cube coordinate from its three axes.
 
 Args:
-    x_: x coordinate.
-    y_: y coordinate.
-    z_: z coordinate.
+    cube_x: x coordinate.
+    cube_y: y coordinate.
+    cube_z: z coordinate.
 
 )doc";
 

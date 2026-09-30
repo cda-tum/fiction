@@ -22,7 +22,6 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/synthesis/network_balancing.hpp>

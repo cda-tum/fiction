@@ -33,6 +33,8 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <cstddef>
+
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;

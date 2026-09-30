@@ -197,14 +197,15 @@ int main()  // NOLINT
             write_sqd_layout(cell_level_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // log results
-            bestagon_exp(
-                benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
-                depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
-                static_cast<uint64_t>(gate_level_layout->x()) + 1, static_cast<uint64_t>(gate_level_layout->y()) + 1,
-                static_cast<uint64_t>(gate_level_layout->x()) + 1 * static_cast<uint64_t>(gate_level_layout->y()) + 1,
-                gate_level_layout->num_gates(), gate_level_layout->num_wires(), cp_tp.critical_path_length,
-                cp_tp.throughput, mockturtle::to_seconds(exact_stats.time_total), *eq, cell_level_layout.num_dots(),
-                area_stats.area);
+            bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
+                         cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
+                         depth_mapped_network.depth(), static_cast<uint64_t>(gate_level_layout->x()) + 1,
+                         static_cast<uint64_t>(gate_level_layout->y()) + 1,
+                         (static_cast<uint64_t>(gate_level_layout->x()) + 1) *
+                             (static_cast<uint64_t>(gate_level_layout->y()) + 1),
+                         gate_level_layout->num_gates(), gate_level_layout->num_wires(), cp_tp.critical_path_length,
+                         cp_tp.throughput, mockturtle::to_seconds(exact_stats.time_total), *eq,
+                         cell_level_layout.num_dots(), area_stats.area);
         }
         else  // no layout was obtained
         {

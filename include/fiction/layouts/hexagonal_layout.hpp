@@ -152,11 +152,14 @@ class hexagonal_layout : public layout_base
         /**
          * Creates a cube coordinate from its three axes.
          *
-         * @param x_ x coordinate.
-         * @param y_ y coordinate.
-         * @param z_ z coordinate.
+         * @param cube_x x coordinate.
+         * @param cube_y y coordinate.
+         * @param cube_z z coordinate.
          */
-        constexpr cube_coordinate(const int32_t x_, const int32_t y_, const int32_t z_) noexcept : x{x_}, y{y_}, z{z_}
+        constexpr cube_coordinate(const int32_t cube_x, const int32_t cube_y, const int32_t cube_z) noexcept :
+                x{cube_x},
+                y{cube_y},
+                z{cube_z}
         {}
         /**
          * Compares against another cube coordinate for equality.
