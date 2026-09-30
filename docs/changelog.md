@@ -158,6 +158,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `noexcept`, so an exception of a progress callback propagates to the caller
   - **Breaking:** `fcn::area_params` takes the layout type whose cell dimensions it defaults to, e.g.,
     `area_params<qca::layout>`
+  - **Breaking:** `exact` and `orthogonal` take `layout_arrangement` in their parameters for shifted Cartesian and
+    hexagonal layouts and throw `std::invalid_argument` without it. `graph_oriented_layout_design` requires a
+    Cartesian layout.
 
 - Build system:
 
@@ -221,6 +224,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     take `int32_t` coordinates and an `int8_t` basis index.
   - Simulation results store charge states and energy beside one shared layout and potential
     landscape instead of copying a `charge_distribution_surface` for every configuration
+  - **Breaking:** `hexagonal_layout` and `shifted_cartesian_layout` take their `layouts::arrangement` as a constructor
+    argument instead of a template parameter, and `get_arrangement()` returns it. The tag types such as `odd_row_hex` and
+    the `has_*_arrangement_v` and `has_*_orientation_v` traits are gone. `types.hpp` defines one gate-level layout
+    per family: `cart_gate_clk_lyt`, `shifted_cart_gate_clk_lyt`, and `hex_gate_clk_lyt`.
 
 - Dependencies:
 
@@ -240,6 +247,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
   - The Bestagon and hexagonalization experiments compute their unchanged area from the cell-grid extent.
   - Gate-layout experiments use direct capability headers and simpler status reporting.
+  - The Bestagon, defect-aware, and on-the-fly experiments pass the even-row arrangement at runtime with unchanged results.
 
 - Gate libraries:
   - **Breaking:** `apply_gate_library<GateLibrary>` and `apply_parameterized_gate_library<GateLibrary>` return the
@@ -248,6 +256,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `apply_gate_library_to_defective_surface` and `apply_parameterized_gate_library_to_defective_surface`
     take the defective surface as a `sidb::layout` and return one that carries its defects.
     SiDB gate placement, surface analysis, and circuit design no longer take a cell-layout template argument.
+  - The Bestagon library throws `std::invalid_argument` for layouts that shift columns instead of failing to compile.
 
 - I/O:
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
@@ -347,6 +356,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Breaking:** Test files are renamed to `test_<header>.cpp` and the `test/` tree mirrors
   `include/fiction/`. CTest case names gain the `test_` prefix accordingly
+  - `read_fgl_layout` creates shifted Cartesian and hexagonal layouts with the arrangement stored in the file; reading into
+    a layout with another arrangement throws `fgl_parsing_error`.
 
 - The `pyfiction` binding sources under `bindings/` mirror the C++ namespaces: each binding sits
   in the directory of its namespace under the name of the header it wraps, and every directory
@@ -399,6 +410,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - **Breaking:** `critical_temperature_stats.is_ground_state_transparent` is renamed
     `energy_between_ground_state_and_first_erroneous`, the member it always exposed
+
+  - **Breaking:** `shifted_cartesian_layout`, `hexagonal_layout`, and their gate layouts take a `layouts.arrangement` as
+    first argument. One class per family replaces the per-arrangement classes, and `exact` and `orthogonal` parameters
+    expose `layout_arrangement`.
 
 ### Removed
 
