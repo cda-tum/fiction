@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import arrangement, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import arrangement, hexagonal_gate_layout, shifted_cartesian_gate_layout
 from mnt.pyfiction.mol_qca import mol_qca_layout
 from mnt.pyfiction.qca import qca_layout
 from mnt.pyfiction.sidb import sidb_layout
@@ -89,6 +89,14 @@ def test_topolinano_rejects_row_arrangements(shell: Shell, shift: arrangement) -
     """ToPoliNano requires column shifts and leaves the cell store empty on rejection."""
     shell.session.gate_layouts.add(shifted_cartesian_gate_layout(shift, (1, 1), "2DDWave"))
     assert "needs a column-shifted Cartesian layout" in shell.fails("cell -l topolinano")
+    assert len(shell.session.cell_layouts) == 0
+
+
+@pytest.mark.parametrize("shift", [arrangement.ODD_COLUMN, arrangement.EVEN_COLUMN])
+def test_bestagon_rejects_column_arrangements(shell: Shell, shift: arrangement) -> None:
+    """Bestagon requires pointy-top layouts and leaves the cell store empty on rejection."""
+    shell.session.gate_layouts.add(hexagonal_gate_layout(shift, (1, 1), "2DDWave"))
+    assert "needs a pointy-top hexagonal layout" in shell.fails("cell -l bestagon")
     assert len(shell.session.cell_layouts) == 0
 
 

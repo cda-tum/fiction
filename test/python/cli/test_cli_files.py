@@ -335,6 +335,15 @@ def test_implicit_gate_layout_filename(mux21_shell: Shell, tmp_path: Path, monke
     assert (tmp_path / "mux21.fgl").is_file()
 
 
+@pytest.mark.parametrize("command", ["read", "read_fgl"])
+def test_read_fgl_rejects_another_arrangement(shell: Shell, tmp_path: Path, command: str) -> None:
+    """A topology mismatch leaves the gate layout store empty."""
+    path = tmp_path / "odd_column.fgl"
+    write_fgl_layout(make_gate_layout("odd_column_cartesian", (0, 0)), str(path))
+    assert "not an even_column_cartesian layout" in shell.fails(f'{command} "{path}" --topology even_column_cartesian')
+    assert len(shell.session.gate_layouts) == 0
+
+
 def test_read_fgl_round_trips_a_gate_layout(shell: Shell, tmp_path: Path, resource: Callable[[str], str]) -> None:
     """read_fgl loads a layout written by `write_fgl`, under the topology the flag names."""
     shell.ok(f'read_verilog "{resource("mux21.v")}"')
