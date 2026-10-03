@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -750,6 +750,9 @@ test = [
     { name = "pytest-xdist" },
 ]
 
+[package.group-requires-python]
+docs = ">=3.12"
+
 [package.metadata]
 requires-dist = [
     { name = "aigverse", specifier = ">=0.1.5" },
@@ -762,7 +765,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 build = [
     { name = "nanobind", specifier = "~=3.1.0" },
-    { name = "scikit-build-core", specifier = "~=1.0.3" },
+    { name = "scikit-build-core", specifier = "~=1.1.0" },
     { name = "vcs-versioning", specifier = "~=2.5.0" },
 ]
 dev = [
@@ -772,7 +775,7 @@ dev = [
     { name = "pytest-cov", specifier = ">=7.1.0" },
     { name = "pytest-sugar", specifier = ">=1.1.1" },
     { name = "pytest-xdist", specifier = ">=3.8.0" },
-    { name = "scikit-build-core", specifier = "~=1.0.3" },
+    { name = "scikit-build-core", specifier = "~=1.1.0" },
     { name = "vcs-versioning", specifier = "~=2.5.0" },
 ]
 docs = [
@@ -1152,7 +1155,7 @@ wheels = [
 
 [[package]]
 name = "scikit-build-core"
-version = "1.0.3"
+version = "1.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
@@ -1161,9 +1164,9 @@ dependencies = [
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8d/7c/0f69b0c7150ce4bcee78c199fe3b7e03a6e01578451bd5d5d1a58beb32f9/scikit_build_core-1.0.3.tar.gz", hash = "sha256:a4d7a05978ee37975c37743510c8991e2debce7ef83afb0a07c0c576fd4f16e8", size = 477539, upload-time = "2026-07-12T05:08:30.298Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b2/1a/8c00b19c0a1e7acf890676af2efa430339d38e59fa9437f2aab8517af3f4/scikit_build_core-1.1.1.tar.gz", hash = "sha256:e347a59193c878ac56a363e57506938652a6dd8c965790cb1cbc6bc7e8d5abad", size = 516192, upload-time = "2026-10-02T19:18:37.596Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/b0/7ad8fa9aebb0835b2e20afebf1483cbe175d1612fe01e85042ce9ced8755/scikit_build_core-1.0.3-py3-none-any.whl", hash = "sha256:ae95427b7d3c14a6cf8bbfd4d901f6138ab64c99e20cbe8ea7d75cd26093f085", size = 278294, upload-time = "2026-07-12T05:08:28.725Z" },
+    { url = "https://files.pythonhosted.org/packages/01/1b/83913d6d5c6a7f8ad5bf5d67b2d57ab09475f1bb9dd0c7a3f44067d59b90/scikit_build_core-1.1.1-py3-none-any.whl", hash = "sha256:6f6d6cf600e2e9639fd258ecd11cfc19bd189354b968916a519c6793e7e26237", size = 293450, upload-time = "2026-10-02T19:18:36.087Z" },
 ]
 
 [[package]]
