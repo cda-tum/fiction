@@ -19,6 +19,7 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/synthesis/technology_mapping.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
@@ -65,7 +66,7 @@ using namespace fiction::synthesis;
 
 int main()  // NOLINT
 {
-    using gate_lyt = hex_even_row_gate_clk_lyt;
+    using gate_lyt = hex_gate_clk_lyt;
 
     design_gates_params design_gate_params{};
     design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
@@ -110,7 +111,7 @@ int main()  // NOLINT
             }
         });
 
-    const auto lattice_tiling = gate_lyt{{11, 30}};
+    const auto lattice_tiling = gate_lyt{arrangement::EVEN_ROW, {11, 30}};
 
     experiments::experiment<std::string, double, uint64_t, bool, uint64_t> sidb_circuits_with_defects{
         "sidb_circuits_with_defects", "benchmark", "runtime", "number of aspect ratios", "equivalent", "#SiDBs"};

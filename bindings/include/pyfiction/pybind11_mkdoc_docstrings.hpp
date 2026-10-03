@@ -991,6 +991,9 @@ Returns:
     ToPoliNano gate representation of `t` including I/Os, rotation,
     etc.
 
+Raises:
+    std::invalid_argument: If `lyt` shifts rows instead of columns.
+
 )doc";
 
 static const char *mkd_doc_fiction_inml_topolinano_library_topolinano_library = R"doc()doc";
@@ -1008,6 +1011,18 @@ static const char *mkd_doc_fiction_is_hexagonal_layout = R"doc()doc";
 static const char *mkd_doc_fiction_is_shifted_cartesian_layout = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_virtual_network_type = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_arrangement =
+R"doc(Arrangement of the shifted rows or columns of a shifted Cartesian or
+hexagonal layout.)doc";
+
+static const char *mkd_doc_fiction_layouts_arrangement_EVEN_COLUMN = R"doc(Even columns are shifted.)doc";
+
+static const char *mkd_doc_fiction_layouts_arrangement_EVEN_ROW = R"doc(Even rows are shifted.)doc";
+
+static const char *mkd_doc_fiction_layouts_arrangement_ODD_COLUMN = R"doc(Odd columns are shifted.)doc";
+
+static const char *mkd_doc_fiction_layouts_arrangement_ODD_ROW = R"doc(Odd rows are shifted.)doc";
 
 static const char *mkd_doc_fiction_layouts_bounding_box_2d =
 R"doc(A 2D bounding box object that computes a minimum-sized box around all
@@ -2163,33 +2178,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_get_scheme_2 =
-R"doc(Returns a clocking scheme by name for layouts of type `Lyt`.
-`2DDWAVEHEX` takes the hexagonal arrangement of `Lyt`. See the non-
-template overload for the accepted names.
-
-Args:
-    scheme_name: Name of the desired clocking scheme.
-
-Template Args:
-    Lyt: Layout type.
-
-Returns:
-    Clocking scheme that matches `scheme_name`, or `std::nullopt` if
-    no clocking scheme by that name exists.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_clocking_hex_arrangement = R"doc(Arrangement of the shifted rows or columns of a hexagonal layout.)doc";
-
-static const char *mkd_doc_fiction_layouts_clocking_hex_arrangement_EVEN_COLUMN = R"doc(Even columns are shifted.)doc";
-
-static const char *mkd_doc_fiction_layouts_clocking_hex_arrangement_EVEN_ROW = R"doc(Even rows are shifted.)doc";
-
-static const char *mkd_doc_fiction_layouts_clocking_hex_arrangement_ODD_COLUMN = R"doc(Odd columns are shifted.)doc";
-
-static const char *mkd_doc_fiction_layouts_clocking_hex_arrangement_ODD_ROW = R"doc(Odd rows are shifted.)doc";
-
 static const char *mkd_doc_fiction_layouts_clocking_is_linear =
 R"doc(Checks whether a given clocking scheme is registered as a cycle-free
 one. These currently are
@@ -3115,89 +3103,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_even_column_cartesian =
-R"doc( 
-```
-+-------+       +-------+
-|       |       |       |
-+-------+ (1,0) +-------+ (3,0) |
-|       |       |       |       |
-| (0,0) +-------+ (2,0) +-------+
-|       |       |       |       |
-+-------+ (1,1) +-------+ (3,1) |
-|       |       |       |       |
-| (0,1) +-------+ (2,1) +-------+
-|       |       |       |       |
-+-------+ (1,2) +-------+ (3,2) |
-|       |       |       |
-+-------+       +-------+
-```)doc";
-
-static const char *mkd_doc_fiction_layouts_even_column_hex =
-R"doc( 
-```
-_____         _____
-/     \       /     \
-_____/ (1,0) \_____/ (3,0) \
-/     \       /     \       /
-/ (0,0) \_____/ (2,0) \_____/
-\       /     \       /     \
-\_____/ (1,1) \_____/ (3,1) \
-/     \       /     \       /
-/ (0,1) \_____/ (2,1) \_____/
-\       /     \       /     \
-\_____/ (1,2) \_____/ (3,2) \
-\       /     \       /
-\_____/       \_____/
-```)doc";
-
-static const char *mkd_doc_fiction_layouts_even_row_cartesian =
-R"doc( 
-```
-+-------+-------+-------+
-|       |       |       |
-| (0,0) | (1,0) | (2,0) |
-|       |       |       |
-+---+---+---+---+---+---+---+
-|       |       |       |
-| (0,1) | (1,1) | (2,1) |
-|       |       |       |
-+---+---+---+---+---+---+---+
-|       |       |       |
-| (0,2) | (1,2) | (2,2) |
-|       |       |       |
-+-------+-------+-------+
-```)doc";
-
-static const char *mkd_doc_fiction_layouts_even_row_hex =
-R"doc( 
-```
-/ \     / \     / \
-/     \ /     \ /     \
-| (0,0) | (1,0) | (2,0) |
-|       |       |       |
-/ \     / \     / \     /
-/     \ /     \ /     \ /
-| (0,1) | (1,1) | (2,1) |
-|       |       |       |
-\     / \     / \     / \
-\ /     \ /     \ /     \
-| (0,2) | (1,2) | (2,2) |
-|       |       |       |
-\     / \     / \     /
-\ /     \ /     \ /
-```)doc";
-
-static const char *mkd_doc_fiction_layouts_flat_top_hex =
-R"doc( 
-```
-_____
-/     \
-/       \
-\       /
-\_____/
-```)doc";
-
 static const char *mkd_doc_fiction_layouts_gate_level_layout =
 R"doc(A gate-level FCN layout owns gates, clocking, synchronization delays,
 and persistent obstructions. Clock zones are tiles in the coordinate
@@ -3703,6 +3608,33 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_3 =
+R"doc(Standard constructor for coordinate layouts with shifted rows or
+columns. Creates a named gate-level layout of the given arrangement
+and aspect ratio. To this end, it calls `CoordinateLayout`'s standard
+constructor.
+
+Args:
+    a: Arrangement of the shifted rows or columns.
+    ar: Highest possible position in the layout.
+    name: Layout name.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_4 =
+R"doc(Standard constructor for coordinate layouts with shifted rows or
+columns. Creates a gate-level layout of the given arrangement and
+aspect ratio and clocks it via the given clocking scheme. To this end,
+it calls `CoordinateLayout`'s standard constructor.
+
+Args:
+    a: Arrangement of the shifted rows or columns.
+    ar: Highest possible position in the layout.
+    scheme: Clocking scheme to apply to this layout.
+    name: Layout name.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_5 =
 R"doc(Copy constructor from another layout's storage.
 
 Args:
@@ -3710,7 +3642,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_4 =
+static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_6 =
 R"doc(Copy constructor from another layout's storage.
 
 Args:
@@ -3719,7 +3651,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_5 =
+static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_7 =
 R"doc(Copy constructor from another `CoordinateLayout`.
 
 Args:
@@ -4789,27 +4721,109 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_value = R"doc()doc"
 static const char *mkd_doc_fiction_layouts_gate_level_layout_visited = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout =
-R"doc(A layout type that utilizes offset coordinates to represent a
-hexagonal grid. Its faces are organized in an offset coordinate system
-as provided. Hexagons can be in the pointy_top_hex or flat_top_hex
-orientation. Based on that, two respectively possible coordinate
-systems emerge accordingly: odd_row_hex and even_row_hex for pointy
-tops and odd_column_hex and even_column_hex for flat tops. All are
-sketched in ASCII above.
+R"doc( A layout type that utilizes offset coordinates to represent a
+ hexagonal grid. Its faces are organized in an offset coordinate
+ system as provided. The arrangement fixed at construction selects
+ which rows or columns are shifted. Row arrangements yield pointy-top
+ hexagons, column arrangements flat-top hexagons. The four
+ arrangements look as follows.
 
-Other representations would be using cube or axial coordinates for
-instance, but since we want the layouts to be rectangular-ish, offset
-coordinates make the most sense here.
+ `arrangement::ODD_ROW`:
+ 
+```
+/ \     / \     / \
+/     \ /     \ /     \
+| (0,0) | (1,0) | (2,0) |
+|       |       |       |
+\     / \     / \     / \
+\ /     \ /     \ /     \
+| (0,1) | (1,1) | (2,1) |
+|       |       |       |
+/ \     / \     / \     /
+/     \ /     \ /     \ /
+| (0,2) | (1,2) | (2,2) |
+|       |       |       |
+\     / \     / \     /
+\ /     \ /     \ /
+```
 
-https://www.redblobgames.com/grids/hexagons/ is a wonderful resource
-on the topic.
+
+
+
+ `arrangement::EVEN_ROW`:
+ 
+```
+/ \     / \     / \
+/     \ /     \ /     \
+| (0,0) | (1,0) | (2,0) |
+|       |       |       |
+/ \     / \     / \     /
+/     \ /     \ /     \ /
+| (0,1) | (1,1) | (2,1) |
+|       |       |       |
+\     / \     / \     / \
+\ /     \ /     \ /     \
+| (0,2) | (1,2) | (2,2) |
+|       |       |       |
+\     / \     / \     /
+\ /     \ /     \ /
+```
+
+
+
+
+ `arrangement::ODD_COLUMN`:
+ 
+```
+_____         _____
+/     \       /     \
+/ (0,0) \_____/ (2,0) \_____
+\       /     \       /     \
+\_____/ (1,0) \_____/ (3,0) \
+/     \       /     \       /
+/ (0,1) \_____/ (2,1) \_____/
+\       /     \       /     \
+\_____/ (1,1) \_____/ (3,1) \
+/     \       /     \       /
+/ (0,2) \_____/ (2,2) \_____/
+\       /     \       /
+\_____/       \_____/
+```
+
+
+
+
+ `arrangement::EVEN_COLUMN`:
+ 
+```
+_____         _____
+/     \       /     \
+_____/ (1,0) \_____/ (3,0) \
+/     \       /     \       /
+/ (0,0) \_____/ (2,0) \_____/
+\       /     \       /     \
+\_____/ (1,1) \_____/ (3,1) \
+/     \       /     \       /
+/ (0,1) \_____/ (2,1) \_____/
+\       /     \       /     \
+\_____/ (1,2) \_____/ (3,2) \
+\       /     \       /
+\_____/       \_____/
+```
+
+
+
+
+ Other representations would be using cube or axial coordinates for
+ instance, but since we want the layouts to be rectangular-ish, offset
+ coordinates make the most sense here.
+
+ https://www.redblobgames.com/grids/hexagons/ is a wonderful resource
+ on the topic.
 
 Template Args:
     OffsetCoordinateType: The coordinate implementation to be used.
                           Offset coordinates are required.
-    HexagonalCoordinateSystem: One of the following: odd_row_hex,
-                               even_row_hex, odd_column_hex,
-                               even_column_hex.
     CubeCoordinateType: Internally, cube coordinates are needed for
                         certain algorithms or calculations.)doc";
 
@@ -4846,12 +4860,12 @@ Returns:
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_adjacent_opposite_coordinates =
 R"doc(Returns a container that contains all coordinates pairs of opposing
 adjacent coordinates with respect to a given one. In this hexagonal
-layout, the container content depends on the hexagonal orientation.
+layout, the container content depends on the arrangement.
 
-In case of a pointy_top_hex orientation, the container will contain
+In case of a row arrangement (pointy-top), the container will contain
 (`east(c)`, `west(c)`), (`north_east(c)`, `south_west(c)`),
-(`north_west(c)`, `south_east(c)`). In case of a flat_top_hex
-orientation, the container will contain (`north(c)`, `south(c)`),
+(`north_west(c)`, `south_east(c)`). In case of a column arrangement
+(flat-top), the container will contain (`north(c)`, `south(c)`),
 (`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`)
 instead.
 
@@ -4989,12 +5003,12 @@ Template Args:
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_foreach_adjacent_opposite_coordinates =
 R"doc(Applies a function to all opposing coordinate pairs adjacent to a
 given one. In this hexagonal layout, the function application depends
-on the hexagonal orientation.
+on the arrangement.
 
-In case of a pointy_top_hex orientation, the function will apply to
+In case of a row arrangement (pointy-top), the function will apply to
 (`east(c)`, `west(c)`), (`north_east(c)`, `south_west(c)`),
-(`north_west(c)`, `south_east(c)`). In case of a flat_top_hex
-orientation, the function will apply to (`north(c)`, `south(c)`),
+(`north_west(c)`, `south_east(c)`). In case of a column arrangement
+(flat-top), the function will apply to (`north(c)`, `south(c)`),
 (`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`)
 instead.
 
@@ -5049,6 +5063,14 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_get_arrangement =
+R"doc(Returns the arrangement of the shifted rows or columns.
+
+Returns:
+    Arrangement fixed at construction.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_ground_coordinates =
 R"doc(Returns a range of all coordinates accessible in the layout's ground
 layer between `start` and `stop`. The iteration order is the same as
@@ -5069,11 +5091,14 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout =
 R"doc(Standard constructor. The given aspect ratio points to the highest
-possible coordinate in the layout. That means in the even_column_hex
-ASCII layout representation above `ar = (3,2)`. Consequently, with `ar
-= (0,0)`, the layout has exactly one coordinate.
+possible coordinate in the layout. That means in the
+`arrangement::EVEN_COLUMN` ASCII layout representation above `ar =
+(3,2)`. Consequently, with `ar = (0,0)`, the layout has exactly one
+coordinate.
 
 Args:
+    a: Arrangement of the shifted rows or columns. It cannot change
+       after construction.
     ar: Highest possible position in the layout.
 
 )doc";
@@ -5087,11 +5112,20 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage = R"doc(State that all copies of a layout share.)doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_dimension = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_dimension = R"doc(Highest possible position in the layout.)doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_hexagonal_layout_storage = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_hexagonal_layout_storage =
+R"doc(Creates the storage of a layout.
+
+Args:
+    ar: Highest possible position in the layout.
+    a: Arrangement of the shifted rows or columns.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_shift = R"doc(Arrangement of the shifted rows or columns.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_is_above =
 R"doc(Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
@@ -5128,8 +5162,8 @@ Args:
 
 Returns:
     `true` iff `c2` is directly adjacent to `c1` in one of the six
-    different ordinal directions possible for the layout's hexagonal
-    orientation.
+    different ordinal directions possible for the layout's
+    arrangement.
 
 )doc";
 
@@ -5407,8 +5441,8 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_north_east =
 R"doc(Returns the coordinate that is located in north-eastern direction of a
-given coordinate `c`. Depending on the hexagonal orientation of the
-layout, the dimension values of the returned coordinate may differ.
+given coordinate `c`. Depending on the arrangement of the layout, the
+dimension values of the returned coordinate may differ.
 
 Args:
     c: Coordinate whose north-eastern counterpart is desired.
@@ -5420,8 +5454,8 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_north_west =
 R"doc(Returns the coordinate that is located in north-western direction of a
-given coordinate `c`. Depending on the hexagonal orientation of the
-layout, the dimension values of the returned coordinate may differ.
+given coordinate `c`. Depending on the arrangement of the layout, the
+dimension values of the returned coordinate may differ.
 
 Args:
     c: Coordinate whose north-western counterpart is desired.
@@ -5467,8 +5501,8 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_south_east =
 R"doc(Returns the coordinate that is located in south-eastern direction of a
-given coordinate `c`. Depending on the hexagonal orientation of the
-layout, the dimension values of the returned coordinate may differ.
+given coordinate `c`. Depending on the arrangement of the layout, the
+dimension values of the returned coordinate may differ.
 
 Args:
     c: Coordinate whose south-eastern counterpart is desired.
@@ -5480,8 +5514,8 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_south_west =
 R"doc(Returns the coordinate that is located in south-western direction of a
-given coordinate `c`. Depending on the hexagonal orientation of the
-layout, the dimension values of the returned coordinate may differ.
+given coordinate `c`. Depending on the arrangement of the layout, the
+dimension values of the returned coordinate may differ.
 
 Args:
     c: Coordinate whose south-western counterpart is desired.
@@ -5516,7 +5550,7 @@ Args:
 
 Returns:
     Cube coordinate representing `offset_coord` in the layout's
-    hexagonal orientation.
+    arrangement.
 
 )doc";
 
@@ -5531,7 +5565,7 @@ Args:
 
 Returns:
     Offset coordinate representing `cube_coord` in the layout's
-    hexagonal orientation.
+    arrangement.
 
 )doc";
 
@@ -5588,20 +5622,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_horizontal_shift_cartesian =
-R"doc( 
-```
-+-------+
-|       |
-|       |
-|       |
-+---+---+---+
-|       |
-|       |
-|       |
-+-------+
-```)doc";
-
 static const char *mkd_doc_fiction_layouts_io_detail_fgl_xml_text =
 R"doc(Escape user-provided text for an XML element.
 
@@ -5610,6 +5630,53 @@ Args:
 
 Returns:
     XML text preserving the original label when parsed.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer =
+R"doc(Base class of the gate-level layout DOT drawers for layouts with
+shifted rows or columns. It draws each row or column in one rank and
+shifts every other one by an invisible node. The derived class chooses
+the rank separation and the node shape.
+
+Template Args:
+    Lyt: Gate-level layout type with shifted rows or columns.
+    ClockColors: Flag to toggle the drawing of clock colors instead of
+                 gate type colors.
+    DrawIndexes: Flag to toggle the drawing of node indices.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_additional_graph_attributes = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_enforce_topology = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_invisible_node =
+R"doc(Returns the name of the invisible node that shifts a row or column.
+
+Args:
+    i: Index of the row or column.
+
+Returns:
+    Node name.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_rank_separation =
+R"doc(Returns the DOT value of the `ranksep` graph attribute.
+
+Returns:
+    Separation of the ranks.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_shift_line =
+R"doc(Shifts a row or column by placing an invisible node in its rank and
+connecting the node to the neighboring rows or columns.
+
+Args:
+    lyt: Layout to draw.
+    index: Index of the row or column.
+    is_row: Whether `index` names a row. Otherwise, it names a column.
+    stream: Stream to write the DOT statements to.
 
 )doc";
 
@@ -5645,11 +5712,25 @@ function in a binary or hexadecimal form.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_is = R"doc(The input stream from which the gate-level layout is read.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_lyt = R"doc(The layout which will be altered based on the parsed information.)doc";
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_layout_name = R"doc(The name of a newly created layout.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_fgl_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_fgl_layout_impl =
+R"doc(Create a reader that constructs a layout from the stream.
 
-static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_fgl_layout_impl_2 = R"doc()doc";
+Args:
+    s: Input stream.
+    name: Name of the new layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_fgl_layout_impl_2 =
+R"doc(Create a reader for an existing layout.
+
+Args:
+    tgt: Target layout.
+    s: Input stream.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_number =
 R"doc(Read a nonnegative integer without truncation or trailing characters.
@@ -5684,6 +5765,10 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_run = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_target =
+R"doc(The layout to read into. It holds the target layout given by the
+caller or is created from the file.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl = R"doc()doc";
 
@@ -5741,21 +5826,9 @@ Template Args:
                  gate type colors.
     DrawIndexes: Flag to toggle the drawing of node indices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_additional_graph_attributes = R"doc()doc";
-
 static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_additional_node_attributes = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_enforce_same_hexagonal_column = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_enforce_same_hexagonal_row = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_enforce_topology = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_invisible_node = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_shift_column = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_shift_row = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_rank_separation = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer =
 R"doc(An extended gate-level layout DOT drawer for shifted Cartesian
@@ -5767,21 +5840,9 @@ Template Args:
                  gate type colors.
     DrawIndexes: Flag to toggle the drawing of node indices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_additional_graph_attributes = R"doc()doc";
-
 static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_additional_node_attributes = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_enforce_same_shifted_column = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_enforce_same_shifted_row = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_enforce_topology = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_invisible_node = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_shift_column = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_shift_row = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_rank_separation = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_io_print_cell_level_layout =
 R"doc(Writes a simplified 2D representation of a cell grid layout, i.e., a
@@ -6015,6 +6076,51 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_is_odd_arrangement =
+R"doc(Checks whether an arrangement shifts odd rows or columns.
+
+Args:
+    a: Arrangement to check.
+
+Returns:
+    `true` iff `a` is `ODD_ROW` or `ODD_COLUMN`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_is_row_arrangement =
+R"doc(Checks whether an arrangement shifts rows, i.e., whether the layout is
+pointy-top (hexagonal) or horizontally shifted (Cartesian).
+
+Args:
+    a: Arrangement to check.
+
+Returns:
+    `true` iff `a` is `ODD_ROW` or `EVEN_ROW`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_make_gate_level_layout =
+R"doc(Creates an empty gate-level layout of type `Lyt`. Cartesian layouts
+ignore the arrangement.
+
+Args:
+    a: Arrangement of the shifted rows or columns. Shifted Cartesian
+       and hexagonal layouts require it.
+    ar: Highest possible position in the layout.
+    scheme: Clocking scheme to apply to the layout.
+
+Template Args:
+    Lyt: Gate-level layout type.
+
+Returns:
+    Empty layout.
+
+Raises:
+    std::invalid_argument: If `Lyt` is a shifted Cartesian or
+                           hexagonal layout and `a` is empty.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_normalize_layout_coordinates =
 R"doc(Returns a copy of the given cell grid layout whose cells are shifted
 towards the origin, so that the smallest occupied x- and y-coordinates
@@ -6142,90 +6248,6 @@ static const char *mkd_doc_fiction_layouts_obstructions_obstructed_connections =
 
 static const char *mkd_doc_fiction_layouts_obstructions_obstructed_coordinates = R"doc(Explicitly blocked positions.)doc";
 
-static const char *mkd_doc_fiction_layouts_odd_column_cartesian =
-R"doc( 
-```
-+-------+       +-------+
-|       |       |       |
-| (0,0) +-------+ (2,0) +-------+
-|       |       |       |       |
-+-------+ (1,0) +-------+ (3,0) |
-|       |       |       |       |
-| (0,1) +-------+ (2,1) +-------+
-|       |       |       |       |
-+-------+ (1,1) +-------+ (3,1) |
-|       |       |       |       |
-| (0,2) +-------+ (2,2) +-------+
-|       |       |       |
-+-------+       +-------+
-```)doc";
-
-static const char *mkd_doc_fiction_layouts_odd_column_hex =
-R"doc( 
-```
-_____         _____
-/     \       /     \
-/ (0,0) \_____/ (2,0) \_____
-\       /     \       /     \
-\_____/ (1,0) \_____/ (3,0) \
-/     \       /     \       /
-/ (0,1) \_____/ (2,1) \_____/
-\       /     \       /     \
-\_____/ (1,1) \_____/ (3,1) \
-/     \       /     \       /
-/ (0,2) \_____/ (2,2) \_____/
-\       /     \       /
-\_____/       \_____/
-```)doc";
-
-static const char *mkd_doc_fiction_layouts_odd_row_cartesian =
-R"doc( 
-```
-+-------+-------+-------+
-|       |       |       |
-| (0,0) | (1,0) | (2,0) |
-|       |       |       |
-+---+---+---+---+---+---+---+
-|       |       |       |
-| (0,1) | (1,1) | (2,1) |
-|       |       |       |
-+---+---+---+---+---+---+---+
-|       |       |       |
-| (0,2) | (1,2) | (2,2) |
-|       |       |       |
-+-------+-------+-------+
-```)doc";
-
-static const char *mkd_doc_fiction_layouts_odd_row_hex =
-R"doc( 
-```
-/ \     / \     / \
-/     \ /     \ /     \
-| (0,0) | (1,0) | (2,0) |
-|       |       |       |
-\     / \     / \     / \
-\ /     \ /     \ /     \
-| (0,1) | (1,1) | (2,1) |
-|       |       |       |
-/ \     / \     / \     /
-/     \ /     \ /     \ /
-| (0,2) | (1,2) | (2,2) |
-|       |       |       |
-\     / \     / \     /
-\ /     \ /     \ /
-```)doc";
-
-static const char *mkd_doc_fiction_layouts_pointy_top_hex =
-R"doc( 
-```
-/ \
-/     \
-|       |
-|       |
-\     /
-\ /
-```)doc";
-
 static const char *mkd_doc_fiction_layouts_port_direction_to_coordinate =
 R"doc(Port directions address coordinates relative to each other by
 specifying cardinal directions. This function converts such a relative
@@ -6289,33 +6311,127 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_require_arrangement =
+R"doc(Rejects a missing arrangement for gate-level layout types that need
+one.
+
+Args:
+    a: Arrangement of the shifted rows or columns the caller provides.
+
+Template Args:
+    Lyt: Gate-level layout type.
+
+Raises:
+    std::invalid_argument: If `Lyt` is a shifted Cartesian or
+                           hexagonal layout and `a` is empty.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_shifted_cartesian_layout =
-R"doc(A layout type that utilizes offset coordinates to represent a
-Cartesian layout with shifted coordinates. Its faces are organizes in
-an offset coordinate system as provided. These can either be the
-horizontal_shift_cartesian or vertical_shift_cartesian orientation.
-Based on that, two respectively possible coordinate systems emerge
-accordingly: odd_row_cartesian and even_row_cartesian for horizontal
-shifts and odd_column_cartesian and even_column_cartesian for vertical
-shifts. All are sketched in ASCII above.
+R"doc( A layout type that utilizes offset coordinates to represent a
+ Cartesian layout with shifted coordinates. Its faces are organized in
+ an offset coordinate system as provided. The arrangement fixed at
+ construction selects which rows or columns are shifted. Row
+ arrangements shift horizontally, column arrangements vertically. The
+ four arrangements look as follows.
+
+ `arrangement::ODD_ROW`:
+ 
+```
++-------+-------+-------+
+|       |       |       |
+| (0,0) | (1,0) | (2,0) |
+|       |       |       |
++---+---+---+---+---+---+---+
+|       |       |       |
+| (0,1) | (1,1) | (2,1) |
+|       |       |       |
++---+---+---+---+---+---+---+
+|       |       |       |
+| (0,2) | (1,2) | (2,2) |
+|       |       |       |
++-------+-------+-------+
+```
+
+
+
+
+ `arrangement::EVEN_ROW`:
+ 
+```
++-------+-------+-------+
+|       |       |       |
+| (0,0) | (1,0) | (2,0) |
+|       |       |       |
++---+---+---+---+---+---+---+
+|       |       |       |
+| (0,1) | (1,1) | (2,1) |
+|       |       |       |
++---+---+---+---+---+---+---+
+|       |       |       |
+| (0,2) | (1,2) | (2,2) |
+|       |       |       |
++-------+-------+-------+
+```
+
+
+
+
+ `arrangement::ODD_COLUMN`:
+ 
+```
++-------+       +-------+
+|       |       |       |
+| (0,0) +-------+ (2,0) +-------+
+|       |       |       |       |
++-------+ (1,0) +-------+ (3,0) |
+|       |       |       |       |
+| (0,1) +-------+ (2,1) +-------+
+|       |       |       |       |
++-------+ (1,1) +-------+ (3,1) |
+|       |       |       |       |
+| (0,2) +-------+ (2,2) +-------+
+|       |       |       |
++-------+       +-------+
+```
+
+
+
+
+ `arrangement::EVEN_COLUMN`:
+ 
+```
++-------+       +-------+
+|       |       |       |
++-------+ (1,0) +-------+ (3,0) |
+|       |       |       |       |
+| (0,0) +-------+ (2,0) +-------+
+|       |       |       |       |
++-------+ (1,1) +-------+ (3,1) |
+|       |       |       |       |
+| (0,1) +-------+ (2,1) +-------+
+|       |       |       |       |
++-------+ (1,2) +-------+ (3,2) |
+|       |       |       |
++-------+       +-------+
+```
+
+
 
 Template Args:
     OffsetCoordinateType: The coordinate implementation to be used.
-                          Offset coordinates are required.
-    ShiftedCartesianCoordinateSystem: One of the following:
-                                      odd_row_cartesian,
-                                      even_row_cartesian,
-                                      odd_column_cartesian,
-                                      even_column_cartesian.)doc";
+                          Offset coordinates are required.)doc";
 
 static const char *mkd_doc_fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout =
 R"doc(Standard constructor. The given aspect ratio points to the highest
 possible coordinate in the layout. That means in the
-even_column_cartesian ASCII layout representation above `ar = (3,2)`.
-Consequently, with `ar = (0,0)`, the layout has exactly one
+`arrangement::EVEN_COLUMN` ASCII layout representation above `ar =
+(3,2)`. Consequently, with `ar = (0,0)`, the layout has exactly one
 coordinate.
 
 Args:
+    a: Arrangement of the shifted rows or columns. It cannot change
+       after construction.
     ar: Highest possible position in the layout.
 
 )doc";
@@ -6483,17 +6599,17 @@ static const char *mkd_doc_fiction_layouts_tile_clocking_tile_x = R"doc(Tile wid
 
 static const char *mkd_doc_fiction_layouts_tile_clocking_tile_y = R"doc(Tile height in cells.)doc";
 
-static const char *mkd_doc_fiction_layouts_vertical_shift_cartesian =
-R"doc( 
-```
-+-------+
-|       |
-|       +-------+
-|       |       |
-+-------+       |
-|       |
-+-------+
-```)doc";
+static const char *mkd_doc_fiction_layouts_to_string =
+R"doc(Returns the name of an arrangement in lower case with underscores,
+e.g., `"odd_row"`.
+
+Args:
+    a: Arrangement to name.
+
+Returns:
+    Name of `a`.
+
+)doc";
 
 static const char *mkd_doc_fiction_mol_qca_cell_type =
 R"doc(Types of molecular Quantum-dot Cellular Automata (molQCA) cells. The
@@ -8702,6 +8818,15 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_lower_bound = R"doc(Lower bound for the number of layout tiles.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_make_layout =
+R"doc(Creates an empty layout of the target type that uses the utilized
+clocking scheme.
+
+Returns:
+    Empty layout.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ntk = R"doc(Specification network.)doc";
 
@@ -11106,6 +11231,11 @@ Returns:
     circuit if one is found under the given parameters;
     `std::nullopt`, otherwise.
 
+Raises:
+    std::invalid_argument: If `Lyt` is a shifted Cartesian or
+                           hexagonal layout and
+                           `ps.layout_arrangement` is empty.
+
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params = R"doc(Parameters for the exact physical design algorithm.)doc";
@@ -11128,6 +11258,11 @@ exactly 20 tiles will be examined. Restricted imposed by the
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_io_pins =
 R"doc(Flag to indicate that I/Os should be realized by designated wire
 segments (preferred).)doc";
+
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_layout_arrangement =
+R"doc(Arrangement of the shifted rows or columns of the created layout.
+Shifted Cartesian and hexagonal layouts require it, Cartesian layouts
+ignore it.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_minimize_crossings =
 R"doc(Flag to indicate that the number of used crossing tiles should be
@@ -11217,6 +11352,11 @@ Returns:
     A gate-level layout of type `Lyt` that implements `ntk` as an FCN
     circuit if one is found under the given parameters;
     `std::nullopt`, otherwise.
+
+Raises:
+    std::invalid_argument: If `Lyt` is a shifted Cartesian or
+                           hexagonal layout and
+                           `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -11724,9 +11864,19 @@ Returns:
     A gate-level layout of type `Lyt` that implements `ntk` as an FCN
     circuit.
 
+Raises:
+    std::invalid_argument: If `Lyt` is a shifted Cartesian or
+                           hexagonal layout and
+                           `ps.layout_arrangement` is empty.
+
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_params = R"doc(Parameters for the orthogonal physical design algorithm.)doc";
+
+static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_params_layout_arrangement =
+R"doc(Arrangement of the shifted rows or columns of the created layout.
+Shifted Cartesian and hexagonal layouts require it, Cartesian layouts
+ignore it.)doc";
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_params_number_of_clock_phases = R"doc(Number of clock phases to use. 3 and 4 are supported.)doc";
 
@@ -13597,10 +13747,14 @@ Args:
        determined.
 
 Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
+    GateLyt: Hexagonal gate-level layout type.
 
 Returns:
     Incoming and outgoing port directions of the tile.
+
+Raises:
+    std::invalid_argument: If `lyt` is not pointy-top, i.e., its
+                           arrangement shifts columns.
 
 )doc";
 
@@ -13642,10 +13796,14 @@ Args:
     t: Tile to be realized as a Bestagon gate.
 
 Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
+    GateLyt: Hexagonal gate-level layout type.
 
 Returns:
     Bestagon gate representation of `t` including mirroring.
+
+Raises:
+    std::invalid_argument: If `lyt` is not pointy-top, i.e., its
+                           arrangement shifts columns.
 
 )doc";
 
@@ -14416,7 +14574,9 @@ static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_
 R"doc(This struct stores the parameters to design an SiDB circuit on a
 defective surface.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params_exact_design_parameters = R"doc(Parameters for the *exact* placement and routing algorithm.)doc";
+static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params_exact_design_parameters =
+R"doc(Parameters for the *exact* placement and routing algorithm. The
+arrangement of the lattice tiling replaces `layout_arrangement`.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_params_sidb_on_the_fly_gate_library_parameters = R"doc(Parameters for the SiDB on-the-fly gate library.)doc";
 

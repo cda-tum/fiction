@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from mnt.pyfiction.layouts import arrangement
 from mnt.pyfiction.physical_design import (
     apply_bestagon_library,
     apply_qca_one_library,
@@ -52,6 +53,7 @@ def test_apply_bestagon_library(mux21: technology_network) -> None:
     params.scheme = "ROW"
     params.crossings = True
     params.border_io = True
+    params.layout_arrangement = arrangement.EVEN_ROW
 
     layout = exact_hexagonal(mux21, params)
     assert layout is not None
@@ -68,6 +70,7 @@ def test_apply_topolinano_library(mux21: technology_network) -> None:
     params.crossings = True
     params.border_io = True
     params.technology_specifics = technology_constraints.TOPOLINANO
+    params.layout_arrangement = arrangement.ODD_COLUMN
 
     layout = exact_shifted_cartesian(mux21, params)
     assert layout is not None

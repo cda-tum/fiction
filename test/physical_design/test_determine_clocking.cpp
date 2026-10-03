@@ -20,6 +20,7 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
@@ -116,24 +117,27 @@ TEST_CASE("Determine clock numbers for non-Cartesian layout topologies", "[deter
     {
         SECTION("odd column")
         {
-            using gate_layout = gate_level_layout<shifted_cartesian_layout<coords::offset, odd_column_cartesian>>;
+            using gate_layout  = gate_level_layout<shifted_cartesian_layout<coords::offset>>;
+            constexpr auto arr = arrangement::ODD_COLUMN;
 
-            remove_assign_and_check_clocking(blueprints::shifted_cart_and_or_inv_gate_layout<gate_layout>());
+            remove_assign_and_check_clocking(blueprints::shifted_cart_and_or_inv_gate_layout<gate_layout>(arr));
         }
         SECTION("even row")
         {
-            using gate_layout = gate_level_layout<shifted_cartesian_layout<coords::offset, even_row_cartesian>>;
+            using gate_layout  = gate_level_layout<shifted_cartesian_layout<coords::offset>>;
+            constexpr auto arr = arrangement::EVEN_ROW;
 
-            remove_assign_and_check_clocking(blueprints::row_clocked_and_xor_gate_layout<gate_layout>());
+            remove_assign_and_check_clocking(blueprints::row_clocked_and_xor_gate_layout<gate_layout>(arr));
         }
     }
     SECTION("hexagonal")
     {
         SECTION("even row")
         {
-            using gate_layout = gate_level_layout<hexagonal_layout<coords::offset, even_row_hex>>;
+            using gate_layout  = gate_level_layout<hexagonal_layout<coords::offset>>;
+            constexpr auto arr = arrangement::EVEN_ROW;
 
-            remove_assign_and_check_clocking(blueprints::row_clocked_and_xor_gate_layout<gate_layout>());
+            remove_assign_and_check_clocking(blueprints::row_clocked_and_xor_gate_layout<gate_layout>(arr));
         }
     }
 }

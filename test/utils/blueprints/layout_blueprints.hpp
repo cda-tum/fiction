@@ -21,11 +21,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/traits.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -35,16 +37,64 @@ namespace blueprints
 {
 
 /**
+ * Creates an empty gate-level layout. Cartesian layouts ignore the arrangement, shifted Cartesian and hexagonal layouts
+ * use it.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @param a Arrangement of the shifted rows or columns.
+ * @param ar Highest possible position in the layout.
+ * @return The empty layout.
+ */
+template <typename GateLyt>
+GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, const typename GateLyt::aspect_ratio& ar)
+{
+    if constexpr (fiction::is_cartesian_layout_v<GateLyt>)
+    {
+        return GateLyt{ar};
+    }
+    else
+    {
+        return GateLyt{a, ar};
+    }
+}
+
+/**
+ * Creates an empty gate-level layout clocked by the given scheme. Cartesian layouts ignore the arrangement, shifted
+ * Cartesian and hexagonal layouts use it.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @param a Arrangement of the shifted rows or columns.
+ * @param ar Highest possible position in the layout.
+ * @param scheme Clocking scheme to apply to the layout.
+ * @return The empty layout.
+ */
+template <typename GateLyt>
+GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, const typename GateLyt::aspect_ratio& ar,
+                    const fiction::layouts::clocking::scheme& scheme)
+{
+    if constexpr (fiction::is_cartesian_layout_v<GateLyt>)
+    {
+        return GateLyt{ar, scheme};
+    }
+    else
+    {
+        return GateLyt{a, ar, scheme};
+    }
+}
+
+/**
  * Creates a gate-level layout of 3 x 3 tiles with a straight wire, clocked by the 2DDWave scheme, with 1 primary input
  * and 1 primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt straight_wire_gate_layout()
+GateLyt straight_wire_gate_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{2, 2}, fiction::layouts::clocking::twoddwave()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, {2, 2}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto w1 = layout.create_buf(x1, {1, 1});
@@ -58,12 +108,14 @@ GateLyt straight_wire_gate_layout()
  * inputs and 3 primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt three_wire_paths_gate_layout()
+GateLyt three_wire_paths_gate_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{4, 4}, fiction::layouts::clocking::use()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, {4, 4}, fiction::layouts::clocking::use());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 2});
@@ -85,14 +137,17 @@ GateLyt three_wire_paths_gate_layout()
  * primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt xor_maj_gate_layout()
+GateLyt
+xor_maj_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 0}, fiction::layouts::clocking::open()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 2, 0},
+                                                   fiction::layouts::clocking::open());
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 1}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -126,12 +181,15 @@ GateLyt xor_maj_gate_layout()
  * primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt and_or_gate_layout()
+GateLyt
+and_or_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::layouts::clocking::open()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 1, 0},
+                                                   fiction::layouts::clocking::open());
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(1));
@@ -156,12 +214,15 @@ GateLyt and_or_gate_layout()
  * primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt and_not_gate_layout()
+GateLyt
+and_not_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::layouts::clocking::open()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 1, 0},
+                                                   fiction::layouts::clocking::open());
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(1));
@@ -186,12 +247,15 @@ GateLyt and_not_gate_layout()
  * 1 primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt or_not_gate_layout()
+GateLyt
+or_not_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::twoddwave()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 0},
+                                                   fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {1, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -207,12 +271,15 @@ GateLyt or_not_gate_layout()
  * and 1 primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt and_or_inv_gate_layout()
+GateLyt
+and_or_inv_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{4, 2, 0}, fiction::layouts::clocking::twoddwave()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{4, 2, 0},
+                                                   fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 2});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -238,12 +305,15 @@ GateLyt and_or_inv_gate_layout()
  * Creates a gate-level layout with an AND gate, clocked by the USE scheme, with 2 primary inputs and 1 primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt use_and_gate_layout()
+GateLyt
+use_and_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 3, 0}, fiction::layouts::clocking::use()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 3, 0},
+                                                   fiction::layouts::clocking::use());
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {3, 3});
@@ -271,12 +341,15 @@ GateLyt use_and_gate_layout()
  * output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt res_maj_gate_layout()
+GateLyt
+res_maj_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::res()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 0},
+                                                   fiction::layouts::clocking::res());
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
 
     const auto x1 = layout.create_pi("x1", {0, 1});
@@ -295,14 +368,17 @@ GateLyt res_maj_gate_layout()
  * primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt single_input_tautology_gate_layout()
+GateLyt single_input_tautology_gate_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 0, 0}, fiction::layouts::clocking::twoddwave()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 0, 0},
+                                                   fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
 
@@ -321,14 +397,17 @@ GateLyt single_input_tautology_gate_layout()
  * primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt tautology_gate_layout()
+GateLyt
+tautology_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 1}, fiction::layouts::clocking::twoddwave()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 1},
+                                                   fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {1, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -348,14 +427,17 @@ GateLyt tautology_gate_layout()
  * primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt res_tautology_gate_layout()
+GateLyt res_tautology_gate_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::res()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 0},
+                                                   fiction::layouts::clocking::res());
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -376,14 +458,17 @@ GateLyt res_tautology_gate_layout()
  * primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt open_tautology_gate_layout()
+GateLyt open_tautology_gate_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::open()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 0},
+                                                   fiction::layouts::clocking::open());
 
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -412,12 +497,15 @@ GateLyt open_tautology_gate_layout()
  * primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt crossing_layout()
+GateLyt
+crossing_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 1}, fiction::layouts::clocking::twoddwave()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 2, 1},
+                                                   fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {1, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -439,10 +527,18 @@ GateLyt crossing_layout()
     return layout;
 }
 
+/**
+ * Creates a gate-level layout fixture.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt fanout_layout() noexcept
+GateLyt
+fanout_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW) noexcept
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 1}};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 1});
 
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(3));
     layout.assign_clock_number({0, 1}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -467,10 +563,18 @@ GateLyt fanout_layout() noexcept
     return layout;
 }
 
+/**
+ * Creates a gate-level layout fixture.
+ *
+ * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
+ * @return The layout.
+ */
 template <typename GateLyt>
-GateLyt unbalanced_and_layout() noexcept
+GateLyt unbalanced_and_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW) noexcept
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 0}};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 2, 0});
 
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(1));
@@ -500,12 +604,15 @@ GateLyt unbalanced_and_layout() noexcept
  * and 1 primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt non_structural_all_function_gate_layout()
+GateLyt non_structural_all_function_gate_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 5, 0}, fiction::layouts::clocking::open()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 5, 0},
+                                                   fiction::layouts::clocking::open());
 
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -554,12 +661,14 @@ GateLyt non_structural_all_function_gate_layout()
  * 1 primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt se_gate_layout()
+GateLyt se_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 1, 0}, fiction::layouts::clocking::twoddwave()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 1, 0},
+                                                   fiction::layouts::clocking::twoddwave());
 
     layout.assign_synchronization_element({1, 0}, 1);
 
@@ -580,13 +689,16 @@ GateLyt se_gate_layout()
  * columnar scheme, with 3 primary inputs and 1 primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt shifted_cart_and_or_inv_gate_layout()
+GateLyt shifted_cart_and_or_inv_gate_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{4, 2, 0},
-                   fiction::layouts::clocking::columnar(fiction::layouts::clocking::num_clks::THREE)};
+    auto layout = blueprints::make_layout<GateLyt>(
+        layout_arrangement, typename GateLyt::aspect_ratio{4, 2, 0},
+        fiction::layouts::clocking::columnar(fiction::layouts::clocking::num_clks::THREE));
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -610,12 +722,15 @@ GateLyt shifted_cart_and_or_inv_gate_layout()
  * primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt row_clocked_and_xor_gate_layout()
+GateLyt row_clocked_and_xor_gate_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 3, 0}, fiction::layouts::clocking::row()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 3, 0},
+                                                   fiction::layouts::clocking::row());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -637,12 +752,15 @@ GateLyt row_clocked_and_xor_gate_layout()
  * with 1 primary input and 1 primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt unclockable_gate_layout()
+GateLyt unclockable_gate_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::layouts::clocking::open()};
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 0},
+                                                   fiction::layouts::clocking::open());
 
     const auto x0  = layout.create_pi("x0", {0, 0});
     const auto fo  = layout.create_buf(x0, {0, 1});
@@ -659,12 +777,15 @@ GateLyt unclockable_gate_layout()
  * scheme, with 2 primary inputs and 2 primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt optimization_layout()
+GateLyt
+optimization_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{2, 3, 1}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {2, 3, 1}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {2, 0});
@@ -687,12 +808,15 @@ GateLyt optimization_layout()
  * clocked by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_1()
+GateLyt optimization_layout_corner_case_outputs_1(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{2, 3, 1}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {2, 3, 1}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -713,12 +837,15 @@ GateLyt optimization_layout_corner_case_outputs_1()
  * clocked by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_2()
+GateLyt optimization_layout_corner_case_outputs_2(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{3, 2, 1}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {3, 2, 1}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -739,12 +866,15 @@ GateLyt optimization_layout_corner_case_outputs_2()
  * by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_3()
+GateLyt optimization_layout_corner_case_outputs_3(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{4, 1, 0}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {4, 1, 0}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -765,12 +895,15 @@ GateLyt optimization_layout_corner_case_outputs_3()
  * by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_4()
+GateLyt optimization_layout_corner_case_outputs_4(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{2, 2, 0}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {2, 2, 0}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -789,12 +922,15 @@ GateLyt optimization_layout_corner_case_outputs_4()
  * clocked by the 2DDWave scheme, with 2 primary inputs and 2 primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_outputs_5()
+GateLyt optimization_layout_corner_case_outputs_5(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{2, 4, 1}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {2, 4, 1}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 2});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -815,12 +951,15 @@ GateLyt optimization_layout_corner_case_outputs_5()
  * the 2DDWave scheme, with 2 primary inputs and 1 primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt optimization_layout_corner_case_inputs()
+GateLyt optimization_layout_corner_case_inputs(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{3, 2, 0}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {3, 2, 0}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {2, 1});
     const auto x2 = layout.create_pi("x2", {1, 2});
@@ -836,12 +975,15 @@ GateLyt optimization_layout_corner_case_inputs()
  * the 2DDWave scheme, with 2 primary inputs and 1 primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt planar_unoptimized_layout()
+GateLyt planar_unoptimized_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{4, 4, 0}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {4, 4, 0}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {0, 2});
@@ -863,12 +1005,15 @@ GateLyt planar_unoptimized_layout()
  * 2DDWave scheme, with 4 primary inputs and 2 primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt planar_optimization_layout()
+GateLyt planar_optimization_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{2, 2, 1}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {2, 2, 1}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -891,12 +1036,15 @@ GateLyt planar_optimization_layout()
  * 2DDWave scheme, with 1 primary input and 1 primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt pi_not_in_border_optimization_layout()
+GateLyt pi_not_in_border_optimization_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{2, 1, 0}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {2, 1, 0}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {1, 1});
     layout.create_po(x1, "f1", {2, 1});
@@ -909,12 +1057,15 @@ GateLyt pi_not_in_border_optimization_layout()
  * 2DDWave scheme, with 1 primary input and 1 primary output.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt po_not_in_border_optimization_layout()
+GateLyt po_not_in_border_optimization_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{1, 2, 0}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {1, 2, 0}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     layout.create_po(x1, "f1", {0, 1});
@@ -927,12 +1078,15 @@ GateLyt po_not_in_border_optimization_layout()
  * border, clocked by the 2DDWave scheme, with 3 primary inputs and 4 primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt po_have_to_be_moved_to_border_optimization_layout()
+GateLyt po_have_to_be_moved_to_border_optimization_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{2, 3, 0}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {2, 3, 0}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -955,12 +1109,15 @@ GateLyt po_have_to_be_moved_to_border_optimization_layout()
  * gates, clocked by the 2DDWave scheme, with 6 primary inputs and 2 primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt ge_gt_le_lt_layout()
+GateLyt
+ge_gt_le_lt_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{6, 2, 1}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {6, 2, 1}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {0, 0});
@@ -988,12 +1145,15 @@ GateLyt ge_gt_le_lt_layout()
  * clocked by the 2DDWave scheme, with 4 primary inputs and 4 primary outputs.
  *
  * @tparam GateLyt Gate-level layout type.
+ * @param layout_arrangement Arrangement of the shifted rows or columns. Cartesian layouts ignore it.
  * @return The layout.
  */
 template <typename GateLyt>
-GateLyt po_extension_corner_case_layout()
+GateLyt po_extension_corner_case_layout(
+    const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    GateLyt layout{{4, 3, 1}, fiction::layouts::clocking::twoddwave()};
+    auto layout =
+        blueprints::make_layout<GateLyt>(layout_arrangement, {4, 3, 1}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto w1 = layout.create_buf(x1, {1, 1});

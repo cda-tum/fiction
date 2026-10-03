@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Hexagonal grid layout in the four pointy- and flat-top offset orientations.
+ * @brief Hexagonal grid layout in the four pointy- and flat-top offset arrangements.
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Simon Hofmann (simon1hofmann)
@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/coordinates.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
@@ -25,12 +26,10 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <memory>
 #include <ranges>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -38,35 +37,11 @@ namespace fiction::layouts
 {
 
 /**
- * \verbatim
-     / \
-   /     \
-  |       |
-  |       |
-   \     /
-     \ /
-  \endverbatim
- */
-struct pointy_top_hex
-{
-    using orientation = pointy_top_hex;
-};
-
-/**
- * \verbatim
-     _____
-    /     \
-   /       \
-   \       /
-    \_____/
-  \endverbatim
- */
-struct flat_top_hex
-{
-    using orientation = flat_top_hex;
-};
-
-/**
+ * A layout type that utilizes offset coordinates to represent a hexagonal grid. Its faces are organized in an offset
+ * coordinate system as provided. The arrangement fixed at construction selects which rows or columns are shifted. Row
+ * arrangements yield pointy-top hexagons, column arrangements flat-top hexagons. The four arrangements look as follows.
+ *
+ * `arrangement::ODD_ROW`:
  * \verbatim
          / \     / \     / \
        /     \ /     \ /     \
@@ -83,10 +58,8 @@ struct flat_top_hex
        \     / \     / \     /
          \ /     \ /     \ /
   \endverbatim
- */
-struct odd_row_hex : pointy_top_hex
-{};
-/**
+ *
+ * `arrangement::EVEN_ROW`:
  * \verbatim
          / \     / \     / \
        /     \ /     \ /     \
@@ -103,10 +76,8 @@ struct odd_row_hex : pointy_top_hex
        \     / \     / \     /
          \ /     \ /     \ /
   \endverbatim
- */
-struct even_row_hex : pointy_top_hex
-{};
-/**
+ *
+ * `arrangement::ODD_COLUMN`:
  * \verbatim
      _____         _____
     /     \       /     \
@@ -122,11 +93,8 @@ struct even_row_hex : pointy_top_hex
    \       /     \       /
     \_____/       \_____/
   \endverbatim
- */
-struct odd_column_hex : flat_top_hex
-{};
-
-/**
+ *
+ * `arrangement::EVEN_COLUMN`:
  * \verbatim
             _____         _____
            /     \       /     \
@@ -142,15 +110,6 @@ struct odd_column_hex : flat_top_hex
           \       /     \       /
            \_____/       \_____/
   \endverbatim
- */
-struct even_column_hex : flat_top_hex
-{};
-
-/**
- * A layout type that utilizes offset coordinates to represent a hexagonal grid. Its faces are organized in an offset
- * coordinate system as provided. Hexagons can be in the pointy_top_hex or flat_top_hex orientation. Based on that, two
- * respectively possible coordinate systems emerge accordingly: odd_row_hex and even_row_hex for pointy tops and
- * odd_column_hex and even_column_hex for flat tops. All are sketched in ASCII above.
  *
  * Other representations would be using cube or axial coordinates for instance, but since we want the layouts to be
  * rectangular-ish, offset coordinates make the most sense here.
@@ -158,15 +117,9 @@ struct even_column_hex : flat_top_hex
  * https://www.redblobgames.com/grids/hexagons/ is a wonderful resource on the topic.
  *
  * @tparam OffsetCoordinateType The coordinate implementation to be used. Offset coordinates are required.
- * @tparam HexagonalCoordinateSystem One of the following: odd_row_hex, even_row_hex, odd_column_hex, even_column_hex.
  * @tparam CubeCoordinateType Internally, cube coordinates are needed for certain algorithms or calculations.
  */
-template <typename OffsetCoordinateType = coords::offset, typename HexagonalCoordinateSystem = even_row_hex,
-          typename CubeCoordinateType = coords::cube>
-    requires std::same_as<HexagonalCoordinateSystem, odd_row_hex> ||
-             std::same_as<HexagonalCoordinateSystem, even_row_hex> ||
-             std::same_as<HexagonalCoordinateSystem, odd_column_hex> ||
-             std::same_as<HexagonalCoordinateSystem, even_column_hex>
+template <typename OffsetCoordinateType = coords::offset, typename CubeCoordinateType = coords::cube>
 class hexagonal_layout
 {
   public:
@@ -177,11 +130,30 @@ class hexagonal_layout
 
     using cube_coordinate = CubeCoordinateType;
 
+    /**
+     * State that all copies of a layout share.
+     */
     struct hexagonal_layout_storage
     {
-        explicit hexagonal_layout_storage(const aspect_ratio& ar) noexcept : dimension{ar} {};
+        /**
+         * Creates the storage of a layout.
+         *
+         * @param ar Highest possible position in the layout.
+         * @param a Arrangement of the shifted rows or columns.
+         */
+        hexagonal_layout_storage(const aspect_ratio& ar, const layouts::arrangement a) noexcept :
+                dimension{ar},
+                shift{a}
+        {}
 
+        /**
+         * Highest possible position in the layout.
+         */
         aspect_ratio dimension;
+        /**
+         * Arrangement of the shifted rows or columns.
+         */
+        layouts::arrangement shift;
     };
 
     static constexpr auto min_fanin_size = 0u;  // NOLINT(readability-identifier-naming): mockturtle requirement
@@ -189,18 +161,19 @@ class hexagonal_layout
 
     using base_type = hexagonal_layout;
 
-    using hex_arrangement = HexagonalCoordinateSystem;
-
     using storage = std::shared_ptr<hexagonal_layout_storage>;
 
     /**
      * Standard constructor. The given aspect ratio points to the highest possible coordinate in the layout. That means
-     * in the even_column_hex ASCII layout representation above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the
-     * layout has exactly one coordinate.
+     * in the `arrangement::EVEN_COLUMN` ASCII layout representation above `ar = (3,2)`. Consequently, with
+     * `ar = (0,0)`, the layout has exactly one coordinate.
      *
+     * @param a Arrangement of the shifted rows or columns. It cannot change after construction.
      * @param ar Highest possible position in the layout.
      */
-    explicit hexagonal_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<hexagonal_layout_storage>(ar)} {}
+    explicit hexagonal_layout(const layouts::arrangement a, const aspect_ratio& ar = {}) :
+            strg{std::make_shared<hexagonal_layout_storage>(ar, a)}
+    {}
     /**
      * Constructor that takes ownership of an existing storage, so that the new layout shares the coordinates of the
      * one the storage came from.
@@ -216,6 +189,15 @@ class hexagonal_layout
     [[nodiscard]] hexagonal_layout clone() const noexcept
     {
         return hexagonal_layout(std::make_shared<hexagonal_layout_storage>(*strg));
+    }
+    /**
+     * Returns the arrangement of the shifted rows or columns.
+     *
+     * @return Arrangement fixed at construction.
+     */
+    [[nodiscard]] layouts::arrangement get_arrangement() const noexcept
+    {
+        return strg->shift;
     }
     /**
      * Creates and returns a coordinate in the layout from the given x-, y-, and z-values.
@@ -353,7 +335,7 @@ class hexagonal_layout
     }
     /**
      * Returns the coordinate that is located in north-eastern direction of a given coordinate `c`. Depending on the
-     * hexagonal orientation of the layout, the dimension values of the returned coordinate may differ.
+     * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose north-eastern counterpart is desired.
      * @return Coordinate directly north-eastern of `c`.
@@ -390,29 +372,21 @@ class hexagonal_layout
     }
     /**
      * Returns the coordinate that is located in south-eastern direction of a given coordinate `c`. Depending on the
-     * hexagonal orientation of the layout, the dimension values of the returned coordinate may differ.
+     * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose south-eastern counterpart is desired.
      * @return Coordinate directly south-eastern of `c`.
      */
     [[nodiscard]] constexpr OffsetCoordinateType south_east(const OffsetCoordinateType& c) const noexcept
     {
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
-        {
-            auto se = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{0, -1, +1});
+        const auto step =
+            is_row_arrangement(get_arrangement()) ? CubeCoordinateType{0, -1, +1} : CubeCoordinateType{+1, -1, 0};
 
-            se.z = c.z;
+        auto se = to_offset_coordinate(to_cube_coordinate(c) + step);
 
-            return is_within_bounds(se) ? se : c;
-        }
-        else
-        {
-            auto se = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{+1, -1, 0});
+        se.z = c.z;
 
-            se.z = c.z;
-
-            return is_within_bounds(se) ? se : c;
-        }
+        return is_within_bounds(se) ? se : c;
     }
     /**
      * Returns the coordinate that is directly adjacent in southern direction of a given coordinate `c`, i.e., the face
@@ -438,7 +412,7 @@ class hexagonal_layout
     }
     /**
      * Returns the coordinate that is located in south-western direction of a given coordinate `c`. Depending on the
-     * hexagonal orientation of the layout, the dimension values of the returned coordinate may differ.
+     * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose south-western counterpart is desired.
      * @return Coordinate directly south-western of `c`.
@@ -472,29 +446,21 @@ class hexagonal_layout
     }
     /**
      * Returns the coordinate that is located in north-western direction of a given coordinate `c`. Depending on the
-     * hexagonal orientation of the layout, the dimension values of the returned coordinate may differ.
+     * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose north-western counterpart is desired.
      * @return Coordinate directly north-western of `c`.
      */
     [[nodiscard]] constexpr OffsetCoordinateType north_west(const OffsetCoordinateType& c) const noexcept
     {
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
-        {
-            auto nw = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{0, +1, -1});
+        const auto step =
+            is_row_arrangement(get_arrangement()) ? CubeCoordinateType{0, +1, -1} : CubeCoordinateType{-1, +1, 0};
 
-            nw.z = c.z;
+        auto nw = to_offset_coordinate(to_cube_coordinate(c) + step);
 
-            return is_within_bounds(nw) ? nw : c;
-        }
-        else
-        {
-            auto nw = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{-1, +1, 0});
+        nw.z = c.z;
 
-            nw.z = c.z;
-
-            return is_within_bounds(nw) ? nw : c;
-        }
+        return is_within_bounds(nw) ? nw : c;
     }
     /**
      * Returns the coordinate that is directly above a given coordinate `c`, i.e., the face whose z-dimension is higher
@@ -590,7 +556,7 @@ class hexagonal_layout
      * @param c1 Base coordinate.
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly adjacent to `c1` in one of the six different ordinal directions possible for
-     * the layout's hexagonal orientation.
+     * the layout's arrangement.
      */
     [[nodiscard]] bool is_adjacent_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
     {
@@ -956,11 +922,12 @@ class hexagonal_layout
     }
     /**
      * Returns a container that contains all coordinates pairs of opposing adjacent coordinates with
-     * respect to a given one. In this hexagonal layout, the container content depends on the hexagonal orientation.
+     * respect to a given one. In this hexagonal layout, the container content depends on the arrangement.
      *
-     * In case of a pointy_top_hex orientation, the container will contain (`east(c)`, `west(c)`), (`north_east(c)`,
-     * `south_west(c)`), (`north_west(c)`, `south_east(c)`). In case of a flat_top_hex orientation, the container will
-     * contain (`north(c)`, `south(c)`), (`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`) instead.
+     * In case of a row arrangement (pointy-top), the container will contain (`east(c)`, `west(c)`), (`north_east(c)`,
+     * `south_west(c)`), (`north_west(c)`, `south_east(c)`). In case of a column arrangement (flat-top), the container
+     * will contain (`north(c)`, `south(c)`), (`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`)
+     * instead.
      *
      * This function comes in handy when straight lines on the layout are to be examined.
      *
@@ -980,11 +947,11 @@ class hexagonal_layout
     }
     /**
      * Applies a function to all opposing coordinate pairs adjacent to a given one. In this hexagonal layout, the
-     * function application depends on the hexagonal orientation.
+     * function application depends on the arrangement.
      *
-     * In case of a pointy_top_hex orientation, the function will apply to (`east(c)`, `west(c)`), (`north_east(c)`,
-     * `south_west(c)`), (`north_west(c)`, `south_east(c)`). In case of a flat_top_hex orientation, the function will
-     * apply to (`north(c)`, `south(c)`), (`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`)
+     * In case of a row arrangement (pointy-top), the function will apply to (`east(c)`, `west(c)`), (`north_east(c)`,
+     * `south_west(c)`), (`north_west(c)`, `south_east(c)`). In case of a column arrangement (flat-top), the function
+     * will apply to (`north(c)`, `south(c)`), (`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`)
      * instead.
      *
      * This function comes in handy when straight lines on the layout are to be examined.
@@ -1006,11 +973,11 @@ class hexagonal_layout
             }
         };
 
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
+        if (is_row_arrangement(get_arrangement()))
         {
             apply_if_not_c(east(c), west(c));
         }
-        else  // flat top
+        else  // column arrangement, flat top
         {
             apply_if_not_c(north(c), south(c));
         }
@@ -1035,26 +1002,23 @@ class hexagonal_layout
      * This implementation is adapted from https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
      *
      * @param offset_coord Offset coordinate to convert.
-     * @return Cube coordinate representing `offset_coord` in the layout's hexagonal orientation.
+     * @return Cube coordinate representing `offset_coord` in the layout's arrangement.
      */
     [[nodiscard]] constexpr CubeCoordinateType
     to_cube_coordinate(const OffsetCoordinateType& offset_coord) const noexcept
     {
         CubeCoordinateType cube_coord{0, 0, 0};
 
-        constexpr const auto offset = std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
-                                              std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ?
-                                          -1 :
-                                          1;
+        const auto offset = is_odd_arrangement(get_arrangement()) ? -1 : 1;
 
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
+        if (is_row_arrangement(get_arrangement()))
         {
             cube_coord.x = offset_coord.x -
                            static_cast<decltype(cube_coord.x)>((offset_coord.y + (offset * (offset_coord.y & 1))) / 2);
             cube_coord.z = offset_coord.y;
             cube_coord.y = -cube_coord.x - cube_coord.z;
         }
-        else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top_hex>)
+        else
         {
             cube_coord.x = offset_coord.x;
             cube_coord.z = offset_coord.y -
@@ -1070,7 +1034,7 @@ class hexagonal_layout
      * This implementation is adapted from https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
      *
      * @param cube_coord Cube coordinate to convert.
-     * @return Offset coordinate representing `cube_coord` in the layout's hexagonal orientation.
+     * @return Offset coordinate representing `cube_coord` in the layout's arrangement.
      */
     [[nodiscard]] constexpr OffsetCoordinateType
     to_offset_coordinate(const CubeCoordinateType& cube_coord) const noexcept
@@ -1078,17 +1042,14 @@ class hexagonal_layout
         // the generated coordinate will be in ground layer
         OffsetCoordinateType offset_coord{0, 0};
 
-        constexpr const auto offset = std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
-                                              std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ?
-                                          -1 :
-                                          1;
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
+        const auto offset = is_odd_arrangement(get_arrangement()) ? -1 : 1;
+        if (is_row_arrangement(get_arrangement()))
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(
                 cube_coord.x + static_cast<int64_t>((cube_coord.z + (offset * (cube_coord.z & 1))) / 2));
             offset_coord.y = static_cast<decltype(offset_coord.y)>(cube_coord.z);
         }
-        else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top_hex>)
+        else
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(cube_coord.x);
             offset_coord.y = static_cast<decltype(offset_coord.y)>(

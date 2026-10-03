@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
@@ -54,20 +55,20 @@ class bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>  // widt
      * information from the stored grid into account to choose the correct gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
-     * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
+     * @tparam GateLyt Hexagonal gate-level layout type.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
      * @return Bestagon gate representation of `t` including mirroring.
+     * @throws std::invalid_argument If `lyt` is not pointy-top, i.e., its arrangement shifts columns.
      */
     template <typename GateLyt>
     [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
         static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt must be a hexagonal layout");
-        static_assert(has_pointy_top_hex_orientation_v<GateLyt>, "GateLyt must be a pointy-top hexagonal layout");
 
-        const auto n = lyt.get_node(t);
         const auto p = determine_port_routing(lyt, t);
+        const auto n = lyt.get_node(t);
 
         try
         {
@@ -310,10 +311,11 @@ class bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>  // widt
     /**
      * @brief Determines the port directions of a given tile.
      *
-     * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
+     * @tparam GateLyt Hexagonal gate-level layout type.
      * @param lyt Layout that contains the tile.
      * @param t Tile whose incoming and outgoing port directions are determined.
      * @return Incoming and outgoing port directions of the tile.
+     * @throws std::invalid_argument If `lyt` is not pointy-top, i.e., its arrangement shifts columns.
      */
     template <typename GateLyt>
     [[nodiscard]] static fcn::port_list<fcn::port_direction> determine_port_routing(const GateLyt&       lyt,
@@ -321,7 +323,11 @@ class bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>  // widt
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
         static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt must be a hexagonal layout");
-        static_assert(has_pointy_top_hex_orientation_v<GateLyt>, "GateLyt must be a pointy-top hexagonal layout");
+
+        if (!layouts::is_row_arrangement(lyt.get_arrangement()))
+        {
+            throw std::invalid_argument("GateLyt must be a pointy-top hexagonal layout");
+        }
 
         fcn::port_list<fcn::port_direction> p{};
 

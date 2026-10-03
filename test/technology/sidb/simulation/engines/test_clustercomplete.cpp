@@ -25,6 +25,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/progress_recorder.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
@@ -163,7 +164,7 @@ TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", 
 
 TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete]")
 {
-    gate_level_layout<hex_even_row_gate_clk_lyt> gate_lyt{{2, 2}};
+    hex_gate_clk_lyt gate_lyt{arrangement::EVEN_ROW, {2, 2}};
     gate_lyt.create_nand({}, {}, {0, 0});
     gate_lyt.create_nand({}, {}, {2, 2});
 

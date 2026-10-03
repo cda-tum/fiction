@@ -96,12 +96,6 @@ void count_gate_types(nanobind::module_& m)
     detail::count_gate_types<py_cartesian_gate_layout>(m);
     detail::count_gate_types<py_shifted_cartesian_gate_layout>(m);
     detail::count_gate_types<py_hexagonal_gate_layout>(m);
-    detail::count_gate_types<py_odd_row_cartesian_gate_layout>(m);
-    detail::count_gate_types<py_even_row_cartesian_gate_layout>(m);
-    detail::count_gate_types<py_even_column_cartesian_gate_layout>(m);
-    detail::count_gate_types<py_odd_row_hex_gate_layout>(m);
-    detail::count_gate_types<py_odd_column_hex_gate_layout>(m);
-    detail::count_gate_types<py_even_column_hex_gate_layout>(m);
 }
 
 }  // namespace pyfiction

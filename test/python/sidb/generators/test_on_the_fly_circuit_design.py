@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout
+from mnt.pyfiction.layouts import arrangement, cartesian_gate_layout, hexagonal_gate_layout
 from mnt.pyfiction.sidb import sidb_layout, site_at_row
 from mnt.pyfiction.sidb.generators import (
     design_sidb_gates_mode,
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 @pytest.fixture
 def and_circuit() -> hexagonal_gate_layout:
     """Return a placed AND circuit with two inputs and one output."""
-    layout = hexagonal_gate_layout((2, 2, 0), "ROW", "AND")
+    layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 0), "ROW", "AND")
     first = layout.create_pi("a", (0, 0, 0))
     second = layout.create_pi("b", (1, 0, 0))
     gate = layout.create_and(first, second, (1, 1, 0))
@@ -135,7 +135,7 @@ def test_unsuccessful_design(and_circuit: hexagonal_gate_layout) -> None:
 
 def test_unsupported_gate() -> None:
     """A majority gate reports its unsupported type and tile."""
-    layout = hexagonal_gate_layout((1, 1, 0), "ROW")
+    layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (1, 1, 0), "ROW")
     layout.create_maj(0, 0, 0, (1, 1, 0))
     with pytest.raises(ValueError, match="Unsupported gate type at tile"):
         on_the_fly_sidb_circuit_design(layout)

@@ -19,6 +19,7 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grids
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/networks/technology_network.hpp>           // technology-mapped network type
@@ -67,7 +68,7 @@ using namespace fiction::verification;
 
 int main()  // NOLINT
 {
-    using gate_lyt = hex_even_row_gate_clk_lyt;
+    using gate_lyt = hex_gate_clk_lyt;
 
     const std::string layouts_folder = fmt::format("{}/bestagon/layouts", EXPERIMENTS_PATH);
 
@@ -125,11 +126,12 @@ int main()  // NOLINT
 
     // parameters for SMT-based physical design
     exact_physical_design_params exact_params{};
-    exact_params.scheme        = "Row";
-    exact_params.crossings     = true;
-    exact_params.border_io     = true;
-    exact_params.desynchronize = true;
-    exact_params.timeout       = 3'600'000;  // 1h in ms
+    exact_params.scheme             = "Row";
+    exact_params.layout_arrangement = arrangement::EVEN_ROW;
+    exact_params.crossings          = true;
+    exact_params.border_io          = true;
+    exact_params.desynchronize      = true;
+    exact_params.timeout            = 3'600'000;  // 1h in ms
     exact_physical_design_stats exact_stats{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::b1_r2 &

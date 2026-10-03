@@ -69,69 +69,15 @@ using py_cartesian_layout = fiction::layouts::cartesian_layout<py_offset_coordin
 /**
  * Shifted Cartesian layout.
  */
-using py_shifted_cartesian_layout =
-    fiction::layouts::shifted_cartesian_layout<py_offset_coordinate, fiction::layouts::odd_column_cartesian>;
+using py_shifted_cartesian_layout = fiction::layouts::shifted_cartesian_layout<py_offset_coordinate>;
 /**
  * Hexagonal layout.
  */
-using py_hexagonal_layout = fiction::layouts::hexagonal_layout<py_offset_coordinate, fiction::layouts::even_row_hex>;
-/**
- * odd row cartesian layout.
- */
-using py_odd_row_cartesian_layout =
-    fiction::layouts::shifted_cartesian_layout<py_offset_coordinate, fiction::layouts::odd_row_cartesian>;
-/**
- * even row cartesian layout.
- */
-using py_even_row_cartesian_layout =
-    fiction::layouts::shifted_cartesian_layout<py_offset_coordinate, fiction::layouts::even_row_cartesian>;
-/**
- * even column cartesian layout.
- */
-using py_even_column_cartesian_layout =
-    fiction::layouts::shifted_cartesian_layout<py_offset_coordinate, fiction::layouts::even_column_cartesian>;
-/**
- * odd row hex layout.
- */
-using py_odd_row_hex_layout = fiction::layouts::hexagonal_layout<py_offset_coordinate, fiction::layouts::odd_row_hex>;
-/**
- * odd column hex layout.
- */
-using py_odd_column_hex_layout =
-    fiction::layouts::hexagonal_layout<py_offset_coordinate, fiction::layouts::odd_column_hex>;
-/**
- * even column hex layout.
- */
-using py_even_column_hex_layout =
-    fiction::layouts::hexagonal_layout<py_offset_coordinate, fiction::layouts::even_column_hex>;
+using py_hexagonal_layout = fiction::layouts::hexagonal_layout<py_offset_coordinate>;
 /**
  * Cartesian layout with unrestricted stacked coordinates.
  */
 using py_stacked_cartesian_layout = fiction::layouts::cartesian_layout<py_cube_coordinate>;
-/**
- * Gate-level odd row cartesian layout.
- */
-using py_odd_row_cartesian_gate_layout = fiction::layouts::gate_level_layout<py_odd_row_cartesian_layout>;
-/**
- * Gate-level even row cartesian layout.
- */
-using py_even_row_cartesian_gate_layout = fiction::layouts::gate_level_layout<py_even_row_cartesian_layout>;
-/**
- * Gate-level even column cartesian layout.
- */
-using py_even_column_cartesian_gate_layout = fiction::layouts::gate_level_layout<py_even_column_cartesian_layout>;
-/**
- * Gate-level odd row hex layout.
- */
-using py_odd_row_hex_gate_layout = fiction::layouts::gate_level_layout<py_odd_row_hex_layout>;
-/**
- * Gate-level odd column hex layout.
- */
-using py_odd_column_hex_gate_layout = fiction::layouts::gate_level_layout<py_odd_column_hex_layout>;
-/**
- * Gate-level even column hex layout.
- */
-using py_even_column_hex_gate_layout = fiction::layouts::gate_level_layout<py_even_column_hex_layout>;
 /**
  * Cartesian gate layout.
  */

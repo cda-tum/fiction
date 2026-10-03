@@ -20,7 +20,7 @@ import pytest
 from mnt.pyfiction import layouts, physical_design
 from mnt.pyfiction.fcn.io import write_qll_layout
 from mnt.pyfiction.inml.io import write_qcc_layout, write_qcc_layout_params
-from mnt.pyfiction.layouts import cartesian_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import arrangement, cartesian_gate_layout, shifted_cartesian_gate_layout
 from mnt.pyfiction.layouts.io import write_dot_layout, write_fgl_layout
 from mnt.pyfiction.physical_design import (
     apply_qca_one_library,
@@ -292,6 +292,10 @@ def test_temperature_forwards_simulation_workers(resources_dir: Path) -> None:
     assert not any(active.values())
 
 
+ARRANGEMENTS = {"hexagonal": arrangement.EVEN_ROW, "shifted_cartesian": arrangement.ODD_COLUMN}
+"""The arrangement under which each non-Cartesian topology is tested."""
+
+
 @pytest.mark.parametrize(
     ("library", "topology"),
     [
@@ -303,7 +307,8 @@ def test_temperature_forwards_simulation_workers(resources_dir: Path) -> None:
 )
 def test_empty_mapping_has_no_completed_gates(library: str, topology: str) -> None:
     """Empty source layouts report no gate mappings for every cell library."""
-    layout = getattr(layouts, f"{topology}_gate_layout")()
+    make_layout = getattr(layouts, f"{topology}_gate_layout")
+    layout = make_layout() if topology == "cartesian" else make_layout(ARRANGEMENTS[topology])
     reports: list[tuple[str, int, int]] = []
     result = getattr(physical_design, f"apply_{library}_library")(
         layout, lambda task, done, total: reports.append((task, done, total))
@@ -315,7 +320,7 @@ def test_empty_mapping_has_no_completed_gates(library: str, topology: str) -> No
 
 def test_failed_mapping_retains_completed_count() -> None:
     """Unsupported routing leaves the last completed count below the mapping total."""
-    layout = shifted_cartesian_gate_layout((1, 1), "2DDWave", "unsupported routing")
+    layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (1, 1), "2DDWave", "unsupported routing")
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (0, 1))
     reports: list[tuple[str, int, int]] = []
@@ -332,6 +337,7 @@ def test_qcc_writer_counts_and_output(mux21: technology_network, tmp_path: Path)
     placement.crossings = True
     placement.border_io = True
     placement.technology_specifics = technology_constraints.TOPOLINANO
+    placement.layout_arrangement = arrangement.ODD_COLUMN
     gate_layout = exact_shifted_cartesian(mux21, placement)
     assert gate_layout is not None
     layout = apply_topolinano_library(gate_layout)
