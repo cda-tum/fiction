@@ -7439,24 +7439,7 @@ static const char *mkd_doc_fiction_networks_technology_network_technology_networ
 
 static const char *mkd_doc_fiction_networks_technology_network_technology_network_2 = R"doc()doc";
 
-static const char *mkd_doc_fiction_networks_views =
-R"doc(Deduction guide for bfs_topo_view.
-
-Template Args:
-    T: Logic network type.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_views_2 =
-R"doc(Deduction guide for bfs_topo_view from a network and signal.
-
-Template Args:
-    T: Logic network type.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_views_3 =
-R"doc(Deduction guide for `mutable_rank_view`.
+static const char *mkd_doc_fiction_networks_views = R"doc(Deduction guide for `mutable_rank_view`.
 
 Template Args:
     T: Network type deduced from the construction context of
@@ -7464,13 +7447,29 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_views_4 =
-R"doc(Deduction guide for `mutable_rank_view` with two constructor
+static const char *mkd_doc_fiction_networks_views_2 = R"doc(Deduction guide for `mutable_rank_view` with two constructor
 arguments.
 
 Template Args:
     T: Network type deduced from the construction context of
        `mutable_rank_view`.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_views_3 = R"doc(Deduction guide for `fiction::networks::views::static_depth_view`.
+
+Template Args:
+    T: Network type deduced from the construction context of
+       `fiction::static_depth_view`.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_views_4 = R"doc(Deduction guide for `fiction::static_depth_view` with two constructor
+arguments
+
+Template Args:
+    T: Network type deduced from the construction context of
+       `fiction::static_depth_view`.
 
 )doc";
 
@@ -27566,4 +27565,1029 @@ static const char *mkd_doc_std_iterator_traits_2 = R"doc()doc";
 #if defined(__GNUG__)
 #pragma GCC diagnostic pop
 #endif
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_params = R"doc(Parameters for the crossing gate planarization algorithm.)doc";
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_params_on_progress = R"doc(Receives completed work and the phase total.)doc";
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_stats = R"doc(Statistics of the crossing gate planarization algorithm.)doc";
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_stats_num_crossings = R"doc(Number of crossings replaced by gadgets.)doc";
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_stats_time_total = R"doc(Runtime of the planarization core. Excludes the final planarity check.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_crossing_left = R"doc(The left edge of the crossing.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_crossing_level = R"doc(Resolution level.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_crossing_right = R"doc(The right edge of the crossing.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge = R"doc(An edge between two adjacent ranks of the source network.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_hash = R"doc(Hash of an edge.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_operator_eq = R"doc(Equality of two edges.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_source = R"doc(Source node.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_target = R"doc(Target node.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_fanout_ntk = R"doc(Fanout view of the source network.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_ntk = R"doc(Source network.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_ps = R"doc(Parameters.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_pst = R"doc(Statistics.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_stage_crossings = R"doc(Crossings of the stage.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_stages = R"doc(Crossings and edges per pair of adjacent ranks.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_delay = R"doc(Delay of the shortest path through the H-graph that ends in this node.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_middle_fanins = R"doc(All remaining fanins.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_outer_fanins = R"doc(First and last fanin of the ordering.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_weights = R"doc(Unscaled cone weight per source node, filled on demand.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_copy_origin = R"doc(Source node of every copy id, indexed by `copy id - ntk.size()`.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_crossing_cost_result = R"doc(Result of costing the crossings of a level.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_crossing_cost_result_cost = R"doc(Estimated number of nodes the crossing gadgets and their padding add.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_crossing_cost_result_num_crossings = R"doc(Number of crossings between the level and the one above it.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_fis = R"doc(Fanins of the node whose slice is being computed, in rank order.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_lvl_pairs = R"doc(H-graph of the current level, one slice per node of the level.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_ntk = R"doc(Source network.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_ps = R"doc(Parameters.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_pst = R"doc(Statistics.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_available_fanouts = R"doc(Free fanout slots per source node, deepest level of its tree.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_fanout_ntk = R"doc(Fanout view of the source network.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_ntk = R"doc(Source network.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_ps = R"doc(Parameters.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_edge_buffers = R"doc(Buffers still to insert before the target is reached.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_edge_source = R"doc(Source node in the stripped network.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_fanout_ntk = R"doc(Fanout view of the source network.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_ntk = R"doc(Source network.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_ps = R"doc(Parameters.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params = R"doc(Parameters for the node duplication planarization algorithm.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_criterion = R"doc(Decision criterion of the hybrid strategy.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_cross_min = R"doc(Crossing minimization of the hybrid strategy.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_crossing_minimization_BARYCENTER = R"doc(One barycenter pass.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_decision_criterion = R"doc(How the hybrid strategy estimates the cost of duplicating a level.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost = R"doc(Duplication cost model of the hybrid strategy.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_amplitude = R"doc(Amplitude of the level-dependent part of a node's weight.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_base = R"doc(Weight of every node.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_buffer_weight = R"doc(Weight of a buffer or inverter chain node.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_level_growth = R"doc(Growth of a node's weight per level.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_max_swaps = R"doc(Maximum number of adjacent swaps per level in the hybrid strategy.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_on_progress = R"doc(Receives completed work and the phase total.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_output_order_KEEP_PO_ORDER = R"doc(Keep the primary output order of the input network.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_planarization_strategy = R"doc(How a level is made crossing-free.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_planarization_strategy_DUPLICATION = R"doc(Duplicate nodes on every level. The result is planar.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_po_order = R"doc(Primary output order used to seed the first level.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_strategy = R"doc(Planarization strategy.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_stats = R"doc(Statistics of the node duplication planarization algorithm.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_stats_num_crossing_levels = R"doc(Number of levels on which the hybrid strategy kept the crossings.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_stats_time_total = R"doc(Runtime of the duplication core. Excludes the final planarity check.)doc";
+static const char *mkd_doc_fiction_synthesis_planar_fanout_substitution_params = R"doc(Parameters for the planar fanout substitution algorithm.)doc";
+static const char *mkd_doc_fiction_synthesis_planar_fanout_substitution_params_on_progress = R"doc(Receives completed work and the phase total.)doc";
+static const char *mkd_doc_fiction_synthesis_planar_rebalancing_params = R"doc(Parameters for the planar rebalancing algorithm.)doc";
+static const char *mkd_doc_fiction_synthesis_planar_rebalancing_params_on_progress = R"doc(Receives completed work and the phase total.)doc";
+static const char *mkd_doc_fiction_synthesis_planarization_params = R"doc(Parameters for the planarization pipeline.)doc";
+static const char *mkd_doc_fiction_synthesis_planarization_params_fanout_degree = R"doc(Maximum output degree of the fanout nodes in the result.)doc";
+static const char *mkd_doc_fiction_synthesis_planarization_params_on_progress = R"doc(Receives completed work and the phase total of every stage in turn.)doc";
+static const char *mkd_doc_fiction_synthesis_planarization_stats = R"doc(Statistics of the planarization pipeline.)doc";
+static const char *mkd_doc_fiction_synthesis_planarization_stats_duplication = R"doc(Statistics of the node duplication stage.)doc";
+static const char *mkd_doc_fiction_synthesis_planarization_stats_num_nodes = R"doc(Number of nodes of the result.)doc";
+static const char *mkd_doc_fiction_synthesis_planarization_stats_time_total = R"doc(Runtime of the whole pipeline.)doc";
+static const char *mkd_doc_fiction_networks_barycenters = R"doc(Computes the barycenter of every node in `nodes`: the mean rank
+position of its non-constant fanins, or 0 for a node without such
+fanins.
 
+Args:
+    ntk: Ranked network.
+    nodes: Nodes of one rank.
+
+Template Args:
+    Ntk: Ranked network type.
+
+Returns:
+    Barycenters, aligned with `nodes`.
+
+)doc";
+static const char *mkd_doc_fiction_networks_initialize_copy_network_with_virtual_pis = R"doc(Creates an empty network of the same type as `src` with copies of its
+constants and primary inputs, virtual primary inputs included, and a
+map from the nodes of `src` to their copies. Primary inputs are
+created in the order that `foreach_pi_unranked` yields when `Ntk`
+offers it, so that rank bookkeeping of the copy matches `src`.
+
+Args:
+    src: Source network.
+
+Template Args:
+    Ntk: Network type.
+
+Returns:
+    The destination network and the node map from `src` to the
+    destination.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization = R"doc(Planarizes a ranked, balanced logic network by replacing every
+crossing of two edges with a crossing gadget that swaps the two
+signals. Crossings between two ranks are resolved pass by pass; in
+every pass, each remaining crossing whose edges are adjacent receives
+a gadget and every other edge a buffer chain of the same depth, so the
+result stays balanced. The rank order of the input is kept.
+
+Gadgets consist of three XORs when `xor_gates` is set, otherwise of
+AND, OR, and NOT gates, which makes them deeper. The result is
+verified crossing-free with `mincross` before the function returns.
+
+Args:
+    ntk: Source network.
+    ps: Parameters.
+    pst: Statistics.
+
+Template Args:
+    Ntk: Ranked, balanced network type (see `mutable_rank_view`).
+
+Returns:
+    Planar network of the same type that computes the same functions
+    as `ntk`.
+
+Raises:
+    std::invalid_argument: If `ntk` is not balanced.
+    std::runtime_error: If a rank exceeds `max_crossings_per_rank` or
+                        the result still contains crossings.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_params_max_crossings_per_rank = R"doc(Ranks with more crossings than this are rejected, since the number of
+gadgets grows with the crossings.)doc";
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_params_xor_gates = R"doc(Build crossing gadgets from XOR gates (three XORs, four levels)
+instead of AND, OR, and NOT gates (fourteen levels).)doc";
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_stats_report = R"doc(Writes the statistics to a stream.
+
+Args:
+    out: Stream to write to.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_calculate_pairs = R"doc(Enumerates the H-graph nodes of one slice, i.e., all orderings of the
+given fanins by their first and last element. A single fanin yields
+one H-graph node. Delays start at infinity.
+
+Args:
+    root: Node whose fanins are ordered.
+    nodes: Fanins in rank order.
+
+Template Args:
+    Ntk: Network type.
+
+Returns:
+    H-graph nodes of the slice.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl = R"doc(Implementation of the crossing gate planarization algorithm.
+
+Template Args:
+    Ntk: Ranked, balanced network type.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_and_or_xor = R"doc(An XOR built from AND, OR, and NOT gates, balanced to six levels:
+:math:`(a \land \lnot(a \land b)) \lor (b \land \lnot(a \land b))`
+with the direct paths of `a` and `b` buffered to the depth of the
+shared term. Nodes are created from left to right per level, which
+keeps the gadget planar in creation order.
+
+Args:
+    dest: Destination network.
+    a: Left input.
+    b: Right input.
+
+Returns:
+    Output signal of the XOR.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_buffer_chain = R"doc(Appends a chain of buffers to a signal.
+
+Args:
+    dest: Destination network.
+    sig: Signal to buffer.
+    length: Number of buffers.
+
+Returns:
+    The end of the chain.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_crossing = R"doc(A crossing of two edges. `level` orders the crossings on the same
+edge: a crossing of level :math:`l` can only be resolved after all
+crossings of lower levels on its edges.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_crossing_gate_planarization_impl = R"doc(Creates the implementation.
+
+Args:
+    src: Source network.
+    p: Parameters.
+    st: Statistics.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_detect_crossings = R"doc(Finds the crossings between every pair of adjacent ranks. Edges are
+swept in rank order of their sources; an edge that ends left of the
+end of an earlier edge crosses it. The level of a crossing is one more
+than the highest level already assigned to either edge, so that
+crossings on one edge are resolved in order.
+
+Raises:
+    std::runtime_error: If a rank has more crossings than
+                        `max_crossings_per_rank`.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_end = R"doc(Current end of every edge in the destination network, once a gadget or
+buffer chain was placed on it.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_hash_operator_call = R"doc(Combines source and target.
+
+Args:
+    e: Edge.
+
+Returns:
+    Hash value.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_signal = R"doc(Signal at the current end of an edge: the end of its last gadget or
+buffer chain, or its source.
+
+Args:
+    old2new: Map from source nodes to destination signals.
+    e: Edge.
+
+Returns:
+    Signal in the destination network.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_extend_edge = R"doc(Extends an edge by a buffer chain of the gadget depth.
+
+Args:
+    dest: Destination network.
+    old2new: Map from source nodes to destination signals.
+    e: Edge.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_gadget_depth = R"doc(Depth of one crossing gadget, including the buffers that align the
+edges it is placed on.
+
+Returns:
+    Number of levels a gadget occupies.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_place_gadget = R"doc(Places the gadget that swaps the signals of two crossing edges: with
+:math:`c_0 = a \oplus b`, the left output :math:`a \oplus c_0 = b`
+continues the right edge and the right output :math:`c_0 \oplus b = a`
+continues the left edge, so the left edge ends up right of the right
+edge. The direct paths are buffered to the depth of the gadget, and
+nodes are created from left to right per level, which keeps the gadget
+planar in creation order.
+
+Args:
+    dest: Destination network.
+    old2new: Map from source nodes to destination signals.
+    c: Crossing to resolve.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_resolve_crossings = R"doc(Resolves the crossings of one stage in order of their levels. Each
+pass over the edges places one gadget per crossing whose left edge is
+next in line and swaps the two edges; every other edge is extended by
+a buffer chain of the gadget depth, so that all edges of the stage
+grow by the same number of levels per pass.
+
+Args:
+    dest: Destination network.
+    old2new: Map from source nodes to destination signals.
+    st: Stage whose crossings are resolved; its edge order is
+        rewritten.
+
+Raises:
+    std::runtime_error: If a pass cannot place any crossing.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_run = R"doc(Runs the algorithm.
+
+Returns:
+    Planar copy of the source network with crossing gadgets.
+
+Raises:
+    std::runtime_error: If a rank has more crossings than
+                        `max_crossings_per_rank` allows.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_stage = R"doc(Crossings between two adjacent ranks and the edges between them in
+rank order of their sources.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_stage_edges = R"doc(All edges of the stage, sources in rank order, targets in rank order
+per source.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node = R"doc(One node of the H-graph used to compute the duplication order of a
+level.
+
+For a node in level :math:`l` of the input network, all orderings of
+its fanins in level :math:`l-1` are enumerated. One H-graph node
+represents one such ordering by its first and last fanin, which decide
+the delay of the ordering. The remaining fanins sit in between; their
+mutual order does not matter for the algorithm.
+
+Template Args:
+    Ntk: Network type.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_fanin_it = R"doc(Index of the predecessor H-graph node on that shortest path, within
+the slice of the previous node.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_hgraph_node = R"doc(Creates an H-graph node.
+
+Args:
+    r: Node whose fanins are ordered.
+    first: Leftmost fanin of the ordering.
+    last: Rightmost fanin of the ordering.
+    delay_value: Initial delay.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_root = R"doc(Node of the upper level whose fanins are ordered. A copy id when that
+node is a duplicate.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl = R"doc(Implementation of the node duplication planarization algorithm.
+
+Nodes of the source network keep their ids. Every duplicate receives a
+fresh id above `ntk.size()`; `origin()` maps it back to the source
+node. For every node of a level, `fanins_of` records which nodes
+(originals or duplicates) of the level below it connects to, so the
+planar network can be rebuilt without searching.
+
+Template Args:
+    Ntk: Ranked, balanced source network type.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_build_network = R"doc(Builds the planar `virtual_pi_network` from the levelized duplication
+order.
+
+Levels are processed from the primary inputs upwards. A repeated
+primary input becomes a virtual primary input; every other repeated
+node becomes a fresh gate with the same function. Fanins are connected
+in the fanin order of the source node, matched by origin against the
+ids recorded in `fanins_of`, and keep their complementation.
+
+Returns:
+    The planar destination network.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_collect_children = R"doc(Collects the fanin signals of a node in the destination network, in
+the fanin order of its source node.
+
+Args:
+    n: Source id or copy id of the node.
+    old2new: Signals in the destination network per source id and copy
+             id.
+    dest: Destination network.
+    by_origin: Whether to connect to the source nodes themselves
+               instead of the recorded copies, which is the case when
+               the level below kept its crossings.
+
+Template Args:
+    NtkDest: Destination network type.
+
+Returns:
+    Fanin signals of the new node.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_compute_node_order = R"doc(Computes the order of the next level from the H-graph of the current
+level: the ordering with the least delay in the last slice is chosen
+and its predecessors are followed back to the first slice. The fanins
+of each ordering are placed from right to left as they are
+encountered.
+
+Returns:
+    Nodes of the next level in planar order, duplicates as copy ids.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_compute_slice_delays = R"doc(Adds one slice to the H-graph of the current level.
+
+A slice holds every ordering of the fanins of `n` as an H-graph node
+(`calculate_pairs`). The delay of each ordering is the shortest path
+from the first slice of the level: moving to an ordering whose first
+fanin equals the last fanin of the previous ordering costs 1, any
+other move costs 2, and the first slice starts at 1. Ties between
+equal delays are broken in favour of orderings that share a fanin in
+the level below, which avoids a duplication there. The slice is
+appended to `lvl_pairs`.
+
+Args:
+    n: Node (source id or copy id) whose fanins form the slice.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_copies_below = R"doc(Counts the nodes the duplication strategy creates below a level, given
+its order, by running it on a copy of the state. Stops early once the
+count exceeds `budget`.
+
+Args:
+    level: Nodes of the level, duplicates as copy ids of this instance
+           or as repeated source nodes.
+    budget: Count at which the run is cut off.
+
+Returns:
+    Nodes created below the level, or a value above `budget` if cut
+    off.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_count_crossings = R"doc(Counts the crossings between an upper level and the level below it,
+both in their current order.
+
+Args:
+    upper: Nodes of the upper level, duplicates as copy ids.
+    lower: Nodes of the lower level, source ids in order.
+
+Returns:
+    Number of crossings.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_crossing_cost = R"doc(Costs keeping the crossings between the upper level and a level in its
+original order: the level is reordered to minimize crossings, then
+every crossing is charged one gadget and every edge the buffers that
+pad it to the number of gadgets on the most crossed edge.
+
+Args:
+    upper: Nodes of the upper level, duplicates as copy ids.
+    lower: Nodes of the lower level in source order; reordered.
+
+Returns:
+    Cost and crossing count; the cost is infinite above
+    `max_crossings_per_rank`.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_crossing_level = R"doc(Whether a level of `ntk_lvls` kept its crossings instead of its
+duplicates.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_crossings_are_cheaper = R"doc(Decides whether keeping the crossings of a level beats duplicating it,
+according to the decision criterion.
+
+Args:
+    gadget_cost: Nodes the crossing gadgets and their padding add.
+    duplicated: The level as the duplication strategy would build it,
+                duplicates as copy ids.
+    crossed: The level in its crossing-minimized source order.
+    lvl: Level in the source network.
+
+Returns:
+    `true` iff the crossings are cheaper.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_duplication_cost = R"doc(Cost of the duplicates in a level: every copy beyond the first
+occurrence of a source node costs the weighted size of that node's
+cone.
+
+Args:
+    level: Nodes of the level, duplicates as copy ids.
+    lvl: Level in the source network.
+
+Returns:
+    Duplication cost.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_fanins_of = R"doc(For every source id and copy id, the ids of the level below it
+connects to, in placement order.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_gadget_depth = R"doc(Number of levels one crossing gadget spans.
+
+Returns:
+    Gadget depth.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_gadget_nodes = R"doc(Number of nodes one crossing gadget adds.
+
+Returns:
+    Gadget size.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_is_final_level = R"doc(Whether a level consists of primary inputs only.
+
+Args:
+    level: Nodes of the level.
+
+Returns:
+    `true` iff every node stands for a primary input.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_make_copy = R"doc(Allocates a new copy id for a source node.
+
+Args:
+    n: Source node.
+
+Returns:
+    The copy id.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_minimize_crossings = R"doc(Orders a level by the barycenters of the positions its nodes are used
+from in the upper level, then applies adjacent swaps that reduce the
+crossing count if the parameters ask for them.
+
+Args:
+    upper: Nodes of the upper level, duplicates as copy ids.
+    lower: Nodes of the lower level, source ids; reordered.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_node_duplication_planarization_impl = R"doc(Creates the implementation.
+
+Args:
+    src: Source network.
+    p: Parameters.
+    st: Statistics.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_ntk_lvls = R"doc(Levelized duplication order, level 0 being the primary outputs;
+duplicates as copy ids.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_origin = R"doc(Maps a node id to the source node it stands for.
+
+Args:
+    n: Source node id or copy id.
+
+Returns:
+    The source node.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_place_fanin = R"doc(Places one fanin into the next level, which is built from right to
+left.
+
+If the rightmost node already placed stands for `n`, that copy is
+shared. Otherwise `n` is appended: as the source node itself when it
+has not been placed in this level yet, as a fresh copy when it has.
+
+Args:
+    n: Source node to place.
+    level_rtl: Next level under construction, rightmost node first.
+    placed: Whether the source node itself is already in the level.
+    fanins: Receives the id (source or copy) that the consumer
+            connects to.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_place_ordering = R"doc(Places the fanins of one H-graph ordering into the next level and
+records them for the ordering's root.
+
+Args:
+    ordering: H-graph node to place.
+    level_rtl: Next level under construction, rightmost node first.
+    placed: Whether a source node itself is already in the level.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_positions = R"doc(Positions of the nodes of a level, indexed by source node.
+
+Args:
+    level: Nodes of the level, source ids only.
+
+Returns:
+    Position per source node, `npos` for nodes not in the level.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_run = R"doc(Runs the algorithm.
+
+Returns:
+    Planar network with duplicated nodes and virtual primary inputs.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_run_from = R"doc(Runs the duplication strategy from a given level down to the primary
+inputs and counts the nodes it creates.
+
+Args:
+    start: Nodes of the level to start from, duplicates as copy ids of
+           this instance.
+    budget: Count at which the run is cut off.
+
+Returns:
+    Nodes created below `start`, or a value above `budget` if cut off.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_share_fanin = R"doc(Whether two source nodes have a fanin in common.
+
+Args:
+    a: First node.
+    b: Second node.
+
+Returns:
+    `true` iff `a` and `b` share at least one fanin.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_to_cost = R"doc(Rounds a cost to an integer, saturating at the maximum.
+
+Args:
+    cost: Cost.
+
+Returns:
+    Rounded cost.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_weighted_tfi_cost = R"doc(Weighted size of the transitive fanin of a source node, see
+`duplication_cost_model`.
+
+Args:
+    root: Source node.
+    current_level: Level on which the node is duplicated.
+
+Returns:
+    Weighted cone size.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl = R"doc(Implementation of the planar fanout substitution algorithm.
+
+Template Args:
+    Ntk: Ranked network type.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_buffer_chain = R"doc(Appends a chain of buffers to a signal.
+
+Args:
+    dest: Destination network.
+    sig: Signal to buffer.
+    length: Number of buffers.
+
+Returns:
+    The end of the chain.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_fanout_node_level = R"doc(Level of the fanout node with the given index in a breadth-first
+fanout tree, the root's first node being 0.
+
+Args:
+    index: Creation index of the fanout node.
+
+Returns:
+    Its level in the tree.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_gather_children = R"doc(Collects the fanin signals of a node in the destination network,
+taking free fanout slots where needed.
+
+Args:
+    dest: Destination network.
+    n: Source node.
+    old2new: Map from source nodes to destination signals.
+
+Returns:
+    Fanin signals in the destination network.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_generate_fanout_tree = R"doc(Builds the breadth-first fanout tree of a node and pads its shallower
+leaves with buffers so that every free slot sits at the depth of the
+deepest fanout node. The free slots are stored in `available_fanouts`.
+
+Args:
+    dest: Destination network.
+    n: Source node.
+    root: Signal the tree hangs from.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_is_proper_fanout = R"doc(Whether a node already is a fanout node within the degree limit and
+needs no tree.
+
+Args:
+    n: Node.
+
+Returns:
+    `true` iff `n` is a proper fanout node.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_max_tree_depth = R"doc(Depth of the deepest fanout tree any node of a rank needs.
+
+Args:
+    r: Rank.
+
+Returns:
+    Maximum tree depth in the rank.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_num_fanout_nodes = R"doc(Number of fanout nodes a node with the given number of outputs needs.
+
+Args:
+    fanouts: Number of outputs.
+
+Returns:
+    Number of fanout nodes in its tree.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_planar_fanout_substitution_impl = R"doc(Creates the implementation.
+
+Args:
+    src: Source network.
+    p: Parameters.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_run = R"doc(Runs the algorithm.
+
+Returns:
+    Fanout-substituted copy of the source network with the same ranks
+    and no new crossings.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_substitute = R"doc(Pushes a node down by `pad` levels: with a buffer chain, or with a
+shorter chain plus its fanout tree so that the tree's leaves end up
+`pad` levels below the node.
+
+Args:
+    dest: Destination network.
+    n: Source node.
+    old2new: Map from source nodes to destination signals; updated for
+             `n`.
+    pad: Depth every node of the rank is pushed down by.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_take_fanout = R"doc(Returns the signal a consumer of `n` connects to: `child` itself while
+it has no output yet, otherwise the next free slot of the fanout tree
+of `n`.
+
+Args:
+    dest: Destination network.
+    n: Source node.
+    child: Current destination signal of `n`.
+
+Returns:
+    Signal to connect to.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_tree_depth = R"doc(Depth of the fanout tree of a node with the given number of outputs.
+
+Args:
+    fanouts: Number of outputs.
+
+Returns:
+    Number of levels the tree adds below the node.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl = R"doc(Implementation of the planar rebalancing algorithm.
+
+Template Args:
+    Ntk: Ranked network type.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_above_chain = R"doc(Follows chain buffers upwards from a node of the source network to the
+first node that is not one.
+
+Args:
+    n: Node of the source network.
+
+Returns:
+    The node itself or the node above its chain of buffers.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_edge = R"doc(An edge of the stripped network while buffers are re-inserted along
+it.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_edge_target = R"doc(Target node in the stripped network. Equal to `source` for an edge
+that leads to a primary output.)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_insert_buffers = R"doc(Re-inserts buffers into the stripped network so that every edge spans
+exactly one level and all primary outputs sit on the top level. Edges
+are swept level by level in rank order; consecutive edges from the
+same source share one buffer per level, so a fanout splits right above
+its targets. The sweep follows the rank order of the stripped network,
+which keeps the result planar.
+
+Args:
+    stripped: Stripped network with final ranks.
+    old2new: Map from source nodes to signals of the stripped network.
+
+Returns:
+    Balanced network.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_is_chain_buffer = R"doc(Whether a node is a buffer that drives exactly one consumer and can be
+removed.
+
+Args:
+    n: Node of the source network.
+
+Returns:
+    `true` iff `n` is a chain buffer.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_max_po_level = R"doc(Level of the highest primary output driver, constants excluded.
+
+Args:
+    net: Ranked network.
+
+Returns:
+    Maximum level among the primary output nodes, 0 if there are none.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_non_constant_fanins = R"doc(Number of non-constant fanins of a node.
+
+Args:
+    net: Network.
+    n: Node.
+
+Returns:
+    Number of fanins that are not constants.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_ordered_consumers = R"doc(Consumers of a node in the source network, ordered by the rank
+position of the node's direct fanouts, with chain buffers skipped. A
+consumer equal to the node itself stands for a primary output.
+
+Args:
+    n: Node of the source network.
+
+Returns:
+    Consumers of `n` in rank order of the source network.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_planar_rebalancing_impl = R"doc(Creates the implementation.
+
+Args:
+    src: Source network.
+    p: Parameters.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_remove_buffer_chains = R"doc(Copies every node of the source network except chain buffers into
+`stripped`. A chain buffer maps to the signal of its fanin, so that
+its consumer connects to the node the buffer delayed.
+
+Args:
+    stripped: Destination network; holds the copied primary inputs on
+              entry.
+    old2new: Map from source nodes to destination signals; completed
+             here.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_reorder_ranks = R"doc(Recomputes the ranks of the stripped network and orders every rank by
+the barycenter of its fanins, with the source rank position as the
+tie-breaker. Removing buffer chains merges nodes of different source
+levels into one rank; the position of a deeper node is taken from the
+node above its former buffer chain, so that nodes of a rank keep their
+relative order from the source network.
+
+Args:
+    stripped: Stripped network; its ranks are rewritten.
+    old2new: Map from source nodes to destination signals.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_run = R"doc(Runs the algorithm.
+
+Returns:
+    Balanced copy of the source network without redundant buffers,
+    with the same rank order.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_source_position = R"doc(Compares two source nodes by their rank position after lifting the
+deeper one to the level of the shallower one along its chain of
+buffers.
+
+Args:
+    a: First source node.
+    b: Second source node.
+
+Returns:
+    `true` iff `a` comes before `b`.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization = R"doc(Planarizes a ranked, balanced logic network by duplicating nodes.
+
+The algorithm follows "Fabricatable Interconnect and Molecular QCA
+Circuits" by A. Chaudhary, D. Z. Chen, X. S. Hu, M. T. Niemier, R.
+Ravichandran, and K. Whitton in IEEE TCAD 26(11), 2007. It solves the
+node duplication crossing elimination problem level by level from the
+primary outputs to the primary inputs. For each level, an H-graph
+enumerates the fanin orderings of every node; the shortest path
+through it gives an ordering of the level below in which every edge
+can be drawn without a crossing, at the cost of duplicating the nodes
+that would otherwise be crossed. Duplicated primary inputs become
+virtual primary inputs of the result.
+
+Consecutive consumers in a level share one copy of their common fanin,
+so the result is not fanout-substituted; `planar_fanout_substitution`
+restores that property while keeping ranks and planarity.
+
+With the hybrid strategy, the algorithm decides per level whether
+duplicating is cheaper than keeping the crossings and resolving them
+later with `crossing_gate_planarization`: the duplication cost is the
+weighted size of the duplicated cones, the crossing cost the size of
+the gadgets plus their padding after a crossing minimization of the
+level. Levels that keep their crossings are not duplicated, and the
+result is then not planar.
+
+The input must be balanced (see `network_balancing`), carry ranks (see
+`mutable_rank_view`), and contain no virtual primary inputs (see
+`delete_virtual_pis`). The result is ranked; with the duplication
+strategy it is crossing-free, which `mincross` verifies before the
+function returns.
+
+Args:
+    ntk: Source network.
+    ps: Parameters.
+    pst: Statistics.
+
+Template Args:
+    Ntk: Ranked, balanced source network type.
+
+Returns:
+    `virtual_pi_network` that computes the same functions as `ntk`;
+    planar with the duplication strategy.
+
+Raises:
+    std::invalid_argument: If `ntk` is not balanced or contains
+                           virtual primary inputs.
+    std::runtime_error: If more than `max_duplications` nodes were
+                        duplicated, or if the result of the
+                        duplication strategy still contains crossings.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_crossing_minimization = R"doc(Crossing minimization applied to a level before its crossings are
+costed in the hybrid strategy.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_crossing_minimization_BARYCENTER_AND_SWAPS = R"doc(One barycenter pass followed by adjacent swaps that reduce the
+crossing count.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_decision_criterion_LOOKAHEAD = R"doc(The number of nodes that duplicating the rest of the network actually
+creates, measured by running the duplication strategy on the levels
+below for both options and stopping once one exceeds the other.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_decision_criterion_WEIGHTED_CONE = R"doc(The weighted size of the duplicated cones, see
+`duplication_cost_model`.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost_model = R"doc(Weights of the duplication cost model of the hybrid strategy. The cost
+of duplicating a node is the weighted size of its transitive fanin,
+since every duplicate drags its whole cone along. A node of level
+:math:`l` weighs :math:`\text{base} + \text{amplitude} \cdot
+\text{level\_growth}^{l}`, a chain buffer or inverter weighs
+`buffer_weight`, and the sum is scaled by
+:math:`\text{depth\_growth}^{d}` for a duplication on level :math:`d`.
+The defaults were determined empirically on the benchmark set.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_depth_growth = R"doc(Growth of the duplication cost per level on which the duplication
+happens.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_lookahead_budget = R"doc(Nodes a lookahead may create before it is cut off; levels whose both
+options exceed it fall back to the weighted cone model.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_max_crossings_per_rank = R"doc(Levels with more crossings are always duplicated in the hybrid
+strategy, matching the limit of `crossing_gate_planarization`.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_max_duplications = R"doc(Abort with `std::runtime_error` once more nodes than this have been
+duplicated. Node duplication can grow exponentially with the depth of
+the network; 0 disables the limit.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_output_order = R"doc(Order in which the primary outputs are placed in the first level
+before the algorithm starts.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_output_order_RANDOM_PO_ORDER = R"doc(Shuffle the primary outputs randomly. Different orders can yield
+different numbers of duplications.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_planarization_strategy_HYBRID = R"doc(Decide per level whether duplicating nodes or keeping the crossings
+for `crossing_gate_planarization` is cheaper. The result contains
+crossings on the levels where gadgets are cheaper.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_seed = R"doc(Seed for the random primary output order. A random seed is drawn when
+none is given.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_xor_gates = R"doc(Whether the subsequent `crossing_gate_planarization` builds its
+gadgets from XOR gates. Sets the gadget cost of the hybrid strategy.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_stats_num_crossings = R"doc(Number of crossings the hybrid strategy left for
+`crossing_gate_planarization`.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_stats_num_duplications = R"doc(Number of nodes in the planarized network minus the number of nodes in
+the input network.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_stats_report = R"doc(Writes the statistics to a stream.
+
+Args:
+    out: Stream to write to.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_planar_fanout_substitution = R"doc(Substitutes high-output degrees in a ranked logic network with trees
+of fanout nodes while keeping the ranks and the planarity of the
+network. Every node of a rank is pushed down by the depth of the
+deepest fanout tree in that rank, with buffers for nodes that need no
+tree or a shallower one, so that all edges keep running between
+adjacent ranks and the rank order stays the one of the input. The
+result is balanced if the input is.
+
+Virtual primary inputs of the input are kept.
+
+Args:
+    ntk: Ranked, balanced input network.
+    ps: Parameters.
+
+Template Args:
+    Ntk: Ranked network type (see `mutable_rank_view`) that supports
+         `create_buf`.
+
+Returns:
+    A fanout-substituted network of the same type with the same ranks
+    and no new crossings.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_planar_fanout_substitution_params_degree = R"doc(Maximum output degree of each fanout node. Every other node drives
+exactly one consumer.)doc";
+static const char *mkd_doc_fiction_synthesis_planar_rebalancing = R"doc(Removes every buffer that drives a single consumer from a ranked,
+planar network and re-inserts the minimum number of buffers that makes
+all edges span exactly one level and puts all primary outputs on the
+top level. Buffers that lead from one source to several consumers are
+shared level by level, so the fanout splits right above its targets.
+The rank order of the input is kept, so a planar input yields a planar
+output; fanout nodes with more than one consumer are kept, so a
+fanout-substituted input yields a fanout-substituted output.
+
+This is the post-processing step of `planar_fanout_substitution`,
+which pads every rank to a uniform depth.
+
+Args:
+    ntk: Ranked, planar input network.
+    ps: Parameters.
+
+Template Args:
+    Ntk: Ranked network type (see `mutable_rank_view`) that supports
+         `create_buf` and `is_buf`.
+
+Returns:
+    A balanced, planar network with unified outputs and no redundant
+    buffers.
+
+Raises:
+    std::runtime_error: If the input is not planar.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_planarization = R"doc(Planarizes a balanced, ranked logic network and returns a planar,
+balanced, fanout-substituted network that computes the same functions.
+The pipeline runs `node_duplication_planarization` with the chosen
+strategy, resolves the crossings that the hybrid strategy kept with
+`crossing_gate_planarization`, restores fanout nodes with
+`planar_fanout_substitution`, and removes the buffers that this leaves
+behind with `planar_rebalancing`.
+
+Duplicated primary inputs become virtual primary inputs of the result.
+
+Args:
+    ntk: Source network.
+    ps: Parameters.
+    pst: Statistics.
+
+Template Args:
+    Ntk: Ranked, balanced network type (see `mutable_rank_view`)
+         without virtual primary inputs.
+
+Returns:
+    Planar `virtual_pi_network` with unified outputs and fanout nodes
+    of at most `fanout_degree` outputs.
+
+Raises:
+    std::invalid_argument: If `ntk` is not balanced or contains
+                           virtual primary inputs.
+    std::runtime_error: If a stage cannot keep its contract, see the
+                        stages' documentation.
+
+)doc";
+static const char *mkd_doc_fiction_synthesis_planarization_params_duplication = R"doc(Parameters of the node duplication stage, including the strategy and
+the gadget type of the crossing gates.)doc";
+static const char *mkd_doc_fiction_synthesis_planarization_stats_crossing_gates = R"doc(Statistics of the crossing gate stage; empty if no level kept its
+crossings.)doc";
+static const char *mkd_doc_fiction_synthesis_planarization_stats_report = R"doc(Writes the statistics to a stream.
+
+Args:
+    out: Stream to write to.
+
+)doc";

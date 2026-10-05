@@ -30,6 +30,7 @@ void fanout_substitution(nanobind::module_& m);
 void network_balancing(nanobind::module_& m);
 void technology_mapping(nanobind::module_& m);
 void network_conversion(nanobind::module_& m);
+void planarization(nanobind::module_& m);
 
 }  // namespace pyfiction
 
@@ -49,6 +50,7 @@ NB_MODULE(synthesis, m)
     pyfiction::network_balancing(m);
     pyfiction::technology_mapping(m);
     pyfiction::network_conversion(m);
+    pyfiction::planarization(m);
 }
 
 #pragma GCC diagnostic pop
