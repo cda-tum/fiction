@@ -888,6 +888,20 @@ template <class Ntk>
 inline constexpr bool has_is_virtual_pi_v = has_is_virtual_pi<Ntk>::value;
 #pragma endregion
 
+#pragma region has_foreach_pi_unranked
+template <class Ntk, class = void>
+struct has_foreach_pi_unranked : std::false_type
+{};
+
+template <class Ntk>
+struct has_foreach_pi_unranked<Ntk, std::void_t<decltype(std::declval<Ntk>().foreach_pi_unranked(
+                                        std::declval<void (*)(mockturtle::node<Ntk>)>()))>> : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_foreach_pi_unranked_v = has_foreach_pi_unranked<Ntk>::value;
+#pragma endregion
+
 #pragma region has_is_real_pi
 template <class Ntk, class = void>
 struct has_is_real_pi : std::false_type
