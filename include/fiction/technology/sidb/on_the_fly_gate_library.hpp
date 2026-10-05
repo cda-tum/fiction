@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
@@ -179,6 +180,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
      * validation and any subsequent search, capped by the enclosing deadline.
      * @param defect_surface Optional atomic defect surface in case atomic defects are present.
      * @return Bestagon gate representation of `t` including mirroring.
+     * @throws std::invalid_argument if `lyt` shifts columns instead of rows.
      * @throws gate_design_exception if no gate can be designed.
      * @throws fcn::unsupported_gate_orientation_exception if the gate orientation is unsupported.
      * @throws fcn::unsupported_gate_type_exception if the gate type is unsupported.
@@ -617,10 +619,19 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
      * @param lyt Layout that contains the tile.
      * @param t Tile whose incoming and outgoing port directions are determined.
      * @return Incoming and outgoing port directions of the tile.
+     * @throws std::invalid_argument if `lyt` shifts columns instead of rows.
      */
     template <typename Lyt>
     [[nodiscard]] static fcn::port_list<fcn::port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
+        static_assert(is_gate_level_layout_v<Lyt>, "Lyt must be a gate-level layout");
+        static_assert(is_hexagonal_layout_v<Lyt>, "Lyt must be a hexagonal layout");
+
+        if (!layouts::is_row_arrangement(lyt.get_arrangement()))
+        {
+            throw std::invalid_argument("GateLyt must be a pointy-top hexagonal layout");
+        }
+
         fcn::port_list<fcn::port_direction> p{};
 
         // determine incoming connector ports

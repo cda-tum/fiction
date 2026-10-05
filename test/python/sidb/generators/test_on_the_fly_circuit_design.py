@@ -102,6 +102,20 @@ def test_invalid_timeout(timeout: float) -> None:
         params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.timeout = timeout  # ty: ignore[invalid-assignment]  # deliberately invalid
 
 
+@pytest.mark.parametrize("shift", [arrangement.ODD_COLUMN, arrangement.EVEN_COLUMN])
+def test_column_arrangements(shift: arrangement) -> None:
+    """Circuit design rejects flat-top layouts instead of dropping their north/south wires."""
+    layout = hexagonal_gate_layout(shift, (0, 2, 0), "2DDWave")
+    first = layout.create_pi("x", (0, 0, 0))
+    wire = layout.create_buf(first, (0, 1, 0))
+    layout.create_po(wire, "y", (0, 2, 0))
+    params = on_the_fly_sidb_circuit_design_params()
+    params.timeout = 1_000
+
+    with pytest.raises(ValueError, match="pointy-top"):
+        on_the_fly_sidb_circuit_design(layout, params)
+
+
 @pytest.mark.slow
 def test_design_and_export(and_circuit: hexagonal_gate_layout, tmp_path: Path) -> None:
     """A real circuit produces SiDBs without modifying its gate-level input."""

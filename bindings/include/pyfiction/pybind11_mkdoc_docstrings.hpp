@@ -16180,6 +16180,9 @@ Template Args:
 Returns:
     Incoming and outgoing port directions of the tile.
 
+Raises:
+    std::invalid_argument: if `lyt` shifts columns instead of rows.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_is_predefined_bestagon_gate_applicable =
@@ -16250,6 +16253,7 @@ Returns:
     Bestagon gate representation of `t` including mirroring.
 
 Raises:
+    std::invalid_argument: if `lyt` shifts columns instead of rows.
     gate_design_exception: if no gate can be designed.
     fcn::unsupported_gate_orientation_exception: if the gate
                                                  orientation is

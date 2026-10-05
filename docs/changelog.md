@@ -615,6 +615,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Gate libraries:
 
+  - On-the-fly SiDB gate mapping now rejects column arrangements instead of dropping north/south wires.
   - Gate-library application assigns the synchronization delay of each tile to its clock zone.
   - ToPoliNano wire optimization now handles two-cell segments and checks every interior cell for obstructions.
 
