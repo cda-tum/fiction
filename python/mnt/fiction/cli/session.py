@@ -48,7 +48,6 @@ from .statistics import json_value
 from .stores import CellEntry, GateLayout, Network, Store, describe, element_name, one_line
 
 if TYPE_CHECKING:
-
     from mnt.pyfiction.synthesis import dynamic_truth_table
 
     from .registry import Result
