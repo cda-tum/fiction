@@ -275,16 +275,16 @@ template <typename Ntk, typename GateLyt>
 #endif
 
 /**
- * @brief Designs a lattice-based SiDB circuit for a placed and routed gate-level layout.
+ * @brief Designs a lattice-based SiDB circuit for a placed and routed pointy-top hexagonal gate-level layout.
  *
- * The process begins with an already placed and routed gate-level layout. For each gate, the corresponding SiDB
- * implementation is designed by using an SiDB gate design algorithm.
+ * For each gate, the SiDB gate design algorithm designs the corresponding SiDB implementation.
  *
- * @tparam GateLyt Gate-level layout type.
- * @param gate_lyt Gate-level layout.
+ * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
+ * @param gate_lyt Pointy-top hexagonal gate-level layout.
  * @param params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_circuit_design_params` object.
  * @return Layout representing the designed SiDB circuit.
+ * @throws std::invalid_argument if gate mapping uses a column arrangement instead of a row arrangement.
  * @throws unsuccessful_gate_design_error if a gate cannot be designed.
  * @throws utils::timeout_error if the shared circuit budget or an individual gate budget expires. No partial circuit
  * is returned. Deadline checks are cooperative and do not interrupt allocation or cell placement.

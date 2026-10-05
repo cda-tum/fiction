@@ -14470,26 +14470,27 @@ static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible_par
 static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible_params_sim_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design =
-R"doc(Designs a lattice-based SiDB circuit for a placed and routed gate-
-level layout.
+R"doc(Designs a lattice-based SiDB circuit for a placed and routed pointy-
+top hexagonal gate-level layout.
 
-The process begins with an already placed and routed gate-level
-layout. For each gate, the corresponding SiDB implementation is
-designed by using an SiDB gate design algorithm.
+For each gate, the SiDB gate design algorithm designs the
+corresponding SiDB implementation.
 
 Args:
-    gate_lyt: Gate-level layout.
+    gate_lyt: Pointy-top hexagonal gate-level layout.
     params: The parameters used for designing the circuit,
             encapsulated in an `on_the_fly_circuit_design_params`
             object.
 
 Template Args:
-    GateLyt: Gate-level layout type.
+    GateLyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
     Layout representing the designed SiDB circuit.
 
 Raises:
+    std::invalid_argument: if gate mapping uses a column arrangement
+                           instead of a row arrangement.
     unsuccessful_gate_design_error: if a gate cannot be designed.
     utils::timeout_error: if the shared circuit budget or an
                           individual gate budget expires. No partial
