@@ -18,7 +18,7 @@ import shutil
 import tempfile
 import threading
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -48,7 +48,6 @@ from .statistics import json_value
 from .stores import CellEntry, GateLayout, Network, Store, describe, element_name, one_line
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
 
     from mnt.pyfiction.synthesis import dynamic_truth_table
 
@@ -462,7 +461,7 @@ class Session:
         return path
 
     @contextlib.contextmanager
-    def progress(self, label: str) -> Iterator[ProgressCallback]:
+    def progress(self, label: str) -> Generator[ProgressCallback, None, None]:
         """Show one row for the command, with aggregate counts and search candidate status.
 
         The display is transient. Quiet mode and nonterminal output disable the display and
