@@ -481,7 +481,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         pis.reserve(this->num_pis());
 
         fiction::networks::views::static_depth_view<Ntk>::foreach_pi([&pis](auto const& pi) { pis.push_back(pi); });
-        std::ranges::sort(pis, [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
+        sort_by_rank(pis);
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
 
@@ -500,6 +500,29 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     void foreach_pi_unranked(Fn&& fn) const
     {
         fiction::networks::views::static_depth_view<Ntk>::foreach_pi(std::forward<Fn>(fn));
+    }
+
+    /**
+     * Sorts nodes by rank position. Nodes without a rank, such as primary inputs that drive nothing, come last in
+     * index order.
+     *
+     * @param nodes Nodes to sort.
+     */
+    void sort_by_rank(std::vector<node>& nodes) const
+    {
+        std::ranges::sort(nodes,
+                          [this](auto const& n1, auto const& n2)
+                          {
+                              const auto p1 = rank_pos.find(n1);
+                              const auto p2 = rank_pos.find(n2);
+
+                              if ((p1 == rank_pos.end()) != (p2 == rank_pos.end()))
+                              {
+                                  return p2 == rank_pos.end();
+                              }
+
+                              return p1 == rank_pos.end() ? n1 < n2 : p1->second < p2->second;
+                          });
     }
 
     /**
@@ -534,7 +557,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         pis.reserve(this->num_pis());
 
         fiction::networks::views::static_depth_view<Ntk>::foreach_ci([&pis](auto const& pi) { pis.push_back(pi); });
-        std::ranges::sort(pis, [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
+        sort_by_rank(pis);
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
     /**

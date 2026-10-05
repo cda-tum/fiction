@@ -25,6 +25,7 @@
 #include <fiction/traits.hpp>
 #include <fiction/verification/virtual_miter.hpp>
 
+#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/buffered.hpp>
@@ -353,4 +354,32 @@ TEST_CASE("Dangling nodes are not ranked", "[mutable-rank-view]")
     CHECK(ranked.rank_width(1) == 1);
     CHECK(ranked.at_rank_position(1, 0) == tec.get_node(a1));
     CHECK(!ranked.has_level(tec.get_node(dangling)));
+}
+
+TEST_CASE("Primary inputs without fanout are visited last", "[mutable-rank-view]")
+{
+    technology_network tec{};
+
+    const auto unused = tec.create_pi();
+    const auto x1     = tec.create_pi();
+    const auto x2     = tec.create_pi();
+    tec.create_po(tec.create_and(x2, x1));
+
+    const mutable_rank_view ranked{tec};
+
+    std::vector<mockturtle::node<technology_network>> visited{};
+    ranked.foreach_pi([&visited](const auto& n) { visited.push_back(n); });
+
+    REQUIRE(visited.size() == 3);
+    CHECK(visited.back() == tec.get_node(unused));
+    CHECK(ranked.rank_position(visited[0]) == 0);
+    CHECK(ranked.rank_position(visited[1]) == 1);
+
+    std::vector<mockturtle::node<technology_network>> cis{};
+    ranked.foreach_ci([&cis](const auto& n) { cis.push_back(n); });
+    CHECK(cis == visited);
+
+    // copying the view through mockturtle keeps every input
+    const auto copy = mockturtle::cleanup_dangling(ranked);
+    CHECK(copy.num_pis() == 3);
 }
