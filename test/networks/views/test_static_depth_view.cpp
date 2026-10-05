@@ -222,3 +222,27 @@ TEST_CASE("Compute levels during node construction after move assignment", "[sta
 
     CHECK(dxag.depth() == 3u);
 }
+
+TEST_CASE("Dangling nodes have no level", "[static-depth-view]")
+{
+    mockturtle::aig_network aig;
+    const auto              a  = aig.create_pi();
+    const auto              b  = aig.create_pi();
+    const auto              f1 = aig.create_nand(a, b);
+    const auto              f2 = aig.create_nand(a, f1);
+    aig.create_po(f2);
+
+    const static_depth_view depth_aig{aig};
+
+    CHECK(depth_aig.has_level(aig.get_node(a)));
+    CHECK(depth_aig.has_level(aig.get_node(f1)));
+    CHECK(depth_aig.has_level(aig.get_node(f2)));
+
+    mockturtle::aig_network dangling_aig = aig;
+    const auto              f3           = dangling_aig.create_nand(b, f1);
+
+    const static_depth_view depth_dangling{dangling_aig};
+
+    CHECK(depth_dangling.has_level(dangling_aig.get_node(f2)));
+    CHECK(!depth_dangling.has_level(dangling_aig.get_node(f3)));
+}

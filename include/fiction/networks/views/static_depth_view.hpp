@@ -277,6 +277,15 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     }
 
     /**
+     * @return Whether a level is stored for the node. A node has no level if it was added after the last call to
+     * `update_levels` without `on_add` being called for it, or if it is dangling.
+     */
+    [[nodiscard]] bool has_level(node const& n) const
+    {
+        return levels.contains(n);
+    }
+
+    /**
      * @return If a node is on the critical path.
      */
     bool is_on_critical_path(node const& n) const

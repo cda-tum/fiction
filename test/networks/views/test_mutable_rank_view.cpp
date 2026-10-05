@@ -333,3 +333,24 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
     cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
 }
+
+TEST_CASE("Dangling nodes are not ranked", "[mutable-rank-view]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto a1 = tec.create_and(x1, x2);
+    tec.create_po(a1);
+
+    // a gate that drives no primary output
+    const auto dangling = tec.create_or(x1, x2);
+
+    const mutable_rank_view ranked{tec};
+
+    CHECK(ranked.check_validity());
+    CHECK(ranked.rank_width(0) == 2);
+    CHECK(ranked.rank_width(1) == 1);
+    CHECK(ranked.at_rank_position(1, 0) == tec.get_node(a1));
+    CHECK(!ranked.has_level(tec.get_node(dangling)));
+}
