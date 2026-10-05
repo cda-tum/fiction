@@ -159,6 +159,173 @@
 
 ::::
 
+## Planarization
+
+A ranked logic network is planar if its edges can be drawn between adjacent ranks without crossings. _fiction_
+offers two ways to remove the crossings of a balanced, ranked network: duplicating nodes, which copies the fanin cone
+of a node once per crossing it would cause and turns duplicated primary inputs into virtual primary inputs, and
+crossing gates, which replace every crossing with a gadget that swaps the two signals. The hybrid strategy of node
+duplication planarization decides per level which of the two is cheaper and leaves the crossings of a level to
+`crossing_gate_planarization` where the gadgets win.
+
+The results share one copy of a fanin among consecutive consumers, so `planar_fanout_substitution` restores fanout
+nodes while keeping ranks and planarity, and `planar_rebalancing` removes the buffers that this padding leaves behind
+and re-inserts the minimum that keeps the network balanced.
+
+### Planarization Pipeline
+
+`planarization` runs the whole pipeline: node duplication with the chosen strategy, crossing gates for the levels the
+hybrid strategy left crossed, planar fanout substitution, and planar rebalancing.
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/synthesis/planarization.hpp`
+
+```{doxygenstruct} fiction::synthesis::planarization_params
+:members:
+```
+
+```{doxygenstruct} fiction::synthesis::planarization_stats
+:members:
+```
+
+```{doxygenfunction} fiction::synthesis::planarization
+
+```
+
+:::
+
+:::{tab-item} Python
+:sync: python
+
+The Python function takes a balanced `technology_network` with unified outputs (see `network_balancing`) and returns
+the planar network together with a list that maps every virtual input, appended after the real inputs, to the index of
+the real input it copies. The node order of the returned network is its rank order.
+
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.synthesis.planarization_params
+   :members:
+
+.. autoclass:: mnt.pyfiction.synthesis.node_duplication_planarization_params
+   :members:
+
+.. autoclass:: mnt.pyfiction.synthesis.planarization_strategy
+
+.. autoclass:: mnt.pyfiction.synthesis.decision_criterion
+
+.. autoclass:: mnt.pyfiction.synthesis.duplication_cost_model
+   :members:
+
+.. autoclass:: mnt.pyfiction.synthesis.planarization_stats
+   :members:
+
+.. autofunction:: mnt.pyfiction.synthesis.planarization
+```
+
+:::
+
+::::
+
+### Node Duplication Planarization
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/synthesis/node_duplication_planarization.hpp`
+
+```{doxygenstruct} fiction::synthesis::node_duplication_planarization_params
+:members:
+```
+
+```{doxygenstruct} fiction::synthesis::node_duplication_planarization_stats
+:members:
+```
+
+```{doxygenfunction} fiction::synthesis::node_duplication_planarization
+
+```
+
+:::
+
+::::
+
+### Crossing Gate Planarization
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/synthesis/crossing_gate_planarization.hpp`
+
+```{doxygenstruct} fiction::synthesis::crossing_gate_planarization_params
+:members:
+```
+
+```{doxygenstruct} fiction::synthesis::crossing_gate_planarization_stats
+:members:
+```
+
+```{doxygenfunction} fiction::synthesis::crossing_gate_planarization
+
+```
+
+:::
+
+::::
+
+### Planar Fanout Substitution
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/synthesis/planar_fanout_substitution.hpp`
+
+```{doxygenstruct} fiction::synthesis::planar_fanout_substitution_params
+:members:
+```
+
+```{doxygenfunction} fiction::synthesis::planar_fanout_substitution
+
+```
+
+:::
+
+::::
+
+### Planar Rebalancing
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/synthesis/planar_rebalancing.hpp`
+
+```{doxygenstruct} fiction::synthesis::planar_rebalancing_params
+:members:
+```
+
+```{doxygenfunction} fiction::synthesis::planar_rebalancing
+
+```
+
+:::
+
+::::
+
 ## Delete Virtual PIs
 
 ::::{tab-set}

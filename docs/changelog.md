@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `synthesis::planarization` turns a balanced, ranked network into a planar, balanced, fanout-substituted one
+  - `synthesis::node_duplication_planarization` planarizes a balanced, ranked network by duplicating nodes, with a
+    hybrid strategy that keeps the crossings of a level where crossing gates are cheaper, estimated by weighted
+    cone sizes or by a budgeted lookahead
+  - `synthesis::crossing_gate_planarization` replaces the crossings of a balanced, ranked network with XOR or
+    AND-OR-NOT gadgets
+  - `synthesis::planar_fanout_substitution` and `synthesis::planar_rebalancing` substitute fanouts and minimize
+    buffers while keeping ranks and planarity
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
   - `physical_design::cell_grid_extent` returns the extent of the cell grid that a gate library spans on a
     gate-level layout
@@ -65,7 +73,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     instead of a template parameter
 
 - Python bindings:
-
+  - `mnt.pyfiction.synthesis.planarization` planarizes a balanced technology network and reports its virtual inputs
   - The callback members of parameter classes accept `None`, which clears the callback.
   - Shared SiDB deadlines raise `TimeoutError`; gate design releases the GIL.
   - Added directory-based test markers, including `pytest -m simulation`.
@@ -524,6 +532,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
   - `convert_network` keeps the inverters of a technology network when the target network
     type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
+  - `synthesis::delete_virtual_pis` maps outputs driven by a virtual primary input to the real one
+  - `synthesis::network_balancing` leaves constant outputs unbuffered when unifying outputs, and `is_balanced`
+    ignores them
+  - `networks::views::mutable_rank_view` skips dangling nodes instead of throwing when initializing ranks
 
 - Build system:
   - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.
