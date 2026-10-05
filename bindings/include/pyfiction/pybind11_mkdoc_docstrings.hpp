@@ -13738,26 +13738,6 @@ is north to south.)doc";
 
 static const char *mkd_doc_fiction_sidb_bestagon_library_bestagon_library = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_bestagon_library_determine_port_routing =
-R"doc(Determines the port directions of a given tile.
-
-Args:
-    lyt: Layout that contains the tile.
-    t: Tile whose incoming and outgoing port directions are
-       determined.
-
-Template Args:
-    GateLyt: Hexagonal gate-level layout type.
-
-Returns:
-    Incoming and outgoing port directions of the tile.
-
-Raises:
-    std::invalid_argument: If `lyt` is not pointy-top, i.e., its
-                           arrangement shifts columns.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_bestagon_library_get_functional_implementations =
 R"doc(Returns a map of all gate functions supported by the library and their
 respectively possible implementations.
@@ -16163,25 +16143,6 @@ Returns:
 
 Raises:
     gate_design_exception: if no gate can be designed.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_determine_port_routing =
-R"doc(Determines the port directions of a given tile.
-
-Args:
-    lyt: Layout that contains the tile.
-    t: Tile whose incoming and outgoing port directions are
-       determined.
-
-Template Args:
-    Lyt: Pointy-top hexagonal gate-level layout type.
-
-Returns:
-    Incoming and outgoing port directions of the tile.
-
-Raises:
-    std::invalid_argument: if `lyt` shifts columns instead of rows.
 
 )doc";
 
@@ -24523,6 +24484,9 @@ Template Args:
 
 Returns:
     Incoming and outgoing port directions of the tile.
+
+Raises:
+    std::invalid_argument: if `lyt` shifts columns instead of rows.
 
 )doc";
 
