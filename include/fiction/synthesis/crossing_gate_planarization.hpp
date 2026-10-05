@@ -91,6 +91,23 @@ namespace detail
 {
 
 /**
+ * Number of nodes of one XOR crossing gadget, buffers included.
+ */
+inline constexpr uint64_t XOR_GADGET_NODES = 10u;
+/**
+ * Number of levels one XOR crossing gadget spans.
+ */
+inline constexpr uint64_t XOR_GADGET_DEPTH = 4u;
+/**
+ * Number of nodes of one crossing gadget built from AND, OR, and NOT gates, buffers included.
+ */
+inline constexpr uint64_t AND_OR_GADGET_NODES = 59u;
+/**
+ * Number of levels one crossing gadget built from AND, OR, and NOT gates spans.
+ */
+inline constexpr uint64_t AND_OR_GADGET_DEPTH = 14u;
+
+/**
  * Implementation of the crossing gate planarization algorithm.
  *
  * @tparam Ntk Ranked, balanced network type.
@@ -268,10 +285,7 @@ class crossing_gate_planarization_impl
      */
     [[nodiscard]] uint32_t gadget_depth() const noexcept
     {
-        constexpr uint32_t xor_gadget_depth    = 4u;
-        constexpr uint32_t and_or_gadget_depth = 14u;
-
-        return ps.xor_gates ? xor_gadget_depth : and_or_gadget_depth;
+        return static_cast<uint32_t>(ps.xor_gates ? XOR_GADGET_DEPTH : AND_OR_GADGET_DEPTH);
     }
     /**
      * Finds the crossings between every pair of adjacent ranks. Edges are swept in rank order of their sources; an

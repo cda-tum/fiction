@@ -21,6 +21,7 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
+#include <fiction/synthesis/crossing_gate_planarization.hpp>
 #include <fiction/synthesis/delete_virtual_pis.hpp>
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
@@ -59,6 +60,18 @@ mutable_rank_view<technology_network> prepare(const Ntk& ntk)
     ps.unify_outputs = true;
 
     return mutable_rank_view{network_balancing<technology_network>(fanout_substitution<technology_network>(ntk), ps)};
+}
+
+/**
+ * Balances with unified outputs and ranks the given network without substituting fanouts.
+ */
+template <typename Ntk>
+mutable_rank_view<technology_network> rank_without_substitution(const Ntk& ntk)
+{
+    network_balancing_params ps{};
+    ps.unify_outputs = true;
+
+    return mutable_rank_view{network_balancing<technology_network>(ntk, ps)};
 }
 
 /**
@@ -367,4 +380,98 @@ TEST_CASE("Statistics report the number of duplications", "[node-duplication-pla
     std::ostringstream os{};
     st.report(os);
     CHECK(os.str().find("duplications") != std::string::npos);
+}
+
+TEST_CASE("Hybrid strategy keeps crossings only where gadgets are cheaper", "[node-duplication-planarization]")
+{
+    for (const auto& ntk : {blueprints::full_adder_network<technology_network>(),
+                            blueprints::parity_network<technology_network>(), blueprints::clpl<technology_network>()})
+    {
+        const auto ranked = rank_without_substitution(ntk);
+
+        for (const bool xor_gates : {false, true})
+        {
+            node_duplication_planarization_params ps{};
+            ps.strategy  = node_duplication_planarization_params::planarization_strategy::HYBRID;
+            ps.xor_gates = xor_gates;
+
+            node_duplication_planarization_stats st{};
+            const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
+
+            // the hybrid result is equivalent and balanced, and crossing-free iff no level kept its crossings
+            check_equivalent(ntk, hybrid);
+            CHECK(is_balanced(hybrid, {.unify_outputs = true}));
+            CHECK((count_crossings(hybrid) == 0) == (st.num_crossing_levels == 0));
+            CHECK((st.num_crossings == 0) == (st.num_crossing_levels == 0));
+
+            // the crossing gates finish the job
+            crossing_gate_planarization_params cg_ps{};
+            cg_ps.xor_gates = xor_gates;
+
+            crossing_gate_planarization_stats cg_st{};
+            const auto                        planar = crossing_gate_planarization(hybrid, cg_ps, &cg_st);
+
+            check_planar_and_equivalent(ntk, planar);
+            CHECK(is_balanced(planar, {.unify_outputs = true}));
+            CHECK(cg_st.num_crossings >= st.num_crossings);
+        }
+    }
+}
+
+TEST_CASE("Hybrid strategy with an infinite crossing cost duplicates everything", "[node-duplication-planarization]")
+{
+    const auto ntk    = blueprints::parity_network<technology_network>();
+    const auto ranked = rank_without_substitution(ntk);
+
+    node_duplication_planarization_stats dup_st{};
+    const auto                           duplicated = node_duplication_planarization(ranked, {}, &dup_st);
+
+    node_duplication_planarization_params ps{};
+    ps.strategy               = node_duplication_planarization_params::planarization_strategy::HYBRID;
+    ps.max_crossings_per_rank = 0;
+
+    node_duplication_planarization_stats st{};
+    const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
+
+    check_planar_and_equivalent(ntk, hybrid);
+    CHECK(st.num_crossing_levels == 0);
+    CHECK(hybrid.size() == duplicated.size());
+    CHECK(st.num_duplications == dup_st.num_duplications);
+}
+
+TEST_CASE("Hybrid strategy with a prohibitive duplication cost keeps crossings", "[node-duplication-planarization]")
+{
+    const auto ntk    = blueprints::parity_network<technology_network>();
+    const auto ranked = rank_without_substitution(ntk);
+
+    node_duplication_planarization_params ps{};
+    ps.strategy              = node_duplication_planarization_params::planarization_strategy::HYBRID;
+    ps.duplication_cost.base = 1e6;
+    ps.cross_min             = node_duplication_planarization_params::crossing_minimization::BARYCENTER;
+
+    node_duplication_planarization_stats st{};
+    const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
+
+    check_equivalent(ntk, hybrid);
+    CHECK(st.num_crossing_levels > 0);
+    CHECK(st.num_crossings > 0);
+    CHECK(count_crossings(hybrid) == st.num_crossings);
+
+    std::ostringstream os{};
+    st.report(os);
+    CHECK(os.str().find("crossing levels") != std::string::npos);
+}
+
+TEST_CASE("The duplication limit aborts the planarization", "[node-duplication-planarization]")
+{
+    const auto ntk    = blueprints::parity_network<technology_network>();
+    const auto ranked = prepare(ntk);
+
+    node_duplication_planarization_params ps{};
+    ps.max_duplications = 1;
+
+    CHECK_THROWS_AS(node_duplication_planarization(ranked, ps), std::runtime_error);
+
+    ps.max_duplications = 0;
+    CHECK_NOTHROW(node_duplication_planarization(ranked, ps));
 }
