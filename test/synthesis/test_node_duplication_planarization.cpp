@@ -475,3 +475,31 @@ TEST_CASE("The duplication limit aborts the planarization", "[node-duplication-p
     ps.max_duplications = 0;
     CHECK_NOTHROW(node_duplication_planarization(ranked, ps));
 }
+
+TEST_CASE("Hybrid strategy with lookahead", "[node-duplication-planarization]")
+{
+    for (const auto& ntk : {blueprints::full_adder_network<technology_network>(),
+                            blueprints::parity_network<technology_network>(), blueprints::clpl<technology_network>()})
+    {
+        const auto ranked = rank_without_substitution(ntk);
+
+        node_duplication_planarization_params ps{};
+        ps.strategy  = node_duplication_planarization_params::planarization_strategy::HYBRID;
+        ps.criterion = node_duplication_planarization_params::decision_criterion::LOOKAHEAD;
+        ps.xor_gates = true;
+
+        node_duplication_planarization_stats st{};
+        const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
+
+        check_equivalent(ntk, hybrid);
+        CHECK((count_crossings(hybrid) == 0) == (st.num_crossing_levels == 0));
+
+        crossing_gate_planarization_params cg_ps{};
+        cg_ps.xor_gates = true;
+
+        const auto planar = crossing_gate_planarization(hybrid, cg_ps);
+
+        check_planar_and_equivalent(ntk, planar);
+        CHECK(is_balanced(planar, {.unify_outputs = true}));
+    }
+}
