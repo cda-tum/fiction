@@ -12,6 +12,7 @@
  * @file
  * @brief Path-balances a logic network with identity-computing buffer nodes.
  * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
  */
 
 #pragma once
@@ -132,7 +133,8 @@ class network_balancing_impl
 
                 auto tgt_po = ntk_topo.is_complemented(po) ? balanced.create_not(tgt_signal) : tgt_signal;
 
-                if (ps.unify_outputs)
+                // constants have no level and are never buffered
+                if (ps.unify_outputs && !ntk_topo.is_constant(ntk_topo.get_node(po)))
                 {
                     insert_buf_chain(balanced, max_po_level - po_levels[i], tgt_po);
                 }
@@ -194,7 +196,18 @@ class is_balanced_impl
 
         if (ps.unify_outputs)
         {
-            const auto po_levels = get_po_levels(ntk_depth);
+            // constants have no level, so only outputs driven by gates or primary inputs must agree
+            std::vector<uint32_t> po_levels{};
+            po_levels.reserve(ntk.num_pos());
+            ntk.foreach_po(
+                [this, &po_levels](const auto& po)
+                {
+                    if (const auto n = ntk.get_node(po); !ntk.is_constant(n))
+                    {
+                        po_levels.push_back(ntk_depth.level(n));
+                    }
+                });
+
             // check whether POs with different depth levels exist
             if (std::ranges::adjacent_find(po_levels, std::not_equal_to<>()) != po_levels.end())
             {
