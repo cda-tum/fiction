@@ -203,8 +203,9 @@ hybrid strategy left crossed, planar fanout substitution, and planar rebalancing
 :sync: python
 
 The Python function takes a balanced `technology_network` with unified outputs (see `network_balancing`) and returns
-the planar network together with a list that maps every virtual input, appended after the real inputs, to the index of
-the real input it copies. The node order of the returned network is its rank order.
+the planar network together with a list that holds, for every input of the result, the index of the input of the
+original network it stands for; a duplicated input appears several times. The node order of the returned network is
+its rank order, inputs included.
 
 ```{eval-rst}
 .. autoclass:: mnt.pyfiction.synthesis.planarization_params

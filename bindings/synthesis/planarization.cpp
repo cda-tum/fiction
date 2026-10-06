@@ -49,25 +49,26 @@ namespace detail
 {
 
 /**
- * Copies a planar `virtual_pi_network` into a plain network whose node order encodes the rank order: real primary
- * inputs first, then the virtual ones, then the gates level by level in rank order. The returned vector maps every
- * virtual input, in the order they appear after the real ones, to the index of its real input.
+ * Copies a planar `virtual_pi_network` into a plain network whose node order encodes the rank order: the primary
+ * inputs in the order of rank 0, then the gates level by level in rank order. The returned vector holds, for every
+ * primary input of the result in that order, the index of the input of the original network it stands for; a virtual
+ * input maps to the index of its real input.
  *
  * @tparam Planar Planar network type.
  * @param planar Planar network.
- * @return The plain network and the virtual-to-real input map.
+ * @return The plain network and the original input index of every input.
  */
 template <typename Planar>
 std::pair<py_tec_network, std::vector<uint32_t>> flatten(const Planar& planar)
 {
     py_tec_network                                                   dest{};
     mockturtle::node_map<mockturtle::signal<py_tec_network>, Planar> old2new{planar};
-    std::vector<uint32_t>                                            virtual_to_real{};
+    std::vector<uint32_t>                                            original_input{};
 
     old2new[planar.get_constant(false)] = dest.get_constant(false);
     old2new[planar.get_constant(true)]  = dest.get_constant(true);
 
-    // real inputs keep their order; their index is their position among the real inputs
+    // the index of every real input in the original network is its creation order
     mockturtle::node_map<uint32_t, Planar> real_index{planar};
     uint32_t                               next_real = 0;
 
@@ -76,18 +77,16 @@ std::pair<py_tec_network, std::vector<uint32_t>> flatten(const Planar& planar)
         {
             if (planar.is_real_pi(n))
             {
-                old2new[n]    = dest.create_pi();
                 real_index[n] = next_real++;
             }
         });
-    planar.foreach_pi_unranked(
+
+    // inputs in rank order, unranked ones last
+    planar.foreach_pi(
         [&](const auto& n)
         {
-            if (!planar.is_real_pi(n))
-            {
-                old2new[n] = dest.create_pi();
-                virtual_to_real.push_back(real_index[planar.get_real_pi(n)]);
-            }
+            old2new[n] = dest.create_pi();
+            original_input.push_back(real_index[planar.is_real_pi(n) ? n : planar.get_real_pi(n)]);
         });
 
     for (uint32_t level = 1; level <= planar.depth(); ++level)
@@ -112,7 +111,7 @@ std::pair<py_tec_network, std::vector<uint32_t>> flatten(const Planar& planar)
 
     fiction::networks::restore_names(planar, dest, old2new);
 
-    return {dest, virtual_to_real};
+    return {dest, original_input};
 }
 
 }  // namespace detail
@@ -211,7 +210,9 @@ void planarization(nanobind::module_& m)
         [](const py_tec_network& network, const fiction::synthesis::planarization_params& ps,
            fiction::synthesis::planarization_stats* pst)
         {
-            // the pipeline needs a balanced network with unified outputs and ranks; the ranks follow the node order
+            // the pipeline needs a balanced network with unified outputs and ranks; the ranks follow the node order.
+            // The result's node order is its rank order, and every input is reported with the index of the original
+            // input it stands for, so that virtual inputs can be tied to their real ones.
             if (!fiction::synthesis::is_balanced(network, {.unify_outputs = true}))
             {
                 throw std::invalid_argument("The network must be balanced with unified outputs; see network_balancing");
