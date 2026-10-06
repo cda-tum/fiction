@@ -1080,13 +1080,13 @@ class hexagonal_layout : public layout_base
 
         if (is_row_arrangement(get_arrangement()))
         {
-            cube_coord.x = ox - (oy + (oy % 2 != 0 ? offset : 0)) / 2;
+            cube_coord.x = ox - half_shifted(oy, offset);
             cube_coord.z = oy;
         }
         else
         {
             cube_coord.x = ox;
-            cube_coord.z = oy - (ox + (ox % 2 != 0 ? offset : 0)) / 2;
+            cube_coord.z = oy - half_shifted(ox, offset);
         }
 
         cube_coord.y = -cube_coord.x - cube_coord.z;
@@ -1107,15 +1107,27 @@ class hexagonal_layout : public layout_base
 
         if (is_row_arrangement(get_arrangement()))
         {
-            return {cube_coord.x + (cube_coord.z + (cube_coord.z % 2 != 0 ? offset : 0)) / 2, cube_coord.z};
+            return {cube_coord.x + half_shifted(cube_coord.z, offset), cube_coord.z};
         }
 
-        return {cube_coord.x, cube_coord.z + (cube_coord.x + (cube_coord.x % 2 != 0 ? offset : 0)) / 2};
+        return {cube_coord.x, cube_coord.z + half_shifted(cube_coord.x, offset)};
     }
 
 #pragma endregion
 
   private:
+    /**
+     * Halves an axis value after moving an odd value by `offset`, which is the shift between neighboring rows or
+     * columns in offset coordinates.
+     *
+     * @param value Axis value.
+     * @param offset Shift of odd values, -1 for odd and +1 for even arrangements.
+     * @return `(value + offset) / 2` for an odd value and `value / 2` for an even one.
+     */
+    [[nodiscard]] static constexpr int64_t half_shifted(const int64_t value, const int64_t offset) noexcept
+    {
+        return (value + (value % 2 != 0 ? offset : 0)) / 2;
+    }
     /**
      * Shared storage for the layout dimensions and arrangement.
      */
