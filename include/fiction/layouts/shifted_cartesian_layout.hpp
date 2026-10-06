@@ -103,6 +103,7 @@ namespace fiction::layouts
 class shifted_cartesian_layout : public hexagonal_layout
 {
   private:
+    /** Geometry shared with hexagonal layouts. */
     using HexagonalLayout = hexagonal_layout;
 
   public:
@@ -113,18 +114,18 @@ class shifted_cartesian_layout : public hexagonal_layout
     using is_shifted_cartesian = std::true_type;
 
     /**
-     * Standard constructor. The given aspect ratio points to the highest possible coordinate in the layout. That means
-     * in the `arrangement::EVEN_COLUMN` ASCII layout representation above `ar = (3,2)`. Consequently, with
-     * `ar = (0,0)`, the layout has exactly one coordinate.
-     *
-     * @param a Arrangement of the shifted rows or columns. It cannot change after construction.
-     * @param ar Highest possible position in the layout.
+     * Creates geometry with half-open, zero-origin bounds. The default extent is empty.
+     * @param a Arrangement of shifted rows or columns.
+     * @param size Axis sizes.
+     * @throws std::invalid_argument If a size exceeds the coordinate domain.
      */
-    explicit shifted_cartesian_layout(const arrangement a, const HexagonalLayout::aspect_ratio& ar = {}) :
-            HexagonalLayout(a, ar)
+    explicit shifted_cartesian_layout(const arrangement a, const HexagonalLayout::extent& size = {}) :
+            HexagonalLayout(a, size)
     {}
 
-    // NOLINTNEXTLINE(*-explicit-constructor, *-explicit-conversions)
+    /** @param lyt Hexagonal geometry to copy. */
+    // NOLINTNEXTLINE(*-explicit-constructor, *-explicit-conversions): implicit geometry conversion preserves clone
+    // usage
     shifted_cartesian_layout(const HexagonalLayout& lyt) : HexagonalLayout(lyt) {}
 
   private:
