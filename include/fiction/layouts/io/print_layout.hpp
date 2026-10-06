@@ -81,8 +81,8 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         return;
     }
 
-    const auto num_cols = static_cast<std::size_t>(layout.x()) + 1u;
-    const auto num_rows = static_cast<std::size_t>(layout.y()) + 1u;
+    const auto num_cols = static_cast<std::size_t>(layout.width());
+    const auto num_rows = static_cast<std::size_t>(layout.height());
 
     // cache operations and directions in a 2d-matrix-like object
     using s_matrix = std::vector<std::vector<std::string>>;
@@ -99,7 +99,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
         // NOLINTBEGIN(*-else-after-return)
 
-        if (const auto n = layout.get_node(t); layout.is_and(n))
+        if (const auto n = layout.find_object(t).value(); layout.is_and(n))
         {
             return "&";
         }
@@ -119,6 +119,14 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         {
             return "X";
         }
+        else if (layout.is_pi(n))
+        {
+            return "I";
+        }
+        else if (layout.is_po(n))
+        {
+            return "O";
+        }
         else if (layout.is_fanout(n))
         {
             return "F";
@@ -126,7 +134,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         else if (layout.is_wire(n))
         {
             // second-layer wire indicates a crossing
-            if (const auto at = layout.above(t); (at != t) && layout.is_wire_tile(at))
+            if (const auto at = layout.above(t); at && layout.is_wire_tile(*at))
             {
                 return "+";
             }
@@ -155,36 +163,43 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             auto t2     = layout.above(t1);
             reprs[i][j] = gate_repr(t1);
 
-            const auto east_west_connections = [&layout, &x_dirs, &t1, &t2, i, j](const auto n)
+            const auto east_west_connections = [&layout, &x_dirs, &t1, &t2, i, j](const auto& ft)
             {
-                const auto ft = layout.get_tile(n);
-                if (layout.is_east_of(t1, ft) || layout.is_east_of(t2, ft))
+                if (layout.is_east_of(t1, ft) || (t2 && layout.is_east_of(*t2, ft)))
                 {
                     x_dirs[i][j] = "→";
                 }
-                if (layout.is_west_of(t1, ft) || layout.is_west_of(t2, ft))
+                if (j > 0 && (layout.is_west_of(t1, ft) || (t2 && layout.is_west_of(*t2, ft))))
                 {
                     x_dirs[i][j - 1] = "←";
                 }
             };
 
-            const auto north_south_connections = [&layout, &y_dirs, &t1, &t2, i, j](const auto n)
+            const auto north_south_connections = [&layout, &y_dirs, &t1, &t2, i, j](const auto& ft)
             {
-                const auto ft = layout.get_tile(n);
-                if (layout.is_north_of(t1, ft) || layout.is_north_of(t2, ft))
+                if (layout.is_north_of(t1, ft) || (t2 && layout.is_north_of(*t2, ft)))
                 {
                     y_dirs[i][j] = "↑";
                 }
-                if (layout.is_south_of(t1, ft) || layout.is_south_of(t2, ft))
+                if (layout.is_south_of(t1, ft) || (t2 && layout.is_south_of(*t2, ft)))
                 {
                     y_dirs[i + 1u][j] = "↓";
                 }
             };
 
-            layout.foreach_fanout(layout.get_node(t1), east_west_connections);
-            layout.foreach_fanout(layout.get_node(t2), east_west_connections);
-            layout.foreach_fanout(layout.get_node(t1), north_south_connections);
-            layout.foreach_fanout(layout.get_node(t2), north_south_connections);
+            for (const auto& target : layout.outgoing_data_flow(t1))
+            {
+                east_west_connections(target);
+                north_south_connections(target);
+            }
+            if (t2)
+            {
+                for (const auto& target : layout.outgoing_data_flow(*t2))
+                {
+                    east_west_connections(target);
+                    north_south_connections(target);
+                }
+            }
         }
     }
 
@@ -265,7 +280,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
     const auto has_cell_above = [&layout](const auto& c)
     {
-        for (decltype(layout.z()) z = c.z + decltype(layout.z()){1}; z <= layout.z(); ++z)
+        for (int64_t z = static_cast<int64_t>(c.z) + 1; z < layout.layers(); ++z)
         {
             if (!layout.is_empty_cell({c.x, c.y, z}))
             {
@@ -276,9 +291,9 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         return false;
     };
 
-    for (decltype(layout.y()) y_pos = 0; y_pos <= layout.y(); ++y_pos)
+    for (uint32_t y_pos = 0; y_pos < layout.height(); ++y_pos)
     {
-        for (decltype(layout.x()) x_pos = 0; x_pos <= layout.x(); ++x_pos)
+        for (uint32_t x_pos = 0; x_pos < layout.width(); ++x_pos)
         {
             const cell<Lyt> c{x_pos, y_pos};
 
@@ -379,17 +394,17 @@ void print_node_to_tile_assignments(const Lyt& lyt, std::ostream& os = std::cout
     lyt.foreach_node(
         [&lyt, &os](const auto& n)
         {
-            os << fmt::format("node {} @ {}\n", n, lyt.get_tile(n));
+            os << fmt::format("object {}:{} @ {}\n", n.index, n.generation, lyt.get_tile(n));
             os << "\t with fanins:\n";
             lyt.foreach_fanin(n,
                               [&lyt, &os](const auto& f)
                               {
-                                  const auto fn = lyt.get_node(f);
-                                  os << fmt::format("\t   {} @ {}\n", fn, lyt.get_tile(fn));
+                                  const auto fn = f.object;
+                                  os << fmt::format("\t   {}:{} @ {}\n", fn.index, fn.generation, lyt.get_tile(fn));
                               });
             os << "\n\t with fanouts:\n";
             lyt.foreach_fanout(n, [&lyt, &os](const auto& fn)
-                               { os << fmt::format("\t   {} @ {}\n", fn, lyt.get_tile(fn)); });
+                               { os << fmt::format("\t   {}:{} @ {}\n", fn.index, fn.generation, lyt.get_tile(fn)); });
         });
 
     os << "\n----------------------\n";
@@ -414,19 +429,21 @@ void print_tile_to_node_assignments(const Lyt& lyt, std::ostream& os = std::cout
         {
             os << fmt::format("tile {}\n", t);
 
-            if (const auto n = lyt.get_node(t); n != 0)
+            if (const auto object = lyt.find_object(t))
             {
-                os << fmt::format("node {} @ {}\n", n, lyt.get_tile(n));
+                const auto n = *object;
+                os << fmt::format("object {}:{} @ {}\n", n.index, n.generation, lyt.get_tile(n));
                 os << "\t with fanins:\n";
                 lyt.foreach_fanin(n,
                                   [&lyt, &os](const auto& f)
                                   {
-                                      const auto fn = lyt.get_node(f);
-                                      os << fmt::format("\t   {} @ {}\n", fn, lyt.get_tile(fn));
+                                      const auto fn = f.object;
+                                      os << fmt::format("\t   {}:{} @ {}\n", fn.index, fn.generation, lyt.get_tile(fn));
                                   });
                 os << "\n\t with fanouts:\n";
-                lyt.foreach_fanout(n, [&lyt, &os](const auto& fn)
-                                   { os << fmt::format("\t   {} @ {}\n", fn, lyt.get_tile(fn)); });
+                lyt.foreach_fanout(
+                    n, [&lyt, &os](const auto& fn)
+                    { os << fmt::format("\t   {}:{} @ {}\n", fn.index, fn.generation, lyt.get_tile(fn)); });
                 os << '\n';
             }
         });
