@@ -36,25 +36,7 @@ using namespace fiction::physical_design::path_finding;
 
 TEST_CASE("Manhattan distance", "[distance]")
 {
-    SECTION("Unsigned Cartesian layout")
-    {
-        using cart_lyt = cartesian_layout;
-
-        const cart_lyt layout{};
-
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(manhattan_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(manhattan_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(manhattan_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == 8);
-
-        // ignore z-axis
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
-    }
-    SECTION("Signed Cartesian layout")
+    SECTION("Cartesian layout")
     {
         using cart_lyt = cartesian_layout;
 
@@ -81,27 +63,7 @@ TEST_CASE("Manhattan distance", "[distance]")
 
 TEST_CASE("Manhattan distance functor", "[distance]")
 {
-    SECTION("Unsigned Cartesian layout")
-    {
-        using cart_lyt = cartesian_layout;
-
-        const cart_lyt layout{};
-
-        const manhattan_distance_functor<cart_lyt> distance{};
-
-        CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(distance(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(distance(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(distance(layout, {1, 2}, {3, 3}) == 3);
-        CHECK(distance(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(distance(layout, {4, 4}, {0, 0}) == 8);
-
-        // ignore z-axis
-        CHECK(distance(layout, {0, 0, 1}, {8, 9, 0}) == 17);
-        CHECK(distance(layout, {0, 0, 1}, {8, 9, 1}) == 17);
-    }
-    SECTION("Signed Cartesian layout")
+    SECTION("Cartesian layout")
     {
         using cart_lyt = cartesian_layout;
 
@@ -132,26 +94,7 @@ TEST_CASE("Euclidean distance", "[distance]")
 {
     using namespace Catch::Matchers;
 
-    SECTION("Unsigned Cartesian layout")
-    {
-        using cart_lyt = cartesian_layout;
-
-        const cart_lyt layout{};
-
-        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
-        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {1, 1}, {1, 1}), WithinAbs(0.0, 0.00001));
-        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 1}), WithinAbs(1.0, 0.00001));
-        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {1, 1}), WithinAbs(std::sqrt(2), 0.00001));
-        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {9, 1}, {6, 2}), WithinAbs(std::sqrt(10), 0.00001));
-        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {6, 2}, {0, 4}), WithinAbs(std::sqrt(40), 0.00001));
-        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 4}, {9, 1}), WithinAbs(std::sqrt(90), 0.00001));
-
-        // ignore z-axis
-        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {6, 2, 1}, {0, 4, 0}), WithinAbs(std::sqrt(40), 0.00001));
-        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {6, 2, 0}, {0, 4, 1}), WithinAbs(std::sqrt(40), 0.00001));
-        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 4, 1}, {9, 1, 1}), WithinAbs(std::sqrt(90), 0.00001));
-    }
-    SECTION("Signed Cartesian layout")
+    SECTION("Cartesian layout")
     {
         using cart_lyt = cartesian_layout;
 
@@ -181,28 +124,7 @@ TEST_CASE("Euclidean distance functor", "[distance]")
 {
     using namespace Catch::Matchers;
 
-    SECTION("Unsigned Cartesian layout")
-    {
-        using cart_lyt = cartesian_layout;
-
-        const cart_lyt layout{};
-
-        const euclidean_distance_functor<cart_lyt> distance{};
-
-        CHECK_THAT(distance(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
-        CHECK_THAT(distance(layout, {1, 1}, {1, 1}), WithinAbs(0.0, 0.00001));
-        CHECK_THAT(distance(layout, {0, 0}, {0, 1}), WithinAbs(1.0, 0.00001));
-        CHECK_THAT(distance(layout, {0, 0}, {1, 1}), WithinAbs(std::sqrt(2), 0.00001));
-        CHECK_THAT(distance(layout, {9, 1}, {6, 2}), WithinAbs(std::sqrt(10), 0.00001));
-        CHECK_THAT(distance(layout, {6, 2}, {0, 4}), WithinAbs(std::sqrt(40), 0.00001));
-        CHECK_THAT(distance(layout, {0, 4}, {9, 1}), WithinAbs(std::sqrt(90), 0.00001));
-
-        // ignore z-axis
-        CHECK_THAT(distance(layout, {6, 2, 1}, {0, 4, 0}), WithinAbs(std::sqrt(40), 0.00001));
-        CHECK_THAT(distance(layout, {6, 2, 0}, {0, 4, 1}), WithinAbs(std::sqrt(40), 0.00001));
-        CHECK_THAT(distance(layout, {0, 4, 1}, {9, 1, 1}), WithinAbs(std::sqrt(90), 0.00001));
-    }
-    SECTION("Signed Cartesian layout")
+    SECTION("Cartesian layout")
     {
         using cart_lyt = cartesian_layout;
 
@@ -232,7 +154,7 @@ TEST_CASE("Euclidean distance functor", "[distance]")
 
 TEST_CASE("Squared Euclidean distance", "[distance]")
 {
-    SECTION("Unsigned Cartesian layout")
+    SECTION("Cartesian layout")
     {
         using cart_lyt = cartesian_layout;
 
@@ -251,25 +173,11 @@ TEST_CASE("Squared Euclidean distance", "[distance]")
         CHECK(squared_euclidean_distance<cart_lyt>(layout, {6, 2, 0}, {0, 4, 1}) == 40);
         CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 4, 1}, {9, 1, 1}) == 90);
     }
-    SECTION("Signed Cartesian layout")
-    {
-        using cart_lyt = cartesian_layout;
-
-        const cart_lyt layout{};
-
-        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(squared_euclidean_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(squared_euclidean_distance<cart_lyt>(layout, {9, 1}, {6, 2}) == 10);
-        CHECK(squared_euclidean_distance<cart_lyt>(layout, {6, 2}, {0, 4}) == 40);
-        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 4}, {9, 1}) == 90);
-    }
 }
 
 TEST_CASE("Squared Euclidean distance functor", "[distance]")
 {
-    SECTION("Unsigned Cartesian layout")
+    SECTION("Cartesian layout")
     {
         using cart_lyt = cartesian_layout;
 
@@ -290,47 +198,11 @@ TEST_CASE("Squared Euclidean distance functor", "[distance]")
         CHECK(distance(layout, {6, 2, 0}, {0, 4, 1}) == 40);
         CHECK(distance(layout, {0, 4, 1}, {9, 1, 1}) == 90);
     }
-    SECTION("Signed Cartesian layout")
-    {
-        using cart_lyt = cartesian_layout;
-
-        const cart_lyt layout{};
-
-        const squared_euclidean_distance_functor<cart_lyt> distance{};
-
-        CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(distance(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(distance(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(distance(layout, {9, 1}, {6, 2}) == 10);
-        CHECK(distance(layout, {6, 2}, {0, 4}) == 40);
-        CHECK(distance(layout, {0, 4}, {9, 1}) == 90);
-    }
 }
 
 TEST_CASE("2DDWave distance", "[distance]")
 {
-    SECTION("Unsigned Cartesian layout")
-    {
-        using cart_lyt = cartesian_layout;
-
-        const cart_lyt layout{};
-
-        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
-        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint32_t>::max());
-        CHECK(twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == std::numeric_limits<uint32_t>::max());
-        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == std::numeric_limits<uint32_t>::max());
-
-        // ignore z-axis
-        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
-        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
-    }
-    SECTION("Signed Cartesian layout")
+    SECTION("Cartesian layout")
     {
         using cart_lyt = cartesian_layout;
 
@@ -360,27 +232,7 @@ TEST_CASE("2DDWave distance", "[distance]")
 
 TEST_CASE("2DDWave distance functor", "[distance]")
 {
-    SECTION("Unsigned Cartesian layout")
-    {
-        using cart_lyt = cartesian_layout;
-
-        const cart_lyt layout{};
-
-        const twoddwave_distance_functor<cart_lyt> distance{};
-
-        CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(distance(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(distance(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(distance(layout, {1, 2}, {3, 3}) == 3);
-        CHECK(distance(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(distance(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint32_t>::max());
-
-        // ignore z-axis
-        CHECK(distance(layout, {0, 0, 1}, {8, 9, 0}) == 17);
-        CHECK(distance(layout, {0, 0, 1}, {8, 9, 1}) == 17);
-    }
-    SECTION("Signed Cartesian layout")
+    SECTION("Cartesian layout")
     {
         using cart_lyt = cartesian_layout;
 
@@ -410,7 +262,7 @@ TEST_CASE("2DDWave distance functor", "[distance]")
 
 TEST_CASE("Chebyshev distance", "[distance]")
 {
-    SECTION("Unsigned Cartesian layout")
+    SECTION("Cartesian layout")
     {
         using cart_lyt = cartesian_layout;
 
@@ -430,27 +282,11 @@ TEST_CASE("Chebyshev distance", "[distance]")
         CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 9);
         CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 9);
     }
-    SECTION("Signed Cartesian layout")
-    {
-        using cart_lyt = cartesian_layout;
-
-        const cart_lyt layout{};
-
-        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(chebyshev_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 1);
-        CHECK(chebyshev_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 2);
-        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 4);
-        CHECK(chebyshev_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == 4);
-        CHECK(chebyshev_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == 2);
-        CHECK(chebyshev_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == 1);
-    }
 }
 
 TEST_CASE("Chebyshev distance functor", "[distance]")
 {
-    SECTION("Unsigned Cartesian layout")
+    SECTION("Cartesian layout")
     {
         using cart_lyt = cartesian_layout;
 
@@ -472,29 +308,11 @@ TEST_CASE("Chebyshev distance functor", "[distance]")
         CHECK(distance(layout, {0, 0, 1}, {8, 9, 0}) == 9);
         CHECK(distance(layout, {0, 0, 1}, {8, 9, 1}) == 9);
     }
-    SECTION("Signed Cartesian layout")
-    {
-        using cart_lyt = cartesian_layout;
-
-        const cart_lyt layout{};
-
-        const chebyshev_distance_functor<cart_lyt> distance{};
-
-        CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(distance(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(distance(layout, {0, 0}, {1, 1}) == 1);
-        CHECK(distance(layout, {1, 2}, {3, 3}) == 2);
-        CHECK(distance(layout, {0, 0}, {4, 4}) == 4);
-        CHECK(distance(layout, {4, 4}, {0, 0}) == 4);
-        CHECK(distance(layout, {2, 1}, {0, 2}) == 2);
-        CHECK(distance(layout, {1, 0}, {0, 1}) == 1);
-    }
 }
 
 TEST_CASE("A* distance", "[distance]")
 {
-    SECTION("Unsigned Cartesian layout")
+    SECTION("Cartesian layout")
     {
         using lyt = cartesian_layout;
 
@@ -566,7 +384,7 @@ TEST_CASE("A* distance", "[distance]")
 
 TEST_CASE("A* distance functor", "[distance]")
 {
-    SECTION("Unsigned Cartesian layout")
+    SECTION("Cartesian layout")
     {
         using lyt = cartesian_layout;
 

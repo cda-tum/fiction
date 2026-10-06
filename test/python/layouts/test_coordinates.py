@@ -166,3 +166,11 @@ def test_setting_an_axis_of_the_invalid_coordinate_keeps_it_invalid():
     c.x = 0
 
     assert not c.is_valid()
+
+
+def test_tuples_outside_of_the_int32_range_do_not_convert_to_coordinates():
+    lyt = cartesian_layout((2, 2))
+
+    # nanobind drops the OverflowError of the implicit tuple conversion and reports a signature mismatch
+    with pytest.raises((TypeError, OverflowError)):
+        lyt.north((2**31, 0))
