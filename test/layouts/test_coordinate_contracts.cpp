@@ -29,7 +29,6 @@
 #include <fiction/traits.hpp>
 
 #include <algorithm>
-#include <cstdint>
 #include <functional>
 #include <set>
 #include <stdexcept>

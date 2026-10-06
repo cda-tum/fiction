@@ -30,7 +30,6 @@
 #include <functional>
 #include <memory>
 #include <ranges>
-#include <stdexcept>
 #include <utility>
 #include <vector>
 

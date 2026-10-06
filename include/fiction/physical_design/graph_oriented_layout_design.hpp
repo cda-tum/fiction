@@ -2568,8 +2568,8 @@ std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_
     }
 
     // `get_possible_positions_pis` is `noexcept` and enlarges the layout by `tiles_to_skip_between_pis + 1`; the bound
-    // keeps that within the extent limit of layouts for every layout that fits into memory
-    if (ps.tiles_to_skip_between_pis < 0 || ps.tiles_to_skip_between_pis > (1 << 20))
+    // 2^20 = 1'048'576 keeps that within the extent limit of layouts for every layout that fits into memory
+    if (ps.tiles_to_skip_between_pis < 0 || ps.tiles_to_skip_between_pis > 1'048'576)
     {
         throw std::invalid_argument("tiles_to_skip_between_pis must lie in [0, 2^20]");
     }

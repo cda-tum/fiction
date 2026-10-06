@@ -421,8 +421,7 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
             std::ranges::sort(left_y);
 
             // check gaps between consecutive PIs on each edge
-            const auto min_gap =
-                static_cast<int32_t>(skip) + 1;  // after placing a PI, leave `skip` empty tiles before next
+            const auto min_gap = skip + 1;  // after placing a PI, leave `skip` empty tiles before next
 
             for (std::size_t i = 1; i < top_x.size(); ++i)
             {
@@ -546,7 +545,7 @@ TEST_CASE("PI spacing outside of its range is rejected", "[graph-oriented-layout
     graph_oriented_layout_design_params params{};
     params.return_first = true;
 
-    for (const int32_t skip : {-1, (1 << 20) + 1, 2147483647})
+    for (const int32_t skip : {-1, 1'048'577, 2147483647})
     {
         params.tiles_to_skip_between_pis = skip;
 
