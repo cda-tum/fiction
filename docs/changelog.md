@@ -45,7 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `sidb::simulation::result` stores one layout plus its physically valid configurations
   - `sidb::simulation::potential_landscape` stores static electrostatics for reuse across
     charge configurations and simulation worker threads
-  - `clocking::get_scheme(name, hex_arrangement)` looks up a clocking scheme without a layout type and accepts a `3`
+  - `clocking::get_scheme(name, arrangement)` looks up a clocking scheme without a layout type and accepts a `3`
     or `4` suffix on every scheme that supports that phase count.
 
 - Dependencies:
@@ -158,6 +158,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `noexcept`, so an exception of a progress callback propagates to the caller
   - **Breaking:** `fcn::area_params` takes the layout type whose cell dimensions it defaults to, e.g.,
     `area_params<qca::layout>`
+  - **Breaking:** `exact` and `orthogonal` take `layout_arrangement` in their parameters for shifted Cartesian and
+    hexagonal layouts and throw `std::invalid_argument` without it. `graph_oriented_layout_design` requires a
+    Cartesian layout.
 
 - Build system:
 
@@ -210,7 +213,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `get_clock_number` returns the same clock number on all layers.
   - **Breaking:** `clocking::scheme` is now a non-template value type over signed `(x, y)` tile positions that can be
     copied, assigned, and compared. Factories drop their layout argument, e.g., `clocking::twoddwave()`, and
-    `twoddwave_hex` takes a `clocking::hex_arrangement`.
+    `twoddwave_hex` takes a `layouts::arrangement`.
   - **Breaking:** `clocking::scheme` exposes `name()`, `num_clocks()`, `max_in_degree()`, and `max_out_degree()` as
     accessors and no longer compares equal to a name string; `clocking::is_linear` drops its layout argument.
   - **Breaking:** molQCA lives in `technology/mol_qca/` and `namespace fiction::mol_qca`, together with
@@ -221,6 +224,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     take `int32_t` coordinates and an `int8_t` basis index.
   - Simulation results store charge states and energy beside one shared layout and potential
     landscape instead of copying a `charge_distribution_surface` for every configuration
+  - **Breaking:** `hexagonal_layout` and `shifted_cartesian_layout` take their `layouts::arrangement` as a constructor
+    argument instead of a template parameter, and `get_arrangement()` returns it.
 
 - Dependencies:
 
@@ -240,6 +245,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
   - The Bestagon and hexagonalization experiments compute their unchanged area from the cell-grid extent.
   - Gate-layout experiments use direct capability headers and simpler status reporting.
+  - The Bestagon, defect-aware, and on-the-fly experiments pass the even-row arrangement at runtime with unchanged results.
 
 - Gate libraries:
   - **Breaking:** `apply_gate_library<GateLibrary>` and `apply_parameterized_gate_library<GateLibrary>` return the
@@ -248,6 +254,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `apply_gate_library_to_defective_surface` and `apply_parameterized_gate_library_to_defective_surface`
     take the defective surface as a `sidb::layout` and return one that carries its defects.
     SiDB gate placement, surface analysis, and circuit design no longer take a cell-layout template argument.
+  - The Bestagon library throws `std::invalid_argument` for layouts that shift columns instead of failing to compile.
+  - The ToPoliNano library and CLI reject row-shifted Cartesian layouts.
 
 - I/O:
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
@@ -347,6 +355,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Breaking:** Test files are renamed to `test_<header>.cpp` and the `test/` tree mirrors
   `include/fiction/`. CTest case names gain the `test_` prefix accordingly
+  - `read_fgl_layout` creates shifted Cartesian and hexagonal layouts with the arrangement stored in the file; reading into
+    a layout with another arrangement throws `fgl_parsing_error`.
+  - **Breaking:** `additional_graph_attributes` and `additional_node_attributes` of the gate-level layout DOT drawers take the
+    layout as an argument. The shifted Cartesian and hexagonal drawers share one base class.
 
 - The `pyfiction` binding sources under `bindings/` mirror the C++ namespaces: each binding sits
   in the directory of its namespace under the name of the header it wraps, and every directory
@@ -399,6 +411,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - **Breaking:** `critical_temperature_stats.is_ground_state_transparent` is renamed
     `energy_between_ground_state_and_first_erroneous`, the member it always exposed
+
+  - **Breaking:** `shifted_cartesian_layout`, `hexagonal_layout`, and their gate layouts take a `layouts.arrangement` as
+    first argument. One class per family replaces the per-arrangement classes, and `exact` and `orthogonal` parameters
+    expose `layout_arrangement`.
 
 ### Removed
 
@@ -599,7 +615,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Gate libraries:
 
+  - On-the-fly SiDB gate mapping now rejects column arrangements instead of dropping north/south wires.
   - Gate-library application assigns the synchronization delay of each tile to its clock zone.
+  - ToPoliNano wire optimization now handles two-cell segments and checks every interior cell for obstructions.
 
 - I/O:
 

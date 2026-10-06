@@ -17,17 +17,66 @@
 
 #pragma once
 
+#include "fiction/layouts/arrangement.hpp"
+#include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <optional>
 #include <random>
+#include <stdexcept>
 #include <utility>
 
 namespace fiction::layouts
 {
+
+/**
+ * Rejects a missing arrangement for gate-level layout types that need one.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @param a Arrangement of the shifted rows or columns the caller provides.
+ * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and `a` is empty.
+ */
+template <typename Lyt>
+void require_arrangement([[maybe_unused]] const std::optional<arrangement>& a)
+{
+    if constexpr (!is_cartesian_layout_v<Lyt>)
+    {
+        if (!a.has_value())
+        {
+            throw std::invalid_argument("An arrangement is required for shifted Cartesian and hexagonal layouts");
+        }
+    }
+}
+
+/**
+ * Creates an empty gate-level layout of type `Lyt`. Cartesian layouts ignore the arrangement.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @param a Arrangement of the shifted rows or columns. Shifted Cartesian and hexagonal layouts require it.
+ * @param ar Highest possible position in the layout.
+ * @param scheme Clocking scheme to apply to the layout.
+ * @return Empty layout.
+ * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and `a` is empty.
+ */
+template <typename Lyt>
+[[nodiscard]] Lyt make_gate_level_layout([[maybe_unused]] const std::optional<arrangement>& a,
+                                         const typename Lyt::aspect_ratio& ar, const clocking::scheme& scheme)
+{
+    require_arrangement<Lyt>(a);
+
+    if constexpr (is_cartesian_layout_v<Lyt>)
+    {
+        return Lyt{ar, scheme};
+    }
+    else
+    {
+        return Lyt{*a, ar, scheme};
+    }
+}
 
 /**
  * Returns the number of adjacent coordinates of a given one. This is not a constant value because `c` could be located
@@ -76,94 +125,33 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
     {
         absolute_c = {t.x * GateSizeX, t.y * GateSizeY, t.z};
     }
-    // shifted Cartesian layouts
-    else if constexpr (is_shifted_cartesian_layout_v<GateLyt>)
+    // shifted Cartesian and hexagonal layouts
+    else if constexpr (is_shifted_cartesian_layout_v<GateLyt> || is_hexagonal_layout_v<GateLyt>)
     {
-        if constexpr (has_horizontally_shifted_cartesian_orientation_v<GateLyt>)
-        {
-            absolute_c = {t.x * GateSizeX, static_cast<decltype(absolute_c.y)>(t.y * (GateSizeY)), t.z};
-        }
-        else if constexpr (has_vertically_shifted_cartesian_orientation_v<GateLyt>)
-        {
-            absolute_c = {static_cast<decltype(absolute_c.x)>(t.x * (GateSizeX)), t.y * (GateSizeY), t.z};
-        }
+        // hexagons nest into each other, so their tiles are 3/4 as far apart perpendicular to the shift
+        constexpr auto step_x = is_hexagonal_layout_v<GateLyt> ? GateSizeX * 3 / 4 : GateSizeX;
+        constexpr auto step_y = is_hexagonal_layout_v<GateLyt> ? GateSizeY * 3 / 4 : GateSizeY;
 
-        if constexpr (has_odd_row_cartesian_arrangement_v<GateLyt>)
-        {
-            if (gate_lyt.is_in_odd_row(t))
-            {
-                // odd rows are shifted in by width / 2
-                absolute_c.x += static_cast<decltype(absolute_c.x)>(static_cast<double>(GateSizeX) / 2.0);
-            }
-        }
-        else if constexpr (has_even_row_cartesian_arrangement_v<GateLyt>)
-        {
-            if (gate_lyt.is_in_even_row(t))
-            {
-                // even rows are shifted in by width / 2
-                absolute_c.x += static_cast<decltype(absolute_c.x)>(static_cast<double>(GateSizeX) / 2.0);
-            }
-        }
-        else if constexpr (has_odd_column_cartesian_arrangement_v<GateLyt>)
-        {
-            if (gate_lyt.is_in_odd_column(t))
-            {
-                // odd columns are shifted in by height / 2
-                absolute_c.y += static_cast<decltype(absolute_c.y)>(static_cast<double>(GateSizeY) / 2.0);
-            }
-        }
-        else if constexpr (has_even_column_cartesian_arrangement_v<GateLyt>)
-        {
-            if (gate_lyt.is_in_even_column(t))
-            {
-                // even columns are shifted in by height / 2
-                absolute_c.y += static_cast<decltype(absolute_c.y)>(static_cast<double>(GateSizeY) / 2.0);
-            }
-        }
-    }
-    // hexagonal layouts
-    else if constexpr (is_hexagonal_layout_v<GateLyt>)
-    {
-        if constexpr (has_pointy_top_hex_orientation_v<GateLyt>)
-        {
-            // vertical distance between pointy top hexagons is height * 3/4
-            absolute_c = {t.x * GateSizeX, static_cast<decltype(absolute_c.y)>(t.y * (GateSizeY * 3 / 4)), t.z};
-        }
-        else if constexpr (has_flat_top_hex_orientation_v<GateLyt>)
-        {
-            // horizontal distance between flat top hexagons is width * 3/4
-            absolute_c = {static_cast<decltype(absolute_c.x)>(t.x * (GateSizeX * 3 / 4)), t.y * (GateSizeY), t.z};
-        }
+        const auto a   = gate_lyt.get_arrangement();
+        const auto odd = is_odd_arrangement(a);
 
-        if constexpr (has_odd_row_hex_arrangement_v<GateLyt>)
+        if (is_row_arrangement(a))
         {
-            if (gate_lyt.is_in_odd_row(t))
+            absolute_c = {t.x * GateSizeX, static_cast<decltype(absolute_c.y)>(t.y * step_y), t.z};
+
+            if (odd ? gate_lyt.is_in_odd_row(t) : gate_lyt.is_in_even_row(t))
             {
-                // odd rows are shifted in by width / 2
+                // shifted rows move in by width / 2
                 absolute_c.x += static_cast<decltype(absolute_c.x)>(static_cast<double>(GateSizeX) / 2.0);
             }
         }
-        else if constexpr (has_even_row_hex_arrangement_v<GateLyt>)
+        else
         {
-            if (gate_lyt.is_in_even_row(t))
+            absolute_c = {static_cast<decltype(absolute_c.x)>(t.x * step_x), t.y * GateSizeY, t.z};
+
+            if (odd ? gate_lyt.is_in_odd_column(t) : gate_lyt.is_in_even_column(t))
             {
-                // even rows are shifted in by width / 2
-                absolute_c.x += static_cast<decltype(absolute_c.x)>(static_cast<double>(GateSizeX) / 2.0);
-            }
-        }
-        else if constexpr (has_odd_column_hex_arrangement_v<GateLyt>)
-        {
-            if (gate_lyt.is_in_odd_column(t))
-            {
-                // odd columns are shifted in by height / 2
-                absolute_c.y += static_cast<decltype(absolute_c.y)>(static_cast<double>(GateSizeY) / 2.0);
-            }
-        }
-        else if constexpr (has_even_column_hex_arrangement_v<GateLyt>)
-        {
-            if (gate_lyt.is_in_even_column(t))
-            {
-                // even columns are shifted in by height / 2
+                // shifted columns move in by height / 2
                 absolute_c.y += static_cast<decltype(absolute_c.y)>(static_cast<double>(GateSizeY) / 2.0);
             }
         }

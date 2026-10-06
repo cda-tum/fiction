@@ -29,6 +29,7 @@
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+#include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -179,6 +180,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
      * validation and any subsequent search, capped by the enclosing deadline.
      * @param defect_surface Optional atomic defect surface in case atomic defects are present.
      * @return Bestagon gate representation of `t` including mirroring.
+     * @throws std::invalid_argument if `lyt` shifts columns instead of rows.
      * @throws gate_design_exception if no gate can be designed.
      * @throws fcn::unsupported_gate_orientation_exception if the gate orientation is unsupported.
      * @throws fcn::unsupported_gate_type_exception if the gate type is unsupported.
@@ -195,7 +197,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
 
         const auto n = lyt.get_node(t);
         const auto f = lyt.node_function(n);
-        const auto p = determine_port_routing(lyt, t);
+        const auto p = skeleton_bestagon_library::determine_port_routing(lyt, t);
 
         // center cell of the Bestagon tile. IMPORTANT: There is no center for the specified Bestagon library. The
         // middle is at 22.66666 (34*2/3). However, this is not an integer and does not specify a cell. Cell close to it
@@ -245,7 +247,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                         if (const auto at = lyt.above(t); (t != at) && lyt.is_wire_tile(at))
                         {
                             // two possible options: actual crossover and (parallel) hourglass wire
-                            const auto pa = determine_port_routing(lyt, at);
+                            const auto pa = skeleton_bestagon_library::determine_port_routing(lyt, at);
 
                             const auto skeleton = cell_list_to_layout(TWO_IN_TWO_OUT);
 
@@ -610,69 +612,6 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
 
         return skeleton_with_defect;
     }
-    /**
-     * @brief Determines the port directions of a given tile.
-     *
-     * @tparam Lyt Pointy-top hexagonal gate-level layout type.
-     * @param lyt Layout that contains the tile.
-     * @param t Tile whose incoming and outgoing port directions are determined.
-     * @return Incoming and outgoing port directions of the tile.
-     */
-    template <typename Lyt>
-    [[nodiscard]] static fcn::port_list<fcn::port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
-    {
-        fcn::port_list<fcn::port_direction> p{};
-
-        // determine incoming connector ports
-        if (lyt.has_north_eastern_incoming_signal(t))
-        {
-            p.inp.emplace(fcn::port_direction::cardinal::NORTH_EAST);
-        }
-        if (lyt.has_north_western_incoming_signal(t))
-        {
-            p.inp.emplace(fcn::port_direction::cardinal::NORTH_WEST);
-        }
-
-        // determine outgoing connector ports
-        if (lyt.has_south_eastern_outgoing_signal(t))
-        {
-            p.out.emplace(fcn::port_direction::cardinal::SOUTH_EAST);
-        }
-        if (lyt.has_south_western_outgoing_signal(t))
-        {
-            p.out.emplace(fcn::port_direction::cardinal::SOUTH_WEST);
-        }
-
-        // gates without connector ports
-
-        // 1-input functions
-        if (const auto n = lyt.get_node(t); lyt.is_pi(n) || lyt.is_po(n) || lyt.is_buf(n) || lyt.is_inv(n))
-        {
-            if (lyt.has_no_incoming_signal(t))
-            {
-                p.inp.emplace(fcn::port_direction::cardinal::NORTH_WEST);
-            }
-            if (lyt.has_no_outgoing_signal(t))
-            {
-                p.out.emplace(fcn::port_direction::cardinal::SOUTH_EAST);
-            }
-        }
-        else  // 2-input functions
-        {
-            if (lyt.has_no_incoming_signal(t))
-            {
-                p.inp.emplace(fcn::port_direction::cardinal::NORTH_WEST);
-                p.inp.emplace(fcn::port_direction::cardinal::NORTH_EAST);
-            }
-            if (lyt.has_no_outgoing_signal(t))
-            {
-                p.out.emplace(fcn::port_direction::cardinal::SOUTH_EAST);
-            }
-        }
-
-        return p;
-    }
-
     // clang-format off
 
     static constexpr const gate CROSSING{cell_list_to_gate<char>({{

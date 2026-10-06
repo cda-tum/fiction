@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/inml/layout.hpp"
@@ -53,12 +54,18 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a ToPoliNano gate.
      * @return ToPoliNano gate representation of `t` including I/Os, rotation, etc.
+     * @throws std::invalid_argument If `lyt` shifts rows instead of columns.
      */
     template <typename GateLyt>
     [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
         static_assert(is_shifted_cartesian_layout_v<GateLyt>, "GateLyt must be a shifted Cartesian layout");
+
+        if (layouts::is_row_arrangement(lyt.get_arrangement()))
+        {
+            throw std::invalid_argument("GateLyt must be a column-shifted Cartesian layout");
+        }
 
         // crossing magnets are handled only in the ground layer
         if (lyt.is_crossing_layer(t))
@@ -175,7 +182,7 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
                      bts == inml::magnet_type::INVERTER_MAGNET))
                 {
                     // hump found, check if there is enough space below for merging
-                    if (std::all_of(hump.begin() + 1, hump.end() - 2,
+                    if (std::all_of(hump.begin() + 1, hump.end() - 1,
                                     [&lyt](const auto hc) { return lyt.is_empty_cell(lyt.south(lyt.south(hc))); }))
                     {
                         // merge it down
@@ -201,7 +208,7 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
                          (btn == inml::magnet_type::NORMAL || out == inml::magnet_type::OUTPUT))
                 {
                     // hump found, check if there is enough space above for merging
-                    if (std::all_of(hump.begin() + 1, hump.end() - 2,
+                    if (std::all_of(hump.begin() + 1, hump.end() - 1,
                                     [&lyt](const auto hc) { return lyt.is_empty_cell(lyt.north(lyt.north(hc))); }))
                     {
                         // merge it up

@@ -73,14 +73,14 @@ static void check_mapping_equiv(const Ntk& ntk)
 
     hexagonalization_stats  stats{};
     hexagonalization_params params{};
-    const auto              hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
+    const auto              hex_layout = hexagonalization<hex_gate_clk_lyt, Lyt>(layout, params, &stats);
 
     check_eq(ntk, layout);
     check_eq(ntk, hex_layout);
     check_eq(layout, hex_layout);
 
     params.input_pin_extension    = hexagonalization_params::io_pin_extension_mode::EXTEND;
-    const auto hex_layout_top_pis = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
+    const auto hex_layout_top_pis = hexagonalization<hex_gate_clk_lyt, Lyt>(layout, params, &stats);
 
     check_eq(ntk, hex_layout_top_pis);
     check_eq(layout, hex_layout_top_pis);
@@ -90,7 +90,7 @@ static void check_mapping_equiv(const Ntk& ntk)
 
     params.input_pin_extension       = hexagonalization_params::io_pin_extension_mode::NONE;
     params.output_pin_extension      = hexagonalization_params::io_pin_extension_mode::EXTEND;
-    const auto hex_layout_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
+    const auto hex_layout_bottom_pos = hexagonalization<hex_gate_clk_lyt, Lyt>(layout, params, &stats);
 
     check_eq(ntk, hex_layout_bottom_pos);
     check_eq(layout, hex_layout_bottom_pos);
@@ -103,7 +103,7 @@ static void check_mapping_equiv(const Ntk& ntk)
         });
 
     params.input_pin_extension               = hexagonalization_params::io_pin_extension_mode::EXTEND;
-    const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
+    const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_gate_clk_lyt, Lyt>(layout, params, &stats);
 
     check_eq(ntk, hex_layout_top_pis_bottom_pos);
     check_eq(layout, hex_layout_top_pis_bottom_pos);
@@ -124,13 +124,13 @@ static void check_mapping_equiv_layout(const Lyt& lyt)
 {
     hexagonalization_stats  stats{};
     hexagonalization_params params{};
-    const auto              hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+    const auto              hex_layout = hexagonalization<hex_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout);
     CHECK(lyt.get_layout_name() == hex_layout.get_layout_name());
 
     params.input_pin_extension    = hexagonalization_params::io_pin_extension_mode::EXTEND;
-    const auto hex_layout_top_pis = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+    const auto hex_layout_top_pis = hexagonalization<hex_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_top_pis);
     CHECK(lyt.get_layout_name() == hex_layout_top_pis.get_layout_name());
@@ -140,7 +140,7 @@ static void check_mapping_equiv_layout(const Lyt& lyt)
 
     params.input_pin_extension       = hexagonalization_params::io_pin_extension_mode::NONE;
     params.output_pin_extension      = hexagonalization_params::io_pin_extension_mode::EXTEND;
-    const auto hex_layout_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+    const auto hex_layout_bottom_pos = hexagonalization<hex_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_bottom_pos);
     CHECK(lyt.get_layout_name() == hex_layout_bottom_pos.get_layout_name());
@@ -152,7 +152,7 @@ static void check_mapping_equiv_layout(const Lyt& lyt)
         });
 
     params.input_pin_extension               = hexagonalization_params::io_pin_extension_mode::EXTEND;
-    const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+    const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_top_pis_bottom_pos);
     CHECK(lyt.get_layout_name() == hex_layout_top_pis_bottom_pos.get_layout_name());
@@ -174,7 +174,7 @@ static void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
     hexagonalization_params params{};
 
     params.input_pin_extension    = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
-    const auto hex_layout_top_pis = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+    const auto hex_layout_top_pis = hexagonalization<hex_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_top_pis);
 
@@ -185,7 +185,7 @@ static void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
 
     params.input_pin_extension       = hexagonalization_params::io_pin_extension_mode::NONE;
     params.output_pin_extension      = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
-    const auto hex_layout_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+    const auto hex_layout_bottom_pos = hexagonalization<hex_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_bottom_pos);
 
@@ -199,7 +199,7 @@ static void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
 
     params.input_pin_extension               = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
     params.output_pin_extension              = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
-    const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+    const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_top_pis_bottom_pos);
 
@@ -262,7 +262,7 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
 TEST_CASE("Cartesian to hexagonal")
 {
     using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
-    using hex_lyt     = hex_even_row_gate_clk_lyt;
+    using hex_lyt     = hex_gate_clk_lyt;
 
     constexpr const auto layout_height = 3;
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 0, 0), layout_height) ==
@@ -308,7 +308,7 @@ TEST_CASE("Cartesian to hexagonal")
 TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
 {
     using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
-    using hex_lyt     = hex_even_row_gate_clk_lyt;
+    using hex_lyt     = hex_gate_clk_lyt;
 
     const auto ntk    = blueprints::mux21_network<technology_network>();
     const auto layout = orthogonal<gate_layout>(ntk);

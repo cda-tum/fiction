@@ -74,12 +74,6 @@ void equivalence_checking_for(nanobind::module_& m)
     equivalence_checking_impl<Spec, py_cartesian_gate_layout>(m);
     equivalence_checking_impl<Spec, py_shifted_cartesian_gate_layout>(m);
     equivalence_checking_impl<Spec, py_hexagonal_gate_layout>(m);
-    equivalence_checking_impl<Spec, py_odd_row_cartesian_gate_layout>(m);
-    equivalence_checking_impl<Spec, py_even_row_cartesian_gate_layout>(m);
-    equivalence_checking_impl<Spec, py_even_column_cartesian_gate_layout>(m);
-    equivalence_checking_impl<Spec, py_odd_row_hex_gate_layout>(m);
-    equivalence_checking_impl<Spec, py_odd_column_hex_gate_layout>(m);
-    equivalence_checking_impl<Spec, py_even_column_hex_gate_layout>(m);
 }
 
 }  // namespace detail
@@ -127,12 +121,6 @@ void equivalence_checking(nanobind::module_& m)
     detail::equivalence_checking_for<py_cartesian_gate_layout>(m);
     detail::equivalence_checking_for<py_shifted_cartesian_gate_layout>(m);
     detail::equivalence_checking_for<py_hexagonal_gate_layout>(m);
-    detail::equivalence_checking_for<py_odd_row_cartesian_gate_layout>(m);
-    detail::equivalence_checking_for<py_even_row_cartesian_gate_layout>(m);
-    detail::equivalence_checking_for<py_even_column_cartesian_gate_layout>(m);
-    detail::equivalence_checking_for<py_odd_row_hex_gate_layout>(m);
-    detail::equivalence_checking_for<py_odd_column_hex_gate_layout>(m);
-    detail::equivalence_checking_for<py_even_column_hex_gate_layout>(m);
 }
 
 }  // namespace pyfiction

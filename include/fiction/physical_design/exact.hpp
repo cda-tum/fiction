@@ -20,6 +20,7 @@
 
 #if (FICTION_Z3_SOLVER)
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/networks/name_utils.hpp"
@@ -91,6 +92,11 @@ struct exact_physical_design_params
      * Clocking scheme to be used.
      */
     std::string scheme = "2DDWave";
+    /**
+     * Arrangement of the shifted rows or columns of the created layout. Shifted Cartesian and hexagonal layouts require
+     * it, Cartesian layouts ignore it.
+     */
+    std::optional<layouts::arrangement> layout_arrangement = std::nullopt;
     /**
      * Number of total tiles to use as an upper bound.
      *
@@ -244,6 +250,15 @@ class exact_impl
     }
 
   private:
+    /**
+     * Creates an empty layout of the target type that uses the utilized clocking scheme.
+     *
+     * @return Empty layout.
+     */
+    [[nodiscard]] Lyt make_layout() const
+    {
+        return layouts::make_gate_level_layout<Lyt>(ps.layout_arrangement, {}, scheme);
+    }
     /**
      * Network type for internal handling. Converting the input network to this type ensures the availability of all
      * necessary member functions.
@@ -2935,7 +2950,7 @@ class exact_impl
         const utils::worker_progress_scope worker_scope{worker_progress, t_num};
         const auto                         ctx = std::make_shared<z3::context>();
 
-        Lyt layout{{}, scheme};
+        Lyt layout = make_layout();
 
         // Network views mutate traversal marks and event subscriptions, so each worker needs its own storage.
         mockturtle::names_view<networks::technology_network> worker_ntk{*ntk};
@@ -3069,7 +3084,7 @@ class exact_impl
      */
     [[nodiscard]] std::optional<Lyt> run_asynchronously()
     {
-        Lyt layout{{}, scheme};
+        Lyt layout = make_layout();
 
         {
             mockturtle::stopwatch stop{pst.time_total};
@@ -3135,7 +3150,7 @@ class exact_impl
     [[nodiscard]] std::optional<Lyt> run_synchronously()
     {
         const utils::worker_progress_scope worker_scope{worker_progress, 0};
-        Lyt                                layout{{}, scheme};
+        Lyt                                layout = make_layout();
 
         smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps, black_list};
 
@@ -3237,6 +3252,8 @@ class exact_impl
  * @param pst Statistics.
  * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit if one is found under the given
  * parameters; `std::nullopt`, otherwise.
+ * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and
+ * `ps.layout_arrangement` is empty.
  */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps = {},
@@ -3247,7 +3264,10 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
 
-    auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
+    layouts::require_arrangement<Lyt>(ps.layout_arrangement);
+
+    auto clocking_scheme =
+        layouts::clocking::get_scheme(ps.scheme, is_hexagonal_layout_v<Lyt> ? ps.layout_arrangement : std::nullopt);
 
     if (!clocking_scheme.has_value())
     {
@@ -3293,6 +3313,8 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
  * @param pst Statistics.
  * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit if one is found under the given
  * parameters; `std::nullopt`, otherwise.
+ * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and
+ * `ps.layout_arrangement` is empty.
  */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list<Lyt, fcn::port_direction>& black_list,
@@ -3304,7 +3326,10 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
 
-    auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
+    layouts::require_arrangement<Lyt>(ps.layout_arrangement);
+
+    auto clocking_scheme =
+        layouts::clocking::get_scheme(ps.scheme, is_hexagonal_layout_v<Lyt> ? ps.layout_arrangement : std::nullopt);
 
     if (!clocking_scheme.has_value())
     {

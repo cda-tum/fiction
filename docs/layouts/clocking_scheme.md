@@ -20,7 +20,7 @@ can be overridden.
 ```{doxygenenum} fiction::layouts::clocking::num_clks
 ```
 
-```{doxygenenum} fiction::layouts::clocking::hex_arrangement
+```{doxygenenum} fiction::layouts::arrangement
 ```
 
 ## Pre-defined schemes
@@ -151,7 +151,7 @@ can be overridden.
 
 ```
 
-```{doxygenfunction} fiction::layouts::clocking::get_scheme(const std::string_view scheme_name, const std::optional<hex_arrangement> hex)
+```{doxygenfunction} fiction::layouts::clocking::get_scheme(const std::string_view scheme_name, const std::optional<arrangement> hex)
 
 ```
 

@@ -18,6 +18,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -44,7 +45,7 @@ using namespace fiction::sidb::generators;
 
 TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-design]")
 {
-    hex_even_row_gate_clk_lyt gate_layout{{2, 2}};
+    hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {2, 2}};
     gate_layout.create_and(0, 1, {1, 2});
 
     on_the_fly_circuit_design_params params{};
@@ -55,10 +56,10 @@ TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-de
 
 TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-circuit-design]")
 {
-    hex_even_row_gate_clk_lyt gate_layout{{2, 2}, clocking::row()};
-    const auto                first  = gate_layout.create_pi("a", {0, 0});
-    const auto                second = gate_layout.create_pi("b", {1, 0});
-    const auto                gate   = gate_layout.create_and(first, second, {1, 1});
+    hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {2, 2}, clocking::row()};
+    const auto       first  = gate_layout.create_pi("a", {0, 0});
+    const auto       second = gate_layout.create_pi("b", {1, 0});
+    const auto       gate   = gate_layout.create_and(first, second, {1, 1});
     gate_layout.create_po(gate, "f", {0, 2});
 
     on_the_fly_circuit_design_params params{};
@@ -97,8 +98,8 @@ TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-cir
     const auto              second = network.create_pi();
     network.create_po(network.create_and(first, second));
 
-    const hex_even_row_gate_clk_lyt tiling{{2, 2}, clocking::row()};
-    const sidb::layout              surface{};
+    const hex_gate_clk_lyt tiling{arrangement::EVEN_ROW, {2, 2}, clocking::row()};
+    const sidb::layout     surface{};
 
     on_the_fly_circuit_design_on_defective_surface_params params{};
     params.exact_design_parameters.scheme        = "Row";

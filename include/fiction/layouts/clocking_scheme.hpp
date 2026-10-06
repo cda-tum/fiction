@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "fiction/traits.hpp"
+#include "fiction/layouts/arrangement.hpp"
 
 #include <phmap.h>
 
@@ -280,28 +280,6 @@ enum class num_clks : uint8_t
      */
     FOUR
 };
-/**
- * Arrangement of the shifted rows or columns of a hexagonal layout.
- */
-enum class hex_arrangement : uint8_t
-{
-    /**
-     * Odd rows are shifted.
-     */
-    ODD_ROW,
-    /**
-     * Even rows are shifted.
-     */
-    EVEN_ROW,
-    /**
-     * Odd columns are shifted.
-     */
-    ODD_COLUMN,
-    /**
-     * Even columns are shifted.
-     */
-    EVEN_COLUMN
-};
 
 namespace detail
 {
@@ -409,7 +387,7 @@ transpose(const std::vector<std::vector<scheme::clock_number>>& cutout)
  * @param n Number of clocks.
  * @return Hexagonal 2DDWave clocking scheme.
  */
-[[nodiscard]] inline scheme twoddwave_hex(const hex_arrangement a, const num_clks n = num_clks::FOUR)
+[[nodiscard]] inline scheme twoddwave_hex(const arrangement a, const num_clks n = num_clks::FOUR)
 {
     using cutout = std::vector<std::vector<scheme::clock_number>>;
 
@@ -449,7 +427,7 @@ transpose(const std::vector<std::vector<scheme::clock_number>>& cutout)
 
     // clang-format on
 
-    const bool  odd  = a == hex_arrangement::ODD_ROW || a == hex_arrangement::ODD_COLUMN;
+    const bool  odd  = a == arrangement::ODD_ROW || a == arrangement::ODD_COLUMN;
     const auto& rows = [&]() -> const cutout&
     {
         if (n == num_clks::THREE)
@@ -460,7 +438,7 @@ transpose(const std::vector<std::vector<scheme::clock_number>>& cutout)
     }();
 
     // column arrangements shift columns instead of rows, so their cutouts are the transposed row cutouts
-    const bool columns = a == hex_arrangement::ODD_COLUMN || a == hex_arrangement::EVEN_COLUMN;
+    const bool columns = a == arrangement::ODD_COLUMN || a == arrangement::EVEN_COLUMN;
 
     return columns ? scheme{TWODDWAVE_HEX_NAME, detail::transpose(rows), detail::count(n), 2u, 2u} :
                      scheme{TWODDWAVE_HEX_NAME, rows, detail::count(n), 2u, 2u};
@@ -585,8 +563,8 @@ class unsupported_scheme_exception : public std::exception
  * @return Clocking scheme that matches `scheme_name`, or `std::nullopt` if no clocking scheme by that name exists or
  * the scheme does not support the requested phase count.
  */
-[[nodiscard]] inline std::optional<scheme> get_scheme(const std::string_view               scheme_name,
-                                                      const std::optional<hex_arrangement> hex = std::nullopt)
+[[nodiscard]] inline std::optional<scheme> get_scheme(const std::string_view           scheme_name,
+                                                      const std::optional<arrangement> hex = std::nullopt)
 {
     std::string name{scheme_name};
     std::ranges::transform(name, name.begin(), [](const char ch)
@@ -658,39 +636,6 @@ class unsupported_scheme_exception : public std::exception
     }
 
     return std::nullopt;
-}
-/**
- * Returns a clocking scheme by name for layouts of type `Lyt`. `2DDWAVEHEX` takes the hexagonal arrangement of `Lyt`.
- * See the non-template overload for the accepted names.
- *
- * @tparam Lyt Layout type.
- * @param scheme_name Name of the desired clocking scheme.
- * @return Clocking scheme that matches `scheme_name`, or `std::nullopt` if no clocking scheme by that name exists.
- */
-template <typename Lyt>
-[[nodiscard]] std::optional<scheme> get_scheme(const std::string_view scheme_name)
-{
-    if constexpr (is_hexagonal_layout_v<Lyt>)
-    {
-        if constexpr (has_odd_row_hex_arrangement_v<Lyt>)
-        {
-            return get_scheme(scheme_name, hex_arrangement::ODD_ROW);
-        }
-        else if constexpr (has_even_row_hex_arrangement_v<Lyt>)
-        {
-            return get_scheme(scheme_name, hex_arrangement::EVEN_ROW);
-        }
-        else if constexpr (has_odd_column_hex_arrangement_v<Lyt>)
-        {
-            return get_scheme(scheme_name, hex_arrangement::ODD_COLUMN);
-        }
-        else if constexpr (has_even_column_hex_arrangement_v<Lyt>)
-        {
-            return get_scheme(scheme_name, hex_arrangement::EVEN_COLUMN);
-        }
-    }
-
-    return get_scheme(scheme_name, std::nullopt);
 }
 
 }  // namespace fiction::layouts::clocking

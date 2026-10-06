@@ -21,7 +21,9 @@
 // NOLINTBEGIN(misc-include-cleaner): no symbol from these headers is named directly, but the
 // clocking::get_scheme free function is looked up via two-phase name lookup at template instantiation time, so
 // removing any of these breaks the build despite the tool's "not used directly" heuristic
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
 // NOLINTEND(misc-include-cleaner)
 // clang-format on
@@ -42,6 +44,7 @@
 #include <istream>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -73,12 +76,19 @@ template <typename Lyt>
 class read_fgl_layout_impl
 {
   public:
-    read_fgl_layout_impl(std::istream& s, const std::string_view& name) : lyt{}, is{s}
-    {
-        networks::set_name(lyt, name);
-    }
+    /**
+     * @brief Create a reader that constructs a layout from the stream.
+     * @param s Input stream.
+     * @param name Name of the new layout.
+     */
+    read_fgl_layout_impl(std::istream& s, const std::string_view& name) : layout_name{name}, is{s} {}
 
-    read_fgl_layout_impl(Lyt& tgt, std::istream& s) : lyt{tgt}, is{s} {}
+    /**
+     * @brief Create a reader for an existing layout.
+     * @param tgt Target layout.
+     * @param s Input stream.
+     */
+    read_fgl_layout_impl(Lyt& tgt, std::istream& s) : target{tgt}, is{s} {}
 
     Lyt run()
     {
@@ -108,116 +118,89 @@ class read_fgl_layout_impl
             throw fgl_parsing_error("Error parsing FGL file: no element 'layout'");
         }
 
-        // set layout name
-        if (auto* const name = layout->FirstChildElement("name"); name != nullptr && (name->GetText() != nullptr))
+        // the topology selects the arrangement of the layout to create
+        auto* const topology = layout->FirstChildElement("topology");
+        if ((topology == nullptr || topology->GetText() == nullptr) && !is_cartesian_layout_v<Lyt>)
         {
-            std::string layout_name = name->GetText();
-            networks::set_name(lyt, layout_name);
+            throw fgl_parsing_error("Error parsing FGL file: no element 'topology' in 'layout'");
         }
 
-        // check topology
-        if (auto* const topology = layout->FirstChildElement("topology");
-            topology != nullptr && (topology->GetText() != nullptr))
+        const std::string topology_name =
+            topology != nullptr && topology->GetText() != nullptr ? topology->GetText() : "cartesian";
+        std::optional<fiction::layouts::arrangement> file_arrangement{};
+        const auto                                   find_arrangement = [&topology_name](const std::string_view family)
         {
-            const std::string                           topology_name = topology->GetText();
-            static constexpr std::array<const char*, 4> shifted_cartesian{
-                "odd_row_cartesian", "even_row_cartesian", "odd_column_cartesian", "even_column_cartesian"};
-            static constexpr std::array<const char*, 4> hex{"odd_row_hex", "even_row_hex", "odd_column_hex",
-                                                            "even_column_hex"};
+            for (const auto a : {fiction::layouts::arrangement::ODD_ROW, fiction::layouts::arrangement::EVEN_ROW,
+                                 fiction::layouts::arrangement::ODD_COLUMN, fiction::layouts::arrangement::EVEN_COLUMN})
+            {
+                if (topology_name == fmt::format("{}_{}", fiction::layouts::to_string(a), family))
+                {
+                    return std::optional{a};
+                }
+            }
 
-            if (topology_name == "cartesian")
+            return std::optional<fiction::layouts::arrangement>{};
+        };
+
+        if (topology_name == "cartesian")
+        {
+            if constexpr (!is_cartesian_layout_v<Lyt>)
             {
-                if constexpr (!is_cartesian_layout_v<Lyt>)
-                {
-                    throw fgl_parsing_error("Error parsing FGL file: Lyt is not a cartesian layout");
-                }
+                throw fgl_parsing_error("Error parsing FGL file: Lyt is not a cartesian layout");
             }
-            else if (std::ranges::find(shifted_cartesian, topology_name) != shifted_cartesian.cend())
+        }
+        else if (const auto shifted = find_arrangement("cartesian"); shifted.has_value())
+        {
+            file_arrangement = shifted;
+
+            if constexpr (!is_shifted_cartesian_layout_v<Lyt>)
             {
-                if constexpr (is_shifted_cartesian_layout_v<Lyt>)
-                {
-                    if (topology_name == "odd_row_cartesian")
-                    {
-                        if constexpr (!has_odd_row_cartesian_arrangement_v<Lyt>)
-                        {
-                            throw fgl_parsing_error("Error parsing FGL file: Lyt is not an odd_row_cartesian layout");
-                        }
-                    }
-                    else if (topology_name == "even_row_cartesian")
-                    {
-                        if constexpr (!has_even_row_cartesian_arrangement_v<Lyt>)
-                        {
-                            throw fgl_parsing_error("Error parsing FGL file: Lyt is not an even_row_cartesian layout");
-                        }
-                    }
-                    else if (topology_name == "odd_column_cartesian")
-                    {
-                        if constexpr (!has_odd_column_cartesian_arrangement_v<Lyt>)
-                        {
-                            throw fgl_parsing_error(
-                                "Error parsing FGL file: Lyt is not an odd_column_cartesian layout");
-                        }
-                    }
-                    else if (topology_name == "even_column_cartesian")
-                    {
-                        if constexpr (!has_even_column_cartesian_arrangement_v<Lyt>)
-                        {
-                            throw fgl_parsing_error(
-                                "Error parsing FGL file: Lyt is not an even_column_cartesian layout");
-                        }
-                    }
-                }
-                else
-                {
-                    throw fgl_parsing_error("Error parsing FGL file: Lyt is not a shifted_cartesian layout");
-                }
+                throw fgl_parsing_error("Error parsing FGL file: Lyt is not a shifted_cartesian layout");
             }
-            else if (std::ranges::find(hex, topology_name) != hex.cend())
+        }
+        else if (const auto hexagonal = find_arrangement("hex"); hexagonal.has_value())
+        {
+            file_arrangement = hexagonal;
+
+            if constexpr (!is_hexagonal_layout_v<Lyt>)
             {
-                if constexpr (is_hexagonal_layout_v<Lyt>)
-                {
-                    if (topology_name == "odd_row_hex")
-                    {
-                        if constexpr (!has_odd_row_hex_arrangement_v<Lyt>)
-                        {
-                            throw fgl_parsing_error("Error parsing FGL file: Lyt is not an odd_row_hex layout");
-                        }
-                    }
-                    else if (topology_name == "even_row_hex")
-                    {
-                        if constexpr (!has_even_row_hex_arrangement_v<Lyt>)
-                        {
-                            throw fgl_parsing_error("Error parsing FGL file: Lyt is not an even_row_hex layout");
-                        }
-                    }
-                    else if (topology_name == "odd_column_hex")
-                    {
-                        if constexpr (!has_odd_column_hex_arrangement_v<Lyt>)
-                        {
-                            throw fgl_parsing_error("Error parsing FGL file: Lyt is not an odd_column_hex layout");
-                        }
-                    }
-                    else if (topology_name == "even_column_hex")
-                    {
-                        if constexpr (!has_even_column_hex_arrangement_v<Lyt>)
-                        {
-                            throw fgl_parsing_error("Error parsing FGL file: Lyt is not an even_column_hex layout");
-                        }
-                    }
-                }
-                else
-                {
-                    throw fgl_parsing_error("Error parsing FGL file: Lyt is not a hexagonal layout");
-                }
-            }
-            else
-            {
-                throw fgl_parsing_error(fmt::format("Error parsing FGL file: unknown topology: {}", topology_name));
+                throw fgl_parsing_error("Error parsing FGL file: Lyt is not a hexagonal layout");
             }
         }
         else
         {
-            throw fgl_parsing_error("Error parsing FGL file: no element 'topology' in 'layout'");
+            throw fgl_parsing_error(fmt::format("Error parsing FGL file: unknown topology: {}", topology_name));
+        }
+
+        // a fresh layout takes its arrangement from the file, a target layout has to match it
+        if (!target.has_value())
+        {
+            if constexpr (is_cartesian_layout_v<Lyt>)
+            {
+                target.emplace();
+            }
+            else
+            {
+                target.emplace(*file_arrangement);
+            }
+
+            networks::set_name(*target, layout_name);
+        }
+        else if constexpr (!is_cartesian_layout_v<Lyt>)
+        {
+            if (target->get_arrangement() != *file_arrangement)
+            {
+                throw fgl_parsing_error(fmt::format("Error parsing FGL file: Lyt is not an {} layout", topology_name));
+            }
+        }
+
+        auto& lyt = *target;
+
+        // set layout name
+        if (auto* const name = layout->FirstChildElement("name"); name != nullptr && (name->GetText() != nullptr))
+        {
+            std::string name_text = name->GetText();
+            networks::set_name(lyt, name_text);
         }
 
         // set layout size
@@ -251,7 +234,8 @@ class read_fgl_layout_impl
             if (auto* const clocking_scheme_name = clocking->FirstChildElement("name");
                 clocking_scheme_name != nullptr && (clocking_scheme_name->GetText() != nullptr))
             {
-                const auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(clocking_scheme_name->GetText());
+                const auto clocking_scheme = layouts::clocking::get_scheme(
+                    clocking_scheme_name->GetText(), is_hexagonal_layout_v<Lyt> ? file_arrangement : std::nullopt);
                 if (clocking_scheme.has_value())
                 {
                     lyt.replace_clocking_scheme(*clocking_scheme);
@@ -583,9 +567,13 @@ class read_fgl_layout_impl
 
   private:
     /**
-     * The layout which will be altered based on the parsed information.
+     * The layout to read into. It holds the target layout given by the caller or is created from the file.
      */
-    Lyt lyt;
+    std::optional<Lyt> target{};
+    /**
+     * The name of a newly created layout.
+     */
+    std::string layout_name{};
     /**
      * The input stream from which the gate-level layout is read.
      */
