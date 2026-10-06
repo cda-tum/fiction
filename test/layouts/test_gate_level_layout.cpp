@@ -578,3 +578,29 @@ TEST_CASE("Copied capabilities remain independent", "[gate-layout-editing]")
     CHECK(original.is_obstructed_coordinate({2, 2}));
     CHECK(original.is_obstructed_connection({0, 0}, {1, 0}));
 }
+
+TEST_CASE("Sparse clock metadata enumerates assigned zones independently of frame area", "[gate-layout-clocking]")
+{
+    gate_level_layout<cartesian_layout> lyt{{1'000'000, 1'000'000}};
+    lyt.assign_clock_number({999'999, 999'999}, 2);
+    lyt.assign_synchronization_element({-1, 4}, 7);
+    uint32_t clocks{};
+    lyt.get_clocking_scheme().foreach_override(
+        [&](const auto x, const auto y, const auto number)
+        {
+            CHECK(x == 999'999);
+            CHECK(y == 999'999);
+            CHECK(number == 2);
+            ++clocks;
+        });
+    uint32_t delays{};
+    lyt.foreach_synchronization_element(
+        [&](const auto& zone, const auto delay)
+        {
+            CHECK(zone == layout_base::coordinate{-1, 4});
+            CHECK(delay == 7);
+            ++delays;
+        });
+    CHECK(clocks == 1);
+    CHECK(delays == 1);
+}

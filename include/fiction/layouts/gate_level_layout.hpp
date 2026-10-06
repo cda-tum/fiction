@@ -1606,6 +1606,17 @@ class gate_level_layout : public CoordinateLayout
 
 #pragma endregion
 
+    /**
+     * Visits zones with a nonzero synchronization delay.
+     * @tparam Fn Callable accepting a clock zone and delay.
+     * @param fn Callback for each synchronization element.
+     */
+    template <typename Fn>
+    void foreach_synchronization_element(Fn&& fn) const
+    {
+        clocking_state.foreach_synchronization_element(std::forward<Fn>(fn));
+    }
+
   private:
     /** @brief Missing slot or edge index. */
     static constexpr uint32_t no_index = std::numeric_limits<uint32_t>::max();

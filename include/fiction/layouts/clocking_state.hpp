@@ -20,6 +20,7 @@
 #include "fiction/layouts/layout_base.hpp"
 
 #include <cstdint>
+#include <functional>
 #include <string_view>
 #include <unordered_map>
 #include <utility>
@@ -200,6 +201,20 @@ class state
     [[nodiscard]] uint32_t num_se() const noexcept
     {
         return static_cast<uint32_t>(synchronization.size());
+    }
+
+    /**
+     * Visits zones with a nonzero synchronization delay.
+     * @tparam Fn Callable accepting a clock zone and delay.
+     * @param fn Callback for each synchronization element.
+     */
+    template <typename Fn>
+    void foreach_synchronization_element(Fn&& fn) const
+    {
+        for (const auto& [zone, delay] : synchronization)
+        {
+            std::invoke(fn, zone, delay);
+        }
     }
 
   private:

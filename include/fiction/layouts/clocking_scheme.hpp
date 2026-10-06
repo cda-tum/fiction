@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <exception>
+#include <functional>
 #include <limits>
 #include <optional>
 #include <stdexcept>
@@ -196,6 +197,20 @@ class scheme
      * @return `true` iff both schemes are equal.
      */
     [[nodiscard]] bool operator==(const scheme& other) const = default;
+
+    /**
+     * Visits manually overridden clock numbers.
+     * @tparam Fn Callable accepting x, y, and clock number.
+     * @param fn Callback for each override.
+     */
+    template <typename Fn>
+    void foreach_override(Fn&& fn) const
+    {
+        for (const auto& [position, number] : overrides)
+        {
+            std::invoke(fn, position.first, position.second, number);
+        }
+    }
 
   private:
     /**
