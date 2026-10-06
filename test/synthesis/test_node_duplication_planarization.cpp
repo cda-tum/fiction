@@ -577,3 +577,50 @@ TEST_CASE("Random primary output order without a seed", "[node-duplication-plana
 
     check_planar_and_equivalent(ntk, planar);
 }
+
+TEST_CASE("Tie-break among equally short paths copies the lightest cone", "[node-duplication-planarization]")
+{
+    // two consumers share a gate whose cone holds three nodes and an inverter whose cone holds two; one of the two is
+    // placed once between the consumers, the other is copied, so both shortest paths duplicate one node on this
+    // level. Balancing ranks the fanins in the order the first output's cone visits them, so the fanin order of the
+    // consumers puts the inverter first or second in rank order; the copy must be the inverter either way.
+    const auto build = [](const bool inverter_first)
+    {
+        technology_network tec{};
+
+        const auto x1 = tec.create_pi();
+        const auto x2 = tec.create_pi();
+        const auto x3 = tec.create_pi();
+        const auto g  = tec.create_and(x1, x2);
+        const auto s  = tec.create_not(x3);
+
+        if (inverter_first)
+        {
+            tec.create_po(tec.create_and(s, g));
+            tec.create_po(tec.create_or(s, g));
+        }
+        else
+        {
+            tec.create_po(tec.create_and(g, s));
+            tec.create_po(tec.create_or(g, s));
+        }
+
+        return tec;
+    };
+
+    for (const bool inverter_first : {true, false})
+    {
+        const auto tec    = build(inverter_first);
+        const auto ranked = rank_without_substitution(tec);
+
+        node_duplication_planarization_stats st{};
+        const auto                           planar = node_duplication_planarization(ranked, {}, &st);
+
+        check_planar_and_equivalent(tec, planar);
+
+        // the inverter and its input are copied, not the gate with its two inputs
+        CHECK(st.num_duplications == 2);
+        CHECK(planar.num_virtual_pis() == 1);
+        CHECK(planar.size() == tec.size() + 2);
+    }
+}

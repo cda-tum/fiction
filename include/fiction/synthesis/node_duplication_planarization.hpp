@@ -252,6 +252,11 @@ struct hgraph_node
      */
     std::size_t fanin_it{};
     /**
+     * Sum of the cone weights of the fanins that the shortest path ending here places once for two consecutive
+     * consumers; the tie-break among equally short paths prefers the heaviest sum.
+     */
+    double shared_weight{0.0};
+    /**
      * Creates an H-graph node.
      *
      * @param r Node whose fanins are ordered.
@@ -493,8 +498,11 @@ class node_duplication_planarization_impl
      *
      * A slice holds every ordering of the fanins of `n` as an H-graph node (`calculate_pairs`). The delay of each
      * ordering is the shortest path from the first slice of the level: moving to an ordering whose first fanin equals
-     * the last fanin of the previous ordering costs 1, any other move costs 2, and the first slice starts at 1. Ties
-     * between equal delays are broken in favour of orderings that share a fanin in the level below, which avoids a
+     * the last fanin of the previous ordering costs 1, any other move costs 2, and the first slice starts at 1. Every
+     * shortest path duplicates the same number of nodes but not the same nodes: where consecutive consumers share
+     * several fanins, only one is placed once between them and the others are copied. Ties between equal delays are
+     * therefore broken in favour of the path whose shared fanins have the heaviest cones, so that the copies drag the
+     * lightest cones along, and then in favour of orderings that share a fanin in the level below, which avoids a
      * duplication there. The slice is appended to `lvl_pairs`.
      *
      * @param n Node (source id or copy id) whose fanins form the slice.
@@ -547,21 +555,25 @@ class node_duplication_planarization_impl
 
             for (auto& cur : combinations)
             {
+                // the cone weight of the fanin this ordering can share with the previous one
+                const double share = cone_weight(cur.outer_fanins.first);
+
                 for (std::size_t last_idx = 0; last_idx < previous.size(); ++last_idx)
                 {
                     const auto& last = previous[last_idx];
 
-                    if (cur.outer_fanins.first == last.outer_fanins.second && last.delay + 1 < cur.delay)
+                    const bool   shares = cur.outer_fanins.first == last.outer_fanins.second;
+                    const auto   delay  = last.delay + (shares ? 1 : 2);
+                    const double weight = last.shared_weight + (shares ? share : 0.0);
+
+                    if (delay < cur.delay || (delay == cur.delay && weight > cur.shared_weight))
                     {
-                        cur.fanin_it = last_idx;
-                        cur.delay    = last.delay + 1;
+                        cur.fanin_it      = last_idx;
+                        cur.delay         = delay;
+                        cur.shared_weight = weight;
                     }
-                    else if (last.delay + 2 < cur.delay)
-                    {
-                        cur.fanin_it = last_idx;
-                        cur.delay    = last.delay + 2;
-                    }
-                    else if (last.delay + 2 == cur.delay && last.fanin_it < previous.size() &&
+                    else if (!shares && delay == cur.delay && weight == cur.shared_weight &&
+                             last.fanin_it < previous.size() &&
                              share_fanin(cur.outer_fanins.first, last.outer_fanins.second))
                     {
                         cur.fanin_it = last_idx;
@@ -668,8 +680,10 @@ class node_duplication_planarization_impl
 
         const auto& last_slice = lvl_pairs.back();
 
-        const auto minimum_it = std::min_element(last_slice.cbegin(), last_slice.cend(),
-                                                 [](const auto& a, const auto& b) { return a.delay < b.delay; });
+        // the least delay; among equal delays the heaviest shared weight; among those the first in rank order
+        const auto minimum_it = std::min_element(
+            last_slice.cbegin(), last_slice.cend(), [](const auto& a, const auto& b)
+            { return a.delay < b.delay || (a.delay == b.delay && a.shared_weight > b.shared_weight); });
 
         if (minimum_it == last_slice.cend())
         {
@@ -1003,10 +1017,22 @@ class node_duplication_planarization_impl
 
         const double scale = std::pow(m.depth_growth, static_cast<double>(current_level));
 
-        // the cone weight of a source node does not depend on the level of the duplication
+        return to_cost(cone_weight(root) * scale);
+    }
+    /**
+     * Weighted size of the transitive fanin cone of a source node under `duplication_cost_model`, without the depth
+     * scaling: a gate weighs `node_weight`, a chain buffer or inverter `buffer_weight`. Memoized per source node.
+     *
+     * @param root Source node.
+     * @return Weighted cone size.
+     */
+    [[nodiscard]] double cone_weight(const mockturtle::node<Ntk> root) const
+    {
+        const auto& m = ps.duplication_cost;
+
         if (const auto it = cone_weights.find(root); it != cone_weights.end())
         {
-            return to_cost(it->second * scale);
+            return it->second;
         }
 
         std::vector<mockturtle::node<Ntk>>        stack{root};
@@ -1031,7 +1057,7 @@ class node_duplication_planarization_impl
 
         cone_weights.emplace(root, total);
 
-        return to_cost(total * scale);
+        return total;
     }
     /**
      * Rounds a cost to an integer, saturating at the maximum.

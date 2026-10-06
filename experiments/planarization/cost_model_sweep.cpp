@@ -11,6 +11,10 @@
 /**
  * @file
  * @brief Sweeps the duplication cost model of the hybrid planarization strategy over benchmark networks.
+ *
+ * Usage: `cost_model_sweep [benchmark filter] [setting filter]`. The benchmark filter is a substring of the
+ * benchmark name, the setting filter a comma-separated list of substrings of setting names.
+ *
  * @author Benjamin Hien (hibenj)
  */
 
@@ -30,6 +34,7 @@
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
@@ -164,6 +169,16 @@ int main(const int argc, const char** argv)  // NOLINT
 {
     const std::span<const char*> args{argv, static_cast<std::size_t>(argc)};
     const std::string            filter = args.size() > 1 ? args[1] : "";
+    // optional second argument: only settings whose name contains one of the comma-separated terms
+    std::vector<std::string> setting_filter{};
+    if (args.size() > 2)
+    {
+        std::istringstream terms{args[2]};
+        for (std::string term{}; std::getline(terms, term, ',');)
+        {
+            setting_filter.push_back(term);
+        }
+    }
 
     experiments::experiment<std::string, std::string, uint32_t, uint32_t, uint64_t, uint64_t, uint32_t, uint32_t,
                             double>
@@ -210,6 +225,13 @@ int main(const int argc, const char** argv)  // NOLINT
 
             for (const auto& [name, ps] : settings())
             {
+                if (!setting_filter.empty() &&
+                    std::none_of(setting_filter.cbegin(), setting_filter.cend(),
+                                 [&name](const auto& term) { return name.find(term) != std::string::npos; }))
+                {
+                    continue;
+                }
+
                 try
                 {
                     mockturtle::stopwatch<>::duration    time{};
