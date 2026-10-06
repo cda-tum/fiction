@@ -42,11 +42,11 @@ namespace blueprints
  *
  * @tparam GateLyt Gate-level layout type.
  * @param a Arrangement of the shifted rows or columns.
- * @param ar Highest possible position in the layout.
+ * @param ar Axis sizes of the layout.
  * @return The empty layout.
  */
 template <typename GateLyt>
-GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, const typename GateLyt::aspect_ratio& ar)
+GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, const typename GateLyt::extent& ar)
 {
     if constexpr (fiction::is_cartesian_layout_v<GateLyt>)
     {
@@ -64,12 +64,12 @@ GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, cons
  *
  * @tparam GateLyt Gate-level layout type.
  * @param a Arrangement of the shifted rows or columns.
- * @param ar Highest possible position in the layout.
+ * @param ar Axis sizes of the layout.
  * @param scheme Clocking scheme to apply to the layout.
  * @return The empty layout.
  */
 template <typename GateLyt>
-GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, const typename GateLyt::aspect_ratio& ar,
+GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, const typename GateLyt::extent& ar,
                     const fiction::layouts::clocking::scheme& scheme)
 {
     if constexpr (fiction::is_cartesian_layout_v<GateLyt>)
@@ -94,7 +94,7 @@ template <typename GateLyt>
 GateLyt straight_wire_gate_layout(
     const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, {2, 2}, fiction::layouts::clocking::twoddwave());
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, {3, 3}, fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto w1 = layout.create_buf(x1, {1, 1});
@@ -115,7 +115,7 @@ template <typename GateLyt>
 GateLyt three_wire_paths_gate_layout(
     const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, {4, 4}, fiction::layouts::clocking::use());
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, {5, 5}, fiction::layouts::clocking::use());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto x2 = layout.create_pi("x2", {0, 2});
@@ -146,7 +146,7 @@ xor_maj_gate_layout(const fiction::layouts::arrangement layout_arrangement = fic
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 2, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{4, 3, 1},
                                                    fiction::layouts::clocking::open());
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -188,7 +188,7 @@ template <typename GateLyt>
 GateLyt
 and_or_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 1, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{4, 2, 1},
                                                    fiction::layouts::clocking::open());
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -221,7 +221,7 @@ template <typename GateLyt>
 GateLyt
 and_not_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 1, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{4, 2, 1},
                                                    fiction::layouts::clocking::open());
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -254,7 +254,7 @@ template <typename GateLyt>
 GateLyt
 or_not_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 3, 1},
                                                    fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {1, 0});
@@ -278,7 +278,7 @@ template <typename GateLyt>
 GateLyt
 and_or_inv_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{4, 2, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{5, 3, 1},
                                                    fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 2});
@@ -312,7 +312,7 @@ template <typename GateLyt>
 GateLyt
 use_and_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 3, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{4, 4, 1},
                                                    fiction::layouts::clocking::use());
 
     const auto x1 = layout.create_pi("x1", {0, 1});
@@ -348,7 +348,7 @@ template <typename GateLyt>
 GateLyt
 res_maj_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 3, 1},
                                                    fiction::layouts::clocking::res());
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
 
@@ -377,7 +377,7 @@ GateLyt single_input_tautology_gate_layout(
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 0, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 1, 1},
                                                    fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
@@ -406,7 +406,7 @@ tautology_gate_layout(const fiction::layouts::arrangement layout_arrangement = f
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 1},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 3, 2},
                                                    fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {1, 0});
@@ -436,7 +436,7 @@ GateLyt res_tautology_gate_layout(
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 3, 1},
                                                    fiction::layouts::clocking::res());
 
     const auto x1 = layout.create_pi("x1", {0, 1});
@@ -467,7 +467,7 @@ GateLyt open_tautology_gate_layout(
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 3, 1},
                                                    fiction::layouts::clocking::open());
 
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -504,7 +504,7 @@ template <typename GateLyt>
 GateLyt
 crossing_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 2, 1},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{4, 3, 2},
                                                    fiction::layouts::clocking::twoddwave());
 
     const auto x1 = layout.create_pi("x1", {1, 0});
@@ -538,7 +538,7 @@ template <typename GateLyt>
 GateLyt
 fanout_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW) noexcept
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 1});
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 3, 2});
 
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(3));
     layout.assign_clock_number({0, 1}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -574,7 +574,7 @@ template <typename GateLyt>
 GateLyt unbalanced_and_layout(
     const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW) noexcept
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 2, 0});
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{4, 3, 1});
 
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(1));
@@ -611,7 +611,7 @@ template <typename GateLyt>
 GateLyt non_structural_all_function_gate_layout(
     const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{3, 5, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{4, 6, 1},
                                                    fiction::layouts::clocking::open());
 
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -667,7 +667,7 @@ GateLyt non_structural_all_function_gate_layout(
 template <typename GateLyt>
 GateLyt se_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 1, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 2, 1},
                                                    fiction::layouts::clocking::twoddwave());
 
     layout.assign_synchronization_element({1, 0}, 1);
@@ -697,7 +697,7 @@ GateLyt shifted_cart_and_or_inv_gate_layout(
     const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
     auto layout = blueprints::make_layout<GateLyt>(
-        layout_arrangement, typename GateLyt::aspect_ratio{4, 2, 0},
+        layout_arrangement, typename GateLyt::extent{5, 3, 1},
         fiction::layouts::clocking::columnar(fiction::layouts::clocking::num_clks::THREE));
 
     const auto x1 = layout.create_pi("x1", {0, 0});
@@ -729,7 +729,7 @@ template <typename GateLyt>
 GateLyt row_clocked_and_xor_gate_layout(
     const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 3, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 4, 1},
                                                    fiction::layouts::clocking::row());
 
     const auto x1 = layout.create_pi("x1", {0, 0});
@@ -759,7 +759,7 @@ template <typename GateLyt>
 GateLyt unclockable_gate_layout(
     const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::aspect_ratio{2, 2, 0},
+    auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 3, 1},
                                                    fiction::layouts::clocking::open());
 
     const auto x0  = layout.create_pi("x0", {0, 0});

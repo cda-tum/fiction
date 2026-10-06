@@ -117,15 +117,10 @@ class tile_clocking
      * The clock zone that contains a cell: its tile on layer 0. Negative axes use floor division.
      *
      * @param c Cell position.
-     * @return Clock zone of `c`, or the invalid clock zone if `c` is invalid.
+     * @return Clock zone of `c`.
      */
     [[nodiscard]] clock_zone get_clock_zone(const layout_base::coordinate& c) const noexcept
     {
-        if (!c.is_valid())
-        {
-            return {};
-        }
-
         return {floor_div(c.x, tile_x), floor_div(c.y, tile_y)};
     }
     /**
