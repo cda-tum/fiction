@@ -130,95 +130,10 @@ def test_obstruction_via_gates(make_layout: Callable[[], GateLayout]) -> None:
     assert layout.is_obstructed_connection((3, 2), (3, 3))
 
 
-def test_cartesian_gate_layout_gate_level_inheritance() -> None:
+@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
+def test_gate_level_inheritance(make_layout: Callable[[], GateLayout]) -> None:
     """Expose placed identities, physical flow, timing, and validation."""
-    layout = cartesian_gate_layout((4, 4, 2), "2DDWave", "Layout")
-
-    assert layout.is_empty()
-
-    # layout creation
-    x1 = layout.create_pi("x1", (1, 0))
-    x2 = layout.create_pi("x2", (0, 1))
-    x3 = layout.create_pi("x3", (2, 0))
-    x4 = layout.create_pi("x4", (0, 2))
-
-    a1 = layout.create_and(x1, x2, (1, 1))
-
-    b1 = layout.create_buf(x3, (2, 1))
-    b2 = layout.create_buf(x4, (1, 2))
-
-    a2 = layout.create_and(b1, b2, (2, 2))
-
-    c = layout.create_buf(a1, (2, 1, 1))
-
-    f1 = layout.create_po(c, "f1", (3, 1))
-    f2 = layout.create_po(a2, "f2", (3, 2))
-
-    assert not layout.is_empty()
-
-    assert layout.pis() == [x1.object, x2.object, x3.object, x4.object]
-    assert layout.pos() == [f1.object, f2.object]
-    gates = layout.gates()
-    assert len(gates) == 2
-    assert a1.object in gates
-    assert a2.object in gates
-    wires = layout.wires()
-    assert len(wires) == 9
-    for port in (x1, x2, x3, x4, b1, b2, c, f1, f2):
-        assert port.object in wires
-    for port, position in [
-        (x1, coordinate(1, 0)),
-        (x2, coordinate(0, 1)),
-        (x3, coordinate(2, 0)),
-        (x4, coordinate(0, 2)),
-        (a1, coordinate(1, 1)),
-        (b1, coordinate(2, 1)),
-        (b2, coordinate(1, 2)),
-        (a2, coordinate(2, 2)),
-        (c, coordinate(2, 1, 1)),
-        (f1, coordinate(3, 1)),
-        (f2, coordinate(3, 2)),
-    ]:
-        assert layout.find_object(position) == port.object
-        assert layout.get_tile(port.object) == position
-        assert layout.output(port.object) == port
-
-    # incoming data flow
-    inx1 = layout.fanins(coordinate(1, 0))
-    assert len(inx1) == 0
-
-    inf1 = layout.fanins(coordinate(3, 1))
-    assert len(inf1) == 1
-    assert coordinate(2, 1, 1) in inf1
-
-    ina2 = layout.fanins(coordinate(2, 2))
-    assert len(ina2) == 2
-    assert coordinate(2, 1) in ina2
-    assert coordinate(1, 2) in ina2
-
-    # outgoing data flow
-    outx1 = layout.fanouts(coordinate(1, 0))
-    assert len(outx1) == 1
-    assert coordinate(1, 1) in outx1
-
-    outf1 = layout.fanouts(coordinate(3, 1))
-    assert len(outf1) == 0
-
-    outa2 = layout.fanouts(coordinate(2, 2))
-    assert len(outa2) == 1
-    assert coordinate(3, 2) in outa2
-
-    cp, tp = critical_path_length_and_throughput(layout)
-    assert cp == 4
-    assert tp == 1
-
-    drv_params = gate_level_drv_params()
-    assert gate_level_drvs(layout, drv_params) == (0, 0)
-
-
-def test_hexagonal_gate_layout_gate_level_inheritance() -> None:
-    """Expose placed identities, physical flow, timing, and validation."""
-    layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (4, 4, 2), "2DDWave", "Layout")
+    layout = make_layout()
 
     assert layout.is_empty()
 
