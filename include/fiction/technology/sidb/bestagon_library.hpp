@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "fiction/layouts/arrangement.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
