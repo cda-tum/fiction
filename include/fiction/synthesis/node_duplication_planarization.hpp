@@ -554,12 +554,6 @@ class node_duplication_planarization_impl
     {
         const auto o = origin(n);
 
-        // primary inputs propagate to the next level, since they must reach the input level without crossings
-        if (ntk.is_pi(o))
-        {
-            slice_fanins.push_back(o);
-        }
-
         // keep rank order among equal delays: a later insertion never overwrites an earlier one
         ntk.foreach_fanin(o,
                           [this](const auto& f)

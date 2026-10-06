@@ -624,3 +624,20 @@ TEST_CASE("Tie-break among equally short paths copies the lightest cone", "[node
         CHECK(planar.size() == tec.size() + 2);
     }
 }
+
+TEST_CASE("Constant fanins are kept", "[node-duplication-planarization]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto a1 = tec.create_and(x1, tec.get_constant(true));
+    const auto o1 = tec.create_or(a1, x2);
+    tec.create_po(o1);
+    tec.create_po(tec.create_and(x1, x2));
+
+    const auto ranked = rank_without_substitution(tec);
+    const auto planar = node_duplication_planarization(ranked);
+
+    check_planar_and_equivalent(tec, planar);
+}
