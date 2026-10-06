@@ -228,9 +228,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     argument instead of a template parameter, and `get_arrangement()` returns it.
   - **Breaking:** Coordinates are signed. `layouts::layout_base::coordinate` with three `int32_t` axes replaces
     `coords::offset` and `coords::cube`, and `cartesian_layout`, `hexagonal_layout`, and `shifted_cartesian_layout`
-    derive from `layout_base` and are no longer templates. `coordinates.hpp` and `layouts::coords` are gone. A coordinate
-    with an axis equal to `INT32_MIN` is invalid, the default coordinate is invalid, and `is_valid()` replaces
-    `is_dead()` on coordinates. Layouts throw `std::invalid_argument` for extents below 0 or above 2^30 - 1, and
+    derive from `layout_base` and are no longer templates. `coordinates.hpp` and `layouts::coords` are gone. The default
+    coordinate is invalid, as is any coordinate whose x axis is `INT32_MIN`, and `is_valid()` replaces `is_dead()` on
+    coordinates. Layouts throw `std::invalid_argument` for extents below 0 or above 2^30 - 1, and
     gate-level layouts throw `std::out_of_range` for tiles with x or y above 2^30 - 1 or z above 1.
   - **Breaking:** `graph_oriented_layout_design_params::tiles_to_skip_between_pis` is an `int32_t`, and
     `graph_oriented_layout_design` throws `std::invalid_argument` for values outside of [0, 2^20].
@@ -421,7 +421,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** `offset_coordinate` becomes `coordinate`, and `offset_area` and `offset_volume` become `area` and `volume`, in
     `mnt.pyfiction.layouts`. `cube_coordinate`, `cube_area`, `cube_volume`, and the `int_repr` constructor are gone. `coordinate()` has
     `x`, `y`, and `z` equal to -2147483648 and `is_valid()` returns `False` for it. Axes must lie in [-2147483647,
-    2147483647]; `coordinate`, `coord`, and the axis setters raise `OverflowError` outside of it. Negative or oversized
+    2147483647]; `coordinate`, `coord`, and the axis setters raise `OverflowError` outside of it, and setting an axis of an invalid coordinate raises
+    `ValueError`. Negative or oversized
     layout extents raise `ValueError`, and gate-level tiles outside of the signal range raise `IndexError`.
     `stacked_cartesian_layout` is an alias of `cartesian_layout`.
 

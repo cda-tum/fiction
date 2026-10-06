@@ -161,9 +161,11 @@ def test_layout_coord_rejects_axes_outside_of_the_int32_range(make_layout, axis)
     assert lyt.coord(1, 2) == coordinate(1, 2, 0)
 
 
-def test_setting_an_axis_of_the_invalid_coordinate_keeps_it_invalid():
+def test_setting_an_axis_of_the_invalid_coordinate_raises():
     c = coordinate()
-    c.x = 0
+
+    with pytest.raises(ValueError, match="invalid coordinate"):
+        c.x = 0
 
     assert not c.is_valid()
 

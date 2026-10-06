@@ -31,6 +31,30 @@
 namespace pyfiction
 {
 
+namespace
+{
+
+/**
+ * @brief Sets one axis of a coordinate.
+ *
+ * @param self Coordinate to change.
+ * @param axis Pointer to the member that holds the axis.
+ * @param value Python integer.
+ * @throws std::invalid_argument If `self` is invalid, because a single axis does not make it valid.
+ * @throws std::overflow_error If `value` does not fit a coordinate axis.
+ */
+void set_axis(py_coordinate& self, int32_t py_coordinate::* axis, const int64_t value)
+{
+    if (!self.is_valid())
+    {
+        throw std::invalid_argument("An axis of an invalid coordinate cannot be set");
+    }
+
+    self.*axis = coordinate_axis(value);
+}
+
+}  // namespace
+
 /**
  * @brief Registers coordinates.
  * @param m Python layouts module.
@@ -75,15 +99,15 @@ void coordinate(nanobind::module_& m)
 
         .def_prop_rw(
             "x", [](const py_coordinate& self) -> int32_t { return self.x; },
-            [](py_coordinate& self, const int64_t value) { self.x = coordinate_axis(value); },
+            [](py_coordinate& self, const int64_t value) { set_axis(self, &py_coordinate::x, value); },
             DOC(fiction_layouts_layout_base_coordinate_x))
         .def_prop_rw(
             "y", [](const py_coordinate& self) -> int32_t { return self.y; },
-            [](py_coordinate& self, const int64_t value) { self.y = coordinate_axis(value); },
+            [](py_coordinate& self, const int64_t value) { set_axis(self, &py_coordinate::y, value); },
             DOC(fiction_layouts_layout_base_coordinate_y))
         .def_prop_rw(
             "z", [](const py_coordinate& self) -> int32_t { return self.z; },
-            [](py_coordinate& self, const int64_t value) { self.z = coordinate_axis(value); },
+            [](py_coordinate& self, const int64_t value) { set_axis(self, &py_coordinate::z, value); },
             DOC(fiction_layouts_layout_base_coordinate_z))
 
         .def("is_valid", &py_coordinate::is_valid, DOC(fiction_layouts_layout_base_coordinate_is_valid))

@@ -4484,8 +4484,7 @@ a given one. Thereby, cardinal and ordinal directions are being
 considered, i.e., the container will contain all coordinates `ac` for
 which `is_adjacent(c, ac)` returns `true`.
 
-Neighbors outside of the layout bounds are not considered, and a
-coordinate outside of the layout bounds has no adjacent coordinates.
+Coordinates that are outside of the layout bounds are not considered.
 Thereby, the size of the returned container is at most 6.
 
 Args:
@@ -4672,8 +4671,7 @@ accordance with `adjacent_coordinates`. Thereby, cardinal and ordinal
 directions are being considered, i.e., the given function is applied
 to all coordinates ac for which `is_adjacent(c, ac)` returns `true`.
 
-Neighbors outside of the layout bounds are not considered, and a
-coordinate outside of the layout bounds has no adjacent coordinates.
+Coordinates that are outside of the layout bounds are not considered.
 Thereby, at most 6 coordinates are touched.
 
 Args:
@@ -5138,7 +5136,7 @@ Args:
 
 Returns:
     Coordinate directly north-eastern of `c`; `c` itself if the
-    neighbor or `c` lies outside of the layout.
+    neighbor lies outside of the layout.
 
 )doc";
 
@@ -5152,7 +5150,7 @@ Args:
 
 Returns:
     Coordinate directly north-western of `c`; `c` itself if the
-    neighbor or `c` lies outside of the layout.
+    neighbor lies outside of the layout.
 
 )doc";
 
@@ -5204,7 +5202,7 @@ Args:
 
 Returns:
     Coordinate directly south-eastern of `c`; `c` itself if the
-    neighbor or `c` lies outside of the layout.
+    neighbor lies outside of the layout.
 
 )doc";
 
@@ -5218,7 +5216,7 @@ Args:
 
 Returns:
     Coordinate directly south-western of `c`; `c` itself if the
-    neighbor or `c` lies outside of the layout.
+    neighbor lies outside of the layout.
 
 )doc";
 
@@ -5252,7 +5250,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_to_offset_coordinate =
-R"doc(Converts a cube coordinate to an offset coordinate.
+R"doc(Converts a cube coordinate to an offset coordinate. The result lies in
+the ground layer.
 
 This implementation is adapted from
 https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
@@ -5834,10 +5833,9 @@ A coordinate defines a location relative to a fixed point (origin).
 Each axis is a signed 32-bit integer. The default-constructed
 coordinate is invalid; it has all axes set to `INVALID_AXIS` and
 stands for "no coordinate", e.g., a neighbor outside of a layout or
-the tile of a node that is not placed. A coordinate with any axis set
-to `INVALID_AXIS` is invalid. Test for invalidity with `is_valid()`,
-because only the default-constructed coordinate compares equal to
-every other coordinate of the same state.
+the tile of a node that is not placed. A coordinate is invalid iff its
+x axis is `INVALID_AXIS`; no other axis of a coordinate should have
+this value.
 
 Gate-level layouts pack a coordinate into a 64-bit signal with
 `explicit operator uint64_t`. This encoding holds 31-bit signed x and
@@ -5899,8 +5897,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_is_valid =
-R"doc(Returns whether the coordinate is valid, i.e., whether none of its
-axes is `INVALID_AXIS`.
+R"doc(Returns whether the coordinate is valid, i.e., whether its x axis
+differs from `INVALID_AXIS`.
 
 Returns:
     `true` iff the coordinate is valid.

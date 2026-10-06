@@ -25,10 +25,9 @@ class coordinate:
     Each axis is a signed 32-bit integer. The default-constructed
     coordinate is invalid; it has all axes set to `INVALID_AXIS` and
     stands for "no coordinate", e.g., a neighbor outside of a layout or
-    the tile of a node that is not placed. A coordinate with any axis set
-    to `INVALID_AXIS` is invalid. Test for invalidity with `is_valid()`,
-    because only the default-constructed coordinate compares equal to
-    every other coordinate of the same state.
+    the tile of a node that is not placed. A coordinate is invalid iff its
+    x axis is `INVALID_AXIS`; no other axis of a coordinate should have
+    this value.
 
     Gate-level layouts pack a coordinate into a 64-bit signal with
     `explicit operator uint64_t`. This encoding holds 31-bit signed x and
@@ -79,8 +78,8 @@ class coordinate:
     def z(self, arg: int, /) -> None: ...
     def is_valid(self) -> bool:
         """
-        Returns whether the coordinate is valid, i.e., whether none of its
-        axes is `INVALID_AXIS`.
+        Returns whether the coordinate is valid, i.e., whether its x axis
+        differs from `INVALID_AXIS`.
 
         Returns:
             `true` iff the coordinate is valid.
@@ -1731,7 +1730,7 @@ class hexagonal_layout:
 
         Returns:
             Coordinate directly north-eastern of `c`; `c` itself if the
-            neighbor or `c` lies outside of the layout.
+            neighbor lies outside of the layout.
         """
 
     def east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -1759,7 +1758,7 @@ class hexagonal_layout:
 
         Returns:
             Coordinate directly south-eastern of `c`; `c` itself if the
-            neighbor or `c` lies outside of the layout.
+            neighbor lies outside of the layout.
         """
 
     def south(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -1787,7 +1786,7 @@ class hexagonal_layout:
 
         Returns:
             Coordinate directly south-western of `c`; `c` itself if the
-            neighbor or `c` lies outside of the layout.
+            neighbor lies outside of the layout.
         """
 
     def west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -1815,7 +1814,7 @@ class hexagonal_layout:
 
         Returns:
             Coordinate directly north-western of `c`; `c` itself if the
-            neighbor or `c` lies outside of the layout.
+            neighbor lies outside of the layout.
         """
 
     def above(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -2239,8 +2238,7 @@ class hexagonal_layout:
         considered, i.e., the container will contain all coordinates `ac` for
         which `is_adjacent(c, ac)` returns `true`.
 
-        Neighbors outside of the layout bounds are not considered, and a
-        coordinate outside of the layout bounds has no adjacent coordinates.
+        Coordinates that are outside of the layout bounds are not considered.
         Thereby, the size of the returned container is at most 6.
 
         Args:

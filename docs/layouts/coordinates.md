@@ -4,7 +4,7 @@
 
 Every layout (Cartesian, shifted Cartesian, and hexagonal) derives from `layout_base`, which defines the one coordinate
 type that all of them share. A coordinate is an offset from a fixed point (origin) with three signed 32-bit axes. The
-default-constructed coordinate is invalid, and so is every coordinate with an axis equal to `-2147483648`. Layouts
+default-constructed coordinate is invalid, and so is every coordinate whose x axis is `-2147483648`. Layouts
 return an invalid coordinate for neighbors that lie outside of them, and gate-level layouts return it for the tile of a
 node that is not placed.
 Each layout exposes the type as `coordinate`, gate-level layouts in C++ also as `tile`, and its aspect ratio as
