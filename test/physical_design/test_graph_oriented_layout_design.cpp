@@ -24,6 +24,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
@@ -31,6 +32,7 @@
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/traits.hpp>
 
+#include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
@@ -282,7 +284,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         REQUIRE(layout.has_value());
         const auto& checked_layout = required_value(layout);
         check_eq(ntk, checked_layout);
-        CHECK(checked_layout.z() == 0);
+        CHECK(checked_layout.layers() == 1);
     }
 
     SECTION("Randomize skip tiles PI placement")
@@ -638,3 +640,77 @@ TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layo
 }
 
 // NOLINTEND(bugprone-unchecked-optional-access)
+
+TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[gold-ports]")
+{
+    mockturtle::names_view<technology_network> ntk{};
+    const auto                                 unused = ntk.create_pi("unused");
+    const auto                                 a      = ntk.create_pi("a");
+    const auto                                 b      = ntk.create_pi("b");
+    ntk.create_po(ntk.create_lt(b, a), "less");
+    ntk.set_network_name("ordered");
+    static_cast<void>(unused);
+    graph_oriented_layout_design_params params{};
+    params.return_first          = true;
+    params.enable_multithreading = false;
+    params.timeout               = 10000;
+    const auto result            = graph_oriented_layout_design<gate_level_layout<cartesian_layout>>(ntk, params);
+    REQUIRE(result.has_value());
+    const auto& layout = required_value(result);
+    CHECK(layout.num_pis() == 3);
+    CHECK(layout.get_name(layout.pi_at(0)) == "unused");
+    CHECK(layout.get_name(layout.pi_at(1)) == "a");
+    CHECK(layout.get_name(layout.pi_at(2)) == "b");
+    CHECK(layout.get_output_name(0) == "less");
+    CHECK(layout.get_layout_name() == "ordered");
+    const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{3};
+    const auto                                                      extracted = extract_layout_network(layout);
+    CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extracted, simulator) ==
+          mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
+    layout.foreach_node([&](const auto id) { CHECK(layout.is_within_bounds(layout.get_tile(id))); });
+}
+
+TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks empty", "[gold-ports]")
+{
+    mockturtle::names_view<technology_network> empty{};
+    graph_oriented_layout_design_params        params{};
+    params.return_first          = true;
+    params.enable_multithreading = false;
+    params.timeout               = 10000;
+    const auto empty_result      = graph_oriented_layout_design<gate_level_layout<cartesian_layout>>(empty, params);
+    REQUIRE(empty_result.has_value());
+    CHECK(required_value(empty_result).is_empty());
+    CHECK(required_value(empty_result).area() == 0);
+    mockturtle::names_view<technology_network> ntk{};
+    ntk.create_po(ntk.get_constant(false), "zero");
+    ntk.create_po(ntk.get_constant(true), "one");
+    const auto result = graph_oriented_layout_design<gate_level_layout<cartesian_layout>>(ntk, params);
+    REQUIRE(result.has_value());
+    CHECK(required_value(result).num_pis() == 0);
+    CHECK(required_value(result).num_pos() == 2);
+    CHECK(required_value(result).num_gates() == 2);
+    const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{0};
+    CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extract_layout_network(required_value(result)), simulator) ==
+          mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
+}
+
+TEST_CASE("GOLD preserves mixed constant and logic output order", "[gold-ports]")
+{
+    mockturtle::names_view<technology_network> ntk{};
+    const auto                                 input = ntk.create_pi("input");
+    ntk.create_po(input, "input_copy");
+    ntk.create_po(ntk.get_constant(true), "one");
+    ntk.create_po(ntk.get_constant(false), "zero");
+    graph_oriented_layout_design_params params{};
+    params.return_first          = true;
+    params.enable_multithreading = false;
+    params.timeout               = 10000;
+    const auto result            = graph_oriented_layout_design<gate_level_layout<cartesian_layout>>(ntk, params);
+    REQUIRE(result.has_value());
+    CHECK(required_value(result).get_output_name(0) == "input_copy");
+    CHECK(required_value(result).get_output_name(1) == "one");
+    CHECK(required_value(result).get_output_name(2) == "zero");
+    const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{1};
+    CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extract_layout_network(required_value(result)), simulator) ==
+          mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
+}

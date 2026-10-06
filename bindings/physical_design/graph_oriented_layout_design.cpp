@@ -40,6 +40,7 @@
 namespace pyfiction
 {
 
+/** @brief Registers graph-oriented layout design. @param m Python module. */
 void graph_oriented_layout_design(nanobind::module_& m)
 {
     namespace py = nanobind;
