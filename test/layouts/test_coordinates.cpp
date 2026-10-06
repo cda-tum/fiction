@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Tests for `fiction/layouts/coordinates.hpp`.
+ * @brief Tests for signed layout coordinates.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)

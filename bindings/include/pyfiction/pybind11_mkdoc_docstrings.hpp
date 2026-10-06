@@ -752,9 +752,27 @@ static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl = R"doc(
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_bb = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_bb_x = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_bb_x =
+R"doc(Returns the x axis relative to the bounding box.
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_bb_y = R"doc()doc";
+Args:
+    c: Cell coordinate.
+
+Returns:
+    The relative x axis.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_bb_y =
+R"doc(Returns the y axis relative to the bounding box.
+
+Args:
+    c: Cell coordinate.
+
+Returns:
+    The relative y axis.
+
+)doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_generate_layout_id_hash = R"doc()doc";
 
