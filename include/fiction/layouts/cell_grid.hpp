@@ -58,11 +58,12 @@ class cell_grid : public cartesian_layout
     /**
      * Creates an empty grid.
      *
-     * @param ar Highest cell position in the grid.
+     * @param size Half-open axis sizes of the grid.
      * @param name Layout name.
+     * @throws std::invalid_argument If a size exceeds the coordinate domain.
      */
-    explicit cell_grid(const aspect_ratio& ar = {}, std::string name = "") :
-            cartesian_layout(ar),
+    explicit cell_grid(const extent& size = {}, std::string name = "") :
+            cartesian_layout(size),
             layout_name{std::move(name)}
     {}
     /**
@@ -116,7 +117,7 @@ class cell_grid : public cartesian_layout
      */
     [[nodiscard]] bool operator==(const cell_grid& other) const noexcept
     {
-        return x() == other.x() && y() == other.y() && z() == other.z() && layout_name == other.layout_name &&
+        return dimensions() == other.dimensions() && layout_name == other.layout_name &&
                cell_types == other.cell_types && cell_names == other.cell_names;
     }
     /**

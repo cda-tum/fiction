@@ -122,7 +122,7 @@ TEST_CASE("Cell traversal stops early", "[cell-grid]")
 
     auto positions = 0u;
     g.foreach_cell_position([&positions](const auto&) { ++positions; });
-    CHECK(positions == 16);
+    CHECK(positions == 9);
 }
 
 TEST_CASE("Cell grid copies are independent", "[cell-grid]")
@@ -139,8 +139,8 @@ TEST_CASE("Cell grid copies are independent", "[cell-grid]")
     copy.assign_cell_name({0, 2}, "a");
 
     CHECK(copy != original);
-    CHECK(original.x() == 5);
-    CHECK(original.z() == 0);
+    CHECK(original.width() == 5);
+    CHECK(original.layers() == 1);
     CHECK(original.get_layout_name() == "original");
     CHECK(original.get_cell_type({0, 2}) == test_cell::NORMAL);
     CHECK(original.get_cell_name({0, 2}).empty());
@@ -149,5 +149,5 @@ TEST_CASE("Cell grid copies are independent", "[cell-grid]")
     assigned = copy;
     CHECK(assigned == copy);
     assigned.resize({1, 1});
-    CHECK(copy.x() == 10);
+    CHECK(copy.width() == 10);
 }

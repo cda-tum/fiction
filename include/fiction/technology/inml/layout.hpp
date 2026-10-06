@@ -96,30 +96,31 @@ class layout : public layouts::cell_grid<magnet_type>, public layouts::tile_cloc
     /**
      * Creates an empty layout with open clocking.
      *
-     * @param ar Highest magnet position; its z-coordinate is ignored because the layout is planar.
+     * @param size Half-open magnet sizes; a nonzero layer count selects one layer.
      * @param name Layout name.
      * @param tile_size_x Clock-zone width in magnets.
      * @param tile_size_y Clock-zone height in magnets.
-     * @throws std::invalid_argument if either clock-zone dimension is zero.
+     * @throws std::invalid_argument If a size exceeds the coordinate domain or a clock-zone size is zero.
      */
-    explicit layout(const aspect_ratio& ar = {}, std::string name = "", const uint16_t tile_size_x = 1u,
+    explicit layout(const extent& size = {}, std::string name = "", const uint16_t tile_size_x = 1u,
                     const uint16_t tile_size_y = 1u) :
-            cell_grid{aspect_ratio{ar.x, ar.y, 0}, std::move(name)},
+            cell_grid{extent{size.width, size.height, layouts::layout_base::checked(size).layers == 0 ? 0u : 1u},
+                      std::move(name)},
             tile_clocking{tile_size_x, tile_size_y}
     {}
     /**
      * Creates an empty layout clocked by the given scheme.
      *
-     * @param ar Highest magnet position; its z-coordinate is ignored because the layout is planar.
+     * @param size Half-open magnet sizes; a nonzero layer count selects one layer.
      * @param scheme Clocking scheme over clock zones.
      * @param name Layout name.
      * @param tile_size_x Clock-zone width in magnets.
      * @param tile_size_y Clock-zone height in magnets.
-     * @throws std::invalid_argument if either clock-zone dimension is zero.
+     * @throws std::invalid_argument If a size exceeds the coordinate domain or a clock-zone size is zero.
      */
-    layout(const aspect_ratio& ar, const clocking_scheme_t& scheme, std::string name = "",
-           const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
-            layout{ar, std::move(name), tile_size_x, tile_size_y}
+    layout(const extent& size, const clocking_scheme_t& scheme, std::string name = "", const uint16_t tile_size_x = 1u,
+           const uint16_t tile_size_y = 1u) :
+            layout{size, std::move(name), tile_size_x, tile_size_y}
     {
         replace_clocking_scheme(scheme);
     }
