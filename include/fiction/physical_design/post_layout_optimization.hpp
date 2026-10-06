@@ -644,7 +644,7 @@ class post_layout_optimization_impl
     {
         using dist = physical_design::path_finding::twoddwave_distance_functor<Lyt, uint64_t>;
         using cost = physical_design::path_finding::unit_cost_functor<Lyt, uint8_t>;
-        static physical_design::path_finding::a_star_params astar_params{};
+        physical_design::path_finding::a_star_params astar_params{};
         astar_params.crossings = !ps.planar_optimization;
 
         const auto path = physical_design::path_finding::a_star<layout_coordinate_path<Lyt>>(

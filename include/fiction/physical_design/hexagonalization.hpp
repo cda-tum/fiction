@@ -316,32 +316,28 @@ template <typename HexLyt, typename CartLyt>
     static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
     static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
 
-    int32_t    offset               = 0;
-    bool       found_non_empty_tile = false;
-    const auto total_diagonals      = cartesian_layout_height + cartesian_layout_width - 1;
-
-    // 1) Find the first diagonal that contains at least one non-empty tile
-    //    and track the maximum X-coordinate among those tiles (in hex coords).
-    for (int32_t diagonal = 0; diagonal < total_diagonals && !found_non_empty_tile; ++diagonal)
-    {
-        for (int32_t row = 0; row < cartesian_layout_height; ++row)
+    int32_t offset{};
+    int64_t first_diagonal = std::numeric_limits<int64_t>::max();
+    lyt.foreach_node(
+        [&](const auto id)
         {
-            // 'col' is derived from current diagonal index minus the row.
-            if (diagonal >= row)
+            const auto t = lyt.get_tile(id);
+            if (t.z != 0)
             {
-                if (const auto col = diagonal - row; col < cartesian_layout_width)
-                {
-                    if (const tile<CartLyt> current_tile{col, cartesian_layout_height - 1 - row};
-                        !lyt.is_empty_tile(current_tile))
-                    {
-                        const auto hex_coord = to_hex<CartLyt, HexLyt>(current_tile, cartesian_layout_height);
-                        offset               = std::max(offset, hex_coord.x);
-                        found_non_empty_tile = true;  // We only need the first diagonal that has a non-empty tile
-                    }
-                }
+                return;
             }
-        }
-    }
+            const auto diagonal = static_cast<int64_t>(t.x) + cartesian_layout_height - 1 - t.y;
+            const auto x        = to_hex<CartLyt, HexLyt>(t, cartesian_layout_height).x;
+            if (diagonal < first_diagonal)
+            {
+                first_diagonal = diagonal;
+                offset         = std::max(0, x);
+            }
+            else if (diagonal == first_diagonal)
+            {
+                offset = std::max(offset, x);
+            }
+        });
 
     // 2) Adjust offset to accommodate primary inputs if required.
     if (input_mode != hexagonalization_params::io_pin_extension_mode::NONE)
