@@ -1268,6 +1268,10 @@ static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_sto
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_dimension = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_two_layers_only =
+R"doc(Whether a gate-level layout shares these dimensions and limits the z
+extent to 1.)doc";
+
 static const char *mkd_doc_fiction_layouts_cartesian_layout_clone =
 R"doc(Clones the layout returning a deep copy.
 
@@ -1292,6 +1296,10 @@ Template Args:
 
 Returns:
     A coordinate in the layout of type `coordinate`.
+
+Raises:
+    std::overflow_error: If an axis is outside the signed 32-bit
+                         range.
 
 Note:
     This function is equivalent to calling `coordinate(x, y, z)`.
@@ -1749,6 +1757,17 @@ Args:
 Raises:
     std::invalid_argument: If an axis of `ar` is negative or larger
                            than :math:`2^{30} - 1`.
+    std::out_of_range: If shared gate geometry limits the z extent to
+                       1 and `ar.z` exceeds 1.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_restrict_to_two_layers =
+R"doc(Limits the shared geometry to the two layers represented by gate-level
+signals.
+
+Raises:
+    std::out_of_range: If the z extent exceeds 1.
 
 )doc";
 
@@ -3273,7 +3292,8 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_7 =
-R"doc(Copy constructor from another `CoordinateLayout`.
+R"doc(Copy constructor from another `CoordinateLayout`. All geometry aliases
+retain the two-layer extent limit of gate-level signals.
 
 Args:
     lyt: Coordinate layout.
@@ -4541,6 +4561,18 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_bounded_offset =
+R"doc(Checks layout bounds before narrowing offset axes.
+
+Args:
+    axes: Signed 64-bit offset axes.
+    layer: Coordinate layer.
+
+Returns:
+    Coordinate in the layout, or the invalid coordinate.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_clone =
 R"doc(Clones the layout returning a deep copy.
 
@@ -4565,6 +4597,10 @@ Template Args:
 
 Returns:
     A coordinate in the layout of type `coordinate`.
+
+Raises:
+    std::overflow_error: If an axis is outside the signed 32-bit
+                         range.
 
 Note:
     This function is equivalent to calling `coordinate(x, y, z)`.
@@ -4828,6 +4864,10 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_shift = R"doc(Arrangement of the shifted rows or columns.)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_two_layers_only =
+R"doc(Whether a gate-level layout shares these dimensions and limits the z
+extent to 1.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_is_above =
 R"doc(Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
@@ -5181,6 +5221,17 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_offset_axes =
+R"doc(Converts cube coordinates to offset axes without narrowing.
+
+Args:
+    cube_coord: Cube coordinate.
+
+Returns:
+    Signed 64-bit x and y offset axes.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_resize =
 R"doc(Updates the layout's dimensions, effectively resizing it.
 
@@ -5190,6 +5241,17 @@ Args:
 Raises:
     std::invalid_argument: If an axis of `ar` is negative or larger
                            than :math:`2^{30} - 1`.
+    std::out_of_range: If shared gate geometry limits the z extent to
+                       1 and `ar.z` exceeds 1.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_restrict_to_two_layers =
+R"doc(Limits the shared geometry to the two layers represented by gate-level
+signals.
+
+Raises:
+    std::out_of_range: If the z extent exceeds 1.
 
 )doc";
 
@@ -5275,8 +5337,8 @@ Args:
     cube_coord: Cube coordinate to convert.
 
 Returns:
-    Offset coordinate representing `cube_coord` in the layout's
-    arrangement.
+    Offset coordinate representing `cube_coord`, or the invalid
+    coordinate if an axis exceeds 32 bits.
 
 )doc";
 
@@ -5831,6 +5893,8 @@ The upper limit keeps the coordinate arithmetic of every layout within
 
 Args:
     ar: Aspect ratio to check.
+    two_layers_only: Whether shared gate geometry limits the z extent
+                     to 1.
 
 Returns:
     `ar`, or (0, 0, 0) if `ar` is invalid.
@@ -5838,6 +5902,8 @@ Returns:
 Raises:
     std::invalid_argument: If an axis of `ar` is negative or larger
                            than :math:`2^{30} - 1`.
+    std::out_of_range: If `two_layers_only` is set and the z extent
+                       exceeds 1.
 
 )doc";
 
@@ -5856,6 +5922,24 @@ Gate-level layouts pack a coordinate into a 64-bit signal with
 `explicit operator uint64_t`. This encoding holds 31-bit signed x and
 y values and a single z bit.)doc";
 
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_checked_axis =
+R"doc(Converts an integral axis without narrowing.
+
+Args:
+    value: Axis value.
+
+Template Args:
+    Axis: Integral input type.
+
+Returns:
+    Signed 32-bit axis.
+
+Raises:
+    std::overflow_error: If `value` is outside the signed 32-bit
+                         range.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_coordinate = R"doc(Default constructor. Creates the invalid coordinate.)doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_coordinate_2 =
@@ -5871,6 +5955,10 @@ Template Args:
     Y: Type of y.
     Z: Type of z.
 
+Raises:
+    std::overflow_error: If an axis is outside the signed 32-bit
+                         range.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_coordinate_3 =
@@ -5883,6 +5971,10 @@ Args:
 Template Args:
     X: Type of x.
     Y: Type of y.
+
+Raises:
+    std::overflow_error: If an axis is outside the signed 32-bit
+                         range.
 
 )doc";
 
@@ -6314,6 +6406,11 @@ Template Args:
 Returns:
     Absolute cell position in a layout.
 
+Raises:
+    std::invalid_argument: If the relative cell lies outside the tile.
+    std::overflow_error: If the absolute cell is outside the signed
+                         32-bit coordinate range.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_require_arrangement =
@@ -6478,7 +6575,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_tile_clocking_get_clock_zone =
-R"doc(The clock zone that contains a cell: its tile on layer 0.
+R"doc(The clock zone that contains a cell: its tile on layer 0. Negative
+axes use floor division.
 
 Args:
     c: Cell position.
@@ -8241,6 +8339,10 @@ Template Args:
 Returns:
     Highest cell position of the grid, including the layer count of
     `gate_lyt`.
+
+Raises:
+    std::overflow_error: If an extent is outside the signed 32-bit
+                         coordinate range.
 
 )doc";
 

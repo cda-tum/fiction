@@ -586,6 +586,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+  - Coordinate construction and gate-to-cell conversion now reject narrowing overflow.
+  - Gate layout geometry now retains its two-layer limit through shared coordinate aliases and base references.
+  - Cell clock zones now use floor division for negative coordinates.
   - Cell layouts reject zero clock-zone dimensions in constructors and setters.
   - Gate layouts constructed from coordinate layouts initialize their logic functions.
   - Clocked degree counts each eligible neighbor once, including neighbors enabled by synchronization.

@@ -114,7 +114,7 @@ class tile_clocking
         tile_y = checked(tile_size_y);
     }
     /**
-     * The clock zone that contains a cell: its tile on layer 0.
+     * The clock zone that contains a cell: its tile on layer 0. Negative axes use floor division.
      *
      * @param c Cell position.
      * @return Clock zone of `c`, or the invalid clock zone if `c` is invalid.
@@ -126,7 +126,7 @@ class tile_clocking
             return {};
         }
 
-        return {c.x / tile_x, c.y / tile_y};
+        return {c.x / tile_x - (c.x % tile_x < 0), c.y / tile_y - (c.y % tile_y < 0)};
     }
     /**
      * Replaces the clocking scheme.

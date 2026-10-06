@@ -54,9 +54,10 @@ namespace fiction::physical_design
  * @tparam GateLyt Gate-level layout type.
  * @param gate_lyt Gate-level layout.
  * @return Highest cell position of the grid, including the layer count of `gate_lyt`.
+ * @throws std::overflow_error If an extent is outside the signed 32-bit coordinate range.
  */
 template <typename GateLibrary, typename GateLyt>
-[[nodiscard]] layouts::layout_base::coordinate cell_grid_extent(const GateLyt& gate_lyt) noexcept
+[[nodiscard]] layouts::layout_base::coordinate cell_grid_extent(const GateLyt& gate_lyt)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
 

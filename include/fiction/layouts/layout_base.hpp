@@ -21,6 +21,7 @@
 #include <fmt/format.h>
 
 #include <algorithm>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -85,12 +86,10 @@ class layout_base
          * @param x_ x position.
          * @param y_ y position.
          * @param z_ z position.
+         * @throws std::overflow_error If an axis is outside the signed 32-bit range.
          */
-        template <class X, class Y, class Z>
-        constexpr coordinate(X x_, Y y_, Z z_) noexcept :
-                x{static_cast<int32_t>(x_)},
-                y{static_cast<int32_t>(y_)},
-                z{static_cast<int32_t>(z_)}
+        template <std::integral X, std::integral Y, std::integral Z>
+        constexpr coordinate(X x_, Y y_, Z z_) : x{checked_axis(x_)}, y{checked_axis(y_)}, z{checked_axis(z_)}
         {}
         /**
          * Standard constructor. Creates a coordinate at (x_, y_, 0).
@@ -99,9 +98,10 @@ class layout_base
          * @tparam Y Type of y.
          * @param x_ x position.
          * @param y_ y position.
+         * @throws std::overflow_error If an axis is outside the signed 32-bit range.
          */
-        template <class X, class Y>
-        constexpr coordinate(X x_, Y y_) noexcept : x{static_cast<int32_t>(x_)}, y{static_cast<int32_t>(y_)}, z{0}
+        template <std::integral X, std::integral Y>
+        constexpr coordinate(X x_, Y y_) : x{checked_axis(x_)}, y{checked_axis(y_)}, z{0}
         {}
         /**
          * Standard constructor. Instantiates a coordinate from the 64-bit encoding of a gate-level signal, where the
@@ -283,6 +283,27 @@ class layout_base
 
       private:
         /**
+         * Converts an integral axis without narrowing.
+         *
+         * @tparam Axis Integral input type.
+         * @param value Axis value.
+         * @return Signed 32-bit axis.
+         * @throws std::overflow_error If `value` is outside the signed 32-bit range.
+         */
+        template <std::integral Axis>
+        static constexpr int32_t checked_axis(const Axis value)
+        {
+            if constexpr (std::numeric_limits<Axis>::digits > std::numeric_limits<int32_t>::digits)
+            {
+                if (value > static_cast<Axis>(std::numeric_limits<int32_t>::max()) ||
+                    (std::signed_integral<Axis> && value < static_cast<Axis>(std::numeric_limits<int32_t>::min())))
+                {
+                    throw std::overflow_error("A coordinate axis is outside the signed 32-bit range");
+                }
+            }
+            return static_cast<int32_t>(value);
+        }
+        /**
          * Mask of the 31 bits of one axis in the signal encoding.
          */
         static constexpr uint64_t AXIS_MASK = (1ull << 31ull) - 1ull;
@@ -313,16 +334,23 @@ class layout_base
      * with exactly one coordinate. The upper limit keeps the coordinate arithmetic of every layout within `int32_t`.
      *
      * @param ar Aspect ratio to check.
+     * @param two_layers_only Whether shared gate geometry limits the z extent to 1.
      * @return `ar`, or (0, 0, 0) if `ar` is invalid.
      * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
+     * @throws std::out_of_range If `two_layers_only` is set and the z extent exceeds 1.
      */
-    static aspect_ratio checked(const aspect_ratio& ar)
+    static aspect_ratio checked(const aspect_ratio& ar, const bool two_layers_only = false)
     {
         constexpr auto max_axis = static_cast<int32_t>((1ull << 30ull) - 1ull);
 
         if (!ar.is_valid())
         {
             return aspect_ratio{0, 0, 0};
+        }
+
+        if (two_layers_only && ar.z > 1)
+        {
+            throw std::out_of_range("The aspect ratio exceeds the two layers of gate-level signals");
         }
 
         if (ar.x < 0 || ar.y < 0 || ar.z < 0 || ar.x > max_axis || ar.y > max_axis || ar.z > max_axis)

@@ -68,6 +68,10 @@ class cartesian_layout : public layout_base
         explicit cartesian_layout_storage(const aspect_ratio& ar) noexcept : dimension{ar} {};
 
         aspect_ratio dimension;
+        /**
+         * Whether a gate-level layout shares these dimensions and limits the z extent to 1.
+         */
+        bool two_layers_only{false};
     };
 
     static constexpr auto min_fanin_size = 0u;  // NOLINT(readability-identifier-naming): mockturtle requirement
@@ -114,9 +118,10 @@ class cartesian_layout : public layout_base
      * @param y y-value.
      * @param z z-value.
      * @return A coordinate in the layout of type `coordinate`.
+     * @throws std::overflow_error If an axis is outside the signed 32-bit range.
      */
-    template <typename X, typename Y, typename Z = uint64_t>
-    constexpr coordinate coord(const X x, const Y y, const Z z = 0ul) const noexcept
+    template <std::integral X, std::integral Y, std::integral Z = uint64_t>
+    constexpr coordinate coord(const X x, const Y y, const Z z = 0ul) const
     {
         return coordinate(x, y, z);
     }
@@ -165,10 +170,11 @@ class cartesian_layout : public layout_base
      *
      * @param ar New aspect ratio.
      * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
+     * @throws std::out_of_range If shared gate geometry limits the z extent to 1 and `ar.z` exceeds 1.
      */
     void resize(const aspect_ratio& ar)
     {
-        strg->dimension = checked(ar);
+        strg->dimension = checked(ar, strg->two_layers_only);
     }
 
 #pragma endregion
@@ -820,6 +826,18 @@ class cartesian_layout : public layout_base
     }
 
 #pragma endregion
+
+  protected:
+    /**
+     * Limits the shared geometry to the two layers represented by gate-level signals.
+     *
+     * @throws std::out_of_range If the z extent exceeds 1.
+     */
+    void restrict_to_two_layers()
+    {
+        static_cast<void>(checked(strg->dimension, true));
+        strg->two_layers_only = true;
+    }
 
   private:
     /**

@@ -24,6 +24,7 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
+#include <fiction/layouts/layout_utils.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/layouts/tile_clocking.hpp>
 #include <fiction/traits.hpp>
@@ -31,6 +32,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <set>
 #include <stdexcept>
 #include <vector>
@@ -375,4 +377,76 @@ TEST_CASE("The clock zone of an invalid cell is invalid", "[coordinate-contracts
 
     CHECK(!clk.get_clock_zone({}).is_valid());
     CHECK(clk.get_clock_zone({4, 7, 0}) == layout_base::coordinate{1, 2, 0});
+}
+
+TEST_CASE("Coordinate construction rejects narrowing", "[coordinate-regressions]")
+{
+    using coord = layout_base::coordinate;
+
+    CHECK_THROWS_AS((coord{4294967296ull, 0}), std::overflow_error);
+    CHECK_THROWS_AS((coord{0, 0, -4294967296ll}), std::overflow_error);
+    CHECK_THROWS_AS((cartesian_layout{{4294967296ull, 0}}), std::overflow_error);
+    CHECK((coord{std::numeric_limits<int32_t>::max(), 0}.x == std::numeric_limits<int32_t>::max()));
+}
+
+TEST_CASE("Shared gate geometry keeps the signal extent limit", "[coordinate-regressions]")
+{
+    const auto check_limit = [](auto coordinates)
+    {
+        using geometry = decltype(coordinates);
+        gate_level_layout<geometry> gates{coordinates};
+
+        CHECK_THROWS_AS(coordinates.resize({3, 3, 3}), std::out_of_range);
+        CHECK_THROWS_AS(static_cast<geometry&>(gates).resize({3, 3, 3}), std::out_of_range);
+        auto alias = static_cast<const geometry&>(gates);
+        CHECK_THROWS_AS(alias.resize({3, 3, 3}), std::out_of_range);
+        auto clone = gates.clone();
+        CHECK_THROWS_AS(static_cast<geometry&>(clone).resize({3, 3, 3}), std::out_of_range);
+
+        coordinates.resize({4, 4, 1});
+        CHECK(gates.x() == 4);
+        CHECK(gates.z() == 1);
+    };
+
+    check_limit(cartesian_layout{{3, 3, 1}});
+    check_limit(hexagonal_layout{arrangement::ODD_ROW, {3, 3, 1}});
+    check_limit(shifted_cartesian_layout{arrangement::EVEN_COLUMN, {3, 3, 1}});
+}
+
+TEST_CASE("Cell scaling checks the final signed coordinate", "[coordinate-regressions]")
+{
+    using coord = layout_base::coordinate;
+    const gate_level_layout<cartesian_layout> gates{{1073741823, 0}};
+
+    CHECK((relative_to_absolute_cell_position<5, 5>(gates, coord{400000000, 0}, coord{4, 0}) == coord{2000000004, 0}));
+    CHECK_THROWS_AS((relative_to_absolute_cell_position<5, 5>(gates, coord{1073741823, 0}, coord{4, 0})),
+                    std::overflow_error);
+    CHECK_THROWS_AS((relative_to_absolute_cell_position<5, 5>(gates, coord{0, 0}, coord{-1, 0})),
+                    std::invalid_argument);
+}
+
+TEST_CASE("Negative cells use the clock zone below zero", "[coordinate-regressions]")
+{
+    tile_clocking clocks{3, 3};
+    clocks.assign_clock_number({-1, -1}, 2);
+
+    CHECK(clocks.get_clock_zone({-1, -2}) == layout_base::coordinate{-1, -1});
+    CHECK(clocks.get_clock_zone({-3, -3}) == layout_base::coordinate{-1, -1});
+    CHECK(clocks.get_clock_zone({-4, 0}) == layout_base::coordinate{-2, 0});
+    CHECK(clocks.get_clock_number({-1, -2}) == 2);
+}
+
+TEST_CASE("Hexagonal cube conversion rejects unrepresentable axes", "[coordinate-regressions]")
+{
+    const auto max_axis = std::numeric_limits<int64_t>::max();
+    const auto min_axis = std::numeric_limits<int64_t>::min();
+    for (const auto a :
+         {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
+    {
+        const hexagonal_layout hex{a, {4, 4}};
+        CHECK(!hex.to_offset_coordinate({max_axis, min_axis, 1}).is_valid());
+        CHECK(!hex.to_offset_coordinate({1, min_axis, max_axis}).is_valid());
+    }
+    const hexagonal_layout rows{arrangement::ODD_ROW, {4, 4}};
+    CHECK(rows.to_offset_coordinate({2147483648ll, -2147483646ll, -2}) == layout_base::coordinate{2147483647, -2});
 }

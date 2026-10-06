@@ -28,6 +28,7 @@
 #include <cassert>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <ranges>
 #include <utility>
@@ -203,6 +204,10 @@ class hexagonal_layout : public layout_base
          */
         aspect_ratio dimension;
         /**
+         * Whether a gate-level layout shares these dimensions and limits the z extent to 1.
+         */
+        bool two_layers_only{false};
+        /**
          * Arrangement of the shifted rows or columns.
          */
         layouts::arrangement shift;
@@ -264,9 +269,10 @@ class hexagonal_layout : public layout_base
      * @param y y-value.
      * @param z z-value.
      * @return A coordinate in the layout of type `coordinate`.
+     * @throws std::overflow_error If an axis is outside the signed 32-bit range.
      */
-    template <typename X, typename Y, typename Z = uint64_t>
-    constexpr coordinate coord(const X x, const Y y, const Z z = 0ul) const noexcept
+    template <std::integral X, std::integral Y, std::integral Z = uint64_t>
+    constexpr coordinate coord(const X x, const Y y, const Z z = 0ul) const
     {
         return coordinate(x, y, z);
     }
@@ -315,10 +321,11 @@ class hexagonal_layout : public layout_base
      *
      * @param ar New aspect ratio.
      * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
+     * @throws std::out_of_range If shared gate geometry limits the z extent to 1 and `ar.z` exceeds 1.
      */
     void resize(const aspect_ratio& ar)
     {
-        strg->dimension = checked(ar);
+        strg->dimension = checked(ar, strg->two_layers_only);
     }
 
 #pragma endregion
@@ -404,11 +411,9 @@ class hexagonal_layout : public layout_base
             return c;
         }
 
-        auto ne = to_offset_coordinate(to_cube_coordinate(c) + cube_coordinate{+1, 0, -1});
+        const auto ne = bounded_offset(offset_axes(to_cube_coordinate(c) + cube_coordinate{+1, 0, -1}), c.z);
 
-        ne.z = c.z;
-
-        return is_within_bounds(ne) ? ne : c;
+        return ne.is_valid() ? ne : c;
     }
     /**
      * Returns the coordinate that is directly adjacent in eastern direction of a given coordinate `c`, i.e., the face
@@ -450,11 +455,9 @@ class hexagonal_layout : public layout_base
         const auto step =
             is_row_arrangement(get_arrangement()) ? cube_coordinate{0, -1, +1} : cube_coordinate{+1, -1, 0};
 
-        auto se = to_offset_coordinate(to_cube_coordinate(c) + step);
+        const auto se = bounded_offset(offset_axes(to_cube_coordinate(c) + step), c.z);
 
-        se.z = c.z;
-
-        return is_within_bounds(se) ? se : c;
+        return se.is_valid() ? se : c;
     }
     /**
      * Returns the coordinate that is directly adjacent in southern direction of a given coordinate `c`, i.e., the face
@@ -493,11 +496,9 @@ class hexagonal_layout : public layout_base
             return c;
         }
 
-        auto sw = to_offset_coordinate(to_cube_coordinate(c) + cube_coordinate{-1, 0, +1});
+        const auto sw = bounded_offset(offset_axes(to_cube_coordinate(c) + cube_coordinate{-1, 0, +1}), c.z);
 
-        sw.z = c.z;
-
-        return is_within_bounds(sw) ? sw : c;
+        return sw.is_valid() ? sw : c;
     }
     /**
      * Returns the coordinate that is directly adjacent in western direction of a given coordinate `c`, i.e., the face
@@ -535,11 +536,9 @@ class hexagonal_layout : public layout_base
         const auto step =
             is_row_arrangement(get_arrangement()) ? cube_coordinate{0, +1, -1} : cube_coordinate{-1, +1, 0};
 
-        auto nw = to_offset_coordinate(to_cube_coordinate(c) + step);
+        const auto nw = bounded_offset(offset_axes(to_cube_coordinate(c) + step), c.z);
 
-        nw.z = c.z;
-
-        return is_within_bounds(nw) ? nw : c;
+        return nw.is_valid() ? nw : c;
     }
     /**
      * Returns the coordinate that is directly above a given coordinate `c`, i.e., the face whose z-dimension is higher
@@ -978,15 +977,8 @@ class hexagonal_layout : public layout_base
         std::ranges::for_each(cube_directions,
                               [this, &c, &fn](const auto& dir)
                               {
-                                  // convert given coordinate to the cube system, add direction, and convert back to
-                                  // offset
-                                  auto neighbor = to_offset_coordinate(to_cube_coordinate(c) + dir);
-                                  // since cube coordinates don't carry the layer information, it has to be manually
-                                  // added
-                                  neighbor.z = c.z;
-
-                                  // add neighboring coordinate if there was no over-/underflow
-                                  if (is_within_bounds(neighbor))
+                                  auto neighbor = bounded_offset(offset_axes(to_cube_coordinate(c) + dir), c.z);
+                                  if (neighbor.is_valid())
                                   {
                                       std::invoke(std::forward<Fn>(fn), std::move(neighbor));
                                   }
@@ -1099,21 +1091,41 @@ class hexagonal_layout : public layout_base
      * This implementation is adapted from https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
      *
      * @param cube_coord Cube coordinate to convert.
-     * @return Offset coordinate representing `cube_coord` in the layout's arrangement.
+     * @return Offset coordinate representing `cube_coord`, or the invalid coordinate if an axis exceeds 32 bits.
      */
     [[nodiscard]] coordinate to_offset_coordinate(const cube_coordinate& cube_coord) const noexcept
     {
-        const int64_t offset = is_odd_arrangement(get_arrangement()) ? -1 : 1;
-
-        if (is_row_arrangement(get_arrangement()))
+        const bool row          = is_row_arrangement(get_arrangement());
+        const auto fixed_axis   = row ? cube_coord.z : cube_coord.x;
+        const auto shifted_axis = row ? cube_coord.x : cube_coord.z;
+        // The shift can cancel at most half of the unchanged 32-bit axis.
+        if (!std::in_range<int32_t>(fixed_axis) ||
+            shifted_axis < 2 * static_cast<int64_t>(std::numeric_limits<int32_t>::min()) ||
+            shifted_axis > 2 * static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
         {
-            return {cube_coord.x + half_shifted(cube_coord.z, offset), cube_coord.z};
+            return {};
         }
-
-        return {cube_coord.x, cube_coord.z + half_shifted(cube_coord.x, offset)};
+        const auto [x, y] = offset_axes(cube_coord);
+        if (!std::in_range<int32_t>(x) || !std::in_range<int32_t>(y))
+        {
+            return {};
+        }
+        return {static_cast<int32_t>(x), static_cast<int32_t>(y)};
     }
 
 #pragma endregion
+
+  protected:
+    /**
+     * Limits the shared geometry to the two layers represented by gate-level signals.
+     *
+     * @throws std::out_of_range If the z extent exceeds 1.
+     */
+    void restrict_to_two_layers()
+    {
+        static_cast<void>(checked(strg->dimension, true));
+        strg->two_layers_only = true;
+    }
 
   private:
     /**
@@ -1127,6 +1139,43 @@ class hexagonal_layout : public layout_base
     [[nodiscard]] static constexpr int64_t half_shifted(const int64_t value, const int64_t offset) noexcept
     {
         return (value + (value % 2 != 0 ? offset : 0)) / 2;
+    }
+    /**
+     * Converts cube coordinates to offset axes without narrowing.
+     *
+     * @param cube_coord Cube coordinate.
+     * @return Signed 64-bit x and y offset axes.
+     */
+    [[nodiscard]] std::pair<int64_t, int64_t> offset_axes(const cube_coordinate& cube_coord) const noexcept
+    {
+        const int64_t offset = is_odd_arrangement(get_arrangement()) ? -1 : 1;
+        auto          x      = cube_coord.x;
+        auto          y      = cube_coord.z;
+        if (is_row_arrangement(get_arrangement()))
+        {
+            x += half_shifted(y, offset);
+        }
+        else
+        {
+            y += half_shifted(x, offset);
+        }
+        return {x, y};
+    }
+    /**
+     * Checks layout bounds before narrowing offset axes.
+     *
+     * @param axes Signed 64-bit offset axes.
+     * @param layer Coordinate layer.
+     * @return Coordinate in the layout, or the invalid coordinate.
+     */
+    [[nodiscard]] coordinate bounded_offset(const std::pair<int64_t, int64_t>& axes, const int32_t layer) const noexcept
+    {
+        const auto [nx, ny] = axes;
+        if (nx < 0 || nx > x() || ny < 0 || ny > y() || layer < 0 || layer > z())
+        {
+            return {};
+        }
+        return {static_cast<int32_t>(nx), static_cast<int32_t>(ny), layer};
     }
     /**
      * Shared storage for the layout dimensions and arrangement.

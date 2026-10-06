@@ -209,6 +209,7 @@ class gate_level_layout : public CoordinateLayout
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
 
+        CoordinateLayout::restrict_to_two_layers();
         initialize_truth_table_cache();
         strg->data.layout_name = name;
     }
@@ -231,6 +232,7 @@ class gate_level_layout : public CoordinateLayout
         replace_clocking_scheme(scheme);
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
 
+        CoordinateLayout::restrict_to_two_layers();
         initialize_truth_table_cache();
         strg->data.layout_name = name;
     }
@@ -251,6 +253,7 @@ class gate_level_layout : public CoordinateLayout
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
+        CoordinateLayout::restrict_to_two_layers();
         initialize_truth_table_cache();
         strg->data.layout_name = name;
     }
@@ -274,6 +277,7 @@ class gate_level_layout : public CoordinateLayout
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
         replace_clocking_scheme(scheme);
+        CoordinateLayout::restrict_to_two_layers();
         initialize_truth_table_cache();
         strg->data.layout_name = name;
     }
@@ -287,6 +291,7 @@ class gate_level_layout : public CoordinateLayout
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+        CoordinateLayout::restrict_to_two_layers();
     }
     /**
      * Copy constructor from another layout's storage.
@@ -297,9 +302,11 @@ class gate_level_layout : public CoordinateLayout
     gate_level_layout(storage s, event_storage e) : strg{std::move(s)}, evnts{std::move(e)}
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+        CoordinateLayout::restrict_to_two_layers();
     }
     /**
      * Copy constructor from another `CoordinateLayout`.
+     * All geometry aliases retain the two-layer extent limit of gate-level signals.
      *
      * @param lyt Coordinate layout.
      * @throws std::out_of_range If the extent of `lyt` exceeds the range that gate-level signals can represent, i.e.,
@@ -312,6 +319,7 @@ class gate_level_layout : public CoordinateLayout
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
         static_cast<void>(checked_extent(typename CoordinateLayout::aspect_ratio{lyt.x(), lyt.y(), lyt.z()}));
+        CoordinateLayout::restrict_to_two_layers();
         initialize_truth_table_cache();
     }
     /**

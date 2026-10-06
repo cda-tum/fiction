@@ -85,7 +85,7 @@ surface_analysis(const GateLyt& gate_lyt, const sidb::layout& surface,
     const auto gate_implementations = GateLibrary::get_functional_implementations();
     const auto gate_ports           = GateLibrary::get_gate_ports();
 
-    const auto analyze_gate = [&](const auto& it, const auto& t) noexcept
+    const auto analyze_gate = [&](const auto& it, const auto& t)
     {
         const auto& [fun, impls] = it;
 

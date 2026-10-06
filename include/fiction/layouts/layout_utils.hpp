@@ -108,22 +108,27 @@ template <typename Lyt>
  * @param t Tile within gate_lyt.
  * @param relative_c Relative cell position within t.
  * @return Absolute cell position in a layout.
+ * @throws std::invalid_argument If the relative cell lies outside the tile.
+ * @throws std::overflow_error If the absolute cell is outside the signed 32-bit coordinate range.
  */
 template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coordinate>
 [[nodiscard]] Coordinate relative_to_absolute_cell_position(const GateLyt& gate_lyt, const tile<GateLyt>& t,
-                                                            const Coordinate& relative_c) noexcept
+                                                            const Coordinate& relative_c)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
 
-    assert(relative_c.x < GateSizeX && relative_c.y < GateSizeY &&
-           "relative_c must be within the bounds of a single tile");
+    if (relative_c.x < 0 || relative_c.x >= GateSizeX || relative_c.y < 0 || relative_c.y >= GateSizeY)
+    {
+        throw std::invalid_argument("The relative cell must be within the bounds of a single tile");
+    }
 
-    Coordinate absolute_c{};
+    int64_t x = static_cast<int64_t>(t.x) * GateSizeX;
+    int64_t y = static_cast<int64_t>(t.y) * GateSizeY;
 
     // Cartesian layouts
     if constexpr (is_cartesian_layout_v<GateLyt>)
     {
-        absolute_c = {t.x * GateSizeX, t.y * GateSizeY, t.z};
+        // Cartesian tiles use the full gate size in both directions.
     }
     // shifted Cartesian and hexagonal layouts
     else if constexpr (is_shifted_cartesian_layout_v<GateLyt> || is_hexagonal_layout_v<GateLyt>)
@@ -137,22 +142,22 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
 
         if (is_row_arrangement(a))
         {
-            absolute_c = {t.x * GateSizeX, static_cast<decltype(absolute_c.y)>(t.y * step_y), t.z};
+            y = static_cast<int64_t>(t.y) * step_y;
 
             if (odd ? gate_lyt.is_in_odd_row(t) : gate_lyt.is_in_even_row(t))
             {
                 // shifted rows move in by width / 2
-                absolute_c.x += static_cast<decltype(absolute_c.x)>(static_cast<double>(GateSizeX) / 2.0);
+                x += static_cast<int64_t>(static_cast<double>(GateSizeX) / 2.0);
             }
         }
         else
         {
-            absolute_c = {static_cast<decltype(absolute_c.x)>(t.x * step_x), t.y * GateSizeY, t.z};
+            x = static_cast<int64_t>(t.x) * step_x;
 
             if (odd ? gate_lyt.is_in_odd_column(t) : gate_lyt.is_in_even_column(t))
             {
                 // shifted columns move in by height / 2
-                absolute_c.y += static_cast<decltype(absolute_c.y)>(static_cast<double>(GateSizeY) / 2.0);
+                y += static_cast<int64_t>(static_cast<double>(GateSizeY) / 2.0);
             }
         }
     }
@@ -162,10 +167,7 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
         assert(false && "unknown gate-level layout type");
     }
 
-    absolute_c.x += relative_c.x;
-    absolute_c.y += relative_c.y;
-
-    return absolute_c;
+    return Coordinate{x + relative_c.x, y + relative_c.y, t.z};
 }
 
 /**
