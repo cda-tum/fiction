@@ -27,6 +27,7 @@
 #include <fmt/format.h>
 
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -77,7 +78,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
                 {
                     if (const auto scheme = fiction::layouts::clocking::get_scheme(scheme_name); scheme.has_value())
                     {
-                        new (self.p) GateLyt{dimension, *scheme, layout_name};
+                        std::construct_at(self.p, dimension, *scheme, layout_name);
                         return;
                     }
 
@@ -103,7 +104,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
                             scheme_name, fiction::is_hexagonal_layout_v<GateLyt> ? std::optional{a} : std::nullopt);
                         scheme.has_value())
                     {
-                        new (self.p) GateLyt{a, dimension, *scheme, layout_name};
+                        std::construct_at(self.p, a, dimension, *scheme, layout_name);
                         return;
                     }
 
