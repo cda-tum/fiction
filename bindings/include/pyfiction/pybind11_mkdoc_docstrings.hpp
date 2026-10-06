@@ -4772,6 +4772,21 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_half_shifted =
+R"doc(Halves an axis value after moving an odd value by `offset`, which is
+the shift between neighboring rows or columns in offset coordinates.
+
+Args:
+    value: Axis value.
+    offset: Shift of odd values, -1 for odd and +1 for even
+            arrangements.
+
+Returns:
+    `(value + offset) / 2` for an odd value and `value / 2` for an
+    even one.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout =
 R"doc(Standard constructor. The given aspect ratio points to the highest
 possible coordinate in the layout. That means in the
