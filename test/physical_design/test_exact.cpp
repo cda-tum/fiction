@@ -513,10 +513,10 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
 
             check_eq(blueprints::and_or_network<technology_network>(), lyt);
 
-            CHECK(!lyt.is_and(lyt.get_node({2, 2})));
-            CHECK(!lyt.is_wire(lyt.get_node({2, 2})));
-            CHECK(!lyt.is_or(lyt.get_node({1, 2})));
-            CHECK(!lyt.is_wire(lyt.get_node({2, 0})));
+            CHECK((!lyt.find_object({2, 2}) || !lyt.is_and(*lyt.find_object({2, 2}))));
+            CHECK((!lyt.find_object({2, 2}) || !lyt.is_wire(*lyt.find_object({2, 2}))));
+            CHECK((!lyt.find_object({1, 2}) || !lyt.is_or(*lyt.find_object({1, 2}))));
+            CHECK((!lyt.find_object({2, 0}) || !lyt.is_wire(*lyt.find_object({2, 0}))));
         }
         SECTION("With port info")
         {
@@ -541,15 +541,15 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
 
             check_eq(blueprints::and_or_network<technology_network>(), lyt);
 
-            CHECK((!lyt.is_and(lyt.get_node({2, 2})) ||
+            CHECK((!lyt.is_and(lyt.find_object({2, 2}).value()) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
                      lyt.has_southern_outgoing_signal({2, 2}))));
 
-            CHECK((!lyt.is_or(lyt.get_node({2, 2})) ||
+            CHECK((!lyt.is_or(lyt.find_object({2, 2}).value()) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
                      lyt.has_southern_outgoing_signal({2, 2}))));
 
-            CHECK((!lyt.is_wire(lyt.get_node({2, 2})) ||
+            CHECK((!lyt.is_wire(lyt.find_object({2, 2}).value()) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_southern_outgoing_signal({2, 2}))));
         }
     }
@@ -791,7 +791,7 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
 
         if (layout)
         {
-            CHECK(layout->y() <= 3);
+            CHECK(layout->height() <= 4);
         }
 
         upper_bound_config.upper_bound_x = 2u;  // additionally, allow only 2 tiles in x direction; this will now fail
