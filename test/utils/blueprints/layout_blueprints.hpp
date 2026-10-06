@@ -144,7 +144,6 @@ template <typename GateLyt>
 GateLyt
 xor_maj_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
     auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{4, 3, 1},
                                                    fiction::layouts::clocking::open());
@@ -375,7 +374,6 @@ template <typename GateLyt>
 GateLyt single_input_tautology_gate_layout(
     const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
     auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 1, 1},
                                                    fiction::layouts::clocking::twoddwave());
@@ -404,7 +402,6 @@ template <typename GateLyt>
 GateLyt
 tautology_gate_layout(const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
     auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 3, 2},
                                                    fiction::layouts::clocking::twoddwave());
@@ -434,7 +431,6 @@ template <typename GateLyt>
 GateLyt res_tautology_gate_layout(
     const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
     auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 3, 1},
                                                    fiction::layouts::clocking::res());
@@ -465,7 +461,6 @@ template <typename GateLyt>
 GateLyt open_tautology_gate_layout(
     const fiction::layouts::arrangement layout_arrangement = fiction::layouts::arrangement::EVEN_ROW)
 {
-    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
     auto layout = blueprints::make_layout<GateLyt>(layout_arrangement, typename GateLyt::extent{3, 3, 1},
                                                    fiction::layouts::clocking::open());
@@ -1182,7 +1177,7 @@ GateLyt po_extension_corner_case_layout(
 
 inline fiction::qca::layout single_layer_qca_and_gate()
 {
-    fiction::qca::layout layout{{4, 4}, "AND"};
+    fiction::qca::layout layout{{5, 5}, "AND"};
 
     layout.assign_cell_type({0, 2}, fiction::qca::cell_type::INPUT);
     layout.assign_cell_type({2, 4}, fiction::qca::cell_type::INPUT);
@@ -1203,7 +1198,7 @@ inline fiction::qca::layout single_layer_qca_and_gate()
 
 inline fiction::qca::layout two_layer_qca_wire_crossing()
 {
-    fiction::qca::layout layout{{4, 4, 1}, "Crossover"};
+    fiction::qca::layout layout{{5, 5, 2}, "Crossover"};
 
     layout.assign_cell_type({0, 2}, fiction::qca::cell_type::INPUT);
     layout.assign_cell_type({2, 0}, fiction::qca::cell_type::INPUT);
@@ -1239,7 +1234,7 @@ inline fiction::qca::layout two_layer_qca_wire_crossing()
 
 inline fiction::inml::layout single_layer_inml_maj_gate()
 {
-    fiction::inml::layout layout{{4, 4}, "MAJ"};
+    fiction::inml::layout layout{{5, 5}, "MAJ"};
 
     layout.assign_cell_type({0, 0}, fiction::inml::magnet_type::INPUT);
     layout.assign_cell_type({0, 2}, fiction::inml::magnet_type::INPUT);
@@ -1265,7 +1260,7 @@ inline fiction::inml::layout single_layer_inml_maj_gate()
 
 inline fiction::inml::layout single_layer_inml_coupler_with_inverter()
 {
-    fiction::inml::layout layout{{11, 4}, "Coupler with inverter"};
+    fiction::inml::layout layout{{12, 5}, "Coupler with inverter"};
 
     layout.assign_cell_type({0, 2}, fiction::inml::magnet_type::INPUT);
     layout.assign_cell_type({1, 2}, fiction::inml::magnet_type::NORMAL);
@@ -1299,7 +1294,7 @@ inline fiction::inml::layout single_layer_inml_coupler_with_inverter()
 
 inline fiction::inml::layout single_layer_inml_crosswire()
 {
-    fiction::inml::layout layout{{5, 2}, "Crosswire"};
+    fiction::inml::layout layout{{6, 3}, "Crosswire"};
 
     layout.assign_cell_type({0, 0}, fiction::inml::magnet_type::INPUT);
     layout.assign_cell_type({0, 2}, fiction::inml::magnet_type::INPUT);
