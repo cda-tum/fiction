@@ -21,11 +21,14 @@ class coordinate:
     """
     Signed coordinates.
 
-    An coordinate coordinate defines a location via an coordinate from a
-    fixed point (origin). Each axis is a signed 32-bit integer. The
-    default-constructed coordinate is invalid; it has all axes set to
-    `INVALID_AXIS` and stands for "no coordinate", e.g., a neighbor
-    outside of a layout or the tile of a node that is not placed.
+    A coordinate defines a location relative to a fixed point (origin).
+    Each axis is a signed 32-bit integer. The default-constructed
+    coordinate is invalid; it has all axes set to `INVALID_AXIS` and
+    stands for "no coordinate", e.g., a neighbor outside of a layout or
+    the tile of a node that is not placed. A coordinate with any axis set
+    to `INVALID_AXIS` is invalid. Test for invalidity with `is_valid()`,
+    because only the default-constructed coordinate compares equal to
+    every other coordinate of the same state.
 
     Gate-level layouts pack a coordinate into a 64-bit signal with
     `explicit operator uint64_t`. This encoding holds 31-bit signed x and
@@ -76,8 +79,8 @@ class coordinate:
     def z(self, arg: int, /) -> None: ...
     def is_valid(self) -> bool:
         """
-        Returns whether the coordinate is valid, i.e., whether it differs from
-        the default-constructed coordinate.
+        Returns whether the coordinate is valid, i.e., whether none of its
+        axes is `INVALID_AXIS`.
 
         Returns:
             `true` iff the coordinate is valid.
@@ -85,8 +88,7 @@ class coordinate:
 
     def __eq__(self, other: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
-        Compares against another coordinate for equality. All invalid
-        coordinates are equal.
+        Compares against another coordinate for equality, axis by axis.
 
         Args:
             other: Right-hand side coordinate.
@@ -245,7 +247,8 @@ class cartesian_layout:
             ar: Highest possible position in the layout.
 
         Raises:
-            std::invalid_argument: If an axis of `ar` is negative.
+            std::invalid_argument: If an axis of `ar` is negative or larger
+                                   than :math:`2^{30} - 1`.
         """
 
     def coord(self, x: int, y: int, z: int = 0) -> coordinate:
@@ -313,7 +316,8 @@ class cartesian_layout:
             ar: New aspect ratio.
 
         Raises:
-            std::invalid_argument: If an axis of `ar` is negative.
+            std::invalid_argument: If an axis of `ar` is negative or larger
+                                   than :math:`2^{30} - 1`.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -1000,7 +1004,8 @@ class shifted_cartesian_layout:
             ar: New aspect ratio.
 
         Raises:
-            std::invalid_argument: If an axis of `ar` is negative.
+            std::invalid_argument: If an axis of `ar` is negative or larger
+                                   than :math:`2^{30} - 1`.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -1620,7 +1625,8 @@ class hexagonal_layout:
             ar: Highest possible position in the layout.
 
         Raises:
-            std::invalid_argument: If an axis of `ar` is negative.
+            std::invalid_argument: If an axis of `ar` is negative or larger
+                                   than :math:`2^{30} - 1`.
         """
 
     def get_arrangement(self) -> arrangement:
@@ -1696,7 +1702,8 @@ class hexagonal_layout:
             ar: New aspect ratio.
 
         Raises:
-            std::invalid_argument: If an axis of `ar` is negative.
+            std::invalid_argument: If an axis of `ar` is negative or larger
+                                   than :math:`2^{30} - 1`.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -1723,7 +1730,8 @@ class hexagonal_layout:
             c: Coordinate whose north-eastern counterpart is desired.
 
         Returns:
-            Coordinate directly north-eastern of `c`.
+            Coordinate directly north-eastern of `c`; `c` itself if the
+            neighbor or `c` lies outside of the layout.
         """
 
     def east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -1750,7 +1758,8 @@ class hexagonal_layout:
             c: Coordinate whose south-eastern counterpart is desired.
 
         Returns:
-            Coordinate directly south-eastern of `c`.
+            Coordinate directly south-eastern of `c`; `c` itself if the
+            neighbor or `c` lies outside of the layout.
         """
 
     def south(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -1777,7 +1786,8 @@ class hexagonal_layout:
             c: Coordinate whose south-western counterpart is desired.
 
         Returns:
-            Coordinate directly south-western of `c`.
+            Coordinate directly south-western of `c`; `c` itself if the
+            neighbor or `c` lies outside of the layout.
         """
 
     def west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -1804,7 +1814,8 @@ class hexagonal_layout:
             c: Coordinate whose north-western counterpart is desired.
 
         Returns:
-            Coordinate directly north-western of `c`.
+            Coordinate directly north-western of `c`; `c` itself if the
+            neighbor or `c` lies outside of the layout.
         """
 
     def above(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -2228,7 +2239,8 @@ class hexagonal_layout:
         considered, i.e., the container will contain all coordinates `ac` for
         which `is_adjacent(c, ac)` returns `true`.
 
-        Coordinates that are outside of the layout bounds are not considered.
+        Neighbors outside of the layout bounds are not considered, and a
+        coordinate outside of the layout bounds has no adjacent coordinates.
         Thereby, the size of the returned container is at most 6.
 
         Args:
@@ -2266,7 +2278,7 @@ class hexagonal_layout:
         """
 
 class cartesian_gate_layout(cartesian_layout):
-    """
+    r"""
     A gate-level FCN layout owns gates, clocking, synchronization delays,
     and persistent obstructions. Clock zones are tiles in the coordinate
     geometry supplied by `CoordinateLayout`. The gate_level_layout class
@@ -2311,9 +2323,12 @@ class cartesian_gate_layout(cartesian_layout):
     checked for via is_inv.
 
     - each `create_...` function requires a tile parameter that determines
-      its placement. If the provided tile is dead,
-    the location will not be stored and the node will not count towards
-    number of gates or wires.
+      its placement. If the provided tile is
+    invalid, the location will not be stored and the node will not count
+    towards number of gates or wires. A valid tile must have a signal,
+    i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\{0,
+    1\}`; otherwise, the function throws `std::out_of_range` and leaves
+    the layout unchanged.
 
     - a node can be overwritten by creating another node on its location.
       This can, however, lead to unwanted effects and
@@ -2617,10 +2632,41 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_po(
-        self, s: int, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...
-    ) -> int: ...
+    def create_pi(self, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int:
+        """
+        Creates a primary input on tile `t`.
+
+        Args:
+            name: Name of the PI. If empty, the name is `pi<i>`, where `i` is
+                  the number of PIs before the new one.
+            t: Tile to place the PI on. An invalid tile leaves the PI
+               unplaced.
+
+        Returns:
+            Signal pointing to `t`.
+
+        Raises:
+            std::out_of_range: If `t` is valid but has no signal encoding.
+        """
+
+    def create_po(self, s: int, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int:
+        """
+        Creates a primary output on tile `t` that is driven by signal `s`.
+
+        Args:
+            s: Signal that drives the PO.
+            name: Name of the PO. If empty, the name is `po<i>`, where `i` is
+                  the number of POs before the new one.
+            t: Tile to place the PO on. An invalid tile leaves the PO
+               unplaced.
+
+        Returns:
+            Signal pointing to `t`.
+
+        Raises:
+            std::out_of_range: If `t` is valid but has no signal encoding.
+        """
+
     def is_pi(self, n: int) -> bool:
         """
         Check whether `n` is a primary input.
@@ -2819,14 +2865,13 @@ class cartesian_gate_layout(cartesian_layout):
     def get_tile(self, n: int) -> coordinate:
         """
         The inverse function of `get_node`. Fetches the tile that the provided
-        node is placed on. Returns a default dead tile if the node is not
-        placed.
+        node is placed on. Returns the invalid tile if the node is not placed.
 
         Args:
             n: Node whose location is desired.
 
         Returns:
-            Tile at which `n` is placed or a default dead tile if `n` is not
+            Tile at which `n` is placed or the invalid tile if `n` is not
             placed.
         """
 
@@ -3313,7 +3358,7 @@ class cartesian_gate_layout(cartesian_layout):
         """
 
 class shifted_cartesian_gate_layout(shifted_cartesian_layout):
-    """
+    r"""
     A gate-level FCN layout owns gates, clocking, synchronization delays,
     and persistent obstructions. Clock zones are tiles in the coordinate
     geometry supplied by `CoordinateLayout`. The gate_level_layout class
@@ -3358,9 +3403,12 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     checked for via is_inv.
 
     - each `create_...` function requires a tile parameter that determines
-      its placement. If the provided tile is dead,
-    the location will not be stored and the node will not count towards
-    number of gates or wires.
+      its placement. If the provided tile is
+    invalid, the location will not be stored and the node will not count
+    towards number of gates or wires. A valid tile must have a signal,
+    i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\{0,
+    1\}`; otherwise, the function throws `std::out_of_range` and leaves
+    the layout unchanged.
 
     - a node can be overwritten by creating another node on its location.
       This can, however, lead to unwanted effects and
@@ -3667,10 +3715,41 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_po(
-        self, s: int, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...
-    ) -> int: ...
+    def create_pi(self, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int:
+        """
+        Creates a primary input on tile `t`.
+
+        Args:
+            name: Name of the PI. If empty, the name is `pi<i>`, where `i` is
+                  the number of PIs before the new one.
+            t: Tile to place the PI on. An invalid tile leaves the PI
+               unplaced.
+
+        Returns:
+            Signal pointing to `t`.
+
+        Raises:
+            std::out_of_range: If `t` is valid but has no signal encoding.
+        """
+
+    def create_po(self, s: int, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int:
+        """
+        Creates a primary output on tile `t` that is driven by signal `s`.
+
+        Args:
+            s: Signal that drives the PO.
+            name: Name of the PO. If empty, the name is `po<i>`, where `i` is
+                  the number of POs before the new one.
+            t: Tile to place the PO on. An invalid tile leaves the PO
+               unplaced.
+
+        Returns:
+            Signal pointing to `t`.
+
+        Raises:
+            std::out_of_range: If `t` is valid but has no signal encoding.
+        """
+
     def is_pi(self, n: int) -> bool:
         """
         Check whether `n` is a primary input.
@@ -3869,14 +3948,13 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def get_tile(self, n: int) -> coordinate:
         """
         The inverse function of `get_node`. Fetches the tile that the provided
-        node is placed on. Returns a default dead tile if the node is not
-        placed.
+        node is placed on. Returns the invalid tile if the node is not placed.
 
         Args:
             n: Node whose location is desired.
 
         Returns:
-            Tile at which `n` is placed or a default dead tile if `n` is not
+            Tile at which `n` is placed or the invalid tile if `n` is not
             placed.
         """
 
@@ -4363,7 +4441,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         """
 
 class hexagonal_gate_layout(hexagonal_layout):
-    """
+    r"""
     A gate-level FCN layout owns gates, clocking, synchronization delays,
     and persistent obstructions. Clock zones are tiles in the coordinate
     geometry supplied by `CoordinateLayout`. The gate_level_layout class
@@ -4408,9 +4486,12 @@ class hexagonal_gate_layout(hexagonal_layout):
     checked for via is_inv.
 
     - each `create_...` function requires a tile parameter that determines
-      its placement. If the provided tile is dead,
-    the location will not be stored and the node will not count towards
-    number of gates or wires.
+      its placement. If the provided tile is
+    invalid, the location will not be stored and the node will not count
+    towards number of gates or wires. A valid tile must have a signal,
+    i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\{0,
+    1\}`; otherwise, the function throws `std::out_of_range` and leaves
+    the layout unchanged.
 
     - a node can be overwritten by creating another node on its location.
       This can, however, lead to unwanted effects and
@@ -4717,10 +4798,41 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_po(
-        self, s: int, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...
-    ) -> int: ...
+    def create_pi(self, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int:
+        """
+        Creates a primary input on tile `t`.
+
+        Args:
+            name: Name of the PI. If empty, the name is `pi<i>`, where `i` is
+                  the number of PIs before the new one.
+            t: Tile to place the PI on. An invalid tile leaves the PI
+               unplaced.
+
+        Returns:
+            Signal pointing to `t`.
+
+        Raises:
+            std::out_of_range: If `t` is valid but has no signal encoding.
+        """
+
+    def create_po(self, s: int, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int:
+        """
+        Creates a primary output on tile `t` that is driven by signal `s`.
+
+        Args:
+            s: Signal that drives the PO.
+            name: Name of the PO. If empty, the name is `po<i>`, where `i` is
+                  the number of POs before the new one.
+            t: Tile to place the PO on. An invalid tile leaves the PO
+               unplaced.
+
+        Returns:
+            Signal pointing to `t`.
+
+        Raises:
+            std::out_of_range: If `t` is valid but has no signal encoding.
+        """
+
     def is_pi(self, n: int) -> bool:
         """
         Check whether `n` is a primary input.
@@ -4919,14 +5031,13 @@ class hexagonal_gate_layout(hexagonal_layout):
     def get_tile(self, n: int) -> coordinate:
         """
         The inverse function of `get_node`. Fetches the tile that the provided
-        node is placed on. Returns a default dead tile if the node is not
-        placed.
+        node is placed on. Returns the invalid tile if the node is not placed.
 
         Args:
             n: Node whose location is desired.
 
         Returns:
-            Tile at which `n` is placed or a default dead tile if `n` is not
+            Tile at which `n` is placed or the invalid tile if `n` is not
             placed.
         """
 

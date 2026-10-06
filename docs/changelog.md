@@ -226,11 +226,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     landscape instead of copying a `charge_distribution_surface` for every configuration
   - **Breaking:** `hexagonal_layout` and `shifted_cartesian_layout` take their `layouts::arrangement` as a constructor
     argument instead of a template parameter, and `get_arrangement()` returns it.
-  - **Breaking:** Coordinates are signed. `layouts::layout_base::coordinate` with three `int32_t` axes replaces `coords::offset` and
-    `coords::cube`, and `cartesian_layout`, `hexagonal_layout`, and `shifted_cartesian_layout` derive from `layout_base`
-    and are no longer templates. `coordinates.hpp` and `layouts::coords` are gone. The default coordinate is invalid
-    (`is_valid()` replaces `is_dead()`), layouts throw `std::invalid_argument` for negative extents, and gate-level layouts
-    throw `std::out_of_range` when x or y exceed 2^30 - 1 or z exceeds 1.
+  - **Breaking:** Coordinates are signed. `layouts::layout_base::coordinate` with three `int32_t` axes replaces
+    `coords::offset` and `coords::cube`, and `cartesian_layout`, `hexagonal_layout`, and `shifted_cartesian_layout`
+    derive from `layout_base` and are no longer templates. `coordinates.hpp` and `layouts::coords` are gone. A coordinate
+    with an axis equal to `INT32_MIN` is invalid, the default coordinate is invalid, and `is_valid()` replaces
+    `is_dead()` on coordinates. Layouts throw `std::invalid_argument` for extents below 0 or above 2^30 - 1, and
+    gate-level layouts throw `std::out_of_range` for tiles with x or y above 2^30 - 1 or z above 1.
 
 - Dependencies:
 
@@ -240,7 +241,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
-  - Layout examples now use the shared signed coordinate API.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
@@ -395,8 +395,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
-  - The coordinate type and the area/volume functions now live in `mnt.pyfiction.layouts`.
-
   - **Breaking:** `mnt.pyfiction` has one submodule per C++ namespace, such as `mnt.pyfiction.layouts` and
     `mnt.pyfiction.sidb.simulation.engines`; import each name from its submodule. The package root
     loads the submodules on first access and re-exports no bound names.
@@ -418,9 +416,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     first argument. One class per family replaces the per-arrangement classes, and `exact` and `orthogonal` parameters
     expose `layout_arrangement`.
 
-  - **Breaking:** `offset_coordinate` becomes `coordinate` in `mnt.pyfiction.layouts`. `cube_coordinate`, `cube_area`, `cube_volume`,
-    and the `int_repr` constructor are gone, `offset_area` and `offset_volume` become `area` and `volume`, and tuple entries
-    outside the `int32` range raise. `stacked_cartesian_layout` is an alias of `cartesian_layout`.
+  - **Breaking:** `offset_coordinate` becomes `coordinate`, and `offset_area` and `offset_volume` become `area` and `volume`, in
+    `mnt.pyfiction.layouts`. `cube_coordinate`, `cube_area`, `cube_volume`, and the `int_repr` constructor are gone. `coordinate()` has
+    `x`, `y`, and `z` equal to -2147483648 and `is_valid()` returns `False` for it. Axes must lie in [-2147483647,
+    2147483647]; `coordinate`, `coord`, and the axis setters raise `OverflowError` outside of it. Negative or oversized
+    layout extents raise `ValueError`, and gate-level tiles outside of the signal range raise `IndexError`.
+    `stacked_cartesian_layout` is an alias of `cartesian_layout`.
 
 ### Removed
 

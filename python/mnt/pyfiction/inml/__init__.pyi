@@ -271,7 +271,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
             c: Cell position.
 
         Returns:
-            Clock zone of `c`.
+            Clock zone of `c`, or the invalid clock zone if `c` is invalid.
         """
 
     def assign_clock_number(

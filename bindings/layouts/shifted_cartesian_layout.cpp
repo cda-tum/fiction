@@ -66,9 +66,9 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
             "get_arrangement", [](const Lyt& lyt) { return lyt.get_arrangement(); },
             DOC(fiction_layouts_hexagonal_layout_get_arrangement))
         .def(
-            "coord",
-            [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z) { return layout.coord(x, y, z); },
-            py::arg("x"), py::arg("y"), py::arg("z") = 0l, DOC(fiction_layouts_cartesian_layout_coord))
+            "coord", [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z)
+            { return layout.coord(coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); }, py::arg("x"),
+            py::arg("y"), py::arg("z") = 0l, DOC(fiction_layouts_cartesian_layout_coord))
         .def(
             "x", [](const Lyt& lyt) { return lyt.x(); }, DOC(fiction_layouts_cartesian_layout_x))
         .def(

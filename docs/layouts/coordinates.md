@@ -3,14 +3,16 @@
 **Header:** `fiction/layouts/layout_base.hpp`
 
 Every layout (Cartesian, shifted Cartesian, and hexagonal) derives from `layout_base`, which defines the one coordinate
-type that all of them share. A coordinate is an offset from a fixed point (origin) with three signed 32-bit axes, so
-subtracting and comparing coordinates never wraps around. The default-constructed coordinate is invalid; layouts return
-it for neighbors that lie outside of them, and gate-level layouts return it for the tile of a node that is not placed.
-Each layout exposes the type as `coordinate`, gate-level layouts also as `tile`, and its aspect ratio as
+type that all of them share. A coordinate is an offset from a fixed point (origin) with three signed 32-bit axes. The
+default-constructed coordinate is invalid, and so is every coordinate with an axis equal to `-2147483648`. Layouts
+return an invalid coordinate for neighbors that lie outside of them, and gate-level layouts return it for the tile of a
+node that is not placed.
+Each layout exposes the type as `coordinate`, gate-level layouts in C++ also as `tile`, and its aspect ratio as
 `aspect_ratio`. An aspect ratio is the highest coordinate that still belongs to a layout, not a size.
 
 Gate-level layouts identify tiles by a 64-bit signal. It holds x and y as 31-bit signed values and z as one bit, so the
-x and y extents of gate-level layouts are limited to \f$2^{30} - 1\f$ and z to 1.
+x and y extents of gate-level layouts are limited to $2^{30} - 1$ and z to 1. Every other layout limits each extent to
+$2^{30} - 1$, so that coordinate arithmetic stays within 32 bits.
 
 ::::{tab-set}
 :sync-group: language

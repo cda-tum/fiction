@@ -1,6 +1,6 @@
 # Hexagonal Layout
 
-Coordinate system that represents a hexagonal grid of compile-time coordinate types. The faces of a hexagonal layout
+Coordinate system that represents a hexagonal grid of signed coordinates. The faces of a hexagonal layout
 are arranged by shifting either odd or even rows (pointy-top hexagons) or columns (flat-top hexagons) inwards. The
 arrangement is a value that the layout receives at construction.
 

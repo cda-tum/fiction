@@ -1249,7 +1249,8 @@ Args:
     ar: Highest possible position in the layout.
 
 Raises:
-    std::invalid_argument: If an axis of `ar` is negative.
+    std::invalid_argument: If an axis of `ar` is negative or larger
+                           than :math:`2^{30} - 1`.
 
 )doc";
 
@@ -1266,21 +1267,6 @@ static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_sto
 static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_cartesian_layout_storage = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_dimension = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cartesian_layout_checked =
-R"doc(Returns an aspect ratio after checking that it describes a layout. An
-invalid aspect ratio describes the layout with exactly one coordinate.
-
-Args:
-    ar: Aspect ratio to check.
-
-Returns:
-    `ar`, or (0, 0, 0) if `ar` is invalid.
-
-Raises:
-    std::invalid_argument: If an axis of `ar` is negative.
-
-)doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_clone =
 R"doc(Clones the layout returning a deep copy.
@@ -1761,7 +1747,8 @@ Args:
     ar: New aspect ratio.
 
 Raises:
-    std::invalid_argument: If an axis of `ar` is negative.
+    std::invalid_argument: If an axis of `ar` is negative or larger
+                           than :math:`2^{30} - 1`.
 
 )doc";
 
@@ -2660,6 +2647,18 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_detail_abs_axis =
+R"doc(Absolute value of one coordinate axis. It widens first, so that
+`INT32_MIN` does not overflow.
+
+Args:
+    axis: Axis value.
+
+Returns:
+    :math:`|axis|`.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout =
 R"doc(A gate-level FCN layout owns gates, clocking, synchronization delays,
 and persistent obstructions. Clock zones are tiles in the coordinate
@@ -2705,9 +2704,12 @@ interchangeably.
 checked for via is_inv.
 
 - each `create_...` function requires a tile parameter that determines
-  its placement. If the provided tile is dead,
-the location will not be stored and the node will not count towards
-number of gates or wires.
+  its placement. If the provided tile is
+invalid, the location will not be stored and the node will not count
+towards number of gates or wires. A valid tile must have a signal,
+i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\{0,
+1\}`; otherwise, the function throws `std::out_of_range` and leaves
+the layout unchanged.
 
 - a node can be overwritten by creating another node on its location.
   This can, however, lead to unwanted effects and
@@ -2768,6 +2770,20 @@ Args:
     cz: Clock zone to turn into a synchronization element.
     se: Number of full clock cycles to extend `cz`'s Hold phase by. If
         this value is 0, `cz` is turned back into a normal clock zone.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_check_tile =
+R"doc(Checks that a tile has a signal. An invalid tile stands for an
+unplaced node and passes.
+
+Args:
+    t: Tile to check.
+
+Raises:
+    std::out_of_range: If `t` is valid but its x or y value lies
+                       outside of :math:`[-2^{30}, 2^{30} - 1]` or its
+                       z value is neither 0 nor 1.
 
 )doc";
 
@@ -2911,9 +2927,40 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_create_not = R"doc(
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_create_or = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_pi = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_pi =
+R"doc(Creates a primary input on tile `t`.
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_po = R"doc()doc";
+Args:
+    name: Name of the PI. If empty, the name is `pi<i>`, where `i` is
+          the number of PIs before the new one.
+    t: Tile to place the PI on. An invalid tile leaves the PI
+       unplaced.
+
+Returns:
+    Signal pointing to `t`.
+
+Raises:
+    std::out_of_range: If `t` is valid but has no signal encoding.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_po =
+R"doc(Creates a primary output on tile `t` that is driven by signal `s`.
+
+Args:
+    s: Signal that drives the PO.
+    name: Name of the PO. If empty, the name is `po<i>`, where `i` is
+          the number of POs before the new one.
+    t: Tile to place the PO on. An invalid tile leaves the PO
+       unplaced.
+
+Returns:
+    Signal pointing to `t`.
+
+Raises:
+    std::out_of_range: If `t` is valid but has no signal encoding.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_create_xnor = R"doc()doc";
 
@@ -3060,7 +3107,7 @@ R"doc(Applies a function to each ground-layer tile in the coordinate range.
 Args:
     fn: Functor applied to each tile.
     start: First tile.
-    stop: Exclusive end tile; a dead tile selects the layout end.
+    stop: Exclusive end tile; an invalid tile selects the layout end.
 
 Template Args:
     Fn: Functor type.
@@ -3138,7 +3185,7 @@ R"doc(Applies a function to each tile in the coordinate range.
 Args:
     fn: Functor applied to each tile.
     start: First tile.
-    stop: Exclusive end tile; a dead tile selects the layout end.
+    stop: Exclusive end tile; an invalid tile selects the layout end.
 
 Template Args:
     Fn: Functor type.
@@ -3230,6 +3277,12 @@ R"doc(Copy constructor from another `CoordinateLayout`.
 
 Args:
     lyt: Coordinate layout.
+
+Raises:
+    std::out_of_range: If the extent of `lyt` exceeds the range that
+                       gate-level signals can represent, i.e., if its
+                       x or y value is larger than :math:`2^{30} - 1`
+                       or its z value is larger than 1.
 
 )doc";
 
@@ -3342,14 +3395,13 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_tile =
 R"doc(The inverse function of `get_node`. Fetches the tile that the provided
-node is placed on. Returns a default dead tile if the node is not
-placed.
+node is placed on. Returns the invalid tile if the node is not placed.
 
 Args:
     n: Node whose location is desired.
 
 Returns:
-    Tile at which `n` is placed or a default dead tile if `n` is not
+    Tile at which `n` is placed or the invalid tile if `n` is not
     placed.
 
 )doc";
@@ -3359,7 +3411,7 @@ R"doc(Returns ground-layer tiles in the coordinate range.
 
 Args:
     start: First tile.
-    stop: Exclusive end tile; a dead tile selects the layout end.
+    stop: Exclusive end tile; an invalid tile selects the layout end.
 
 Returns:
     Tile range.
@@ -4299,7 +4351,7 @@ R"doc(Returns the tiles in the coordinate range.
 
 Args:
     start: First tile.
-    stop: Exclusive end tile; a dead tile selects the layout end.
+    stop: Exclusive end tile; an invalid tile selects the layout end.
 
 Returns:
     Tile range.
@@ -4432,7 +4484,8 @@ a given one. Thereby, cardinal and ordinal directions are being
 considered, i.e., the container will contain all coordinates `ac` for
 which `is_adjacent(c, ac)` returns `true`.
 
-Coordinates that are outside of the layout bounds are not considered.
+Neighbors outside of the layout bounds are not considered, and a
+coordinate outside of the layout bounds has no adjacent coordinates.
 Thereby, the size of the returned container is at most 6.
 
 Args:
@@ -4486,21 +4539,6 @@ Args:
 
 Returns:
     Coordinate directly below `c`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_checked =
-R"doc(Returns an aspect ratio after checking that it describes a layout. An
-invalid aspect ratio describes the layout with exactly one coordinate.
-
-Args:
-    ar: Aspect ratio to check.
-
-Returns:
-    `ar`, or (0, 0, 0) if `ar` is invalid.
-
-Raises:
-    std::invalid_argument: If an axis of `ar` is negative.
 
 )doc";
 
@@ -4634,7 +4672,8 @@ accordance with `adjacent_coordinates`. Thereby, cardinal and ordinal
 directions are being considered, i.e., the given function is applied
 to all coordinates ac for which `is_adjacent(c, ac)` returns `true`.
 
-Coordinates that are outside of the layout bounds are not considered.
+Neighbors outside of the layout bounds are not considered, and a
+coordinate outside of the layout bounds has no adjacent coordinates.
 Thereby, at most 6 coordinates are touched.
 
 Args:
@@ -4748,7 +4787,8 @@ Args:
     ar: Highest possible position in the layout.
 
 Raises:
-    std::invalid_argument: If an axis of `ar` is negative.
+    std::invalid_argument: If an axis of `ar` is negative or larger
+                           than :math:`2^{30} - 1`.
 
 )doc";
 
@@ -5097,7 +5137,8 @@ Args:
     c: Coordinate whose north-eastern counterpart is desired.
 
 Returns:
-    Coordinate directly north-eastern of `c`.
+    Coordinate directly north-eastern of `c`; `c` itself if the
+    neighbor or `c` lies outside of the layout.
 
 )doc";
 
@@ -5110,7 +5151,8 @@ Args:
     c: Coordinate whose north-western counterpart is desired.
 
 Returns:
-    Coordinate directly north-western of `c`.
+    Coordinate directly north-western of `c`; `c` itself if the
+    neighbor or `c` lies outside of the layout.
 
 )doc";
 
@@ -5133,7 +5175,8 @@ Args:
     ar: New aspect ratio.
 
 Raises:
-    std::invalid_argument: If an axis of `ar` is negative.
+    std::invalid_argument: If an axis of `ar` is negative or larger
+                           than :math:`2^{30} - 1`.
 
 )doc";
 
@@ -5160,7 +5203,8 @@ Args:
     c: Coordinate whose south-eastern counterpart is desired.
 
 Returns:
-    Coordinate directly south-eastern of `c`.
+    Coordinate directly south-eastern of `c`; `c` itself if the
+    neighbor or `c` lies outside of the layout.
 
 )doc";
 
@@ -5173,7 +5217,8 @@ Args:
     c: Coordinate whose south-western counterpart is desired.
 
 Returns:
-    Coordinate directly south-western of `c`.
+    Coordinate directly south-western of `c`; `c` itself if the
+    neighbor or `c` lies outside of the layout.
 
 )doc";
 
@@ -5710,6 +5755,10 @@ Args:
 Template Args:
     Lyt: Layout.
 
+Raises:
+    std::invalid_argument: If a node is unplaced or placed on a tile
+                           with a negative coordinate.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_write_fgl_layout_2 =
@@ -5725,6 +5774,10 @@ Args:
 
 Template Args:
     Lyt: Layout.
+
+Raises:
+    std::invalid_argument: If a node is unplaced or placed on a tile
+                           with a negative coordinate.
 
 )doc";
 
@@ -5756,14 +5809,35 @@ R"doc(Base class of all layouts. It defines the signed coordinate type that
 every layout topology (Cartesian, shifted Cartesian, and hexagonal)
 exposes under the same API.)doc";
 
+static const char *mkd_doc_fiction_layouts_layout_base_checked =
+R"doc(Returns an aspect ratio after checking that it describes a layout. An
+invalid aspect ratio describes the layout with exactly one coordinate.
+The upper limit keeps the coordinate arithmetic of every layout within
+`int32_t`.
+
+Args:
+    ar: Aspect ratio to check.
+
+Returns:
+    `ar`, or (0, 0, 0) if `ar` is invalid.
+
+Raises:
+    std::invalid_argument: If an axis of `ar` is negative or larger
+                           than :math:`2^{30} - 1`.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate =
 R"doc(Signed coordinates.
 
-An coordinate coordinate defines a location via an coordinate from a
-fixed point (origin). Each axis is a signed 32-bit integer. The
-default-constructed coordinate is invalid; it has all axes set to
-`INVALID_AXIS` and stands for "no coordinate", e.g., a neighbor
-outside of a layout or the tile of a node that is not placed.
+A coordinate defines a location relative to a fixed point (origin).
+Each axis is a signed 32-bit integer. The default-constructed
+coordinate is invalid; it has all axes set to `INVALID_AXIS` and
+stands for "no coordinate", e.g., a neighbor outside of a layout or
+the tile of a node that is not placed. A coordinate with any axis set
+to `INVALID_AXIS` is invalid. Test for invalidity with `is_valid()`,
+because only the default-constructed coordinate compares equal to
+every other coordinate of the same state.
 
 Gate-level layouts pack a coordinate into a 64-bit signal with
 `explicit operator uint64_t`. This encoding holds 31-bit signed x and
@@ -5825,8 +5899,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_is_valid =
-R"doc(Returns whether the coordinate is valid, i.e., whether it differs from
-the default-constructed coordinate.
+R"doc(Returns whether the coordinate is valid, i.e., whether none of its
+axes is `INVALID_AXIS`.
 
 Returns:
     `true` iff the coordinate is valid.
@@ -5894,8 +5968,7 @@ static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_opera
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_ne = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_operator_eq =
-R"doc(Compares against another coordinate for equality. All invalid
-coordinates are equal.
+R"doc(Compares against another coordinate for equality, axis by axis.
 
 Args:
     other: Right-hand side coordinate.
@@ -6398,7 +6471,7 @@ Args:
     c: Cell position.
 
 Returns:
-    Clock zone of `c`.
+    Clock zone of `c`, or the invalid clock zone if `c` is invalid.
 
 )doc";
 

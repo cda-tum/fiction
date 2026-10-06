@@ -31,6 +31,8 @@
 #include <mockturtle/views/names_view.hpp>
 
 #include <cstdint>
+#include <limits>
+#include <stdexcept>
 
 #include <nanobind/nanobind.h>
 
@@ -61,6 +63,23 @@ using py_mig_network = mockturtle::names_view<mockturtle::mig_network>;
  * Coordinates.
  */
 using py_coordinate = fiction::layouts::layout_base::coordinate;
+/**
+ * Converts a Python integer to a coordinate axis. `std::numeric_limits<int32_t>::min()` is excluded because it marks
+ * the invalid coordinate.
+ *
+ * @param value Python integer.
+ * @return The axis value.
+ * @throws std::overflow_error If `value` does not lie in \f$[-2^{31} + 1, 2^{31} - 1]\f$.
+ */
+inline int32_t coordinate_axis(const int64_t value)
+{
+    if (value <= std::numeric_limits<int32_t>::min() || value > std::numeric_limits<int32_t>::max())
+    {
+        throw std::overflow_error("A coordinate axis must lie between -2147483647 and 2147483647");
+    }
+
+    return static_cast<int32_t>(value);
+}
 /**
  * Cartesian layout.
  */

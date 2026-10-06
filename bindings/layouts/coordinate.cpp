@@ -21,7 +21,6 @@
 
 #include <cstdint>
 #include <functional>
-#include <limits>
 #include <memory>
 #include <stdexcept>
 
@@ -31,30 +30,6 @@
 
 namespace pyfiction
 {
-
-namespace
-{
-
-/**
- * @brief Converts a Python integer to a coordinate axis.
- *
- * `std::numeric_limits<int32_t>::min()` is excluded because it marks the invalid coordinate.
- *
- * @param value Python integer.
- * @return The axis value.
- * @throws std::overflow_error If `value` does not fit a coordinate axis.
- */
-int32_t coordinate_axis(const int64_t value)
-{
-    if (value <= std::numeric_limits<int32_t>::min() || value > std::numeric_limits<int32_t>::max())
-    {
-        throw std::overflow_error("A coordinate axis must fit a signed 32-bit integer");
-    }
-
-    return static_cast<int32_t>(value);
-}
-
-}  // namespace
 
 /**
  * @brief Registers coordinates.

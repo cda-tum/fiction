@@ -18,6 +18,8 @@ from mnt.pyfiction.layouts import (
     cartesian_layout,
     coordinate,
     hexagonal_gate_layout,
+    hexagonal_layout,
+    shifted_cartesian_layout,
     stacked_cartesian_layout,
 )
 
@@ -135,3 +137,32 @@ def test_gate_layouts_reject_extents_beyond_the_signal_range():
 
     cartesian_gate_layout((2, 2, 1))
     cartesian_gate_layout((2**30 - 1, 0))
+
+
+@pytest.mark.parametrize("axis", [2**31, 2**40])
+@pytest.mark.parametrize(
+    "make_layout",
+    [
+        pytest.param(lambda: cartesian_layout((2, 2)), id="cartesian"),
+        pytest.param(lambda: hexagonal_layout(arrangement.EVEN_ROW, (2, 2)), id="hexagonal"),
+        pytest.param(lambda: shifted_cartesian_layout(arrangement.EVEN_ROW, (2, 2)), id="shifted_cartesian"),
+    ],
+)
+def test_layout_coord_rejects_axes_outside_of_the_int32_range(make_layout, axis):
+    lyt = make_layout()
+
+    with pytest.raises(OverflowError):
+        lyt.coord(axis, 5)
+    with pytest.raises(OverflowError):
+        lyt.coord(5, axis, 0)
+    with pytest.raises(OverflowError):
+        lyt.coord(5, 5, axis)
+
+    assert lyt.coord(1, 2) == coordinate(1, 2, 0)
+
+
+def test_setting_an_axis_of_the_invalid_coordinate_keeps_it_invalid():
+    c = coordinate()
+    c.x = 0
+
+    assert not c.is_valid()
