@@ -30,11 +30,9 @@
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
-#include <filesystem>
 #include <span>
 #include <sstream>
 #include <string>
@@ -75,6 +73,8 @@ struct setting
 
 /**
  * Builds the one-factor-at-a-time settings around the defaults, plus the degenerate models.
+ *
+ * @return Settings to sweep.
  */
 std::vector<setting> settings()
 {
@@ -176,36 +176,10 @@ std::vector<setting> settings()
 }
 
 /**
- * Lists the IWLS93 benchmarks shipped in `benchmarks/IWLS93`, sorted by name.
- */
-std::vector<std::string> iwls93_benchmarks()
-{
-    namespace fs = std::filesystem;
-
-    std::vector<std::string> benchmarks{};
-
-    const auto dir = fs::path{EXPERIMENTS_PATH} / "../benchmarks/IWLS93";
-
-    if (!fs::is_directory(dir))
-    {
-        return benchmarks;
-    }
-
-    for (const auto& entry : fs::directory_iterator{dir})
-    {
-        if (entry.is_regular_file() && entry.path().extension() == ".v")
-        {
-            benchmarks.push_back(fmt::format("IWLS93/{}", entry.path().stem().string()));
-        }
-    }
-
-    std::sort(benchmarks.begin(), benchmarks.end());
-
-    return benchmarks;
-}
-
-/**
  * Reads the first network of a benchmark file.
+ *
+ * @param name Benchmark name relative to `benchmarks/`, without extension.
+ * @return The network.
  */
 tec_nt read_network(const std::string& name)
 {
@@ -236,7 +210,7 @@ int main(const int argc, const char** argv)  // NOLINT
                   "time (s)"};
 
     auto       benchmarks = fiction_experiments::all_benchmarks();
-    const auto iwls93     = iwls93_benchmarks();
+    const auto iwls93     = fiction_experiments::iwls93_benchmarks();
     benchmarks.insert(benchmarks.end(), iwls93.cbegin(), iwls93.cend());
 
     for (const auto& benchmark : benchmarks)
@@ -281,7 +255,8 @@ int main(const int argc, const char** argv)  // NOLINT
                         planarized        = hybrid.size();
 
                         crossing_gate_planarization_params cg_ps{};
-                        cg_ps.xor_gates = true;
+                        cg_ps.xor_gates              = true;
+                        cg_ps.max_crossings_per_rank = ps.max_crossings_per_rank;
 
                         const auto with_gadgets = crossing_gate_planarization(hybrid, cg_ps);
                         gadgets                 = with_gadgets.size();

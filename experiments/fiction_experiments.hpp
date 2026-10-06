@@ -20,8 +20,10 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -193,6 +195,38 @@ inline std::vector<std::string> all_benchmarks(uint64_t selection = all)
 std::string benchmark_path(const std::string& benchmark_name, const std::string& benchmark_folder = "../benchmarks")
 {
     return fmt::format("{}{}/{}.v", EXPERIMENTS_PATH, benchmark_folder, benchmark_name);
+}
+
+/**
+ * Lists the IWLS93 benchmarks shipped in `benchmarks/IWLS93`, sorted by name.
+ *
+ * @return Benchmark names in the form `IWLS93/<name>`, empty if the directory is missing.
+ */
+inline std::vector<std::string> iwls93_benchmarks()
+{
+    namespace fs = std::filesystem;
+
+    std::vector<std::string> benchmarks{};
+
+    const auto dir = fs::path{EXPERIMENTS_PATH} / "../benchmarks/IWLS93";
+
+    if (!fs::is_directory(dir))
+    {
+        fmt::print("[w] IWLS93 directory not found: {}\n", dir.string());
+        return benchmarks;
+    }
+
+    for (const auto& entry : fs::directory_iterator{dir})
+    {
+        if (entry.is_regular_file() && entry.path().extension() == ".v")
+        {
+            benchmarks.push_back(fmt::format("IWLS93/{}", entry.path().stem().string()));
+        }
+    }
+
+    std::sort(benchmarks.begin(), benchmarks.end());
+
+    return benchmarks;
 }
 
 }  // namespace fiction_experiments

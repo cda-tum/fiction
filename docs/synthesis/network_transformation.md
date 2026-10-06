@@ -214,8 +214,10 @@ the real input it copies. The node order of the returned network is its rank ord
    :members:
 
 .. autoclass:: mnt.pyfiction.synthesis.planarization_strategy
+   :members:
 
 .. autoclass:: mnt.pyfiction.synthesis.decision_criterion
+   :members:
 
 .. autoclass:: mnt.pyfiction.synthesis.duplication_cost_model
    :members:

@@ -67,6 +67,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added synchronized C++/Python tabs and code copy buttons.
   - Added `llms.txt`, `llms-full.txt`, and Markdown exports of documentation pages.
 
+- Experiments:
+
+  - `planarization` runs every benchmark set through the planarization pipeline and verifies each result;
+    `cost_model_sweep` varies the hybrid strategy's cost model and decision criterion
+
 - I/O:
   - `read_sqd_layout`, `write_sqd_layout`, `write_sidb_layout_svg`, `read_surface_defects`, and
     `print_sidb_layout` accept and produce `sidb::layout`; the SQD reader takes the lattice from the file

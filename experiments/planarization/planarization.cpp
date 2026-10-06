@@ -38,11 +38,9 @@
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
-#include <filesystem>
 #include <span>
 #include <sstream>
 #include <string>
@@ -79,6 +77,9 @@ constexpr uint64_t MAX_DUPLICATIONS = 2000000;
 
 /**
  * Reads the first network of a benchmark file.
+ *
+ * @param name Benchmark name relative to `benchmarks/`, without extension.
+ * @return The network.
  */
 tec_nt read_network(const std::string& name)
 {
@@ -86,36 +87,6 @@ tec_nt read_network(const std::string& name)
     network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
 
     return *reader.get_networks().front();
-}
-
-/**
- * Lists the IWLS93 benchmarks shipped in `benchmarks/IWLS93`, sorted by name.
- */
-std::vector<std::string> iwls93_benchmarks()
-{
-    namespace fs = std::filesystem;
-
-    std::vector<std::string> benchmarks{};
-
-    const auto dir = fs::path{EXPERIMENTS_PATH} / "../benchmarks/IWLS93";
-
-    if (!fs::is_directory(dir))
-    {
-        fmt::print("[w] IWLS93 directory not found: {}\n", dir.string());
-        return benchmarks;
-    }
-
-    for (const auto& entry : fs::directory_iterator{dir})
-    {
-        if (entry.is_regular_file() && entry.path().extension() == ".v")
-        {
-            benchmarks.push_back(fmt::format("IWLS93/{}", entry.path().stem().string()));
-        }
-    }
-
-    std::sort(benchmarks.begin(), benchmarks.end());
-
-    return benchmarks;
 }
 
 /**
@@ -280,7 +251,7 @@ int main(const int argc, const char** argv)  // NOLINT
                           "size decrease (%)"};
 
     auto       benchmarks = fiction_experiments::all_benchmarks();
-    const auto iwls93     = iwls93_benchmarks();
+    const auto iwls93     = fiction_experiments::iwls93_benchmarks();
     benchmarks.insert(benchmarks.end(), iwls93.cbegin(), iwls93.cend());
 
     uint32_t failures = 0;
