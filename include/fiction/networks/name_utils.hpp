@@ -37,7 +37,7 @@ namespace fiction::networks
  * @return Name of given network or layout.
  */
 template <typename NtkOrLyt>
-std::string get_name(const NtkOrLyt& ntk_or_lyt) noexcept
+std::string get_name(const NtkOrLyt& ntk_or_lyt)
 {
     if constexpr (mockturtle::has_get_network_name_v<NtkOrLyt>)
     {
@@ -59,15 +59,15 @@ std::string get_name(const NtkOrLyt& ntk_or_lyt) noexcept
  * @param name Name to assign to given network or layout.
  */
 template <typename NtkOrLyt>
-void set_name(NtkOrLyt& ntk_or_lyt, const std::string_view& name) noexcept
+void set_name(NtkOrLyt& ntk_or_lyt, const std::string_view& name)
 {
     if constexpr (mockturtle::has_set_network_name_v<NtkOrLyt>)
     {
-        return ntk_or_lyt.set_network_name(name.data());
+        return ntk_or_lyt.set_network_name(std::string{name});
     }
     else if constexpr (fiction::has_set_layout_name_v<NtkOrLyt>)
     {
-        return ntk_or_lyt.set_layout_name(name.data());
+        return ntk_or_lyt.set_layout_name(std::string{name});
     }
 }
 /**
@@ -81,10 +81,10 @@ void set_name(NtkOrLyt& ntk_or_lyt, const std::string_view& name) noexcept
  * @param ntk_or_lyt_dest Target network or layout that is to be assigned `ntk_or_lyt_src`'s name.
  */
 template <typename NtkOrLytSrc, typename NtkOrLytDest>
-void restore_network_name(const NtkOrLytSrc& ntk_or_lyt_src, NtkOrLytDest& ntk_or_lyt_dest) noexcept
+void restore_network_name(const NtkOrLytSrc& ntk_or_lyt_src, NtkOrLytDest& ntk_or_lyt_dest)
 {
-    static_assert(mockturtle::is_network_type_v<NtkOrLytSrc>, "NtkSrc is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkOrLytDest>, "NtkDest is not a network type");
+    static_assert(mockturtle::is_network_type_v<NtkOrLytSrc> || is_gate_level_layout_v<NtkOrLytSrc>);
+    static_assert(mockturtle::is_network_type_v<NtkOrLytDest> || is_gate_level_layout_v<NtkOrLytDest>);
 
     std::string network_name{};
 
@@ -107,57 +107,68 @@ void restore_network_name(const NtkOrLytSrc& ntk_or_lyt_src, NtkOrLytDest& ntk_o
     }
 }
 /**
- * Assigns input names from one network to another. Matching inputs are identified by their index. Since gate-level
- * layout's are network types as well, this function naturally works for them, too.
+ * Assigns input names from one network to another. Matching inputs are identified by their index.
  *
  * @tparam NtkSrc Source network type.
- * @tparam NtkDest Target network type.
+ * @tparam NtkDest Target network or gate-level layout type.
  * @param ntk_src Source logic network whose input names are to be transferred to `ntk_dest`.
  * @param ntk_dest Target logic network whose inputs are to be assigned `ntk_src`'s names.
  */
 template <typename NtkSrc, typename NtkDest>
-void restore_input_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
+void restore_input_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
+    static_assert(mockturtle::is_network_type_v<NtkSrc> || is_gate_level_layout_v<NtkSrc>);
+    static_assert(mockturtle::is_network_type_v<NtkDest> || is_gate_level_layout_v<NtkDest>);
 
-    if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> &&
-                  mockturtle::has_set_name_v<NtkDest>)
+    if constexpr ((is_gate_level_layout_v<NtkSrc> ||
+                   (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc>)) &&
+                  (is_gate_level_layout_v<NtkDest> || mockturtle::has_set_name_v<NtkDest>))
     {
-        static_assert(mockturtle::has_foreach_pi_v<NtkSrc>, "NtkSrc does not implement the foreach_pi function");
-        static_assert(mockturtle::has_make_signal_v<NtkSrc>, "NtkSrc does not implement the make_signal function");
-        static_assert(mockturtle::has_make_signal_v<NtkDest>, "NtkDest does not implement the make_signal function");
-        static_assert(mockturtle::has_pi_at_v<NtkDest>, "NtkDest does not implement the pi_at function");
-
         ntk_src.foreach_pi(
-            [&ntk_src, &ntk_dest](const auto& pi, auto i)
+            [&](const auto& pi, const auto i)
             {
-                if (const auto pi_signal = ntk_src.make_signal(pi); ntk_src.has_name(pi_signal))
+                const auto input = [&]
                 {
-                    ntk_dest.set_name(ntk_dest.make_signal(ntk_dest.pi_at(i)), ntk_src.get_name(pi_signal));
+                    if constexpr (is_gate_level_layout_v<NtkSrc>)
+                    {
+                        return ntk_src.output(pi);
+                    }
+                    else
+                    {
+                        return ntk_src.make_signal(pi);
+                    }
+                }();
+                if (ntk_src.has_name(input))
+                {
+                    if constexpr (is_gate_level_layout_v<NtkDest>)
+                    {
+                        ntk_dest.set_name(ntk_dest.pi_at(i), ntk_src.get_name(input));
+                    }
+                    else
+                    {
+                        ntk_dest.set_name(ntk_dest.make_signal(ntk_dest.pi_at(i)), ntk_src.get_name(input));
+                    }
                 }
             });
     }
 }
 /**
- * Assigns output names from one network to another. Matching outputs are identified by their order. Since gate-level
- * layout's are network types as well, this function naturally works for them, too.
+ * Assigns output names from one network to another. Matching outputs are identified by their order.
  *
  * @tparam NtkSrc Source network type.
- * @tparam NtkDest Target network type.
+ * @tparam NtkDest Target network or gate-level layout type.
  * @param ntk_src Source logic network whose output names are to be transferred to `ntk_dest`.
  * @param ntk_dest Target logic network whose outputs are to be assigned `ntk_src`'s names.
  */
 template <typename NtkSrc, typename NtkDest>
-void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
+void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
+    static_assert(mockturtle::is_network_type_v<NtkSrc> || is_gate_level_layout_v<NtkSrc>);
+    static_assert(mockturtle::is_network_type_v<NtkDest> || is_gate_level_layout_v<NtkDest>);
 
     if constexpr (mockturtle::has_has_output_name_v<NtkSrc> && mockturtle::has_get_output_name_v<NtkSrc> &&
-                  mockturtle::has_set_output_name_v<NtkDest>)
+                  (is_gate_level_layout_v<NtkDest> || mockturtle::has_set_output_name_v<NtkDest>))
     {
-        static_assert(mockturtle::has_foreach_po_v<NtkSrc>, "NtkSrc does not implement the foreach_po function");
 
         ntk_src.foreach_po(
             [&ntk_src, &ntk_dest]([[maybe_unused]] const auto& po, const auto i)
@@ -177,20 +188,20 @@ void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
  * them, too.
  *
  * @tparam NtkSrc Source network type.
- * @tparam NtkDest Target network type.
+ * @tparam NtkDest Target network or gate-level layout type.
  * @param ntk_src Source logic network whose signal names are to be transferred to `ntk_dest`.
  * @param ntk_dest Target logic network whose signal names are to be assigned `ntk_src`'s names.
+ * @tparam Signal Target signal or layout output port type.
  * @param old2new Mapping of signals from `ntk_src` to `ntk_dest`.
  */
-template <typename NtkSrc, typename NtkDest>
-void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest,
-                          const mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc>& old2new) noexcept
+template <typename NtkSrc, typename NtkDest, typename Signal>
+void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<Signal, NtkSrc>& old2new)
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
+    static_assert(mockturtle::is_network_type_v<NtkSrc> || is_gate_level_layout_v<NtkSrc>);
+    static_assert(mockturtle::is_network_type_v<NtkDest> || is_gate_level_layout_v<NtkDest>);
 
     if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> &&
-                  mockturtle::has_set_name_v<NtkDest>)
+                  (is_gate_level_layout_v<NtkDest> || mockturtle::has_set_name_v<NtkDest>))
     {
         static_assert(mockturtle::has_foreach_node_v<NtkSrc>, "NtkSrc does not implement the foreach_node function");
         static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin function");
@@ -216,7 +227,7 @@ void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest,
  * e.g., by their position on the layout.
  *
  * @tparam NtkSrc Source network type.
- * @tparam NtkDest Target network type.
+ * @tparam NtkDest Target network or gate-level layout type.
  * @tparam fanout_size Maximum fanout size in the network.
  * @param ntk_src Source logic network whose signal names are to be transferred to `ntk_dest`.
  * @param ntk_dest Target logic network whose signal names are to be assigned `ntk_src`'s names.
@@ -226,13 +237,13 @@ template <typename NtkSrc, typename NtkDest, uint16_t fanout_size = 2>
 void restore_signal_names(
     const NtkSrc& ntk_src, NtkDest& ntk_dest,
     const mockturtle::node_map<physical_design::branching_signal_container<NtkDest, NtkSrc, fanout_size>, NtkSrc>&
-        old2new) noexcept
+        old2new)
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
+    static_assert(mockturtle::is_network_type_v<NtkSrc> || is_gate_level_layout_v<NtkSrc>);
+    static_assert(mockturtle::is_network_type_v<NtkDest> || is_gate_level_layout_v<NtkDest>);
 
     if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> &&
-                  mockturtle::has_set_name_v<NtkDest>)
+                  (is_gate_level_layout_v<NtkDest> || mockturtle::has_set_name_v<NtkDest>))
     {
         static_assert(mockturtle::has_foreach_node_v<NtkSrc>, "NtkSrc does not implement the foreach_node function");
         static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin function");
@@ -258,12 +269,12 @@ void restore_signal_names(
  * calls `restore_network_name`, `restore_input_names`, and `restore_output_names`.
  *
  * @tparam NtkSrc Source network type.
- * @tparam NtkDest Target network type.
+ * @tparam NtkDest Target network or gate-level layout type.
  * @param ntk_src Source logic network whose I/O names are to be transferred to `ntk_dest`.
  * @param ntk_dest Target logic network whose I/O names are to be assigned `ntk_src`'s names.
  */
 template <typename NtkSrc, typename NtkDest>
-void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
+void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
 {
     restore_network_name(ntk_src, ntk_dest);
     restore_input_names(ntk_src, ntk_dest);
@@ -274,7 +285,7 @@ void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
  * calls `restore_network_name`, `restore_signal_names`, and `restore_output_names`.
  *
  * @tparam NtkSrc Source network type.
- * @tparam NtkDest Target network type.
+ * @tparam NtkDest Target network or gate-level layout type.
  * @tparam T Mapping type to identify signals by. Currently, `mockturtle::signal<NtkDest>` and
  * `branching_signal_container<NtkDest, NtkSrc, fanout_size>` are supported.
  * @param ntk_src Source logic network whose signal names are to be transferred to `ntk_dest`.
@@ -282,7 +293,7 @@ void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
  * @param old2new Mapping of signals from `ntk_src` to `ntk_dest` using a signal identifier.
  */
 template <typename NtkSrc, typename NtkDest, typename T>
-void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, mockturtle::node_map<T, NtkSrc>& old2new) noexcept
+void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, mockturtle::node_map<T, NtkSrc>& old2new)
 {
     restore_network_name(ntk_src, ntk_dest);
     restore_input_names(ntk_src, ntk_dest);
