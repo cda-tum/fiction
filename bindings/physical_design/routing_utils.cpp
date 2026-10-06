@@ -21,6 +21,7 @@
 #include <fiction/traits.hpp>
 
 #include <algorithm>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -31,6 +32,7 @@
 #include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/tuple.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
@@ -39,6 +41,7 @@ namespace pyfiction
 namespace detail
 {
 
+/** @brief Registers crossing queries. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
 void is_crossable_wire(nanobind::module_& m)
 {
@@ -48,6 +51,7 @@ void is_crossable_wire(nanobind::module_& m)
           py::arg("successor"), DOC(fiction_physical_design_is_crossable_wire));
 }
 
+/** @brief Registers routing to explicit destination input ports. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
 void route_path(nanobind::module_& m)
 {
@@ -55,17 +59,16 @@ void route_path(nanobind::module_& m)
 
     m.def(
         "route_path",
-        [](Lyt& lyt, const std::vector<fiction::coordinate<Lyt>>& path)
+        [](Lyt& lyt, const std::vector<fiction::coordinate<Lyt>>& path, const typename Lyt::input_port destination)
         {
-            fiction::physical_design::layout_coordinate_path<Lyt> converted_path{};
-            converted_path.resize(path.size());
-            converted_path.assign(path.cbegin(), path.cend());
+            const fiction::physical_design::layout_coordinate_path<Lyt> converted_path{path.cbegin(), path.cend()};
 
-            fiction::physical_design::route_path(lyt, converted_path);
+            fiction::physical_design::route_path(lyt, converted_path, destination);
         },
-        py::arg("layout"), py::arg("path"), DOC(fiction_physical_design_route_path));
+        py::arg("layout"), py::arg("path"), py::arg("destination"), DOC(fiction_physical_design_route_path));
 }
 
+/** @brief Registers objectives including logical input indices. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
 void extract_routing_objectives(nanobind::module_& m)
 {
@@ -73,20 +76,23 @@ void extract_routing_objectives(nanobind::module_& m)
 
     m.def(
         "extract_routing_objectives",
-        [](Lyt& lyt) -> std::vector<std::pair<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>>>
+        [](Lyt& lyt) -> std::vector<std::tuple<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>, uint32_t>>
         {
-            std::vector<std::pair<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>>> converted_objectives{};
+            std::vector<std::tuple<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>, uint32_t>>
+                converted_objectives{};
 
             const auto objectives = fiction::physical_design::extract_routing_objectives(lyt);
 
-            std::for_each(objectives.cbegin(), objectives.cend(), [&converted_objectives](const auto& objective)
-                          { converted_objectives.emplace_back(objective.source, objective.target); });
+            std::for_each(
+                objectives.cbegin(), objectives.cend(), [&converted_objectives](const auto& objective)
+                { converted_objectives.emplace_back(objective.source, objective.target, objective.input_index); });
 
             return converted_objectives;
         },
         py::arg("layout"), DOC(fiction_physical_design_extract_routing_objectives));
 }
 
+/** @brief Registers removal of routing wires and connections. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
 void clear_routing(nanobind::module_& m)
 {
@@ -98,6 +104,7 @@ void clear_routing(nanobind::module_& m)
 
 }  // namespace detail
 
+/** @brief Registers routing helpers. @param m Python module. */
 void routing_utils(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!

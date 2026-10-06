@@ -42,7 +42,7 @@ using namespace fiction::physical_design;
 template <typename Lyt, typename Ntk>
 static void check_layout_equiv(const Ntk& ntk)
 {
-    const auto layout = orthogonal<Lyt>(ntk, {});
+    auto layout = orthogonal<Lyt>(ntk, {});
 
     post_layout_optimization_stats stats{};
     post_layout_optimization<Lyt>(layout, {}, &stats);
@@ -124,7 +124,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
         SECTION("optimization_layout_corner_case_outputs_1")
         {
-            const auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
+            auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
             post_layout_optimization_stats stats_corner_case_1{};
             post_layout_optimization<gate_layout>(layout_corner_case_1, {}, &stats_corner_case_1);
             check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
@@ -132,7 +132,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
         SECTION("optimization_layout_corner_case_outputs_2")
         {
-            const auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
+            auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
             post_layout_optimization_stats stats_corner_case_2{};
             post_layout_optimization<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
             check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
@@ -140,7 +140,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
         SECTION("optimization_layout_corner_case_outputs_3")
         {
-            const auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<gate_layout>();
+            auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<gate_layout>();
             post_layout_optimization_stats stats_corner_case_3{};
             post_layout_optimization<gate_layout>(layout_corner_case_3, {}, &stats_corner_case_3);
             check_eq(blueprints::optimization_layout_corner_case_outputs_3<gate_layout>(), layout_corner_case_3);
@@ -148,7 +148,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
         SECTION("optimization_layout_corner_case_outputs_4")
         {
-            const auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<gate_layout>();
+            auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<gate_layout>();
             post_layout_optimization_stats stats_corner_case_4{};
             post_layout_optimization<gate_layout>(layout_corner_case_4, {}, &stats_corner_case_4);
             check_eq(blueprints::optimization_layout_corner_case_outputs_4<gate_layout>(), layout_corner_case_4);
@@ -156,7 +156,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
         SECTION("optimization_layout_corner_case_outputs_5")
         {
-            const auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<gate_layout>();
+            auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<gate_layout>();
             post_layout_optimization_stats stats_corner_case_5{};
             post_layout_optimization<gate_layout>(layout_corner_case_5, {}, &stats_corner_case_5);
             check_eq(blueprints::optimization_layout_corner_case_outputs_5<gate_layout>(), layout_corner_case_5);
@@ -164,7 +164,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
         SECTION("optimization_layout_corner_case_inputs")
         {
-            const auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
+            auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
             post_layout_optimization_stats stats_corner_case_3{};
             post_layout_optimization<gate_layout>(layout_corner_case_3, {}, &stats_corner_case_3);
             check_eq(blueprints::optimization_layout_corner_case_inputs<gate_layout>(), layout_corner_case_3);
@@ -177,7 +177,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
         for (int64_t max_gate_relocations = 0; max_gate_relocations < 10; max_gate_relocations++)
         {
-            const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+            auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
             post_layout_optimization_stats  stats{};
             post_layout_optimization_params params{};
@@ -192,7 +192,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
@@ -206,7 +206,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
@@ -220,7 +220,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
@@ -235,7 +235,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout = blueprints::planar_unoptimized_layout<gate_layout>();
+        auto layout = blueprints::planar_unoptimized_layout<gate_layout>();
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
@@ -243,25 +243,25 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         post_layout_optimization<gate_layout>(layout, params, &stats);
 
         check_eq(blueprints::planar_unoptimized_layout<gate_layout>(), layout);
-        CHECK(layout.z() == 0);
+        CHECK(layout.layers() == 1);
     }
 
     SECTION("Planar optimization with crossing layout")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout = blueprints::planar_optimization_layout<gate_layout>();
+        auto layout = blueprints::planar_optimization_layout<gate_layout>();
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
 
         params.planar_optimization = true;
         post_layout_optimization<gate_layout>(layout, params, &stats);
-        CHECK(!layout.is_inv(layout.get_node({1, 0})));
+        CHECK(!layout.is_inv(*layout.find_object({1, 0})));
 
         params.planar_optimization = false;
         post_layout_optimization<gate_layout>(layout, params, &stats);
-        CHECK(layout.is_inv(layout.get_node({1, 0})));
+        CHECK(layout.is_inv(*layout.find_object({1, 0})));
     }
 }
 
@@ -269,8 +269,8 @@ TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    const auto layout    = blueprints::use_and_gate_layout<gate_layout>();
-    auto       obstr_lyt = gate_layout(layout);
+    auto layout    = blueprints::use_and_gate_layout<gate_layout>();
+    auto obstr_lyt = gate_layout(layout);
 
     SECTION("Call functions")
     {
@@ -287,13 +287,13 @@ TEST_CASE("PI and PO border validation", "[post_layout_optimization]")
     SECTION("Invalid layout with PI not in borders")
     {
         auto layout = blueprints::pi_not_in_border_optimization_layout<gate_layout>();
-        CHECK_NOTHROW(post_layout_optimization<gate_layout>(layout));
+        CHECK_THROWS_AS(post_layout_optimization<gate_layout>(layout), std::invalid_argument);
     }
 
     SECTION("Invalid layout with PO not in borders")
     {
         auto layout = blueprints::po_not_in_border_optimization_layout<gate_layout>();
-        CHECK_NOTHROW(post_layout_optimization<gate_layout>(layout));
+        CHECK_THROWS_AS(post_layout_optimization<gate_layout>(layout), std::invalid_argument);
     }
 
     SECTION("PO have to be moved to borders during optimization")
@@ -311,7 +311,7 @@ TEST_CASE("PI and PO border validation", "[post_layout_optimization]")
         layout.foreach_po(
             [&layout](const auto& po) noexcept
             {
-                const auto tile = layout.get_tile(layout.get_node(po));
+                const auto tile = layout.get_tile(po);
                 CHECK((layout.is_at_eastern_border(tile) || layout.is_at_southern_border(tile)));
             });
     }
@@ -322,7 +322,7 @@ TEST_CASE("Post-layout optimization reports progress", "[post_layout_optimizatio
     using gate_layout = gate_level_layout<cartesian_layout>;
 
     const auto ntk    = blueprints::mux21_network<technology_network>();
-    const auto layout = orthogonal<gate_layout>(ntk);
+    auto       layout = orthogonal<gate_layout>(ntk);
 
     progress_recorder               rec{};
     post_layout_optimization_params params{};
@@ -336,4 +336,66 @@ TEST_CASE("Post-layout optimization reports progress", "[post_layout_optimizatio
     CHECK(rec.is_consistent("gate relocations"));
     // the nested wiring reduction reports through the same callback
     CHECK(rec.is_consistent("wire paths"));
+}
+
+TEST_CASE("Post-layout optimization edits its caller and preserves terminal identities", "[post-layout-ports]")
+{
+    gate_level_layout<cartesian_layout> layout{{6, 3}, layouts::clocking::twoddwave()};
+    const auto                          a           = layout.create_pi("a", {0, 0});
+    const auto                          wire        = layout.create_buf(a, {1, 0});
+    const auto                          po          = layout.create_po(wire, "f", {5, 0});
+    const auto                          independent = layout;
+    post_layout_optimization_params     params{};
+    params.timeout = 0;
+    post_layout_optimization_stats stats{};
+    post_layout_optimization(layout, params, &stats);
+    CHECK(layout.contains(a.object));
+    CHECK(layout.contains(po.object));
+    CHECK(layout.source({po.object, 0}) == wire);
+    CHECK(layout.width() == 6);
+    CHECK(layout.height() == 1);
+    CHECK(independent.height() == 3);
+    CHECK(stats.y_size_before == 3);
+    CHECK(stats.y_size_after == 1);
+}
+
+TEST_CASE("Post-layout optimization rejects invalid inputs without mutation", "[post-layout-ports]")
+{
+    gate_level_layout<cartesian_layout> layout{{4, 4}, layouts::clocking::twoddwave()};
+    const auto                          pi = layout.create_pi("a", {1, 1});
+    const auto                          po = layout.create_po(pi, "f", {3, 1});
+    CHECK_THROWS_AS(post_layout_optimization(layout), std::invalid_argument);
+    CHECK(layout.get_tile(pi.object) == gate_level_layout<cartesian_layout>::tile{1, 1});
+    CHECK(layout.source({po.object, 0}) == pi);
+    CHECK(layout.height() == 4);
+}
+
+TEST_CASE("Post-layout rerouting preserves noncommutative input order", "[post-layout-ports]")
+{
+    gate_level_layout<cartesian_layout> layout{{4, 4, 2}, layouts::clocking::twoddwave()};
+    const auto                          a    = layout.create_pi("a", {0, 0});
+    const auto                          b    = layout.create_pi("b", {0, 2});
+    auto                                left = a;
+    for (const gate_level_layout<cartesian_layout>::tile t :
+         {gate_level_layout<cartesian_layout>::tile{1, 0}, {2, 0}, {3, 0}, {3, 1}})
+    {
+        left = layout.create_buf(left, t);
+    }
+    const auto                      right = layout.create_buf(layout.create_buf(b, {1, 2}), {2, 2});
+    const auto                      gate  = layout.create_lt(left, right, {3, 2});
+    const auto                      po    = layout.create_po(gate, "f", {3, 3});
+    post_layout_optimization_params params{};
+    params.max_gate_relocations = 20;
+    post_layout_optimization(layout, params);
+    CHECK(layout.contains(gate.object));
+    CHECK(layout.contains(po.object));
+    CHECK(layout.is_lt(gate.object));
+    const auto objectives = extract_routing_objectives(layout);
+    CHECK(std::ranges::find(objectives,
+                            routing_objective<gate_level_layout<cartesian_layout>>{
+                                layout.get_tile(a.object), layout.get_tile(gate.object), 0}) != objectives.end());
+    CHECK(std::ranges::find(objectives,
+                            routing_objective<gate_level_layout<cartesian_layout>>{
+                                layout.get_tile(b.object), layout.get_tile(gate.object), 1}) != objectives.end());
+    CHECK(layout.area() <= 16);
 }

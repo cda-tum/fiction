@@ -38,6 +38,7 @@
 namespace pyfiction
 {
 
+/** @brief Registers mutable wiring_reduction operations. @param m Python module. */
 void wiring_reduction(nanobind::module_& m)
 {
     namespace py = nanobind;

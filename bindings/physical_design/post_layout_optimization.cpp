@@ -38,6 +38,7 @@
 namespace pyfiction
 {
 
+/** @brief Registers mutable post_layout_optimization operations. @param m Python module. */
 void post_layout_optimization(nanobind::module_& m)
 {
     namespace py = nanobind;

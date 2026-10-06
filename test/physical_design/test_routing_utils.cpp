@@ -28,6 +28,9 @@
 using namespace fiction;
 using namespace fiction::physical_design;
 
+/** @brief Checks objective coordinates and logical input indices. @tparam Lyt Layout type.
+ * @param objectives Extracted objectives. @param expected_objectives Expected connections.
+ */
 template <typename Lyt>
 void check_containing_objectives(const std::vector<routing_objective<Lyt>>& objectives,
                                  const std::vector<routing_objective<Lyt>>& expected_objectives)
@@ -53,7 +56,7 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
         const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {0, 2}, .target = {2, 0}},
-                                                 {.source = {1, 0}, .target = {2, 0}},
+                                                 {.source = {1, 0}, .target = {2, 0}, .input_index = 1},
                                                  {.source = {2, 0}, .target = {3, 0}}});
     }
     SECTION("Three paths wire connections")
@@ -71,10 +74,10 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
         const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {1, 1}, .target = {2, 1}},
-                                                 {.source = {2, 0}, .target = {2, 1}},
-                                                 {.source = {3, 1}, .target = {2, 1}},
+                                                 {.source = {2, 0}, .target = {2, 1}, .input_index = 1},
+                                                 {.source = {3, 1}, .target = {2, 1}, .input_index = 2},
                                                  {.source = {1, 1}, .target = {1, 0}},
-                                                 {.source = {2, 0}, .target = {1, 0}},
+                                                 {.source = {2, 0}, .target = {1, 0}, .input_index = 1},
                                                  {.source = {2, 1}, .target = {2, 2}},
                                                  {.source = {1, 0}, .target = {0, 0}}});
     }
@@ -84,11 +87,14 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
         const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {0, 1}, .target = {1, 2}},
-                                                 {.source = {3, 3}, .target = {1, 2}},
+                                                 {.source = {3, 3}, .target = {1, 2}, .input_index = 1},
                                                  {.source = {1, 2}, .target = {3, 2}}});
     }
 }
 
+/** @brief Checks a retained tile after clearing its connections. @tparam Lyt Layout type.
+ * @param lyt Layout. @param t Retained tile.
+ */
 template <typename Lyt>
 void check_non_empty_tile(const Lyt& lyt, const tile<Lyt>& t) noexcept
 {
@@ -157,4 +163,74 @@ TEST_CASE("Clear routing", "[routing-utils]")
 
         CHECK(layout.is_empty_tile({2, 2}));
     }
+}
+
+TEST_CASE("Routing preserves duplicate destination ports and retained identities", "[routing-ports]")
+{
+    cart_gate_clk_lyt layout{{6, 4, 2}, layouts::clocking::twoddwave()};
+    const auto        a          = layout.create_pi("a", {0, 0});
+    const auto        gate       = layout.create_lt(a, a, {4, 2});
+    const auto        po         = layout.create_po(gate, "f", {5, 2});
+    const auto        objectives = extract_routing_objectives(layout);
+    CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 2}, 0}) != objectives.end());
+    CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 2}, 1}) != objectives.end());
+    CHECK((routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 2}, 0} !=
+           routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 2}, 1}));
+    clear_routing(layout);
+    CHECK(layout.contains(a.object));
+    CHECK(layout.contains(gate.object));
+    CHECK(layout.contains(po.object));
+    CHECK_FALSE(layout.source({gate.object, 0}));
+    CHECK_FALSE(layout.source({gate.object, 1}));
+    const layout_coordinate_path<cart_gate_clk_lyt> second{{0, 0}, {1, 0}, {4, 2}};
+    route_path(layout, second, {gate.object, 1});
+    CHECK_FALSE(layout.source({gate.object, 0}));
+    const auto second_wire = *layout.source({gate.object, 1});
+    CHECK(layout.source({second_wire.object, 0}) == a);
+    const layout_coordinate_path<cart_gate_clk_lyt> first{{0, 0}, {0, 1}, {4, 2}};
+    route_path(layout, first, {gate.object, 0});
+    CHECK(layout.source({gate.object, 1}) == second_wire);
+    CHECK(layout.is_lt(gate.object));
+    layout.move_node(gate.object, {4, 3});
+    CHECK(layout.source({gate.object, 1}) == second_wire);
+}
+
+TEST_CASE("Invalid routing endpoints reject before creating wires", "[routing-ports]")
+{
+    cart_gate_clk_lyt                               layout{{5, 3, 2}};
+    const auto                                      a    = layout.create_pi("a", {0, 0});
+    const auto                                      b    = layout.create_pi("b", {0, 1});
+    const auto                                      gate = layout.create_lt(a, b, {4, 0});
+    const layout_coordinate_path<cart_gate_clk_lyt> path{{0, 0}, {1, 0}, {4, 0}};
+    CHECK_THROWS_AS(route_path(layout, path, {gate.object, 2}), std::out_of_range);
+    CHECK(layout.size() == 3);
+    CHECK(layout.source({gate.object, 0}) == a);
+    CHECK(layout.source({gate.object, 1}) == b);
+    const layout_coordinate_path<cart_gate_clk_lyt> mismatch{{0, 0}, {1, 0}, {4, 1}};
+    CHECK_THROWS_AS(route_path(layout, mismatch, {gate.object, 0}), std::invalid_argument);
+    CHECK_FALSE(layout.find_object({1, 0}));
+    const auto blocker = layout.create_buf({1, 0});
+    layout.create_buf({1, 0, 1});
+    CHECK_THROWS_AS(route_path(layout, path, {gate.object, 0}), std::invalid_argument);
+    CHECK(layout.find_object({1, 0}) == blocker.object);
+    CHECK(layout.source({gate.object, 0}) == a);
+}
+
+TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[routing-ports]")
+{
+    cart_gate_clk_lyt layout{{5, 3, 2}, layouts::clocking::twoddwave()};
+    const auto        a    = layout.create_pi("a", {0, 0});
+    const auto        b    = layout.create_pi("b", {0, 1});
+    const auto        gate = layout.create_lt(a, b, {4, 1});
+    clear_routing(layout);
+    const layout_coordinate_path<cart_gate_clk_lyt> second{{0, 1}, {1, 1}, {4, 1}};
+    const layout_coordinate_path<cart_gate_clk_lyt> first{{0, 0}, {1, 0}, {4, 1}};
+    route_path(layout, second, {gate.object, 1});
+    route_path(layout, first, {gate.object, 0});
+    CHECK(layout.source({layout.source({gate.object, 0})->object, 0}) == a);
+    CHECK(layout.source({layout.source({gate.object, 1})->object, 0}) == b);
+    CHECK(layout.is_lt(gate.object));
+    const auto objectives = extract_routing_objectives(layout);
+    CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 1}, 0}) != objectives.end());
+    CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 1}, {4, 1}, 1}) != objectives.end());
 }

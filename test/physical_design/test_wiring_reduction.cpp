@@ -40,7 +40,7 @@ using namespace fiction::physical_design;
 template <typename Lyt, typename Ntk>
 static void check_layout_equiv(const Ntk& ntk)
 {
-    const auto layout = orthogonal<Lyt>(ntk, {});
+    auto layout = orthogonal<Lyt>(ntk, {});
 
     wiring_reduction_stats stats{};
     wiring_reduction<Lyt>(layout, {}, &stats);
@@ -120,32 +120,32 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
+        auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
         wiring_reduction_stats stats_corner_case_1{};
         wiring_reduction<gate_layout>(layout_corner_case_1, {}, &stats_corner_case_1);
         check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
 
-        const auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
+        auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
         wiring_reduction_stats stats_corner_case_2{};
         wiring_reduction<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
         check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
 
-        const auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<gate_layout>();
+        auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<gate_layout>();
         wiring_reduction_stats stats_corner_case_3{};
         wiring_reduction<gate_layout>(layout_corner_case_3, {}, &stats_corner_case_3);
         check_eq(blueprints::optimization_layout_corner_case_outputs_3<gate_layout>(), layout_corner_case_3);
 
-        const auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<gate_layout>();
+        auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<gate_layout>();
         wiring_reduction_stats stats_corner_case_4{};
         wiring_reduction<gate_layout>(layout_corner_case_4, {}, &stats_corner_case_4);
         check_eq(blueprints::optimization_layout_corner_case_outputs_4<gate_layout>(), layout_corner_case_4);
 
-        const auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<gate_layout>();
+        auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<gate_layout>();
         wiring_reduction_stats stats_corner_case_5{};
         wiring_reduction<gate_layout>(layout_corner_case_5, {}, &stats_corner_case_5);
         check_eq(blueprints::optimization_layout_corner_case_outputs_5<gate_layout>(), layout_corner_case_5);
 
-        const auto layout_corner_case_inputs = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
+        auto layout_corner_case_inputs = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
         wiring_reduction_stats stats_corner_case_inputs{};
         wiring_reduction<gate_layout>(layout_corner_case_inputs, {}, &stats_corner_case_inputs);
         check_eq(blueprints::optimization_layout_corner_case_inputs<gate_layout>(), layout_corner_case_inputs);
@@ -155,7 +155,7 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         wiring_reduction_stats  stats{};
         wiring_reduction_params params{};
@@ -169,7 +169,7 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         wiring_reduction_stats  stats{};
         wiring_reduction_params params{};
@@ -185,8 +185,8 @@ TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    const auto layout    = blueprints::use_and_gate_layout<gate_layout>();
-    auto       obstr_lyt = gate_layout(layout);
+    auto layout    = blueprints::use_and_gate_layout<gate_layout>();
+    auto obstr_lyt = gate_layout(layout);
 
     SECTION("Call functions")
     {
@@ -195,7 +195,8 @@ TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
 
         wiring_reduction_stats stats_wrong_clocking_scheme{};
 
-        CHECK_NOTHROW(wiring_reduction<gate_layout>(obstr_lyt, {}, &stats_wrong_clocking_scheme));
+        CHECK_THROWS_AS(wiring_reduction<gate_layout>(obstr_lyt, {}, &stats_wrong_clocking_scheme),
+                        std::invalid_argument);
     }
 }
 
@@ -203,8 +204,8 @@ TEST_CASE("Search Direction", "[wiring_reduction]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    const auto layout    = blueprints::straight_wire_gate_layout<gate_layout>();
-    auto       obstr_lyt = gate_layout(layout);
+    auto layout    = blueprints::straight_wire_gate_layout<gate_layout>();
+    auto obstr_lyt = gate_layout(layout);
 
     SECTION("Get")
     {
@@ -221,13 +222,13 @@ TEST_CASE("PI and PO border validation", "[wiring_reduction]")
     SECTION("Invalid layout with PI not in borders")
     {
         auto layout = blueprints::pi_not_in_border_optimization_layout<gate_layout>();
-        CHECK_NOTHROW(wiring_reduction<gate_layout>(layout));
+        CHECK_THROWS_AS(wiring_reduction<gate_layout>(layout), std::invalid_argument);
     }
 
     SECTION("Invalid layout with PO not in borders")
     {
         auto layout = blueprints::po_not_in_border_optimization_layout<gate_layout>();
-        CHECK_NOTHROW(wiring_reduction<gate_layout>(layout));
+        CHECK_THROWS_AS(wiring_reduction<gate_layout>(layout), std::invalid_argument);
     }
 }
 
@@ -236,7 +237,7 @@ TEST_CASE("Wiring reduction reports progress", "[wiring_reduction]")
     using gate_layout = gate_level_layout<cartesian_layout>;
 
     const auto ntk    = blueprints::mux21_network<technology_network>();
-    const auto layout = orthogonal<gate_layout>(ntk);
+    auto       layout = orthogonal<gate_layout>(ntk);
 
     progress_recorder       rec{};
     wiring_reduction_params params{};
@@ -251,4 +252,61 @@ TEST_CASE("Wiring reduction reports progress", "[wiring_reduction]")
     const auto reports = rec.reports_of("wire paths");
     REQUIRE(!reports.empty());
     CHECK(reports.back().total == 0);
+}
+
+TEST_CASE("Wiring reduction preserves identities and ordered input ports", "[wiring-reduction-ports]")
+{
+    gate_level_layout<cartesian_layout> layout{{3, 6, 2}, layouts::clocking::twoddwave()};
+    const auto                          a     = layout.create_pi("a", {0, 0});
+    const auto                          b     = layout.create_pi("b", {2, 0});
+    auto                                left  = a;
+    auto                                right = b;
+    for (int32_t y = 1; y < 4; ++y)
+    {
+        left  = layout.create_buf(left, {0, y});
+        right = layout.create_buf(right, {2, y});
+    }
+    const auto             gate        = layout.create_lt(left, right, {1, 4});
+    const auto             po          = layout.create_po(gate, "f", {1, 5});
+    const auto             independent = layout;
+    wiring_reduction_stats stats{};
+    wiring_reduction(layout, {}, &stats);
+    CHECK(layout.contains(a.object));
+    CHECK(layout.contains(b.object));
+    CHECK(layout.contains(gate.object));
+    CHECK(layout.contains(po.object));
+    CHECK(layout.source({po.object, 0}) == gate);
+    const auto objectives = extract_routing_objectives(layout);
+    CHECK(std::ranges::find(objectives,
+                            routing_objective<gate_level_layout<cartesian_layout>>{
+                                layout.get_tile(a.object), layout.get_tile(gate.object), 0}) != objectives.end());
+    CHECK(std::ranges::find(objectives,
+                            routing_objective<gate_level_layout<cartesian_layout>>{
+                                layout.get_tile(b.object), layout.get_tile(gate.object), 1}) != objectives.end());
+    CHECK(layout.is_lt(gate.object));
+    CHECK(layout.num_wires() < independent.num_wires());
+    CHECK(independent.height() == 6);
+    CHECK(stats.y_size_after == layout.height());
+}
+TEST_CASE("Wiring reduction handles empty layouts and invalid geometry", "[wiring-reduction-ports]")
+{
+    gate_level_layout<cartesian_layout> empty{{}, layouts::clocking::twoddwave()};
+    wiring_reduction_stats              stats{};
+    wiring_reduction(empty, {}, &stats);
+    CHECK(empty.is_empty());
+    CHECK(empty.area() == 0);
+    CHECK(stats.area_improvement == 0);
+    CHECK(stats.wiring_improvement == 0);
+    gate_level_layout<cartesian_layout> invalid{{2, 2}, layouts::clocking::twoddwave()};
+    const auto                          outside = invalid.create_buf({-1, 0});
+    CHECK_THROWS_AS(wiring_reduction(invalid), std::invalid_argument);
+    CHECK(invalid.get_tile(outside.object) == gate_level_layout<cartesian_layout>::tile{-1, 0});
+}
+
+TEST_CASE("Wiring reduction rejects dimensions beyond its routing range", "[wiring-reduction-ports]")
+{
+    gate_level_layout<cartesian_layout> layout{{2147483647, 1}, layouts::clocking::twoddwave()};
+    const auto                          object = layout.create_buf({0, 0});
+    CHECK_THROWS_AS(wiring_reduction(layout), std::overflow_error);
+    CHECK(layout.get_tile(object.object) == gate_level_layout<cartesian_layout>::tile{0, 0});
 }
