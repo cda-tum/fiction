@@ -27,8 +27,9 @@
 #include <mockturtle/traits.hpp>
 #include <phmap.h>
 
-#include <iterator>
+#include <algorithm>
 #include <stdexcept>
+#include <vector>
 
 namespace fiction::qca
 {
@@ -116,36 +117,37 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
     }
     /**
      * Post-layout optimization that turns the ends of crossing wires into vias: a crossing-layer cell with at most one
-     * neighbor gets the via mode, and a via cell is added below it on the ground layer.
+     * neighbor gets the via mode, and a via cell is added below it on the ground layer. The optimization visits
+     * occupied cells inside the frame and ignores empty positions.
      *
      * @param lyt The QCA layout that has been created via application of `set_up_gate`.
      */
     static void post_layout_optimization(qca::layout& lyt)
     {
-        lyt.foreach_cell_position(
-            [&lyt](const auto& c)
+        /** Occupied crossing cells inside the frame, stable while ground vias are inserted. */
+        std::vector<qca::layout::cell> crossing_cells{};
+        lyt.foreach_cell(
+            [&lyt, &crossing_cells](const auto& c)
             {
-                if (lyt.is_crossing_layer(c))
+                if (lyt.contains_coordinate(c) && lyt.is_crossing_layer(c))
                 {
-                    if (!lyt.is_empty_cell(c))
-                    {
-                        // gather adjacent cell positions
-                        auto adjacent_cells = lyt.adjacent_coordinates(c);
-                        // remove all empty cells
-                        std::erase_if(adjacent_cells, [&lyt](const auto& ac) { return lyt.is_empty_cell(ac); });
-                        // if there is at most one neighbor left
-                        if (std::ranges::distance(adjacent_cells) <= 1)
-                        {
-                            // change cell mode to via
-                            lyt.assign_cell_mode(c, qca::cell_mode::VERTICAL);
-                            // create a corresponding via ground cell
-                            const qca::layout::cell ground_via_cell{c.x, c.y, 0};
-                            lyt.assign_cell_type(ground_via_cell, qca::cell_type::NORMAL);
-                            lyt.assign_cell_mode(ground_via_cell, qca::cell_mode::VERTICAL);
-                        }
-                    }
+                    crossing_cells.push_back(c);
                 }
             });
+        for (const auto& c : crossing_cells)
+        {
+            /** Occupied neighbors in the crossing layer. */
+            auto adjacent_cells = lyt.adjacent_coordinates(c);
+            std::erase_if(adjacent_cells, [&lyt](const auto& ac) { return lyt.is_empty_cell(ac); });
+            if (adjacent_cells.size() <= 1)
+            {
+                lyt.assign_cell_mode(c, qca::cell_mode::VERTICAL);
+                /** Ground coordinate beneath the crossing endpoint. */
+                const qca::layout::cell ground_via_cell{c.x, c.y, 0};
+                lyt.assign_cell_type(ground_via_cell, qca::cell_type::NORMAL);
+                lyt.assign_cell_mode(ground_via_cell, qca::cell_mode::VERTICAL);
+            }
+        }
     }
 
   private:

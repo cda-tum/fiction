@@ -187,3 +187,44 @@ TEST_CASE("QCA ONE rejects an unoccupied tile", "[qca-one-library]")
     CHECK_THROWS_AS(qca_one_library::set_up_gate(layout, {0, 0}),
                     fcn::unsupported_gate_type_exception<cartesian_layout::coordinate>);
 }
+
+TEST_CASE("QCA ONE vias in a sparse frame", "[qca-one-library]")
+{
+    /** Sparse geometry spanning the complete nonnegative x domain. */
+    qca::layout layout{{uint32_t{1} << 31, 8, 2}};
+    layout.assign_cell_type({4, 1, 1}, cell_type::NORMAL);
+    layout.assign_cell_type({4, 2, 1}, cell_type::NORMAL);
+    layout.assign_cell_type({4, 3, 1}, cell_type::NORMAL);
+    layout.assign_cell_type({4, 1, 0}, cell_type::OUTPUT);
+    layout.assign_cell_type({-1, 1, 1}, cell_type::NORMAL);
+    layout.assign_cell_type({4, 8, 1}, cell_type::OUTPUT);
+    layout.assign_cell_type({4, 2, 3}, cell_type::NORMAL);
+
+    for (int32_t x = 16; x < 136; x += 3)
+    {
+        layout.assign_cell_type({x, 5, 1}, cell_type::NORMAL);
+    }
+
+    qca_one_library::post_layout_optimization(layout);
+
+    CHECK(layout.get_cell_mode({4, 1, 1}) == cell_mode::VERTICAL);
+    CHECK(layout.get_cell_mode({4, 3, 1}) == cell_mode::VERTICAL);
+    CHECK(layout.get_cell_mode({4, 2, 1}) == cell_mode::NORMAL);
+    CHECK(layout.get_cell_type({4, 1, 0}) == cell_type::NORMAL);
+    CHECK(layout.get_cell_type({4, 3, 0}) == cell_type::NORMAL);
+    CHECK(layout.get_cell_mode({4, 1, 0}) == cell_mode::VERTICAL);
+    CHECK(layout.get_cell_mode({4, 3, 0}) == cell_mode::VERTICAL);
+    CHECK(layout.get_cell_mode({-1, 1, 1}) == cell_mode::NORMAL);
+    CHECK(layout.get_cell_type({-1, 1, 0}) == cell_type::EMPTY);
+    CHECK(layout.get_cell_mode({4, 8, 1}) == cell_mode::NORMAL);
+    CHECK(layout.get_cell_type({4, 8, 1}) == cell_type::OUTPUT);
+    CHECK(layout.get_cell_type({4, 8, 0}) == cell_type::EMPTY);
+    CHECK(layout.get_cell_mode({4, 2, 3}) == cell_mode::NORMAL);
+    CHECK(layout.get_cell_type({4, 2, 0}) == cell_type::EMPTY);
+    for (int32_t x = 16; x < 136; x += 3)
+    {
+        CHECK(layout.get_cell_mode({x, 5, 1}) == cell_mode::VERTICAL);
+        CHECK(layout.get_cell_type({x, 5, 0}) == cell_type::NORMAL);
+        CHECK(layout.get_cell_mode({x, 5, 0}) == cell_mode::VERTICAL);
+    }
+}
