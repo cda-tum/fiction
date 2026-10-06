@@ -21,175 +21,92 @@
 #include "fiction/traits.hpp"
 
 #include <algorithm>
-#include <limits>
+#include <cstdint>
+#include <optional>
 
 namespace fiction::layouts
 {
 /**
- * A 2D bounding box object that computes a minimum-sized box around all non-empty coordinates in a given layout.
- * Layouts can be of arbitrary size and, thus, may be larger than their contained elements. Sometimes, it might be
- * necessary to know exactly which space the associated layout internals occupy. A bounding box computes coordinates
- * that span a minimum-sized rectangle that encloses all non-empty layout coordinates.
- *
- * The bounding box does not automatically updated when the layout changes. Call `update_bounding_box()` to recompute
- * it.
- *
- * @tparam Lyt Gate-level or cell-level layout type.
+ * @brief Cached two-dimensional bounds of every occupied coordinate, including positions outside the geometry.
+ * @tparam Lyt Gate-level layout or cell grid.
  */
 template <typename Lyt>
 class bounding_box_2d
 {
   public:
-    /**
-     * Standard constructor that computes an initial bounding box.
-     *
-     * @param lyt Gate-level or cell-level layout whose bounding box is desired.
-     */
-    explicit bounding_box_2d(const Lyt& lyt) noexcept : layout{lyt}
+    /** @brief Computes occupied bounds. @param lyt Layout whose occupied positions are enclosed. */
+    explicit bounding_box_2d(const Lyt& lyt) : layout{lyt}
     {
-        static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+        static_assert(is_gate_level_layout_v<Lyt> || is_cell_grid_v<Lyt>);
         update_bounding_box();
     }
-    /**
-     * The bounding box is not automatically updated when the layout changes. This function recomputes the bounding box.
-     */
+    /** @brief Recomputes bounds from live occupied coordinates. Empty layouts have no bounds. */
     void update_bounding_box()
     {
-        min = {0, 0, 0};
-        max = {0, 0, 0};
-
-        // empty layouts don't need further computation
-        if (layout.is_empty())
+        min.reset();
+        max.reset();
+        x_size             = 0;
+        y_size             = 0;
+        const auto include = [&](const auto& c)
         {
-            return;
-        }
-
-        // Helper function to update bounding box
-        const auto update_min_max = [](auto& min_coord, auto& max_coord, const auto& coord) noexcept
-        {
-            min_coord.x = std::min(min_coord.x, coord.x);
-            max_coord.x = std::max(max_coord.x, coord.x);
-            min_coord.y = std::min(min_coord.y, coord.y);
-            max_coord.y = std::max(max_coord.y, coord.y);
+            if (!min)
+            {
+                min = coordinate<Lyt>{c.x, c.y, 0};
+                max = min;
+            }
+            else
+            {
+                min->x = std::min(min->x, c.x);
+                min->y = std::min(min->y, c.y);
+                max->x = std::max(max->x, c.x);
+                max->y = std::max(max->y, c.y);
+            }
         };
-
-        min = {std::numeric_limits<decltype(coordinate<Lyt>::x)>::max(),
-               std::numeric_limits<decltype(coordinate<Lyt>::y)>::max()};
-        max = {std::numeric_limits<decltype(coordinate<Lyt>::x)>::min(),
-               std::numeric_limits<decltype(coordinate<Lyt>::y)>::min()};
-
         if constexpr (is_gate_level_layout_v<Lyt>)
         {
-            layout.foreach_coordinate(
-                [&](const auto& c)
-                {
-                    if (!is_empty_coordinate(c))
-                    {
-                        update_min_max(min, max, c);
-                    }
-                });
+            layout.foreach_node([&](const auto id) { include(layout.get_tile(id)); });
         }
-
-        else if constexpr (is_cell_grid_v<Lyt>)
+        else
         {
-            layout.foreach_cell([&](const auto& c) { update_min_max(min, max, c); });
+            layout.foreach_cell(include);
         }
-
-        // no non-empty coordinate lies within the layout
-        if (min.x > max.x)
+        if (min)
         {
-            min = {0, 0, 0};
-            max = {0, 0, 0};
+            x_size = static_cast<uint64_t>(static_cast<int64_t>(max->x) - min->x) + 1;
+            y_size = static_cast<uint64_t>(static_cast<int64_t>(max->y) - min->y) + 1;
         }
-
-        // Final bounding box dimensions
-        x_size = max.x - min.x;
-        y_size = max.y - min.y;
     }
-    /**
-     * Returns the minimum corner of the bounding box.
-     *
-     * In a `cartesian_layout` object, this location represents the most north-western coordinate
-     * of the bounding box enclosing every non-empty coordinate.
-     *
-     * @return The minimum enclosing coordinate in the associated layout.
-     */
-    [[nodiscard]] coordinate<Lyt> get_min() const noexcept
+    /** @brief Returns the minimum occupied corner, or no coordinate for an empty layout. */
+    [[nodiscard]] std::optional<coordinate<Lyt>> get_min() const noexcept
     {
         return min;
     }
-    /**
-     * Returns the maximum corner of the bounding box.
-     *
-     * In a `cartesian_layout` object, this location represents the most south-eastern coordinate
-     * of the bounding box enclosing every non-empty coordinate.
-     *
-     * @return The maximum enclosing coordinate in the associated layout.
-     */
-    [[nodiscard]] coordinate<Lyt> get_max() const noexcept
+    /** @brief Returns the maximum occupied corner, or no coordinate for an empty layout. */
+    [[nodiscard]] std::optional<coordinate<Lyt>> get_max() const noexcept
     {
         return max;
     }
-    /**
-     * Returns the horizontal size of the bounding box in layout coordinates.
-     *
-     * @return Bounding box size along the x-axis.
-     */
-    [[nodiscard]] auto get_x_size() const noexcept
+    /** @brief Counts occupied bounding columns; zero for an empty layout. */
+    [[nodiscard]] uint64_t get_x_size() const noexcept
     {
         return x_size;
     }
-    /**
-     * Returns the vertical size of the bounding box in layout coordinates.
-     *
-     * @return Bounding box size along the y-axis.
-     */
-    [[nodiscard]] auto get_y_size() const noexcept
+    /** @brief Counts occupied bounding rows; zero for an empty layout. */
+    [[nodiscard]] uint64_t get_y_size() const noexcept
     {
         return y_size;
     }
 
   private:
-    /**
-     * The layout whose bounding box is being computed.
-     */
+    /** @brief Layout observed when bounds are recomputed. */
     const Lyt& layout;
-
-    /**
-     * The minimum and maximum coordinates of the bounding box.
-     */
-    coordinate<Lyt> min{0, 0, 0}, max{0, 0, 0};
-
-    /**
-     * The horizontal size of the bounding box in layout coordinates.
-     */
-    decltype(min.x) x_size{};
-
-    /**
-     * The vertical size of the bounding box in layout coordinates.
-     */
-    decltype(min.y) y_size{};
-
-    /**
-     * Checks if a given coordinate is empty in the layout.
-     *
-     * @param c The coordinate to check.
-     * @return True if the coordinate is empty, false otherwise.
-     */
-    [[nodiscard]] bool is_empty_coordinate(const coordinate<Lyt>& c) const noexcept
-    {
-        static_assert(is_gate_level_layout_v<Lyt> || is_cell_grid_v<Lyt>,
-                      "Lyt is neither a gate-level nor a cell-level layout");
-
-        if constexpr (is_gate_level_layout_v<Lyt>)
-        {
-            return layout.is_empty_tile(c);
-        }
-        else
-        {
-            return layout.is_empty_cell(c);
-        }
-    }
+    /** @brief Minimum occupied corner. */
+    std::optional<coordinate<Lyt>> min{};
+    /** @brief Maximum occupied corner. */
+    std::optional<coordinate<Lyt>> max{};
+    /** @brief Number of bounding columns. */
+    uint64_t x_size{};
+    /** @brief Number of bounding rows. */
+    uint64_t y_size{};
 };
-
 }  // namespace fiction::layouts
