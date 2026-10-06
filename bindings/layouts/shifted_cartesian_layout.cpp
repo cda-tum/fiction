@@ -22,6 +22,7 @@
 #include <fiction/traits.hpp>
 
 #include <cstdint>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -214,24 +215,34 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
 
         .def(
             "coordinates",
-            [](const Lyt& lyt)
+            [](const Lyt& lyt, const std::optional<py_coordinate> start, const std::optional<py_coordinate> stop)
             {
                 std::vector<fiction::coordinate<Lyt>> coords{};
-                coords.reserve(lyt.volume());
-                lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); });
+                if (!start && !stop)
+                {
+                    coords.reserve(lyt.volume());
+                }
+                lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); }, start, stop);
                 return coords;
             },
-            DOC(fiction_layouts_cartesian_layout_coordinates))
+            py::arg("start") = py::none(), py::arg("stop") = py::none(),
+            "Returns coordinates in z/y/x order from the inclusive start to the exclusive stop. None uses the frame "
+            "boundary.")
         .def(
             "ground_coordinates",
-            [](const Lyt& lyt)
+            [](const Lyt& lyt, const std::optional<py_coordinate> start, const std::optional<py_coordinate> stop)
             {
                 std::vector<fiction::coordinate<Lyt>> coords{};
-                coords.reserve(lyt.layers() == 0 ? 0 : lyt.area());
-                lyt.foreach_ground_coordinate([&coords](const auto& c) { coords.push_back(c); });
+                if (!start && !stop)
+                {
+                    coords.reserve(lyt.layers() == 0 ? 0 : lyt.area());
+                }
+                lyt.foreach_ground_coordinate([&coords](const auto& c) { coords.push_back(c); }, start, stop);
                 return coords;
             },
-            DOC(fiction_layouts_cartesian_layout_ground_coordinates))
+            py::arg("start") = py::none(), py::arg("stop") = py::none(),
+            "Returns layer-zero coordinates from the inclusive start to the exclusive stop. None uses the frame "
+            "boundary. Bounds outside layer zero raise ValueError.")
         .def(
             "adjacent_coordinates", [](const Lyt& lyt, const py_coordinate& c) { return lyt.adjacent_coordinates(c); },
             py::arg("c"), DOC(fiction_layouts_cartesian_layout_adjacent_coordinates))

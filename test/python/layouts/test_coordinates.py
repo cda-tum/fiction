@@ -242,3 +242,30 @@ def test_zero_layers_skip_coordinate_allocation(
     layout = make_layout()
     assert layout.coordinates() == []
     assert layout.ground_coordinates() == []
+
+
+@pytest.mark.parametrize(
+    "make_layout",
+    [
+        pytest.param(cartesian_layout, id="cartesian"),
+        pytest.param(lambda size: hexagonal_layout(arrangement.EVEN_ROW, size), id="hexagonal"),
+        pytest.param(lambda size: shifted_cartesian_layout(arrangement.EVEN_ROW, size), id="shifted_cartesian"),
+    ],
+)
+def test_coordinate_ranges_accept_optional_bounds(
+    make_layout: Callable[[tuple[int, int, int]], cartesian_layout | hexagonal_layout | shifted_cartesian_layout],
+) -> None:
+    layout = make_layout((4, 3, 2))
+    assert layout.coordinates(start=(1, 1), stop=(3, 1)) == [coordinate(1, 1), coordinate(2, 1)]
+    assert layout.ground_coordinates(start=(1, 1), stop=(0, 2)) == [
+        coordinate(1, 1),
+        coordinate(2, 1),
+        coordinate(3, 1),
+    ]
+    assert layout.coordinates(start=(3, 1), stop=(1, 1)) == []
+    assert len(layout.coordinates(start=None, stop=None)) == 24
+    with pytest.raises(ValueError, match="layer zero"):
+        layout.ground_coordinates(stop=(0, 0, 1))
+    huge = make_layout((2**31, 2**31, 4))
+    assert huge.coordinates(stop=(2, 0)) == [coordinate(0, 0), coordinate(1, 0)]
+    assert huge.ground_coordinates(stop=(2, 0)) == [coordinate(0, 0), coordinate(1, 0)]
