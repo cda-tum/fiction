@@ -323,8 +323,8 @@ void optimize_output_positions(Lyt& lyt) noexcept
     if (lyt.is_po_tile({lyt.x(), lyt.y(), 0}) && (lyt.num_pos() == 1))
     {
         // check if relocation would save tiles
-        if (lyt.has_western_incoming_signal({lyt.x(), lyt.y(), 0}) &&
-            ((lyt.x() * (lyt.y() + 2)) < ((lyt.x() + 1) * (lyt.y() + 1))))
+        // x * (y + 2) < (x + 1) * (y + 1) holds iff x <= y; the comparison avoids the products
+        if (lyt.has_western_incoming_signal({lyt.x(), lyt.y(), 0}) && (lyt.x() <= lyt.y()))
         {
             // get fanin signal of the PO
             std::vector<mockturtle::signal<Lyt>> signals{};
@@ -339,8 +339,8 @@ void optimize_output_positions(Lyt& lyt) noexcept
             lyt.move_node(lyt.get_node({lyt.x(), lyt.y() - 1}), {lyt.x() - 1, lyt.y(), 0}, signals);
         }
         // check if relocation would save tiles
-        else if (lyt.has_northern_incoming_signal({lyt.x(), lyt.y(), 0}) &&
-                 (((lyt.x() + 2) * lyt.y()) < ((lyt.x() + 1) * (lyt.y() + 1))))
+        // (x + 2) * y < (x + 1) * (y + 1) holds iff y <= x
+        else if (lyt.has_northern_incoming_signal({lyt.x(), lyt.y(), 0}) && (lyt.y() <= lyt.x()))
         {
             // get fanin signal of the PO
             std::vector<mockturtle::signal<Lyt>> signals{};
@@ -466,7 +466,7 @@ class post_layout_optimization_impl
         pst.num_crossings_before = plyt.num_crossings();
 
         // determine the maximum number of gate relocations
-        max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
+        max_gate_relocations = ps.max_gate_relocations.value_or(plyt.area());
 
         // share the layout storage while updating placement
         auto layout = plyt;
