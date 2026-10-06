@@ -624,12 +624,12 @@ class cartesian_layout : public layout_base
      * @param c Coordinate whose adjacent ones are desired.
      * @return A container that contains all of `c`'s adjacent coordinates.
      */
-    [[nodiscard]] auto adjacent_coordinates(const coordinate& c) const noexcept
+    [[nodiscard]] auto adjacent_coordinates(const coordinate& c) const
     {
         std::vector<coordinate> cnt{};
         cnt.reserve(max_fanin_size + 1);  // reserve memory
 
-        foreach_adjacent_coordinate(c, [&cnt](const auto& ac) noexcept { cnt.push_back(ac); });
+        foreach_adjacent_coordinate(c, [&cnt](const auto& ac) { cnt.push_back(ac); });
 
         return cnt;
     }
@@ -646,7 +646,7 @@ class cartesian_layout : public layout_base
     template <typename Fn>
     void foreach_adjacent_coordinate(const coordinate& c, Fn&& fn) const
     {
-        const auto apply_if_present = [&fn](const auto& cardinal) noexcept
+        const auto apply_if_present = [&fn](const auto& cardinal)
         {
             if (cardinal)
             {
@@ -670,12 +670,12 @@ class cartesian_layout : public layout_base
      * @param c Coordinate whose opposite ones are desired.
      * @return A container that contains pairs of `c`'s opposing coordinates.
      */
-    [[nodiscard]] auto adjacent_opposite_coordinates(const coordinate& c) const noexcept
+    [[nodiscard]] auto adjacent_opposite_coordinates(const coordinate& c) const
     {
         std::vector<std::pair<coordinate, coordinate>> cnt{};
         cnt.reserve((max_fanin_size + 1) / 2);  // reserve memory
 
-        foreach_adjacent_opposite_coordinates(c, [&cnt](const auto& cp) noexcept { cnt.push_back(cp); });
+        foreach_adjacent_opposite_coordinates(c, [&cnt](const auto& cp) { cnt.push_back(cp); });
 
         return cnt;
     }
@@ -690,7 +690,7 @@ class cartesian_layout : public layout_base
     template <typename Fn>
     void foreach_adjacent_opposite_coordinates(const coordinate& c, Fn&& fn) const
     {
-        const auto apply_if_present = [&fn](auto cardinal1, auto cardinal2) noexcept
+        const auto apply_if_present = [&fn](auto cardinal1, auto cardinal2)
         {
             if (cardinal1 && cardinal2)
             {

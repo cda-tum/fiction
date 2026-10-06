@@ -24,6 +24,7 @@
 #include <fiction/traits.hpp>
 
 #include <set>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -764,4 +765,15 @@ TEST_CASE("Hexagonal empty geometry and signed edge arithmetic", "[hexagonal-lay
             CHECK(empty.is_adjacent_elevation_of(c, {n.x, n.y, 1}));
         }
     }
+}
+
+TEST_CASE("Hexagonal neighbor callbacks propagate exceptions", "[hexagonal-layout][neighbor-exceptions]")
+{
+    const hexagonal_layout layout{arrangement::ODD_ROW, {3, 3}};
+    CHECK_THROWS_AS(
+        layout.foreach_adjacent_coordinate({1, 1}, [](const auto&) { throw std::runtime_error("callback"); }),
+        std::runtime_error);
+    CHECK_THROWS_AS(
+        layout.foreach_adjacent_opposite_coordinates({1, 1}, [](const auto&) { throw std::runtime_error("callback"); }),
+        std::runtime_error);
 }

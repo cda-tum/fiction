@@ -23,6 +23,7 @@
 #include <fiction/traits.hpp>
 
 #include <set>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -179,4 +180,15 @@ TEST_CASE("Cartesian predicates ignore frame bounds", "[cartesian-layout][size-c
     const cartesian_layout wide{{2147483648ull, 1, 1}};
     CHECK(!wide.east({2147483647, 0}));
     CHECK(wide.west({2147483647, 0}) == layout_base::coordinate{2147483646, 0});
+}
+
+TEST_CASE("Cartesian neighbor callbacks propagate exceptions", "[cartesian-layout][neighbor-exceptions]")
+{
+    const cartesian_layout layout{{3, 3}};
+    CHECK_THROWS_AS(
+        layout.foreach_adjacent_coordinate({1, 1}, [](const auto&) { throw std::runtime_error("callback"); }),
+        std::runtime_error);
+    CHECK_THROWS_AS(
+        layout.foreach_adjacent_opposite_coordinates({1, 1}, [](const auto&) { throw std::runtime_error("callback"); }),
+        std::runtime_error);
 }
