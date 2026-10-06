@@ -21,6 +21,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/technology/fcn/io/write_qll_layout.hpp>
+#include <fiction/technology/inml/io/write_qcc_layout.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
@@ -74,7 +75,7 @@ TEST_CASE("Write empty iNML layout", "[qll]")
 
     std::ostringstream layout_stream{};
 
-    const inml::layout layout{{2, 2}, "empty layout"};
+    const inml::layout layout{{3, 3}, "empty layout"};
 
     write_qll_layout(layout, layout_stream);
 
@@ -85,7 +86,7 @@ TEST_CASE("Abort on non-pin iNML layouts", "[qll]")
 {
     std::ostringstream layout_stream{};
 
-    inml::layout layout{{4, 4}, "Non-pin layout"};
+    inml::layout layout{{5, 5}, "Non-pin layout"};
 
     // add two normal cells to span a bounding boy
     layout.assign_cell_type({0, 0}, inml::magnet_type::NORMAL);
@@ -380,7 +381,7 @@ TEST_CASE("Write empty mQCA layout", "[qll]")
 
     std::ostringstream layout_stream{};
 
-    const qca::layout layout{{2, 2, 1}, "empty layout"};
+    const qca::layout layout{{3, 3, 2}, "empty layout"};
 
     write_qll_layout(layout, layout_stream);
 
@@ -425,7 +426,7 @@ TEST_CASE("Write single-layer molQCA phase cells", "[qll]")
 
     std::ostringstream layout_stream{};
 
-    mol_qca::layout layout{{3, 0}, "molQCA phase cells"};
+    mol_qca::layout layout{{4, 1}, "molQCA phase cells"};
     layout.assign_cell_type({0, 0}, mol_qca::cell_type::NORMAL1);
     layout.assign_cell_type({1, 0}, mol_qca::cell_type::NORMAL2);
     layout.assign_cell_type({2, 0}, mol_qca::cell_type::NORMAL3);
@@ -466,7 +467,7 @@ TEST_CASE("Write molQCA constant cells", "[qll]")
 
         std::ostringstream layout_stream{};
 
-        mol_qca::layout layout{{0, 0}, "molQCA constant 0 cell"};
+        mol_qca::layout layout{{1, 1}, "molQCA constant 0 cell"};
         layout.assign_cell_type({0, 0}, mol_qca::cell_type::CONST_0);
 
         write_qll_layout(layout, layout_stream);
@@ -502,7 +503,7 @@ TEST_CASE("Write molQCA constant cells", "[qll]")
 
         std::ostringstream layout_stream{};
 
-        mol_qca::layout layout{{0, 0}, "molQCA constant 1 cell"};
+        mol_qca::layout layout{{1, 1}, "molQCA constant 1 cell"};
         layout.assign_cell_type({0, 0}, mol_qca::cell_type::CONST_1);
 
         write_qll_layout(layout, layout_stream);
@@ -628,4 +629,16 @@ TEST_CASE("Write dual-layer mQCA crossover", "[qll]")
     write_qll_layout(layout, layout_stream);
 
     CHECK(layout_stream.str() == qll_layout);
+}
+
+TEST_CASE("QCC dimensions retain their maximum-index schema", "[qcc]")
+{
+    inml::layout layout{{3, 1}};
+    layout.assign_cell_type({0, 0}, inml::magnet_type::INPUT);
+    layout.assign_cell_type({1, 0}, inml::magnet_type::NORMAL);
+    layout.assign_cell_type({2, 0}, inml::magnet_type::OUTPUT);
+    std::ostringstream stream{};
+    inml::io::write_qcc_layout(layout, stream);
+    CHECK(stream.str().find("maxX=\"2\" maxY=\"0\"") != std::string::npos);
+    CHECK(stream.str().find("x=\"2\" y=\"0\"") != std::string::npos);
 }

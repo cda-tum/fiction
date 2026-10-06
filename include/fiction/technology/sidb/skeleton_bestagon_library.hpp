@@ -126,6 +126,13 @@ class skeleton_bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>
      * @return Incoming and outgoing port directions of the tile.
      * @throws std::invalid_argument if `lyt` shifts columns instead of rows.
      */
+    /**
+     * Routes the physical connector ports of an occupied tile.
+     * @tparam Lyt Gate-level layout type.
+     * @param lyt Layout.
+     * @param t Occupied tile.
+     * @return Physical connector ports.
+     */
     template <typename Lyt>
     [[nodiscard]] static fcn::port_list<fcn::port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
@@ -135,6 +142,11 @@ class skeleton_bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>
         if (!layouts::is_row_arrangement(lyt.get_arrangement()))
         {
             throw std::invalid_argument("GateLyt must be a pointy-top hexagonal layout");
+        }
+
+        if (!lyt.find_object(t))
+        {
+            throw fcn::unsupported_gate_type_exception(t);
         }
 
         fcn::port_list<fcn::port_direction> p{};
@@ -162,7 +174,8 @@ class skeleton_bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>
         // gates without connector ports
 
         // 1-input functions
-        if (const auto n = lyt.get_node(t); lyt.is_pi(n) || lyt.is_po(n) || lyt.is_buf(n) || lyt.is_inv(n))
+        if (const auto n = lyt.find_object(t);
+            n && (lyt.is_pi(*n) || lyt.is_po(*n) || lyt.is_buf(*n) || lyt.is_inv(*n)))
         {
             if (lyt.has_no_incoming_signal(t))
             {

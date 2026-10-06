@@ -180,3 +180,10 @@ TEST_CASE("Setting up fanouts", "[qca-one-library]")
     CHECK(qca_one_library::set_up_gate(layout, {2, 1}) == qca_one_library::rotate_90(fanout));
     CHECK(qca_one_library::set_up_gate(layout, {2, 2}) == qca_one_library::rotate_270(bent_wire));
 }
+
+TEST_CASE("QCA ONE rejects an unoccupied tile", "[qca-one-library]")
+{
+    const gate_level_layout<cartesian_layout> layout{{2, 2}};
+    CHECK_THROWS_AS(qca_one_library::set_up_gate(layout, {0, 0}),
+                    fcn::unsupported_gate_type_exception<cartesian_layout::coordinate>);
+}

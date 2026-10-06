@@ -178,7 +178,7 @@ class write_qcc_layout_impl
      */
     [[nodiscard]] auto bb_x(const inml::layout::cell& c) const noexcept
     {
-        return c.x - bb.get_min().x;
+        return static_cast<uint64_t>(static_cast<int64_t>(c.x) - bb.get_min()->x);
     }
 
     /**
@@ -188,9 +188,12 @@ class write_qcc_layout_impl
      */
     [[nodiscard]] auto bb_y(const inml::layout::cell& c) const noexcept
     {
-        return c.y - bb.get_min().y;
+        return static_cast<uint64_t>(static_cast<int64_t>(c.y) - bb.get_min()->y);
     }
 
+    /**
+     * @brief Checks whether each I/O cell lies on its designated horizontal border.
+     */
     [[nodiscard]] bool has_border_io_pins() const noexcept
     {
         auto all_border_pins = true;
@@ -210,7 +213,7 @@ class write_qcc_layout_impl
         lyt.foreach_po(
             [this, &all_border_pins](const auto& po)
             {
-                if (bb_x(po) != lyt.x())
+                if (bb_x(po) != (lyt.width() == 0 ? 0 : lyt.width() - 1))
                 {
                     all_border_pins = false;
                     return false;  // break iteration
@@ -241,12 +244,15 @@ class write_qcc_layout_impl
         return pin_data;
     }
 
+    /**
+     * @brief Computes the MagCAD component identifier from occupied bounds and pins.
+     */
     [[nodiscard]] std::string generate_layout_id_hash() const
     {
         std::stringstream ss{};
 
-        ss << lyt.get_layout_name() << qcc::LIBRARY_NAME << qcc::TECHNOLOGY << num_magnets << bb.get_x_size()
-           << bb.get_y_size();
+        ss << lyt.get_layout_name() << qcc::LIBRARY_NAME << qcc::TECHNOLOGY << num_magnets
+           << (bb.get_x_size() == 0 ? 0 : bb.get_x_size() - 1) << (bb.get_y_size() == 0 ? 0 : bb.get_y_size() - 1);
 
         const auto pin_data = get_pin_data();
         std::ranges::for_each(pin_data, [&ss](auto&& pdata) { ss << std::forward<decltype(pdata)>(pdata); });
@@ -256,13 +262,17 @@ class write_qcc_layout_impl
         return fmt::format("{0:<020}13{0:<020}37{0:<020}", hash_fragment);
     }
 
+    /**
+     * @brief Writes format settings and dimensions as maximum indices.
+     */
     void write_header()
     {
         os << fmt::format(qcc::VERSION_HEADER, FICTION_VERSION, FICTION_REPO);
         os << fmt::format(qcc::OPEN_QCA_COMPONENT, qcc::TECHNOLOGY, qcc::LIBRARY_NAME,
                           ps.use_filename_as_component_name ? std::filesystem::path{ps.filename}.stem().string() :
                                                               lyt.get_layout_name(),
-                          generate_layout_id_hash(), bb.get_x_size(), bb.get_y_size(), num_magnets);
+                          generate_layout_id_hash(), (bb.get_x_size() == 0 ? 0 : bb.get_x_size() - 1),
+                          (bb.get_y_size() == 0 ? 0 : bb.get_y_size() - 1), num_magnets);
     }
 
     void write_entity()
@@ -290,16 +300,19 @@ class write_qcc_layout_impl
         os << qcc::CLOSE_COMPONENTS;
     }
 
+    /**
+     * @brief Writes occupied cells within the half-open geometry.
+     */
     void write_layout()
     {
-        utils::progress_reporter progress{ps.on_progress, "writing rows", static_cast<std::size_t>(lyt.y() + 1)};
+        utils::progress_reporter progress{ps.on_progress, "writing rows", static_cast<std::size_t>(lyt.height())};
         std::unordered_set<inml::layout::cell> skip{};
 
         os << qcc::OPEN_LAYOUT;
 
-        for (decltype(lyt.y()) row = 0; row <= lyt.y(); ++row)
+        for (uint32_t row = 0; row < lyt.height(); ++row)
         {
-            for (decltype(lyt.x()) col = 0; col <= lyt.x(); ++col)
+            for (uint32_t col = 0; col < lyt.width(); ++col)
             {
                 const auto c    = inml::layout::cell{col, row};
                 const auto type = lyt.get_cell_type(c);

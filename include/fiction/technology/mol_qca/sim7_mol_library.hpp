@@ -66,63 +66,56 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
 
-        const auto n = lyt.get_node(t);
+        const auto object = lyt.find_object(t);
+        if (!object)
+        {
+            throw fcn::unsupported_gate_type_exception(t);
+        }
+        const auto n = *object;
         auto       p = determine_port_routing(lyt, t);
 
         try
         {
-            if constexpr (fiction::has_is_fanout_v<GateLyt>)
-            {
-                if (lyt.is_fanout(n))
-                {
-                    // Fan-out orientation is determined from all physically connected fan-out branches. Clocking-aware
-                    // routing can hide valid 1-to-3 branches because clocking schemes usually expose only a subset of
-                    // outgoing directions from a tile.
-                    const auto fanout_size = lyt.template fanout_size<false>(n);
-                    p                      = determine_port_routing<GateLyt, false>(lyt, t);
 
-                    if (fanout_size == 3u)
-                    {
-                        return set_up_1_to_3_fanout(p);
-                    }
+            if (lyt.is_fanout(n))
+            {
+                // Fan-out orientation is determined from all physically connected fan-out branches. Clocking-aware
+                // routing can hide valid 1-to-3 branches because clocking schemes usually expose only a subset of
+                // outgoing directions from a tile.
+                p                      = determine_port_routing<GateLyt, false>(lyt, t);
+                const auto fanout_size = p.out.size();
 
-                    return FANOUT_MAP.at(p);
-                }
-            }
-            if constexpr (fiction::has_is_buf_v<GateLyt>)
-            {
-                if (lyt.is_buf(n))
+                if (fanout_size == 3u)
                 {
-                    return WIRE_MAP.at(p);
+                    return set_up_1_to_3_fanout(p);
                 }
+
+                return FANOUT_MAP.at(p);
             }
-            if constexpr (fiction::has_is_inv_v<GateLyt>)
+
+            if (lyt.is_buf(n))
             {
-                if (lyt.is_inv(n))
-                {
-                    return INVERTER_MAP.at(p);
-                }
+                return WIRE_MAP.at(p);
             }
-            if constexpr (mockturtle::has_is_and_v<GateLyt>)
+
+            if (lyt.is_inv(n))
             {
-                if (lyt.is_and(n))
-                {
-                    return CONJUNCTION_MAP.at(p);
-                }
+                return INVERTER_MAP.at(p);
             }
-            if constexpr (mockturtle::has_is_or_v<GateLyt>)
+
+            if (lyt.is_and(n))
             {
-                if (lyt.is_or(n))
-                {
-                    return DISJUNCTION_MAP.at(p);
-                }
+                return CONJUNCTION_MAP.at(p);
             }
-            if constexpr (mockturtle::has_is_maj_v<GateLyt>)
+
+            if (lyt.is_or(n))
             {
-                if (lyt.is_maj(n))
-                {
-                    return MAJORITY_MAP.at(p);
-                }
+                return DISJUNCTION_MAP.at(p);
+            }
+
+            if (lyt.is_maj(n))
+            {
+                return MAJORITY_MAP.at(p);
             }
         }
         catch (const std::out_of_range&)
@@ -190,15 +183,16 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
 
         bool is_wire_or_inverter = false;
 
-        const auto n = lyt.get_node(t);
-        if constexpr (fiction::has_is_buf_v<Lyt>)
+        const auto object = lyt.find_object(t);
+        if (!object)
         {
-            is_wire_or_inverter = is_wire_or_inverter || lyt.is_buf(n);
+            throw fcn::unsupported_gate_type_exception(t);
         }
-        if constexpr (fiction::has_is_inv_v<Lyt>)
-        {
-            is_wire_or_inverter = is_wire_or_inverter || lyt.is_inv(n);
-        }
+        const auto n = *object;
+
+        is_wire_or_inverter = is_wire_or_inverter || lyt.is_buf(n);
+
+        is_wire_or_inverter = is_wire_or_inverter || lyt.is_inv(n);
 
         // fallback for tiles with no connectors (e.g., primary inputs/outputs on one side)
         if (!is_wire_or_inverter)

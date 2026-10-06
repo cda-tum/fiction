@@ -45,8 +45,10 @@ using namespace fiction::sidb::generators;
 
 TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-design]")
 {
-    hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {2, 2}};
-    gate_layout.create_and(0, 1, {1, 2});
+    hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {3, 3}};
+    const auto       first  = gate_layout.create_pi("a", {0, 0});
+    const auto       second = gate_layout.create_pi("b", {1, 0});
+    gate_layout.create_and(first, second, {1, 2});
 
     on_the_fly_circuit_design_params params{};
     params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs = 0;
@@ -56,7 +58,7 @@ TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-de
 
 TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-circuit-design]")
 {
-    hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {2, 2}, clocking::row()};
+    hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
     const auto       first  = gate_layout.create_pi("a", {0, 0});
     const auto       second = gate_layout.create_pi("b", {1, 0});
     const auto       gate   = gate_layout.create_and(first, second, {1, 1});
@@ -87,7 +89,7 @@ TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-c
     CHECK(std::chrono::steady_clock::now() - start < std::chrono::seconds{10});
     CHECK(gate_layout.num_pis() == 2);
     CHECK(gate_layout.num_pos() == 1);
-    CHECK(gate_layout.is_and(gate_layout.get_node({1, 1})));
+    CHECK(gate_layout.is_and(gate_layout.find_object({1, 1}).value()));
 }
 
 #if (FICTION_Z3_SOLVER)
@@ -98,7 +100,7 @@ TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-cir
     const auto              second = network.create_pi();
     network.create_po(network.create_and(first, second));
 
-    const hex_gate_clk_lyt tiling{arrangement::EVEN_ROW, {2, 2}, clocking::row()};
+    const hex_gate_clk_lyt tiling{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
     const sidb::layout     surface{};
 
     on_the_fly_circuit_design_on_defective_surface_params params{};

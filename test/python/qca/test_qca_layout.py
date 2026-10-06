@@ -21,7 +21,7 @@ def test_cell_types_and_modes() -> None:
 
 
 def test_geometry_is_cartesian() -> None:
-    layout = qca_layout((9, 9, 1))
+    layout = qca_layout((10, 10, 2))
 
     for t in layout.coordinates():
         assert t <= (9, 9, 1)
@@ -35,7 +35,7 @@ def test_geometry_is_cartesian() -> None:
 
 
 def test_cell_type_and_mode_assignment() -> None:
-    layout = qca_layout((4, 4, 1), "OPEN", "crossing")
+    layout = qca_layout((5, 5, 2), "OPEN", "crossing")
 
     assert layout.is_empty()
     assert layout.get_layout_name() == "crossing"
@@ -65,13 +65,13 @@ def test_cell_type_and_mode_assignment() -> None:
 
 def test_clock_zones_and_synchronization_elements() -> None:
     """Clock numbers and synchronization elements belong to clock zones, i.e., to tiles of cells."""
-    layout = qca_layout((4, 4), "2DDWave", "", 2, 2)
+    layout = qca_layout((5, 5), "2DDWave", "", 2, 2)
     assert layout.get_tile_size_x() == 2
     assert layout.is_clocking_scheme("2DDWAVE")
     with pytest.raises(ValueError, match="positive"):
         layout.set_tile_size_x(0)
     with pytest.raises(ValueError, match="positive"):
-        qca_layout((4, 4), "2DDWave", "", 0, 1)
+        qca_layout((5, 5), "2DDWave", "", 0, 1)
 
     assert layout.get_clock_zone((3, 2)) == (1, 1)
     layout.assign_clock_number((1, 1), 3)
@@ -94,4 +94,4 @@ def test_clock_zones_and_synchronization_elements() -> None:
     with pytest.raises(ValueError, match="Unknown clocking scheme"):
         layout.replace_clocking_scheme("3DDWave")
     with pytest.raises(ValueError, match="clocking scheme"):
-        qca_layout((4, 4), "3DDWave")
+        qca_layout((5, 5), "3DDWave")

@@ -60,59 +60,51 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
 
-        const auto n = lyt.get_node(t);
+        const auto object = lyt.find_object(t);
+        if (!object)
+        {
+            throw fcn::unsupported_gate_type_exception(t);
+        }
+        const auto n = *object;
         const auto p = determine_port_routing(lyt, t);
 
         try
         {
-            if constexpr (fiction::has_is_fanout_v<GateLyt>)
+            if (lyt.is_fanout(n))
             {
-                if (lyt.is_fanout(n))
+                if (p.out.size() == 2)
                 {
-                    if (lyt.fanout_size(n) == 2)
-                    {
-                        return FANOUT_MAP.at(p);
-                    }
-                    if (lyt.fanout_size(n) == 3)
-                    {
-                        return FAN_OUT_1_3;
-                    }
+                    return FANOUT_MAP.at(p);
+                }
+                if (p.out.size() == 3)
+                {
+                    return FAN_OUT_1_3;
                 }
             }
-            if constexpr (fiction::has_is_buf_v<GateLyt>)
+
+            if (lyt.is_buf(n))
             {
-                if (lyt.is_buf(n))
-                {
-                    return WIRE_MAP.at(p);
-                }
+                return WIRE_MAP.at(p);
             }
-            if constexpr (fiction::has_is_inv_v<GateLyt>)
+
+            if (lyt.is_inv(n))
             {
-                if (lyt.is_inv(n))
-                {
-                    return INVERTER_MAP.at(p);
-                }
+                return INVERTER_MAP.at(p);
             }
-            if constexpr (mockturtle::has_is_and_v<GateLyt>)
+
+            if (lyt.is_and(n))
             {
-                if (lyt.is_and(n))
-                {
-                    return CONJUNCTION_MAP.at(p);
-                }
+                return CONJUNCTION_MAP.at(p);
             }
-            if constexpr (mockturtle::has_is_or_v<GateLyt>)
+
+            if (lyt.is_or(n))
             {
-                if (lyt.is_or(n))
-                {
-                    return DISJUNCTION_MAP.at(p);
-                }
+                return DISJUNCTION_MAP.at(p);
             }
-            if constexpr (mockturtle::has_is_maj_v<GateLyt>)
+
+            if (lyt.is_maj(n))
             {
-                if (lyt.is_maj(n))
-                {
-                    return MAJORITY;
-                }
+                return MAJORITY;
             }
         }
         catch (const std::out_of_range&)
@@ -157,6 +149,13 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
     }
 
   private:
+    /**
+     * Routes the physical connector ports of an occupied tile.
+     * @tparam Lyt Gate-level layout type.
+     * @param lyt Layout.
+     * @param t Occupied tile.
+     * @return Physical connector ports.
+     */
     template <typename Lyt>
     [[nodiscard]] static fcn::port_list<fcn::port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
@@ -199,7 +198,7 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
         }
 
         // has no connector ports
-        if (const auto n = lyt.get_node(t); !lyt.is_wire(n) && !lyt.is_inv(n))
+        if (const auto n = lyt.find_object(t); n && (!lyt.is_wire(*n) && !lyt.is_inv(*n)))
         {
             if (lyt.has_no_incoming_signal(t))
             {

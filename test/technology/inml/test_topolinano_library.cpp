@@ -17,7 +17,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "fiction/layouts/io/print_layout.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
@@ -26,14 +25,12 @@
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
-#include <iostream>
 #include <stdexcept>
 #include <type_traits>
 
 using namespace fiction;
 using namespace fiction::inml;
 using namespace fiction::layouts;
-using namespace fiction::layouts::io;
 
 TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
 {
@@ -45,7 +42,7 @@ TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
 TEST_CASE("ToPoliNano rejects row-shifted layouts", "[inml-topolinano-library]")
 {
     const auto                a = GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW);
-    shifted_cart_gate_clk_lyt lyt{a, {1, 1}};
+    shifted_cart_gate_clk_lyt lyt{a, {2, 2}};
     const auto                x = lyt.create_pi("x", {0, 0});
     const auto                y = lyt.create_pi("y", {1, 0});
     lyt.create_and(x, y, {1, 1});
@@ -57,7 +54,7 @@ TEST_CASE("ToPoliNano rejects row-shifted layouts", "[inml-topolinano-library]")
 TEST_CASE("ToPoliNano straightens two-cell wire segments", "[inml-topolinano-library]")
 {
     const auto   row = GENERATE(0u, 2u);
-    inml::layout lyt{{2, 3}};
+    inml::layout lyt{{3, 4}};
     lyt.assign_cell_type({0, row}, magnet_type::INPUT);
     lyt.assign_cell_name({0, row}, "x");
     lyt.assign_cell_type({1, row}, magnet_type::NORMAL);
@@ -75,7 +72,7 @@ TEST_CASE("ToPoliNano straightens two-cell wire segments", "[inml-topolinano-lib
 TEST_CASE("ToPoliNano preserves obstructed wire segments", "[inml-topolinano-library]")
 {
     const auto   row = GENERATE(0u, 4u);
-    inml::layout lyt{{3, 5}};
+    inml::layout lyt{{4, 6}};
     for (const auto column : {0u, 1u, 2u})
     {
         lyt.assign_cell_type({column, row}, magnet_type::NORMAL);
@@ -96,8 +93,6 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
 {
     const auto layout =
         blueprints::shifted_cart_and_or_inv_gate_layout<shifted_cart_gate_clk_lyt>(arrangement::ODD_COLUMN);
-
-    print_gate_level_layout(std::cout, layout);
 
     // clang-format off
 
@@ -186,4 +181,21 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
     CHECK(topolinano_library::set_up_gate(layout, {3, 0}) == disjunction);
 
     CHECK(topolinano_library::set_up_gate(layout, {4, 0}) == lower_po);
+}
+
+TEST_CASE("ToPoliNano preserves wire segments without a neighboring row", "[inml-topolinano-library]")
+{
+    inml::layout lyt{{3, 1}};
+    lyt.assign_cell_type({0, 0}, magnet_type::INPUT);
+    lyt.assign_cell_name({0, 0}, "x");
+    lyt.assign_cell_type({1, 0}, magnet_type::NORMAL);
+    lyt.assign_cell_type({2, 0}, magnet_type::OUTPUT);
+
+    topolinano_library::post_layout_optimization(lyt);
+
+    CHECK(lyt.num_cells() == 3);
+    CHECK(lyt.get_cell_type({0, 0}) == magnet_type::INPUT);
+    CHECK(lyt.get_cell_name({0, 0}) == "x");
+    CHECK(lyt.get_cell_type({1, 0}) == magnet_type::NORMAL);
+    CHECK(lyt.get_cell_type({2, 0}) == magnet_type::OUTPUT);
 }

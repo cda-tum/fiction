@@ -17,9 +17,9 @@ def test_magnet_types() -> None:
 
 
 def test_planar_clocked_layout() -> None:
-    layout = inml_layout((7, 7, 1), "2DDWave", "inverter", 4, 4)
+    layout = inml_layout((8, 8, 2), "2DDWave", "inverter", 4, 4)
 
-    assert layout.z() == 0
+    assert layout.layers() == 1
     assert layout.get_tile_size_x() == 4
 
     layout.assign_cell_type((0, 1), inml_magnet_type.INPUT)

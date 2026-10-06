@@ -36,7 +36,7 @@ TEST_CASE("Write empty QCAD layout", "[qcad]")
 {
     using qca_layout = qca::layout;
 
-    const qca_layout layout{{2, 2, 1}, "empty layout"};
+    const qca_layout layout{{3, 3, 2}, "empty layout"};
 
     SECTION("with vias")
     {
@@ -158,7 +158,7 @@ TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
 {
     using qca_layout = qca::layout;
 
-    qca_layout layout{{4, 4}, "AND"};
+    qca_layout layout{{5, 5}, "AND"};
 
     layout.assign_cell_type({0, 2}, qca::cell_type::INPUT);
     layout.assign_cell_type({2, 4}, qca::cell_type::INPUT);
@@ -774,7 +774,7 @@ TEST_CASE("Write wire crossing", "[qcad]")
 {
     using qca_layout = qca::layout;
 
-    qca_layout layout{{4, 4, 1}, "Crossover"};
+    qca_layout layout{{5, 5, 2}, "Crossover"};
 
     layout.assign_cell_type({0, 2, 0}, qca::cell_type::INPUT);
     layout.assign_cell_type({2, 0, 0}, qca::cell_type::INPUT);

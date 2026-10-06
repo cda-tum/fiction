@@ -103,8 +103,10 @@ double area(const Lyt& lyt, const area_params<Dims>& ps = {}, area_stats* pst = 
 {
     area_stats st{};
 
-    st.width  = (static_cast<double>(lyt.x() + 1) * ps.width) + (static_cast<double>(lyt.x()) * ps.hspace);
-    st.height = (static_cast<double>(lyt.y() + 1) * ps.height) + (static_cast<double>(lyt.y()) * ps.vspace);
+    st.width  = (static_cast<double>(lyt.width()) * ps.width) +
+                (static_cast<double>(lyt.width() == 0 ? 0 : lyt.width() - 1) * ps.hspace);
+    st.height = (static_cast<double>(lyt.height()) * ps.height) +
+                (static_cast<double>(lyt.height() == 0 ? 0 : lyt.height() - 1) * ps.vspace);
     st.area   = st.width * st.height;
 
     if (pst != nullptr)
@@ -131,11 +133,11 @@ double area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<Lyt>& ps 
 {
     area_stats st{};
 
-    st.width =
-        (static_cast<double>(bb.get_x_size() + 1) * ps.width) + (static_cast<double>(bb.get_x_size()) * ps.hspace);
-    st.height =
-        (static_cast<double>(bb.get_y_size() + 1) * ps.height) + (static_cast<double>(bb.get_y_size()) * ps.vspace);
-    st.area = st.width * st.height;
+    st.width  = (static_cast<double>(bb.get_x_size()) * ps.width) +
+                (static_cast<double>(bb.get_x_size() == 0 ? 0 : bb.get_x_size() - 1) * ps.hspace);
+    st.height = (static_cast<double>(bb.get_y_size()) * ps.height) +
+                (static_cast<double>(bb.get_y_size() == 0 ? 0 : bb.get_y_size() - 1) * ps.vspace);
+    st.area   = st.width * st.height;
 
     if (pst != nullptr)
     {
