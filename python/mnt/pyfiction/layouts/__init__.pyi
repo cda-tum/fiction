@@ -52,6 +52,10 @@ class coordinate:
             X: Type of x.
             Y: Type of y.
             Z: Type of z.
+
+        Raises:
+            std::overflow_error: If an axis is outside the signed 32-bit
+                                 range.
         """
 
     @overload
@@ -268,6 +272,10 @@ class cartesian_layout:
         Returns:
             A coordinate in the layout of type `coordinate`.
 
+        Raises:
+            std::overflow_error: If an axis is outside the signed 32-bit
+                                 range.
+
         Note:
             This function is equivalent to calling `coordinate(x, y, z)`.
         """
@@ -317,6 +325,8 @@ class cartesian_layout:
         Raises:
             std::invalid_argument: If an axis of `ar` is negative or larger
                                    than :math:`2^{30} - 1`.
+            std::out_of_range: If shared gate geometry limits the z extent to
+                               1 and `ar.z` exceeds 1.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -956,6 +966,10 @@ class shifted_cartesian_layout:
         Returns:
             A coordinate in the layout of type `coordinate`.
 
+        Raises:
+            std::overflow_error: If an axis is outside the signed 32-bit
+                                 range.
+
         Note:
             This function is equivalent to calling `coordinate(x, y, z)`.
         """
@@ -1005,6 +1019,8 @@ class shifted_cartesian_layout:
         Raises:
             std::invalid_argument: If an axis of `ar` is negative or larger
                                    than :math:`2^{30} - 1`.
+            std::out_of_range: If shared gate geometry limits the z extent to
+                               1 and `ar.z` exceeds 1.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
@@ -1654,6 +1670,10 @@ class hexagonal_layout:
         Returns:
             A coordinate in the layout of type `coordinate`.
 
+        Raises:
+            std::overflow_error: If an axis is outside the signed 32-bit
+                                 range.
+
         Note:
             This function is equivalent to calling `coordinate(x, y, z)`.
         """
@@ -1703,6 +1723,8 @@ class hexagonal_layout:
         Raises:
             std::invalid_argument: If an axis of `ar` is negative or larger
                                    than :math:`2^{30} - 1`.
+            std::out_of_range: If shared gate geometry limits the z extent to
+                               1 and `ar.z` exceeds 1.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:

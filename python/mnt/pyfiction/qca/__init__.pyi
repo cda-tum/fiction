@@ -271,7 +271,8 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
         self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> mnt.pyfiction.layouts.coordinate:
         """
-        The clock zone that contains a cell: its tile on layer 0.
+        The clock zone that contains a cell: its tile on layer 0. Negative
+        axes use floor division.
 
         Args:
             c: Cell position.
