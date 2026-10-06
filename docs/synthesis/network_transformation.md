@@ -159,20 +159,15 @@
 
 ::::
 
+(planarization)=
+
 ## Planarization
 
-A ranked logic network is planar if its edges can be drawn between adjacent ranks without crossings. _fiction_
-offers two ways to remove the crossings of a balanced, ranked network: duplicating nodes, which copies the fanin cone
-of a node once per crossing it would cause and turns duplicated primary inputs into virtual primary inputs, and
-crossing gates, which replace every crossing with a gadget that swaps the two signals. The hybrid strategy of node
-duplication planarization decides per level which of the two is cheaper and leaves the crossings of a level to
-`crossing_gate_planarization` where the gadgets win.
-
-The results share one copy of a fanin among consecutive consumers, so `planar_fanout_substitution` restores fanout
-nodes while keeping ranks and planarity, and `planar_rebalancing` removes the buffers that this padding leaves behind
-and re-inserts the minimum that keeps the network balanced.
-
-### Planarization Pipeline
+A ranked logic network is planar if its edges can be drawn between adjacent ranks without crossings. The
+planarization pipeline removes the crossings of a balanced, ranked network by duplicating nodes, by crossing gates
+that swap two signals, or by a per-level choice between the two {cite:p}`nano_2026_3`, then restores
+fanout nodes and the minimum buffering while keeping ranks and planarity. The stages below are also available on
+their own.
 
 `planarization` runs the whole pipeline: node duplication with the chosen strategy, crossing gates for the levels the
 hybrid strategy left crossed, planar fanout substitution, and planar rebalancing. The pipeline defaults to the hybrid
@@ -232,7 +227,7 @@ virtual inputs; see its docstring below.
 
 ::::
 
-### Node Duplication Planarization
+## Node Duplication Planarization
 
 ::::{tab-set}
 :sync-group: language
@@ -258,7 +253,7 @@ virtual inputs; see its docstring below.
 
 ::::
 
-### Crossing Gate Planarization
+## Crossing Gate Planarization
 
 ::::{tab-set}
 :sync-group: language
@@ -284,7 +279,7 @@ virtual inputs; see its docstring below.
 
 ::::
 
-### Planar Fanout Substitution
+## Planar Fanout Substitution
 
 ::::{tab-set}
 :sync-group: language
@@ -306,7 +301,7 @@ virtual inputs; see its docstring below.
 
 ::::
 
-### Planar Rebalancing
+## Planar Rebalancing
 
 ::::{tab-set}
 :sync-group: language

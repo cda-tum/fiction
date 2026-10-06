@@ -1359,12 +1359,12 @@ class node_duplication_planarization_impl
 /**
  * Planarizes a ranked, balanced logic network by duplicating nodes.
  *
- * The algorithm follows "Fabricatable Interconnect and Molecular QCA Circuits" by A. Chaudhary, D. Z. Chen, X. S. Hu,
- * M. T. Niemier, R. Ravichandran, and K. Whitton in IEEE TCAD 26(11), 2007. It solves the node duplication crossing
- * elimination problem level by level from the primary outputs to the primary inputs. For each level, an H-graph
- * enumerates the fanin orderings of every node; the shortest path through it gives an ordering of the level below in
- * which every edge can be drawn without a crossing, at the cost of duplicating the nodes that would otherwise be
- * crossed. Duplicated primary inputs become virtual primary inputs of the result.
+ * The algorithm was originally proposed in \"Fabricatable Interconnect and Molecular QCA Circuits\" by A. Chaudhary,
+ * D. Z. Chen, X. S. Hu, M. T. Niemier, R. Ravichandran, and K. Whitton in IEEE TCAD 2007. It solves the node
+ * duplication crossing elimination problem level by level from the primary outputs to the primary inputs. For each
+ * level, an H-graph enumerates the fanin orderings of every node; the shortest path through it gives an ordering of the
+ * level below in which every edge can be drawn without a crossing, at the cost of duplicating the nodes that would
+ * otherwise be crossed. Duplicated primary inputs become virtual primary inputs of the result.
  *
  * Consecutive consumers in a level share one copy of their common fanin, so the result is not fanout-substituted;
  * `planar_fanout_substitution` restores that property while keeping ranks and planarity.
