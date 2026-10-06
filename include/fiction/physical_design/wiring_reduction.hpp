@@ -725,7 +725,7 @@ template <typename WiringReductionLyt>
  * @param possible_path The path of coordinates to be considered for updating the to-delete list.
  * @param to_delete Reference to the to-delete list to be updated with new coordinates.
  */
-template <typename Lyt, typename WiringReductionLyt>
+template <typename WiringReductionLyt>
 void update_to_delete_list(WiringReductionLyt& lyt, const layout_coordinate_path<WiringReductionLyt>& possible_path,
                            layout_coordinate_path<WiringReductionLyt>& to_delete)
 {
@@ -781,7 +781,7 @@ template <typename Matrix>
  * @param to_delete The to-delete list representing coordinates to be considered for the offset matrix.
  * @return A 2D vector representing the calculated offset matrix.
  */
-template <typename Lyt, typename WiringReductionLyt>
+template <typename WiringReductionLyt>
 [[nodiscard]] offset_matrix calculate_offset_matrix(const WiringReductionLyt&                         lyt,
                                                     const layout_coordinate_path<WiringReductionLyt>& to_delete)
 {
@@ -858,7 +858,7 @@ template <typename Lyt, typename WiringReductionLyt>
 void delete_wires(Lyt& lyt, const WiringReductionLyt& wiring_reduction_layout,
                   const layout_coordinate_path<WiringReductionLyt>& to_delete)
 {
-    const auto offsets = calculate_offset_matrix<Lyt>(wiring_reduction_layout, to_delete);
+    const auto                                  offsets = calculate_offset_matrix(wiring_reduction_layout, to_delete);
     std::unordered_set<typename Lyt::object_id> removed{};
     for (const auto& t : to_delete)
     {
@@ -960,8 +960,8 @@ class wiring_reduction_impl
 
         // record initial layout statistics
         pst.num_wires_before = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
-        pst.x_size_before    = static_cast<uint64_t>((static_cast<int32_t>(plyt.width()) - 1)) + 1;
-        pst.y_size_before    = static_cast<uint64_t>((static_cast<int32_t>(plyt.height()) - 1)) + 1;
+        pst.x_size_before    = plyt.width();
+        pst.y_size_before    = plyt.height();
 
         // edit the caller-owned layout
         auto& layout = plyt;
@@ -1023,7 +1023,7 @@ class wiring_reduction_impl
                 while (!possible_path.empty() && !timeout_limit_reached)
                 {
                     // update the list of wires to delete based on the current path
-                    update_to_delete_list<Lyt, wiring_reduction_layout>(wiring_reduction_lyt, possible_path, to_delete);
+                    update_to_delete_list(wiring_reduction_lyt, possible_path, to_delete);
 
                     progress.advance();
 
@@ -1056,8 +1056,8 @@ class wiring_reduction_impl
                                 typename Lyt::extent{});
 
         // update final layout statistics
-        pst.x_size_after = static_cast<uint64_t>((static_cast<int32_t>(layout.width()) - 1)) + 1;
-        pst.y_size_after = static_cast<uint64_t>((static_cast<int32_t>(layout.height()) - 1)) + 1;
+        pst.x_size_after = layout.width();
+        pst.y_size_after = layout.height();
 
         const uint64_t area_before = pst.x_size_before * pst.y_size_before;
         const uint64_t area_after  = pst.x_size_after * pst.y_size_after;
