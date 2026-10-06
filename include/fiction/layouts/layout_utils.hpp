@@ -125,13 +125,7 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
     int64_t x = static_cast<int64_t>(t.x) * GateSizeX;
     int64_t y = static_cast<int64_t>(t.y) * GateSizeY;
 
-    // Cartesian layouts
-    if constexpr (is_cartesian_layout_v<GateLyt>)
-    {
-        // Cartesian tiles use the full gate size in both directions.
-    }
-    // shifted Cartesian and hexagonal layouts
-    else if constexpr (is_shifted_cartesian_layout_v<GateLyt> || is_hexagonal_layout_v<GateLyt>)
+    if constexpr (is_shifted_cartesian_layout_v<GateLyt> || is_hexagonal_layout_v<GateLyt>)
     {
         // hexagons nest into each other, so their tiles are 3/4 as far apart perpendicular to the shift
         constexpr auto step_x = is_hexagonal_layout_v<GateLyt> ? GateSizeX * 3 / 4 : GateSizeX;
@@ -147,7 +141,7 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
             if (odd ? gate_lyt.is_in_odd_row(t) : gate_lyt.is_in_even_row(t))
             {
                 // shifted rows move in by width / 2
-                x += static_cast<int64_t>(static_cast<double>(GateSizeX) / 2.0);
+                x += GateSizeX / 2;
             }
         }
         else
@@ -157,14 +151,13 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
             if (odd ? gate_lyt.is_in_odd_column(t) : gate_lyt.is_in_even_column(t))
             {
                 // shifted columns move in by height / 2
-                y += static_cast<int64_t>(static_cast<double>(GateSizeY) / 2.0);
+                y += GateSizeY / 2;
             }
         }
     }
-    // more gate-level layout types go here
     else
     {
-        assert(false && "unknown gate-level layout type");
+        static_assert(is_cartesian_layout_v<GateLyt>, "GateLyt does not have a supported geometry");
     }
 
     return Coordinate{x + relative_c.x, y + relative_c.y, t.z};
