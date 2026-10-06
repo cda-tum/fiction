@@ -17,6 +17,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
 #include <fiction/traits.hpp>
 
@@ -40,7 +41,7 @@ namespace pyfiction
 namespace detail
 {
 /**
- * Register one concrete topology.
+ * Register the layout class.
  * @tparam Lyt Concrete layout.
  * @param m Python module.
  * @param name Python class name.
@@ -57,9 +58,13 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
      * hexagonal layout, which we do not expose in pyfiction.
      */
     py::class_<Lyt>(m, name, DOC(fiction_shifted_cartesian_layout_overridden))
-        .def(py::init<>(), DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout))
-        .def(py::init<const fiction::aspect_ratio<Lyt>&>(), py::arg("dimension"),
+        .def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
              DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout))
+        .def(py::init<fiction::layouts::arrangement, const fiction::aspect_ratio<Lyt>&>(), py::arg("arrangement"),
+             py::arg("dimension"), DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout))
+        .def(
+            "get_arrangement", [](const Lyt& lyt) { return lyt.get_arrangement(); },
+            DOC(fiction_layouts_hexagonal_layout_get_arrangement))
         .def(
             "coord",
             [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z) { return layout.coord(x, y, z); },
@@ -247,15 +252,12 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
 }  // namespace detail
 
 /**
- * Register supported shifted_cartesian topologies.
+ * Register the shifted Cartesian layout.
  * @param m Python module.
  */
 void shifted_cartesian_layout(nanobind::module_& m)
 {
     detail::shifted_cartesian_layout<py_shifted_cartesian_layout>(m, "shifted_cartesian_layout");
-    detail::shifted_cartesian_layout<py_odd_row_cartesian_layout>(m, "odd_row_cartesian_layout");
-    detail::shifted_cartesian_layout<py_even_row_cartesian_layout>(m, "even_row_cartesian_layout");
-    detail::shifted_cartesian_layout<py_even_column_cartesian_layout>(m, "even_column_cartesian_layout");
 }
 
 }  // namespace pyfiction

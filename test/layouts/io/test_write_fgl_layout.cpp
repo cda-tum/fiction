@@ -18,11 +18,13 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -38,6 +40,7 @@
 
 #include <mockturtle/networks/aig.hpp>
 
+#include <optional>
 #include <sstream>
 #include <string_view>
 
@@ -91,6 +94,11 @@ void check_parsing_equiv_layout(const Lyt& lyt)
 
     compare_written_and_read_layout(lyt, read_layout);
 
+    if constexpr (!is_cartesian_layout_v<Lyt>)
+    {
+        CHECK(read_layout.get_arrangement() == lyt.get_arrangement());
+    }
+
     check_eq(lyt, read_layout);
     CHECK(lyt.get_layout_name() == read_layout.get_layout_name());
 }
@@ -123,35 +131,34 @@ void check_parsing_equiv_layout_all()
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::single_input_tautology_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::and_or_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_odd_row_gate_clk_lyt>(blueprints::and_or_gate_layout<cart_odd_row_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_even_row_gate_clk_lyt>(
-        blueprints::and_or_gate_layout<cart_even_row_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_odd_col_gate_clk_lyt>(blueprints::and_or_gate_layout<cart_odd_col_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_even_col_gate_clk_lyt>(
-        blueprints::and_or_gate_layout<cart_even_col_gate_clk_lyt>());
-    check_parsing_equiv_layout<hex_odd_row_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_odd_row_gate_clk_lyt>());
-    check_parsing_equiv_layout<hex_even_row_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_even_row_gate_clk_lyt>());
-    check_parsing_equiv_layout<hex_odd_col_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_odd_col_gate_clk_lyt>());
-    check_parsing_equiv_layout<hex_even_col_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_even_col_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::and_not_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::or_not_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::use_and_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::res_maj_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::res_tautology_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<hex_even_row_gate_clk_lyt>(
-        blueprints::open_tautology_gate_layout<hex_even_row_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::crossing_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::fanout_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::unbalanced_and_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_odd_col_gate_clk_lyt>(
-        blueprints::shifted_cart_and_or_inv_gate_layout<cart_odd_col_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_even_row_gate_clk_lyt>(
-        blueprints::row_clocked_and_xor_gate_layout<cart_even_row_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::optimization_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(
         blueprints::optimization_layout_corner_case_outputs_1<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(
         blueprints::optimization_layout_corner_case_outputs_2<cart_gate_clk_lyt>());
+
+    for (const auto a :
+         {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
+    {
+        check_parsing_equiv_layout<shifted_cart_gate_clk_lyt>(
+            blueprints::and_or_gate_layout<shifted_cart_gate_clk_lyt>(a));
+        check_parsing_equiv_layout<hex_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_gate_clk_lyt>(a));
+    }
+
+    check_parsing_equiv_layout<hex_gate_clk_lyt>(
+        blueprints::open_tautology_gate_layout<hex_gate_clk_lyt>(arrangement::EVEN_ROW));
+    check_parsing_equiv_layout<shifted_cart_gate_clk_lyt>(
+        blueprints::shifted_cart_and_or_inv_gate_layout<shifted_cart_gate_clk_lyt>(arrangement::ODD_COLUMN));
+    check_parsing_equiv_layout<shifted_cart_gate_clk_lyt>(
+        blueprints::row_clocked_and_xor_gate_layout<shifted_cart_gate_clk_lyt>(arrangement::EVEN_ROW));
 }
 
 TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
@@ -175,10 +182,11 @@ TEST_CASE("Write and read layouts", "[write-fgl-layout]")
 }
 
 TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fgl-layout]", cart_gate_clk_lyt,
-                   cart_odd_row_gate_clk_lyt, cart_even_row_gate_clk_lyt, cart_odd_col_gate_clk_lyt,
-                   cart_even_col_gate_clk_lyt, hex_odd_row_gate_clk_lyt, hex_even_row_gate_clk_lyt,
-                   hex_odd_col_gate_clk_lyt, hex_even_col_gate_clk_lyt)
+                   shifted_cart_gate_clk_lyt, hex_gate_clk_lyt)
 {
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+
     for (const auto* const name : {"OPEN3", "OPEN4", "COLUMNAR3", "COLUMNAR4", "ROW3", "ROW4", "2DDWAVE3", "2DDWAVE4",
                                    "2DDWAVEHEX3", "2DDWAVEHEX4", "BANCS"})
     {
@@ -190,13 +198,15 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
             }
         }
         INFO(name);
-        const auto scheme = clocking::get_scheme<TestType>(name);
+        const auto scheme =
+            clocking::get_scheme(name, is_hexagonal_layout_v<TestType> ? std::optional{a} : std::nullopt);
         if (!scheme.has_value())
         {
             FAIL("Unknown clocking scheme");
             return;
         }
-        TestType original{{3, 2, 0}, *scheme, "clock phases"};
+        auto original = blueprints::make_layout<TestType>(a, {3, 2, 0}, *scheme);
+        original.set_layout_name("clock phases");
         if (!scheme->is_regular())
         {
             original.assign_clock_number({1, 1, 0}, 2);

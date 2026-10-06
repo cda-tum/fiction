@@ -19,6 +19,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
@@ -115,17 +116,17 @@ TEST_CASE("Network-layout equivalence", "[equiv]")
     {
         using gate_layout = gate_level_layout<hexagonal_layout<>>;
 
-        check_for_strong_equiv(mockturtle::aig_network{}, gate_layout{});
-        check_for_strong_equiv(mockturtle::mig_network{}, gate_layout{});
+        check_for_strong_equiv(mockturtle::aig_network{}, gate_layout{arrangement::EVEN_ROW});
+        check_for_strong_equiv(mockturtle::mig_network{}, gate_layout{arrangement::EVEN_ROW});
 
         check_for_strong_equiv(blueprints::and_or_network<mockturtle::aig_network>(),
-                               blueprints::and_or_gate_layout<hex_even_col_gate_clk_lyt>());
+                               blueprints::and_or_gate_layout<hex_gate_clk_lyt>(arrangement::EVEN_COLUMN));
         check_for_strong_equiv(blueprints::and_or_network<mockturtle::mig_network>(),
-                               blueprints::and_or_gate_layout<hex_odd_col_gate_clk_lyt>());
+                               blueprints::and_or_gate_layout<hex_gate_clk_lyt>(arrangement::ODD_COLUMN));
         check_for_strong_equiv(blueprints::and_or_network<mockturtle::xag_network>(),
-                               blueprints::and_or_gate_layout<hex_even_row_gate_clk_lyt>());
+                               blueprints::and_or_gate_layout<hex_gate_clk_lyt>(arrangement::EVEN_ROW));
         check_for_strong_equiv(blueprints::and_or_network<technology_network>(),
-                               blueprints::and_or_gate_layout<hex_odd_row_gate_clk_lyt>());
+                               blueprints::and_or_gate_layout<hex_gate_clk_lyt>(arrangement::ODD_ROW));
     }
 }
 
@@ -134,30 +135,30 @@ TEST_CASE("Layout-layout equivalence", "[equiv]")
     SECTION("TP == 1/1")
     {
         check_for_strong_equiv(cart_gate_clk_lyt{}, cart_gate_clk_lyt{});
-        check_for_strong_equiv(cart_gate_clk_lyt{}, hex_even_col_gate_clk_lyt{});
-        check_for_strong_equiv(cart_gate_clk_lyt{}, hex_odd_col_gate_clk_lyt{});
-        check_for_strong_equiv(cart_gate_clk_lyt{}, hex_even_row_gate_clk_lyt{});
-        check_for_strong_equiv(cart_gate_clk_lyt{}, hex_odd_row_gate_clk_lyt{});
+        check_for_strong_equiv(cart_gate_clk_lyt{}, hex_gate_clk_lyt{arrangement::EVEN_COLUMN});
+        check_for_strong_equiv(cart_gate_clk_lyt{}, hex_gate_clk_lyt{arrangement::ODD_COLUMN});
+        check_for_strong_equiv(cart_gate_clk_lyt{}, hex_gate_clk_lyt{arrangement::EVEN_ROW});
+        check_for_strong_equiv(cart_gate_clk_lyt{}, hex_gate_clk_lyt{arrangement::ODD_ROW});
 
         check_for_strong_equiv(blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>(),
-                               blueprints::xor_maj_gate_layout<hex_even_col_gate_clk_lyt>());
+                               blueprints::xor_maj_gate_layout<hex_gate_clk_lyt>(arrangement::EVEN_COLUMN));
         check_for_strong_equiv(blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>(),
-                               blueprints::xor_maj_gate_layout<hex_odd_col_gate_clk_lyt>());
+                               blueprints::xor_maj_gate_layout<hex_gate_clk_lyt>(arrangement::ODD_COLUMN));
         check_for_strong_equiv(blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>(),
-                               blueprints::xor_maj_gate_layout<hex_even_row_gate_clk_lyt>());
+                               blueprints::xor_maj_gate_layout<hex_gate_clk_lyt>(arrangement::EVEN_ROW));
         check_for_strong_equiv(blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>(),
-                               blueprints::xor_maj_gate_layout<hex_odd_row_gate_clk_lyt>());
+                               blueprints::xor_maj_gate_layout<hex_gate_clk_lyt>(arrangement::ODD_ROW));
     }
     SECTION("TP == 1/2")
     {
         check_for_strong_equiv(blueprints::unbalanced_and_layout<cart_gate_clk_lyt>(),
-                               blueprints::unbalanced_and_layout<hex_even_col_gate_clk_lyt>());
+                               blueprints::unbalanced_and_layout<hex_gate_clk_lyt>(arrangement::EVEN_COLUMN));
         check_for_strong_equiv(blueprints::unbalanced_and_layout<cart_gate_clk_lyt>(),
-                               blueprints::unbalanced_and_layout<hex_odd_col_gate_clk_lyt>());
+                               blueprints::unbalanced_and_layout<hex_gate_clk_lyt>(arrangement::ODD_COLUMN));
         check_for_strong_equiv(blueprints::unbalanced_and_layout<cart_gate_clk_lyt>(),
-                               blueprints::unbalanced_and_layout<hex_even_row_gate_clk_lyt>());
+                               blueprints::unbalanced_and_layout<hex_gate_clk_lyt>(arrangement::EVEN_ROW));
         check_for_strong_equiv(blueprints::unbalanced_and_layout<cart_gate_clk_lyt>(),
-                               blueprints::unbalanced_and_layout<hex_odd_row_gate_clk_lyt>());
+                               blueprints::unbalanced_and_layout<hex_gate_clk_lyt>(arrangement::ODD_ROW));
     }
 }
 
@@ -166,13 +167,13 @@ TEST_CASE("Weak equivalence", "[equiv]")
     check_for_weak_equiv(blueprints::one_to_five_path_difference_network<mockturtle::aig_network>(),
                          blueprints::unbalanced_and_layout<cart_gate_clk_lyt>());
     check_for_weak_equiv(blueprints::one_to_five_path_difference_network<mockturtle::mig_network>(),
-                         blueprints::unbalanced_and_layout<hex_even_col_gate_clk_lyt>());
+                         blueprints::unbalanced_and_layout<hex_gate_clk_lyt>(arrangement::EVEN_COLUMN));
     check_for_weak_equiv(blueprints::one_to_five_path_difference_network<mockturtle::xag_network>(),
-                         blueprints::unbalanced_and_layout<hex_odd_col_gate_clk_lyt>());
+                         blueprints::unbalanced_and_layout<hex_gate_clk_lyt>(arrangement::ODD_COLUMN));
     check_for_weak_equiv(blueprints::one_to_five_path_difference_network<mockturtle::klut_network>(),
-                         blueprints::unbalanced_and_layout<hex_even_row_gate_clk_lyt>());
+                         blueprints::unbalanced_and_layout<hex_gate_clk_lyt>(arrangement::EVEN_ROW));
     check_for_weak_equiv(blueprints::one_to_five_path_difference_network<technology_network>(),
-                         blueprints::unbalanced_and_layout<hex_odd_row_gate_clk_lyt>());
+                         blueprints::unbalanced_and_layout<hex_gate_clk_lyt>(arrangement::ODD_ROW));
 }
 
 TEST_CASE("No equivalence", "[equiv]")
@@ -182,7 +183,7 @@ TEST_CASE("No equivalence", "[equiv]")
     check_for_no_equiv(blueprints::full_adder_network<mockturtle::aig_network>(),
                        blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>());
     check_for_no_equiv(blueprints::half_adder_network<mockturtle::mig_network>(),
-                       blueprints::and_or_gate_layout<hex_even_row_gate_clk_lyt>());
-    check_for_no_equiv(blueprints::and_not_gate_layout<hex_odd_row_gate_clk_lyt>(),
-                       blueprints::and_or_gate_layout<hex_even_col_gate_clk_lyt>());
+                       blueprints::and_or_gate_layout<hex_gate_clk_lyt>(arrangement::EVEN_ROW));
+    check_for_no_equiv(blueprints::and_not_gate_layout<hex_gate_clk_lyt>(arrangement::ODD_ROW),
+                       blueprints::and_or_gate_layout<hex_gate_clk_lyt>(arrangement::EVEN_COLUMN));
 }

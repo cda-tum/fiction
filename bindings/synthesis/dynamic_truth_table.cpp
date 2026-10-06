@@ -21,7 +21,7 @@
 #include <kitty/print.hpp>
 
 #include <cstdint>
-#include <new>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -70,7 +70,7 @@ void dynamic_truth_table(nanobind::module_& m)
 
     py::class_<py_tt>(m, "dynamic_truth_table")
         .def(
-            "__init__", [](py_tt* tt) { new (tt) py_tt{0u}; }, "Constructs the constant-zero truth table.")
+            "__init__", [](py_tt* tt) { std::construct_at(tt, 0u); }, "Constructs the constant-zero truth table.")
         .def(
             "__init__",
             [](py_tt* tt, const uint32_t num_vars)
@@ -79,7 +79,7 @@ void dynamic_truth_table(nanobind::module_& m)
                 {
                     throw std::invalid_argument("truth tables require fewer than 38 variables");
                 }
-                new (tt) py_tt{num_vars};
+                std::construct_at(tt, num_vars);
             },
             py::arg("num_vars"), "Constructs a truth table with fewer than 38 variables.")
 

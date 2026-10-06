@@ -125,12 +125,6 @@ void design_rule_violations(nanobind::module_& m)
     detail::gate_level_drvs_impl<py_cartesian_gate_layout>(m);
     detail::gate_level_drvs_impl<py_shifted_cartesian_gate_layout>(m);
     detail::gate_level_drvs_impl<py_hexagonal_gate_layout>(m);
-    detail::gate_level_drvs_impl<py_odd_row_cartesian_gate_layout>(m);
-    detail::gate_level_drvs_impl<py_even_row_cartesian_gate_layout>(m);
-    detail::gate_level_drvs_impl<py_even_column_cartesian_gate_layout>(m);
-    detail::gate_level_drvs_impl<py_odd_row_hex_gate_layout>(m);
-    detail::gate_level_drvs_impl<py_odd_column_hex_gate_layout>(m);
-    detail::gate_level_drvs_impl<py_even_column_hex_gate_layout>(m);
 }
 
 }  // namespace pyfiction

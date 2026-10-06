@@ -17,7 +17,7 @@ from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import positive_float, positive_int
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.statistics import stats_to_dict
-from mnt.fiction.cli.topologies import FGL_READERS, GATE_LAYOUTS
+from mnt.fiction.cli.topologies import FGL_READERS, SPECS, canonical, make_gate_layout
 from mnt.pyfiction import physical_design
 from mnt.pyfiction.networks import get_name
 
@@ -49,7 +49,7 @@ def _clocking_scheme(name: str, topology: str) -> str:
     """
     scheme = name.upper()
     try:
-        GATE_LAYOUTS[topology]((0, 0), scheme)
+        make_gate_layout(topology, (0, 0), scheme)
     except RuntimeError as error:
         msg = f"'{name}' is not a clocking scheme for {topology} layouts; see the CLI documentation for the list"
         raise CommandError(msg) from error
@@ -114,8 +114,8 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
     params = _exact_parameters(args, _clocking_scheme(args.scheme, topology))
     params.on_progress = session.report_progress
     params.on_worker_progress = session.report_worker_progress
-    native_topology = {"odd_column_cartesian": "shifted_cartesian", "even_row_hex": "hexagonal"}.get(topology, topology)
-    design = getattr(physical_design, f"exact_{native_topology}")
+    family, params.layout_arrangement = SPECS[canonical(topology)]
+    design = getattr(physical_design, f"exact_{family}")
     if args.synchronization_elements and topology != "cartesian":
         msg_0 = "synchronization elements require Cartesian topology"
         raise CommandError(msg_0)

@@ -20,6 +20,7 @@
 #include <fiction/layouts/coordinates.hpp>
 
 #include <cstdint>
+#include <memory>
 #include <stdexcept>
 
 #include <nanobind/nanobind.h>
@@ -59,13 +60,13 @@ void offset_coordinate(nanobind::module_& m)
 
                 if (size == 2)
                 {
-                    new (self.p) py_offset_coordinate{py::int_(py::handle(t[0])), py::int_(py::handle(t[1]))};
+                    std::construct_at(self.p, py::int_(py::handle(t[0])), py::int_(py::handle(t[1])));
                     return;
                 }
                 if (size == 3)
                 {
-                    new (self.p) py_offset_coordinate{py::int_(py::handle(t[0])), py::int_(py::handle(t[1])),
-                                                      py::int_(py::handle(t[2]))};
+                    std::construct_at(self.p, py::int_(py::handle(t[0])), py::int_(py::handle(t[1])),
+                                      py::int_(py::handle(t[2])));
                     return;
                 }
 
@@ -129,13 +130,13 @@ void cube_coordinate(nanobind::module_& m)
 
                 if (size == 2)
                 {
-                    new (self.p) py_cube_coordinate{py::int_(py::handle(t[0])), py::int_(py::handle(t[1]))};
+                    std::construct_at(self.p, py::int_(py::handle(t[0])), py::int_(py::handle(t[1])));
                     return;
                 }
                 if (size == 3)
                 {
-                    new (self.p) py_cube_coordinate{py::int_(py::handle(t[0])), py::int_(py::handle(t[1])),
-                                                    py::int_(py::handle(t[2]))};
+                    std::construct_at(self.p, py::int_(py::handle(t[0])), py::int_(py::handle(t[1])),
+                                      py::int_(py::handle(t[2])));
                     return;
                 }
 
