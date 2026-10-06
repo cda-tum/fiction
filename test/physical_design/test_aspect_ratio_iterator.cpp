@@ -114,3 +114,16 @@ TEST_CASE("Aspect ratio iteration", "[aspect-ratio-iterator]")
         }
     }
 }
+
+TEST_CASE("Aspect ratio iterator copies own their position", "[aspect-ratio-iterator]")
+{
+    aspect_ratio_iterator<layout_base::extent> current{2};
+    auto                                       copy = current;
+    ++current;
+    ++current;
+    CHECK(*copy == layout_base::extent{1, 2});
+    CHECK(*(copy++) == layout_base::extent{1, 2});
+    CHECK(*copy == layout_base::extent{2, 1});
+    CHECK(copy < current);
+    CHECK_FALSE(current <= copy);
+}

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <tuple>
@@ -58,10 +59,10 @@ class aspect_ratio_iterator
      */
     aspect_ratio_iterator& operator++()
     {
-        ++it;
+        ++factor_index;
 
         // end of factors: compute next ones
-        if (it == factors.end())
+        if (factor_index == factors.size())
         {
             next();
         }
@@ -88,7 +89,7 @@ class aspect_ratio_iterator
     /** @brief Return the current extent. */
     [[nodiscard]] AspectRatio operator*() const
     {
-        return *it;
+        return factors[factor_index];
     }
 
     /** @brief Compare iterator positions. */
@@ -100,7 +101,7 @@ class aspect_ratio_iterator
     /** @brief Compare iterator positions. */
     [[nodiscard]] bool operator==(const aspect_ratio_iterator& other) const
     {
-        return (num == other.num) && (*it == *(other.it));
+        return (num == other.num) && (factor_index == other.factor_index);
     }
 
     /** @brief Compare iterator positions. */
@@ -124,8 +125,7 @@ class aspect_ratio_iterator
     /** @brief Compare iterator positions. */
     [[nodiscard]] bool operator<(const aspect_ratio_iterator& other) const
     {
-        return (num < other.num) ||
-               (num == other.num && std::tie(it->width, it->height) < std::tie(other.it->width, other.it->height));
+        return std::tie(num, factor_index) < std::tie(other.num, other.factor_index);
     }
 
     /** @brief Compare iterator positions. */
@@ -137,8 +137,7 @@ class aspect_ratio_iterator
     /** @brief Compare iterator positions. */
     [[nodiscard]] bool operator<=(const aspect_ratio_iterator& other) const
     {
-        return (num <= other.num) ||
-               (num == other.num && std::tie(it->width, it->height) <= std::tie(other.it->width, other.it->height));
+        return std::tie(num, factor_index) <= std::tie(other.num, other.factor_index);
     }
 
   private:
@@ -151,9 +150,9 @@ class aspect_ratio_iterator
      */
     std::vector<AspectRatio> factors;
     /**
-     * Iterator pointing to current factor.
+     * Index of the current factor.
      */
-    typename std::vector<AspectRatio>::iterator it;
+    std::size_t factor_index{};
 
     /**
      * Factorizes the current `num` into all possible factors \f$(x, y)\f$ with \f$x \cdot y = num\f$. The result is
@@ -178,8 +177,7 @@ class aspect_ratio_iterator
             }
         }
 
-        // let it point to the first element of the sequence
-        it = factors.begin();
+        factor_index = 0;
     }
     /**
      * Computes the next possible `num` where a factorization \f$(x, y)\f$ with \f$x \cdot y = num\f$ exists.
