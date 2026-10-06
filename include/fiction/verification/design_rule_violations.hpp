@@ -22,7 +22,6 @@
 #include <fmt/color.h>
 #include <fmt/format.h>
 #include <fmt/ranges.h>
-#include <mockturtle/traits.hpp>
 #include <nlohmann/json.hpp>
 
 #include <array>
@@ -44,15 +43,10 @@ struct gate_level_drv_params
 {
     // Topology
 
+    /** @brief Check that every live object lies within the zero-origin extent. */
+    bool outside_extent = true;
+
     /**
-     * Check for nodes without locations.
-     */
-    bool unplaced_nodes = true;
-    /**
-     * Check for placed but dead nodes.
-     */
-    bool placed_dead_nodes = true;
-    /*
      * Check for nodes that are connected to non-adjacent ones.
      */
     bool non_adjacent_connections = true;
@@ -79,14 +73,6 @@ struct gate_level_drv_params
      */
     bool has_io = true;
     /**
-     * Check if the I/Os are assigned to empty tiles.
-     */
-    bool empty_io = true;
-    /**
-     * Check if the I/Os are assigned to wire segments.
-     */
-    bool io_pins = true;
-    /**
      * Check if the I/Os are located at the layout's border.
      */
     bool border_io = true;
@@ -99,6 +85,7 @@ struct gate_level_drv_params
     utils::progress_callback on_progress{};
 };
 
+/** @brief Design rule report and issue counts. */
 struct gate_level_drv_stats
 {
     /**
@@ -118,6 +105,7 @@ struct gate_level_drv_stats
 namespace detail
 {
 
+/** @brief Checks live object placement, connections, clocking, and interfaces. @tparam Lyt Gate layout type. */
 template <typename Lyt>
 class gate_level_drvs_impl
 {
@@ -142,32 +130,23 @@ class gate_level_drvs_impl
      *   - Missing connections
      *   - Wires crossing operations
      *   - Non-consecutive clocking of connected tiles
-     *   - I/O assigned to empty tiles
+     *   - Objects outside the extent
      *
      *  Warning:
-     *   - Unplaced (alive) nodes
-     *   - Non-wire I/O
      *   - Non-border I/O
      */
     void run()
     {
         utils::progress_reporter progress{
             ps.on_progress, "design rule checks",
-            static_cast<std::size_t>(ps.unplaced_nodes) + static_cast<std::size_t>(ps.placed_dead_nodes) +
-                static_cast<std::size_t>(ps.non_adjacent_connections) +
+            static_cast<std::size_t>(ps.outside_extent) + static_cast<std::size_t>(ps.non_adjacent_connections) +
                 static_cast<std::size_t>(ps.missing_connections) + static_cast<std::size_t>(ps.crossing_gates) +
                 static_cast<std::size_t>(ps.clocked_data_flow) + static_cast<std::size_t>(ps.has_io) +
-                static_cast<std::size_t>(ps.empty_io) + static_cast<std::size_t>(ps.io_pins) +
                 static_cast<std::size_t>(ps.border_io)};
         *ps.out << "[i] Topology:\n";
-        if (ps.unplaced_nodes)
+        if (ps.outside_extent)
         {
-            *ps.out << "[i]" << unplaced_nodes_check() << '\n';
-            progress.advance();
-        }
-        if (ps.placed_dead_nodes)
-        {
-            *ps.out << "[i]" << placed_dead_nodes_check() << '\n';
+            *ps.out << "[i]" << outside_extent_check() << '\n';
             progress.advance();
         }
         if (ps.non_adjacent_connections)
@@ -201,16 +180,6 @@ class gate_level_drvs_impl
             *ps.out << "[i]" << has_io_check() << '\n';
             progress.advance();
         }
-        if (ps.empty_io)
-        {
-            *ps.out << "[i]" << empty_io_check() << '\n';
-            progress.advance();
-        }
-        if (ps.io_pins)
-        {
-            *ps.out << "[i]" << io_pin_check() << '\n';
-            progress.advance();
-        }
         if (ps.border_io)
         {
             *ps.out << "[i]" << border_io_check() << '\n';
@@ -234,7 +203,7 @@ class gate_level_drvs_impl
     /**
      * Layout to perform design rule checks on.
      */
-    Lyt lyt;
+    const Lyt& lyt;
     /**
      * Parameters.
      */
@@ -268,7 +237,7 @@ class gate_level_drvs_impl
      * @param t Tile whose attributes are to be logged.
      * @param report Report to log into.
      */
-    void log_tile(const tile<Lyt> t, nlohmann::json& report) const noexcept
+    void log_tile(const tile<Lyt> t, nlohmann::json& report) const
     {
         std::stringstream s{};
 
@@ -278,7 +247,7 @@ class gate_level_drvs_impl
         }
         else
         {
-            s << "node: " << lyt.node_to_index(lyt.get_node(t));  // log node
+            s << "node: " << lyt.find_object(t)->index;  // log node
         }
 
         auto clk = lyt.get_clock_number(t);
@@ -298,10 +267,6 @@ class gate_level_drvs_impl
         report[t.str()] = s.str();
     }
 
-    void log_node(const mockturtle::node<Lyt>& n, nlohmann::json& report) const noexcept
-    {
-        report[n] = lyt.node_to_index(n);
-    }
     /**
      * Returns the check icon corresponding to a check's outcome.
      *
@@ -330,91 +295,33 @@ class gate_level_drvs_impl
      * @param brk Flag to indicate that a failure is design breaking. If it's not, msg is printed as a warning.
      * @return Formatted summary message.
      */
-    std::string summary(std::string&& msg, const bool chk, const bool brk) const noexcept
+    std::string summary(std::string&& msg, const bool chk, const bool brk) const
     {
         return fmt::format(" [{}] {}{}", check_icon(chk, brk), chk ? "" : "not ", std::move(msg));
     }
     /**
-     * Checks for nodes that are not placed but still alive.
-     *
-     * @return Check summary as a one liner.
+     * @brief Checks containment of all live object placements.
+     * @return Check summary.
      */
-    std::string unplaced_nodes_check()
+    std::string outside_extent_check()
     {
-        nlohmann::json unplaced_report{};
-
-        auto all_placed = true;
-
-        if (!lyt.is_empty())
-        {
-            std::size_t traversal_count{};
-            if (ps.on_progress)
+        nlohmann::json           report{};
+        bool                     contained = true;
+        utils::progress_reporter traversal{ps.on_progress, "outside extent", lyt.size()};
+        lyt.foreach_node(
+            [&](const auto id)
             {
-                lyt.foreach_node([&](const auto&) { ++traversal_count; });
-            }
-            utils::progress_reporter traversal{ps.on_progress, "unplaced nodes", traversal_count};
-            lyt.foreach_node(
-                [&unplaced_report, &all_placed, this, &traversal](const auto& n)
+                const auto t = lyt.get_tile(id);
+                if (!lyt.contains_coordinate(t))
                 {
-                    // skip constants
-                    if (!lyt.is_constant(n))
-                    {
-                        // if a node is alive but placed on a dead tile (e.g. not placed at all)
-                        if (!lyt.get_tile(n).is_valid())
-                        {
-                            all_placed = false;
-                            log_node(n, unplaced_report);
-                            ++pst.warnings;
-                        }
-                    }
-                    traversal.advance();
-                });
-        }
-
-        pst.report["Unplaced nodes"] = unplaced_report;
-
-        return summary("all nodes are properly placed", all_placed, false);
-    }
-    /**
-     * Checks for nodes that are placed but dead.
-     *
-     * @return Check summary as a one liner.
-     */
-    std::string placed_dead_nodes_check()
-    {
-        nlohmann::json placed_dead_report{};
-
-        auto all_alive = true;
-
-        if (!lyt.is_empty())
-        {
-            utils::progress_reporter traversal{ps.on_progress, "placed dead nodes",
-                                               (static_cast<std::size_t>(lyt.x()) + 1) *
-                                                   (static_cast<std::size_t>(lyt.y()) + 1) *
-                                                   (static_cast<std::size_t>(lyt.z()) + 1)};
-            lyt.foreach_tile(
-                [&placed_dead_report, &all_alive, this, &traversal](const auto& t)
-                {
-                    // skip empty tiles
-                    if (!lyt.is_empty_tile(t))
-                    {
-                        const auto n = lyt.get_node(t);
-
-                        // if the node is dead but placed
-                        if (lyt.is_dead(n))
-                        {
-                            all_alive = false;
-                            log_tile(t, placed_dead_report);
-                            ++pst.warnings;
-                        }
-                    }
-                    traversal.advance();
-                });
-        }
-
-        pst.report["Dead placed nodes"] = placed_dead_report;
-
-        return summary("all placed nodes are alive", all_alive, false);
+                    contained = false;
+                    log_tile(t, report);
+                    ++pst.drvs;
+                }
+                traversal.advance();
+            });
+        pst.report["Objects outside extent"] = report;
+        return summary("all objects lie within the layout extent", contained, true);
     }
     /**
      * Checks for proper clocking of connected tiles based on their assigned nodes.
@@ -429,33 +336,24 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
-            utils::progress_reporter traversal{ps.on_progress, "non adjacent connections",
-                                               (static_cast<std::size_t>(lyt.x()) + 1) *
-                                                   (static_cast<std::size_t>(lyt.y()) + 1) *
-                                                   (static_cast<std::size_t>(lyt.z()) + 1)};
-            lyt.foreach_tile(
-                [this, &non_adjacency_report, &adjacencies_respected, &traversal](const auto& t)
+            utils::progress_reporter traversal{ps.on_progress, "non adjacent connections", lyt.size()};
+            lyt.foreach_node(
+                [this, &non_adjacency_report, &adjacencies_respected, &traversal](const auto id)
                 {
-                    // skip empty tiles
-                    if (lyt.is_empty_tile(t))
-                    {
-                        traversal.advance();
-                        return;
-                    }
+                    const auto t = lyt.get_tile(id);
 
-                    const auto n = lyt.get_node(t);
-
-                    for (const auto& child : lyt.strg->nodes[n].children)
-                    {
-                        const auto ct = lyt.get_tile(lyt.get_node(child.index));
-                        if (!lyt.is_adjacent_elevation_of(t, ct))
-                        {
-                            adjacencies_respected = false;
-                            log_tile(ct, non_adjacency_report);
-                            log_tile(t, non_adjacency_report);
-                            ++pst.drvs;
-                        }
-                    }
+                    lyt.foreach_fanin(id,
+                                      [&](const auto child)
+                                      {
+                                          const auto ct = lyt.get_tile(child.object);
+                                          if (!lyt.is_adjacent_elevation_of(t, ct))
+                                          {
+                                              adjacencies_respected = false;
+                                              log_tile(ct, non_adjacency_report);
+                                              log_tile(t, non_adjacency_report);
+                                              ++pst.drvs;
+                                          }
+                                      });
                     traversal.advance();
                 });
         }
@@ -477,23 +375,18 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
-            utils::progress_reporter traversal{ps.on_progress, "missing connections",
-                                               (static_cast<std::size_t>(lyt.x()) + 1) *
-                                                   (static_cast<std::size_t>(lyt.y()) + 1) *
-                                                   (static_cast<std::size_t>(lyt.z()) + 1)};
-            lyt.foreach_tile(
-                [this, &connections_report, &all_connected, &traversal](const auto& t)
+            utils::progress_reporter traversal{ps.on_progress, "missing connections", lyt.size()};
+            lyt.foreach_node(
+                [this, &connections_report, &all_connected, &traversal](const auto id)
                 {
-                    if (lyt.is_empty_tile(t))
+                    const auto t = lyt.get_tile(id);
+
+                    bool dangling_inp_connection = false;
+                    for (uint32_t input{}; input < lyt.input_count(id); ++input)
                     {
-                        traversal.advance();
-                        return;
+                        dangling_inp_connection |= !lyt.source({id, input}).has_value();
                     }
-
-                    const auto n = lyt.get_node(t);
-
-                    const bool dangling_inp_connection = lyt.fanin_size(n) == 0 && !lyt.is_pi_tile(t);
-                    const bool dangling_out_connection = lyt.fanout_size(n) == 0 && !lyt.is_po_tile(t);
+                    const bool dangling_out_connection = lyt.fanout_size(id) == 0 && !lyt.is_po_tile(t);
 
                     if (dangling_out_connection || dangling_inp_connection)
                     {
@@ -533,7 +426,7 @@ class gate_level_drvs_impl
                 {
                     if (const auto t = lyt.get_tile(w); lyt.is_crossing_layer(t))
                     {
-                        if (!lyt.is_wire_tile(lyt.below(t)))
+                        if (const auto lower = lyt.below(t); !lower || !lyt.is_wire_tile(*lower))
                         {
                             all_wire_crossings = false;
                             log_tile(t, crossing_report);
@@ -561,32 +454,24 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
-            utils::progress_reporter traversal{ps.on_progress, "clocked data flow",
-                                               (static_cast<std::size_t>(lyt.x()) + 1) *
-                                                   (static_cast<std::size_t>(lyt.y()) + 1) *
-                                                   (static_cast<std::size_t>(lyt.z()) + 1)};
-            lyt.foreach_tile(
-                [this, &data_flow_report, &data_flow_respected, &traversal](const auto& t)
+            utils::progress_reporter traversal{ps.on_progress, "clocked data flow", lyt.size()};
+            lyt.foreach_node(
+                [this, &data_flow_report, &data_flow_respected, &traversal](const auto id)
                 {
-                    if (lyt.is_empty_tile(t))
-                    {
-                        traversal.advance();
-                        return;
-                    }
+                    const auto t = lyt.get_tile(id);
 
-                    const auto n = lyt.get_node(t);
-
-                    for (const auto& child : lyt.strg->nodes[n].children)
-                    {
-                        const auto ct = lyt.get_tile(lyt.get_node(child.index));
-                        if (!lyt.is_incoming_clocked(t, ct))
-                        {
-                            data_flow_respected = false;
-                            log_tile(ct, data_flow_report);
-                            log_tile(t, data_flow_report);
-                            ++pst.drvs;
-                        }
-                    }
+                    lyt.foreach_fanin(id,
+                                      [&](const auto child)
+                                      {
+                                          const auto ct = lyt.get_tile(child.object);
+                                          if (!lyt.is_incoming_clocked(t, ct))
+                                          {
+                                              data_flow_respected = false;
+                                              log_tile(ct, data_flow_report);
+                                              log_tile(t, data_flow_report);
+                                              ++pst.drvs;
+                                          }
+                                      });
                     traversal.advance();
                 });
         }
@@ -610,7 +495,7 @@ class gate_level_drvs_impl
         {
             uint32_t num_io{0ul};
 
-            const auto count_io = [&num_io]([[maybe_unused]] const mockturtle::node<Lyt>& io) { ++num_io; };
+            const auto count_io = [&num_io]([[maybe_unused]] const auto io) { ++num_io; };
 
             has_io_report["Specified PIs"] = lyt.num_pis();
             lyt.foreach_pi(count_io);
@@ -625,7 +510,7 @@ class gate_level_drvs_impl
             num_io = 0ul;
 
             has_io_report["Specified POs"] = lyt.num_pos();
-            lyt.foreach_po([this, &count_io](const auto& o) { count_io(lyt.get_node(o)); });
+            lyt.foreach_po(count_io);
             has_io_report["Counted POs"] = num_io;
 
             if (lyt.num_pos() != num_io || lyt.num_pos() == 0 || num_io == 0)
@@ -640,68 +525,6 @@ class gate_level_drvs_impl
         return summary("all I/O are properly specified", ios_present, true);
     }
     /**
-     * Checks if no PI/PO is assigned to an empty tile.
-     *
-     * @return Check summary as a one liner.
-     */
-    std::string empty_io_check()
-    {
-        nlohmann::json empty_io_report{};
-
-        auto all_non_empty = true;
-
-        if (!lyt.is_empty())
-        {
-            const auto check_io = [this, &empty_io_report, &all_non_empty](const mockturtle::node<Lyt>& io)
-            {
-                if (const auto iot = lyt.get_tile(io); lyt.is_empty_tile(iot))
-                {
-                    all_non_empty = false;
-                    log_tile(iot, empty_io_report);
-                    ++pst.drvs;
-                }
-            };
-
-            lyt.foreach_pi(check_io);
-            lyt.foreach_po([this, &check_io](const auto& o) { check_io(lyt.get_node(o)); });
-        }
-
-        pst.report["Empty I/O ports"] = empty_io_report;
-
-        return summary("all I/O ports are assigned to a non-empty tile", all_non_empty, true);
-    }
-    /**
-     * Checks if all PI/POs are designated pins.
-     *
-     * @return Check summary as a one liner.
-     */
-    std::string io_pin_check()
-    {
-        nlohmann::json io_pin_report{};
-
-        auto all_pin = true;
-
-        if (!lyt.is_empty())
-        {
-            const auto check_io = [this, &io_pin_report, &all_pin](const mockturtle::node<Lyt>& io)
-            {
-                if (const auto iot = lyt.get_tile(io); !lyt.is_buf(io))
-                {
-                    all_pin = false;
-                    log_tile(iot, io_pin_report);
-                    ++pst.warnings;
-                }
-            };
-
-            lyt.foreach_pi(check_io);
-            lyt.foreach_po([this, &check_io](const auto& o) { check_io(lyt.get_node(o)); });
-        }
-
-        pst.report["Gate I/O ports"] = io_pin_report;
-
-        return summary("all I/O ports are realized by designated pins", all_pin, false);
-    }
-    /**
      * Checks if all PI/POs are located at the layout's borders.
      *
      * @return Check summary as a one liner.
@@ -714,7 +537,7 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
-            const auto check_io = [this, &border_report, &all_border](const mockturtle::node<Lyt>& io)
+            const auto check_io = [this, &border_report, &all_border](const auto io)
             {
                 if (const auto iot = lyt.get_tile(io); !lyt.is_at_any_border(iot))
                 {
@@ -725,7 +548,7 @@ class gate_level_drvs_impl
             };
 
             lyt.foreach_pi(check_io);
-            lyt.foreach_po([this, &check_io](const auto& o) { check_io(lyt.get_node(o)); });
+            lyt.foreach_po(check_io);
         }
 
         pst.report["Border I/O ports"] = border_report;
@@ -745,8 +568,9 @@ class gate_level_drvs_impl
  * Furthermore, this function does not only find and log DRVs but can also warn for instances that are not per se errors
  * but defy best practices of layout generation, e.g., I/Os not being placed at the layout borders.
  *
- * For this function to work, `detail::gate_level_drvs_impl` need to be declared as a `friend class` to the layout type
- * that is going to be examined.
+ * The checker inspects every live object through public ordered ports, including placements outside the extent.
+ * Unplaced objects, placed dead objects, empty terminals, and gate terminals cannot occur in the placed-object API
+ * and have no corresponding checks.
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt The gate-level layout that is to be examined for DRVs and warnings.
@@ -757,12 +581,6 @@ template <typename Lyt>
 void gate_level_drvs(const Lyt& lyt, const gate_level_drv_params& ps = {}, gate_level_drv_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(mockturtle::has_get_node_v<Lyt>, "Lyt does not implement the get_node function");
-    static_assert(mockturtle::has_node_to_index_v<Lyt>, "Lyt does not implement the node_to_index function");
-    static_assert(mockturtle::has_is_constant_v<Lyt>, "Lyt does not implement the is_constant function");
-    static_assert(mockturtle::has_is_buf_v<Lyt>, "Lyt does not implement the is_buf function");
-    static_assert(mockturtle::has_foreach_pi_v<Lyt>, "Lyt does not implement the foreach_pi function");
-    static_assert(mockturtle::has_foreach_po_v<Lyt>, "Lyt does not implement the foreach_po function");
 
     gate_level_drv_stats              st{};
     detail::gate_level_drvs_impl<Lyt> p{lyt, ps, st};

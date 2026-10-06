@@ -18,11 +18,12 @@
 
 #include "fiction/traits.hpp"
 
-#include <phmap.h>
-
 #include <algorithm>
 #include <cstdint>
-#include <cstdlib>
+#include <limits>
+#include <optional>
+#include <stdexcept>
+#include <unordered_map>
 #include <vector>
 
 namespace fiction::verification
@@ -46,149 +47,99 @@ struct cp_and_tp
 namespace detail
 {
 
+/**
+ * @brief Evaluates declared output dependencies with an explicit traversal stack.
+ * @tparam Lyt Placed object layout type.
+ */
 template <typename Lyt>
 class critical_path_length_and_throughput_impl
 {
   public:
+    /** @brief Stores the layout without copying it. @param src Layout to analyze. */
     explicit critical_path_length_and_throughput_impl(const Lyt& src) : lyt{src} {}
 
+    /** @brief Computes physical path length and throughput. @return Path length and throughput denominator. */
     cp_and_tp run()
     {
+        cp_and_tp result{};
+        uint64_t  max_diff{};
         lyt.foreach_po(
-            [this](const auto& po)
+            [&](const auto po)
             {
-                result.critical_path_length =
-                    std::max(signal_delay(static_cast<tile<Lyt>>(po)).length, result.critical_path_length);
+                if (!cache.contains(po))
+                {
+                    cache.emplace(po, std::nullopt);
+                    pending.push_back({po, 0});
+                }
+                while (!pending.empty())
+                {
+                    auto& current = pending.back();
+                    if (current.input < lyt.input_count(current.object))
+                    {
+                        const auto source = lyt.source({current.object, current.input++});
+                        if (!source)
+                        {
+                            throw std::invalid_argument("A primary output dependency has a disconnected input");
+                        }
+                        const auto [entry, inserted] = cache.try_emplace(source->object, std::nullopt);
+                        if (inserted)
+                        {
+                            pending.push_back({source->object, 0});
+                        }
+                        else if (!entry->second)
+                        {
+                            throw std::invalid_argument("A primary output dependency contains a cycle");
+                        }
+                        continue;
+                    }
+                    path_info path{1, lyt.get_clock_number(lyt.get_tile(current.object))};
+                    if (lyt.input_count(current.object) != 0)
+                    {
+                        uint64_t shortest_delay = std::numeric_limits<uint64_t>::max();
+                        path                    = {};
+                        for (uint32_t input{}; input < lyt.input_count(current.object); ++input)
+                        {
+                            const auto child = *cache.at(lyt.source({current.object, input})->object);
+                            path.length      = std::max(path.length, child.length);
+                            path.delay       = std::max(path.delay, child.delay);
+                            shortest_delay   = std::min(shortest_delay, child.delay);
+                        }
+                        max_diff = std::max(max_diff, path.delay - shortest_delay);
+                        ++path.length;
+                        ++path.delay;
+                    }
+                    cache.at(current.object) = path;
+                    pending.pop_back();
+                }
+                result.critical_path_length = std::max(result.critical_path_length, cache.at(po)->length);
             });
-
-        const auto max_diff{std::ranges::max_element(delay_cache, [](const auto& i1, const auto& i2)
-                                                     { return i1.second.diff < i2.second.diff; })};
-
-        if (max_diff != delay_cache.cend())
-        {
-            result.throughput = max_diff->second.diff;
-        }
-
-        // give throughput in cycles, not in phases
-        result.throughput /= lyt.num_clocks();
-
-        // convert cycle difference to throughput, i.e., x where throughput == 1/x
-        result.throughput++;
-
+        result.throughput = max_diff / lyt.num_clocks() + 1;
         return result;
     }
 
   private:
-    /**
-     * Gate-level layout.
-     */
-    Lyt lyt;
-    /**
-     * Result storage.
-     */
-    cp_and_tp result;
-
+    /** @brief Source layout; analysis never mutates layout state. */
+    const Lyt& lyt;
+    /** @brief Completed path length and arrival phase. */
     struct path_info
     {
-        path_info() = default;
-        path_info(const uint64_t len, const uint64_t dly, const uint64_t dff) : length{len}, delay{dly}, diff{dff} {}
-
-        uint64_t length{0ull}, delay{0ull}, diff{0ull};
+        /** @brief Number of placed objects on the longest path. */
+        uint64_t length{};
+        /** @brief Latest arrival phase, including the source's clock number. */
+        uint64_t delay{};
     };
-
-    phmap::flat_hash_map<tile<Lyt>, path_info> delay_cache{};
-
-    /**
-     * @brief Evaluates an output's incoming paths without consuming the native call stack.
-     * @param t Output tile whose path information is needed.
-     * @return Length, delay, and delay difference of the dominant path.
-     */
-    path_info signal_delay(const tile<Lyt> t)
+    /** @brief Suspended traversal of an object's ordered inputs. */
+    struct frame
     {
-        /** @brief Suspended traversal of one tile's incoming paths. */
-        struct frame
-        {
-            /** @brief Tile whose predecessors are being evaluated. */
-            tile<Lyt> position;
-            /** @brief Incoming tiles in layout traversal order. */
-            std::vector<tile<Lyt>> incoming;
-            /** @brief Completed predecessor paths in the same order. */
-            std::vector<path_info> infos{};
-            /** @brief Wire tiles between this frame's caller and its current position. */
-            uint64_t wire_length{};
-        };
-
-        std::vector<frame> pending{{t, lyt.incoming_data_flow(t)}};
-        path_info          dominant_path{};
-        while (!pending.empty())
-        {
-            auto& current = pending.back();
-            while (current.infos.empty() && current.incoming.size() == 1 && lyt.is_wire_tile(current.position) &&
-                   !lyt.is_pi_tile(current.position))
-            {
-                current.position = current.incoming.front();
-                current.incoming = lyt.incoming_data_flow(current.position);
-                ++current.wire_length;
-            }
-            if (lyt.is_empty_tile(current.position))
-            {
-                dominant_path = {};
-            }
-            else if (current.incoming.empty())
-            {
-                dominant_path = {1, lyt.get_clock_number(current.position), 0};
-            }
-            else if (const auto it = delay_cache.find(current.position); it != delay_cache.end())
-            {
-                dominant_path = it->second;
-            }
-            else if (current.infos.size() < current.incoming.size())
-            {
-                const auto predecessor = current.incoming[current.infos.size()];
-                pending.push_back({predecessor, lyt.incoming_data_flow(predecessor)});
-                continue;
-            }
-            else
-            {
-                auto& infos = current.infos;
-                if (lyt.is_pi_tile(current.position))
-                {
-                    infos.emplace_back(
-                        1ull,
-                        static_cast<uint64_t>((lyt.get_clock_number(current.position) + (lyt.num_clocks() - 1)) %
-                                              lyt.num_clocks()),
-                        0ull);
-                }
-                if (infos.size() == 1)
-                {
-                    dominant_path = infos.front();
-                }
-                else
-                {
-                    std::ranges::sort(infos, [](const auto& i1, const auto& i2) { return i1.length < i2.length; });
-                    dominant_path = {infos.back().length, infos.back().delay,
-                                     static_cast<uint64_t>(
-                                         std::abs(static_cast<int64_t>(infos.back().delay - infos.front().delay)))};
-                }
-                ++dominant_path.length;
-                ++dominant_path.delay;
-
-                // Cache gates only: routed layouts can contain millions of wire tiles.
-                if (!lyt.is_wire_tile(current.position))
-                {
-                    delay_cache[current.position] = dominant_path;
-                }
-            }
-            dominant_path.length += current.wire_length;
-            dominant_path.delay += current.wire_length;
-            pending.pop_back();
-            if (!pending.empty())
-            {
-                pending.back().infos.push_back(dominant_path);
-            }
-        }
-        return dominant_path;
-    }
+        /** @brief Object under traversal. */
+        typename Lyt::object_id object{};
+        /** @brief Next input index to visit. */
+        uint32_t input{};
+    };
+    /** @brief An empty entry marks an active dependency; a value marks a completed dependency. */
+    std::unordered_map<typename Lyt::object_id, std::optional<path_info>> cache{};
+    /** @brief Explicit traversal stack independent of native call stack size. */
+    std::vector<frame> pending{};
 };
 
 }  // namespace detail
@@ -196,7 +147,9 @@ class critical_path_length_and_throughput_impl
 /**
  * Computes the critical path length (CP) length and the throughput (TP) of a gate-level layout.
  *
- * The critical path length is defined as the longest path from any PI to any PO in tiles.
+ * The critical path length counts every placed object on the longest path to any PO, including wires and terminals.
+ * Traversal follows declared input ports, independent of physical adjacency and clocking legality.
+ * Only output dependencies enter the analysis. Explicit placed zero-input functions act as path sources.
  *
  * The throughput is defined as \f$\frac{1}{x}\f$ where \f$x\f$ is the highest path length difference between any
  * sets of paths that lead to the same gate. This function provides only the denominator \f$x\f$, as the numerator is
@@ -216,6 +169,7 @@ class critical_path_length_and_throughput_impl
  * @tparam Lyt Gate-level layout type.
  * @param lyt The gate-level layout whose CP and TP are desired.
  * @return A struct containing the CP and TP.
+ * @throws std::invalid_argument If an output dependency has a disconnected input or a cycle.
  */
 template <typename Lyt>
 cp_and_tp critical_path_length_and_throughput(const Lyt& lyt)

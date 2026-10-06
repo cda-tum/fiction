@@ -24,52 +24,43 @@
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
 
-#include <mockturtle/views/depth_view.hpp>
-
 #include <cstdint>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::verification;
 
 /**
- * @brief Checks the critical path against the network depth.
- * @tparam Lyt Gate-level layout type.
- * @param lyt Layout to check.
- * @param cp_tp Computed critical path and throughput.
+ * @brief Checks physical path length and throughput against declared expectations.
+ * @tparam Lyt Gate layout type.
+ * @param lyt Layout to analyze.
+ * @param length Expected longest path in objects.
+ * @param throughput Expected throughput denominator.
  */
 template <typename Lyt>
-void check_critical_path_length(const Lyt& lyt, const cp_and_tp& cp_tp) noexcept
+void check(const Lyt& lyt, const uint64_t length, const uint64_t throughput)
 {
-    const mockturtle::depth_view depth_lyt{lyt};
-
-    CHECK(cp_tp.critical_path_length == depth_lyt.depth() + 1);  // + 1 because depth_view does not count POs
-}
-
-template <typename Lyt>
-void check(const Lyt& lyt, const uint64_t throughput) noexcept
-{
-    const auto cp_tp = critical_path_length_and_throughput(lyt);
-
-    check_critical_path_length(lyt, cp_tp);
-    CHECK(cp_tp.throughput == throughput);
+    const auto result = critical_path_length_and_throughput(lyt);
+    CHECK(result.critical_path_length == length);
+    CHECK(result.throughput == throughput);
 }
 
 TEST_CASE("Balanced layout", "[throughput]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    check(blueprints::and_or_gate_layout<gate_layout>(), 1);
-    check(blueprints::xor_maj_gate_layout<gate_layout>(), 1);
-    check(blueprints::or_not_gate_layout<gate_layout>(), 1);
-    check(blueprints::fanout_layout<gate_layout>(), 1);
-    check(blueprints::crossing_layout<gate_layout>(), 1);
+    check(blueprints::and_or_gate_layout<gate_layout>(), 3, 1);
+    check(blueprints::xor_maj_gate_layout<gate_layout>(), 3, 1);
+    check(blueprints::or_not_gate_layout<gate_layout>(), 4, 1);
+    check(blueprints::fanout_layout<gate_layout>(), 5, 1);
+    check(blueprints::crossing_layout<gate_layout>(), 4, 1);
 
     SECTION("Synchronization Elements")
     {
         using se_gate_layout = gate_level_layout<cartesian_layout>;
 
-        check(blueprints::se_gate_layout<se_gate_layout>(), 1);
+        check(blueprints::se_gate_layout<se_gate_layout>(), 4, 1);
     }
 }
 
@@ -77,18 +68,18 @@ TEST_CASE("Unbalanced layout", "[throughput]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    check(blueprints::unbalanced_and_layout<gate_layout>(), 2);
+    check(blueprints::unbalanced_and_layout<gate_layout>(), 6, 2);
 }
 
 TEST_CASE("Critical path analysis handles long routes", "[throughput]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    constexpr uint64_t length{100'000};
-    gate_layout        layout{{length, 1}, clocking::twoddwave()};
-    auto               signal = layout.create_pi("in", {0, 0});
-    auto               branch = signal;
-    for (uint64_t x = 1; x < length; ++x)
+    constexpr int64_t length{1'000'000};
+    gate_layout       layout{{length + 1, 2}, clocking::twoddwave()};
+    auto              signal = layout.create_pi("in", {0, 0});
+    auto              branch = signal;
+    for (int64_t x = 1; x < length; ++x)
     {
         signal = x == length / 2 ? layout.create_not(signal, {x, 0}) : layout.create_buf(signal, {x, 0});
         if (x == length / 2)
@@ -100,6 +91,39 @@ TEST_CASE("Critical path analysis handles long routes", "[throughput]")
     layout.create_po(branch, "branch", {length / 2, 1});
 
     const auto result = critical_path_length_and_throughput(layout);
-    CHECK(result.critical_path_length == length + 1);
+    CHECK(result.critical_path_length == static_cast<uint64_t>(length + 1));
     CHECK(result.throughput == 1);
+}
+
+TEST_CASE("Timing rejects required holes and cycles without rejecting dangling objects", "[throughput][placed-objects]")
+{
+    gate_level_layout<cartesian_layout> lyt{{1, 4}};
+    const auto                          pi       = lyt.create_pi("a", {0, 0});
+    const auto                          wire     = lyt.create_buf(pi, {0, 1});
+    const auto                          po       = lyt.create_po(wire, "result", {0, 2});
+    const auto                          dangling = lyt.create_buf({0, 3});
+    lyt.connect(dangling, {dangling.object, 0});
+    const auto result = critical_path_length_and_throughput(lyt);
+    CHECK(result.critical_path_length == 3);
+    CHECK(result.throughput == 1);
+    lyt.disconnect({wire.object, 0});
+    CHECK_THROWS_AS(critical_path_length_and_throughput(lyt), std::invalid_argument);
+    lyt.connect(po, {wire.object, 0});
+    CHECK_THROWS_AS(critical_path_length_and_throughput(lyt), std::invalid_argument);
+}
+
+TEST_CASE("Timing counts declared wire paths independently of placement", "[throughput][placed-objects]")
+{
+    gate_level_layout<cartesian_layout> lyt{{1, 1}};
+    const auto                          pi   = lyt.create_pi("a", {10, 0});
+    auto                                path = pi;
+    for (int64_t x = 11; x < 15; ++x)
+    {
+        path = lyt.create_buf(path, {x, 0});
+    }
+    const auto gate = lyt.create_and(pi, path, {15, 0});
+    lyt.create_po(gate, "result", {16, 0});
+    const auto result = critical_path_length_and_throughput(lyt);
+    CHECK(result.critical_path_length == 7);
+    CHECK(result.throughput == 2);
 }

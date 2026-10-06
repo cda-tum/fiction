@@ -30,6 +30,7 @@ namespace pyfiction
 namespace detail
 {
 
+/** @brief Binds gate classification for an operand. @tparam NtkOrLyt Network or layout type. @param m Python module. */
 template <typename NtkOrLyt>
 void count_gate_types(nanobind::module_& m)
 {
@@ -48,13 +49,16 @@ void count_gate_types(nanobind::module_& m)
 
 }  // namespace detail
 
+/** @brief Registers gate type counts and reports. @param m Python module. */
 void count_gate_types(nanobind::module_& m)
 {
     namespace py = nanobind;
 
+    /** @brief Bound gate type statistics. */
     using stats = fiction::verification::count_gate_types_stats;
 
-    py::class_<stats>(m, "count_gate_types_stats", "The number of nodes of each gate type in a network or layout.")
+    py::class_<stats>(m, "count_gate_types_stats",
+                      "Counts logic gates and placed wires, excluding primary terminals and network constants.")
         .def(py::init<>(), "Default constructor.")
         .def(
             "report",

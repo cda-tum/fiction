@@ -17,12 +17,14 @@
 
 #pragma once
 
-#include "fiction/networks/name_utils.hpp"
+#include "fiction/networks/extract_layout_network.hpp"
+#include "fiction/networks/interface_matching.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/verification/critical_path_length_and_throughput.hpp"
 #include "fiction/verification/design_rule_violations.hpp"
 
 #include <fmt/format.h>
+#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
 #include <mockturtle/networks/klut.hpp>
@@ -31,6 +33,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <vector>
 
 namespace fiction::verification
@@ -41,19 +44,20 @@ namespace fiction::verification
 enum class eq_type
 {
     /**
-     * `Spec` and `Impl` are logically not equivalent OR `Impl` has DRVs.
+     * `Spec` and `Impl` differ logically, contain required topology defects, or either layout has DRVs.
      */
     NO,
     /**
-     * `Spec` and `Impl` are logically equivalent BUT `Impl` has a throughput of \f$\frac{1}{x}\f$ with \f$x > 1\f$.
+     * `Spec` and `Impl` are logically equivalent and have different throughput denominators.
      */
     WEAK,
     /**
-     * `Spec` and `Impl` are logically equivalent AND `Impl` has a throughput of \f$\frac{1}{1}\f$.
+     * `Spec` and `Impl` are logically equivalent and have equal throughput denominators.
      */
     STRONG
 };
 
+/** @brief Physical equivalence result, throughput, and diagnostics. */
 struct equivalence_checking_stats
 {
     /**
@@ -81,6 +85,8 @@ struct equivalence_checking_stats
 namespace detail
 {
 
+/** @brief Compares logical interfaces and physical layout timing. @tparam Spec Specification. @tparam Impl
+ * Implementation. */
 template <typename Spec, typename Impl>
 class equivalence_checking_impl
 {
@@ -90,7 +96,6 @@ class equivalence_checking_impl
      *
      * @param specification Logical specification of intended functionality.
      * @param implementation Implementation of specified functionality.
-     * @param p Parameters.
      * @param st Statistics.
      */
     explicit equivalence_checking_impl(const Spec& specification, const Impl& implementation,
@@ -100,7 +105,8 @@ class equivalence_checking_impl
             pst{st}
     {}
 
-    eq_type run() noexcept
+    /** @brief Checks design rules, aligned logic, and throughput. @return Physical equivalence type. */
+    eq_type run()
     {
         mockturtle::stopwatch stop{pst.runtime};
 
@@ -119,7 +125,59 @@ class equivalence_checking_impl
             }
         }
 
-        const auto miter = mockturtle::miter<mockturtle::klut_network>(spec, impl);
+        if (spec.num_pis() != impl.num_pis() || spec.num_pos() != impl.num_pos())
+        {
+            return eq_type::NO;
+        }
+        try
+        {
+            return compare_logic();
+        }
+        catch (const std::invalid_argument&)
+        {
+            pst.eq = eq_type::NO;
+            return pst.eq;
+        }
+    }
+
+  private:
+    /**
+     * @brief Provides a logical network for a layout or an existing network.
+     * @tparam NtkOrLyt Network or layout type.
+     * @param source Comparison operand.
+     * @return Extracted network value or const reference to the existing network.
+     */
+    template <typename NtkOrLyt>
+    static decltype(auto) logical_network(const NtkOrLyt& source)
+    {
+        if constexpr (is_gate_level_layout_v<NtkOrLyt>)
+        {
+            return networks::extract_layout_network(source);
+        }
+        else
+        {
+            return (source);
+        }
+    }
+
+    /** @brief Compares aligned logical interfaces and retains physical throughput. @return Equivalence type. */
+    eq_type compare_logic()
+    {
+        const auto                                    matching = networks::match_interfaces(spec, impl);
+        const auto&                                   spec_ntk = logical_network(spec);
+        const auto&                                   impl_ntk = logical_network(impl);
+        mockturtle::klut_network                      aligned{};
+        std::vector<mockturtle::klut_network::signal> inputs(impl_ntk.num_pis());
+        for (uint32_t input{}; input < spec_ntk.num_pis(); ++input)
+        {
+            inputs[matching.inputs[input]] = aligned.create_pi();
+        }
+        const auto outputs = mockturtle::cleanup_dangling(impl_ntk, aligned, inputs.begin(), inputs.end());
+        for (const auto output : matching.outputs)
+        {
+            aligned.create_po(outputs[output]);
+        }
+        const auto miter = mockturtle::miter<mockturtle::klut_network>(spec_ntk, aligned);
 
         if (miter)
         {
@@ -183,16 +241,19 @@ class equivalence_checking_impl
     /**
      * Specification.
      */
-    const Spec spec;
+    const Spec& spec;
     /**
      * Implementation.
      */
-    const Impl impl;
+    const Impl& impl;
 
+    /** @brief Result statistics. */
     equivalence_checking_stats& pst;
 
+    /** @brief Checks physical legality without printing a report. @tparam NtkOrLyt Layout type. @param ntk_or_lyt
+     * Layout. @param stats DRV statistics. @return Whether a DRV exists. */
     template <typename NtkOrLyt>
-    bool has_drvs(const NtkOrLyt& ntk_or_lyt, gate_level_drv_stats* stats) const noexcept
+    bool has_drvs(const NtkOrLyt& ntk_or_lyt, gate_level_drv_stats* stats) const
     {
         fiction::verification::gate_level_drv_params drv_ps{};
 
@@ -210,7 +271,9 @@ class equivalence_checking_impl
 
 /**
  * Performs SAT-based equivalence checking between a specification of type `Spec` and an implementation of type `Impl`.
- * Both `Spec` and `Impl` need to be network types (that is, gate-level layouts can be utilized as well).
+ * Each operand is a logic network or a placed gate-level layout. Layout logic is extracted before SAT checking.
+ * Interfaces match by names unique on both sides, then by remaining declared positions. Unequal interface sizes,
+ * missing required inputs, and required dependency cycles return `NO`.
  *
  * This implementation enables the comparison of two logic networks, a logic network and a gate-level layout or two
  * gate-level layouts. Since gate-level layouts have a notion of timing that logic networks do not, this function does
@@ -220,11 +283,9 @@ class equivalence_checking_impl
  *
  * - `NO` equivalence: Spec and Impl are not logically equivalent or one of them is a gate-level layout that contains
  * DRVs and, thus, cannot be checked for equivalence.
- * - `WEAK` equivalence: Spec and Impl are logically equivalent but either one of them is a gate-level layout with TP of
- * \f$\frac{1}{x}\f$ with \f$x > 1\f$ or both of them are gate-level layouts with TP of \f$\frac{1}{x}\f$ and
- * \f$\frac{1}{y}\f$, respectively, where \f$x \neq y\f$.
- * - `STRONG` equivalence: Spec and Impl are logically equivalent and all involved gate-level layouts have TP of
- * \f$\frac{1}{1}\f$.
+ * - `WEAK` equivalence: Spec and Impl are logically equivalent and have different throughput denominators.
+ * - `STRONG` equivalence: Spec and Impl are logically equivalent and have equal throughput denominators.
+ * Logic networks have throughput denominator one.
  *
  * This approach was first proposed in \"Verification for Field-coupled Nanocomputing Circuits\" by M. Walter, R. Wille,
  * F. Sill Torres, D. Große, and R. Drechsler in DAC 2020.
@@ -239,8 +300,10 @@ class equivalence_checking_impl
 template <typename Spec, typename Impl>
 eq_type equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checking_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Spec>, "Spec is not a network type");
-    static_assert(mockturtle::is_network_type_v<Impl>, "Impl is not a network type");
+    static_assert(mockturtle::is_network_type_v<Spec> || is_gate_level_layout_v<Spec>,
+                  "Spec is not a network or gate layout");
+    static_assert(mockturtle::is_network_type_v<Impl> || is_gate_level_layout_v<Impl>,
+                  "Impl is not a network or gate layout");
 
     equivalence_checking_stats        st{};
     detail::equivalence_checking_impl p{spec, impl, st};
