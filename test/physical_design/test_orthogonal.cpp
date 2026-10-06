@@ -26,6 +26,7 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
@@ -210,5 +211,25 @@ TEST_CASE("Orthogonal physical design of a network without primary inputs", "[or
     technology_network ntk{};
     ntk.create_po(ntk.get_constant(false));
 
-    CHECK_NOTHROW(orthogonal<gate_layout>(ntk));
+    const auto lyt = orthogonal<gate_layout>(ntk);
+    CHECK(lyt.num_pis() == 0);
+    CHECK(lyt.num_pos() == 1);
+    check_eq(ntk, extract_layout_network(lyt));
+}
+
+TEST_CASE("Orthogonal placement preserves noncommutative input order", "[orthogonal]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+    technology_network ntk{};
+    const auto         a      = ntk.create_pi();
+    const auto         b      = ntk.create_pi();
+    const auto         unused = ntk.create_pi();
+    ntk.create_po(ntk.create_lt(b, a));
+    const auto lyt = orthogonal<gate_layout>(ntk);
+    CHECK(lyt.num_pis() == 3);
+    CHECK(lyt.is_pi(lyt.pi_at(2)));
+    const auto extracted = extract_layout_network(lyt);
+    CHECK(extracted.num_pis() == 3);
+    check_eq(ntk, extract_layout_network(lyt));
+    CHECK(ntk.is_pi(ntk.get_node(unused)));
 }
