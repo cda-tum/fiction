@@ -26,10 +26,9 @@
 #include <utility>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): enables callback conversion
-#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner): enables return-value conversion
+#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner): enables return-value conversion
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
 
 namespace pyfiction
@@ -42,7 +41,7 @@ namespace detail
 template <typename Lyt>
 void gate_level_drvs_impl(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
     m.def(
         "gate_level_drvs",
@@ -80,7 +79,7 @@ void gate_level_drvs_impl(nanobind::module_& m)
 /** @brief Registers design rule checks and reports. @param m Python module. */
 void design_rule_violations(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
     py::class_<fiction::verification::gate_level_drv_params>(m, "gate_level_drv_params",
                                                              DOC(fiction_verification_gate_level_drv_params))

@@ -22,7 +22,7 @@
 #include <sstream>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner): enables return-value conversion
 
 namespace pyfiction
 {
@@ -34,7 +34,7 @@ namespace detail
 template <typename NtkOrLyt>
 void count_gate_types(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
     m.def(
         "count_gate_types",

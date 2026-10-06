@@ -23,8 +23,7 @@
 #include <utility>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/pair.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>  // NOLINT(misc-include-cleaner): enables return-value conversion
 
 namespace pyfiction
 {
@@ -36,7 +35,7 @@ namespace detail
 template <typename Lyt>
 void critical_path_length_and_throughput_impl(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
     m.def(
         "critical_path_length_and_throughput",

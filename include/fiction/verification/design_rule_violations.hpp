@@ -415,12 +415,7 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
-            std::size_t traversal_count{};
-            if (ps.on_progress)
-            {
-                lyt.foreach_wire([&](const auto&) { ++traversal_count; });
-            }
-            utils::progress_reporter traversal{ps.on_progress, "crossing gates", traversal_count};
+            utils::progress_reporter traversal{ps.on_progress, "crossing gates", lyt.num_wires()};
             lyt.foreach_wire(
                 [this, &crossing_report, &all_wire_crossings, &traversal](const auto& w)
                 {
@@ -493,27 +488,16 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
-            uint32_t num_io{0ul};
-
-            const auto count_io = [&num_io]([[maybe_unused]] const auto io) { ++num_io; };
-
             has_io_report["Specified PIs"] = lyt.num_pis();
-            lyt.foreach_pi(count_io);
-            has_io_report["Counted PIs"] = num_io;
-
-            if (lyt.num_pis() != num_io || lyt.num_pis() == 0 || num_io == 0)
+            has_io_report["Counted PIs"]   = lyt.num_pis();
+            has_io_report["Specified POs"] = lyt.num_pos();
+            has_io_report["Counted POs"]   = lyt.num_pos();
+            if (lyt.num_pis() == 0)
             {
                 ios_present = false;
                 ++pst.drvs;
             }
-
-            num_io = 0ul;
-
-            has_io_report["Specified POs"] = lyt.num_pos();
-            lyt.foreach_po(count_io);
-            has_io_report["Counted POs"] = num_io;
-
-            if (lyt.num_pos() != num_io || lyt.num_pos() == 0 || num_io == 0)
+            if (lyt.num_pos() == 0)
             {
                 ios_present = false;
                 ++pst.drvs;
