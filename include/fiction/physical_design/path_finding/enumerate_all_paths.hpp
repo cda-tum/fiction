@@ -23,6 +23,7 @@
 #include <phmap.h>
 
 #include <cassert>
+#include <stdexcept>
 
 namespace fiction::physical_design::path_finding
 {
@@ -58,13 +59,12 @@ class enumerate_all_paths_impl
      *
      * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] path_collection<Path> run() noexcept
+    [[nodiscard]] path_collection<Path> run()
     {
-        assert(objective.source.is_valid() && objective.target.is_valid() &&
-               "Neither source nor target coordinate can be dead");
-
-        assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
-               "Both source and target coordinate have to be within the layout bounds");
+        if (!layout.contains_coordinate(objective.source) || !layout.contains_coordinate(objective.target))
+        {
+            throw std::invalid_argument("Routing endpoints must lie within the layout extent");
+        }
 
         recursively_enumerate_all_paths(objective.source, objective.target, Path{});
 
@@ -99,7 +99,7 @@ class enumerate_all_paths_impl
      *
      * @param c Coordinate to mark as visited.
      */
-    void mark_visited(const coordinate<Lyt>& c) noexcept
+    void mark_visited(const coordinate<Lyt>& c)
     {
         visited.insert(c);
     }
@@ -108,7 +108,7 @@ class enumerate_all_paths_impl
      *
      * @param c Coordinate to mark as unvisited.
      */
-    void mark_unvisited(const coordinate<Lyt>& c) noexcept
+    void mark_unvisited(const coordinate<Lyt>& c)
     {
         visited.erase(c);
     }
@@ -118,7 +118,7 @@ class enumerate_all_paths_impl
      * @param c Coordinate to check.
      * @return `true` if the coordinate has been visited, `false` otherwise.
      */
-    [[nodiscard]] bool is_visited(const coordinate<Lyt>& c) const noexcept
+    [[nodiscard]] bool is_visited(const coordinate<Lyt>& c) const
     {
         return visited.count(c) > 0;
     }
@@ -131,7 +131,7 @@ class enumerate_all_paths_impl
      * @param tgt Target coordinate.
      * @param p Current path to extend.
      */
-    void recursively_enumerate_all_paths(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt, Path p) noexcept
+    void recursively_enumerate_all_paths(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt, Path p)
     {
         // mark source coordinate as visited and append it to the path
         mark_visited(src);
@@ -144,7 +144,7 @@ class enumerate_all_paths_impl
         }
         else  // destination is not reached yet
         {
-            const auto explore_successor = [&, this](const auto& adjacent) noexcept
+            const auto explore_successor = [&, this](const auto& adjacent)
             {
                 const auto next = physical_design::detail::routing_successor(layout, src, adjacent, tgt,
                                                                              params.crossings, search_obstructions);
@@ -220,7 +220,7 @@ class enumerate_all_paths_impl
 template <typename Path, typename Lyt>
 [[nodiscard]] path_collection<Path> enumerate_all_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
                                                         const enumerate_all_paths_params& params       = {},
-                                                        const layouts::obstructions&      obstructions = {}) noexcept
+                                                        const layouts::obstructions&      obstructions = {})
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 

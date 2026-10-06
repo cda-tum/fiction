@@ -32,6 +32,7 @@
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
 
@@ -73,13 +74,12 @@ class a_star_impl
      *
      * @return The shortest path in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] Path run() noexcept
+    [[nodiscard]] Path run()
     {
-        assert(objective.source.is_valid() && objective.target.is_valid() &&
-               "Neither source nor target coordinate can be dead");
-
-        assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
-               "Both source and target coordinate have to be within the layout bounds");
+        if (!layout.contains_coordinate(objective.source) || !layout.contains_coordinate(objective.target))
+        {
+            throw std::invalid_argument("Routing endpoints must lie within the layout extent");
+        }
 
         while (!open_list.empty())  // until the open list is empty
         {
@@ -194,7 +194,7 @@ class a_star_impl
      *
      * @return Coordinate with the lowest f-value from the open list.
      */
-    coordinate<Lyt> get_lowest_f_coord() noexcept
+    coordinate<Lyt> get_lowest_f_coord()
     {
         const auto current = open_list.top().coord;
         open_list.pop();
@@ -206,9 +206,9 @@ class a_star_impl
      *
      * @param current Coordinate that is currently examined.
      */
-    void expand(const coordinate<Lyt>& current) noexcept
+    void expand(const coordinate<Lyt>& current)
     {
-        const auto explore_successor = [this, current](const auto& adjacent) noexcept
+        const auto explore_successor = [this, current](const auto& adjacent)
         {
             const auto next = physical_design::detail::routing_successor(layout, current, adjacent, objective.target,
                                                                          params.crossings, search_obstructions);
@@ -271,7 +271,7 @@ class a_star_impl
      * @param c Coordinate to check.
      * @return `true` iff c has already been visited.
      */
-    bool is_visited(const coordinate<Lyt>& c) const noexcept
+    bool is_visited(const coordinate<Lyt>& c) const
     {
         return closed_list.count(c) > 0;
     }
@@ -281,7 +281,7 @@ class a_star_impl
      * @param c Coordinate whose g-value is desired.
      * @return g-value of coordinate c or 0 if no value has been stored.
      */
-    g_f_type g(const coordinate<Lyt>& c) const noexcept
+    g_f_type g(const coordinate<Lyt>& c) const
     {
         if (const auto it = g_values.find(c); it != g_values.cend())
         {
@@ -296,7 +296,7 @@ class a_star_impl
      * @param c Coordinate whose g-value is to be updated to g_val.
      * @param g_val New g-value for c.
      */
-    void set_g(const coordinate<Lyt>& c, const g_f_type g_val) noexcept
+    void set_g(const coordinate<Lyt>& c, const g_f_type g_val)
     {
         g_values.insert_or_assign(c, g_val);
     }
@@ -308,7 +308,7 @@ class a_star_impl
      * @param g_val g-value to compare to c's.
      * @return `true` iff the given g-value does not mean an improvement for the given coordinate.
      */
-    bool no_improvement(const coordinate<Lyt>& c, const g_f_type g_val) noexcept
+    bool no_improvement(const coordinate<Lyt>& c, const g_f_type g_val)
     {
         return g_val >= g(c);
     }
@@ -317,7 +317,7 @@ class a_star_impl
      *
      * @return The shortest path connecting source and target.
      */
-    Path reconstruct_path() const noexcept
+    Path reconstruct_path() const
     {
         Path path{};
 
@@ -387,7 +387,7 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
 [[nodiscard]] Path a_star(const Lyt& layout, const routing_objective<Lyt>& objective,
                           const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, uint64_t>(),
                           const cost_functor<Lyt, Cost>&     cost_fn = unit_cost_functor<Lyt, uint8_t>(),
-                          const a_star_params& params = {}, const layouts::obstructions& obstructions = {}) noexcept
+                          const a_star_params& params = {}, const layouts::obstructions& obstructions = {})
 {
     return detail::a_star_impl<Path, Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, params, obstructions}.run();
 }
@@ -411,7 +411,7 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
 template <typename Lyt, typename Dist = uint64_t>
     requires is_coordinate_layout_v<Lyt> && (std::integral<Dist> || std::floating_point<Dist>)
 [[nodiscard]] Dist a_star_distance(const Lyt& layout, const coordinate<Lyt>& source, const coordinate<Lyt>& target,
-                                   const layouts::obstructions& obstructions = {}) noexcept
+                                   const layouts::obstructions& obstructions = {})
 {
     const auto path_length =
         a_star<layout_coordinate_path<Lyt>>(layout, {source, target}, manhattan_distance_functor<Lyt>(),

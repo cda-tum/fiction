@@ -154,8 +154,8 @@ class wiring_reduction_layout : public layouts::cartesian_layout
      * @param ar The aspect ratio for the layout. Defaults to an empty aspect ratio if not provided.
      * @param direction The search direction to be used. Defaults to HORIZONTAL if not provided.
      */
-    explicit wiring_reduction_layout(const layouts::cartesian_layout::aspect_ratio& ar = {},
-                                     search_direction direction                        = search_direction::HORIZONTAL) :
+    explicit wiring_reduction_layout(const layouts::cartesian_layout::extent& ar = {},
+                                     search_direction direction                  = search_direction::HORIZONTAL) :
             layouts::cartesian_layout(ar),
             search_dir(direction)
     {}
@@ -187,7 +187,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout
             {
                 wiring_reduction_layout::foreach_adjacent_coordinate_first_column(c, std::forward<Fn>(fn));
             }
-            else if (c.x == layouts::cartesian_layout::x())
+            else if (c.x == (layouts::cartesian_layout::width() - 1))
             {
                 wiring_reduction_layout::foreach_adjacent_coordinate_last_column(c, std::forward<Fn>(fn));
             }
@@ -202,7 +202,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout
             {
                 wiring_reduction_layout::foreach_adjacent_coordinate_first_row(c, std::forward<Fn>(fn));
             }
-            else if (c.y == layouts::cartesian_layout::y())
+            else if (c.y == (layouts::cartesian_layout::height() - 1))
             {
                 wiring_reduction_layout::foreach_adjacent_coordinate_last_row(c, std::forward<Fn>(fn));
             }
@@ -225,17 +225,21 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     template <typename Fn>
     void foreach_adjacent_coordinate_first_column(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
+        const auto apply_if_not_c = [&c, &fn](const auto& cardinal)
         {
-            if (cardinal != c)
+            if (cardinal && *cardinal != c)
             {
-                std::invoke(std::forward<Fn>(fn), cardinal);
+                std::invoke(fn, *cardinal);
             }
         };
 
-        apply_if_not_c(layouts::cartesian_layout::east(layouts::cartesian_layout::north(c)));
+        apply_if_not_c(layouts::cartesian_layout::north(c) ?
+                           layouts::cartesian_layout::east(*layouts::cartesian_layout::north(c)) :
+                           std::nullopt);
         apply_if_not_c(layouts::cartesian_layout::east(c));
-        apply_if_not_c(layouts::cartesian_layout::east(layouts::cartesian_layout::south(c)));
+        apply_if_not_c(layouts::cartesian_layout::south(c) ?
+                           layouts::cartesian_layout::east(*layouts::cartesian_layout::south(c)) :
+                           std::nullopt);
         apply_if_not_c(layouts::cartesian_layout::south(c));
     }
     /**
@@ -251,17 +255,21 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     template <typename Fn>
     void foreach_adjacent_coordinate_middle_columns(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
+        const auto apply_if_not_c = [&c, &fn](const auto& cardinal)
         {
-            if (cardinal != c)
+            if (cardinal && *cardinal != c)
             {
-                std::invoke(std::forward<Fn>(fn), cardinal);
+                std::invoke(fn, *cardinal);
             }
         };
 
-        apply_if_not_c(layouts::cartesian_layout::east(layouts::cartesian_layout::north(c)));
+        apply_if_not_c(layouts::cartesian_layout::north(c) ?
+                           layouts::cartesian_layout::east(*layouts::cartesian_layout::north(c)) :
+                           std::nullopt);
         apply_if_not_c(layouts::cartesian_layout::east(c));
-        apply_if_not_c(layouts::cartesian_layout::east(layouts::cartesian_layout::south(c)));
+        apply_if_not_c(layouts::cartesian_layout::south(c) ?
+                           layouts::cartesian_layout::east(*layouts::cartesian_layout::south(c)) :
+                           std::nullopt);
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the last column.
@@ -276,11 +284,11 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     template <typename Fn>
     void foreach_adjacent_coordinate_last_column(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
+        const auto apply_if_not_c = [&c, &fn](const auto& cardinal)
         {
-            if (cardinal != c)
+            if (cardinal && *cardinal != c)
             {
-                std::invoke(std::forward<Fn>(fn), cardinal);
+                std::invoke(fn, *cardinal);
             }
         };
 
@@ -299,17 +307,21 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     template <typename Fn>
     void foreach_adjacent_coordinate_first_row(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
+        const auto apply_if_not_c = [&c, &fn](const auto& cardinal)
         {
-            if (cardinal != c)
+            if (cardinal && *cardinal != c)
             {
-                std::invoke(std::forward<Fn>(fn), cardinal);
+                std::invoke(fn, *cardinal);
             }
         };
 
-        apply_if_not_c(layouts::cartesian_layout::south(layouts::cartesian_layout::east(c)));
+        apply_if_not_c(layouts::cartesian_layout::east(c) ?
+                           layouts::cartesian_layout::south(*layouts::cartesian_layout::east(c)) :
+                           std::nullopt);
         apply_if_not_c(layouts::cartesian_layout::south(c));
-        apply_if_not_c(layouts::cartesian_layout::south(layouts::cartesian_layout::west(c)));
+        apply_if_not_c(layouts::cartesian_layout::west(c) ?
+                           layouts::cartesian_layout::south(*layouts::cartesian_layout::west(c)) :
+                           std::nullopt);
         apply_if_not_c(layouts::cartesian_layout::east(c));
     }
     /**
@@ -325,17 +337,21 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     template <typename Fn>
     void foreach_adjacent_coordinate_middle_rows(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
+        const auto apply_if_not_c = [&c, &fn](const auto& cardinal)
         {
-            if (cardinal != c)
+            if (cardinal && *cardinal != c)
             {
-                std::invoke(std::forward<Fn>(fn), cardinal);
+                std::invoke(fn, *cardinal);
             }
         };
 
-        apply_if_not_c(layouts::cartesian_layout::south(layouts::cartesian_layout::east(c)));
+        apply_if_not_c(layouts::cartesian_layout::east(c) ?
+                           layouts::cartesian_layout::south(*layouts::cartesian_layout::east(c)) :
+                           std::nullopt);
         apply_if_not_c(layouts::cartesian_layout::south(c));
-        apply_if_not_c(layouts::cartesian_layout::south(layouts::cartesian_layout::west(c)));
+        apply_if_not_c(layouts::cartesian_layout::west(c) ?
+                           layouts::cartesian_layout::south(*layouts::cartesian_layout::west(c)) :
+                           std::nullopt);
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the last row.
@@ -350,11 +366,11 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     template <typename Fn>
     void foreach_adjacent_coordinate_last_row(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
+        const auto apply_if_not_c = [&c, &fn](const auto& cardinal)
         {
-            if (cardinal != c)
+            if (cardinal && *cardinal != c)
             {
-                std::invoke(std::forward<Fn>(fn), cardinal);
+                std::invoke(fn, *cardinal);
             }
         };
 

@@ -57,14 +57,14 @@ void require_arrangement([[maybe_unused]] const std::optional<arrangement>& a)
  *
  * @tparam Lyt Gate-level layout type.
  * @param a Arrangement of the shifted rows or columns. Shifted Cartesian and hexagonal layouts require it.
- * @param ar Highest possible position in the layout.
+ * @param ar Axis sizes of the layout.
  * @param scheme Clocking scheme to apply to the layout.
  * @return Empty layout.
  * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and `a` is empty.
  */
 template <typename Lyt>
 [[nodiscard]] Lyt make_gate_level_layout([[maybe_unused]] const std::optional<arrangement>& a,
-                                         const typename Lyt::aspect_ratio& ar, const clocking::scheme& scheme)
+                                         const typename Lyt::extent& ar, const clocking::scheme& scheme)
 {
     require_arrangement<Lyt>(a);
 
@@ -173,11 +173,11 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
  * @param lyt Coordinate layout.
  * @param c Coordinate to consider.
  * @param port Port direction.
- * @return Absolute coordinate specified by a coordinate `c` in layout `lyt` and a port direction.
+ * @return Adjacent coordinate, or no coordinate when the neighbor lies outside the layout.
  */
 template <typename Lyt>
-[[nodiscard]] coordinate<Lyt> port_direction_to_coordinate(const Lyt& lyt, const coordinate<Lyt>& c,
-                                                           const fcn::port_direction& port) noexcept
+[[nodiscard]] std::optional<coordinate<Lyt>> port_direction_to_coordinate(const Lyt& lyt, const coordinate<Lyt>& c,
+                                                                          const fcn::port_direction& port) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
@@ -243,8 +243,8 @@ template <typename Lyt>
         return lyt;
     }
 
-    auto x_offset = lyt.x();
-    auto y_offset = lyt.y();
+    int64_t x_offset = lyt.width();
+    int64_t y_offset = lyt.height();
 
     lyt.foreach_cell(
         [&x_offset, &y_offset](const auto& c)
@@ -260,7 +260,8 @@ template <typename Lyt>
 
     lyt.foreach_cell([&normalized](const auto& c) { normalized.assign_cell_type(c, Lyt::cell_type::EMPTY); });
 
-    normalized.resize({lyt.x() - x_offset, lyt.y() - y_offset, lyt.z()});
+    normalized.resize(
+        {static_cast<int64_t>(lyt.width()) - x_offset, static_cast<int64_t>(lyt.height()) - y_offset, lyt.layers()});
 
     lyt.foreach_cell(
         [&normalized, &lyt, x_offset, y_offset](const auto& c)
