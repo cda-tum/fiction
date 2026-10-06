@@ -1692,7 +1692,7 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Coordinate lookup independent of identities and connections. */
     phmap::flat_hash_map<tile, uint32_t> occupancy{};
     /** @brief Deduplicated cold truth-table payloads. */
-    mockturtle::truth_table_cache<kitty::dynamic_truth_table> functions{16};
+    mockturtle::truth_table_cache<kitty::dynamic_truth_table> functions{0};
     /** @brief Sparse cold names. */
     phmap::flat_hash_map<object_id, std::string> names{};
     /** @brief Declared primary input order. */
@@ -1976,14 +1976,17 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Interns the elementary gate functions without allocating layout objects. */
     void initialize_functions()
     {
-        functions.insert(kitty::dynamic_truth_table{0});
+        /** @brief Complete elementary cache, committed after all allocations succeed. */
+        mockturtle::truth_table_cache<kitty::dynamic_truth_table> initialized{16};
+        initialized.insert(kitty::dynamic_truth_table{0});
         for (const auto [literal, arity] : std::array<std::pair<uint64_t, uint32_t>, 7>{
                  {{0x1, 1}, {0x8, 2}, {0xe, 2}, {0x2, 2}, {0xb, 2}, {0x6, 2}, {0xe8, 3}}})
         {
             kitty::dynamic_truth_table table{arity};
             kitty::create_from_words(table, &literal, &literal + 1);
-            functions.insert(table);
+            initialized.insert(table);
         }
+        functions = std::move(initialized);
     }
 };
 }  // namespace fiction::layouts

@@ -24,12 +24,70 @@
 #include <mockturtle/traits.hpp>
 
 #include <array>
+#include <cstdlib>
+#include <new>
+#include <optional>
 #include <set>
 #include <stdexcept>
 #include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
+
+namespace
+{
+/**
+ * Number of successful allocations before the test injects a failure; unset disables injection.
+ */
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables): Test allocation control.
+thread_local std::optional<std::size_t> gate_allocation_budget{};
+}  // namespace
+/**
+ * Allocates memory and injects a failure when the test allocation budget is exhausted.
+ *
+ * @param size Requested byte count.
+ * @return Allocated memory.
+ * @throws std::bad_alloc if allocation fails or the test exhausts its budget.
+ */
+void* operator new(const std::size_t size)
+{
+    if (gate_allocation_budget.has_value())
+    {
+        if (*gate_allocation_budget == 0)
+        {
+            gate_allocation_budget.reset();
+            throw std::bad_alloc{};
+        }
+        --*gate_allocation_budget;
+    }
+    // The global new replacement must use malloc to avoid recursion.
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,hicpp-no-malloc)
+    if (auto* const memory = std::malloc(size == 0 ? 1 : size))
+    {
+        return memory;
+    }
+    throw std::bad_alloc{};
+}
+/**
+ * Releases memory allocated by the test's global allocation replacement.
+ *
+ * @param memory Memory to release.
+ */
+void operator delete(void* const memory) noexcept
+{
+    // Matches malloc in the global new replacement.
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,hicpp-no-malloc)
+    std::free(memory);
+}
+/**
+ * Releases a sized allocation through the matching global deallocator.
+ *
+ * @param memory Memory to release.
+ */
+void operator delete(void* const memory, std::size_t) noexcept
+{
+    ::operator delete(memory);
+}
 
 TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gate-layout-editing]")
 {
@@ -603,4 +661,38 @@ TEST_CASE("Sparse clock metadata enumerates assigned zones independently of fram
         });
     CHECK(clocks == 1);
     CHECK(delays == 1);
+}
+
+TEST_CASE("Moved-from layouts recover from interrupted cache initialization", "[gate-layout-editing]")
+{
+    using layout = gate_level_layout<cartesian_layout>;
+    for (std::size_t failure = 0;; ++failure)
+    {
+        layout     source{{4, 4}};
+        const auto original = source.create_pi("original", {0, 0});
+        layout     destination{std::move(source)};
+        bool       created{};
+        gate_allocation_budget = failure;
+        try
+        {
+            source.create_pi("first", {0, 0});
+            created = true;
+        }
+        catch (const std::bad_alloc&)
+        {}
+        gate_allocation_budget.reset();
+        source.clear_tile({0, 0});
+        const auto a    = source.create_pi("a", {0, 0});
+        const auto b    = source.create_pi("b", {1, 0});
+        const auto gate = source.create_and(a, b, {1, 1});
+        CHECK(source.node_function(a.object).num_vars() == 1);
+        CHECK(source.node_function(gate.object).num_vars() == 2);
+        CHECK(kitty::get_bit(source.node_function(gate.object), 3));
+        CHECK_FALSE(kitty::get_bit(source.node_function(gate.object), 0));
+        CHECK(destination.get_name(original) == "original");
+        if (created)
+        {
+            break;
+        }
+    }
 }
