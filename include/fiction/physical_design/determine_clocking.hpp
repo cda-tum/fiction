@@ -106,7 +106,7 @@ class sat_clocking_handler
      *
      * @return `true` iff a valid clocking scheme could be found.
      */
-    bool determine_clocks() noexcept
+    bool determine_clocks()
     {
         at_least_one_clock_number_per_tile();
         at_most_one_clock_number_per_tile();
@@ -151,7 +151,7 @@ class sat_clocking_handler
     /**
      * Adds constraints to the solver that enforce the assignment of at least one clock number per tile.
      */
-    void at_least_one_clock_number_per_tile() noexcept
+    void at_least_one_clock_number_per_tile()
     {
         // for each non-empty tile
         layout.foreach_node(
@@ -179,7 +179,7 @@ class sat_clocking_handler
     /**
      * Adds constraints to the solver that enforce the assignment of at most one clock number per tile.
      */
-    void at_most_one_clock_number_per_tile() noexcept
+    void at_most_one_clock_number_per_tile()
     {
         // for each pair of clock numbers
         for (typename Lyt::clock_number_t c1 = 0; c1 < number_of_clocks; ++c1)
@@ -208,7 +208,7 @@ class sat_clocking_handler
     /**
      * Adds constraints to the solver that exclude the assignment of non-adjacently clocked tiles.
      */
-    void exclude_clock_assignments_that_violate_information_flow() noexcept
+    void exclude_clock_assignments_that_violate_information_flow()
     {
         // for each non-empty tile
         layout.foreach_node(
@@ -248,7 +248,7 @@ class sat_clocking_handler
     /**
      * Adds constraints to the solver that ensure the assignment of the same clock number to crossing tiles.
      */
-    void ensure_same_clock_number_on_crossing_tiles() noexcept
+    void ensure_same_clock_number_on_crossing_tiles()
     {
         // for each crossing wire
         layout.foreach_wire(
@@ -277,7 +277,7 @@ class sat_clocking_handler
      * Adds constraints to the solver that help to speed up the solving process by breaking symmetries in the solution
      * space.
      */
-    void symmetry_breaking() noexcept
+    void symmetry_breaking()
     {
         const std::function<void(const mockturtle::node<Lyt>& n)> recurse =
             [this, &recurse, clk = 0](const auto& n) mutable
@@ -310,7 +310,7 @@ class sat_clocking_handler
      *
      * @param model The model to extract the clocking scheme from.
      */
-    void assign_clock_numbers(const bill::result::model_type& model) noexcept
+    void assign_clock_numbers(const bill::result::model_type& model)
     {
         // for each non-empty tile
         layout.foreach_node(

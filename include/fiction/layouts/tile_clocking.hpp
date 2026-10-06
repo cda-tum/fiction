@@ -127,8 +127,9 @@ class tile_clocking
      * Replaces the clocking scheme.
      *
      * @param scheme New clocking scheme over clock zones.
+     * @throws std::bad_alloc If allocation fails.
      */
-    void replace_clocking_scheme(const clocking_scheme_t& scheme) noexcept
+    void replace_clocking_scheme(const clocking_scheme_t& scheme)
     {
         clocking.replace_clocking_scheme(scheme);
     }
@@ -137,8 +138,9 @@ class tile_clocking
      *
      * @param cz Clock zone.
      * @param cn Clock number.
+     * @throws std::bad_alloc If allocation fails.
      */
-    void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
+    void assign_clock_number(const clock_zone& cz, const clock_number_t cn)
     {
         clocking.assign_clock_number(cz, cn);
     }
@@ -184,8 +186,9 @@ class tile_clocking
      * A copy of the clocking scheme.
      *
      * @return Clocking scheme.
+     * @throws std::bad_alloc If allocation fails.
      */
-    [[nodiscard]] clocking_scheme_t get_clocking_scheme() const noexcept
+    [[nodiscard]] clocking_scheme_t get_clocking_scheme() const
     {
         return clocking.get_clocking_scheme();
     }
