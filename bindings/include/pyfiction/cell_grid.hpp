@@ -34,6 +34,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner): converts empty occupied bounds
 #include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts clocking scheme names
@@ -174,7 +175,7 @@ void bind_tile_clocking(nanobind::class_<Lyt, py_cartesian_layout>& cls)
 }
 /**
  * @brief Binds the constructors of a cell grid layout with tile-based clocking: an empty layout, a layout of the given
- * dimension with open clocking, and a layout clocked by a predefined scheme.
+ * axis sizes with open clocking, and a layout clocked by a predefined scheme.
  *
  * @tparam Lyt Cell grid layout type with tile-based clocking.
  * @param cls Python class of `Lyt`.
@@ -185,23 +186,23 @@ void bind_clocked_constructors(nanobind::class_<Lyt, py_cartesian_layout>& cls)
     namespace py = nanobind;
 
     cls.def(py::init<>())
-        .def(py::init<const typename Lyt::aspect_ratio&>(), py::arg("dimension"))
+        .def(py::init<const typename Lyt::extent&>(), py::arg("dimensions"))
         .def(
             "__init__",
-            [](Lyt* self, const typename Lyt::aspect_ratio& dimension, const std::string& scheme_name,
+            [](Lyt* self, const typename Lyt::extent& dimensions, const std::string& scheme_name,
                const std::string& layout_name, const uint16_t tile_size_x, const uint16_t tile_size_y)
             {
                 if (const auto scheme = fiction::layouts::clocking::get_scheme(scheme_name); scheme.has_value())
                 {
-                    std::construct_at(self, dimension, *scheme, layout_name, tile_size_x, tile_size_y);
+                    std::construct_at(self, dimensions, *scheme, layout_name, tile_size_x, tile_size_y);
                     return;
                 }
 
                 throw std::invalid_argument("Given name does not refer to a supported clocking scheme");
             },
-            py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
+            py::arg("dimensions"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
             py::arg("tile_size_x") = 1u, py::arg("tile_size_y") = 1u,
-            "Creates an empty layout of the given dimension, clocked by the predefined scheme of the given name, with "
+            "Creates an empty layout of the given dimensions, clocked by the predefined scheme of the given name, with "
             "clock zones of the given tile size. Raises ValueError for an unknown scheme or a zero tile size.");
 }
 

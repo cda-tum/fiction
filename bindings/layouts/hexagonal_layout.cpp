@@ -57,8 +57,8 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
     py::class_<Lyt>(m, name, DOC(fiction_hexagonal_layout_overridden))
         .def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
              DOC(fiction_layouts_hexagonal_layout_hexagonal_layout))
-        .def(py::init<fiction::layouts::arrangement, const fiction::aspect_ratio<Lyt>&>(), py::arg("arrangement"),
-             py::arg("dimension"), DOC(fiction_layouts_hexagonal_layout_hexagonal_layout))
+        .def(py::init<fiction::layouts::arrangement, const typename Lyt::extent&>(), py::arg("arrangement"),
+             py::arg("dimensions"), DOC(fiction_layouts_hexagonal_layout_hexagonal_layout))
         .def(
             "get_arrangement", [](const Lyt& lyt) { return lyt.get_arrangement(); },
             DOC(fiction_layouts_hexagonal_layout_get_arrangement))
@@ -66,11 +66,15 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
             "coord", [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z)
             { return layout.coord(coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); }, py::arg("x"),
             py::arg("y"), py::arg("z") = 0l, DOC(fiction_layouts_hexagonal_layout_coord))
-        .def("x", &Lyt::x, DOC(fiction_layouts_hexagonal_layout_x))
-        .def("y", &Lyt::y, DOC(fiction_layouts_hexagonal_layout_y))
-        .def("z", &Lyt::z, DOC(fiction_layouts_hexagonal_layout_z))
+        .def("width", &Lyt::width, "Returns the width count.")
+        .def("height", &Lyt::height, "Returns the height count.")
+        .def("layers", &Lyt::layers, "Returns the layers count.")
+        .def("dimensions", &Lyt::dimensions, "Returns the axis sizes.")
+        .def("last_coordinate", &Lyt::last_coordinate, "Returns the last coordinate, or None for empty geometry.")
+        .def("contains_coordinate", &Lyt::contains_coordinate, py::arg("c"), "Tests the half-open geometry bounds.")
+        .def("volume", &Lyt::volume, "Returns the checked volume in coordinates.")
         .def("area", &Lyt::area, DOC(fiction_layouts_hexagonal_layout_area))
-        .def("resize", &Lyt::resize, py::arg("dimension"), DOC(fiction_layouts_hexagonal_layout_resize))
+        .def("resize", &Lyt::resize, py::arg("dimensions"), DOC(fiction_layouts_hexagonal_layout_resize))
 
         .def("north", &Lyt::north, py::arg("c"), DOC(fiction_layouts_hexagonal_layout_north))
         .def("north_east", &Lyt::north_east, py::arg("c"), DOC(fiction_layouts_hexagonal_layout_north_east))
@@ -139,7 +143,7 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
             [](const Lyt& lyt)
             {
                 std::vector<fiction::coordinate<Lyt>> coords{};
-                coords.reserve(lyt.area() * (static_cast<uint64_t>(lyt.z()) + 1u));
+                coords.reserve(lyt.volume());
                 lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); });
                 return coords;
             },
@@ -149,7 +153,7 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
             [](const Lyt& lyt)
             {
                 std::vector<fiction::coordinate<Lyt>> coords{};
-                coords.reserve(lyt.area());
+                coords.reserve(lyt.layers() == 0 ? 0 : lyt.area());
                 lyt.foreach_ground_coordinate([&coords](const auto& c) { coords.push_back(c); });
                 return coords;
             },
@@ -158,6 +162,12 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
              DOC(fiction_layouts_hexagonal_layout_adjacent_coordinates))
         .def("adjacent_opposite_coordinates", &Lyt::adjacent_opposite_coordinates, py::arg("c"),
              DOC(fiction_layouts_hexagonal_layout_adjacent_opposite_coordinates))
+
+        .def(
+            "__copy__", [](const Lyt& lyt) { return Lyt{lyt}; }, "Returns an independent geometry copy.")
+        .def(
+            "__deepcopy__", [](const Lyt& lyt, const py::dict&) { return Lyt{lyt}; }, py::arg("memo"),
+            "Returns an independent geometry copy.")
 
         .def(
             "__repr__",

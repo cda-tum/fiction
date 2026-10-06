@@ -40,23 +40,17 @@ namespace
  * @param self Coordinate to change.
  * @param axis Pointer to the member that holds the axis.
  * @param value Python integer.
- * @throws std::invalid_argument If `self` is invalid, because a single axis does not make it valid.
  * @throws std::overflow_error If `value` does not fit a coordinate axis.
  */
 void set_axis(py_coordinate& self, int32_t py_coordinate::* axis, const int64_t value)
 {
-    if (!self.is_valid())
-    {
-        throw std::invalid_argument("An axis of an invalid coordinate cannot be set");
-    }
-
     self.*axis = coordinate_axis(value);
 }
 
 }  // namespace
 
 /**
- * @brief Registers coordinates.
+ * @brief Registers signed coordinates and checked size extents.
  * @param m Python layouts module.
  */
 void coordinate(nanobind::module_& m)
@@ -110,8 +104,6 @@ void coordinate(nanobind::module_& m)
             [](py_coordinate& self, const int64_t value) { set_axis(self, &py_coordinate::z, value); },
             DOC(fiction_layouts_layout_base_coordinate_z))
 
-        .def("is_valid", &py_coordinate::is_valid, DOC(fiction_layouts_layout_base_coordinate_is_valid))
-
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
         .def(py::self == py::self, py::arg("other"), DOC(fiction_layouts_layout_base_coordinate_operator_eq))
         .def(py::self != py::self, py::arg("other"), DOC(fiction_layouts_layout_base_coordinate_operator_ne))
@@ -129,18 +121,53 @@ void coordinate(nanobind::module_& m)
         ;
 
     py::implicitly_convertible<py::tuple, py_coordinate>();
+
+    py::class_<py_extent>(m, "Extent", "Nonnegative width, height, and layer counts of a zero-origin layout.")
+        .def(py::init<>(), "Creates an empty extent.")
+        .def(
+            "__init__",
+            [](py::pointer_and_handle<py_extent> self, const int64_t width, const int64_t height, const int64_t layers)
+            { std::construct_at(self.p, width, height, layers); }, py::arg("width"), py::arg("height"),
+            py::arg("layers") = 1,
+            "Creates checked sizes. Two axes describe one layer. Each size lies between zero and 2147483648.")
+        .def(py::init<const py_extent&>(), py::arg("dimensions"))
+        .def(
+            "__init__",
+            [](py::pointer_and_handle<py_extent> self, const py::tuple& dimensions)
+            {
+                if (dimensions.size() != 2 && dimensions.size() != 3)
+                {
+                    throw std::invalid_argument("An extent requires two or three axis sizes");
+                }
+                std::construct_at(self.p, py::cast<int64_t>(dimensions[0]), py::cast<int64_t>(dimensions[1]),
+                                  dimensions.size() == 3 ? py::cast<int64_t>(dimensions[2]) : 1);
+            },
+            py::arg("dimensions"),
+            py::sig("def __init__(self, dimensions: tuple[int, int] | tuple[int, int, int]) -> None"))
+        .def_prop_rw(
+            "width", [](const py_extent& self) { return self.width; }, [](py_extent& self, const int64_t value)
+            { self.width = py_extent{value, 0}.width; }, "Checked width in coordinates.")
+        .def_prop_rw(
+            "height", [](const py_extent& self) { return self.height; }, [](py_extent& self, const int64_t value)
+            { self.height = py_extent{0, value}.height; }, "Checked height in coordinates.")
+        .def_prop_rw(
+            "layers", [](const py_extent& self) { return self.layers; }, [](py_extent& self, const int64_t value)
+            { self.layers = py_extent{0, 0, value}.layers; }, "Checked number of layers.")
+        .def("__eq__", &py_extent::operator==, py::arg("other"));
+
+    py::implicitly_convertible<py::tuple, py_extent>();
 }
 
 /**
- * @brief Registers coordinate area and volume functions.
+ * @brief Registers area and volume functions for size extents.
  * @param m Python layouts module.
  */
 void coordinate_utility(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    m.def("area", &fiction::layouts::area_of<py_coordinate>, py::arg("coord"), DOC(fiction_layouts_area_of));
-    m.def("volume", &fiction::layouts::volume_of<py_coordinate>, py::arg("coord"), DOC(fiction_layouts_volume_of));
+    m.def("area", &fiction::layouts::area_of, py::arg("dimensions"), DOC(fiction_layouts_area_of));
+    m.def("volume", &fiction::layouts::volume_of, py::arg("dimensions"), DOC(fiction_layouts_volume_of));
 }
 
 }  // namespace pyfiction

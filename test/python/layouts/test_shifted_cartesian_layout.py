@@ -14,7 +14,7 @@ from mnt.pyfiction.layouts import arrangement, shifted_cartesian_layout
 
 
 def test_coordinate_iteration():
-    layout = shifted_cartesian_layout(arrangement.ODD_COLUMN, (9, 9, 1))
+    layout = shifted_cartesian_layout(arrangement.ODD_COLUMN, (10, 10, 2))
 
     for t in layout.coordinates():
         assert t <= (9, 9, 1)

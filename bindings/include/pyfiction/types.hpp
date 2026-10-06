@@ -64,22 +64,25 @@ using py_mig_network = mockturtle::names_view<mockturtle::mig_network>;
  */
 using py_coordinate = fiction::layouts::layout_base::coordinate;
 /**
- * Converts a Python integer to a coordinate axis. `std::numeric_limits<int32_t>::min()` is excluded because it marks
- * the invalid coordinate.
+ * Converts a Python integer to a signed coordinate axis.
  *
  * @param value Python integer.
  * @return The axis value.
- * @throws std::overflow_error If `value` does not lie in \f$[-2^{31} + 1, 2^{31} - 1]\f$.
+ * @throws std::overflow_error If `value` does not lie in \f$[-2^{31}, 2^{31} - 1]\f$.
  */
 inline int32_t coordinate_axis(const int64_t value)
 {
-    if (value <= std::numeric_limits<int32_t>::min() || value > std::numeric_limits<int32_t>::max())
+    if (value < std::numeric_limits<int32_t>::min() || value > std::numeric_limits<int32_t>::max())
     {
-        throw std::overflow_error("A coordinate axis must lie between -2147483647 and 2147483647");
+        throw std::overflow_error("A coordinate axis must lie between -2147483648 and 2147483647");
     }
 
     return static_cast<int32_t>(value);
 }
+/**
+ * Nonnegative axis sizes of a zero-origin layout.
+ */
+using py_extent = fiction::layouts::layout_base::extent;
 /**
  * Cartesian layout.
  */
@@ -124,10 +127,22 @@ struct type_caster<pyfiction::py_coordinate> : type_caster_base<pyfiction::py_co
 };
 
 /**
+ * @brief Describes size tuple inputs while retaining the registered class caster.
+ */
+template <>
+struct type_caster<pyfiction::py_extent> : type_caster_base<pyfiction::py_extent>
+{
+    /** @brief Accepted Python inputs and the concrete return type. */
+    // NOLINTNEXTLINE(readability-identifier-naming): nanobind requires the member name Name.
+    static constexpr auto Name =
+        const_name<pyfiction::py_extent>() + io_name(" | tuple[int, int] | tuple[int, int, int]", "");
+};
+
+/**
  * @brief Keeps constructor self arguments as a single registered class.
  *
  * nanobind recognizes constructors by the exact self descriptor, without an input union.
- * @tparam Coordinate Coordinate type constructed by the Python call.
+ * @tparam Coordinate Registered value type constructed by the Python call.
  */
 template <typename Coordinate>
 struct coordinate_constructor_caster
@@ -139,7 +154,7 @@ struct coordinate_constructor_caster
      * @param src Python instance being constructed.
      * @param flags Constructor conversion flags.
      * @param cleanup Temporary conversion storage.
-     * @return Whether the instance belongs to the coordinate class.
+     * @return Whether the instance belongs to the registered class.
      */
     bool from_python(nanobind::handle src, std::uint32_t flags, cleanup_list* cleanup) noexcept
     {
@@ -159,6 +174,12 @@ struct coordinate_constructor_caster
 template <>
 struct type_caster<nanobind::pointer_and_handle<pyfiction::py_coordinate>>
         : coordinate_constructor_caster<pyfiction::py_coordinate>
+{};
+
+/** @brief Preserves extent constructor dispatch. */
+template <>
+struct type_caster<nanobind::pointer_and_handle<pyfiction::py_extent>>
+        : coordinate_constructor_caster<pyfiction::py_extent>
 {};
 
 }  // namespace nanobind::detail
