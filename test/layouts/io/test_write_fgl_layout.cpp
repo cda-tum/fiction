@@ -56,7 +56,7 @@ using namespace fiction::physical_design;
 
 /** @brief Compare serialized placement, functions, ports, and interfaces. */
 template <typename WLyt, typename RLyt>
-void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt) noexcept
+void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
 {
     CHECK(wlyt.get_layout_name() == rlyt.get_layout_name());
 

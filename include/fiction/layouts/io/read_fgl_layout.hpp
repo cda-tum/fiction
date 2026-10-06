@@ -50,7 +50,9 @@
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <tuple>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction::layouts::io
@@ -405,65 +407,12 @@ class read_fgl_layout_impl
                     {
                         std::string hex      = gate.type;
                         uint32_t    required = arity;
-                        if (gate.type == "INV")
+                        const auto  alias    = std::ranges::find_if(LEGACY_GATE_FUNCTIONS, [&](const auto& function)
+                                                                    { return std::get<0>(function) == gate.type; });
+                        if (alias != LEGACY_GATE_FUNCTIONS.end())
                         {
-                            hex      = "1";
-                            required = 1;
-                        }
-                        else if (gate.type == "AND")
-                        {
-                            hex      = "8";
-                            required = 2;
-                        }
-                        else if (gate.type == "NAND")
-                        {
-                            hex      = "7";
-                            required = 2;
-                        }
-                        else if (gate.type == "OR")
-                        {
-                            hex      = "e";
-                            required = 2;
-                        }
-                        else if (gate.type == "NOR")
-                        {
-                            hex      = "1";
-                            required = 2;
-                        }
-                        else if (gate.type == "XOR")
-                        {
-                            hex      = "6";
-                            required = 2;
-                        }
-                        else if (gate.type == "XNOR")
-                        {
-                            hex      = "9";
-                            required = 2;
-                        }
-                        else if (gate.type == "LT")
-                        {
-                            hex      = "2";
-                            required = 2;
-                        }
-                        else if (gate.type == "GT")
-                        {
-                            hex      = "4";
-                            required = 2;
-                        }
-                        else if (gate.type == "LE")
-                        {
-                            hex      = "b";
-                            required = 2;
-                        }
-                        else if (gate.type == "GE")
-                        {
-                            hex      = "d";
-                            required = 2;
-                        }
-                        else if (gate.type == "MAJ")
-                        {
-                            hex      = "e8";
-                            required = 3;
+                            hex      = std::get<1>(*alias);
+                            required = std::get<2>(*alias);
                         }
                         if ((!version_two && arity == 0) || arity != required || arity >= 64 || hex.empty() ||
                             !std::ranges::all_of(hex, [](const unsigned char c) { return std::isxdigit(c) != 0; }) ||
@@ -544,10 +493,24 @@ class read_fgl_layout_impl
         {
             throw fgl_parsing_error("Error parsing FGL file: no element 'gates'");
         }
-        return lyt;
+        return std::move(lyt);
     }
 
   private:
+    /** @brief Legacy gate names, truth tables, and declared input counts. */
+    inline static constexpr std::array<std::tuple<std::string_view, std::string_view, uint32_t>, 12>
+        LEGACY_GATE_FUNCTIONS{{{"INV", "1", 1},
+                               {"AND", "8", 2},
+                               {"NAND", "7", 2},
+                               {"OR", "e", 2},
+                               {"NOR", "1", 2},
+                               {"XOR", "6", 2},
+                               {"XNOR", "9", 2},
+                               {"LT", "2", 2},
+                               {"GT", "4", 2},
+                               {"LE", "b", 2},
+                               {"GE", "d", 2},
+                               {"MAJ", "e8", 3}}};
     /**
      * Scratch layout created from the file.
      */
@@ -640,7 +603,7 @@ class read_fgl_layout_impl
          */
         std::string type;
         /**
-         * Name of the gate (for inputs and outputs).
+         * Object label.
          */
         std::string name;
         /**
@@ -689,9 +652,7 @@ template <typename Lyt>
 
     detail::read_fgl_layout_impl<Lyt> p{is, name};
 
-    const auto lyt = p.run();
-
-    return lyt;
+    return p.run();
 }
 /**
  * Reads legacy maximum-index extents or version-2 extent counts and declared interface order.
@@ -733,10 +694,7 @@ template <typename Lyt>
         throw std::ifstream::failure("could not open file");
     }
 
-    const auto lyt = read_fgl_layout<Lyt>(is, name);
-    is.close();
-
-    return lyt;
+    return read_fgl_layout<Lyt>(is, name);
 }
 /**
  * Reads a gate-level layout from an FGL file provided as a file name.
@@ -760,7 +718,6 @@ void read_fgl_layout(Lyt& lyt, const std::string_view& filename)
     }
 
     read_fgl_layout<Lyt>(lyt, is);
-    is.close();
 }
 
 }  // namespace fiction::layouts::io

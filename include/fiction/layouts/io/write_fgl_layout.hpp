@@ -128,12 +128,6 @@ inline constexpr const char* GATE = "      <id>{}</id>\n"
 inline constexpr const char* OPEN_INCOMING = "      <incoming>\n";
 /** @brief FGL XML fragment. */
 inline constexpr const char* CLOSE_INCOMING = "      </incoming>\n";
-/** @brief FGL XML fragment. */
-inline constexpr const char* SIGNAL = "        <signal>\n"
-                                      "          <x>{}</x>\n"
-                                      "          <y>{}</y>\n"
-                                      "          <z>{}</z>\n"
-                                      "        </signal>\n";
 
 }  // namespace fgl
 
