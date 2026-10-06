@@ -63,10 +63,10 @@ TEST_CASE("Read empty FGL layout", "[read-fgl-layout]")
 
     const auto check = [](const auto& lyt)
     {
-        CHECK(lyt.x() == 0);
-        CHECK(lyt.y() == 0);
+        CHECK(lyt.width() == 1);
+        CHECK(lyt.height() == 1);
         CHECK(lyt.area() == 1);
-        CHECK(get_name(lyt) == "Test");
+        CHECK(lyt.get_layout_name() == "Test");
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
     };
 
@@ -156,18 +156,18 @@ TEST_CASE("Read simple FGL layout", "[read-fgl-layout]")
 
     const auto check = [](const auto& lyt)
     {
-        CHECK(lyt.x() == 2);
-        CHECK(lyt.y() == 1);
+        CHECK(lyt.width() == 3);
+        CHECK(lyt.height() == 2);
         CHECK(lyt.area() == 6);
-        CHECK(get_name(lyt) == "Test");
+        CHECK(lyt.get_layout_name() == "Test");
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
         CHECK(lyt.is_pi_tile({0, 1}));
-        CHECK(lyt.get_name(lyt.get_node({0, 1})) == "pi0");
+        CHECK(lyt.get_name(*lyt.find_object({0, 1})) == "pi0");
         CHECK(lyt.is_pi_tile({1, 0}));
-        CHECK(lyt.get_name(lyt.get_node({1, 0})) == "pi1");
-        CHECK(lyt.is_and(lyt.get_node({1, 1})));
+        CHECK(lyt.get_name(*lyt.find_object({1, 0})) == "pi1");
+        CHECK(lyt.is_and(*lyt.find_object({1, 1})));
         CHECK(lyt.is_po_tile({2, 1}));
-        CHECK(lyt.get_name(lyt.get_node({2, 1})) == "po0");
+        CHECK(lyt.get_name(*lyt.find_object({2, 1})) == "po0");
     };
 
     using gate_layout = gate_level_layout<cartesian_layout>;
@@ -256,18 +256,18 @@ TEST_CASE("Read FGL layout with hexadecimal gate type", "[read-fgl-layout]")
 
     const auto check = [](const auto& lyt)
     {
-        CHECK(lyt.x() == 2);
-        CHECK(lyt.y() == 1);
+        CHECK(lyt.width() == 3);
+        CHECK(lyt.height() == 2);
         CHECK(lyt.area() == 6);
-        CHECK(get_name(lyt) == "Test");
+        CHECK(lyt.get_layout_name() == "Test");
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
         CHECK(lyt.is_pi_tile({0, 1}));
-        CHECK(lyt.get_name(lyt.get_node({0, 1})) == "pi0");
+        CHECK(lyt.get_name(*lyt.find_object({0, 1})) == "pi0");
         CHECK(lyt.is_pi_tile({1, 0}));
-        CHECK(lyt.get_name(lyt.get_node({1, 0})) == "pi1");
-        CHECK(lyt.is_le(lyt.get_node({1, 1})));
+        CHECK(lyt.get_name(*lyt.find_object({1, 0})) == "pi1");
+        CHECK(lyt.is_le(*lyt.find_object({1, 1})));
         CHECK(lyt.is_po_tile({2, 1}));
-        CHECK(lyt.get_name(lyt.get_node({2, 1})) == "po0");
+        CHECK(lyt.get_name(*lyt.find_object({2, 1})) == "po0");
     };
 
     using gate_layout = gate_level_layout<cartesian_layout>;
@@ -548,9 +548,9 @@ TEST_CASE("Read FGL layout without topology", "[read-fgl-layout]")
     {
         std::istringstream layout_stream{document};
         const auto         lyt = read_fgl_layout<cart_gate_clk_lyt>(layout_stream);
-        CHECK(lyt.x() == 0);
-        CHECK(lyt.y() == 0);
-        CHECK(get_name(lyt) == "Test");
+        CHECK(lyt.width() == 1);
+        CHECK(lyt.height() == 1);
+        CHECK(lyt.get_layout_name() == "Test");
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
     }
 
@@ -731,10 +731,10 @@ TEST_CASE("Parsing error: target layout has another arrangement than the file", 
     }
 }
 
-TEST_CASE("Parsing error: size exceeds the range of gate-level signals", "[read-fgl-layout]")
+TEST_CASE("Parsing error: size exceeds the coordinate domain", "[read-fgl-layout]")
 {
     const auto [axis, value] =
-        GENERATE(std::pair{"x", "1073741824"}, std::pair{"y", "1073741824"}, std::pair{"z", "2"});
+        GENERATE(std::pair{"x", "2147483648"}, std::pair{"y", "2147483648"}, std::pair{"z", "2147483648"});
 
     const char* const x = std::string{axis} == "x" ? value : "2";
     const char* const y = std::string{axis} == "y" ? value : "1";
@@ -1821,7 +1821,7 @@ TEST_CASE("Parsing error: no element 'z' in 'signal'", "[read-fgl-layout]")
 TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout]")
 {
     using sync_layout = gate_level_layout<cartesian_layout>;
-    sync_layout original{{2, 0, 0}};
+    sync_layout original{{2, 1, 1}};
     original.set_layout_name("A & B < C");
     const auto input = original.create_pi("in<&>", {0, 0, 0});
     original.create_po(input, "out<&>", {1, 0, 0});
@@ -1833,8 +1833,8 @@ TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout
     CHECK(restored.get_layout_name() == original.get_layout_name());
     CHECK(restored.num_pis() == 1);
     CHECK(restored.num_pos() == 1);
-    CHECK(restored.get_name(restored.get_node({0, 0, 0})) == "in<&>");
-    CHECK(restored.get_name(restored.get_node({1, 0, 0})) == "out<&>");
+    CHECK(restored.get_name(*restored.find_object({0, 0, 0})) == "in<&>");
+    CHECK(restored.get_name(*restored.find_object({1, 0, 0})) == "out<&>");
     CHECK(restored.num_se() == 2);
     CHECK(restored.get_synchronization_element({0, 0, 0}) == 2);
     CHECK(restored.get_synchronization_element({1, 0, 0}) == 255);
@@ -1906,4 +1906,87 @@ TEST_CASE("FGL rejects invalid numeric metadata", "[read-fgl-layout]")
         "</delay></element></synchronization_elements></clocking></layout><gates><gate><id>" + id +
         "</id><type>PI</type><name>input</name><loc><x>0</x><y>0</y><z>0</z></loc></gate></gates></fgl>"};
     CHECK_THROWS_AS(read_fgl_layout<sync_layout>(stream), fgl_parsing_error);
+}
+
+TEST_CASE("FGL failed connection read leaves target unchanged", "[read-fgl-layout]")
+{
+    cart_gate_clk_lyt layout{{2, 1, 1}, clocking::twoddwave(), "original"};
+    layout.create_pi("kept", {0, 0, 0});
+    std::stringstream stream{R"(<fgl version="2"><layout><size><x>2</x><y>1</y><z>1</z></size>
+      <clocking><name>2DDWave</name></clocking><inputs></inputs><outputs><id>1</id></outputs></layout>
+      <gates><gate><id>1</id><type>PO</type><name>f</name><arity>1</arity>
+      <loc><x>1</x><y>0</y><z>0</z></loc><incoming><signal><source>999</source><index>0</index>
+      <input>0</input></signal></incoming></gate></gates></fgl>)"};
+    CHECK_THROWS_AS(read_fgl_layout(layout, stream), fgl_parsing_error);
+    CHECK(layout.get_layout_name() == "original");
+    CHECK(layout.num_pis() == 1);
+    CHECK(layout.get_input_name(0) == "kept");
+}
+
+TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-layout]")
+{
+    std::string xml{R"(<fgl version="2"><layout><size><x>2</x><y>1</y><z>1</z></size>
+      <clocking><name>2DDWave</name></clocking><inputs><id>4294967295</id></inputs><outputs><id>2</id></outputs></layout>
+      <gates><gate><id>2</id><type>PO</type><name></name><arity>1</arity>
+      <loc><x>1</x><y>0</y><z>0</z></loc><incoming><signal><source>4294967295</source><index>0</index>
+      <input>0</input></signal></incoming></gate><gate><id>4294967295</id><type>PI</type><name></name><arity>0</arity>
+      <loc><x>0</x><y>0</y><z>0</z></loc></gate></gates></fgl>)"};
+    SECTION("Sources can follow destinations and use the full ID range")
+    {
+        std::stringstream stream{xml};
+        const auto        restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
+        CHECK(restored.get_input_name(0).empty());
+        CHECK(restored.get_output_name(0).empty());
+        const auto output = *restored.find_object({1, 0, 0});
+        CHECK(restored.get_tile(restored.source({output, 0})->object) == (cart_gate_clk_lyt::tile{0, 0, 0}));
+    }
+    SECTION("Missing input")
+    {
+        xml.erase(xml.find("<signal>"), xml.find("</signal>") + 9 - xml.find("<signal>"));
+        std::stringstream stream{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
+    }
+    SECTION("Duplicate input connection")
+    {
+        const auto start     = xml.find("<signal>");
+        const auto length    = xml.find("</signal>") + 9 - start;
+        const auto duplicate = xml.substr(start, length);
+        xml.insert(start, duplicate);
+        std::stringstream stream{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
+    }
+    SECTION("Input index exceeds arity")
+    {
+        xml.replace(xml.find("<input>0</input>"), 16, "<input>1</input>");
+        std::stringstream stream{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
+    }
+    SECTION("Invalid output index")
+    {
+        xml.replace(xml.find("<index>0</index>"), 16, "<index>1</index>");
+        std::stringstream stream{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
+    }
+    SECTION("Wrong interface role")
+    {
+        xml.replace(xml.find("<outputs><id>2</id>"), 19, "<outputs><id>4294967295</id>");
+        std::stringstream stream{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
+    }
+    SECTION("Unsupported version")
+    {
+        xml.replace(xml.find("version=\"2\""), 11, "version=\"3\"");
+        std::stringstream stream{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
+    }
+}
+
+TEST_CASE("Legacy FGL maximum layer indices become layer counts", "[read-fgl-layout]")
+{
+    std::stringstream stream{R"(<fgl><layout><size><x>0</x><y>0</y><z>2</z></size>
+      <clocking><name>2DDWave</name></clocking></layout></fgl>)"};
+    const auto        layout = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    CHECK(layout.width() == 1);
+    CHECK(layout.height() == 1);
+    CHECK(layout.layers() == 3);
 }
