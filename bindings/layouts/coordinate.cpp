@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <memory>
 #include <stdexcept>
 
 #include <nanobind/nanobind.h>
@@ -68,7 +69,7 @@ void coordinate(nanobind::module_& m)
         .def(
             "__init__",
             [](py::pointer_and_handle<py_coordinate> self, const int64_t x, const int64_t y, const int64_t z)
-            { new (self.p) py_coordinate{coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)}; }, py::arg("x"),
+            { std::construct_at(self.p, coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); }, py::arg("x"),
             py::arg("y"), py::arg("z") = 0, DOC(fiction_layouts_layout_base_coordinate_coordinate_2))
         .def(py::init<const py_coordinate>(), py::arg("c"),
              py::sig("def __init__(self, c: mnt.pyfiction.layouts.coordinate) -> None"))
@@ -80,15 +81,15 @@ void coordinate(nanobind::module_& m)
 
                 if (size == 2)
                 {
-                    new (self.p) py_coordinate{coordinate_axis(py::cast<int64_t>(py::int_(py::handle(t[0])))),
-                                               coordinate_axis(py::cast<int64_t>(py::int_(py::handle(t[1]))))};
+                    std::construct_at(self.p, coordinate_axis(py::cast<int64_t>(py::int_(py::handle(t[0])))),
+                                      coordinate_axis(py::cast<int64_t>(py::int_(py::handle(t[1])))));
                     return;
                 }
                 if (size == 3)
                 {
-                    new (self.p) py_coordinate{coordinate_axis(py::cast<int64_t>(py::int_(py::handle(t[0])))),
-                                               coordinate_axis(py::cast<int64_t>(py::int_(py::handle(t[1])))),
-                                               coordinate_axis(py::cast<int64_t>(py::int_(py::handle(t[2]))))};
+                    std::construct_at(self.p, coordinate_axis(py::cast<int64_t>(py::int_(py::handle(t[0])))),
+                                      coordinate_axis(py::cast<int64_t>(py::int_(py::handle(t[1])))),
+                                      coordinate_axis(py::cast<int64_t>(py::int_(py::handle(t[2])))));
                     return;
                 }
 

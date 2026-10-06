@@ -13661,26 +13661,6 @@ is north to south.)doc";
 
 static const char *mkd_doc_fiction_sidb_bestagon_library_bestagon_library = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_bestagon_library_determine_port_routing =
-R"doc(Determines the port directions of a given tile.
-
-Args:
-    lyt: Layout that contains the tile.
-    t: Tile whose incoming and outgoing port directions are
-       determined.
-
-Template Args:
-    GateLyt: Hexagonal gate-level layout type.
-
-Returns:
-    Incoming and outgoing port directions of the tile.
-
-Raises:
-    std::invalid_argument: If `lyt` is not pointy-top, i.e., its
-                           arrangement shifts columns.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_bestagon_library_get_functional_implementations =
 R"doc(Returns a map of all gate functions supported by the library and their
 respectively possible implementations.
@@ -14413,26 +14393,27 @@ static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible_par
 static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible_params_sim_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design =
-R"doc(Designs a lattice-based SiDB circuit for a placed and routed gate-
-level layout.
+R"doc(Designs a lattice-based SiDB circuit for a placed and routed pointy-
+top hexagonal gate-level layout.
 
-The process begins with an already placed and routed gate-level
-layout. For each gate, the corresponding SiDB implementation is
-designed by using an SiDB gate design algorithm.
+For each gate, the SiDB gate design algorithm designs the
+corresponding SiDB implementation.
 
 Args:
-    gate_lyt: Gate-level layout.
+    gate_lyt: Pointy-top hexagonal gate-level layout.
     params: The parameters used for designing the circuit,
             encapsulated in an `on_the_fly_circuit_design_params`
             object.
 
 Template Args:
-    GateLyt: Gate-level layout type.
+    GateLyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
     Layout representing the designed SiDB circuit.
 
 Raises:
+    std::invalid_argument: if gate mapping uses a column arrangement
+                           instead of a row arrangement.
     unsuccessful_gate_design_error: if a gate cannot be designed.
     utils::timeout_error: if the shared circuit budget or an
                           individual gate budget expires. No partial
@@ -16089,22 +16070,6 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_determine_port_routing =
-R"doc(Determines the port directions of a given tile.
-
-Args:
-    lyt: Layout that contains the tile.
-    t: Tile whose incoming and outgoing port directions are
-       determined.
-
-Template Args:
-    Lyt: Pointy-top hexagonal gate-level layout type.
-
-Returns:
-    Incoming and outgoing port directions of the tile.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_is_predefined_bestagon_gate_applicable =
 R"doc(Checks whether a predefined Bestagon gate can be used on a skeleton
 with defects: none of its logic dots may be affected by a defect, and
@@ -16173,6 +16138,7 @@ Returns:
     Bestagon gate representation of `t` including mirroring.
 
 Raises:
+    std::invalid_argument: if `lyt` shifts columns instead of rows.
     gate_design_exception: if no gate can be designed.
     fcn::unsupported_gate_orientation_exception: if the gate
                                                  orientation is
@@ -24442,6 +24408,9 @@ Template Args:
 
 Returns:
     Incoming and outgoing port directions of the tile.
+
+Raises:
+    std::invalid_argument: if `lyt` shifts columns instead of rows.
 
 )doc";
 

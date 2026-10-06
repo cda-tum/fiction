@@ -18,6 +18,7 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -36,6 +37,7 @@
 #include <array>
 #include <chrono>
 #include <optional>
+#include <stdexcept>
 #include <type_traits>
 
 using namespace fiction;
@@ -47,6 +49,19 @@ using namespace fiction::synthesis;
 TEST_CASE("Parameterized gate library traits", "[parameterized-gate-library]")
 {
     CHECK(std::is_same_v<on_the_fly_gate_library::layout, sidb::layout>);
+}
+
+TEST_CASE("On-the-fly SiDB gate mapping rejects column arrangements", "[parameterized-gate-library]")
+{
+    const auto a = GENERATE(arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+
+    hex_gate_clk_lyt gate_layout{a, {0, 2}, clocking::twoddwave()};
+    const auto       input = gate_layout.create_pi("x", {0, 0});
+    const auto       wire  = gate_layout.create_buf(input, {0, 1});
+    gate_layout.create_po(wire, "y", {0, 2});
+
+    CHECK_THROWS_AS(on_the_fly_gate_library::set_up_gate(gate_layout, {0, 1}, on_the_fly_gate_library_params{}),
+                    std::invalid_argument);
 }
 
 TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeout", "[parameterized-gate-library]")

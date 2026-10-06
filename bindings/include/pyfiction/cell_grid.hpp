@@ -25,6 +25,7 @@
 #include <fiction/layouts/io/print_layout.hpp>
 
 #include <cstdint>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -192,7 +193,7 @@ void bind_clocked_constructors(nanobind::class_<Lyt, py_cartesian_layout>& cls)
             {
                 if (const auto scheme = fiction::layouts::clocking::get_scheme(scheme_name); scheme.has_value())
                 {
-                    new (self) Lyt{dimension, *scheme, layout_name, tile_size_x, tile_size_y};
+                    std::construct_at(self, dimension, *scheme, layout_name, tile_size_x, tile_size_y);
                     return;
                 }
 
