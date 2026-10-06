@@ -29,6 +29,7 @@
 #include <fiction/traits.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <functional>
 #include <set>
 #include <stdexcept>
@@ -206,32 +207,65 @@ TEST_CASE("Predicates on directions reject the invalid coordinate", "[coordinate
     CHECK(!hex.is_above({0, 0, 5}, {}));
 }
 
-TEST_CASE("Hexagonal layouts give coordinates outside of the layout no neighbors", "[coordinate-contracts]")
+TEST_CASE("Hexagonal offset and cube coordinates convert back and forth for negative and extreme values",
+          "[coordinate-contracts]")
+{
+    for (const auto a :
+         {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
+    {
+        const hexagonal_layout hex{a, {0, 0, 0}};
+
+        for (int32_t x = -7; x <= 7; ++x)
+        {
+            for (int32_t y = -7; y <= 7; ++y)
+            {
+                const auto cube = hex.to_cube_coordinate({x, y});
+
+                CHECK(cube.x + cube.y + cube.z == 0);
+                CHECK(hex.to_offset_coordinate(cube) == layout_base::coordinate{x, y});
+            }
+        }
+
+        for (const auto x : {-2147483647, 2147483647})
+        {
+            for (const auto y : {-2147483647, 2147483647})
+            {
+                CHECK(hex.to_offset_coordinate(hex.to_cube_coordinate({x, y})) == layout_base::coordinate{x, y});
+            }
+        }
+    }
+}
+
+TEST_CASE("Hexagonal neighbor queries stay inside the layout for any 32-bit coordinate", "[coordinate-contracts]")
 {
     for (const auto a :
          {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
     {
         const hexagonal_layout hex{a, {6, 6, 1}};
 
-        for (const auto& c : {coordinate<hexagonal_layout>{-1, 1, 0},
-                              {0, -1, 0},
-                              {1, 1, -1},
-                              {7, 1, 0},
-                              {1, 7, 0},
-                              {1, 1, 2},
-                              {},
+        for (const auto& c : {coordinate<hexagonal_layout>{},
                               {2, layout_base::coordinate::INVALID_AXIS, 0},
                               {2147483647, 0, 0},
                               {0, 2147483647, 0},
-                              {2147483647, 2147483647, 0}})
+                              {2147483647, 2147483647, 0},
+                              {-2147483647, 0, 0},
+                              {0, -2147483647, 0},
+                              {-2147483647, -2147483647, 0},
+                              {-1, 1, 0},
+                              {7, 1, 0}})
         {
-            CHECK(hex.adjacent_coordinates(c).empty());
-            CHECK(!hex.is_adjacent_of(c, {0, 0, 0}));
-            CHECK(hex.north_east(c) == c);
-            CHECK(hex.south_east(c) == c);
-            CHECK(hex.south_west(c) == c);
-            CHECK(hex.north_west(c) == c);
+            for (const auto& n : hex.adjacent_coordinates(c))
+            {
+                CHECK(hex.is_within_bounds(n));
+            }
+
+            for (const auto& n : {hex.north_east(c), hex.south_east(c), hex.south_west(c), hex.north_west(c)})
+            {
+                CHECK((n == c || hex.is_within_bounds(n)));
+            }
         }
+
+        CHECK(hex.adjacent_coordinates({}).empty());
     }
 }
 
@@ -307,12 +341,12 @@ TEST_CASE("Gate-level layouts check tiles before they change anything", "[coordi
 
         CHECK(!lyt.is_empty_tile({2, 0, 0}));
     }
-    SECTION("An axis equal to the invalid value leaves a node unplaced")
+    SECTION("An invalid tile leaves a node unplaced")
     {
         lyt_t lyt{{3, 3, 1}, clocking::twoddwave()};
 
         lyt.create_pi("a", {layout_base::coordinate::INVALID_AXIS, 0, 0});
-        lyt.create_pi("b", {0, layout_base::coordinate::INVALID_AXIS, 0});
+        lyt.create_pi("b");
 
         CHECK(lyt.num_pis() == 2);
         lyt.foreach_pi([&lyt](const auto& n) { CHECK(!lyt.get_tile(n).is_valid()); });

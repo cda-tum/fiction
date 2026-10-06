@@ -135,15 +135,15 @@ class hexagonal_layout : public layout_base
         /**
          * x coordinate.
          */
-        int32_t x;
+        int64_t x;
         /**
          * y coordinate.
          */
-        int32_t y;
+        int64_t y;
         /**
          * z coordinate.
          */
-        int32_t z;
+        int64_t z;
         /**
          * Creates a cube coordinate at the origin.
          */
@@ -155,7 +155,7 @@ class hexagonal_layout : public layout_base
          * @param cube_y y coordinate.
          * @param cube_z z coordinate.
          */
-        constexpr cube_coordinate(const int32_t cube_x, const int32_t cube_y, const int32_t cube_z) noexcept :
+        constexpr cube_coordinate(const int64_t cube_x, const int64_t cube_y, const int64_t cube_z) noexcept :
                 x{cube_x},
                 y{cube_y},
                 z{cube_z}
@@ -395,11 +395,11 @@ class hexagonal_layout : public layout_base
      * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose north-eastern counterpart is desired.
-     * @return Coordinate directly north-eastern of `c`; `c` itself if the neighbor or `c` lies outside of the layout.
+     * @return Coordinate directly north-eastern of `c`; `c` itself if the neighbor lies outside of the layout.
      */
     [[nodiscard]] coordinate north_east(const coordinate& c) const noexcept
     {
-        if (!is_within_bounds(c))
+        if (!c.is_valid())
         {
             return c;
         }
@@ -438,11 +438,11 @@ class hexagonal_layout : public layout_base
      * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose south-eastern counterpart is desired.
-     * @return Coordinate directly south-eastern of `c`; `c` itself if the neighbor or `c` lies outside of the layout.
+     * @return Coordinate directly south-eastern of `c`; `c` itself if the neighbor lies outside of the layout.
      */
     [[nodiscard]] coordinate south_east(const coordinate& c) const noexcept
     {
-        if (!is_within_bounds(c))
+        if (!c.is_valid())
         {
             return c;
         }
@@ -484,11 +484,11 @@ class hexagonal_layout : public layout_base
      * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose south-western counterpart is desired.
-     * @return Coordinate directly south-western of `c`; `c` itself if the neighbor or `c` lies outside of the layout.
+     * @return Coordinate directly south-western of `c`; `c` itself if the neighbor lies outside of the layout.
      */
     [[nodiscard]] coordinate south_west(const coordinate& c) const noexcept
     {
-        if (!is_within_bounds(c))
+        if (!c.is_valid())
         {
             return c;
         }
@@ -523,11 +523,11 @@ class hexagonal_layout : public layout_base
      * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose north-western counterpart is desired.
-     * @return Coordinate directly north-western of `c`; `c` itself if the neighbor or `c` lies outside of the layout.
+     * @return Coordinate directly north-western of `c`; `c` itself if the neighbor lies outside of the layout.
      */
     [[nodiscard]] coordinate north_west(const coordinate& c) const noexcept
     {
-        if (!is_within_bounds(c))
+        if (!c.is_valid())
         {
             return c;
         }
@@ -936,8 +936,8 @@ class hexagonal_layout : public layout_base
      * directions are being considered, i.e., the container will contain all coordinates `ac` for which `is_adjacent(c,
      * ac)` returns `true`.
      *
-     * Neighbors outside of the layout bounds are not considered, and a coordinate outside of the layout bounds has no
-     * adjacent coordinates. Thereby, the size of the returned container is at most 6.
+     * Coordinates that are outside of the layout bounds are not considered. Thereby, the size of the returned container
+     * is at most 6.
      *
      * @param c Coordinate whose adjacent ones are desired.
      * @return A container that contains all of `c`'s adjacent coordinates.
@@ -956,8 +956,7 @@ class hexagonal_layout : public layout_base
      * cardinal and ordinal directions are being considered, i.e., the given function is applied to all coordinates ac
      * for which `is_adjacent(c, ac)` returns `true`.
      *
-     * Neighbors outside of the layout bounds are not considered, and a coordinate outside of the layout bounds has no
-     * adjacent coordinates. Thereby, at most 6 coordinates are touched.
+     * Coordinates that are outside of the layout bounds are not considered. Thereby, at most 6 coordinates are touched.
      *
      * @tparam Fn Functor type.
      * @param c Coordinate whose adjacent ones are desired.
@@ -966,7 +965,7 @@ class hexagonal_layout : public layout_base
     template <typename Fn>
     void foreach_adjacent_coordinate(const coordinate& c, Fn&& fn) const
     {
-        if (!is_within_bounds(c))
+        if (!c.is_valid())
         {
             return;
         }
@@ -1061,13 +1060,6 @@ class hexagonal_layout : public layout_base
 
 #pragma endregion
 
-// data types cannot properly be converted to bit field types
-#pragma GCC diagnostic push
-#ifndef __clang__
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#endif
-#pragma GCC diagnostic ignored "-Wconversion"
-
 #pragma region coordinates
     /**
      * Converts an offset coordinate to a cube coordinate.
@@ -1079,29 +1071,30 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] cube_coordinate to_cube_coordinate(const coordinate& offset_coord) const noexcept
     {
-        cube_coordinate cube_coord{0, 0, 0};
+        // 64-bit arithmetic keeps the conversion free of overflow for every 32-bit coordinate
+        const int64_t offset = is_odd_arrangement(get_arrangement()) ? -1 : 1;
+        const int64_t ox     = offset_coord.x;
+        const int64_t oy     = offset_coord.y;
 
-        const auto offset = is_odd_arrangement(get_arrangement()) ? -1 : 1;
+        cube_coordinate cube_coord{0, 0, 0};
 
         if (is_row_arrangement(get_arrangement()))
         {
-            cube_coord.x = offset_coord.x - static_cast<decltype(cube_coord.x)>(
-                                                (offset_coord.y + (offset_coord.y % 2 != 0 ? offset : 0)) / 2);
-            cube_coord.z = offset_coord.y;
-            cube_coord.y = -cube_coord.x - cube_coord.z;
+            cube_coord.x = ox - (oy + (oy % 2 != 0 ? offset : 0)) / 2;
+            cube_coord.z = oy;
         }
         else
         {
-            cube_coord.x = offset_coord.x;
-            cube_coord.z = offset_coord.y - static_cast<decltype(cube_coord.z)>(
-                                                (offset_coord.x + (offset_coord.x % 2 != 0 ? offset : 0)) / 2);
-            cube_coord.y = -cube_coord.x - cube_coord.z;
+            cube_coord.x = ox;
+            cube_coord.z = oy - (ox + (ox % 2 != 0 ? offset : 0)) / 2;
         }
+
+        cube_coord.y = -cube_coord.x - cube_coord.z;
 
         return cube_coord;
     }
     /**
-     * Converts a cube coordinate to an offset coordinate.
+     * Converts a cube coordinate to an offset coordinate. The result lies in the ground layer.
      *
      * This implementation is adapted from https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
      *
@@ -1110,29 +1103,17 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] coordinate to_offset_coordinate(const cube_coordinate& cube_coord) const noexcept
     {
-        // the generated coordinate will be in ground layer
-        coordinate offset_coord{0, 0};
+        const int64_t offset = is_odd_arrangement(get_arrangement()) ? -1 : 1;
 
-        const auto offset = is_odd_arrangement(get_arrangement()) ? -1 : 1;
         if (is_row_arrangement(get_arrangement()))
         {
-            offset_coord.x = static_cast<decltype(offset_coord.x)>(
-                cube_coord.x + static_cast<int64_t>((cube_coord.z + (cube_coord.z % 2 != 0 ? offset : 0)) / 2));
-            offset_coord.y = static_cast<decltype(offset_coord.y)>(cube_coord.z);
-        }
-        else
-        {
-            offset_coord.x = static_cast<decltype(offset_coord.x)>(cube_coord.x);
-            offset_coord.y = static_cast<decltype(offset_coord.y)>(
-                cube_coord.z + static_cast<int64_t>((cube_coord.x + (cube_coord.x % 2 != 0 ? offset : 0)) / 2));
+            return {cube_coord.x + (cube_coord.z + (cube_coord.z % 2 != 0 ? offset : 0)) / 2, cube_coord.z};
         }
 
-        return offset_coord;
+        return {cube_coord.x, cube_coord.z + (cube_coord.x + (cube_coord.x % 2 != 0 ? offset : 0)) / 2};
     }
 
 #pragma endregion
-
-#pragma GCC diagnostic pop
 
   private:
     /**

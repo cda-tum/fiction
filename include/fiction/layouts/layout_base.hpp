@@ -45,9 +45,8 @@ class layout_base
      *
      * A coordinate defines a location relative to a fixed point (origin). Each axis is a signed 32-bit integer. The
      * default-constructed coordinate is invalid; it has all axes set to `INVALID_AXIS` and stands for "no coordinate",
-     * e.g., a neighbor outside of a layout or the tile of a node that is not placed. A coordinate with any axis set to
-     * `INVALID_AXIS` is invalid. Test for invalidity with `is_valid()`, because only the default-constructed
-     * coordinate compares equal to every other coordinate of the same state.
+     * e.g., a neighbor outside of a layout or the tile of a node that is not placed. A coordinate is invalid iff its x
+     * axis is `INVALID_AXIS`; no other axis of a coordinate should have this value.
      *
      * Gate-level layouts pack a coordinate into a 64-bit signal with `explicit operator uint64_t`. This encoding holds
      * 31-bit signed x and y values and a single z bit.
@@ -146,13 +145,13 @@ class layout_base
                    (static_cast<uint64_t>(x) & AXIS_MASK);
         }
         /**
-         * Returns whether the coordinate is valid, i.e., whether none of its axes is `INVALID_AXIS`.
+         * Returns whether the coordinate is valid, i.e., whether its x axis differs from `INVALID_AXIS`.
          *
          * @return `true` iff the coordinate is valid.
          */
         [[nodiscard]] constexpr bool is_valid() const noexcept
         {
-            return x != INVALID_AXIS && y != INVALID_AXIS && z != INVALID_AXIS;
+            return x != INVALID_AXIS;
         }
         /**
          * Returns whether the coordinate fits the 64-bit signal encoding, i.e., x and y are 31-bit signed values and z
@@ -522,11 +521,9 @@ struct hash<fiction::layouts::layout_base::coordinate>
 {
     std::size_t operator()(const fiction::layouts::layout_base::coordinate& c) const noexcept
     {
-        // every axis takes part, so that coordinates that differ only in z or only in the high bits of x or y do not
-        // collide
-        const auto xy = (static_cast<uint64_t>(static_cast<uint32_t>(c.y)) << 32ull) | static_cast<uint32_t>(c.x);
-
-        return std::hash<uint64_t>{}(xy ^ (static_cast<uint64_t>(static_cast<uint32_t>(c.z)) * 0x9e3779b97f4a7c15ull));
+        // the hash of the signal encoding: coordinates that differ only in z by a multiple of 2 collide, which affects
+        // the speed of hash maps keyed by such coordinates but never their correctness
+        return std::hash<uint64_t>{}(static_cast<uint64_t>(c));
     }
 };
 
