@@ -348,27 +348,9 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
             /**
              * @brief Whether the node implements a supported binary gate.
              */
-            bool is_supported_binary_gate{};
-
-            is_supported_binary_gate = is_supported_binary_gate || lyt.is_and(n);
-
-            is_supported_binary_gate = is_supported_binary_gate || lyt.is_or(n);
-
-            is_supported_binary_gate = is_supported_binary_gate || lyt.is_nand(n);
-
-            is_supported_binary_gate = is_supported_binary_gate || lyt.is_nor(n);
-
-            is_supported_binary_gate = is_supported_binary_gate || lyt.is_xor(n);
-
-            is_supported_binary_gate = is_supported_binary_gate || lyt.is_xnor(n);
-
-            is_supported_binary_gate = is_supported_binary_gate || lyt.is_ge(n);
-
-            is_supported_binary_gate = is_supported_binary_gate || lyt.is_le(n);
-
-            is_supported_binary_gate = is_supported_binary_gate || lyt.is_gt(n);
-
-            is_supported_binary_gate = is_supported_binary_gate || lyt.is_lt(n);
+            const auto is_supported_binary_gate = lyt.is_and(n) || lyt.is_or(n) || lyt.is_nand(n) || lyt.is_nor(n) ||
+                                                  lyt.is_xor(n) || lyt.is_xnor(n) || lyt.is_ge(n) || lyt.is_le(n) ||
+                                                  lyt.is_gt(n) || lyt.is_lt(n);
 
             if (is_supported_binary_gate)
             {

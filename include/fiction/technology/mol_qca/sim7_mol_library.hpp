@@ -181,8 +181,6 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
             p.out.emplace(0u, 5u);
         }
 
-        bool is_wire_or_inverter = false;
-
         const auto object = lyt.find_object(t);
         if (!object)
         {
@@ -190,9 +188,7 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
         }
         const auto n = *object;
 
-        is_wire_or_inverter = is_wire_or_inverter || lyt.is_buf(n);
-
-        is_wire_or_inverter = is_wire_or_inverter || lyt.is_inv(n);
+        const auto is_wire_or_inverter = lyt.is_buf(n) || lyt.is_inv(n);
 
         // fallback for tiles with no connectors (e.g., primary inputs/outputs on one side)
         if (!is_wire_or_inverter)

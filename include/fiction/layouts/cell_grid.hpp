@@ -71,12 +71,7 @@ class cell_grid : public cartesian_layout
      *
      * @param other Grid to copy.
      */
-    cell_grid(const cell_grid& other) :
-            cartesian_layout(other.clone()),
-            layout_name{other.layout_name},
-            cell_types{other.cell_types},
-            cell_names{other.cell_names}
-    {}
+    cell_grid(const cell_grid& other) = default;
     /**
      * Moves a grid.
      *
@@ -89,15 +84,7 @@ class cell_grid : public cartesian_layout
      * @param other Grid to copy.
      * @return This grid.
      */
-    cell_grid& operator=(const cell_grid& other)
-    {
-        if (this != &other)
-        {
-            *this = cell_grid{other};
-        }
-
-        return *this;
-    }
+    cell_grid& operator=(const cell_grid& other) = default;
     /**
      * Moves a grid.
      *
