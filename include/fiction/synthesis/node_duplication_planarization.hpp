@@ -102,7 +102,7 @@ struct node_duplication_planarization_params
     /**
      * Weights of the duplication cost model of the hybrid strategy's `WEIGHTED_CONE` criterion. The cost of
      * duplicating a node is the weighted size of its transitive fanin, since every duplicate drags its whole cone
-     * along: a gate weighs `node_weight`, a chain buffer or inverter `buffer_weight`, and the sum is scaled by
+     * along. A gate weighs `node_weight` and a chain buffer or inverter weighs `buffer_weight`. The sum is scaled by
      * \f$\text{depth\_growth}^{d}\f$ for a duplication on level \f$d\f$, because duplicates on deep levels are
      * duplicated again by the decisions below. The weights are in units of one crossing gadget node. The defaults
      * were determined empirically on the benchmark sets; see `experiments/planarization/cost_model_sweep.cpp`.

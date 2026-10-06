@@ -884,9 +884,8 @@ class duplication_cost_model:
     Weights of the duplication cost model of the hybrid strategy's
     `WEIGHTED_CONE` criterion. The cost of duplicating a node is the
     weighted size of its transitive fanin, since every duplicate drags its
-    whole cone
-    along: a gate weighs `node_weight`, a chain buffer or inverter
-           `buffer_weight`, and the sum is scaled by
+    whole cone along. A gate weighs `node_weight` and a chain buffer or
+    inverter weighs `buffer_weight`. The sum is scaled by
     :math:`\\text{depth\\_growth}^{d}` for a duplication on level :math:`d`,
     because duplicates on deep levels are duplicated again by the
     decisions below. The weights are in units of one crossing gadget node.
@@ -1064,32 +1063,20 @@ def planarization(
     statistics: planarization_stats | None = None,
 ) -> tuple[mnt.pyfiction.networks.technology_network, list[int]]:
     """
-    Planarizes a balanced, ranked logic network and returns a planar,
-    balanced, fanout-substituted network that computes the same functions.
-    The pipeline runs `node_duplication_planarization` with the chosen
-    strategy, resolves the crossings that the hybrid strategy kept with
-    `crossing_gate_planarization`, restores fanout nodes with
-    `planar_fanout_substitution`, and removes the buffers that this leaves
-    behind with `planar_rebalancing`.
-
-    Duplicated primary inputs become virtual primary inputs of the result.
+    Planarizes a balanced technology network with unified outputs: node duplication with the chosen
+    strategy, crossing gates for the levels the hybrid strategy left crossed, planar fanout substitution, and planar
+    rebalancing. See `network_balancing` for the precondition.
 
     Args:
-        ntk: Source network.
-        ps: Parameters.
-        pst: Statistics.
-
-    Template Args:
-        Ntk: Ranked, balanced network type (see `mutable_rank_view`)
-             without virtual primary inputs.
+        network: Balanced technology network with unified outputs.
+        params: Parameters of the pipeline.
+        statistics: Optional statistics object that receives the runtimes and node counts.
 
     Returns:
-        Planar `virtual_pi_network` with unified outputs and fanout nodes
-        of at most `fanout_degree` outputs.
+        A pair of the planar, balanced, fanout-substituted network in rank order and, for every input of that
+        network, the index of the input of `network` it stands for. A duplicated input appears several times; tie
+        those inputs together when simulating or checking equivalence.
 
     Raises:
-        std::invalid_argument: If `ntk` is not balanced or contains
-                               virtual primary inputs.
-        std::runtime_error: If a stage cannot keep its contract, see the
-                            stages' documentation.
+        ValueError: If `network` is not balanced with unified outputs, or if a gate has only constant fanins.
     """

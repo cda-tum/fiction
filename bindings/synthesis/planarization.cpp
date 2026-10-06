@@ -220,7 +220,23 @@ void planarization(nanobind::module_& m)
             return detail::flatten(fiction::synthesis::planarization(ranked, ps, pst));
         },
         py::arg("network"), py::arg("params") = fiction::synthesis::planarization_params{},
-        py::arg("statistics") = nullptr, DOC(fiction_synthesis_planarization),
+        py::arg("statistics") = nullptr,
+        R"doc(Planarizes a balanced technology network with unified outputs: node duplication with the chosen
+strategy, crossing gates for the levels the hybrid strategy left crossed, planar fanout substitution, and planar
+rebalancing. See `network_balancing` for the precondition.
+
+Args:
+    network: Balanced technology network with unified outputs.
+    params: Parameters of the pipeline.
+    statistics: Optional statistics object that receives the runtimes and node counts.
+
+Returns:
+    A pair of the planar, balanced, fanout-substituted network in rank order and, for every input of that
+    network, the index of the input of `network` it stands for. A duplicated input appears several times; tie
+    those inputs together when simulating or checking equivalence.
+
+Raises:
+    ValueError: If `network` is not balanced with unified outputs, or if a gate has only constant fanins.)doc",
         py::call_guard<py::gil_scoped_release>());
 }
 

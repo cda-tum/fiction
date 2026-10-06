@@ -84,11 +84,19 @@ class static_depth_view<Ntk, NodeCostFn, true> : public Ntk
     explicit static_depth_view(Ntk const& ntk, [[maybe_unused]] depth_view_params const& params = {}) : Ntk(ntk) {}
 
     /**
-     * @return Whether a level is stored for the node. The wrapped network keeps levels for every node.
+     * @return Whether a level is stored for the node: the wrapped network's answer if it offers `has_level`, otherwise
+     * `true`, since a network with a depth interface keeps levels for every node.
      */
     [[nodiscard]] bool has_level([[maybe_unused]] typename Ntk::node const& n) const
     {
-        return true;
+        if constexpr (has_has_level_v<Ntk>)
+        {
+            return Ntk::has_level(n);
+        }
+        else
+        {
+            return true;
+        }
     }
 };
 

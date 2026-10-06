@@ -26207,9 +26207,8 @@ static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_para
 R"doc(Weights of the duplication cost model of the hybrid strategy's
 `WEIGHTED_CONE` criterion. The cost of duplicating a node is the
 weighted size of its transitive fanin, since every duplicate drags its
-whole cone
-along: a gate weighs `node_weight`, a chain buffer or inverter
-       `buffer_weight`, and the sum is scaled by
+whole cone along. A gate weighs `node_weight` and a chain buffer or
+inverter weighs `buffer_weight`. The sum is scaled by
 :math:`\text{depth\_growth}^{d}` for a duplication on level :math:`d`,
 because duplicates on deep levels are duplicated again by the
 decisions below. The weights are in units of one crossing gadget node.
@@ -26401,6 +26400,15 @@ the gadget type of the crossing gates. The pipeline defaults to the
 hybrid strategy, which yields the fewest nodes.)doc";
 
 static const char *mkd_doc_fiction_synthesis_planarization_params_fanout_degree = R"doc(Maximum output degree of the fanout nodes in the result.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planarization_params_hybrid_duplication =
+R"doc(Default parameters of the node duplication stage: the hybrid strategy,
+which yields the fewest nodes.
+
+Returns:
+    Node duplication parameters with the hybrid strategy selected.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_planarization_params_on_progress =
 R"doc(Receives completed work and the phase total of every stage in turn,

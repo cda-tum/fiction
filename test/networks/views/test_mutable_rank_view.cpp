@@ -38,6 +38,7 @@
 #include <mockturtle/traits.hpp>
 
 #include <functional>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -354,6 +355,7 @@ TEST_CASE("Dangling nodes are not ranked", "[mutable-rank-view]")
     CHECK(ranked.rank_width(1) == 1);
     CHECK(ranked.at_rank_position(1, 0) == tec.get_node(a1));
     CHECK(!ranked.has_level(tec.get_node(dangling)));
+    CHECK_THROWS_AS(ranked.rank_position(tec.get_node(dangling)), std::out_of_range);
 }
 
 TEST_CASE("Primary inputs without fanout are visited last", "[mutable-rank-view]")

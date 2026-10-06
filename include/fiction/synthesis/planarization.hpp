@@ -45,11 +45,22 @@ struct planarization_params
      */
     utils::progress_callback on_progress{};
     /**
+     * Default parameters of the node duplication stage: the hybrid strategy, which yields the fewest nodes.
+     *
+     * @return Node duplication parameters with the hybrid strategy selected.
+     */
+    [[nodiscard]] static node_duplication_planarization_params hybrid_duplication() noexcept
+    {
+        node_duplication_planarization_params ps{};
+        ps.strategy = node_duplication_planarization_params::planarization_strategy::HYBRID;
+
+        return ps;
+    }
+    /**
      * Parameters of the node duplication stage, including the strategy and the gadget type of the crossing gates.
      * The pipeline defaults to the hybrid strategy, which yields the fewest nodes.
      */
-    node_duplication_planarization_params duplication{
-        .strategy = node_duplication_planarization_params::planarization_strategy::HYBRID};
+    node_duplication_planarization_params duplication = hybrid_duplication();
     /**
      * Maximum output degree of the fanout nodes in the result.
      */

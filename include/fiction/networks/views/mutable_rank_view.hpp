@@ -640,7 +640,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
 
     /**
      * Initializes the ranks for the given network. It traverses the nodes in the network using a depth-first search and
-     * inserts each non-constant node into the rank.
+     * inserts each non-constant node that has a level into the rank of its level. Constants and nodes without a level
+     * (dangling nodes) get no rank.
      *
      * This function is noexcept.
      */

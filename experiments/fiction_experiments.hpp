@@ -206,27 +206,27 @@ inline std::vector<std::string> iwls93_benchmarks()
 {
     namespace fs = std::filesystem;
 
-    std::vector<std::string> benchmarks{};
+    std::vector<std::string> result{};
 
     const auto dir = fs::path{EXPERIMENTS_PATH} / "../benchmarks/IWLS93";
 
     if (!fs::is_directory(dir))
     {
         fmt::print("[w] IWLS93 directory not found: {}\n", dir.string());
-        return benchmarks;
+        return result;
     }
 
     for (const auto& entry : fs::directory_iterator{dir})
     {
         if (entry.is_regular_file() && entry.path().extension() == ".v")
         {
-            benchmarks.push_back(fmt::format("IWLS93/{}", entry.path().stem().string()));
+            result.push_back(fmt::format("IWLS93/{}", entry.path().stem().string()));
         }
     }
 
-    std::sort(benchmarks.begin(), benchmarks.end());
+    std::sort(result.begin(), result.end());
 
-    return benchmarks;
+    return result;
 }
 
 }  // namespace fiction_experiments

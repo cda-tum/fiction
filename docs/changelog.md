@@ -47,6 +47,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - `networks::initialize_copy_network_with_virtual_pis` copies the constants and inputs of a network, virtual
+    inputs included, and `networks::barycenters` computes the mean fanin positions of ranked nodes
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
     `sidb::layout` stores tagged dots and defects without templates
   - `sidb::charge_distribution` assigns one charge state per SiDB and carries its energy;

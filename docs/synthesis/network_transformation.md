@@ -203,10 +203,8 @@ strategy with the lookahead criterion, which produced the fewest nodes on the be
 :::{tab-item} Python
 :sync: python
 
-The Python function takes a balanced `technology_network` with unified outputs (see `network_balancing`) and returns
-the planar network together with a list that holds, for every input of the result, the index of the input of the
-original network it stands for; a duplicated input appears several times. The node order of the returned network is
-its rank order, inputs included.
+The Python function works on a `technology_network` and reports duplicated inputs through an index list instead of
+virtual inputs; see its docstring below.
 
 ```{eval-rst}
 .. autoclass:: mnt.pyfiction.synthesis.planarization_params

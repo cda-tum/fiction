@@ -27,6 +27,7 @@
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/cost_functions.hpp>
+#include <mockturtle/views/depth_view.hpp>
 
 #include <memory>
 
@@ -246,4 +247,16 @@ TEST_CASE("Dangling nodes have no level", "[static-depth-view]")
 
     CHECK(depth_dangling.has_level(dangling_aig.get_node(f2)));
     CHECK(!depth_dangling.has_level(dangling_aig.get_node(f3)));
+
+    // a depth view over a depth view passes the question through instead of claiming a level for every node
+    // (the template argument is spelled out, since class template argument deduction would pick the copy)
+    const static_depth_view<static_depth_view<mockturtle::aig_network>> nested{depth_dangling};
+
+    CHECK(nested.has_level(dangling_aig.get_node(f2)));
+    CHECK(!nested.has_level(dangling_aig.get_node(f3)));
+
+    // a depth view over mockturtle's depth view answers true, since that view keeps levels for every node
+    const static_depth_view over_mockturtle{mockturtle::depth_view{aig}};
+
+    CHECK(over_mockturtle.has_level(aig.get_node(f2)));
 }

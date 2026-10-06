@@ -902,6 +902,20 @@ template <class Ntk>
 inline constexpr bool has_foreach_pi_unranked_v = has_foreach_pi_unranked<Ntk>::value;
 #pragma endregion
 
+#pragma region has_has_level
+template <class Ntk, class = void>
+struct has_has_level : std::false_type
+{};
+
+template <class Ntk>
+struct has_has_level<Ntk, std::void_t<decltype(std::declval<Ntk>().has_level(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_has_level_v = has_has_level<Ntk>::value;
+#pragma endregion
+
 #pragma region has_is_real_pi
 template <class Ntk, class = void>
 struct has_is_real_pi : std::false_type
