@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/networks/io/dot_drawers.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
@@ -51,7 +52,7 @@ template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class simple_gate_layout_tile_drawer : public networks::io::technology_dot_drawer<Lyt, DrawIndexes>
 {
   public:
-    [[nodiscard]] virtual std::vector<std::string> additional_graph_attributes() const noexcept
+    [[nodiscard]] virtual std::vector<std::string> additional_graph_attributes(const Lyt& /*lyt*/) const noexcept
     {
         // 'concentrate' merges edges, so it would be great to have since the layout topology in dot relies on invisible
         // edges, which, however, still consume area as other edges are routed around them to avoid collisions. In
@@ -72,7 +73,7 @@ class simple_gate_layout_tile_drawer : public networks::io::technology_dot_drawe
         return fmt::format("x{}y{}", t.x, t.y);
     }
 
-    [[nodiscard]] virtual std::vector<std::string> additional_node_attributes() const noexcept
+    [[nodiscard]] virtual std::vector<std::string> additional_node_attributes(const Lyt& /*lyt*/) const noexcept
     {
         if constexpr (DrawIndexes)
         {
@@ -220,9 +221,9 @@ template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>
 {
   public:
-    [[nodiscard]] std::vector<std::string> additional_graph_attributes() const noexcept override
+    [[nodiscard]] std::vector<std::string> additional_graph_attributes(const Lyt& lyt) const noexcept override
     {
-        auto graph_attributes = base_drawer::additional_graph_attributes();
+        auto graph_attributes = base_drawer::additional_graph_attributes(lyt);
 
         if constexpr (DrawIndexes)
         {
@@ -238,9 +239,9 @@ class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, 
         return graph_attributes;
     }
 
-    [[nodiscard]] std::vector<std::string> additional_node_attributes() const noexcept override
+    [[nodiscard]] std::vector<std::string> additional_node_attributes(const Lyt& lyt) const noexcept override
     {
-        auto node_attributes = base_drawer::additional_node_attributes();
+        auto node_attributes = base_drawer::additional_node_attributes(lyt);
 
         node_attributes.emplace_back("shape=square");
 
@@ -278,51 +279,31 @@ class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, 
   private:
     using base_drawer = simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>;
 };
+namespace detail
+{
+
 /**
- * An extended gate-level layout DOT drawer for shifted Cartesian layouts.
+ * Base class of the gate-level layout DOT drawers for layouts with shifted rows or columns. It draws each row or
+ * column in one rank and shifts every other one by an invisible node. The derived class chooses the rank separation and
+ * the node shape.
  *
- * @tparam Lyt Shifted Cartesian gate-level layout type.
+ * @tparam Lyt Gate-level layout type with shifted rows or columns.
  * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
  * @tparam DrawIndexes Flag to toggle the drawing of node indices.
  */
-template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
-class gate_layout_shifted_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>
+template <typename Lyt, bool ClockColors, bool DrawIndexes>
+class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>
 {
   public:
-    [[nodiscard]] std::vector<std::string> additional_graph_attributes() const noexcept override
+    [[nodiscard]] std::vector<std::string> additional_graph_attributes(const Lyt& lyt) const noexcept override
     {
-        auto graph_attributes = base_drawer::additional_graph_attributes();
+        auto graph_attributes = base_drawer::additional_graph_attributes(lyt);
 
-        if constexpr (DrawIndexes)
-        {
-            graph_attributes.emplace_back("ranksep=0.5");
-        }
-        else
-        {
-            graph_attributes.emplace_back("ranksep=0.25");
-        }
-
-        // horizontal shifts are modeled as top-down graphs
-        if constexpr (has_horizontally_shifted_cartesian_orientation_v<Lyt>)
-        {
-            graph_attributes.emplace_back("rankdir=TB");
-        }
-        // while vertical shifts are modeled as left-right graphs
-        else
-        {
-            graph_attributes.emplace_back("rankdir=LR");
-        }
+        graph_attributes.emplace_back(fmt::format("ranksep={}", rank_separation()));
+        // shifted rows are modeled as top-down graphs, shifted columns as left-right graphs
+        graph_attributes.emplace_back(is_row_arrangement(lyt.get_arrangement()) ? "rankdir=TB" : "rankdir=LR");
 
         return graph_attributes;
-    }
-
-    [[nodiscard]] std::vector<std::string> additional_node_attributes() const noexcept override
-    {
-        auto node_attributes = base_drawer::additional_node_attributes();
-
-        node_attributes.emplace_back("shape=square");
-
-        return node_attributes;
     }
 
     [[nodiscard]] std::string enforce_topology(const Lyt& lyt) const
@@ -341,53 +322,27 @@ class gate_layout_shifted_cartesian_drawer : public simple_gate_layout_tile_draw
             topology << "node [label=\"\", width=0.5, height=0.5, style=invis];\n";
         }
 
-        if constexpr (has_odd_row_cartesian_arrangement_v<Lyt>)
-        {
-            enforce_same_shifted_row(lyt, topology);
+        const auto a     = lyt.get_arrangement();
+        const auto rows  = is_row_arrangement(a);
+        const auto first = is_odd_arrangement(a) ? 1ul : 0ul;
 
-            // shift odd rows
-            for (auto i = 1ul; i <= lyt.y(); i += 2)
-            {
-                shift_row(lyt, i, topology);
-            }
+        for (const auto& line : rows ? base_drawer::rows(lyt) : base_drawer::columns(lyt))
+        {
+            topology << base_drawer::same_rank(line);
         }
-        else if constexpr (has_even_row_cartesian_arrangement_v<Lyt>)
-        {
-            enforce_same_shifted_row(lyt, topology);
 
-            // shift even rows
-            for (auto i = 0ul; i <= lyt.y(); i += 2)
-            {
-                shift_row(lyt, i, topology);
-            }
-        }
-        else if constexpr (has_odd_column_cartesian_arrangement_v<Lyt>)
+        // shift every other row or column
+        for (auto i = first; i <= (rows ? lyt.y() : lyt.x()); i += 2)
         {
-            enforce_same_shifted_column(lyt, topology);
-
-            // shift odd columns
-            for (auto i = 1ul; i <= lyt.x(); i += 2)
-            {
-                shift_column(lyt, i, topology);
-            }
-        }
-        else if constexpr (has_even_column_cartesian_arrangement_v<Lyt>)
-        {
-            enforce_same_shifted_column(lyt, topology);
-
-            // shift even columns
-            for (auto i = 0ul; i <= lyt.x(); i += 2)
-            {
-                shift_column(lyt, i, topology);
-            }
+            shift_line(lyt, i, rows, topology);
         }
 
         // enforce connections other than those in direct row/column via edges
         lyt.foreach_ground_tile(
-            [this, &lyt, &topology](const auto& t)
+            [this, &lyt, &topology, rows](const auto& t)
             {
                 lyt.foreach_adjacent_tile(t,
-                                          [this, &topology, &t](const auto& at)
+                                          [this, &topology, &t, rows](const auto& at)
                                           {
                                               // skip adjacent tiles in one direction to prevent double edges
                                               if (t >= at)
@@ -395,21 +350,10 @@ class gate_layout_shifted_cartesian_drawer : public simple_gate_layout_tile_draw
                                                   return true;
                                               }
 
-                                              if constexpr (has_horizontally_shifted_cartesian_orientation_v<Lyt>)
+                                              // skip adjacent tiles in the same row or column to prevent double edges
+                                              if (rows ? t.y == at.y : t.x == at.x)
                                               {
-                                                  // skip adjacent tiles in same row to prevent double edges
-                                                  if (t.y == at.y)
-                                                  {
-                                                      return true;
-                                                  }
-                                              }
-                                              else  // vertically shifted
-                                              {
-                                                  // skip adjacent tiles in same column to prevent double edges
-                                                  if (t.x == at.x)
-                                                  {
-                                                      return true;
-                                                  }
+                                                  return true;
                                               }
 
                                               topology << base_drawer::edge(base_drawer::tile_id(t),
@@ -423,66 +367,89 @@ class gate_layout_shifted_cartesian_drawer : public simple_gate_layout_tile_draw
     }
 
   protected:
+    /**
+     * The drawer of the tiles that this class extends.
+     */
     using base_drawer = simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>;
+    /**
+     * Returns the DOT value of the `ranksep` graph attribute.
+     *
+     * @return Separation of the ranks.
+     */
+    [[nodiscard]] virtual std::string_view rank_separation() const noexcept = 0;
 
-    [[nodiscard]] std::string invisible_node(const uint64_t i) const noexcept
+  private:
+    /**
+     * Returns the name of the invisible node that shifts a row or column.
+     *
+     * @param i Index of the row or column.
+     * @return Node name.
+     */
+    [[nodiscard]] static std::string invisible_node(const uint64_t i) noexcept
     {
         return fmt::format("invis{}", i);
     }
-
-    void enforce_same_shifted_column(const Lyt& lyt, std::stringstream& stream) const noexcept
+    /**
+     * Shifts a row or column by placing an invisible node in its rank and connecting the node to the neighboring rows
+     * or columns.
+     *
+     * @param lyt Layout to draw.
+     * @param index Index of the row or column.
+     * @param is_row Whether `index` names a row. Otherwise, it names a column.
+     * @param stream Stream to write the DOT statements to.
+     */
+    void shift_line(const Lyt& lyt, const uint64_t index, const bool is_row, std::stringstream& stream) const noexcept
     {
-        for (const auto& col : base_drawer::columns(lyt))
+        const auto line_tile = [is_row](const uint64_t i) { return is_row ? tile<Lyt>{0, i} : tile<Lyt>{i, 0}; };
+
+        stream << base_drawer::same_rank(
+            std::vector<std::string>{invisible_node(index), base_drawer::tile_id(line_tile(index))});
+
+        // the previous row or column only exists if index != 0
+        if (index != 0)
         {
-            stream << base_drawer::same_rank(col);
+            stream << base_drawer::edge(invisible_node(index), base_drawer::tile_id(line_tile(index - 1)));
+        }
+
+        // the next row or column could be out of bounds and needs to be checked for
+        if (index < (is_row ? lyt.y() : lyt.x()))
+        {
+            stream << base_drawer::edge(invisible_node(index), base_drawer::tile_id(line_tile(index + 1)));
         }
     }
+};
 
-    void enforce_same_shifted_row(const Lyt& lyt, std::stringstream& stream) const noexcept
+}  // namespace detail
+
+/**
+ * An extended gate-level layout DOT drawer for shifted Cartesian layouts.
+ *
+ * @tparam Lyt Shifted Cartesian gate-level layout type.
+ * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
+ * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ */
+template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
+class gate_layout_shifted_cartesian_drawer
+        : public detail::gate_layout_shifted_tile_drawer<Lyt, ClockColors, DrawIndexes>
+{
+  public:
+    [[nodiscard]] std::vector<std::string> additional_node_attributes(const Lyt& lyt) const noexcept override
     {
-        for (const auto& row : base_drawer::rows(lyt))
-        {
-            stream << base_drawer::same_rank(row);
-        }
+        auto node_attributes = shifted_drawer::additional_node_attributes(lyt);
+
+        node_attributes.emplace_back("shape=square");
+
+        return node_attributes;
     }
 
-    void shift_column(const Lyt& lyt, const uint64_t col, std::stringstream& stream) const noexcept
+  protected:
+    [[nodiscard]] std::string_view rank_separation() const noexcept override
     {
-        stream << base_drawer::same_rank({{invisible_node(col), base_drawer::tile_id({col, 0})}});
-
-        // previous column only exist if i != 0
-        if (col != 0)
-        {
-            const tile<Lyt> previous_column_tile{col - 1, 0};
-
-            stream << base_drawer::edge(invisible_node(col), base_drawer::tile_id(previous_column_tile));
-        }
-
-        // next column could be out of bounds and need to be checked for
-        if (const tile<Lyt> next_column_tile{col + 1, 0}; lyt.x() >= next_column_tile.x)
-        {
-            stream << base_drawer::edge(invisible_node(col), base_drawer::tile_id(next_column_tile));
-        }
+        return DrawIndexes ? "0.5" : "0.25";
     }
 
-    void shift_row(const Lyt& lyt, const uint64_t row, std::stringstream& stream) const noexcept
-    {
-        stream << base_drawer::same_rank({{invisible_node(row), base_drawer::tile_id({0, row})}});
-
-        // previous row only exist if i != 0
-        if (row != 0)
-        {
-            const tile<Lyt> previous_row_tile{0, row - 1};
-
-            stream << base_drawer::edge(invisible_node(row), base_drawer::tile_id(previous_row_tile));
-        }
-
-        // next row could be out of bounds and need to be checked for
-        if (const tile<Lyt> next_row_tile{0, row + 1}; lyt.y() >= next_row_tile.y)
-        {
-            stream << base_drawer::edge(invisible_node(row), base_drawer::tile_id(next_row_tile));
-        }
-    }
+  private:
+    using shifted_drawer = detail::gate_layout_shifted_tile_drawer<Lyt, ClockColors, DrawIndexes>;
 };
 /**
  * An extended gate-level layout DOT drawer for hexagonal layouts.
@@ -492,44 +459,16 @@ class gate_layout_shifted_cartesian_drawer : public simple_gate_layout_tile_draw
  * @tparam DrawIndexes Flag to toggle the drawing of node indices.
  */
 template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
-class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>
+class gate_layout_hexagonal_drawer : public detail::gate_layout_shifted_tile_drawer<Lyt, ClockColors, DrawIndexes>
 {
   public:
-    [[nodiscard]] std::vector<std::string> additional_graph_attributes() const noexcept override
+    [[nodiscard]] std::vector<std::string> additional_node_attributes(const Lyt& lyt) const noexcept override
     {
-        auto graph_attributes = base_drawer::additional_graph_attributes();
-
-        // hexagon visuals benefit from halved rank separation because they are interlaced
-        if constexpr (DrawIndexes)
-        {
-            graph_attributes.emplace_back("ranksep=0.25");
-        }
-        else
-        {
-            graph_attributes.emplace_back("ranksep=0.125");
-        }
-
-        // pointy top hexagons are modeled as top-down graphs
-        if constexpr (has_pointy_top_hex_orientation_v<Lyt>)
-        {
-            graph_attributes.emplace_back("rankdir=TB");
-        }
-        // while flat top hexagons are modeled as left-right graphs
-        else
-        {
-            graph_attributes.emplace_back("rankdir=LR");
-        }
-
-        return graph_attributes;
-    }
-
-    [[nodiscard]] std::vector<std::string> additional_node_attributes() const noexcept override
-    {
-        auto node_attributes = base_drawer::additional_node_attributes();
+        auto node_attributes = shifted_drawer::additional_node_attributes(lyt);
 
         node_attributes.emplace_back("shape=hexagon");
 
-        if constexpr (has_pointy_top_hex_orientation_v<Lyt>)
+        if (is_row_arrangement(lyt.get_arrangement()))
         {
             // pointy top hexagons are rotated by 30°
             node_attributes.emplace_back("orientation=30");
@@ -538,164 +477,15 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
         return node_attributes;
     }
 
-    [[nodiscard]] std::string enforce_topology(const Lyt& lyt) const
-    {
-        std::stringstream topology{};
-
-        topology << "edge [constraint=true, style=invis];\n";
-
-        // add invisible nodes to shift rows/columns
-        if constexpr (DrawIndexes)
-        {
-            topology << "node [label=\"\", width=1, height=1, style=invis];\n";
-        }
-        else
-        {
-            topology << "node [label=\"\", width=0.5, height=0.5, style=invis];\n";
-        }
-
-        if constexpr (has_odd_row_hex_arrangement_v<Lyt>)
-        {
-            enforce_same_hexagonal_row(lyt, topology);
-
-            // shift odd rows
-            for (auto i = 1ul; i <= lyt.y(); i += 2)
-            {
-                shift_row(lyt, i, topology);
-            }
-        }
-        else if constexpr (has_even_row_hex_arrangement_v<Lyt>)
-        {
-            enforce_same_hexagonal_row(lyt, topology);
-
-            // shift even rows
-            for (auto i = 0ul; i <= lyt.y(); i += 2)
-            {
-                shift_row(lyt, i, topology);
-            }
-        }
-        else if constexpr (has_odd_column_hex_arrangement_v<Lyt>)
-        {
-            enforce_same_hexagonal_column(lyt, topology);
-
-            // shift odd columns
-            for (auto i = 1ul; i <= lyt.x(); i += 2)
-            {
-                shift_column(lyt, i, topology);
-            }
-        }
-        else if constexpr (has_even_column_hex_arrangement_v<Lyt>)
-        {
-            enforce_same_hexagonal_column(lyt, topology);
-
-            // shift even columns
-            for (auto i = 0ul; i <= lyt.x(); i += 2)
-            {
-                shift_column(lyt, i, topology);
-            }
-        }
-
-        // enforce connections other than those in direct row/column via edges
-        lyt.foreach_ground_tile(
-            [this, &lyt, &topology](const auto& t)
-            {
-                lyt.foreach_adjacent_tile(t,
-                                          [this, &topology, &t](const auto& at)
-                                          {
-                                              // skip adjacent tiles in one direction to prevent double edges
-                                              if (t >= at)
-                                              {
-                                                  return true;
-                                              }
-
-                                              if constexpr (has_pointy_top_hex_orientation_v<Lyt>)
-                                              {
-                                                  // skip adjacent tiles in same row to prevent double edges
-                                                  if (t.y == at.y)
-                                                  {
-                                                      return true;
-                                                  }
-                                              }
-                                              else  // flat_top
-                                              {
-                                                  // skip adjacent tiles in same column to prevent double edges
-                                                  if (t.x == at.x)
-                                                  {
-                                                      return true;
-                                                  }
-                                              }
-
-                                              topology << base_drawer::edge(base_drawer::tile_id(t),
-                                                                            base_drawer::tile_id(at));
-
-                                              return true;
-                                          });
-            });
-
-        return topology.str();
-    }
-
   protected:
-    using base_drawer = simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>;
-
-    [[nodiscard]] static std::string invisible_node(const uint64_t i) noexcept
+    // hexagon visuals benefit from halved rank separation because they are interlaced
+    [[nodiscard]] std::string_view rank_separation() const noexcept override
     {
-        return fmt::format("invis{}", i);
+        return DrawIndexes ? "0.25" : "0.125";
     }
 
-    void enforce_same_hexagonal_column(const Lyt& lyt, std::stringstream& stream) const noexcept
-    {
-        for (const auto& col : base_drawer::columns(lyt))
-        {
-            stream << base_drawer::same_rank(col);
-        }
-    }
-
-    void enforce_same_hexagonal_row(const Lyt& lyt, std::stringstream& stream) const noexcept
-    {
-        for (const auto& row : base_drawer::rows(lyt))
-        {
-            stream << base_drawer::same_rank(row);
-        }
-    }
-
-    void shift_column(const Lyt& lyt, const uint64_t col, std::stringstream& stream) const noexcept
-    {
-        stream << base_drawer::same_rank({{invisible_node(col), base_drawer::tile_id({col, 0})}});
-
-        // previous column only exist if i != 0
-        if (col != 0)
-        {
-            const tile<Lyt> previous_column_tile{col - 1, 0};
-
-            stream << base_drawer::edge(invisible_node(col), base_drawer::tile_id(previous_column_tile));
-        }
-
-        // next column could be out of bounds and need to be checked for
-        if (const tile<Lyt> next_column_tile{col + 1, 0}; lyt.x() >= next_column_tile.x)
-        {
-            stream << base_drawer::edge(invisible_node(col), base_drawer::tile_id(next_column_tile));
-        }
-    }
-
-    void shift_row(const Lyt& lyt, const uint64_t row, std::stringstream& stream) const noexcept
-    {
-        stream << base_drawer::same_rank(std::vector<std::string>{invisible_node(row), base_drawer::tile_id({0, row})});
-
-        // previous row only exist if i != 0
-        if (row != 0)
-        {
-            const tile<Lyt> previous_row_tile{0, row - 1};
-
-            stream << base_drawer::edge(invisible_node(row), base_drawer::tile_id(previous_row_tile));
-        }
-
-        // next row could be out of bounds and need to be checked for
-        if (const tile<Lyt> next_row_tile{0, row + 1}; lyt.y() >= next_row_tile.y)
-        {
-            stream << base_drawer::edge(invisible_node(row), base_drawer::tile_id(next_row_tile));
-        }
-    }
+  private:
+    using shifted_drawer = detail::gate_layout_shifted_tile_drawer<Lyt, ClockColors, DrawIndexes>;
 };
 /*! \brief Writes layout in DOT format into output stream
  *
@@ -721,7 +511,7 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
 
     std::stringstream nodes{}, edges{}, topology{};
 
-    auto node_attributes = drawer.additional_node_attributes();
+    auto node_attributes = drawer.additional_node_attributes(lyt);
     node_attributes.emplace_back("style=filled");
 
     nodes << fmt::format("node [{}];\n", fmt::join(node_attributes, ", "));
@@ -758,7 +548,7 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
 
     // draw layout
     os << fmt::format("digraph layout {{  // Generated by {} ({})\n{};\n\n", FICTION_VERSION, FICTION_REPO,
-                      fmt::join(drawer.additional_graph_attributes(), ";\n"))
+                      fmt::join(drawer.additional_graph_attributes(lyt), ";\n"))
        << nodes.rdbuf() << '\n'
        << edges.rdbuf() << '\n'
        << topology.rdbuf() << "}\n";

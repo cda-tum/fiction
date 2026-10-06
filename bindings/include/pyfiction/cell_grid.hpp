@@ -25,6 +25,7 @@
 #include <fiction/layouts/io/print_layout.hpp>
 
 #include <cstdint>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -158,7 +159,7 @@ void bind_tile_clocking(nanobind::class_<Lyt, py_cartesian_layout>& cls)
             "replace_clocking_scheme",
             [](Lyt& lyt, const std::string& name)
             {
-                if (const auto scheme = fiction::layouts::clocking::get_scheme<Lyt>(name); scheme)
+                if (const auto scheme = fiction::layouts::clocking::get_scheme(name); scheme)
                 {
                     lyt.replace_clocking_scheme(*scheme);
                 }
@@ -190,9 +191,9 @@ void bind_clocked_constructors(nanobind::class_<Lyt, py_cartesian_layout>& cls)
             [](Lyt* self, const typename Lyt::aspect_ratio& dimension, const std::string& scheme_name,
                const std::string& layout_name, const uint16_t tile_size_x, const uint16_t tile_size_y)
             {
-                if (const auto scheme = fiction::layouts::clocking::get_scheme<Lyt>(scheme_name); scheme.has_value())
+                if (const auto scheme = fiction::layouts::clocking::get_scheme(scheme_name); scheme.has_value())
                 {
-                    new (self) Lyt{dimension, *scheme, layout_name, tile_size_x, tile_size_y};
+                    std::construct_at(self, dimension, *scheme, layout_name, tile_size_x, tile_size_y);
                     return;
                 }
 

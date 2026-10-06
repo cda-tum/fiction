@@ -10,7 +10,12 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import (
+    arrangement,
+    cartesian_gate_layout,
+    hexagonal_gate_layout,
+    shifted_cartesian_gate_layout,
+)
 from mnt.pyfiction.layouts.coords import offset_coordinate
 from mnt.pyfiction.verification import critical_path_length_and_throughput, gate_level_drv_params, gate_level_drvs
 
@@ -20,9 +25,13 @@ from mnt.pyfiction.verification import critical_path_length_and_throughput, gate
     [
         pytest.param(lambda: cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="cartesian_gate_layout"),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
+            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 2, 0), "2DDWave", "Layout"),
+            id="shifted_cartesian_gate_layout",
         ),
-        pytest.param(lambda: hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+        pytest.param(
+            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 0), "2DDWave", "Layout"),
+            id="hexagonal_gate_layout",
+        ),
     ],
 )
 def test_gate_level_layout_inheritance(make_layout):
@@ -42,9 +51,13 @@ def test_gate_level_layout_inheritance(make_layout):
     [
         pytest.param(lambda: cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"), id="cartesian_gate_layout"),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
+            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 3, 1), "2DDWave", "Layout"),
+            id="shifted_cartesian_gate_layout",
         ),
-        pytest.param(lambda: hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+        pytest.param(
+            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 1), "2DDWave", "Layout"),
+            id="hexagonal_gate_layout",
+        ),
     ],
 )
 def test_gate_level_layout_iteration(make_layout):
@@ -184,8 +197,8 @@ def test_gate_level_layout_iteration(make_layout):
 def test_gate_level_layout_gate_types():
     layouts: list[cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout] = [
         cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
-        shifted_cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
-        hexagonal_gate_layout((2, 8, 0), "2DDWave", "Layout"),
+        shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 8, 0), "2DDWave", "Layout"),
+        hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 8, 0), "2DDWave", "Layout"),
     ]
     for layout in layouts:
         assert layout.is_empty()
@@ -242,8 +255,8 @@ def test_gate_level_layout_gate_types():
 
     layouts = [
         cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
-        shifted_cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
-        hexagonal_gate_layout((2, 2, 0), "RES", "Layout"),
+        shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 2, 0), "RES", "Layout"),
+        hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 0), "RES", "Layout"),
     ]
     for layout in layouts:
         assert layout.is_empty()

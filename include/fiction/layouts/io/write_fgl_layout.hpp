@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/traits.hpp"
@@ -146,41 +147,11 @@ class write_fgl_layout_impl
         }
         else if constexpr (is_shifted_cartesian_layout_v<Lyt>)
         {
-            if constexpr (has_odd_row_cartesian_arrangement_v<Lyt>)
-            {
-                topology = "odd_row_cartesian";
-            }
-            else if constexpr (has_even_row_cartesian_arrangement_v<Lyt>)
-            {
-                topology = "even_row_cartesian";
-            }
-            else if constexpr (has_odd_column_cartesian_arrangement_v<Lyt>)
-            {
-                topology = "odd_column_cartesian";
-            }
-            else if constexpr (has_even_column_cartesian_arrangement_v<Lyt>)
-            {
-                topology = "even_column_cartesian";
-            }
+            topology = fmt::format("{}_cartesian", layouts::to_string(lyt.get_arrangement()));
         }
         else if constexpr (is_hexagonal_layout_v<Lyt>)
         {
-            if constexpr (has_odd_row_hex_arrangement_v<Lyt>)
-            {
-                topology = "odd_row_hex";
-            }
-            else if constexpr (has_even_row_hex_arrangement_v<Lyt>)
-            {
-                topology = "even_row_hex";
-            }
-            else if constexpr (has_odd_column_hex_arrangement_v<Lyt>)
-            {
-                topology = "odd_column_hex";
-            }
-            else if constexpr (has_even_column_hex_arrangement_v<Lyt>)
-            {
-                topology = "even_column_hex";
-            }
+            topology = fmt::format("{}_hex", layouts::to_string(lyt.get_arrangement()));
         }
 
         os << fmt::format(fgl::LAYOUT_METADATA, fgl::xml_text(layout_name), topology, lyt.x(), lyt.y(), lyt.z());

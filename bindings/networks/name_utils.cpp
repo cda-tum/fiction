@@ -62,12 +62,6 @@ void name_utils(nanobind::module_& m)
     detail::get_name<py_cartesian_gate_layout>(m);
     detail::get_name<py_shifted_cartesian_gate_layout>(m);
     detail::get_name<py_hexagonal_gate_layout>(m);
-    detail::get_name<py_odd_row_cartesian_gate_layout>(m);
-    detail::get_name<py_even_row_cartesian_gate_layout>(m);
-    detail::get_name<py_even_column_cartesian_gate_layout>(m);
-    detail::get_name<py_odd_row_hex_gate_layout>(m);
-    detail::get_name<py_odd_column_hex_gate_layout>(m);
-    detail::get_name<py_even_column_hex_gate_layout>(m);
     detail::get_name<fiction::qca::layout>(m);
     detail::get_name<fiction::mol_qca::layout>(m);
     detail::get_name<fiction::inml::layout>(m);
@@ -80,12 +74,6 @@ void name_utils(nanobind::module_& m)
     detail::set_name<py_cartesian_gate_layout>(m);
     detail::set_name<py_shifted_cartesian_gate_layout>(m);
     detail::set_name<py_hexagonal_gate_layout>(m);
-    detail::set_name<py_odd_row_cartesian_gate_layout>(m);
-    detail::set_name<py_even_row_cartesian_gate_layout>(m);
-    detail::set_name<py_even_column_cartesian_gate_layout>(m);
-    detail::set_name<py_odd_row_hex_gate_layout>(m);
-    detail::set_name<py_odd_column_hex_gate_layout>(m);
-    detail::set_name<py_even_column_hex_gate_layout>(m);
     detail::set_name<fiction::qca::layout>(m);
     detail::set_name<fiction::mol_qca::layout>(m);
     detail::set_name<fiction::inml::layout>(m);

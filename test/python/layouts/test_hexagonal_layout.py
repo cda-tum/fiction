@@ -8,11 +8,13 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.layouts import hexagonal_layout
+import pytest
+
+from mnt.pyfiction.layouts import arrangement, hexagonal_layout
 
 
 def test_coordinate_iteration():
-    layout = hexagonal_layout((9, 9, 1))
+    layout = hexagonal_layout(arrangement.EVEN_ROW, (9, 9, 1))
 
     for t in layout.coordinates():
         assert t <= (9, 9, 1)
@@ -26,3 +28,14 @@ def test_coordinate_iteration():
     # comparing the whole set rather than each element also catches a missing neighbor
     neighbors = {(t.x, t.y, t.z) for t in layout.adjacent_coordinates((2, 2))}
     assert neighbors == {(2, 1, 0), (3, 1, 0), (3, 2, 0), (3, 3, 0), (2, 3, 0), (1, 2, 0)}
+
+
+@pytest.mark.parametrize("a", list(arrangement))
+def test_arrangement_round_trips(a):
+    assert hexagonal_layout(a, (3, 3)).get_arrangement() == a
+    assert hexagonal_layout(a).get_arrangement() == a
+
+
+def test_arrangement_is_required():
+    with pytest.raises(TypeError):
+        hexagonal_layout((3, 3))  # ty: ignore[invalid-argument-type]  # deliberately missing arrangement

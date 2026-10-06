@@ -11,6 +11,7 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction.layouts import (
+    arrangement,
     cartesian_gate_layout,
     cartesian_layout,
     hexagonal_gate_layout,
@@ -54,9 +55,12 @@ def test_search_constraints_are_local() -> None:
 CLOCKED_LAYOUTS = [
     pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
     pytest.param(
-        lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
+        lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (4, 4), "2DDWave", "Layout"),
+        id="shifted_cartesian_gate_layout",
     ),
-    pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+    pytest.param(
+        lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"
+    ),
 ]
 
 
@@ -64,8 +68,8 @@ CLOCKED_LAYOUTS = [
     "make_lyt",
     [
         pytest.param(lambda: cartesian_layout((4, 4)), id="cartesian_layout"),
-        pytest.param(lambda: shifted_cartesian_layout((4, 4)), id="shifted_cartesian_layout"),
-        pytest.param(lambda: hexagonal_layout((4, 4)), id="hexagonal_layout"),
+        pytest.param(lambda: shifted_cartesian_layout(arrangement.ODD_COLUMN, (4, 4)), id="shifted_cartesian_layout"),
+        pytest.param(lambda: hexagonal_layout(arrangement.EVEN_ROW, (4, 4)), id="hexagonal_layout"),
     ],
 )
 def test_non_clocked_path_finding(make_lyt):
@@ -93,11 +97,11 @@ def test_clocked_path_finding(make_lyt):
             id="cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
+            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (4, 4), "2DDWave", "Layout"),
             id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"),
+            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (4, 4), "2DDWave", "Layout"),
             id="hexagonal_gate_layout",
         ),
     ],
@@ -133,11 +137,11 @@ def test_path_finding_with_obstructions(make_lyt):
             id="cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout"),
+            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 1, 1), "2DDWave", "Layout"),
             id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_gate_layout((2, 1, 1), "2DDWave", "Layout"),
+            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 1, 1), "2DDWave", "Layout"),
             id="hexagonal_gate_layout",
         ),
     ],

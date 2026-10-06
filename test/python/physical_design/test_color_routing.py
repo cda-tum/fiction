@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout
+from mnt.pyfiction.layouts import arrangement, cartesian_gate_layout, hexagonal_gate_layout
 from mnt.pyfiction.layouts.coords import offset_coordinate
 from mnt.pyfiction.physical_design import color_routing, color_routing_params
 
@@ -19,7 +19,9 @@ from mnt.pyfiction.physical_design import color_routing, color_routing_params
     "make_lyt",
     [
         pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
-        pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+        pytest.param(
+            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"
+        ),
     ],
 )
 def test_routing(make_lyt):

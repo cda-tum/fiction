@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/networks/name_utils.hpp"
@@ -429,7 +430,6 @@ class hexagonalization_impl
         // static assertions for layout types
         static_assert(is_gate_level_layout_v<HexLyt>, "HexLyt is not a gate-level layout");
         static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
-        static_assert(has_even_row_hex_arrangement_v<HexLyt>, "HexLyt does not have an even row hexagon arrangement");
         static_assert(is_gate_level_layout_v<CartLyt>, "CartLyt is not a gate-level layout");
         static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
 
@@ -455,7 +455,7 @@ class hexagonalization_impl
         }
 
         // create the initial hexagonal layout
-        HexLyt hex_layout{{hex_width, hex_height, hex_depth}, layouts::clocking::row()};
+        HexLyt hex_layout{layouts::arrangement::EVEN_ROW, {hex_width, hex_height, hex_depth}, layouts::clocking::row()};
 
         // initialize statistics for hexagonalization
         hexagonalization_stats stats{};

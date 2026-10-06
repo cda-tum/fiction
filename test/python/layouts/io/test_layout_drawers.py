@@ -10,22 +10,33 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from functools import partial
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import (
+    arrangement,
+    cartesian_gate_layout,
+    hexagonal_gate_layout,
+    shifted_cartesian_gate_layout,
+)
 from mnt.pyfiction.layouts.io import write_dot_layout
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
 
 @pytest.mark.parametrize(
     "layout_type",
-    [cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout],
+    [
+        cartesian_gate_layout,
+        partial(shifted_cartesian_gate_layout, arrangement.ODD_COLUMN),
+        partial(hexagonal_gate_layout, arrangement.EVEN_ROW),
+    ],
 )
-def test_write_dot_layout_draws_every_topology(tmp_path: Path, layout_type: type) -> None:
+def test_write_dot_layout_draws_every_topology(tmp_path: Path, layout_type: Callable[..., Any]) -> None:
     layout = layout_type((2, 2, 1), "2DDWave", "drawn")
     x1 = layout.create_pi("a", (0, 0))
     x2 = layout.create_pi("b", (1, 0))

@@ -8,11 +8,13 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction.layouts import shifted_cartesian_layout
+import pytest
+
+from mnt.pyfiction.layouts import arrangement, shifted_cartesian_layout
 
 
 def test_coordinate_iteration():
-    layout = shifted_cartesian_layout((9, 9, 1))
+    layout = shifted_cartesian_layout(arrangement.ODD_COLUMN, (9, 9, 1))
 
     for t in layout.coordinates():
         assert t <= (9, 9, 1)
@@ -25,3 +27,14 @@ def test_coordinate_iteration():
 
     for t in layout.adjacent_coordinates((2, 2)):
         assert t in [(1, 1), (1, 2), (2, 1), (3, 1), (3, 2), (2, 3)]
+
+
+@pytest.mark.parametrize("a", list(arrangement))
+def test_arrangement_round_trips(a):
+    assert shifted_cartesian_layout(a, (3, 3)).get_arrangement() == a
+    assert shifted_cartesian_layout(a).get_arrangement() == a
+
+
+def test_arrangement_is_required():
+    with pytest.raises(TypeError):
+        shifted_cartesian_layout((3, 3))  # ty: ignore[invalid-argument-type]  # deliberately missing arrangement

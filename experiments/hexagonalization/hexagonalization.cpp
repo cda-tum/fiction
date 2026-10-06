@@ -61,7 +61,7 @@ using namespace fiction::verification;
 int main()  // NOLINT
 {
     using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
-    using hex_lyt  = hex_even_row_gate_clk_lyt;
+    using hex_lyt  = hex_gate_clk_lyt;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,

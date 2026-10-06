@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import pytest
 
+from mnt.pyfiction.layouts import arrangement
 from mnt.pyfiction.networks import high_degree_fanin_exception
 from mnt.pyfiction.networks.io import read_technology_network
-from mnt.pyfiction.physical_design import orthogonal, orthogonal_params, orthogonal_stats
+from mnt.pyfiction.physical_design import orthogonal, orthogonal_hexagonal, orthogonal_params, orthogonal_stats
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 
@@ -67,3 +68,19 @@ def test_orthogonal_rejects_high_degree_fanin(tmp_path):
 
     with pytest.raises(high_degree_fanin_exception):
         orthogonal(read_technology_network(str(path)))
+
+
+@pytest.mark.parametrize("a", list(arrangement))
+def test_orthogonal_hexagonal_takes_the_arrangement_from_the_parameters(mux21, a):
+    params = orthogonal_params()
+    params.layout_arrangement = a
+
+    layout = orthogonal_hexagonal(mux21, params)
+
+    assert layout.get_arrangement() == a
+    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+
+
+def test_orthogonal_hexagonal_requires_an_arrangement(mux21):
+    with pytest.raises(ValueError, match="arrangement"):
+        orthogonal_hexagonal(mux21)
