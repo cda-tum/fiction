@@ -126,7 +126,7 @@ class tile_clocking
             return {};
         }
 
-        return {c.x / tile_x - (c.x % tile_x < 0), c.y / tile_y - (c.y % tile_y < 0)};
+        return {floor_div(c.x, tile_x), floor_div(c.y, tile_y)};
     }
     /**
      * Replaces the clocking scheme.
@@ -202,6 +202,19 @@ class tile_clocking
     clocking::state clocking{clocking::open()};
 
   private:
+    /**
+     * Divides and rounds toward negative infinity.
+     *
+     * @param value Dividend.
+     * @param size Divisor, greater than zero.
+     * @return The largest integer that does not exceed `value / size`.
+     */
+    [[nodiscard]] static constexpr int32_t floor_div(const int32_t value, const int32_t size) noexcept
+    {
+        const int32_t quotient = value / size;
+
+        return value % size < 0 ? quotient - 1 : quotient;
+    }
     /**
      * Tile width in cells.
      */
