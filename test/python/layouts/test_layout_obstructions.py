@@ -8,9 +8,12 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from mnt.pyfiction.layouts import (
+    LayoutInputPort,
     arrangement,
     cartesian_gate_layout,
     coordinate,
@@ -19,17 +22,23 @@ from mnt.pyfiction.layouts import (
 )
 from mnt.pyfiction.verification import critical_path_length_and_throughput, gate_level_drv_params, gate_level_drvs
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from typing import TypeAlias
+
+GateLayout: TypeAlias = cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout
+
 OBSTRUCTION_LAYOUTS = [
     pytest.param(
-        lambda: cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"),
+        lambda: cartesian_gate_layout((4, 4, 2), "2DDWave", "Layout"),
         id="cartesian_gate_layout",
     ),
     pytest.param(
-        lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 3, 1), "2DDWave", "Layout"),
+        lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (4, 4, 2), "2DDWave", "Layout"),
         id="shifted_cartesian_gate_layout",
     ),
     pytest.param(
-        lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 1), "2DDWave", "Layout"),
+        lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (4, 4, 2), "2DDWave", "Layout"),
         id="hexagonal_gate_layout",
     ),
 ]
@@ -39,20 +48,21 @@ OBSTRUCTION_LAYOUTS = [
     "make_layout",
     [
         pytest.param(
-            lambda: cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
+            lambda: cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"),
             id="cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 2, 0), "2DDWave", "Layout"),
+            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 3, 1), "2DDWave", "Layout"),
             id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 0), "2DDWave", "Layout"),
+            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 1), "2DDWave", "Layout"),
             id="hexagonal_gate_layout",
         ),
     ],
 )
-def test_gate_layout_clocking_inheritance(make_layout):
+def test_gate_layout_clocking_inheritance(make_layout: Callable[[], GateLayout]) -> None:
+    """Expose clocked geometry through obstruction-aware gate layouts."""
     layout = make_layout()
     assert layout.incoming_clocked_zones((0, 0)) == []
     assert layout.outgoing_clocked_zones((2, 2)) == []
@@ -65,7 +75,8 @@ def test_gate_layout_clocking_inheritance(make_layout):
 
 
 @pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
-def test_obstructed_coordinates(make_layout):
+def test_obstructed_coordinates(make_layout: Callable[[], GateLayout]) -> None:
+    """Keep manual coordinate obstructions."""
     layout = make_layout()
     for c in layout.coordinates():
         assert not layout.is_obstructed_coordinate(c)
@@ -80,7 +91,8 @@ def test_obstructed_coordinates(make_layout):
 
 
 @pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
-def test_obstructed_connections(make_layout):
+def test_obstructed_connections(make_layout: Callable[[], GateLayout]) -> None:
+    """Keep manual connection obstructions."""
     layout = make_layout()
     for c1 in layout.coordinates():
         for c2 in layout.coordinates():
@@ -94,7 +106,8 @@ def test_obstructed_connections(make_layout):
 
 
 @pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
-def test_obstruction_via_gates(make_layout):
+def test_obstruction_via_gates(make_layout: Callable[[], GateLayout]) -> None:
+    """Treat placed objects and physical connections as implicit obstructions."""
     layout = make_layout()
     x1 = layout.create_pi("x1", (0, 1))
     x2 = layout.create_pi("x2", (3, 2))
@@ -117,8 +130,9 @@ def test_obstruction_via_gates(make_layout):
     assert layout.is_obstructed_connection((3, 2), (3, 3))
 
 
-def test_cartesian_gate_layout_gate_level_inheritance():
-    layout = cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")
+def test_cartesian_gate_layout_gate_level_inheritance() -> None:
+    """Expose placed identities, physical flow, timing, and validation."""
+    layout = cartesian_gate_layout((4, 4, 2), "2DDWave", "Layout")
 
     assert layout.is_empty()
 
@@ -142,76 +156,32 @@ def test_cartesian_gate_layout_gate_level_inheritance():
 
     assert not layout.is_empty()
 
-    # Pis
-    pis = layout.pis()
-    assert len(pis) == 4
-    assert coordinate(1, 0) in pis
-    assert coordinate(0, 1) in pis
-    assert coordinate(2, 0) in pis
-    assert coordinate(0, 2) in pis
-    assert layout.get_node(coordinate(1, 0)) == 2
-    assert layout.get_node(coordinate(0, 1)) == 3
-    assert layout.get_node(coordinate(2, 0)) == 4
-    assert layout.get_node(coordinate(0, 2)) == 5
-    assert layout.get_tile(2) == coordinate(1, 0)
-    assert layout.get_tile(3) == coordinate(0, 1)
-    assert layout.get_tile(4) == coordinate(2, 0)
-    assert layout.get_tile(5) == coordinate(0, 2)
-    assert layout.make_signal(2) == x1
-    assert layout.make_signal(3) == x2
-    assert layout.make_signal(4) == x3
-    assert layout.make_signal(5) == x4
-
-    # POs
-    pos = layout.pos()
-    assert len(pos) == 2
-    assert coordinate(3, 1) in pos
-    assert coordinate(3, 2) in pos
-    assert layout.get_node(coordinate(3, 1)) == 11
-    assert layout.get_node(coordinate(3, 2)) == 12
-    assert layout.get_tile(11) == coordinate(3, 1)
-    assert layout.get_tile(12) == coordinate(3, 2)
-    assert layout.make_signal(11) == f1
-    assert layout.make_signal(12) == f2
-
-    # gates
+    assert layout.pis() == [x1.object, x2.object, x3.object, x4.object]
+    assert layout.pos() == [f1.object, f2.object]
     gates = layout.gates()
-    assert len(gates) == 7
-    assert coordinate(1, 1) in gates
-    assert coordinate(2, 2) in gates
-    assert coordinate(2, 1) in gates
-    assert coordinate(1, 2) in gates
-    assert coordinate(2, 1, 1) in gates
-    assert coordinate(3, 1) in gates
-    assert coordinate(3, 2) in gates
-    assert layout.get_node(coordinate(1, 1)) == 6
-    assert layout.get_node(coordinate(2, 1)) == 7
-    assert layout.get_node(coordinate(1, 2)) == 8
-    assert layout.get_node(coordinate(2, 2)) == 9
-    assert layout.get_node(coordinate(2, 1, 1)) == 10
-    assert layout.get_tile(6) == coordinate(1, 1)
-    assert layout.get_tile(7) == coordinate(2, 1)
-    assert layout.get_tile(8) == coordinate(1, 2)
-    assert layout.get_tile(9) == coordinate(2, 2)
-    assert layout.get_tile(10) == coordinate(2, 1, 1)
-    assert layout.make_signal(6) == a1
-    assert layout.make_signal(7) == b1
-    assert layout.make_signal(8) == b2
-    assert layout.make_signal(9) == a2
-    assert layout.make_signal(10) == c
-
-    # wires
+    assert len(gates) == 2
+    assert a1.object in gates
+    assert a2.object in gates
     wires = layout.wires()
     assert len(wires) == 9
-    assert coordinate(1, 0) in wires
-    assert coordinate(0, 1) in wires
-    assert coordinate(2, 0) in wires
-    assert coordinate(0, 2) in wires
-    assert coordinate(2, 1) in wires
-    assert coordinate(1, 2) in wires
-    assert coordinate(2, 1, 1) in wires
-    assert coordinate(3, 1) in wires
-    assert coordinate(3, 2) in wires
+    for port in (x1, x2, x3, x4, b1, b2, c, f1, f2):
+        assert port.object in wires
+    for port, position in [
+        (x1, coordinate(1, 0)),
+        (x2, coordinate(0, 1)),
+        (x3, coordinate(2, 0)),
+        (x4, coordinate(0, 2)),
+        (a1, coordinate(1, 1)),
+        (b1, coordinate(2, 1)),
+        (b2, coordinate(1, 2)),
+        (a2, coordinate(2, 2)),
+        (c, coordinate(2, 1, 1)),
+        (f1, coordinate(3, 1)),
+        (f2, coordinate(3, 2)),
+    ]:
+        assert layout.find_object(position) == port.object
+        assert layout.get_tile(port.object) == position
+        assert layout.output(port.object) == port
 
     # incoming data flow
     inx1 = layout.fanins(coordinate(1, 0))
@@ -246,8 +216,9 @@ def test_cartesian_gate_layout_gate_level_inheritance():
     assert gate_level_drvs(layout, drv_params) == (0, 0)
 
 
-def test_hexagonal_gate_layout_gate_level_inheritance():
-    layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 1), "2DDWave", "Layout")
+def test_hexagonal_gate_layout_gate_level_inheritance() -> None:
+    """Expose placed identities, physical flow, timing, and validation."""
+    layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (4, 4, 2), "2DDWave", "Layout")
 
     assert layout.is_empty()
 
@@ -271,76 +242,32 @@ def test_hexagonal_gate_layout_gate_level_inheritance():
 
     assert not layout.is_empty()
 
-    # Pis
-    pis = layout.pis()
-    assert len(pis) == 4
-    assert coordinate(1, 0) in pis
-    assert coordinate(0, 1) in pis
-    assert coordinate(2, 0) in pis
-    assert coordinate(0, 2) in pis
-    assert layout.get_node(coordinate(1, 0)) == 2
-    assert layout.get_node(coordinate(0, 1)) == 3
-    assert layout.get_node(coordinate(2, 0)) == 4
-    assert layout.get_node(coordinate(0, 2)) == 5
-    assert layout.get_tile(2) == coordinate(1, 0)
-    assert layout.get_tile(3) == coordinate(0, 1)
-    assert layout.get_tile(4) == coordinate(2, 0)
-    assert layout.get_tile(5) == coordinate(0, 2)
-    assert layout.make_signal(2) == x1
-    assert layout.make_signal(3) == x2
-    assert layout.make_signal(4) == x3
-    assert layout.make_signal(5) == x4
-
-    # POs
-    pos = layout.pos()
-    assert len(pos) == 2
-    assert coordinate(3, 1) in pos
-    assert coordinate(3, 2) in pos
-    assert layout.get_node(coordinate(3, 1)) == 11
-    assert layout.get_node(coordinate(3, 2)) == 12
-    assert layout.get_tile(11) == coordinate(3, 1)
-    assert layout.get_tile(12) == coordinate(3, 2)
-    assert layout.make_signal(11) == f1
-    assert layout.make_signal(12) == f2
-
-    # gates
+    assert layout.pis() == [x1.object, x2.object, x3.object, x4.object]
+    assert layout.pos() == [f1.object, f2.object]
     gates = layout.gates()
-    assert len(gates) == 7
-    assert coordinate(1, 1) in gates
-    assert coordinate(2, 2) in gates
-    assert coordinate(2, 1) in gates
-    assert coordinate(1, 2) in gates
-    assert coordinate(2, 1, 1) in gates
-    assert coordinate(3, 1) in gates
-    assert coordinate(3, 2) in gates
-    assert layout.get_node(coordinate(1, 1)) == 6
-    assert layout.get_node(coordinate(2, 1)) == 7
-    assert layout.get_node(coordinate(1, 2)) == 8
-    assert layout.get_node(coordinate(2, 2)) == 9
-    assert layout.get_node(coordinate(2, 1, 1)) == 10
-    assert layout.get_tile(6) == coordinate(1, 1)
-    assert layout.get_tile(7) == coordinate(2, 1)
-    assert layout.get_tile(8) == coordinate(1, 2)
-    assert layout.get_tile(9) == coordinate(2, 2)
-    assert layout.get_tile(10) == coordinate(2, 1, 1)
-    assert layout.make_signal(6) == a1
-    assert layout.make_signal(7) == b1
-    assert layout.make_signal(8) == b2
-    assert layout.make_signal(9) == a2
-    assert layout.make_signal(10) == c
-
-    # wires
+    assert len(gates) == 2
+    assert a1.object in gates
+    assert a2.object in gates
     wires = layout.wires()
     assert len(wires) == 9
-    assert coordinate(1, 0) in wires
-    assert coordinate(0, 1) in wires
-    assert coordinate(2, 0) in wires
-    assert coordinate(0, 2) in wires
-    assert coordinate(2, 1) in wires
-    assert coordinate(1, 2) in wires
-    assert coordinate(2, 1, 1) in wires
-    assert coordinate(3, 1) in wires
-    assert coordinate(3, 2) in wires
+    for port in (x1, x2, x3, x4, b1, b2, c, f1, f2):
+        assert port.object in wires
+    for port, position in [
+        (x1, coordinate(1, 0)),
+        (x2, coordinate(0, 1)),
+        (x3, coordinate(2, 0)),
+        (x4, coordinate(0, 2)),
+        (a1, coordinate(1, 1)),
+        (b1, coordinate(2, 1)),
+        (b2, coordinate(1, 2)),
+        (a2, coordinate(2, 2)),
+        (c, coordinate(2, 1, 1)),
+        (f1, coordinate(3, 1)),
+        (f2, coordinate(3, 2)),
+    ]:
+        assert layout.find_object(position) == port.object
+        assert layout.get_tile(port.object) == position
+        assert layout.output(port.object) == port
 
     # incoming data flow
     inx1 = layout.fanins(coordinate(1, 0))
@@ -373,3 +300,72 @@ def test_hexagonal_gate_layout_gate_level_inheritance():
 
     drv_params = gate_level_drv_params()
     assert gate_level_drvs(layout, drv_params) == (0, 0)
+
+
+@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
+def test_disconnect_and_move_update_implicit_obstructions(make_layout: Callable[[], GateLayout]) -> None:
+    """Track physical connections and moved placements through typed endpoints."""
+    layout = make_layout()
+    source = layout.create_pi("a", (0, 0))
+    wire = layout.create_buf(source, (1, 0))
+    output = layout.create_po(wire, "f", (1, 1))
+    assert layout.is_obstructed_connection((0, 0), (1, 0))
+    assert layout.is_obstructed_connection((1, 0), (1, 1))
+    layout.disconnect(LayoutInputPort(output.object, 0))
+    assert layout.source(LayoutInputPort(output.object, 0)) is None
+    assert not layout.is_obstructed_connection((1, 0), (1, 1))
+    assert layout.is_obstructed_coordinate((1, 1))
+    layout.move_node(wire.object, (0, 1))
+    assert not layout.is_obstructed_coordinate((1, 0))
+    assert layout.is_obstructed_coordinate((0, 1))
+    assert not layout.is_obstructed_connection((0, 0), (1, 0))
+    assert layout.is_obstructed_connection((0, 0), (0, 1))
+    layout.connect(wire, LayoutInputPort(output.object, 0))
+    assert layout.is_obstructed_connection((0, 1), (1, 1))
+    layout.remove(wire.object)
+    assert layout.source(LayoutInputPort(output.object, 0)) is None
+    assert not layout.is_obstructed_coordinate((0, 1))
+    assert not layout.is_obstructed_connection((0, 1), (1, 1))
+
+
+@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
+def test_clearing_manual_obstructions_preserves_objects_and_ports(make_layout: Callable[[], GateLayout]) -> None:
+    """Clear manual obstructions without changing declared placement or topology."""
+    layout = make_layout()
+    source = layout.create_pi("a", (0, 0))
+    wire = layout.create_buf(source, (1, 0))
+    layout.obstruct_coordinate((1, 0))
+    layout.obstruct_connection((0, 0), (1, 0))
+    layout.clear_obstructed_coordinate((1, 0))
+    layout.clear_obstructed_connection((0, 0), (1, 0))
+    assert layout.contains(wire.object)
+    assert layout.source(LayoutInputPort(wire.object, 0)) == source
+    assert layout.is_obstructed_coordinate((1, 0))
+    assert layout.is_obstructed_connection((0, 0), (1, 0))
+    layout.disconnect(LayoutInputPort(wire.object, 0))
+    assert not layout.is_obstructed_connection((0, 0), (1, 0))
+    layout.remove(wire.object)
+    assert not layout.is_obstructed_coordinate((1, 0))
+
+
+@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
+def test_clone_owns_obstructions_objects_and_connections(make_layout: Callable[[], GateLayout]) -> None:
+    """Keep manual and implicit obstructions independent in a cloned layout."""
+    layout = make_layout()
+    source = layout.create_pi("a", (0, 0))
+    wire = layout.create_buf(source, (1, 0))
+    output = layout.create_po(wire, "f", (2, 0))
+    layout.obstruct_coordinate((0, 2))
+    layout.obstruct_connection((0, 0), (0, 1))
+    clone = layout.clone()
+    clone.clear_obstructed_coordinates()
+    clone.clear_obstructed_connections()
+    clone.remove(wire.object)
+    assert layout.is_obstructed_coordinate((0, 2))
+    assert layout.is_obstructed_connection((0, 0), (0, 1))
+    assert not clone.is_obstructed_coordinate((0, 2))
+    assert not clone.is_obstructed_connection((0, 0), (0, 1))
+    assert layout.is_obstructed_coordinate((1, 0))
+    assert not clone.is_obstructed_coordinate((1, 0))
+    assert layout.source(LayoutInputPort(output.object, 0)) == wire
+    assert clone.source(LayoutInputPort(output.object, 0)) is None
