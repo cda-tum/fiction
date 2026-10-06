@@ -232,6 +232,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     with an axis equal to `INT32_MIN` is invalid, the default coordinate is invalid, and `is_valid()` replaces
     `is_dead()` on coordinates. Layouts throw `std::invalid_argument` for extents below 0 or above 2^30 - 1, and
     gate-level layouts throw `std::out_of_range` for tiles with x or y above 2^30 - 1 or z above 1.
+  - **Breaking:** `graph_oriented_layout_design_params::tiles_to_skip_between_pis` is an `int32_t`, and
+    `graph_oriented_layout_design` throws `std::invalid_argument` for values outside of [0, 2^20].
 
 - Dependencies:
 

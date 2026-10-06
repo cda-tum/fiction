@@ -390,7 +390,7 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
     params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
     params.return_first = true;
 
-    for (uint64_t skip = 0; skip < 5; ++skip)
+    for (int32_t skip = 0; skip < 5; ++skip)
     {
         SECTION(fmt::format("tiles_to_skip_between_pis = {}", skip))
         {
@@ -536,6 +536,22 @@ TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout
     params.return_first = true;
 
     CHECK_THROWS_AS(graph_oriented_layout_design<gate_layout>(ntk, params, &stats), std::invalid_argument);
+}
+
+TEST_CASE("PI spacing outside of its range is rejected", "[graph-oriented-layout-design]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+    const auto ntk    = blueprints::mux21_network<technology_network>();
+
+    graph_oriented_layout_design_params params{};
+    params.return_first = true;
+
+    for (const int32_t skip : {-1, (1 << 20) + 1, 2147483647})
+    {
+        params.tiles_to_skip_between_pis = skip;
+
+        CHECK_THROWS_AS(graph_oriented_layout_design<gate_layout>(ntk, params), std::invalid_argument);
+    }
 }
 
 TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-oriented-layout-design]")

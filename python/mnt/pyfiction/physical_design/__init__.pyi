@@ -838,7 +838,7 @@ class graph_oriented_layout_design_params:
         This soft margin can reduce local congestion and increase the
         probability of finding a routable layout at the expense of a
         temporarily larger footprint, which post-layout optimization may later
-        shrink. Defaults to `0`.
+        shrink. Must lie in :math:`[0, 2^{20}]`. Defaults to `0`.
         """
 
     @tiles_to_skip_between_pis.setter
@@ -961,6 +961,14 @@ def graph_oriented_layout_design(
     Returns:
         The smallest layout yielded by the graph-oriented layout design
         algorithm under the given parameters.
+
+    Raises:
+        networks::high_degree_fanin_exception: If `ntk` has a node with
+                                               more than two fanins.
+        std::invalid_argument: If the cost objective is `CUSTOM` and no
+                               custom cost objective is provided, or if
+                               `ps.tiles_to_skip_between_pis` does not lie
+                               in :math:`[0, 2^{20}]`.
     """
 
 def apply_qca_one_library(

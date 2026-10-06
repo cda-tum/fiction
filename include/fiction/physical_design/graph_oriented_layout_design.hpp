@@ -206,9 +206,9 @@ struct graph_oriented_layout_design_params
      *
      * This soft margin can reduce local congestion and increase the probability of
      * finding a routable layout at the expense of a temporarily larger footprint,
-     * which post-layout optimization may later shrink. Defaults to `0`.
+     * which post-layout optimization may later shrink. Must lie in \f$[0, 2^{20}]\f$. Defaults to `0`.
      */
-    uint64_t tiles_to_skip_between_pis = 0;
+    int32_t tiles_to_skip_between_pis = 0;
     /**
      * When enabled, randomizes the tiles_to_skip_between_pis value for each PI placement.
      * The random value is chosen from `tiles_to_skip_between_pis - 1` to `tiles_to_skip_between_pis`
@@ -1271,14 +1271,14 @@ class graph_oriented_layout_design_impl
         coord_vec_type<Lyt> possible_positions{};
 
         // if no PIs yet, no skipping; otherwise use appropriate setting.
-        uint64_t skip_tiles = 0;
+        int32_t skip_tiles = 0;
         if (!layout.is_empty())
         {
             if (ps.randomize_tiles_to_skip_between_pis)
             {
                 const auto min_skip = ps.tiles_to_skip_between_pis == 0 ? 0 : ps.tiles_to_skip_between_pis - 1;
-                skip_tiles          = std::uniform_int_distribution<uint64_t>{min_skip, ps.tiles_to_skip_between_pis}(
-                    ssg.pi_placement_rng);
+                skip_tiles = std::uniform_int_distribution<int32_t>{min_skip,
+                                                                    ps.tiles_to_skip_between_pis}(ssg.pi_placement_rng);
             }
             else
             {
@@ -1289,7 +1289,7 @@ class graph_oriented_layout_design_impl
         auto skip_left = skip_tiles;
 
         // make sure we have enough margin in both directions.
-        const int32_t resize = static_cast<int32_t>(skip_tiles) + 1;
+        const int32_t resize = skip_tiles + 1;
 
         layout.resize({layout.x() + resize, layout.y() + resize, layout.z()});
         const tile<Lyt> drain{layout.x(), layout.y(), 0};
@@ -2541,6 +2541,9 @@ class graph_oriented_layout_design_impl
  * Should be a function that can be calculated based on the current partial layout and returns an uint64_t that should
  * be minimized.
  * @return The smallest layout yielded by the graph-oriented layout design algorithm under the given parameters.
+ * @throws networks::high_degree_fanin_exception If `ntk` has a node with more than two fanins.
+ * @throws std::invalid_argument If the cost objective is `CUSTOM` and no custom cost objective is provided, or if
+ * `ps.tiles_to_skip_between_pis` does not lie in \f$[0, 2^{20}]\f$.
  */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_design_params ps = {},
@@ -2562,6 +2565,13 @@ std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_
     if (ps.cost == graph_oriented_layout_design_params::cost_objective::CUSTOM && !custom_cost_objective)
     {
         throw std::invalid_argument("No custom cost objective provided.");
+    }
+
+    // `get_possible_positions_pis` is `noexcept` and enlarges the layout by `tiles_to_skip_between_pis + 1`; the bound
+    // keeps that within the extent limit of layouts for every layout that fits into memory
+    if (ps.tiles_to_skip_between_pis < 0 || ps.tiles_to_skip_between_pis > (1 << 20))
+    {
+        throw std::invalid_argument("tiles_to_skip_between_pis must lie in [0, 2^20]");
     }
 
     graph_oriented_layout_design_stats             st{};
