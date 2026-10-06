@@ -83,7 +83,7 @@ class cartesian_layout : public layout_base
      * in the ASCII layout above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the layout has exactly one coordinate.
      *
      * @param ar Highest possible position in the layout.
-     * @throws std::invalid_argument If an axis of `ar` is negative.
+     * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
      */
     explicit cartesian_layout(const aspect_ratio& ar = {0, 0}) :
             strg{std::make_shared<cartesian_layout_storage>(checked(ar))}
@@ -165,7 +165,7 @@ class cartesian_layout : public layout_base
      * Updates the layout's dimensions, effectively resizing it.
      *
      * @param ar New aspect ratio.
-     * @throws std::invalid_argument If an axis of `ar` is negative.
+     * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
      */
     void resize(const aspect_ratio& ar)
     {
@@ -416,7 +416,7 @@ class cartesian_layout : public layout_base
      */
     [[nodiscard]] bool is_east_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && east(c1) == c2;
+        return c2.is_valid() && c1 != c2 && east(c1) == c2;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly south of coordinate `c1`.
@@ -427,7 +427,7 @@ class cartesian_layout : public layout_base
      */
     [[nodiscard]] bool is_south_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && south(c1) == c2;
+        return c2.is_valid() && c1 != c2 && south(c1) == c2;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly west of coordinate `c1`.
@@ -472,7 +472,7 @@ class cartesian_layout : public layout_base
      */
     [[nodiscard]] bool is_above(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && above(c1) == c2;
+        return c2.is_valid() && c1 != c2 && above(c1) == c2;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
@@ -823,28 +823,6 @@ class cartesian_layout : public layout_base
 #pragma endregion
 
   private:
-    /**
-     * Returns an aspect ratio after checking that it describes a layout. An invalid aspect ratio describes the layout
-     * with exactly one coordinate.
-     *
-     * @param ar Aspect ratio to check.
-     * @return `ar`, or (0, 0, 0) if `ar` is invalid.
-     * @throws std::invalid_argument If an axis of `ar` is negative.
-     */
-    static aspect_ratio checked(const aspect_ratio& ar)
-    {
-        if (!ar.is_valid())
-        {
-            return aspect_ratio{0, 0, 0};
-        }
-
-        if (ar.x < 0 || ar.y < 0 || ar.z < 0)
-        {
-            throw std::invalid_argument("The aspect ratio of a layout must not be negative");
-        }
-
-        return ar;
-    }
     /**
      * Shared storage for the Cartesian layout dimensions.
      */

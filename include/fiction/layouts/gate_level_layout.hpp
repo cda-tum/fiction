@@ -93,8 +93,10 @@ namespace fiction::layouts
  * - signals (pointers to tiles) cannot be inverting. Thereby, inverter nodes (gates) have to be created that can be
  * checked for via is_inv.
  *
- * - each `create_...` function requires a tile parameter that determines its placement. If the provided tile is dead,
- * the location will not be stored and the node will not count towards number of gates or wires.
+ * - each `create_...` function requires a tile parameter that determines its placement. If the provided tile is
+ * invalid, the location will not be stored and the node will not count towards number of gates or wires. A valid tile
+ * must have a signal, i.e., x and y in \f$[-2^{30}, 2^{30} - 1]\f$ and z in \f$\{0, 1\}\f$; otherwise, the function
+ * throws `std::out_of_range` and leaves the layout unchanged.
  *
  * - a node can be overwritten by creating another node on its location. This can, however, lead to unwanted effects and
  * should be avoided.
@@ -300,6 +302,8 @@ class gate_level_layout : public CoordinateLayout
      * Copy constructor from another `CoordinateLayout`.
      *
      * @param lyt Coordinate layout.
+     * @throws std::out_of_range If the extent of `lyt` exceeds the range that gate-level signals can represent, i.e.,
+     * if its x or y value is larger than \f$2^{30} - 1\f$ or its z value is larger than 1.
      */
     explicit gate_level_layout(const CoordinateLayout& lyt) :
             CoordinateLayout(lyt),
@@ -307,6 +311,7 @@ class gate_level_layout : public CoordinateLayout
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+        static_cast<void>(checked_extent(typename CoordinateLayout::aspect_ratio{lyt.x(), lyt.y(), lyt.z()}));
         initialize_truth_table_cache();
     }
     /**
@@ -343,7 +348,7 @@ class gate_level_layout : public CoordinateLayout
 
     [[nodiscard]] signal get_constant(bool value = false) const noexcept
     {
-        // tiles reserved for constants: const0 = (1,0,0,0), const1 = (1,1,0,0)
+        // signals reserved for constants: const0 has only the invalid bit set, const1 the invalid bit and the z bit
         return value ? strg->data.const1 : strg->data.const0;
     }
 
@@ -357,8 +362,18 @@ class gate_level_layout : public CoordinateLayout
         return n == 1;
     }
 
+    /**
+     * Creates a primary input on tile `t`.
+     *
+     * @param name Name of the PI. If empty, the name is `pi<i>`, where `i` is the number of PIs before the new one.
+     * @param t Tile to place the PI on. An invalid tile leaves the PI unplaced.
+     * @return Signal pointing to `t`.
+     * @throws std::out_of_range If `t` is valid but has no signal encoding.
+     */
     signal create_pi(const std::string& name = {}, const tile& t = {})
     {
+        check_tile(t);
+
         const auto n = static_cast<node>(strg->nodes.size());
         strg->nodes.emplace_back();     // empty node data
         strg->nodes[n].data[1].h1 = 2;  // assign identity function
@@ -369,8 +384,19 @@ class gate_level_layout : public CoordinateLayout
         return static_cast<signal>(t);
     }
 
+    /**
+     * Creates a primary output on tile `t` that is driven by signal `s`.
+     *
+     * @param s Signal that drives the PO.
+     * @param name Name of the PO. If empty, the name is `po<i>`, where `i` is the number of POs before the new one.
+     * @param t Tile to place the PO on. An invalid tile leaves the PO unplaced.
+     * @return Signal pointing to `t`.
+     * @throws std::out_of_range If `t` is valid but has no signal encoding.
+     */
     signal create_po(const signal& s, [[maybe_unused]] const std::string& name = {}, const tile& t = {})
     {
+        check_tile(t);
+
         const auto n = static_cast<node>(strg->nodes.size());
         strg->nodes.emplace_back();     // empty node data
         strg->nodes[n].data[1].h1 = 2;  // assign identity function
@@ -782,14 +808,15 @@ class gate_level_layout : public CoordinateLayout
      */
     [[nodiscard]] node get_node(const tile& t) const noexcept
     {
-        return get_node(static_cast<signal>(t));
+        // a tile without a signal never hosts a node, and its truncated signal would alias another tile
+        return t.fits_signal() ? get_node(static_cast<signal>(t)) : 0;
     }
     /**
-     * The inverse function of `get_node`. Fetches the tile that the provided node is placed on. Returns a default dead
+     * The inverse function of `get_node`. Fetches the tile that the provided node is placed on. Returns the invalid
      * tile if the node is not placed.
      *
      * @param n Node whose location is desired.
-     * @return Tile at which `n` is placed or a default dead tile if `n` is not placed.
+     * @return Tile at which `n` is placed or the invalid tile if `n` is not placed.
      */
     [[nodiscard]] tile get_tile(const node n) const noexcept
     {
@@ -834,6 +861,9 @@ class gate_level_layout : public CoordinateLayout
      */
     signal move_node(const node n, const tile& t, const std::vector<signal>& new_children = {})
     {
+        // validate before the first mutation so that a throw leaves the layout unchanged
+        check_tile(t);
+
         // n's current position
         const auto old_t = get_tile(n);
         // n's children
@@ -897,6 +927,11 @@ class gate_level_layout : public CoordinateLayout
      */
     void clear_tile(const tile& t) noexcept
     {
+        if (!t.fits_signal())
+        {
+            return;
+        }
+
         if (const auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
         {
             const auto n = it->second;
@@ -1087,7 +1122,7 @@ class gate_level_layout : public CoordinateLayout
      */
     [[nodiscard]] bool is_gate_tile(const tile& t) const noexcept
     {
-        return is_gate(get_node(static_cast<signal>(t)));
+        return is_gate(get_node(t));
     }
     /**
      * Returns whether the node assigned to `t` fulfills `is_wire`.
@@ -1097,7 +1132,7 @@ class gate_level_layout : public CoordinateLayout
      */
     [[nodiscard]] bool is_wire_tile(const tile& t) const noexcept
     {
-        return is_wire(get_node(static_cast<signal>(t)));
+        return is_wire(get_node(t));
     }
     /**
      * Returns whether `t` does not have a node assigned to it.
@@ -1107,7 +1142,7 @@ class gate_level_layout : public CoordinateLayout
      */
     [[nodiscard]] bool is_empty_tile(const tile& t) const noexcept
     {
-        return !get_node(static_cast<signal>(t));
+        return !get_node(t);
     }
 
 #pragma endregion
@@ -2143,7 +2178,7 @@ class gate_level_layout : public CoordinateLayout
     /**
      * @brief Returns the tiles in the coordinate range.
      * @param start First tile.
-     * @param stop Exclusive end tile; a dead tile selects the layout end.
+     * @param stop Exclusive end tile; an invalid tile selects the layout end.
      * @return Tile range.
      */
     [[nodiscard]] auto tiles(const tile& start = {}, const tile& stop = {}) const
@@ -2156,7 +2191,7 @@ class gate_level_layout : public CoordinateLayout
      * @tparam Fn Functor type.
      * @param fn Functor applied to each tile.
      * @param start First tile.
-     * @param stop Exclusive end tile; a dead tile selects the layout end.
+     * @param stop Exclusive end tile; an invalid tile selects the layout end.
      */
     template <typename Fn>
     void foreach_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
@@ -2167,7 +2202,7 @@ class gate_level_layout : public CoordinateLayout
     /**
      * @brief Returns ground-layer tiles in the coordinate range.
      * @param start First tile.
-     * @param stop Exclusive end tile; a dead tile selects the layout end.
+     * @param stop Exclusive end tile; an invalid tile selects the layout end.
      * @return Tile range.
      */
     [[nodiscard]] auto ground_tiles(const tile& start = {}, const tile& stop = {}) const
@@ -2180,7 +2215,7 @@ class gate_level_layout : public CoordinateLayout
      * @tparam Fn Functor type.
      * @param fn Functor applied to each tile.
      * @param start First tile.
-     * @param stop Exclusive end tile; a dead tile selects the layout end.
+     * @param stop Exclusive end tile; an invalid tile selects the layout end.
      */
     template <typename Fn>
     void foreach_ground_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
@@ -2234,6 +2269,20 @@ class gate_level_layout : public CoordinateLayout
 
 #pragma endregion
   private:
+    /**
+     * Checks that a tile has a signal. An invalid tile stands for an unplaced node and passes.
+     *
+     * @param t Tile to check.
+     * @throws std::out_of_range If `t` is valid but its x or y value lies outside of \f$[-2^{30}, 2^{30} - 1]\f$ or
+     * its z value is neither 0 nor 1.
+     */
+    static void check_tile(const tile& t)
+    {
+        if (t.is_valid() && !t.fits_signal())
+        {
+            throw std::out_of_range("The tile is outside of the range that gate-level signals can represent");
+        }
+    }
     /**
      * Returns an aspect ratio after checking that all tiles within it have a signal.
      *
@@ -2299,11 +2348,6 @@ class gate_level_layout : public CoordinateLayout
     {
         if (t.is_valid())
         {
-            if (!t.fits_signal())
-            {
-                throw std::out_of_range("The tile is outside of the range that gate-level signals can represent");
-            }
-
             clear_tile(t);
 
             strg->data.tile_node_map[static_cast<signal>(t)] = n;
@@ -2361,6 +2405,8 @@ class gate_level_layout : public CoordinateLayout
      */
     signal create_node_from_literal(const std::vector<signal>& children, uint32_t literal, const tile& t)
     {
+        check_tile(t);
+
         typename storage::element_type::node_type node_data;
         std::ranges::copy(children, std::back_inserter(node_data.children));
         node_data.data[1].h1 = literal;

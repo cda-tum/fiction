@@ -42,6 +42,7 @@
 
 #include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <string_view>
 
 using namespace fiction;
@@ -237,4 +238,33 @@ TEST_CASE("FGL preserves clock numbers on crossing layers", "[write-fgl-layout]"
 
     CHECK(restored.get_clock_number({1, 1, 0}) == 2);
     CHECK(restored.get_clock_number({1, 1, 1}) == 2);
+}
+
+TEST_CASE("FGL refuses nodes it cannot place", "[write-fgl-layout]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+
+    std::stringstream stream{};
+
+    SECTION("Unplaced node")
+    {
+        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
+        lyt.create_pi("a");
+
+        CHECK_THROWS_AS(write_fgl_layout(lyt, stream), std::invalid_argument);
+    }
+    SECTION("Node on a negative tile")
+    {
+        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
+        lyt.create_pi("a", {-1, 0, 0});
+
+        CHECK_THROWS_AS(write_fgl_layout(lyt, stream), std::invalid_argument);
+    }
+    SECTION("Placed nodes")
+    {
+        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
+        lyt.create_pi("a", {0, 0, 0});
+
+        CHECK_NOTHROW(write_fgl_layout(lyt, stream));
+    }
 }

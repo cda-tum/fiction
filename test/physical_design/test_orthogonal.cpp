@@ -202,3 +202,13 @@ TEST_CASE("Orthogonal physical design requires an arrangement for hexagonal layo
 
     CHECK_THROWS_AS(orthogonal<gate_layout>(blueprints::and_or_network<technology_network>()), std::invalid_argument);
 }
+
+TEST_CASE("Orthogonal physical design of a network without primary inputs", "[orthogonal]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+
+    technology_network ntk{};
+    ntk.create_po(ntk.get_constant(false));
+
+    CHECK_NOTHROW(orthogonal<gate_layout>(ntk));
+}

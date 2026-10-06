@@ -120,8 +120,35 @@ TEST_CASE("Signed offset coordinates", "[coordinates]")
     }
     SECTION("Hash")
     {
-        CHECK(std::hash<coordinate>{}(coordinate{5, 7, 1}) == std::hash<uint64_t>{}(0x4000000380000005));
-        CHECK(std::hash<coordinate>{}(coordinate{}) == std::hash<uint64_t>{}(0x8000000000000000));
+        const auto h = [](const coordinate& c) { return std::hash<coordinate>{}(c); };
+
+        CHECK(h({5, 7, 1}) == h({5, 7, 1}));
+        CHECK(h({}) == h({}));
+
+        // every axis takes part
+        CHECK(h({3, 4, 0}) != h({3, 4, 2}));
+        CHECK(h({3, 4, 1}) != h({3, 4, 3}));
+        CHECK(h({1073741824, 0, 0}) != h({-1073741824, 0, 0}));
+        CHECK(h({0, -1, 0}) != h({0, 2147483647, 0}));
+    }
+    SECTION("Any axis set to the invalid value makes a coordinate invalid")
+    {
+        constexpr auto invalid_axis = layout_base::coordinate::INVALID_AXIS;
+
+        CHECK(!coordinate{}.is_valid());
+        CHECK(!coordinate{invalid_axis, 5, 0}.is_valid());
+        CHECK(!coordinate{5, invalid_axis, 0}.is_valid());
+        CHECK(!coordinate{5, 0, invalid_axis}.is_valid());
+        CHECK(coordinate{-2147483647, 0, 0}.is_valid());
+        CHECK(static_cast<uint64_t>(coordinate{5, invalid_axis, 0}) == static_cast<uint64_t>(coordinate{}));
+    }
+    SECTION("Area and volume of extreme coordinates")
+    {
+        CHECK(area_of(coordinate{-3, 2}) == 12);
+        CHECK(volume_of(coordinate{-3, 2, -1}) == 24);
+        // |INT32_MIN| does not wrap
+        CHECK(area_of(coordinate{layout_base::coordinate::INVALID_AXIS, 0, 0}) == 2147483649ull);
+        CHECK(volume_of(coordinate{0, 0, layout_base::coordinate::INVALID_AXIS}) == 2147483649ull);
     }
 
     std::ostringstream os{};
@@ -216,3 +243,19 @@ TEST_CASE("Computing area and volume of offset coordinates", "[coordinates]")
 }
 
 #pragma GCC diagnostic pop
+
+TEST_CASE("Incrementing the end of an enumeration keeps it at the end", "[coordinates]")
+{
+    using coord_t = layout_base::coordinate;
+
+    layout_base::coordinate_iterator it{coord_t{2, 2, 0}, coord_t{2, 2, 0}};
+
+    CHECK((*it).is_valid());
+
+    ++it;
+    CHECK(!(*it).is_valid());
+
+    ++it;
+    CHECK(!(*it).is_valid());
+    CHECK(it == layout_base::coordinate_iterator{coord_t{2, 2, 0}, coord_t{}});
+}

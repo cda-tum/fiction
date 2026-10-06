@@ -18,17 +18,21 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
+#include <fiction/layouts/tile_clocking.hpp>
 #include <fiction/traits.hpp>
 
 #include <algorithm>
 #include <cstdint>
 #include <functional>
 #include <set>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -159,18 +163,77 @@ TEST_CASE("Coordinates order by layer, then row, then column", "[coordinate-cont
     CHECK(*ordered.rbegin() == coord{0, 0, 1});
 }
 
-TEST_CASE("Coordinates hash as their packed gate-level encoding", "[coordinate-contracts]")
+TEST_CASE("Equal coordinates hash equally", "[coordinate-contracts]")
 {
     using coord = coordinate<cartesian_layout>;
 
     const auto hash_of = [](const coord& c) { return std::hash<coord>{}(c); };
-    const auto packed  = [](const uint64_t x, const uint64_t y, const uint64_t z)
-    { return std::hash<uint64_t>{}((z << 62ull) | (y << 31ull) | x); };
 
-    CHECK(hash_of({0, 0, 0}) == packed(0, 0, 0));
-    CHECK(hash_of({5, 7, 0}) == packed(5, 7, 0));
-    CHECK(hash_of({5, 7, 1}) == packed(5, 7, 1));
-    CHECK(hash_of({1'000'000, 2'000'000, 1}) == packed(1'000'000, 2'000'000, 1));
+    CHECK(hash_of({5, 7, 1}) == hash_of({5, 7, 1}));
+    CHECK(hash_of({-5, 7, 0}) == hash_of({-5, 7, 0}));
+    CHECK(hash_of({}) == hash_of({}));
+}
+
+TEST_CASE("Layouts reject extents outside of [0, 2^30 - 1]", "[coordinate-contracts]")
+{
+    CHECK_THROWS_AS((cartesian_layout{layout_base::aspect_ratio{-1, 0, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS((cartesian_layout{layout_base::aspect_ratio{0, 1073741824, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS((hexagonal_layout{arrangement::ODD_ROW, {0, -1, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS((hexagonal_layout{arrangement::ODD_ROW, {1073741824, 0, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS((shifted_cartesian_layout{arrangement::EVEN_COLUMN, {0, 0, -1}}), std::invalid_argument);
+
+    cartesian_layout cart{{1, 1, 0}};
+    CHECK_THROWS_AS(cart.resize({-1, 0, 0}), std::invalid_argument);
+    CHECK_THROWS_AS(cart.resize({0, 0, 2147483647}), std::invalid_argument);
+
+    hexagonal_layout hex{arrangement::ODD_ROW, {1, 1, 0}};
+    CHECK_THROWS_AS(hex.resize({0, -1, 0}), std::invalid_argument);
+
+    // the largest extent is accepted
+    CHECK_NOTHROW((cartesian_layout{layout_base::aspect_ratio{1073741823, 1073741823, 1073741823}}));
+    CHECK_NOTHROW((hexagonal_layout{arrangement::ODD_ROW, {1073741823, 1073741823, 0}}));
+}
+
+TEST_CASE("Predicates on directions reject the invalid coordinate", "[coordinate-contracts]")
+{
+    const cartesian_layout cart{{3, 3, 0}};
+    const hexagonal_layout hex{arrangement::ODD_ROW, {3, 3, 0}};
+
+    CHECK(!cart.is_east_of({7, 0, 0}, {}));
+    CHECK(!cart.is_south_of({0, 9, 0}, {}));
+    CHECK(!cart.is_above({0, 0, 5}, {}));
+    CHECK(!hex.is_east_of({7, 0, 0}, {}));
+    CHECK(!hex.is_south_of({0, 9, 0}, {}));
+    CHECK(!hex.is_above({0, 0, 5}, {}));
+}
+
+TEST_CASE("Hexagonal layouts give coordinates outside of the layout no neighbors", "[coordinate-contracts]")
+{
+    for (const auto a :
+         {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
+    {
+        const hexagonal_layout hex{a, {6, 6, 1}};
+
+        for (const auto& c : {coordinate<hexagonal_layout>{-1, 1, 0},
+                              {0, -1, 0},
+                              {1, 1, -1},
+                              {7, 1, 0},
+                              {1, 7, 0},
+                              {1, 1, 2},
+                              {},
+                              {2, layout_base::coordinate::INVALID_AXIS, 0},
+                              {2147483647, 0, 0},
+                              {0, 2147483647, 0},
+                              {2147483647, 2147483647, 0}})
+        {
+            CHECK(hex.adjacent_coordinates(c).empty());
+            CHECK(!hex.is_adjacent_of(c, {0, 0, 0}));
+            CHECK(hex.north_east(c) == c);
+            CHECK(hex.south_east(c) == c);
+            CHECK(hex.south_west(c) == c);
+            CHECK(hex.north_west(c) == c);
+        }
+    }
 }
 
 TEST_CASE("Gate-level layouts map tiles to nodes and back", "[coordinate-contracts]")
@@ -190,4 +253,93 @@ TEST_CASE("Gate-level layouts map tiles to nodes and back", "[coordinate-contrac
 
     CHECK(lyt.get_tile(lyt.get_node(moved)) == coordinate<cartesian_layout>{2, 2, 0});
     CHECK(lyt.is_empty_tile({1, 1, 1}));
+}
+
+TEST_CASE("Gate-level layouts check tiles before they change anything", "[coordinate-contracts]")
+{
+    using lyt_t = gate_level_layout<cartesian_layout>;
+    using tile  = coordinate<lyt_t>;
+
+    SECTION("The converting constructor checks the extent")
+    {
+        CHECK_THROWS_AS((lyt_t{cartesian_layout{{5, 5, 3}}}), std::out_of_range);
+        CHECK_NOTHROW((lyt_t{cartesian_layout{{5, 5, 1}}}));
+    }
+    SECTION("A tile without a signal leaves the layout unchanged")
+    {
+        lyt_t lyt{{3, 3, 1}, clocking::twoddwave()};
+
+        const auto a = lyt.create_pi("a", {0, 0, 0});
+
+        CHECK_THROWS_AS(lyt.create_pi("b", {1073741824, 0, 0}), std::out_of_range);
+        CHECK_THROWS_AS(lyt.create_po(a, "po", {0, 1073741824, 0}), std::out_of_range);
+        CHECK_THROWS_AS(lyt.create_and(a, a, {0, 0, 2}), std::out_of_range);
+        CHECK_THROWS_AS(lyt.create_buf(a, {0, 0, -1}), std::out_of_range);
+
+        CHECK(lyt.num_pis() == 1);
+        CHECK(lyt.num_pos() == 0);
+        CHECK(lyt.size() == 3);
+        CHECK(lyt.num_gates() == 0);
+
+        const auto buf = lyt.create_buf(a, {1, 0, 0});
+        const auto po  = lyt.create_po(buf, "po", {2, 0, 0});
+
+        CHECK_THROWS_AS(lyt.move_node(lyt.get_node(buf), {5, 0, 2}, {a}), std::out_of_range);
+
+        CHECK(!lyt.is_dead(lyt.get_node(buf)));
+        CHECK(lyt.get_tile(lyt.get_node(buf)) == tile{1, 0, 0});
+        CHECK(lyt.num_wires() == 3);
+        CHECK(lyt.fanin_size(lyt.get_node(po)) == 1);
+
+        CHECK_THROWS_AS(lyt.move_node(lyt.get_node(po), {0, 0, 5}, {a}), std::out_of_range);
+
+        lyt.foreach_po([&po](const auto& s) { CHECK(s == po); });
+    }
+    SECTION("A tile without a signal does not alias another tile")
+    {
+        lyt_t lyt{{3, 3, 1}, clocking::twoddwave()};
+
+        lyt.create_pi("a", {2, 0, 0});
+
+        CHECK(lyt.is_empty_tile({2, 0, 2}));
+        CHECK(lyt.get_node(tile{2, 0, 2}) == 0);
+
+        lyt.clear_tile({2, 0, 2});
+
+        CHECK(!lyt.is_empty_tile({2, 0, 0}));
+    }
+    SECTION("An axis equal to the invalid value leaves a node unplaced")
+    {
+        lyt_t lyt{{3, 3, 1}, clocking::twoddwave()};
+
+        lyt.create_pi("a", {layout_base::coordinate::INVALID_AXIS, 0, 0});
+        lyt.create_pi("b", {0, layout_base::coordinate::INVALID_AXIS, 0});
+
+        CHECK(lyt.num_pis() == 2);
+        lyt.foreach_pi([&lyt](const auto& n) { CHECK(!lyt.get_tile(n).is_valid()); });
+    }
+}
+
+TEST_CASE("Bounding boxes of layouts without a tile in range", "[coordinate-contracts]")
+{
+    using lyt_t = gate_level_layout<cartesian_layout>;
+
+    lyt_t lyt{{3, 3, 1}, clocking::twoddwave()};
+
+    lyt.create_pi("a", {10, 10, 0});
+
+    const bounding_box_2d bb{lyt};
+
+    CHECK(bb.get_x_size() == 0);
+    CHECK(bb.get_y_size() == 0);
+    CHECK(bb.get_min() == coordinate<lyt_t>{0, 0, 0});
+    CHECK(bb.get_max() == coordinate<lyt_t>{0, 0, 0});
+}
+
+TEST_CASE("The clock zone of an invalid cell is invalid", "[coordinate-contracts]")
+{
+    const tile_clocking clk{3, 3};
+
+    CHECK(!clk.get_clock_zone({}).is_valid());
+    CHECK(clk.get_clock_zone({4, 7, 0}) == layout_base::coordinate{1, 2, 0});
 }

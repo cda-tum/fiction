@@ -117,10 +117,15 @@ class tile_clocking
      * The clock zone that contains a cell: its tile on layer 0.
      *
      * @param c Cell position.
-     * @return Clock zone of `c`.
+     * @return Clock zone of `c`, or the invalid clock zone if `c` is invalid.
      */
     [[nodiscard]] clock_zone get_clock_zone(const layout_base::coordinate& c) const noexcept
     {
+        if (!c.is_valid())
+        {
+            return {};
+        }
+
         return {c.x / tile_x, c.y / tile_y};
     }
     /**

@@ -23,10 +23,6 @@
 #include <algorithm>
 #include <limits>
 
-// data types cannot properly be converted to bit field types
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-
 namespace fiction::layouts
 {
 /**
@@ -97,6 +93,13 @@ class bounding_box_2d
         else if constexpr (is_cell_grid_v<Lyt>)
         {
             layout.foreach_cell([&](const auto& c) { update_min_max(min, max, c); });
+        }
+
+        // no non-empty coordinate lies within the layout
+        if (min.x > max.x)
+        {
+            min = {0, 0, 0};
+            max = {0, 0, 0};
         }
 
         // Final bounding box dimensions
@@ -190,4 +193,3 @@ class bounding_box_2d
 };
 
 }  // namespace fiction::layouts
-#pragma GCC diagnostic pop

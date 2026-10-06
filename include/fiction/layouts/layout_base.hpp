@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include "fiction/utils/math/math_utils.hpp"
-
 #include <fmt/format.h>
 
 #include <algorithm>
@@ -29,6 +27,7 @@
 #include <iostream>
 #include <iterator>
 #include <limits>
+#include <stdexcept>
 #include <string>
 
 namespace fiction::layouts
@@ -44,9 +43,11 @@ class layout_base
     /**
      * Signed coordinates.
      *
-     * An coordinate coordinate defines a location via an coordinate from a fixed point (origin). Each axis is a signed
-     * 32-bit integer. The default-constructed coordinate is invalid; it has all axes set to `INVALID_AXIS` and stands
-     * for "no coordinate", e.g., a neighbor outside of a layout or the tile of a node that is not placed.
+     * A coordinate defines a location relative to a fixed point (origin). Each axis is a signed 32-bit integer. The
+     * default-constructed coordinate is invalid; it has all axes set to `INVALID_AXIS` and stands for "no coordinate",
+     * e.g., a neighbor outside of a layout or the tile of a node that is not placed. A coordinate with any axis set to
+     * `INVALID_AXIS` is invalid. Test for invalidity with `is_valid()`, because only the default-constructed
+     * coordinate compares equal to every other coordinate of the same state.
      *
      * Gate-level layouts pack a coordinate into a 64-bit signal with `explicit operator uint64_t`. This encoding holds
      * 31-bit signed x and y values and a single z bit.
@@ -54,7 +55,7 @@ class layout_base
     struct coordinate
     {
         /**
-         * Value of every axis of the invalid coordinate.
+         * Value of every axis of the invalid coordinate. No valid coordinate has an axis of this value.
          */
         static constexpr int32_t INVALID_AXIS = std::numeric_limits<int32_t>::min();
         /**
@@ -145,13 +146,13 @@ class layout_base
                    (static_cast<uint64_t>(x) & AXIS_MASK);
         }
         /**
-         * Returns whether the coordinate is valid, i.e., whether it differs from the default-constructed coordinate.
+         * Returns whether the coordinate is valid, i.e., whether none of its axes is `INVALID_AXIS`.
          *
          * @return `true` iff the coordinate is valid.
          */
         [[nodiscard]] constexpr bool is_valid() const noexcept
         {
-            return x != INVALID_AXIS;
+            return x != INVALID_AXIS && y != INVALID_AXIS && z != INVALID_AXIS;
         }
         /**
          * Returns whether the coordinate fits the 64-bit signal encoding, i.e., x and y are 31-bit signed values and z
@@ -196,7 +197,7 @@ class layout_base
             }
         }
         /**
-         * Compares against another coordinate for equality. All invalid coordinates are equal.
+         * Compares against another coordinate for equality, axis by axis.
          *
          * @param other Right-hand side coordinate.
          * @return `true` iff both coordinates are identical.
@@ -307,6 +308,33 @@ class layout_base
      */
     using aspect_ratio = coordinate;
 
+  protected:
+    /**
+     * Returns an aspect ratio after checking that it describes a layout. An invalid aspect ratio describes the layout
+     * with exactly one coordinate. The upper limit keeps the coordinate arithmetic of every layout within `int32_t`.
+     *
+     * @param ar Aspect ratio to check.
+     * @return `ar`, or (0, 0, 0) if `ar` is invalid.
+     * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
+     */
+    static aspect_ratio checked(const aspect_ratio& ar)
+    {
+        constexpr auto max_axis = static_cast<int32_t>((1ull << 30ull) - 1ull);
+
+        if (!ar.is_valid())
+        {
+            return aspect_ratio{0, 0, 0};
+        }
+
+        if (ar.x < 0 || ar.y < 0 || ar.z < 0 || ar.x > max_axis || ar.y > max_axis || ar.z > max_axis)
+        {
+            throw std::invalid_argument("The aspect ratio of a layout must not be negative or exceed 2^30 - 1");
+        }
+
+        return ar;
+    }
+
+  public:
     /**
      * An iterator type that allows to enumerate coordinates in order within a boundary.
      */
@@ -368,6 +396,12 @@ class layout_base
          */
         constexpr coordinate_iterator& operator++() noexcept
         {
+            // the end of the enumeration stays the end
+            if (!current.is_valid())
+            {
+                return *this;
+            }
+
             if (current != bound)
             {
                 ++current.x;
@@ -433,6 +467,22 @@ inline std::ostream& operator<<(std::ostream& os, const layout_base::coordinate&
     return os;
 }
 
+namespace detail
+{
+
+/**
+ * Absolute value of one coordinate axis. It widens first, so that `INT32_MIN` does not overflow.
+ *
+ * @param axis Axis value.
+ * @return \f$|axis|\f$.
+ */
+constexpr uint64_t abs_axis(const int32_t axis) noexcept
+{
+    return axis < 0 ? -static_cast<uint64_t>(static_cast<int64_t>(axis)) : static_cast<uint64_t>(axis);
+}
+
+}  // namespace detail
+
 /**
  * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)\f$.
  *
@@ -443,8 +493,7 @@ inline std::ostream& operator<<(std::ostream& os, const layout_base::coordinate&
 template <typename CoordinateType>
 uint64_t area_of(const CoordinateType& coord) noexcept
 {
-    return (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.x)) + 1) *
-           (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.y)) + 1);
+    return (detail::abs_axis(coord.x) + 1) * (detail::abs_axis(coord.y) + 1);
 }
 /**
  * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)
@@ -457,9 +506,7 @@ uint64_t area_of(const CoordinateType& coord) noexcept
 template <typename CoordinateType>
 uint64_t volume_of(const CoordinateType& coord) noexcept
 {
-    return (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.x)) + 1) *
-           (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.y)) + 1) *
-           (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.z)) + 1);
+    return (detail::abs_axis(coord.x) + 1) * (detail::abs_axis(coord.y) + 1) * (detail::abs_axis(coord.z) + 1);
 }
 
 }  // namespace fiction::layouts
@@ -475,7 +522,11 @@ struct hash<fiction::layouts::layout_base::coordinate>
 {
     std::size_t operator()(const fiction::layouts::layout_base::coordinate& c) const noexcept
     {
-        return std::hash<uint64_t>{}(static_cast<uint64_t>(c));
+        // every axis takes part, so that coordinates that differ only in z or only in the high bits of x or y do not
+        // collide
+        const auto xy = (static_cast<uint64_t>(static_cast<uint32_t>(c.y)) << 32ull) | static_cast<uint32_t>(c.x);
+
+        return std::hash<uint64_t>{}(xy ^ (static_cast<uint64_t>(static_cast<uint32_t>(c.z)) * 0x9e3779b97f4a7c15ull));
     }
 };
 

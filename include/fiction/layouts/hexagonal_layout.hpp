@@ -223,7 +223,7 @@ class hexagonal_layout : public layout_base
      *
      * @param a Arrangement of the shifted rows or columns. It cannot change after construction.
      * @param ar Highest possible position in the layout.
-     * @throws std::invalid_argument If an axis of `ar` is negative.
+     * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
      */
     explicit hexagonal_layout(const layouts::arrangement a, const aspect_ratio& ar = {0, 0}) :
             strg{std::make_shared<hexagonal_layout_storage>(checked(ar), a)}
@@ -315,7 +315,7 @@ class hexagonal_layout : public layout_base
      * Updates the layout's dimensions, effectively resizing it.
      *
      * @param ar New aspect ratio.
-     * @throws std::invalid_argument If an axis of `ar` is negative.
+     * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
      */
     void resize(const aspect_ratio& ar)
     {
@@ -396,11 +396,11 @@ class hexagonal_layout : public layout_base
      * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose north-eastern counterpart is desired.
-     * @return Coordinate directly north-eastern of `c`.
+     * @return Coordinate directly north-eastern of `c`; `c` itself if the neighbor or `c` lies outside of the layout.
      */
-    [[nodiscard]] constexpr coordinate north_east(const coordinate& c) const noexcept
+    [[nodiscard]] coordinate north_east(const coordinate& c) const noexcept
     {
-        if (!c.is_valid())
+        if (!is_within_bounds(c))
         {
             return c;
         }
@@ -439,11 +439,11 @@ class hexagonal_layout : public layout_base
      * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose south-eastern counterpart is desired.
-     * @return Coordinate directly south-eastern of `c`.
+     * @return Coordinate directly south-eastern of `c`; `c` itself if the neighbor or `c` lies outside of the layout.
      */
-    [[nodiscard]] constexpr coordinate south_east(const coordinate& c) const noexcept
+    [[nodiscard]] coordinate south_east(const coordinate& c) const noexcept
     {
-        if (!c.is_valid())
+        if (!is_within_bounds(c))
         {
             return c;
         }
@@ -485,11 +485,11 @@ class hexagonal_layout : public layout_base
      * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose south-western counterpart is desired.
-     * @return Coordinate directly south-western of `c`.
+     * @return Coordinate directly south-western of `c`; `c` itself if the neighbor or `c` lies outside of the layout.
      */
-    [[nodiscard]] constexpr coordinate south_west(const coordinate& c) const noexcept
+    [[nodiscard]] coordinate south_west(const coordinate& c) const noexcept
     {
-        if (!c.is_valid())
+        if (!is_within_bounds(c))
         {
             return c;
         }
@@ -524,11 +524,11 @@ class hexagonal_layout : public layout_base
      * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose north-western counterpart is desired.
-     * @return Coordinate directly north-western of `c`.
+     * @return Coordinate directly north-western of `c`; `c` itself if the neighbor or `c` lies outside of the layout.
      */
-    [[nodiscard]] constexpr coordinate north_west(const coordinate& c) const noexcept
+    [[nodiscard]] coordinate north_west(const coordinate& c) const noexcept
     {
-        if (!c.is_valid())
+        if (!is_within_bounds(c))
         {
             return c;
         }
@@ -604,7 +604,7 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] bool is_east_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && east(c1) == c2;
+        return c2.is_valid() && c1 != c2 && east(c1) == c2;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly south of coordinate `c1`.
@@ -615,7 +615,7 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] bool is_south_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && south(c1) == c2;
+        return c2.is_valid() && c1 != c2 && south(c1) == c2;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly west of coordinate `c1`.
@@ -673,7 +673,7 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] bool is_above(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && above(c1) == c2;
+        return c2.is_valid() && c1 != c2 && above(c1) == c2;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
@@ -937,8 +937,8 @@ class hexagonal_layout : public layout_base
      * directions are being considered, i.e., the container will contain all coordinates `ac` for which `is_adjacent(c,
      * ac)` returns `true`.
      *
-     * Coordinates that are outside of the layout bounds are not considered. Thereby, the size of the returned container
-     * is at most 6.
+     * Neighbors outside of the layout bounds are not considered, and a coordinate outside of the layout bounds has no
+     * adjacent coordinates. Thereby, the size of the returned container is at most 6.
      *
      * @param c Coordinate whose adjacent ones are desired.
      * @return A container that contains all of `c`'s adjacent coordinates.
@@ -957,7 +957,8 @@ class hexagonal_layout : public layout_base
      * cardinal and ordinal directions are being considered, i.e., the given function is applied to all coordinates ac
      * for which `is_adjacent(c, ac)` returns `true`.
      *
-     * Coordinates that are outside of the layout bounds are not considered. Thereby, at most 6 coordinates are touched.
+     * Neighbors outside of the layout bounds are not considered, and a coordinate outside of the layout bounds has no
+     * adjacent coordinates. Thereby, at most 6 coordinates are touched.
      *
      * @tparam Fn Functor type.
      * @param c Coordinate whose adjacent ones are desired.
@@ -966,7 +967,7 @@ class hexagonal_layout : public layout_base
     template <typename Fn>
     void foreach_adjacent_coordinate(const coordinate& c, Fn&& fn) const
     {
-        if (!c.is_valid())
+        if (!is_within_bounds(c))
         {
             return;
         }
@@ -1135,28 +1136,6 @@ class hexagonal_layout : public layout_base
 #pragma GCC diagnostic pop
 
   private:
-    /**
-     * Returns an aspect ratio after checking that it describes a layout. An invalid aspect ratio describes the layout
-     * with exactly one coordinate.
-     *
-     * @param ar Aspect ratio to check.
-     * @return `ar`, or (0, 0, 0) if `ar` is invalid.
-     * @throws std::invalid_argument If an axis of `ar` is negative.
-     */
-    static aspect_ratio checked(const aspect_ratio& ar)
-    {
-        if (!ar.is_valid())
-        {
-            return aspect_ratio{0, 0, 0};
-        }
-
-        if (ar.x < 0 || ar.y < 0 || ar.z < 0)
-        {
-            throw std::invalid_argument("The aspect ratio of a layout must not be negative");
-        }
-
-        return ar;
-    }
     /**
      * Shared storage for the layout dimensions and arrangement.
      */
