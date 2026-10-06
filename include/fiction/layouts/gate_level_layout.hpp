@@ -22,1475 +22,903 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/clocking_state.hpp"
 #include "fiction/layouts/obstructions.hpp"
-#include "fiction/networks/mockturtle_utils.hpp"
 #include "fiction/traits.hpp"
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
-#include <kitty/operations.hpp>
-#include <mockturtle/networks/detail/foreach.hpp>
-#include <mockturtle/networks/events.hpp>
-#include <mockturtle/networks/storage.hpp>
-#include <mockturtle/traits.hpp>
-#include <mockturtle/utils/algorithm.hpp>
 #include <mockturtle/utils/truth_table_cache.hpp>
 #include <phmap.h>
 
 #include <algorithm>
-#include <cassert>
+#include <array>
+#include <compare>
 #include <concepts>
 #include <cstdint>
 #include <functional>
-#include <memory>
+#include <limits>
+#include <optional>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
-namespace fiction::verification::detail
+namespace fiction::layouts
 {
 /**
- * Forward declaration for the friend declaration in `gate_level_layout`. Including
- * `verification/design_rule_violations.hpp` here instead would pull `nlohmann/json.hpp` and three `fmt`
- * headers into every translation unit that touches a gate-level layout.
+ * @brief Layout-local object identity. A removed object's generation cannot identify its replacement.
+ *
+ * Copies preserve identities; use an identity only with the layout that supplied it or its copy.
  */
-template <typename Lyt>
-class gate_level_drvs_impl;
+struct layout_object_id
+{
+    /** @brief Storage slot. */
+    uint32_t index{};
+    /** @brief Slot generation; zero does not identify a live object. */
+    uint32_t generation{};
+    /** @brief Compares object identities. */
+    constexpr auto operator<=>(const layout_object_id&) const noexcept = default;
+};
+/** @brief Output endpoint of a placed object. FCN objects provide output zero. */
+struct layout_output_port
+{
+    /** @brief Source object. */
+    layout_object_id object{};
+    /** @brief Output index. */
+    uint32_t index{};
+    /** @brief Compares output endpoints. */
+    constexpr auto operator<=>(const layout_output_port&) const noexcept = default;
+};
+/** @brief Input endpoint. Its index is the truth-table argument index. */
+struct layout_input_port
+{
+    /** @brief Destination object. */
+    layout_object_id object{};
+    /** @brief Truth-table argument index. */
+    uint32_t index{};
+    /** @brief Compares input endpoints. */
+    constexpr auto operator<=>(const layout_input_port&) const noexcept = default;
+};
+}  // namespace fiction::layouts
 
-}  // namespace fiction::verification::detail
+namespace std
+{
+/** @brief Hashes both parts of an object identity. */
+template <>
+struct hash<fiction::layouts::layout_object_id>
+{
+    /** @brief Returns the identity's hash. */
+    size_t operator()(const fiction::layouts::layout_object_id id) const noexcept
+    {
+        return hash<uint64_t>{}((static_cast<uint64_t>(id.generation) << 32) | id.index);
+    }
+};
+}  // namespace std
 
 namespace fiction::layouts
 {
-
 /**
- * A gate-level FCN layout owns gates, clocking, synchronization delays, and persistent obstructions. Clock zones are
- * tiles in the coordinate geometry supplied by `CoordinateLayout`. The
- * gate_level_layout class fulfills the requirements of a `mockturtle` logic network so that it can be used in many of
- * `mockturtle`'s algorithms. Since a layout has to assign fixed positions to its gates (logic nodes), most generative
- * member functions like `create_pi`, `create_po`, `create_and`, etc. require additional coordinate parameters.
- * Consequently, `mockturtle`'s algorithms cannot be used to generate gate_level_layout networks. To make the class
- * compliant with the API anyways, these member functions have their parameters defaulted but they are, in fact required
- * to create meaningful layouts.
+ * @brief Placed FCN objects, ordered ports, clocking, and obstructions.
  *
- * The following notion is utilized in this implementation:
- * - a node `n` is an index representing the `n`th created gate. All properties of said gate, e.g., its type and
- * position, are stored independently and can be requested from the layout. An empty layout has 2 nodes, namely `const0`
- * and `const1` as required by `mockturtle`. At the moment, they are not used for anything meaningful but could be.
- *
- * - a signal is an unsigned integer representation of a `tile`, i.e., a coordinate in the layout. It can be seen as a
- * pointer to a position. Consequently, the utilized coordinates need to be convertible to `uint64_t`.
- *
- * - the creation of PIs and POs creates nodes (the latter in contrast to other `mockturtle` networks) that have a
- * position on the layout.
- *
- * - the creation of buffers (`create_buf`) creates nodes as well. A buffer with more than one output is a fanout such
- * that `is_fanout` will return `true` on it. However, it is also still a buffer (`is_buf` returns `true` as well).
- * Buffers and wires are used interchangeably.
- *
- * - each node has an associated gate function. PIs, POs, and buffers compute the identity function.
- *
- * - signals (pointers to tiles) cannot be inverting. Thereby, inverter nodes (gates) have to be created that can be
- * checked for via is_inv.
- *
- * - each `create_...` function requires a tile parameter that determines its placement. If the provided tile is
- * invalid, the location will not be stored and the node will not count towards number of gates or wires. A valid tile
- * must have a signal, i.e., x and y in \f$[-2^{30}, 2^{30} - 1]\f$ and z in \f$\{0, 1\}\f$; otherwise, the function
- * throws `std::out_of_range` and leaves the layout unchanged.
- *
- * - a node can be overwritten by creating another node on its location. This can, however, lead to unwanted effects and
- * should be avoided.
- *
- * - nodes can be moved via the `move_node` function. This function can also be used to update their children, i.e.,
- * incoming signals.
- *
- * Most implementation details regarding `mockturtle`-specific functions are borrowed from
- * `mockturtle/networks/klut.hpp`. Therefore, `mockturtle` API functions are only sporadically documented where their
- * behavior might differ. Information on their functionality can be found in `mockturtle`'s docs.
- *
- * @tparam CoordinateLayout Coordinate geometry used for gate placement.
+ * Objects have stable identities independent of their coordinates. Connections describe declared topology;
+ * physical validation checks adjacency, clocking, and geometry separately. Copies own independent state.
+ * @tparam CoordinateLayout Coordinate geometry used for placement.
  */
 template <typename CoordinateLayout>
 class gate_level_layout : public CoordinateLayout
 {
   public:
-#pragma region Types and constructors
-
     /** @brief Coordinate identifying a clock zone. */
     using clock_zone = typename CoordinateLayout::coordinate;
-    /** @brief Clocking scheme for this layout. */
+    /** @brief Clocking scheme. */
     using clocking_scheme_t = clocking::scheme;
-    /** @brief Clock phase index. */
+    /** @brief Clock phase. */
     using clock_number_t = typename clocking_scheme_t::clock_number;
     /** @brief Number of clocked neighbors. */
     using degree_t = uint8_t;
-    /** @brief Hold-phase extension in full clock cycles. */
+    /** @brief Hold extension in full cycles. */
     using sync_elem_t = clocking::state::sync_elem_t;
-
-    /** @brief Coordinate identifying a gate position. */
+    /** @brief Placement coordinate. */
     using tile = typename CoordinateLayout::coordinate;
-
-    template <typename Node, typename Tile>
-    struct gate_level_layout_storage_data
-    {
-
-        /** @brief Scheme, clock overrides, and synchronization delays. */
-        clocking::state clocking{clocking::open()};
-        /** @brief Persistent manually assigned obstructions. */
-        layouts::obstructions                                     obstructions{};
-        mockturtle::truth_table_cache<kitty::dynamic_truth_table> fn_cache;
-
-        const Tile const0{0x8000000000000000ull};
-        const Tile const1{0xc000000000000000ull};
-
-        // these maps grow large! use parallel_flat_hashmap for better performance
-        phmap::parallel_flat_hash_map<Tile, Node> tile_node_map{
-            {{const0, static_cast<Node>(0ull)}, {const1, static_cast<Node>(1ull)}}};
-        phmap::parallel_flat_hash_map<Node, Tile> node_tile_map{
-            {{static_cast<Node>(0ull), const0}, {static_cast<Node>(1ull), const1}}};
-
-        uint32_t num_gates     = 0ull;
-        uint32_t num_wires     = 0ull;
-        uint32_t num_crossings = 0ull;
-
-        uint32_t trav_id = 0ul;
-
-        std::string layout_name{};
-
-        // usually quite a small map, use flat_hash_map
-        phmap::flat_hash_map<Node, std::string> node_names{};
-    };
-
-    /*! \brief gate-level layout node
-     *
-     * `data[0].h1`: Internal (data-flow independent) fan-out size (MSB indicates dead nodes)
-     * `data[0].h2`: Application-specific value
-     * `data[1].h1`: Function literal in truth table cache
-     * `data[2].h2`: Visited flags
-     */
-    struct gate_level_layout_storage_node : mockturtle::mixed_fanin_node<2>
-    {
-        bool operator==(const gate_level_layout_storage_node& other) const
-        {
-            return data[1].h1 == other.data[1].h1 && children == other.children;
-        }
-    };
-
-    /** @brief Minimum fan-in storage required by the mockturtle network interface. */
-    // NOLINTNEXTLINE(readability-identifier-naming) -- mockturtle requires this member name.
-    static constexpr auto min_fanin_size = std::max(CoordinateLayout::min_fanin_size, 1u);
-    static constexpr auto max_fanin_size = CoordinateLayout::max_fanin_size;  // NOLINT(*-identifier-naming)
-
+    /** @brief Stable layout-local identity. */
+    using object_id = layout_object_id;
+    /** @brief Source endpoint. */
+    using output_port = layout_output_port;
+    /** @brief Ordered destination endpoint. */
+    using input_port = layout_input_port;
+    /** @brief Concrete layout type. */
     using base_type = gate_level_layout;
-    using node      = uint32_t;
-    using signal    = uint64_t;
 
-    using event_storage = std::shared_ptr<mockturtle::network_events<base_type>>;
-
-    /*! \brief tile-based layout storage container */
-    using gate_level_layout_storage =
-        mockturtle::storage<gate_level_layout_storage_node, gate_level_layout_storage_data<node, signal>>;
-
-    using storage = std::shared_ptr<gate_level_layout_storage>;
-
-    /**
-     * Standard constructor. Creates a named gate-level layout of the given aspect ratio. To this end, it calls
-     * `CoordinateLayout`'s standard constructor.
-     *
-     * @param ar Highest possible position in the layout.
-     * @param name Layout name.
-     */
-    explicit gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar = {0, 0}, const std::string& name = {})
-        requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::aspect_ratio&>
-            :
-            CoordinateLayout(checked_extent(ar)),
-            strg{std::make_shared<gate_level_layout_storage>()},
-            evnts{std::make_shared<typename event_storage::element_type>()}
+    /** @brief Creates an empty layout with the given geometry and name. */
+    explicit gate_level_layout(const typename CoordinateLayout::extent& dimensions = {}, const std::string& name = {})
+        requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::extent&>
+            : CoordinateLayout{dimensions}, layout_name{name}
     {
-        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
-
-        CoordinateLayout::restrict_to_two_layers();
-        initialize_truth_table_cache();
-        strg->data.layout_name = name;
+        initialize_functions();
     }
-    /**
-     * Standard constructor. Creates a gate-level layout of the given aspect ratio and clocks it via the given clocking
-     * scheme. To this end, it calls `CoordinateLayout`'s standard constructor.
-     *
-     * @param ar Highest possible position in the layout.
-     * @param scheme Clocking scheme to apply to this layout.
-     * @param name Layout name.
-     */
-    gate_level_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking::scheme& scheme,
+    /** @brief Creates an empty layout with the given geometry, clocking, and name. */
+    gate_level_layout(const typename CoordinateLayout::extent& dimensions, const clocking::scheme& scheme,
                       const std::string& name = {})
-        requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::aspect_ratio&>
-            :
-            CoordinateLayout(checked_extent(ar)),
-            strg{std::make_shared<gate_level_layout_storage>()},
-            evnts{std::make_shared<typename event_storage::element_type>()}
+        requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::extent&>
+            : gate_level_layout{dimensions, name}
     {
         replace_clocking_scheme(scheme);
-        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
-
-        CoordinateLayout::restrict_to_two_layers();
-        initialize_truth_table_cache();
-        strg->data.layout_name = name;
     }
-    /**
-     * Standard constructor for coordinate layouts with shifted rows or columns. Creates a named gate-level layout of
-     * the given arrangement and aspect ratio. To this end, it calls `CoordinateLayout`'s standard constructor.
-     *
-     * @param a Arrangement of the shifted rows or columns.
-     * @param ar Highest possible position in the layout.
-     * @param name Layout name.
-     */
-    explicit gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::aspect_ratio& ar = {0, 0},
+    /** @brief Creates an empty layout with shifted rows or columns. */
+    explicit gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::extent& dimensions = {},
                                const std::string& name = {})
-        requires std::constructible_from<CoordinateLayout, const layouts::arrangement,
-                                         const typename CoordinateLayout::aspect_ratio&>
-            :
-            CoordinateLayout(a, checked_extent(ar)),
-            strg{std::make_shared<gate_level_layout_storage>()},
-            evnts{std::make_shared<typename event_storage::element_type>()}
+        requires std::constructible_from<CoordinateLayout, layouts::arrangement,
+                                         const typename CoordinateLayout::extent&>
+            : CoordinateLayout{a, dimensions}, layout_name{name}
     {
-        CoordinateLayout::restrict_to_two_layers();
-        initialize_truth_table_cache();
-        strg->data.layout_name = name;
+        initialize_functions();
     }
-    /**
-     * Standard constructor for coordinate layouts with shifted rows or columns. Creates a gate-level layout of the
-     * given arrangement and aspect ratio and clocks it via the given clocking scheme. To this end, it calls
-     * `CoordinateLayout`'s standard constructor.
-     *
-     * @param a Arrangement of the shifted rows or columns.
-     * @param ar Highest possible position in the layout.
-     * @param scheme Clocking scheme to apply to this layout.
-     * @param name Layout name.
-     */
-    gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::aspect_ratio& ar,
+    /** @brief Creates an empty layout with shifted rows or columns and clocking. */
+    gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::extent& dimensions,
                       const clocking::scheme& scheme, const std::string& name = {})
-        requires std::constructible_from<CoordinateLayout, const layouts::arrangement,
-                                         const typename CoordinateLayout::aspect_ratio&>
-            :
-            CoordinateLayout(a, checked_extent(ar)),
-            strg{std::make_shared<gate_level_layout_storage>()},
-            evnts{std::make_shared<typename event_storage::element_type>()}
+        requires std::constructible_from<CoordinateLayout, layouts::arrangement,
+                                         const typename CoordinateLayout::extent&>
+            : gate_level_layout{a, dimensions, name}
     {
         replace_clocking_scheme(scheme);
-        CoordinateLayout::restrict_to_two_layers();
-        initialize_truth_table_cache();
-        strg->data.layout_name = name;
     }
-    /**
-     * Copy constructor from another layout's storage.
-     *
-     * @param s Storage of another gate_level_layout.
-     */
-    explicit gate_level_layout(storage s) :
-            strg{std::move(s)},
-            evnts{std::make_shared<typename event_storage::element_type>()}
+    /** @brief Creates an empty layout with an independent copy of the geometry. */
+    explicit gate_level_layout(const CoordinateLayout& geometry) : CoordinateLayout{geometry.clone()}
     {
-        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
-        CoordinateLayout::restrict_to_two_layers();
+        initialize_functions();
     }
-    /**
-     * Copy constructor from another layout's storage.
-     *
-     * @param s Storage of another gate_level_layout.
-     * @param e Event storage of another gate_level_layout.
-     */
-    gate_level_layout(storage s, event_storage e) : strg{std::move(s)}, evnts{std::move(e)}
+    /** @brief Copies geometry, identities, connections, and owned capabilities independently. */
+    gate_level_layout(const gate_level_layout& other) :
+            CoordinateLayout{static_cast<const CoordinateLayout&>(other).clone()},
+            objects{other.objects},
+            edges{other.edges},
+            occupancy{other.occupancy},
+            functions{other.functions},
+            names{other.names},
+            inputs{other.inputs},
+            outputs{other.outputs},
+            clocking_state{other.clocking_state},
+            obstruction_state{other.obstruction_state},
+            layout_name{other.layout_name},
+            free_object{other.free_object},
+            free_edge{other.free_edge},
+            live_count{other.live_count},
+            wire_count{other.wire_count}
+    {}
+    /** @brief Replaces this layout with an independent value copy. */
+    gate_level_layout& operator=(const gate_level_layout& other)
     {
-        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
-        CoordinateLayout::restrict_to_two_layers();
-    }
-    /**
-     * Copy constructor from another `CoordinateLayout`.
-     * All geometry aliases retain the two-layer extent limit of gate-level signals.
-     *
-     * @param lyt Coordinate layout.
-     * @throws std::out_of_range If the extent of `lyt` exceeds the range that gate-level signals can represent, i.e.,
-     * if its x or y value is larger than \f$2^{30} - 1\f$ or its z value is larger than 1.
-     */
-    explicit gate_level_layout(const CoordinateLayout& lyt) :
-            CoordinateLayout(lyt),
-            strg{std::make_shared<gate_level_layout_storage>()},
-            evnts{std::make_shared<typename event_storage::element_type>()}
-    {
-        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
-        static_cast<void>(checked_extent(typename CoordinateLayout::aspect_ratio{lyt.x(), lyt.y(), lyt.z()}));
-        CoordinateLayout::restrict_to_two_layers();
-        initialize_truth_table_cache();
-    }
-    /**
-     * Clones the layout returning a deep copy.
-     *
-     * @return Deep copy of the layout.
-     */
-    [[nodiscard]] gate_level_layout clone() const noexcept
-    {
-        gate_level_layout copy{*this};
-        static_cast<CoordinateLayout&>(copy) = CoordinateLayout::clone();
-        copy.strg                            = std::make_shared<gate_level_layout_storage>(*strg);
-        copy.evnts                           = std::make_shared<mockturtle::network_events<base_type>>(*evnts);
-
-        return copy;
-    }
-
-    /**
-     * Updates the layout's dimensions, effectively resizing it.
-     *
-     * @param ar New aspect ratio.
-     * @throws std::invalid_argument If an axis of `ar` is negative.
-     * @throws std::out_of_range If `ar` exceeds the range that gate-level signals can represent, i.e., if its x or y
-     * value is larger than \f$2^{30} - 1\f$ or its z value is larger than 1.
-     */
-    void resize(const typename CoordinateLayout::aspect_ratio& ar)
-    {
-        CoordinateLayout::resize(checked_extent(ar));
-    }
-
-#pragma endregion
-
-#pragma region Primary I / O and constants
-
-    [[nodiscard]] signal get_constant(bool value = false) const noexcept
-    {
-        // signals reserved for constants: const0 has only the invalid bit set, const1 the invalid bit and the z bit
-        return value ? strg->data.const1 : strg->data.const0;
-    }
-
-    [[nodiscard]] bool is_constant(const node n) const noexcept
-    {
-        return n <= 1;
-    }
-
-    [[nodiscard]] bool constant_value(const node n) const noexcept
-    {
-        return n == 1;
-    }
-
-    /**
-     * Creates a primary input on tile `t`.
-     *
-     * @param name Name of the PI. If empty, the name is `pi<i>`, where `i` is the number of PIs before the new one.
-     * @param t Tile to place the PI on. An invalid tile leaves the PI unplaced.
-     * @return Signal pointing to `t`.
-     * @throws std::out_of_range If `t` is valid but has no signal encoding.
-     */
-    signal create_pi(const std::string& name = {}, const tile& t = {})
-    {
-        check_tile(t);
-
-        const auto n = static_cast<node>(strg->nodes.size());
-        strg->nodes.emplace_back();     // empty node data
-        strg->nodes[n].data[1].h1 = 2;  // assign identity function
-        strg->inputs.emplace_back(n);
-        strg->data.node_names[n] = name.empty() ? fmt::format("pi{}", num_pis()) : name;
-        assign_node(t, n);
-
-        return static_cast<signal>(t);
-    }
-
-    /**
-     * Creates a primary output on tile `t` that is driven by signal `s`.
-     *
-     * @param s Signal that drives the PO.
-     * @param name Name of the PO. If empty, the name is `po<i>`, where `i` is the number of POs before the new one.
-     * @param t Tile to place the PO on. An invalid tile leaves the PO unplaced.
-     * @return Signal pointing to `t`.
-     * @throws std::out_of_range If `t` is valid but has no signal encoding.
-     */
-    signal create_po(const signal& s, [[maybe_unused]] const std::string& name = {}, const tile& t = {})
-    {
-        check_tile(t);
-
-        const auto n = static_cast<node>(strg->nodes.size());
-        strg->nodes.emplace_back();     // empty node data
-        strg->nodes[n].data[1].h1 = 2;  // assign identity function
-        strg->outputs.emplace_back(static_cast<signal>(t));
-        strg->data.node_names[n] = name.empty() ? fmt::format("po{}", num_pos()) : name;
-        assign_node(t, n);
-
-        /* increase ref-count to child */
-        strg->nodes[get_node(s)].data[0].h1++;
-        strg->nodes[n].children.push_back(s);
-
-        return static_cast<signal>(t);
-    }
-
-    /**
-     * Check whether `n` is a primary input.
-     *
-     * @param n Node to be checked.
-     * @return `true` iff `n` is a PI.
-     */
-    [[nodiscard]] bool is_pi(const node n) const noexcept
-    {
-        return std::ranges::find(strg->inputs, n) != strg->inputs.cend();
-    }
-    [[nodiscard]] bool is_ci(const node n) const noexcept
-    {
-        return is_pi(n);
-    }
-    /**
-     * Check whether tile `t` hosts a primary input.
-     *
-     * @param t Tile to be checked.
-     * @return `true` iff the node located at tile `t` is a PI.
-     */
-    [[nodiscard]] bool is_pi_tile(const tile& t) const noexcept
-    {
-        return is_pi(get_node(t));
-    }
-
-    /**
-     * Check whether `n` is a primary output.
-     *
-     * @param n Node to be checked.
-     * @return `true` iff `n` is a PO.
-     */
-    [[nodiscard]] bool is_po(const node n) const noexcept
-    {
-        return std::ranges::find_if(strg->outputs, [this, &n](const auto& p)
-                                    { return this->get_node(p.index) == n; }) != strg->outputs.cend();
-    }
-
-    [[nodiscard]] bool is_co(const node n) const noexcept
-    {
-        return is_po(n);
-    }
-    /**
-     * Check whether tile `t` hosts a primary output.
-     *
-     * @param t Tile to be checked.
-     * @return `true` iff the node located at tile `t` is a PO.
-     */
-    [[nodiscard]] bool is_po_tile(const tile& t) const noexcept
-    {
-        return is_po(get_node(t));
-    }
-
-    [[nodiscard]] node pi_at(const uint32_t index) const noexcept
-    {
-        assert(index < num_pis());
-        return static_cast<node>(strg->inputs[index]);
-    }
-
-    [[nodiscard]] signal po_at(const uint32_t index) const noexcept
-    {
-        assert(index < num_pos());
-        return strg->outputs[index].index;
-    }
-
-    [[nodiscard]] bool is_combinational() const noexcept
-    {
-        return true;
-    }
-
-#pragma endregion
-
-#pragma region node names
-
-    void set_layout_name(const std::string& name) noexcept
-    {
-        strg->data.layout_name = name;
-    }
-
-    [[nodiscard]] std::string get_layout_name() const noexcept
-    {
-        return strg->data.layout_name;
-    }
-
-    void set_name(const node n, const std::string& name) noexcept
-    {
-        strg->data.node_names[n] = name;
-    }
-
-    void set_name(const signal s, const std::string& name) noexcept
-    {
-        set_name(get_node(s), name);
-    }
-
-    [[nodiscard]] std::string get_name(const node n) const noexcept
-    {
-        if (auto it = strg->data.node_names.find(n); it != strg->data.node_names.cend())
+        if (this != &other)
         {
-            return it->second;
+            auto copy = other;
+            *this     = std::move(copy);
         }
-
-        return {};
+        return *this;
     }
-
-    [[nodiscard]] std::string get_name(const signal s) const noexcept
+    /** @brief Moves owned state and leaves an empty reusable source with its original geometry. */
+    gate_level_layout(gate_level_layout&& other) : CoordinateLayout{static_cast<const CoordinateLayout&>(other).clone()}
     {
-        return get_name(get_node(s));
+        swap_owned_state(other);
     }
-
-    [[nodiscard]] bool has_name(const node n) const noexcept
+    /** @brief Moves owned state and leaves an empty reusable source. */
+    gate_level_layout& operator=(gate_level_layout&& other)
     {
-        return !get_name(n).empty();
-    }
-
-    [[nodiscard]] bool has_name(const signal s) const noexcept
-    {
-        return !get_name(s).empty();
-    }
-
-    void set_input_name(const uint32_t index, const std::string& name) noexcept
-    {
-        if (index < num_pis())
+        if (this != &other)
         {
-            strg->data.node_names[static_cast<node>(strg->inputs[index])] = name;
+            gate_level_layout moved{std::move(other)};
+            static_cast<CoordinateLayout&>(*this) = std::move(static_cast<CoordinateLayout&>(moved));
+            swap_owned_state(moved);
         }
+        return *this;
+    }
+    /** @brief Returns an independent value copy. */
+    [[nodiscard]] gate_level_layout clone() const
+    {
+        return *this;
     }
 
-    [[nodiscard]] std::string get_input_name(const uint32_t index) const noexcept
+    /** @brief Creates a primary input at `t`. Occupied coordinates reject without mutation. */
+    output_port create_pi(const std::string& name, const tile& t)
     {
-        if (index < num_pis())
+        const auto p = create_object({}, 2, object_kind::pi, 0, t);
+        try
         {
-            return get_name(static_cast<node>(strg->inputs[index]));
+            set_name(p.object, name);
+            inputs.push_back(p.object.index);
         }
-
-        return {};
-    }
-
-    [[nodiscard]] bool has_input_name(const uint32_t index) const noexcept
-    {
-        return !get_input_name(index).empty();
-    }
-
-    void set_output_name(const uint32_t index, const std::string& name) noexcept
-    {
-        if (index < num_pos())
+        catch (...)
         {
-            strg->data.node_names[get_node(strg->outputs[index].index)] = name;
+            remove(p.object);
+            throw;
         }
+        return p;
+    }
+    /** @brief Creates a primary output driven by `s` at `t`. */
+    output_port create_po(const output_port s, const std::string& name, const tile& t)
+    {
+        return create_terminal(std::array{s}, name, t);
+    }
+    /** @brief Creates a primary output with its input disconnected. */
+    output_port create_po(const std::string& name, const tile& t)
+    {
+        return create_terminal({}, name, t);
+    }
+    /** @brief Creates a wire driven by `a`. */
+    output_port create_buf(const output_port a, const tile& t)
+    {
+        return create_object(std::array{a}, 2, object_kind::wire, 1, t);
+    }
+    /** @brief Creates a wire with its input disconnected. */
+    output_port create_buf(const tile& t)
+    {
+        return create_object({}, 2, object_kind::wire, 1, t);
+    }
+    /** @brief Creates a NOT gate. */
+    output_port create_not(const output_port a, const tile& t)
+    {
+        return create_object(std::array{a}, 3, object_kind::gate, 1, t);
+    }
+    /** @brief Creates a AND gate. */
+    output_port create_and(const output_port a, const output_port b, const tile& t)
+    {
+        return create_object(std::array{a, b}, 4, object_kind::gate, 2, t);
+    }
+    /** @brief Creates a NAND gate. */
+    output_port create_nand(const output_port a, const output_port b, const tile& t)
+    {
+        return create_object(std::array{a, b}, 5, object_kind::gate, 2, t);
+    }
+    /** @brief Creates a OR gate. */
+    output_port create_or(const output_port a, const output_port b, const tile& t)
+    {
+        return create_object(std::array{a, b}, 6, object_kind::gate, 2, t);
+    }
+    /** @brief Creates a NOR gate. */
+    output_port create_nor(const output_port a, const output_port b, const tile& t)
+    {
+        return create_object(std::array{a, b}, 7, object_kind::gate, 2, t);
+    }
+    /** @brief Creates a LT gate. */
+    output_port create_lt(const output_port a, const output_port b, const tile& t)
+    {
+        return create_object(std::array{a, b}, 8, object_kind::gate, 2, t);
+    }
+    /** @brief Creates a GE gate. */
+    output_port create_ge(const output_port a, const output_port b, const tile& t)
+    {
+        return create_object(std::array{a, b}, 9, object_kind::gate, 2, t);
+    }
+    /** @brief Creates a GT gate. */
+    output_port create_gt(const output_port a, const output_port b, const tile& t)
+    {
+        return create_object(std::array{a, b}, 10, object_kind::gate, 2, t);
+    }
+    /** @brief Creates a LE gate. */
+    output_port create_le(const output_port a, const output_port b, const tile& t)
+    {
+        return create_object(std::array{a, b}, 11, object_kind::gate, 2, t);
+    }
+    /** @brief Creates a XOR gate. */
+    output_port create_xor(const output_port a, const output_port b, const tile& t)
+    {
+        return create_object(std::array{a, b}, 12, object_kind::gate, 2, t);
+    }
+    /** @brief Creates a XNOR gate. */
+    output_port create_xnor(const output_port a, const output_port b, const tile& t)
+    {
+        return create_object(std::array{a, b}, 13, object_kind::gate, 2, t);
     }
 
-    [[nodiscard]] std::string get_output_name(const uint32_t index) const noexcept
+    /** @brief Creates a majority gate. */
+    output_port create_maj(const output_port a, const output_port b, const output_port c, const tile& t)
     {
-        if (index < num_pos())
+        return create_object(std::array{a, b, c}, 14, object_kind::gate, 3, t);
+    }
+    /**
+     * @brief Creates a gate with an ordered truth table and initial input connections.
+     *
+     * Unspecified trailing inputs remain disconnected. Constant functions require an explicit placed object.
+     * @throws std::invalid_argument If placement is occupied, or children exceed the function arity.
+     */
+    output_port create_node(const std::vector<output_port>& children, const kitty::dynamic_truth_table& function,
+                            const tile& t)
+    {
+        check_placement(t);
+        if (children.size() > function.num_vars())
         {
-            return get_name(get_node(strg->outputs[index].index));
+            throw std::invalid_argument("Connections exceed the gate function's input count");
         }
-
-        return {};
-    }
-
-    [[nodiscard]] bool has_output_name(const uint32_t index) const noexcept
-    {
-        return !get_output_name(index).empty();
-    }
-
-#pragma endregion
-
-#pragma region Create function tiles
-
-    signal create_buf(signal const& a, const tile& t = {})
-    {
-        return create_node_from_literal({a}, 2, t);
-    }
-
-    signal create_not(signal const& a, const tile& t = {})
-    {
-        return create_node_from_literal({a}, 3, t);
-    }
-
-    signal create_and(signal a, signal b, const tile& t = {})
-    {
-        return create_node_from_literal({a, b}, 4, t);
-    }
-
-    signal create_nand(signal a, signal b, const tile& t = {})
-    {
-        return create_node_from_literal({a, b}, 5, t);
-    }
-
-    signal create_or(signal a, signal b, const tile& t = {})
-    {
-        return create_node_from_literal({a, b}, 6, t);
-    }
-
-    signal create_nor(signal a, signal b, const tile& t = {})
-    {
-        return create_node_from_literal({a, b}, 7, t);
-    }
-
-    signal create_lt(signal a, signal b, const tile& t = {})
-    {
-        return create_node_from_literal({a, b}, 8, t);
-    }
-
-    signal create_ge(signal a, signal b, const tile& t = {})
-    {
-        return create_node_from_literal({a, b}, 9, t);
-    }
-
-    signal create_gt(signal a, signal b, const tile& t = {})
-    {
-        return create_node_from_literal({a, b}, 10, t);
-    }
-
-    signal create_le(signal a, signal b, const tile& t = {})
-    {
-        return create_node_from_literal({a, b}, 11, t);
-    }
-
-    signal create_xor(signal a, signal b, const tile& t = {})
-    {
-        return create_node_from_literal({a, b}, 12, t);
-    }
-
-    signal create_xnor(signal a, signal b, const tile& t = {})
-    {
-        return create_node_from_literal({a, b}, 13, t);
-    }
-
-    signal create_maj(signal a, signal b, signal c, const tile& t = {})
-    {
-        return create_node_from_literal({a, b, c}, 14, t);
-    }
-
-    signal create_node(const std::vector<signal>& children, const kitty::dynamic_truth_table& function,
-                       const tile& t = {})
-    {
-        if (children.empty())
+        for (const auto child : children)
         {
-            assert(function.num_vars() == 0u);
-            return get_constant(!kitty::is_const0(function));
+            check_output(child);
         }
-
-        return create_node_from_literal(children, strg->data.fn_cache.insert(function), t);
+        ensure_functions();
+        const auto literal = functions.insert(function);
+        return create_object(children, literal, literal == 2 ? object_kind::wire : object_kind::gate,
+                             function.num_vars(), t);
     }
-
-#pragma endregion
-
-#pragma region Functional properties
-
-    [[nodiscard]] kitty::dynamic_truth_table node_function(const node n) const
+    /** @brief Returns whether this identity names a live object. */
+    [[nodiscard]] bool contains(const object_id id) const noexcept
     {
-        return strg->data.fn_cache[strg->nodes[n].data[1].h1];
+        return id.generation != 0 && id.index < objects.size() && objects[id.index].kind != object_kind::removed &&
+               objects[id.index].generation == id.generation;
     }
-
-#pragma endregion
-
-#pragma region Structural properties
-
-    /**
-     * Does NOT return the layout dimensions but the number of nodes (including constants and dead ones) in accordance
-     * with the `mockturtle` API.
-     *
-     * @return Number of all nodes.
-     */
-    [[nodiscard]] auto size() const noexcept
+    /** @brief Finds the object at a coordinate; empty coordinates have no identity. */
+    [[nodiscard]] std::optional<object_id> find_object(const tile& t) const noexcept
     {
-        return static_cast<uint32_t>(strg->nodes.size());
+        const auto it = occupancy.find(t);
+        return it == occupancy.end() ? std::nullopt : std::optional{identity(it->second)};
     }
-
-    [[nodiscard]] auto num_cis() const noexcept
+    /** @brief Returns the object's coordinate. @throws std::invalid_argument If the identity is stale. */
+    [[nodiscard]] tile get_tile(const object_id id) const
     {
-        return num_pis();
+        return checked_object(id).position;
     }
-
-    [[nodiscard]] auto num_pis() const noexcept
+    /** @brief Returns output zero of an object. */
+    [[nodiscard]] output_port output(const object_id id) const
     {
-        return strg->inputs.size();
+        static_cast<void>(checked_object(id));
+        return {id, 0};
     }
-
-    [[nodiscard]] auto num_cos() const noexcept
+    /** @brief Returns the truth table in logical input-index order. */
+    [[nodiscard]] kitty::dynamic_truth_table node_function(const object_id id) const
     {
-        return num_pos();
+        return functions[checked_object(id).function];
     }
-
-    [[nodiscard]] auto num_pos() const noexcept
+    /** @brief Returns the number of input slots, including disconnected slots. */
+    [[nodiscard]] uint32_t input_count(const object_id id) const
     {
-        return strg->outputs.size();
+        return static_cast<uint32_t>(checked_object(id).inputs.size());
     }
-
-    [[nodiscard]] uint32_t num_latches() const
+    /** @brief Returns the declared source of an input, or no source if disconnected. */
+    [[nodiscard]] std::optional<output_port> source(const input_port port) const
     {
-        return 0u;
-    }
-
-    [[nodiscard]] uint32_t num_registers() const
-    {
-        return 0u;
+        const auto edge = checked_input(port);
+        return edge == no_index ? std::nullopt : std::optional{output_port{identity(edges[edge].source), 0}};
     }
     /**
-     * Returns the number of placed nodes in the layout that do not compute the identity function.
+     * @brief Connects an output to an ordered input, replacing the input's existing source.
      *
-     * @return Number of gates in the layout.
+     * Port and identity checks precede mutation. Adjacency, clocking, and geometry need not be valid during editing.
      */
-    [[nodiscard]] auto num_gates() const noexcept
+    void connect(const output_port src, const input_port dst)
     {
-        return strg->data.num_gates;
-    }
-    /**
-     * Returns the number of placed nodes in the layout that compute the identity function including PIs and POs.
-     *
-     * @return Number of wires in the layout.
-     */
-    [[nodiscard]] auto num_wires() const noexcept
-    {
-        return strg->data.num_wires;
-    }
-    /**
-     * Returns the number of placed nodes in the layout that compute the identity function and cross other nodes.
-     *
-     * @return Number of crossings in the layout.
-     */
-    [[nodiscard]] auto num_crossings() const noexcept
-    {
-        return strg->data.num_crossings;
-    }
-    /**
-     * Checks whether there are no gates or wires assigned to the layout's coordinates.
-     *
-     * @return `true` iff the layout is empty.
-     */
-    [[nodiscard]] bool is_empty() const noexcept
-    {
-        return num_gates() + num_wires() == 0;
-    }
-    /**
-     * Returns the number of incoming, adjacently placed, and properly clocked signals to the given node.
-     *
-     * @tparam RespectClocking Flag to indicate that the underlying clocking is to be respected when evaluating fanins.
-     * @param n Node to check.
-     * @return Number of fanins to `n`.
-     */
-    template <bool RespectClocking = true>
-    [[nodiscard]] auto fanin_size(const node n) const
-    {
-        uint32_t fin_size{0u};
-        auto     fanin_counter = [&fin_size](auto const&) { ++fin_size; };
-
-        foreach_fanin<decltype(fanin_counter), RespectClocking>(n, std::move(fanin_counter));
-
-        return fin_size;
-    }
-    /**
-     * Returns the number of outgoing, adjacently placed, and properly clocked signals of the given node.
-     *
-     * @tparam RespectClocking Flag to indicate that the underlying clocking is to be respected when evaluating fanouts.
-     * @param n Node to check.
-     * @return Number of fanouts to `n`.
-     */
-    template <bool RespectClocking = true>
-    [[nodiscard]] auto fanout_size(const node n) const
-    {
-        uint32_t fout_size{0u};
-        auto     fanout_counter = [&fout_size](auto const&) { ++fout_size; };
-
-        foreach_fanout<decltype(fanout_counter), RespectClocking>(n, std::move(fanout_counter));
-
-        return fout_size;
-    }
-
-#pragma endregion
-
-#pragma region Nodes and signals
-
-    /**
-     * Fetches the node that is placed onto a tile pointed to by a given signal. If no node is placed there, the
-     * `const0` node is returned.
-     *
-     * @param s Pointer to a tile.
-     * @return Node at position `t` where `s` points at `t`; or 0 if no node is placed at `t`.
-     */
-    [[nodiscard]] node get_node(const signal& s) const noexcept
-    {
-        if (const auto it = strg->data.tile_node_map.find(s); it != strg->data.tile_node_map.cend())
-        {
-            return it->second;
-        }
-
-        return 0;
-    }
-    /**
-     * Fetches the node that is placed onto the provided tile If no node is placed there, the `const0` node is returned.
-     *
-     * @param t Tile in the layout.
-     * @return Node at position `t`; or 0 if no node is placed at `t`.
-     */
-    [[nodiscard]] node get_node(const tile& t) const noexcept
-    {
-        // a tile without a signal never hosts a node, and its truncated signal would alias another tile
-        return t.fits_signal() ? get_node(static_cast<signal>(t)) : 0;
-    }
-    /**
-     * The inverse function of `get_node`. Fetches the tile that the provided node is placed on. Returns the invalid
-     * tile if the node is not placed.
-     *
-     * @param n Node whose location is desired.
-     * @return Tile at which `n` is placed or the invalid tile if `n` is not placed.
-     */
-    [[nodiscard]] tile get_tile(const node n) const noexcept
-    {
-        if (auto it = strg->data.node_tile_map.find(n); it != strg->data.node_tile_map.cend())
-        {
-            return static_cast<tile>(it->second);
-        }
-
-        return {};
-    }
-    /**
-     * Checks whether a node (not its assigned tile) is dead. Nodes can be dead for a variety of reasons. For instance
-     * if they are dangling (see the `mockturtle` API). In this layout type, nodes are also marked dead when they are
-     * not assigned to a tile (which is considered equivalent to dangling).
-     *
-     * @param n Node to check for liveliness.
-     * @return `true` iff `n` is dead.
-     */
-    [[nodiscard]] bool is_dead(const node n) const noexcept
-    {
-        return static_cast<bool>((strg->nodes[n].data[0].h1 >> 31) & 1);
-    }
-    /**
-     * Invokes the same behavior as `get_tile(n)` but additionally casts the return value to a signal. That is, this
-     * function returns the signal representation of the tile that the node `n` is assigned to.
-     *
-     * @param n Node whose signal is desired.
-     * @return Signal that points to `n`.
-     */
-    [[nodiscard]] signal make_signal(const node n) const noexcept
-    {
-        return static_cast<signal>(get_tile(n));
-    }
-    /**
-     * Moves a given node to a new position and also updates its children, i.e., incoming signals.
-     *
-     * @param n Node to move.
-     * @param t Tile to move `n` to.
-     * @param new_children New incoming signals to `n`.
-     * @return Signal pointing to `n`'s new tile.
-     * @throws std::out_of_range If `t` has no signal encoding.
-     */
-    signal move_node(const node n, const tile& t, const std::vector<signal>& new_children = {})
-    {
-        // validate before the first mutation so that a throw leaves the layout unchanged
-        check_tile(t);
-
-        // n's current position
-        const auto old_t = get_tile(n);
-        // n's children
-        auto& children = strg->nodes[n].children;
-        // decrease ref-count of children
-        std::ranges::for_each(children, [this](const auto& c) { strg->nodes[get_node(c.index)].data[0].h1--; });
-        // clear n's children
-        children.clear();
-
-        // clear old_t only if it is different from t (this function can also be used to simply update n's children)
-        if (t != old_t)
-        {
-            if (t.is_valid())
-            {
-                // if n lived on a tile that was marked as PO, update it with the new tile t
-                std::ranges::replace(strg->outputs, static_cast<signal>(old_t), static_cast<signal>(t));
-            }
-
-            // clear n's position
-            clear_tile(old_t);
-            // assign n to its new position
-            assign_node(t, n);
-            // since clear_tile marks n as dead, it has to be revived
-            revive_node(n);
-        }
-
-        // assign new children
-        std::ranges::copy(new_children, std::back_inserter(children));
-        // increase ref-count to new children
-        std::ranges::for_each(new_children, [this](const auto& nc) { strg->nodes[get_node(nc)].data[0].h1++; });
-
-        return static_cast<signal>(t);
-    }
-    /**
-     * Connects the given signal `s` to the given node `n` as a child. The new child `s` is appended at the end of `n`'s
-     * list of children. Thus, if the order of children is important, `move_node()` should be used instead. Otherwise,
-     * this function has a smaller overhead and is to be preferred.
-     *
-     * @param s New incoming signal to `n`.
-     * @param n Node that should add `s` as its child.
-     * @return Signal pointing to `n`.
-     */
-    signal connect(const signal& s, const node n) noexcept
-    {
-        if (!is_constant(n))
-        {
-            strg->nodes[n].children.push_back(s);
-        }
-
-        return make_signal(n);
-    }
-    /**
-     * Removes all assigned nodes from the given tile and marks them as dead.
-     *
-     * @note This function does not reduce the number of nodes in the layout nor does it reduce the number of PIs
-     * that are being returned via `num_pis()` even if the tile to clear is an input tile. However, the number of POs is
-     * reduced if the tile to clear is an output tile. While this seems counter-intuitive and inconsistent, it is in
-     * line with mockturtle's understanding of nodes and primary outputs.
-     *
-     * @param t Tile whose nodes are to be removed.
-     */
-    void clear_tile(const tile& t) noexcept
-    {
-        if (!t.fits_signal())
+        check_output(src);
+        const auto old_edge = checked_input(dst);
+        if (old_edge != no_index && edges[old_edge].source == src.object.index)
         {
             return;
         }
-
-        if (const auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
+        if (old_edge != no_index)
         {
-            const auto n = it->second;
-
-            if (t.is_valid())
-            {
-                // decrease wire count
-                if (is_wire(n))
-                {
-                    strg->data.num_wires--;
-
-                    // decrease crossing count
-                    if (CoordinateLayout::is_crossing_layer(t) && !is_empty_tile(CoordinateLayout::below(t)))
-                    {
-                        strg->data.num_crossings--;
-                    }
-
-                    if (CoordinateLayout::is_ground_layer(t) &&
-                        CoordinateLayout::is_crossing_layer(CoordinateLayout::above(t)) &&
-                        !is_empty_tile(CoordinateLayout::above(t)))
-                    {
-                        strg->data.num_crossings--;
-                    }
-
-                    // find PO entry and remove it if present
-                    if (const auto po_it = std::ranges::find_if(strg->outputs, [this, &n](const auto& p)
-                                                                { return this->get_node(p.index) == n; });
-                        po_it != strg->outputs.cend())
-                    {
-                        strg->outputs.erase(po_it);
-                    }
-                }
-                else  // decrease gate count
-                {
-                    strg->data.num_gates--;
-                }
-            }
-            // mark node as dead
-            kill_node(n);
-
-            // remove node-tile
-            strg->data.node_tile_map.erase(n);
-            // remove tile-node
-            strg->data.tile_node_map.erase(it);
+            unlink_edge(old_edge);
+        }
+        const auto edge_id    = allocate_edge();
+        auto&      edge       = edges[edge_id];
+        auto&      src_object = objects[src.object.index];
+        edge                  = {src.object.index, dst.object.index, dst.index, no_index, src_object.first_sink};
+        if (edge.next != no_index)
+        {
+            edges[edge.next].previous = edge_id;
+        }
+        src_object.first_sink = edge_id;
+        ++src_object.sink_count;
+        objects[dst.object.index].inputs[dst.index] = edge_id;
+    }
+    /** @brief Disconnects one input without changing the indices of other inputs. */
+    void disconnect(const input_port port)
+    {
+        if (const auto edge = checked_input(port); edge != no_index)
+        {
+            unlink_edge(edge);
         }
     }
-    /**
-     * Necessary function in the `mockturtle` API. However, in this layout type, signals cannot be complemented.
-     *
-     * @param s Signal to check.
-     * @return `false`.
-     */
-    [[nodiscard]] bool is_complemented([[maybe_unused]] const signal& s) const noexcept
+    /** @brief Moves an object without changing its identity or connections. */
+    output_port move_node(const object_id id, const tile& t)
     {
-        return false;
-    }
-
-    [[nodiscard]] uint32_t node_to_index(const node n) const noexcept
-    {
-        return static_cast<uint32_t>(n);
-    }
-
-    [[nodiscard]] node index_to_node(const uint32_t index) const noexcept
-    {
-        return index;
-    }
-    /**
-     * Returns whether a given node is a gate in accordance with `mockturtle`'s definition, i.e., whether it not a
-     * constant and not a PI. Thereby, any wire/buffer (including POs) is a gate if this function is used to check for
-     * it. This poses an inconsistency but is required to comply with certain `mockturtle` algorithms.
-     *
-     * @param n Node to check.
-     * @return `true` iff `n` is neither a constant nor a PI.
-     */
-    [[nodiscard]] bool is_gate(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 >= 2 && !is_pi(n);
-    }
-    /**
-     * Returns whether `n` computes the identity function.
-     *
-     * @param n Node to check.
-     * @return `true` iff `n` computes the identity.
-     */
-    [[nodiscard]] bool is_buf(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 2;
-    }
-    /**
-     * Equivalent to `is_buf`.
-     */
-    [[nodiscard]] bool is_wire(const node n) const noexcept
-    {
-        return is_buf(n);
-    }
-    /**
-     * Returns whether `n` computes the binary inversion (NOT gate).
-     *
-     * @param n Node to check.
-     * @return `true` iff `n` is a NOT gate.
-     */
-    [[nodiscard]] bool is_inv(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 3;
-    }
-
-    [[nodiscard]] bool is_and(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 4;
-    }
-
-    [[nodiscard]] bool is_nand(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 5;
-    }
-
-    [[nodiscard]] bool is_or(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 6;
-    }
-
-    [[nodiscard]] bool is_nor(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 7;
-    }
-
-    [[nodiscard]] bool is_lt(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 8;
-    }
-
-    [[nodiscard]] bool is_ge(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 9;
-    }
-
-    [[nodiscard]] bool is_gt(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 10;
-    }
-
-    [[nodiscard]] bool is_le(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 11;
-    }
-
-    [[nodiscard]] bool is_xor(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 12;
-    }
-
-    [[nodiscard]] bool is_xnor(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 13;
-    }
-
-    [[nodiscard]] bool is_maj(const node n) const noexcept
-    {
-        return strg->nodes[n].data[1].h1 == 14;
-    }
-    /**
-     * Returns whether `n` is a wire and has multiple outputs, thereby, acting as a fanout gate. Note that a fanout will
-     * return `true` for both `is_wire` and `is_fanout`.
-     *
-     * @param n Node to check.
-     * @return `true` iff `n` is a fanout gate.
-     */
-    [[nodiscard]] bool is_fanout(const node n) const noexcept
-    {
-        return is_wire(n) && fanout_size(n) > 1;
-    }
-    /**
-     * Returns whether `n`ode `n` computes a function. That is, this function returns `true` iff `n` is not a constant.
-     *
-     * @param n Node to check.
-     * @return `true` iff `n` is not a constant.
-     */
-    [[nodiscard]] bool is_function(const node n) const
-    {
-        return n > 1;
-    }
-    /**
-     * Returns whether the node assigned to `t` fulfills `is_gate` (in accordance with `mockturtle`'s definition of
-     * gates).
-     *
-     * @param t Tile to check.
-     * @return `true` iff `t` hosts a node that is a neither a constant nor a PI.
-     */
-    [[nodiscard]] bool is_gate_tile(const tile& t) const noexcept
-    {
-        return is_gate(get_node(t));
-    }
-    /**
-     * Returns whether the node assigned to `t` fulfills `is_wire`.
-     *
-     * @param t Tile to check.
-     * @return `true` iff `t` hosts a node that computes the identity.
-     */
-    [[nodiscard]] bool is_wire_tile(const tile& t) const noexcept
-    {
-        return is_wire(get_node(t));
-    }
-    /**
-     * Returns whether `t` does not have a node assigned to it.
-     *
-     * @param t Tile to check.
-     * @return `true` iff `t` is an empty tile.
-     */
-    [[nodiscard]] bool is_empty_tile(const tile& t) const noexcept
-    {
-        return !get_node(t);
-    }
-
-#pragma endregion
-
-#pragma region Iteration
-
-    /**
-     * Applies a function to all primary input nodes (including dead ones) in the layout.
-     *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by
-     * `mockturtle::foreach_element_transform`.
-     * @param fn Functor to apply to each primary input node.
-     */
-    template <typename Fn>
-    void foreach_pi(Fn&& fn) const
-    {
-        using iterator_type = decltype(strg->inputs.cbegin());
-        mockturtle::detail::foreach_element_transform<iterator_type, node>(
-            strg->inputs.cbegin(), strg->inputs.cend(), [](const auto& i) { return static_cast<node>(i); },
-            std::forward<Fn>(fn));
-    }
-    /**
-     * Applies a function to all primary output signals (including those that point to dead nodes) in the layout. Note
-     * the difference to `foreach_pi` in the signature of `fn`. This function applies to all POs as signals whereas
-     * `foreach_pi` applies to all PIs as nodes. This is with respect to `mockturtle`'s API.
-     *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by
-     * `mockturtle::foreach_element_transform`.
-     * @param fn Functor to apply to each primary output signal.
-     */
-    template <typename Fn>
-    void foreach_po(Fn&& fn) const
-    {
-        using iterator_type = decltype(strg->outputs.cbegin());
-        mockturtle::detail::foreach_element_transform<iterator_type, signal>(
-            strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return o.index; }, std::forward<Fn>(fn));
-    }
-    /**
-     * Applies a function to all nodes (excluding dead ones) in the layout.
-     *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by
-     * `mockturtle::foreach_element_if`.
-     * @param fn Functor to apply to each node that is not dead.
-     */
-    template <typename Fn>
-    void foreach_node(Fn&& fn) const
-    {
-        auto r = mockturtle::range<node>(static_cast<node>(strg->nodes.size()));
-        mockturtle::detail::foreach_element_if(
-            r.begin(), r.end(), [this](const auto& n) { return !is_dead(n); }, std::forward<Fn>(fn));
-    }
-    /**
-     * Applies a function to all gates (excluding dead ones) in the layout. Uses `is_gate` to check whether a node is a
-     * gate.
-     *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by
-     * `mockturtle::foreach_element_if`.
-     * @param fn Functor to apply to each gate that is not dead.
-     */
-    template <typename Fn>
-    void foreach_gate(Fn&& fn) const
-    {
-        auto r = mockturtle::range<node>(2u, static_cast<node>(strg->nodes.size()));  // start from 2 to avoid constants
-        mockturtle::detail::foreach_element_if(
-            r.begin(), r.end(), [this](const auto n) { return is_gate(n) && !is_dead(n); }, std::forward<Fn>(fn));
-    }
-    /**
-     * Applies a function to all wires (excluding dead ones) in the layout. Uses `is_wire` to check whether a node is a
-     * wire.
-     *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by
-     * `mockturtle::foreach_element_if`.
-     * @param fn Functor to apply to each wire that is not dead.
-     */
-    template <typename Fn>
-    void foreach_wire(Fn&& fn) const
-    {
-        auto r = mockturtle::range<node>(2u, static_cast<node>(strg->nodes.size()));  // start from 2 to avoid constants
-        mockturtle::detail::foreach_element_if(
-            r.begin(), r.end(), [this](const auto n) { return is_wire(n) && !is_dead(n); }, std::forward<Fn>(fn));
-    }
-    /**
-     * Applies a function to all nodes that are incoming to a given one. Thereby, only incoming clocked zones (+/- one
-     * layer to include crossings) are being considered whose data flow connections are respectively established. That
-     * is, the given function is applied to all nodes that are connected to the one assigned to `t` as fanins on
-     * neighboring tiles.
-     *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by
-     * `mockturtle::foreach_element_transform`.
-     * @tparam RespectClocking Flag to indicate that the underlying clocking is to be respected when evaluating fanins.
-     * @param n Node whose fanins are desired.
-     * @param fn Functor to apply to each of `n`'s fanins.
-     */
-    template <typename Fn, bool RespectClocking = true>
-    void foreach_fanin(const node n, Fn&& fn) const
-    {
-        if (n <= 1)
-        {  // const-0 or const-1
-            return;
-        }
-
-        const auto nt = get_tile(n);
-
-        using iterator_type = decltype(strg->nodes[n].children.cbegin());
-        mockturtle::detail::foreach_element_if_transform<iterator_type, signal>(
-            strg->nodes[n].children.cbegin(), strg->nodes[n].children.cend(),
-            [this, &nt](const auto& c)
-            {
-                const auto ct = get_tile(get_node(c.index));
-
-                if constexpr (RespectClocking)
-                {
-                    return CoordinateLayout::is_adjacent_elevation_of(nt, ct) && this->is_incoming_clocked(nt, ct);
-                }
-                else
-                {
-                    return CoordinateLayout::is_adjacent_elevation_of(nt, ct);
-                }
-            },
-            [this](const auto& c) -> signal { return make_signal(get_node(c.index)); }, std::forward<Fn>(fn));
-    }
-    /**
-     * Returns a container that contains all tiles that feed information to the given one. Thereby, only
-     * incoming clocked zones (+/- one layer to include crossings) are being considered whose data flow connections are
-     * respectively established. That is, the returned container contains all tiles that host nodes that are connected
-     * to the one assigned to `t` as fanins.
-     *
-     * @tparam RespectClocking Flag to indicate that the underlying clocking is to be respected when evaluating fanins.
-     * @param t Tile whose incoming data flow ones are desired.
-     * @return A container that contains all of `t`'s incoming data flow tiles.
-     */
-    template <bool RespectClocking = true>
-    [[nodiscard]] auto incoming_data_flow(const tile& t) const noexcept
-    {
-        std::vector<tile> data_flow{};
-        data_flow.reserve(CoordinateLayout::max_fanin_size);
-
-        auto fanin_collector = [&data_flow](const auto& fin) { data_flow.push_back(static_cast<tile>(fin)); };
-
-        foreach_fanin<decltype(fanin_collector), RespectClocking>(get_node(t), std::move(fanin_collector));
-
-        return data_flow;
-    }
-    /**
-     * Applies a function to all nodes that are outgoing from a given one. Thereby, only outgoing clocked zones (+/- one
-     * layer to include crossings) are being considered whose data flow connections are respectively established. That
-     * is, the given function is applied to all nodes that are connected to the one assigned to `t` as fanouts on
-     * neighboring tiles.
-     *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by
-     * `mockturtle::foreach_element_transform`.
-     * @tparam RespectClocking Flag to indicate that the underlying clocking is to be respected when evaluating fanouts.
-     * @param n Node whose fanouts are desired.
-     * @param fn Functor to apply to each of `n`'s fanouts.
-     */
-    // fn is captured by reference into fanout_collector, which may be invoked up to three times below (once per
-    // adjacent tile); it is forwarded on each of those calls
-    template <typename Fn, bool RespectClocking = true>
-    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
-    void foreach_fanout(const node n, Fn&& fn) const
-    {
-        // `fn` is captured by reference into nested lambdas invoked zero to several times (once per fanout tile); it
-        // is forwarded exactly once at its actual call site further down, not at this outer parameter.
-        if (n <= 1)
-        {  // const-0 or const-1
-            return;
-        }
-
-        const auto nt = get_tile(n);
-
-        auto fanout_collector = [this, &fn, &nt](const auto& out_t)
+        auto& object = checked_object(id);
+        if (object.position == t)
         {
-            const auto apply_functor = [this, &fn](const auto& parent_t)
-            {
-                const auto parent_index = node_to_index(parent_t);
-                auto       parents      = mockturtle::range(parent_index, parent_index + 1);
-                using iterator_type     = decltype(parents.begin());
-                mockturtle::detail::foreach_element_transform<iterator_type, node>(
-                    parents.begin(), parents.end(), [this](const auto& p) -> node { return index_to_node(p); },
-                    std::forward<Fn>(fn));
-            };
-
-            const auto apply_if_parent = [this, &nt, &apply_functor](const auto& adj_t)
-            {
-                if (const auto adj_n = get_node(adj_t); is_child(adj_n, static_cast<signal>(nt)))
-                {
-                    apply_functor(adj_n);
-                }
-            };
-
-            apply_if_parent(out_t);
-
-            if (const auto above_t = CoordinateLayout::above(out_t); above_t != out_t)
-            {
-                apply_if_parent(above_t);
-            }
-            if (const auto below_t = CoordinateLayout::below(out_t); below_t != out_t)
-            {
-                apply_if_parent(below_t);
-            }
-        };
-
-        if constexpr (RespectClocking)
+            return {id, 0};
+        }
+        check_placement(t);
+        occupancy.emplace(t, id.index);
+        occupancy.erase(object.position);
+        object.position = t;
+        return {id, 0};
+    }
+    /** @brief Removes an object and disconnects all inputs and sinks. Stale identities reject. */
+    void remove(const object_id id)
+    {
+        auto& object = checked_object(id);
+        for (const auto edge : object.inputs)
         {
-            this->foreach_outgoing_clocked_zone(nt, std::move(fanout_collector));
+            if (edge != no_index)
+            {
+                unlink_edge(edge);
+            }
+        }
+        while (object.first_sink != no_index)
+        {
+            unlink_edge(object.first_sink);
+        }
+        occupancy.erase(object.position);
+        names.erase(id);
+        if (object.kind == object_kind::pi)
+        {
+            std::erase(inputs, id.index);
+        }
+        if (object.kind == object_kind::po)
+        {
+            std::erase(outputs, id.index);
+        }
+        --live_count;
+        wire_count -= object.function == 2;
+        object.inputs.clear();
+        object.kind = object_kind::removed;
+        if (object.generation == std::numeric_limits<uint32_t>::max())
+        {
+            object.generation = 0;  // Exhausted generations retire the slot rather than revive a stale identity.
         }
         else
         {
-            CoordinateLayout::foreach_adjacent_coordinate(nt, std::move(fanout_collector));
+            ++object.generation;
+            object.first_sink = free_object;
+            free_object       = id.index;
+        }
+    }
+    /** @brief Removes the occupant of a coordinate if present. */
+    void clear_tile(const tile& t)
+    {
+        if (const auto id = find_object(t))
+        {
+            remove(*id);
+        }
+    }
+    /** @brief Counts live objects. */
+    [[nodiscard]] uint32_t size() const noexcept
+    {
+        return live_count;
+    }
+    /** @brief Counts primary inputs. */
+    [[nodiscard]] uint32_t num_pis() const noexcept
+    {
+        return static_cast<uint32_t>(inputs.size());
+    }
+    /** @brief Counts primary outputs. */
+    [[nodiscard]] uint32_t num_pos() const noexcept
+    {
+        return static_cast<uint32_t>(outputs.size());
+    }
+    /** @brief Counts non-identity objects. */
+    [[nodiscard]] uint32_t num_gates() const noexcept
+    {
+        return live_count - wire_count;
+    }
+    /** @brief Counts identity objects, including terminals. */
+    [[nodiscard]] uint32_t num_wires() const noexcept
+    {
+        return wire_count;
+    }
+    /** @brief Returns whether the layout has no objects. */
+    [[nodiscard]] bool is_empty() const noexcept
+    {
+        return live_count == 0;
+    }
+    /** @brief Counts crossing-layer wires above occupied ground-layer tiles. */
+    [[nodiscard]] uint32_t num_crossings() const
+    {
+        uint32_t count{};
+        foreach_wire(
+            [&](const auto id)
+            {
+                const auto t = get_tile(id);
+                count += t.z == 1 && find_object({t.x, t.y, 0}).has_value();
+            });
+        return count;
+    }
+    /** @brief Counts connected input slots, irrespective of physical legality. */
+    [[nodiscard]] uint32_t fanin_size(const object_id id) const
+    {
+        const auto& ins = checked_object(id).inputs;
+        return static_cast<uint32_t>(std::ranges::count_if(ins, [](const auto edge) { return edge != no_index; }));
+    }
+    /** @brief Counts sink input ports, including multiple ports on one object. */
+    [[nodiscard]] uint32_t fanout_size(const object_id id) const
+    {
+        return checked_object(id).sink_count;
+    }
+    /** @brief Returns a primary input in declared interface order. */
+    [[nodiscard]] object_id pi_at(const uint32_t index) const
+    {
+        return identity(inputs.at(index));
+    }
+    /** @brief Returns a primary output in declared interface order. */
+    [[nodiscard]] object_id po_at(const uint32_t index) const
+    {
+        return identity(outputs.at(index));
+    }
+    /** @brief Sets the complete input permutation. Invalid orders reject without mutation. */
+    void set_input_order(const std::span<const object_id> order)
+    {
+        set_terminal_order(inputs, order, object_kind::pi);
+    }
+    /** @brief Sets the complete output permutation. Invalid orders reject without mutation. */
+    void set_output_order(const std::span<const object_id> order)
+    {
+        set_terminal_order(outputs, order, object_kind::po);
+    }
+    /** @brief Returns whether an object is a primary input. */
+    [[nodiscard]] bool is_pi(const object_id id) const
+    {
+        return checked_object(id).kind == object_kind::pi;
+    }
+    /** @brief Returns whether an object is a primary output. */
+    [[nodiscard]] bool is_po(const object_id id) const
+    {
+        return checked_object(id).kind == object_kind::po;
+    }
+    /** @brief Returns whether an object is a logic gate rather than a wire or terminal. */
+    [[nodiscard]] bool is_gate(const object_id id) const
+    {
+        return checked_object(id).kind == object_kind::gate;
+    }
+    /** @brief Returns whether an object computes the identity function. */
+    [[nodiscard]] bool is_buf(const object_id id) const
+    {
+        return checked_object(id).function == 2;
+    }
+    /** @brief Returns whether an object computes the identity function. */
+    [[nodiscard]] bool is_wire(const object_id id) const
+    {
+        return is_buf(id);
+    }
+    /** @brief Returns whether an identity object drives more than one input port. */
+    [[nodiscard]] bool is_fanout(const object_id id) const
+    {
+        return is_wire(id) && fanout_size(id) > 1;
+    }
+    /** @brief Returns whether the object computes INV. */
+    [[nodiscard]] bool is_inv(const object_id id) const
+    {
+        return checked_object(id).function == 3;
+    }
+    /** @brief Returns whether the object computes AND. */
+    [[nodiscard]] bool is_and(const object_id id) const
+    {
+        return checked_object(id).function == 4;
+    }
+    /** @brief Returns whether the object computes NAND. */
+    [[nodiscard]] bool is_nand(const object_id id) const
+    {
+        return checked_object(id).function == 5;
+    }
+    /** @brief Returns whether the object computes OR. */
+    [[nodiscard]] bool is_or(const object_id id) const
+    {
+        return checked_object(id).function == 6;
+    }
+    /** @brief Returns whether the object computes NOR. */
+    [[nodiscard]] bool is_nor(const object_id id) const
+    {
+        return checked_object(id).function == 7;
+    }
+    /** @brief Returns whether the object computes LT. */
+    [[nodiscard]] bool is_lt(const object_id id) const
+    {
+        return checked_object(id).function == 8;
+    }
+    /** @brief Returns whether the object computes GE. */
+    [[nodiscard]] bool is_ge(const object_id id) const
+    {
+        return checked_object(id).function == 9;
+    }
+    /** @brief Returns whether the object computes GT. */
+    [[nodiscard]] bool is_gt(const object_id id) const
+    {
+        return checked_object(id).function == 10;
+    }
+    /** @brief Returns whether the object computes LE. */
+    [[nodiscard]] bool is_le(const object_id id) const
+    {
+        return checked_object(id).function == 11;
+    }
+    /** @brief Returns whether the object computes XOR. */
+    [[nodiscard]] bool is_xor(const object_id id) const
+    {
+        return checked_object(id).function == 12;
+    }
+    /** @brief Returns whether the object computes XNOR. */
+    [[nodiscard]] bool is_xnor(const object_id id) const
+    {
+        return checked_object(id).function == 13;
+    }
+    /** @brief Returns whether the object computes MAJ. */
+    [[nodiscard]] bool is_maj(const object_id id) const
+    {
+        return checked_object(id).function == 14;
+    }
+    /** @brief Returns whether the coordinate hosts a pi. */
+    [[nodiscard]] bool is_pi_tile(const tile& t) const
+    {
+        const auto id = find_object(t);
+        return id && is_pi(*id);
+    }
+    /** @brief Returns whether the coordinate hosts a po. */
+    [[nodiscard]] bool is_po_tile(const tile& t) const
+    {
+        const auto id = find_object(t);
+        return id && is_po(*id);
+    }
+    /** @brief Returns whether the coordinate hosts a gate. */
+    [[nodiscard]] bool is_gate_tile(const tile& t) const
+    {
+        const auto id = find_object(t);
+        return id && is_gate(*id);
+    }
+    /** @brief Returns whether the coordinate hosts a wire. */
+    [[nodiscard]] bool is_wire_tile(const tile& t) const
+    {
+        const auto id = find_object(t);
+        return id && is_wire(*id);
+    }
+
+    /** @brief Returns whether a coordinate has no occupant. */
+    [[nodiscard]] bool is_empty_tile(const tile& t) const noexcept
+    {
+        return !find_object(t);
+    }
+    /** @brief Visits live objects. Callbacks may accept an object and enumeration index and return false to stop. */
+    template <typename Fn>
+    void foreach_node(Fn&& fn) const
+    {
+        uint32_t index{};
+        for (uint32_t slot{}; slot < objects.size(); ++slot)
+        {
+            if (objects[slot].kind != object_kind::removed && !visit(fn, identity(slot), index++))
+            {
+                break;
+            }
+        }
+    }
+    /** @brief Visits primary inputs in declared interface order. */
+    template <typename Fn>
+    void foreach_pi(Fn&& fn) const
+    {
+        foreach_terminal(inputs, fn);
+    }
+    /** @brief Visits primary outputs in declared interface order. */
+    template <typename Fn>
+    void foreach_po(Fn&& fn) const
+    {
+        foreach_terminal(outputs, fn);
+    }
+    /** @brief Visits logic gates. */
+    template <typename Fn>
+    void foreach_gate(Fn&& fn) const
+    {
+        uint32_t index{};
+        foreach_node([&](const auto id) { return !is_gate(id) || visit(fn, id, index++); });
+    }
+    /** @brief Visits identity objects, including terminals. */
+    template <typename Fn>
+    void foreach_wire(Fn&& fn) const
+    {
+        uint32_t index{};
+        foreach_node([&](const auto id) { return !is_wire(id) || visit(fn, id, index++); });
+    }
+    /**
+     * @brief Visits declared sources in input-index order. Disconnected inputs retain their indices.
+     * Callbacks must not remove the traversed object or change its input connections.
+     */
+    template <typename Fn>
+    void foreach_fanin(const object_id id, Fn&& fn) const
+    {
+        const auto count = input_count(id);
+        for (uint32_t input{}; input < count; ++input)
+        {
+            const auto edge = objects[id.index].inputs[input];
+            if (edge != no_index && !visit(fn, output_port{identity(edges[edge].source), 0}, input))
+            {
+                break;
+            }
         }
     }
     /**
-     * Returns a container that contains all tiles that accept information from the given one. Thereby,
-     * only outgoing clocked zones (+/- one layer to include crossings) are being considered whose data flow connections
-     * are respectively established. That is, the returned container contains all tiles that host nodes that are
-     * connected to the one assigned to `t` as fanouts.
-     *
-     * @tparam RespectClocking Flag to indicate that the underlying clocking is to be respected when evaluating fanouts.
-     * @param t Tile whose outgoing data flow ones are desired.
-     * @return A container that contains all of `t`'s outgoing data flow tiles.
+     * @brief Visits sink input ports of an output, irrespective of physical legality.
+     * Callbacks must not remove the source object or change its sink connections.
      */
+    template <typename Fn>
+    void foreach_sink(const output_port src, Fn&& fn) const
+    {
+        check_output(src);
+        uint32_t index{};
+        for (auto edge = objects[src.object.index].first_sink; edge != no_index; edge = edges[edge].next)
+        {
+            const auto& connection = edges[edge];
+            if (!visit(fn, input_port{identity(connection.destination), connection.input}, index++))
+            {
+                break;
+            }
+        }
+    }
+    /** @brief Visits destination objects once per connected input port. */
+    template <typename Fn>
+    void foreach_fanout(const object_id id, Fn&& fn) const
+    {
+        foreach_sink(output(id), [&](const auto port, const auto index) { return visit(fn, port.object, index); });
+    }
+    /** @brief Returns coordinates of declared sources; optionally filters physical clocking and adjacency. */
     template <bool RespectClocking = true>
-    [[nodiscard]] auto outgoing_data_flow(const tile& t) const noexcept
+    [[nodiscard]] std::vector<tile> incoming_data_flow(const tile& t) const
     {
-        std::vector<tile> data_flow{};
-        data_flow.reserve(CoordinateLayout::max_fanin_size);
-
-        const auto fanout_collector = [this, &data_flow](const auto& fout) { data_flow.push_back(get_tile(fout)); };
-
-        foreach_fanout<decltype(fanout_collector), RespectClocking>(get_node(t), std::move(fanout_collector));
-
-        return data_flow;
-    }
-
-    /**
-     * Applies a function to all combinational input nodes (including dead ones) in the layout. Alias for
-     * `foreach_pi`.
-     *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by
-     * `mockturtle::foreach_element_transform`.
-     * @param fn Functor to apply to each combinational input node.
-     */
-    template <typename Fn>
-    void foreach_ci(Fn&& fn) const
-    {
-        foreach_pi(std::forward<Fn>(fn));
-    }
-    /**
-     * Applies a function to all combinational output signals (including those that point to dead nodes) in the
-     * layout. Alias for `foreach_po`.
-     *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by
-     * `mockturtle::foreach_element_transform`.
-     * @param fn Functor to apply to each combinational output signal.
-     */
-    template <typename Fn>
-    void foreach_co(Fn&& fn) const
-    {
-        foreach_po(std::forward<Fn>(fn));
-    }
-
-#pragma endregion
-
-#pragma region Simulate values
-
-    template <typename Iterator>
-    mockturtle::iterates_over_t<Iterator, bool> compute(const node n, Iterator begin, Iterator end) const
-    {
-        uint32_t index{0};
-        while (begin != end)
+        std::vector<tile> result{};
+        if (const auto id = find_object(t))
         {
-            index <<= 1u;
-            index ^= *begin++ ? 1 : 0;
+            foreach_fanin(*id,
+                          [&](const auto src)
+                          {
+                              const auto c = get_tile(src.object);
+                              if (this->is_adjacent_elevation_of(t, c) &&
+                                  (!RespectClocking || is_incoming_clocked(t, c)))
+                              {
+                                  result.push_back(c);
+                              }
+                          });
         }
-
-        return kitty::get_bit(strg->data.cache[strg->nodes[n].data[1].h1], index);
-    }
-
-    template <typename Iterator>
-    mockturtle::iterates_over_truth_table_t<Iterator> compute(const node n, Iterator begin, Iterator end) const
-    {
-        std::vector<typename Iterator::value_type> tts{begin, end};
-
-        const auto num_fanin = fanin_size(n);
-        assert(tts.size() == num_fanin);
-        assert(num_fanin != 0ul);
-
-        /* resulting truth table has the same size as any of the children */
-        auto       result  = tts.front().construct();
-        const auto gate_tt = strg->data.fn_cache[strg->nodes[n].data[1].h1];
-
-        for (uint32_t i = 0u; i < static_cast<uint32_t>(result.num_bits()); ++i)
-        {
-            uint32_t pattern = 0u;
-            for (uint32_t j = 0u; j < num_fanin; ++j)
-            {
-                pattern |= static_cast<uint32_t>(kitty::get_bit(tts[j], i)) << j;
-            }
-
-            if (kitty::get_bit(gate_tt, pattern))
-            {
-                kitty::set_bit(result, i);
-            }
-        }
-
         return result;
     }
-
-#pragma endregion
-
-#pragma region Cardinal operations
-
-    /**
-     * Checks whether signal `s` is incoming to tile `t`. That is, whether tile `t` hosts a node that has a fanin
-     * assigned to the tile that signal `s` points to.
-     *
-     * @tparam RespectClocking Flag to indicate that the underlying clocking is to be respected when evaluating fanins.
-     * @param t Base tile.
-     * @param s Signal pointing to a potential incoming tile to `t`.
-     * @return `true` iff `s` is incoming to `t`.
-     */
+    /** @brief Returns coordinates of declared sinks; optionally filters physical clocking and adjacency. */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool is_incoming_signal(const tile& t, const signal& s) const noexcept
+    [[nodiscard]] std::vector<tile> outgoing_data_flow(const tile& t) const
     {
-        bool incoming_signal   = false;
-        auto in_signal_checker = [this, &s, &incoming_signal](const auto& i)
+        std::vector<tile> result{};
+        if (const auto id = find_object(t))
         {
-            if (const auto it = static_cast<tile>(i); i == s || static_cast<signal>(CoordinateLayout::above(it)) == s ||
-                                                      static_cast<signal>(CoordinateLayout::below(it)) == s)
-            {
-                incoming_signal = true;
-                return false;  // abort iteration
-            }
-
-            return true;  // keep looping
-        };
-
-        foreach_fanin<decltype(in_signal_checker), RespectClocking>(get_node(t), std::move(in_signal_checker));
-
-        return incoming_signal;
+            foreach_fanout(*id,
+                           [&](const auto dst)
+                           {
+                               const auto c = get_tile(dst);
+                               if (this->is_adjacent_elevation_of(t, c) &&
+                                   (!RespectClocking || is_outgoing_clocked(t, c)))
+                               {
+                                   result.push_back(c);
+                               }
+                           });
+        }
+        return result;
+    }
+    /** @brief Sets an object's name. */
+    void set_name(const object_id id, const std::string& name)
+    {
+        static_cast<void>(checked_object(id));
+        if (name.empty())
+        {
+            names.erase(id);
+        }
+        else
+        {
+            names[id] = name;
+        }
+    }
+    /** @brief Sets an output's object name. */
+    void set_name(const output_port port, const std::string& name)
+    {
+        check_output(port);
+        set_name(port.object, name);
+    }
+    /** @brief Returns an object's name, or an empty string for an unnamed object. */
+    [[nodiscard]] std::string get_name(const object_id id) const
+    {
+        static_cast<void>(checked_object(id));
+        const auto it = names.find(id);
+        return it == names.end() ? std::string{} : it->second;
+    }
+    /** @brief Returns an output's object name. */
+    [[nodiscard]] std::string get_name(const output_port port) const
+    {
+        check_output(port);
+        return get_name(port.object);
+    }
+    /** @brief Returns whether an object has a name. */
+    [[nodiscard]] bool has_name(const object_id id) const
+    {
+        return !get_name(id).empty();
+    }
+    /** @brief Returns whether an output's object has a name. */
+    [[nodiscard]] bool has_name(const output_port port) const
+    {
+        return !get_name(port).empty();
+    }
+    /** @brief Returns the input name at an interface index. */
+    [[nodiscard]] std::string get_input_name(const uint32_t index) const
+    {
+        return get_name(pi_at(index));
+    }
+    /** @brief Sets the input name at an interface index. */
+    void set_input_name(const uint32_t index, const std::string& name)
+    {
+        set_name(pi_at(index), name);
+    }
+    /** @brief Returns whether an input has a name. */
+    [[nodiscard]] bool has_input_name(const uint32_t index) const
+    {
+        return !get_input_name(index).empty();
+    }
+    /** @brief Returns the output name at an interface index. */
+    [[nodiscard]] std::string get_output_name(const uint32_t index) const
+    {
+        return get_name(po_at(index));
+    }
+    /** @brief Sets the output name at an interface index. */
+    void set_output_name(const uint32_t index, const std::string& name)
+    {
+        set_name(po_at(index), name);
+    }
+    /** @brief Returns whether an output has a name. */
+    [[nodiscard]] bool has_output_name(const uint32_t index) const
+    {
+        return !get_output_name(index).empty();
+    }
+    /** @brief Returns the layout name. */
+    [[nodiscard]] std::string get_layout_name() const
+    {
+        return layout_name;
+    }
+    /** @brief Sets the layout name. */
+    void set_layout_name(const std::string& name)
+    {
+        layout_name = name;
+    }
+    /** @brief Checks for a physical incoming connection from the given x/y location. */
+    template <bool RespectClocking = true>
+    [[nodiscard]] bool is_incoming_signal(const tile& t, const std::optional<tile>& source_tile) const
+    {
+        if (!source_tile)
+        {
+            return false;
+        }
+        bool found{};
+        if (const auto id = find_object(t))
+        {
+            foreach_fanin(*id,
+                          [&](const auto port)
+                          {
+                              const auto c = get_tile(port.object);
+                              found        = this->is_adjacent_elevation_of(t, c) &&
+                                             (!RespectClocking || is_incoming_clocked(t, c)) && c.x == source_tile->x &&
+                                             c.y == source_tile->y &&
+                                             std::abs(static_cast<int64_t>(c.z) - source_tile->z) <= 1;
+                              return !found;
+                          });
+        }
+        return found;
+    }
+    /** @brief Checks for a physical outgoing connection to the given x/y location. */
+    template <bool RespectClocking = true>
+    [[nodiscard]] bool is_outgoing_signal(const tile& t, const std::optional<tile>& target_tile) const
+    {
+        if (!target_tile)
+        {
+            return false;
+        }
+        bool found{};
+        if (const auto id = find_object(t))
+        {
+            foreach_fanout(*id,
+                           [&](const auto dst)
+                           {
+                               const auto c = get_tile(dst);
+                               found = this->is_adjacent_elevation_of(t, c) &&
+                                       (!RespectClocking || is_outgoing_clocked(t, c)) && c.x == target_tile->x &&
+                                       c.y == target_tile->y &&
+                                       std::abs(static_cast<int64_t>(c.z) - target_tile->z) <= 1;
+                               return !found;
+                           });
+        }
+        return found;
     }
     /**
      * Checks whether the given tile has an incoming one in northern direction.
@@ -1500,9 +928,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `north(t)` is incoming to `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_northern_incoming_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_northern_incoming_signal(const tile& t) const
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::north(t)));
+        return is_incoming_signal<RespectClocking>(t, CoordinateLayout::north(t));
     }
     /**
      * Checks whether the given tile has an incoming one in north-eastern direction.
@@ -1512,9 +940,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `north_east(t)` is incoming to `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_north_eastern_incoming_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_north_eastern_incoming_signal(const tile& t) const
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::north_east(t)));
+        return is_incoming_signal<RespectClocking>(t, CoordinateLayout::north_east(t));
     }
     /**
      * Checks whether the given tile has an incoming one in eastern direction.
@@ -1524,9 +952,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `east(t)` is incoming to `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_eastern_incoming_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_eastern_incoming_signal(const tile& t) const
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::east(t)));
+        return is_incoming_signal<RespectClocking>(t, CoordinateLayout::east(t));
     }
     /**
      * Checks whether the given tile has an incoming one in south-eastern direction.
@@ -1536,9 +964,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `south_east(t)` is incoming to `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_south_eastern_incoming_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_south_eastern_incoming_signal(const tile& t) const
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::south_east(t)));
+        return is_incoming_signal<RespectClocking>(t, CoordinateLayout::south_east(t));
     }
     /**
      * Checks whether the given tile has an incoming one in southern direction.
@@ -1548,9 +976,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `south(t)` is incoming to `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_southern_incoming_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_southern_incoming_signal(const tile& t) const
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::south(t)));
+        return is_incoming_signal<RespectClocking>(t, CoordinateLayout::south(t));
     }
     /**
      * Checks whether the given tile has an incoming one in south-western direction.
@@ -1560,9 +988,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `south_west(t)` is incoming to `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_south_western_incoming_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_south_western_incoming_signal(const tile& t) const
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::south_west(t)));
+        return is_incoming_signal<RespectClocking>(t, CoordinateLayout::south_west(t));
     }
     /**
      * Checks whether the given tile has an incoming one in western direction.
@@ -1572,9 +1000,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `west(t)` is incoming to `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_western_incoming_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_western_incoming_signal(const tile& t) const
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::west(t)));
+        return is_incoming_signal<RespectClocking>(t, CoordinateLayout::west(t));
     }
     /**
      * Checks whether the given tile has an incoming one in north-western direction.
@@ -1584,9 +1012,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `north_west(t)` is incoming to `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_north_western_incoming_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_north_western_incoming_signal(const tile& t) const
     {
-        return is_incoming_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::north_west(t)));
+        return is_incoming_signal<RespectClocking>(t, CoordinateLayout::north_west(t));
     }
     /**
      * Checks whether the given tile has no incoming tiles.
@@ -1598,37 +1026,7 @@ class gate_level_layout : public CoordinateLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_no_incoming_signal(const tile& t) const noexcept
     {
-        return fanin_size<RespectClocking>(get_node(t)) == 0u;
-    }
-    /**
-     * Checks whether signal `s` is outgoing from tile `t`. That is, whether tile `t` hosts a node that has a fanout
-     * assigned to the tile that signal `s` points to.
-     *
-     * @tparam RespectClocking Flag to indicate that the underlying clocking is to be respected when evaluating fanouts.
-     * @param t Base tile.
-     * @param s Signal pointing to a potential outgoing tile of `t`.
-     * @return `true` iff `s` is outgoing from `t`.
-     */
-    template <bool RespectClocking = true>
-    [[nodiscard]] bool is_outgoing_signal(const tile& t, const signal& s) const noexcept
-    {
-        bool outgoing_signal    = false;
-        auto out_signal_checker = [this, &s, &outgoing_signal](const auto& o)
-        {
-            if (const auto ot = get_tile(o); static_cast<signal>(ot) == s ||
-                                             static_cast<signal>(CoordinateLayout::above(ot)) == s ||
-                                             static_cast<signal>(CoordinateLayout::below(ot)) == s)
-            {
-                outgoing_signal = true;
-                return false;  // abort iteration
-            }
-
-            return true;  // keep looping
-        };
-
-        foreach_fanout<decltype(out_signal_checker), RespectClocking>(get_node(t), std::move(out_signal_checker));
-
-        return outgoing_signal;
+        return incoming_data_flow<RespectClocking>(t).size() == 0u;
     }
     /**
      * Checks whether the given tile has an outgoing one in northern direction.
@@ -1638,9 +1036,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `north(t)` is outgoing from `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_northern_outgoing_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_northern_outgoing_signal(const tile& t) const
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::north(t)));
+        return is_outgoing_signal<RespectClocking>(t, CoordinateLayout::north(t));
     }
     /**
      * Checks whether the given tile has an outgoing one in north-eastern direction.
@@ -1650,9 +1048,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `north_east(t)` is outgoing from `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_north_eastern_outgoing_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_north_eastern_outgoing_signal(const tile& t) const
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::north_east(t)));
+        return is_outgoing_signal<RespectClocking>(t, CoordinateLayout::north_east(t));
     }
     /**
      * Checks whether the given tile has an outgoing one in eastern direction.
@@ -1662,9 +1060,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `east(t)` is outgoing from `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_eastern_outgoing_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_eastern_outgoing_signal(const tile& t) const
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::east(t)));
+        return is_outgoing_signal<RespectClocking>(t, CoordinateLayout::east(t));
     }
     /**
      * Checks whether the given tile has an outgoing one in south-eastern direction.
@@ -1674,9 +1072,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `south_east(t)` is outgoing from `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_south_eastern_outgoing_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_south_eastern_outgoing_signal(const tile& t) const
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::south_east(t)));
+        return is_outgoing_signal<RespectClocking>(t, CoordinateLayout::south_east(t));
     }
     /**
      * Checks whether the given tile has an outgoing one in southern direction.
@@ -1686,9 +1084,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `south(t)` is outgoing from `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_southern_outgoing_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_southern_outgoing_signal(const tile& t) const
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::south(t)));
+        return is_outgoing_signal<RespectClocking>(t, CoordinateLayout::south(t));
     }
     /**
      * Checks whether the given tile has an outgoing one in south-western direction.
@@ -1698,9 +1096,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `south_west(t)` is outgoing from `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_south_western_outgoing_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_south_western_outgoing_signal(const tile& t) const
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::south_west(t)));
+        return is_outgoing_signal<RespectClocking>(t, CoordinateLayout::south_west(t));
     }
     /**
      * Checks whether the given tile has an outgoing one in western direction.
@@ -1710,9 +1108,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `west(t)` is outgoing from `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_western_outgoing_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_western_outgoing_signal(const tile& t) const
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::west(t)));
+        return is_outgoing_signal<RespectClocking>(t, CoordinateLayout::west(t));
     }
     /**
      * Checks whether the given tile has an outgoing one in north-western direction.
@@ -1722,9 +1120,9 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `north_west(t)` is outgoing from `t`.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_north_western_outgoing_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_north_western_outgoing_signal(const tile& t) const
     {
-        return is_outgoing_signal<RespectClocking>(t, static_cast<signal>(CoordinateLayout::north_west(t)));
+        return is_outgoing_signal<RespectClocking>(t, CoordinateLayout::north_west(t));
     }
     /**
      * Checks whether the given tile has no outgoing tiles.
@@ -1736,7 +1134,7 @@ class gate_level_layout : public CoordinateLayout
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_no_outgoing_signal(const tile& t) const noexcept
     {
-        return fanout_size<RespectClocking>(get_node(t)) == 0u;
+        return outgoing_data_flow<RespectClocking>(t).size() == 0u;
     }
     /**
      * Checks whether the given tile `t` has its incoming and outgoing signals on opposite sides of the tile. For this
@@ -1759,7 +1157,7 @@ class gate_level_layout : public CoordinateLayout
             t,
             [this, &t, &opposite_signals](const auto& sp)
             {
-                const auto s1 = static_cast<signal>(std::get<0>(sp)), s2 = static_cast<signal>(std::get<1>(sp));
+                const auto s1 = std::get<0>(sp), s2 = std::get<1>(sp);
 
                 if ((is_incoming_signal<RespectClocking>(t, s1) && is_outgoing_signal<RespectClocking>(t, s2)) ||
                     (is_incoming_signal<RespectClocking>(t, s2) && is_outgoing_signal<RespectClocking>(t, s1)))
@@ -1777,87 +1175,14 @@ class gate_level_layout : public CoordinateLayout
 
 #pragma endregion
 
-#pragma region Custom node values
-
-    /**
-     * Resets the custom value of every node in the layout to 0.
-     */
-    void clear_values() const noexcept
-    {
-        std::ranges::for_each(strg->nodes, [](auto& n) { n.data[0].h2 = 0; });
-    }
-
-    [[nodiscard]] uint32_t value(const node n) const
-    {
-        return strg->nodes[n].data[0].h2;
-    }
-
-    void set_value(const node n, uint32_t v) const
-    {
-        strg->nodes[n].data[0].h2 = v;
-    }
-
-    [[nodiscard]] uint32_t incr_value(const node n) const
-    {
-        return static_cast<uint32_t>(strg->nodes[n].data[0].h2++);
-    }
-
-    [[nodiscard]] uint32_t decr_value(const node n) const
-    {
-        return static_cast<uint32_t>(--strg->nodes[n].data[0].h2);
-    }
-
-#pragma endregion
-
-#pragma region Visited flags
-
-    /**
-     * Resets the visited flag of every node in the layout to 0.
-     */
-    void clear_visited() const
-    {
-        std::ranges::for_each(strg->nodes, [](auto& n) { n.data[1].h2 = 0; });
-    }
-
-    [[nodiscard]] auto visited(const node n) const
-    {
-        return strg->nodes[n].data[1].h2;
-    }
-
-    void set_visited(const node n, uint32_t v) const
-    {
-        strg->nodes[n].data[1].h2 = v;
-    }
-
-    [[nodiscard]] uint32_t trav_id() const
-    {
-        return strg->data.trav_id;
-    }
-
-    void incr_trav_id() const
-    {
-        strg->data.trav_id++;
-    }
-
-#pragma endregion
-
-#pragma region General methods
-
-    auto& events() const
-    {
-        return *evnts;
-    }
-
-#pragma endregion
-
     /**
      * Replaces the stored clocking scheme with the provided one.
      *
      * @param scheme New clocking scheme.
      */
-    void replace_clocking_scheme(const clocking_scheme_t& scheme) noexcept
+    void replace_clocking_scheme(const clocking_scheme_t& scheme)
     {
-        strg->data.clocking.replace_clocking_scheme(scheme);
+        clocking_state.replace_clocking_scheme(scheme);
     }
     /**
      * Overrides the clock number of a tile in the stored scheme. The clock number applies to every layer of the tile,
@@ -1866,9 +1191,9 @@ class gate_level_layout : public CoordinateLayout
      * @param cz Clock zone to override.
      * @param cn New clock number for `cz`.
      */
-    void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
+    void assign_clock_number(const clock_zone& cz, const clock_number_t cn)
     {
-        strg->data.clocking.assign_clock_number(cz, cn);
+        clocking_state.assign_clock_number(cz, cn);
     }
     /**
      * Returns the clock number of a tile. Every layer of a tile has the same clock number, so the z-coordinate of `cz`
@@ -1877,9 +1202,9 @@ class gate_level_layout : public CoordinateLayout
      * @param cz Clock zone.
      * @return Clock number of `cz`.
      */
-    [[nodiscard]] clock_number_t get_clock_number(const clock_zone& cz) const noexcept
+    [[nodiscard]] clock_number_t get_clock_number(const clock_zone& cz) const
     {
-        return strg->data.clocking.get_clock_number(cz);
+        return clocking_state.get_clock_number(cz);
     }
     /**
      * Returns the number of clock phases in the layout. Each clock cycle is divided into n phases. In QCA, the number
@@ -1887,18 +1212,18 @@ class gate_level_layout : public CoordinateLayout
      *
      * @return The number of different clock signals in the layout.
      */
-    [[nodiscard]] clock_number_t num_clocks() const noexcept
+    [[nodiscard]] clock_number_t num_clocks() const
     {
-        return strg->data.clocking.num_clocks();
+        return clocking_state.num_clocks();
     }
     /**
      * Returns whether the layout is clocked by a regular clocking scheme with no overwritten zones.
      *
      * @return `true` iff the layout is clocked by a regular scheme and no zones have been overwritten.
      */
-    [[nodiscard]] bool is_regularly_clocked() const noexcept
+    [[nodiscard]] bool is_regularly_clocked() const
     {
-        return strg->data.clocking.is_regularly_clocked();
+        return clocking_state.is_regularly_clocked();
     }
     /**
      * Compares the stored clocking scheme against the provided name. Predefined names are constants in
@@ -1907,18 +1232,18 @@ class gate_level_layout : public CoordinateLayout
      * @param name Clocking scheme name.
      * @return `true` iff the layout is clocked by a clocking scheme of name `name`.
      */
-    [[nodiscard]] bool is_clocking_scheme(const std::string_view& name) const noexcept
+    [[nodiscard]] bool is_clocking_scheme(const std::string_view& name) const
     {
-        return strg->data.clocking.is_clocking_scheme(name);
+        return clocking_state.is_clocking_scheme(name);
     }
     /**
      * Returns a copy of the stored clocking scheme object.
      *
      * @return A copy of the stored clocking scheme object.
      */
-    [[nodiscard]] clocking_scheme_t get_clocking_scheme() const noexcept
+    [[nodiscard]] clocking_scheme_t get_clocking_scheme() const
     {
-        return strg->data.clocking.get_clocking_scheme();
+        return clocking_state.get_clocking_scheme();
     }
     /**
      * Evaluates whether clock zone `cz2` feeds information to clock zone `cz1`, i.e., whether `cz2` is clocked with a
@@ -1928,9 +1253,9 @@ class gate_level_layout : public CoordinateLayout
      * @param cz2 Clock zone to check whether its clock number is lower by 1.
      * @return `true` iff `cz2` can feed information to `cz1`.
      */
-    [[nodiscard]] bool is_incoming_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
+    [[nodiscard]] bool is_incoming_clocked(const clock_zone& cz1, const clock_zone& cz2) const
     {
-        return strg->data.clocking.is_incoming_clocked(cz1, cz2);
+        return clocking_state.is_incoming_clocked(cz1, cz2);
     }
     /**
      * Evaluates whether clock zone `cz2` accepts information from clock zone `cz1`, i.e., whether `cz2` is clocked with
@@ -1940,9 +1265,9 @@ class gate_level_layout : public CoordinateLayout
      * @param cz2 Clock zone to check whether its clock number is higher by 1.
      * @return `true` iff `cz2` can accept information from `cz1`.
      */
-    [[nodiscard]] bool is_outgoing_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
+    [[nodiscard]] bool is_outgoing_clocked(const clock_zone& cz1, const clock_zone& cz2) const
     {
-        return strg->data.clocking.is_outgoing_clocked(cz1, cz2);
+        return clocking_state.is_outgoing_clocked(cz1, cz2);
     }
 
     /**
@@ -1952,9 +1277,9 @@ class gate_level_layout : public CoordinateLayout
      * @param se Number of full clock cycles to extend `cz`'s Hold phase by. If this value is 0, `cz` is turned back
      * into a normal clock zone.
      */
-    void assign_synchronization_element(const clock_zone& cz, const sync_elem_t se) noexcept
+    void assign_synchronization_element(const clock_zone& cz, const sync_elem_t se)
     {
-        strg->data.clocking.assign_synchronization_element(cz, se);
+        clocking_state.assign_synchronization_element(cz, se);
     }
     /**
      * Check whether the provided clock zone is a synchronization element.
@@ -1962,9 +1287,9 @@ class gate_level_layout : public CoordinateLayout
      * @param cz Clock zone to check.
      * @return `true` iff `cz` is a synchronization element.
      */
-    [[nodiscard]] bool is_synchronization_element(const clock_zone& cz) const noexcept
+    [[nodiscard]] bool is_synchronization_element(const clock_zone& cz) const
     {
-        return strg->data.clocking.is_synchronization_element(cz);
+        return clocking_state.is_synchronization_element(cz);
     }
     /**
      * Returns the Hold phase extension in clock cycles of clock zone `cz`.
@@ -1972,24 +1297,24 @@ class gate_level_layout : public CoordinateLayout
      * @param cz Clock zone to check.
      * @return Synchronization element value, i.e., Hold phase extension, of clock zone `cz`.
      */
-    [[nodiscard]] sync_elem_t get_synchronization_element(const clock_zone& cz) const noexcept
+    [[nodiscard]] sync_elem_t get_synchronization_element(const clock_zone& cz) const
     {
-        return strg->data.clocking.get_synchronization_element(cz);
+        return clocking_state.get_synchronization_element(cz);
     }
 
     /** @brief Counts zones with a nonzero Hold-phase extension. @return Synchronization element count. */
-    [[nodiscard]] uint32_t num_se() const noexcept
+    [[nodiscard]] uint32_t num_se() const
     {
-        return strg->data.clocking.num_se();
+        return clocking_state.num_se();
     }
     /**
      * Marks the given coordinate as obstructed.
      *
      * @param c clock_zone to obstruct.
      */
-    void obstruct_coordinate(const clock_zone& c) noexcept
+    void obstruct_coordinate(const clock_zone& c)
     {
-        strg->data.obstructions.obstruct_coordinate(c);
+        obstruction_state.obstruct_coordinate(c);
     }
     /**
      * Marks the connection from coordinate `src` to coordinate `tgt` as obstructed.
@@ -1999,9 +1324,9 @@ class gate_level_layout : public CoordinateLayout
      * @param src Source coordinate.
      * @param tgt Target coordinate.
      */
-    void obstruct_connection(const clock_zone& src, const clock_zone& tgt) noexcept
+    void obstruct_connection(const clock_zone& src, const clock_zone& tgt)
     {
-        strg->data.obstructions.obstruct_connection(src, tgt);
+        obstruction_state.obstruct_connection(src, tgt);
     }
     /**
      * Clears the obstruction status of the given coordinate `c` if the obstruction was manually marked via
@@ -2009,9 +1334,9 @@ class gate_level_layout : public CoordinateLayout
      *
      * @param c clock_zone to clear.
      */
-    void clear_obstructed_coordinate(const clock_zone& c) noexcept
+    void clear_obstructed_coordinate(const clock_zone& c)
     {
-        strg->data.obstructions.clear_obstructed_coordinate(c);
+        obstruction_state.clear_obstructed_coordinate(c);
     }
     /**
      * Clears the obstruction status of the connection from coordinate `src` to coordinate `tgt` if the obstruction was
@@ -2020,23 +1345,23 @@ class gate_level_layout : public CoordinateLayout
      * @param src Source coordinate.
      * @param tgt Target coordinate.
      */
-    void clear_obstructed_connection(const clock_zone& src, const clock_zone& tgt) noexcept
+    void clear_obstructed_connection(const clock_zone& src, const clock_zone& tgt)
     {
-        strg->data.obstructions.clear_obstructed_connection(src, tgt);
+        obstruction_state.clear_obstructed_connection(src, tgt);
     }
     /**
      * Clears all obstructed coordinates that were manually marked via `obstruct_coordinate`.
      */
-    void clear_obstructed_coordinates() noexcept
+    void clear_obstructed_coordinates()
     {
-        strg->data.obstructions.clear_obstructed_coordinates();
+        obstruction_state.clear_obstructed_coordinates();
     }
     /**
      * Clears all obstructed connections that were manually marked via `obstruct_connection`.
      */
-    void clear_obstructed_connections() noexcept
+    void clear_obstructed_connections()
     {
-        strg->data.obstructions.clear_obstructed_connections();
+        obstruction_state.clear_obstructed_connections();
     }
     /**
      * Checks if the given coordinate is obstructed of some sort.
@@ -2044,9 +1369,9 @@ class gate_level_layout : public CoordinateLayout
      * @param c Coordinate to check.
      * @return `true` iff `c` is obstructed.
      */
-    [[nodiscard]] bool is_obstructed_coordinate(const clock_zone& c) const noexcept
+    [[nodiscard]] bool is_obstructed_coordinate(const clock_zone& c) const
     {
-        return strg->data.obstructions.is_obstructed_coordinate(c) || !is_empty_tile(c);
+        return obstruction_state.is_obstructed_coordinate(c) || !is_empty_tile(c);
     }
     /**
      * Checks if the given coordinate-coordinate connection is obstructed of some sort.
@@ -2055,10 +1380,10 @@ class gate_level_layout : public CoordinateLayout
      * @param tgt Target coordinate.
      * @return `true` iff the connection from `src` to `tgt` is obstructed.
      */
-    [[nodiscard]] bool is_obstructed_connection(const clock_zone& src, const clock_zone& tgt) const noexcept
+    [[nodiscard]] bool is_obstructed_connection(const clock_zone& src, const clock_zone& tgt) const
     {
-        return strg->data.obstructions.is_obstructed_connection(src, tgt) ||
-               is_incoming_signal(tgt, static_cast<signal>(src)) || is_outgoing_signal(src, static_cast<signal>(tgt));
+        return obstruction_state.is_obstructed_connection(src, tgt) || is_incoming_signal(tgt, src) ||
+               is_outgoing_signal(src, tgt);
     }
 
 #pragma region Iteration
@@ -2069,7 +1394,7 @@ class gate_level_layout : public CoordinateLayout
      * @param cz Base clock zone.
      * @return A container with all clock zones that are incoming to `cz`.
      */
-    [[nodiscard]] auto incoming_clocked_zones(const clock_zone& cz) const noexcept
+    [[nodiscard]] auto incoming_clocked_zones(const clock_zone& cz) const
     {
         std::vector<clock_zone> incoming{};
 
@@ -2102,7 +1427,7 @@ class gate_level_layout : public CoordinateLayout
      * @param cz Base clock zone.
      * @return A container with all clock zones that are outgoing from `cz`.
      */
-    [[nodiscard]] auto outgoing_clocked_zones(const clock_zone& cz) const noexcept
+    [[nodiscard]] auto outgoing_clocked_zones(const clock_zone& cz) const
     {
         std::vector<clock_zone> outgoing{};
 
@@ -2139,7 +1464,7 @@ class gate_level_layout : public CoordinateLayout
      * @param cz Base clock zone.
      * @return Number of `cz`'s incoming clock zones.
      */
-    [[nodiscard]] degree_t in_degree(const clock_zone& cz) const noexcept
+    [[nodiscard]] degree_t in_degree(const clock_zone& cz) const
     {
         degree_t idg{0};
         foreach_incoming_clocked_zone(cz, [&idg](const auto&) { ++idg; });
@@ -2152,7 +1477,7 @@ class gate_level_layout : public CoordinateLayout
      * @param cz Base clock zone.
      * @return Number of `cz`'s outgoing clock zones.
      */
-    [[nodiscard]] degree_t out_degree(const clock_zone& cz) const noexcept
+    [[nodiscard]] degree_t out_degree(const clock_zone& cz) const
     {
         degree_t odg{0};
         foreach_outgoing_clocked_zone(cz, [&odg](const auto&) { ++odg; });
@@ -2165,7 +1490,7 @@ class gate_level_layout : public CoordinateLayout
      * @param cz Base clock zone.
      * @return Number of distinct clocked neighbors of `cz`.
      */
-    [[nodiscard]] degree_t degree(const clock_zone& cz) const noexcept
+    [[nodiscard]] degree_t degree(const clock_zone& cz) const
     {
         degree_t count{0};
         CoordinateLayout::foreach_adjacent_coordinate(cz,
@@ -2189,7 +1514,8 @@ class gate_level_layout : public CoordinateLayout
      * @param stop Exclusive end tile; an invalid tile selects the layout end.
      * @return Tile range.
      */
-    [[nodiscard]] auto tiles(const tile& start = {}, const tile& stop = {}) const
+    [[nodiscard]] auto tiles(const std::optional<tile>& start = std::nullopt,
+                             const std::optional<tile>& stop  = std::nullopt) const
     {
         return CoordinateLayout::coordinates(start, stop);
     }
@@ -2202,7 +1528,8 @@ class gate_level_layout : public CoordinateLayout
      * @param stop Exclusive end tile; an invalid tile selects the layout end.
      */
     template <typename Fn>
-    void foreach_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
+    void foreach_tile(Fn&& fn, const std::optional<tile>& start = std::nullopt,
+                      const std::optional<tile>& stop = std::nullopt) const
     {
         CoordinateLayout::foreach_coordinate(std::forward<Fn>(fn), start, stop);
     }
@@ -2213,7 +1540,8 @@ class gate_level_layout : public CoordinateLayout
      * @param stop Exclusive end tile; an invalid tile selects the layout end.
      * @return Tile range.
      */
-    [[nodiscard]] auto ground_tiles(const tile& start = {}, const tile& stop = {}) const
+    [[nodiscard]] auto ground_tiles(const std::optional<tile>& start = std::nullopt,
+                                    const std::optional<tile>& stop  = std::nullopt) const
     {
         return CoordinateLayout::ground_coordinates(start, stop);
     }
@@ -2226,7 +1554,8 @@ class gate_level_layout : public CoordinateLayout
      * @param stop Exclusive end tile; an invalid tile selects the layout end.
      */
     template <typename Fn>
-    void foreach_ground_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
+    void foreach_ground_tile(Fn&& fn, const std::optional<tile>& start = std::nullopt,
+                             const std::optional<tile>& stop = std::nullopt) const
     {
         CoordinateLayout::foreach_ground_coordinate(std::forward<Fn>(fn), start, stop);
     }
@@ -2236,7 +1565,7 @@ class gate_level_layout : public CoordinateLayout
      * @param t Base tile.
      * @return Adjacent tiles in the coordinate geometry.
      */
-    std::vector<tile> adjacent_tiles(const tile& t) const noexcept
+    std::vector<tile> adjacent_tiles(const tile& t) const
     {
         return CoordinateLayout::adjacent_coordinates(t);
     }
@@ -2258,7 +1587,7 @@ class gate_level_layout : public CoordinateLayout
      * @param t Base tile.
      * @return Adjacent tiles in the coordinate geometry.
      */
-    std::vector<std::pair<tile, tile>> adjacent_opposite_tiles(const tile& t) const noexcept
+    std::vector<std::pair<tile, tile>> adjacent_opposite_tiles(const tile& t) const
     {
         return CoordinateLayout::adjacent_opposite_coordinates(t);
     }
@@ -2276,182 +1605,350 @@ class gate_level_layout : public CoordinateLayout
     }
 
 #pragma endregion
+
   private:
-    /**
-     * Checks that a tile has a signal. An invalid tile stands for an unplaced node and passes.
-     *
-     * @param t Tile to check.
-     * @throws std::out_of_range If `t` is valid but its x or y value lies outside of \f$[-2^{30}, 2^{30} - 1]\f$ or
-     * its z value is neither 0 nor 1.
-     */
-    static void check_tile(const tile& t)
+    /** @brief Missing slot or edge index. */
+    static constexpr uint32_t no_index = std::numeric_limits<uint32_t>::max();
+    /** @brief Object role; removed slots have no coordinate or connections visible through the API. */
+    enum class object_kind : uint8_t
     {
-        if (t.is_valid() && !t.fits_signal())
+        removed,
+        pi,
+        po,
+        wire,
+        gate
+    };
+    /** @brief Hot object data. Names and truth-table payloads are stored separately. */
+    struct object_record
+    {
+        /** @brief Assigned coordinate. */
+        tile position{};
+        /** @brief Generation checked by object handles. */
+        uint32_t generation{1};
+        /** @brief Interned truth-table literal. */
+        uint32_t function{};
+        /** @brief First reverse connection, or next free object when removed. */
+        uint32_t first_sink{no_index};
+        /** @brief Number of connected sink input ports. */
+        uint32_t sink_count{};
+        /** @brief Physical role. */
+        object_kind kind{object_kind::removed};
+        /** @brief Input-index to connection mapping; missing entries remain holes. */
+        std::vector<uint32_t> inputs{};
+    };
+    /** @brief Mutable connection with constant-time removal from the source's sink list. */
+    struct edge_record
+    {
+        /** @brief Source object slot. */
+        uint32_t source{};
+        /** @brief Destination object slot. */
+        uint32_t destination{};
+        /** @brief Destination input index. */
+        uint32_t input{};
+        /** @brief Previous sink edge. */
+        uint32_t previous{no_index};
+        /** @brief Next sink edge, or next free edge when disconnected. */
+        uint32_t next{no_index};
+    };
+    /** @brief Reusable object slots. */
+    std::vector<object_record> objects{};
+    /** @brief Reusable contiguous connection storage. */
+    std::vector<edge_record> edges{};
+    /** @brief Coordinate lookup independent of identities and connections. */
+    phmap::flat_hash_map<tile, uint32_t> occupancy{};
+    /** @brief Deduplicated cold truth-table payloads. */
+    mockturtle::truth_table_cache<kitty::dynamic_truth_table> functions{16};
+    /** @brief Sparse cold names. */
+    phmap::flat_hash_map<object_id, std::string> names{};
+    /** @brief Declared primary input order. */
+    std::vector<uint32_t> inputs{};
+    /** @brief Declared primary output order. */
+    std::vector<uint32_t> outputs{};
+    /** @brief Clocking overrides and synchronization. */
+    clocking::state clocking_state{clocking::open()};
+    /** @brief Persistent manual obstructions. */
+    layouts::obstructions obstruction_state{};
+    /** @brief Layout name. */
+    std::string layout_name{};
+    /** @brief First reusable object slot. */
+    uint32_t free_object{no_index};
+    /** @brief First reusable connection slot. */
+    uint32_t free_edge{no_index};
+    /** @brief Live object count. */
+    uint32_t live_count{};
+    /** @brief Live identity-function count. */
+    uint32_t wire_count{};
+
+    /** @brief Swaps owned state without changing geometry. */
+    void swap_owned_state(gate_level_layout& other) noexcept
+    {
+        using std::swap;
+        swap(objects, other.objects);
+        swap(edges, other.edges);
+        swap(occupancy, other.occupancy);
+        swap(functions, other.functions);
+        swap(names, other.names);
+        swap(inputs, other.inputs);
+        swap(outputs, other.outputs);
+        swap(clocking_state, other.clocking_state);
+        swap(obstruction_state, other.obstruction_state);
+        swap(layout_name, other.layout_name);
+        swap(free_object, other.free_object);
+        swap(free_edge, other.free_edge);
+        swap(live_count, other.live_count);
+        swap(wire_count, other.wire_count);
+    }
+    /** @brief Initializes elementary functions when a moved-from layout is reused. */
+    void ensure_functions()
+    {
+        if (functions.size() == 0)
         {
-            throw std::out_of_range("The tile is outside of the range that gate-level signals can represent");
+            initialize_functions();
         }
     }
-    /**
-     * Returns an aspect ratio after checking that all tiles within it have a signal.
-     *
-     * @param ar Aspect ratio to check.
-     * @return `ar`.
-     * @throws std::out_of_range If the x or y value of `ar` is larger than \f$2^{30} - 1\f$ or its z value is larger
-     * than 1.
-     */
-    static typename CoordinateLayout::aspect_ratio checked_extent(const typename CoordinateLayout::aspect_ratio& ar)
+    /** @brief Reconstructs a live slot's identity. */
+    [[nodiscard]] object_id identity(const uint32_t slot) const noexcept
     {
-        constexpr auto max_axis = static_cast<int32_t>((1ull << 30ull) - 1ull);
-
-        if (ar.x > max_axis || ar.y > max_axis || ar.z > 1)
+        return {slot, objects[slot].generation};
+    }
+    /** @brief Validates an object identity. */
+    [[nodiscard]] const object_record& checked_object(const object_id id) const
+    {
+        if (!contains(id))
         {
-            throw std::out_of_range("The aspect ratio exceeds the range that gate-level signals can represent");
+            throw std::invalid_argument("Object identity is stale or belongs to no live object");
         }
-
-        return ar;
+        return objects[id.index];
     }
-    storage strg;
-
-    event_storage evnts;
-
-    template <typename>
-    friend class fiction::verification::detail::gate_level_drvs_impl;
-
-    /**
-     * Populates the truth table cache with the constant and elementary functions used by the fundamental gate
-     * creation functions (`create_not`, `create_and`, etc.).
-     */
-    void initialize_truth_table_cache()
+    /** @brief Validates an object identity. */
+    [[nodiscard]] object_record& checked_object(const object_id id)
     {
-        /* reserve the second node for constant 1 */
-        strg->nodes.emplace_back();
-
-        kitty::dynamic_truth_table tt_zero(0);
-        strg->data.fn_cache.insert(tt_zero);
-
-        strg->nodes[0].data[1].h1 = 0;
-        strg->nodes[1].data[1].h1 = 1;
-
-        /* reserve some truth tables for nodes */
-        const auto create_and_cache = [this](const auto& literal, auto n)
-        {
-            kitty::dynamic_truth_table tt(static_cast<uint32_t>(n));
-            kitty::create_from_words(tt, &literal, &literal + 1);
-            strg->data.fn_cache.insert(tt);
-        };
-
-        static constexpr const uint64_t lit_not = 0x1, lit_and = 0x8, lit_or = 0xe, lit_lt = 0x2, lit_le = 0xb,
-                                        lit_xor = 0x6, lit_maj = 0xe8;
-
-        create_and_cache(lit_not, 1);  // since NOT is not normal, its complement, i.e., the identity, is stored
-        create_and_cache(lit_and, 2);
-        create_and_cache(lit_or, 2);
-        create_and_cache(lit_lt, 2);  // since GE is not normal, it is covered as LT's complement
-        create_and_cache(lit_le, 2);  // since GT is not normal, it is covered as LE's complement
-        create_and_cache(lit_xor, 2);
-        create_and_cache(lit_maj, 3);
+        static_cast<void>(std::as_const(*this).checked_object(id));
+        return objects[id.index];
     }
-
-    void assign_node(const tile& t, const node n)
+    /** @brief Checks an output endpoint before mutation. */
+    void check_output(const output_port port) const
     {
-        if (t.is_valid())
+        static_cast<void>(checked_object(port.object));
+        if (port.index != 0)
         {
-            clear_tile(t);
-
-            strg->data.tile_node_map[static_cast<signal>(t)] = n;
-
-            strg->data.node_tile_map[n] = static_cast<signal>(t);
-
-            // keep track of number of gates and wire segments
-            if (is_wire(n))
+            throw std::out_of_range("An FCN object has only output zero");
+        }
+    }
+    /** @brief Validates an input endpoint and returns its connection index. */
+    [[nodiscard]] uint32_t checked_input(const input_port port) const
+    {
+        const auto& object = checked_object(port.object);
+        if (port.index >= object.inputs.size())
+        {
+            throw std::out_of_range("Input index exceeds the object's arity");
+        }
+        return object.inputs[port.index];
+    }
+    /** @brief Rejects absent or occupied placement before any object mutation. */
+    void check_placement(const tile& t) const
+    {
+        if (occupancy.contains(t))
+        {
+            throw std::invalid_argument("The placement coordinate is occupied");
+        }
+    }
+    /** @brief Allocates an edge from the free list or grows storage. */
+    uint32_t allocate_edge()
+    {
+        if (free_edge != no_index)
+        {
+            const auto id = free_edge;
+            free_edge     = edges[id].next;
+            return id;
+        }
+        if (edges.size() == no_index)
+        {
+            throw std::length_error("Layout connection capacity exhausted");
+        }
+        edges.emplace_back();
+        return static_cast<uint32_t>(edges.size() - 1);
+    }
+    /** @brief Removes a connection from both endpoints and recycles the edge slot. */
+    void unlink_edge(const uint32_t id) noexcept
+    {
+        auto& edge = edges[id];
+        auto& src  = objects[edge.source];
+        if (edge.previous != no_index)
+        {
+            edges[edge.previous].next = edge.next;
+        }
+        else
+        {
+            src.first_sink = edge.next;
+        }
+        if (edge.next != no_index)
+        {
+            edges[edge.next].previous = edge.previous;
+        }
+        --src.sink_count;
+        objects[edge.destination].inputs[edge.input] = no_index;
+        edge.next                                    = free_edge;
+        free_edge                                    = id;
+    }
+    /** @brief Creates a validated object and its initial ordered connections. */
+    output_port create_object(const std::span<const output_port> children, const uint32_t function,
+                              const object_kind kind, const uint32_t arity, const tile& t)
+    {
+        check_placement(t);
+        ensure_functions();
+        if (children.size() > arity)
+        {
+            throw std::invalid_argument("Connections exceed the object's input count");
+        }
+        for (const auto child : children)
+        {
+            check_output(child);
+        }
+        object_record record{};
+        record.position = t;
+        record.function = function;
+        record.kind     = kind;
+        record.inputs.resize(arity, no_index);
+        if (children.size() > no_index - edges.size())
+        {
+            throw std::length_error("Layout connection capacity exhausted");
+        }
+        const bool reuse = free_object != no_index;
+        if (!reuse && objects.size() == no_index)
+        {
+            throw std::length_error("Layout object capacity exhausted");
+        }
+        const auto slot = reuse ? free_object : static_cast<uint32_t>(objects.size());
+        occupancy.emplace(t, slot);
+        if (reuse)
+        {
+            record.generation = objects[slot].generation;
+            free_object       = objects[slot].first_sink;
+            objects[slot]     = std::move(record);
+        }
+        else
+        {
+            try
             {
-                strg->data.num_wires++;
-
-                if (CoordinateLayout::is_crossing_layer(t) && !is_empty_tile(CoordinateLayout::below(t)))
-                {
-                    strg->data.num_crossings++;
-                }
-
-                if (CoordinateLayout::is_ground_layer(t) &&
-                    CoordinateLayout::is_crossing_layer(CoordinateLayout::above(t)) &&
-                    !is_empty_tile(CoordinateLayout::above(t)))
-                {
-                    strg->data.num_crossings++;
-                }
+                objects.push_back(std::move(record));
             }
-            else  // is gate
+            catch (...)
             {
-                strg->data.num_gates++;
+                occupancy.erase(t);
+                throw;
+            }
+        }
+        ++live_count;
+        wire_count += function == 2;
+        const auto id = identity(slot);
+        try
+        {
+            for (uint32_t input{}; input < children.size(); ++input)
+            {
+                connect(children[input], {id, input});
+            }
+        }
+        catch (...)
+        {
+            remove(id);
+            throw;
+        }
+        return {id, 0};
+    }
+    /** @brief Creates a named output terminal. */
+    output_port create_terminal(const std::span<const output_port> children, const std::string& name, const tile& t)
+    {
+        const auto p = create_object(children, 2, object_kind::po, 1, t);
+        try
+        {
+            set_name(p.object, name);
+            outputs.push_back(p.object.index);
+        }
+        catch (...)
+        {
+            remove(p.object);
+            throw;
+        }
+        return p;
+    }
+    /** @brief Validates a terminal permutation before applying it. */
+    void set_terminal_order(std::vector<uint32_t>& terminals, const std::span<const object_id> order,
+                            const object_kind kind)
+    {
+        if (order.size() != terminals.size())
+        {
+            throw std::invalid_argument("Interface order must include every terminal");
+        }
+        std::vector<uint32_t> reordered{};
+        reordered.reserve(order.size());
+        for (const auto id : order)
+        {
+            if (checked_object(id).kind != kind)
+            {
+                throw std::invalid_argument("Interface order contains a different object role");
+            }
+            reordered.push_back(id.index);
+        }
+        auto sorted = reordered;
+        std::ranges::sort(sorted);
+        if (std::ranges::adjacent_find(sorted) != sorted.end())
+        {
+            throw std::invalid_argument("Interface order repeats a terminal");
+        }
+        terminals = std::move(reordered);
+    }
+    /** @brief Visits a value with an optional enumeration index and early stopping. */
+    template <typename Fn, typename Value>
+    static bool visit(Fn& fn, const Value value, const uint32_t index)
+    {
+        if constexpr (std::is_invocable_v<Fn&, Value, uint32_t>)
+        {
+            if constexpr (std::is_same_v<std::invoke_result_t<Fn&, Value, uint32_t>, bool>)
+            {
+                return std::invoke(fn, value, index);
+            }
+            else
+            {
+                std::invoke(fn, value, index);
+            }
+        }
+        else
+        {
+            if constexpr (std::is_same_v<std::invoke_result_t<Fn&, Value>, bool>)
+            {
+                return std::invoke(fn, value);
+            }
+            else
+            {
+                std::invoke(fn, value);
+            }
+        }
+        return true;
+    }
+    /** @brief Visits interface objects in their declared order. */
+    template <typename Fn>
+    void foreach_terminal(const std::vector<uint32_t>& terminals, Fn& fn) const
+    {
+        for (uint32_t index{}; index < terminals.size(); ++index)
+        {
+            if (!visit(fn, identity(terminals[index]), index))
+            {
+                break;
             }
         }
     }
-
-    void kill_node(const node n)
+    /** @brief Interns the elementary gate functions without allocating layout objects. */
+    void initialize_functions()
     {
-        if (!is_constant(n))
+        functions.insert(kitty::dynamic_truth_table{0});
+        for (const auto [literal, arity] : std::array<std::pair<uint64_t, uint32_t>, 7>{
+                 {{0x1, 1}, {0x8, 2}, {0xe, 2}, {0x2, 2}, {0xb, 2}, {0x6, 2}, {0xe8, 3}}})
         {
-            strg->nodes[n].data[0].h1 |= UINT32_C(0x80000000);
+            kitty::dynamic_truth_table table{arity};
+            kitty::create_from_words(table, &literal, &literal + 1);
+            functions.insert(table);
         }
-    }
-
-    void revive_node(const node n)
-    {
-        if (!is_constant(n))
-        {
-            strg->nodes[n].data[0].h1 &= ~UINT32_C(0x80000000);
-        }
-    }
-
-    /**
-     * Creates a new node with the given `children` and cached truth table `literal`, assigns it to tile `t`, and
-     * notifies all `on_add` event listeners.
-     *
-     * @param children Fanin signals of the new node.
-     * @param literal Cached truth table literal representing the new node's function.
-     * @param t Tile to assign the new node to.
-     * @return Signal representing tile `t`, now hosting the newly created node.
-     */
-    signal create_node_from_literal(const std::vector<signal>& children, uint32_t literal, const tile& t)
-    {
-        check_tile(t);
-
-        typename storage::element_type::node_type node_data;
-        std::ranges::copy(children, std::back_inserter(node_data.children));
-        node_data.data[1].h1 = literal;
-
-        const auto n = static_cast<node>(strg->nodes.size());
-        strg->nodes.push_back(node_data);
-
-        /* increase ref-count to children */
-        for (const auto& c : children)
-        {
-            strg->nodes[get_node(c)].data[0].h1++;
-        }
-
-        set_value(n, 0);
-
-        assign_node(t, n);
-
-        for (auto const& fn : evnts->on_add)
-        {
-            (*fn)(n);
-        }
-
-        return static_cast<signal>(t);
-    }
-
-    /**
-     * Check whether `s` is among the fanin signals of `n`.
-     *
-     * @param n Node to be checked.
-     * @param s Signal to look for among `n`'s children.
-     * @return `true` iff `s` is a child of `n`.
-     */
-    [[nodiscard]] bool is_child(const node n, const signal& s) const noexcept
-    {
-        const auto& node_data = strg->nodes[n];
-        return std::ranges::find(node_data.children, s) != node_data.children.cend();
     }
 };
-
 }  // namespace fiction::layouts

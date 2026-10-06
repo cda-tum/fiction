@@ -46,7 +46,8 @@ class cell_grid;
  */
 
 template <typename Lyt>
-using aspect_ratio = typename Lyt::aspect_ratio;
+/** @brief Size-based extent of a coordinate layout. */
+using extent = typename Lyt::extent;
 
 template <typename Lyt>
 using coordinate = typename Lyt::coordinate;
@@ -240,13 +241,11 @@ struct is_coordinate_layout : std::false_type
 
 template <class Lyt>
 struct is_coordinate_layout<
-    Lyt,
-    std::enable_if_t<std::conjunction_v<std::is_constructible<aspect_ratio<Lyt>, coordinate<Lyt>>,
-                                        has_cardinal_operations<Lyt>, has_elevation_operations<Lyt>>,
-                     std::void_t<typename Lyt::base_type, aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage,
-                                 decltype(Lyt::max_fanin_size), decltype(Lyt::min_fanin_size),
-                                 decltype(std::declval<Lyt>().x()), decltype(std::declval<Lyt>().y()),
-                                 decltype(std::declval<Lyt>().z()), decltype(std::declval<Lyt>().area())>>>
+    Lyt, std::enable_if_t<std::conjunction_v<has_cardinal_operations<Lyt>, has_elevation_operations<Lyt>>,
+                          std::void_t<typename Lyt::base_type, extent<Lyt>, coordinate<Lyt>,
+                                      decltype(Lyt::max_fanin_size), decltype(Lyt::min_fanin_size),
+                                      decltype(std::declval<Lyt>().width()), decltype(std::declval<Lyt>().height()),
+                                      decltype(std::declval<Lyt>().layers()), decltype(std::declval<Lyt>().area())>>>
         : std::true_type
 {};
 
@@ -306,10 +305,8 @@ struct is_cartesian_layout : std::false_type
 {};
 
 template <class Lyt>
-struct is_cartesian_layout<
-    Lyt,
-    std::enable_if_t<is_coordinate_layout_v<Lyt> && Lyt::max_fanin_size == 3u,
-                     std::void_t<typename Lyt::base_type, aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage>>>
+struct is_cartesian_layout<Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt> && Lyt::max_fanin_size == 3u,
+                                                 std::void_t<typename Lyt::base_type, extent<Lyt>, coordinate<Lyt>>>>
         : std::true_type
 {};
 
@@ -324,9 +321,10 @@ struct is_shifted_cartesian_layout : std::false_type
 
 template <class Lyt>
 struct is_shifted_cartesian_layout<
-    Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt> && has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
-                          std::void_t<typename Lyt::base_type, typename Lyt::is_shifted_cartesian, aspect_ratio<Lyt>,
-                                      coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
+    Lyt, std::enable_if_t<
+             is_coordinate_layout_v<Lyt> && has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
+             std::void_t<typename Lyt::base_type, typename Lyt::is_shifted_cartesian, extent<Lyt>, coordinate<Lyt>>>>
+        : std::true_type
 {};
 
 template <class Lyt>
@@ -343,7 +341,7 @@ struct is_hexagonal_layout<
     Lyt, std::enable_if_t<!is_shifted_cartesian_layout_v<Lyt> && is_coordinate_layout_v<Lyt> &&
                               has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
                           std::void_t<typename Lyt::base_type, decltype(std::declval<Lyt>().get_arrangement()),
-                                      aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
+                                      extent<Lyt>, coordinate<Lyt>>>> : std::true_type
 {};
 
 template <class Lyt>
@@ -439,9 +437,11 @@ struct is_gate_level_layout : std::false_type
 {};
 
 template <class Lyt>
-struct is_gate_level_layout<
-    Lyt, std::enable_if_t<std::conjunction_v<is_coordinate_layout<Lyt>, mockturtle::is_network_type<Lyt>>,
-                          std::void_t<typename Lyt::base_type, tile<Lyt>, typename Lyt::storage>>> : std::true_type
+struct is_gate_level_layout<Lyt,
+                            std::enable_if_t<is_coordinate_layout_v<Lyt>,
+                                             std::void_t<typename Lyt::base_type, tile<Lyt>, typename Lyt::object_id,
+                                                         typename Lyt::input_port, typename Lyt::output_port>>>
+        : std::true_type
 {};
 
 template <class Lyt>
