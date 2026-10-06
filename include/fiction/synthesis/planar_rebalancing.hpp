@@ -156,21 +156,6 @@ class planar_rebalancing_impl
         networks::restore_names(ntk, stripped, old2new);
     }
     /**
-     * Follows chain buffers upwards from a node of the source network to the first node that is not one.
-     *
-     * @param n Node of the source network.
-     * @return The node itself or the node above its chain of buffers.
-     */
-    [[nodiscard]] mockturtle::node<Ntk> above_chain(mockturtle::node<Ntk> n) const
-    {
-        while (is_chain_buffer(n))
-        {
-            n = networks::fanins(ntk, n).fanin_nodes.front();
-        }
-
-        return n;
-    }
-    /**
      * Recomputes the ranks of the stripped network and orders every rank by the barycenter of its fanins, with the
      * source rank position as the tie-breaker. Removing buffer chains merges nodes of different source levels into one
      * rank; the position of a deeper node is taken from the node above its former buffer chain, so that nodes of a
@@ -274,14 +259,16 @@ class planar_rebalancing_impl
     }
     /**
      * Consumers of a node in the source network, ordered by the rank position of the node's direct fanouts, with
-     * chain buffers skipped. A consumer equal to the node itself stands for a primary output.
+     * chain buffers skipped. A consumer equal to the node itself stands for a primary output; one that the node drives
+     * directly comes first.
      *
      * @param n Node of the source network.
      * @return Consumers of `n` in rank order of the source network.
      */
     [[nodiscard]] std::vector<mockturtle::node<Ntk>> ordered_consumers(const mockturtle::node<Ntk> n) const
     {
-        std::vector<std::pair<uint32_t, mockturtle::node<Ntk>>> consumers{};
+        // ordered by the rank position of the direct fanout; a direct output has no position and comes first
+        std::vector<std::pair<int64_t, mockturtle::node<Ntk>>> consumers{};
 
         fanout_ntk.foreach_fanout(n,
                                   [&](const auto& fo)
@@ -295,12 +282,13 @@ class planar_rebalancing_impl
 
                                       // ordered by the direct fanout, which sits in the rank above `n`; a buffer
                                       // chain that ends in a primary output stands for that output
-                                      consumers.emplace_back(ntk.rank_position(fo), is_chain_buffer(c) ? n : c);
+                                      consumers.emplace_back(static_cast<int64_t>(ntk.rank_position(fo)),
+                                                             is_chain_buffer(c) ? n : c);
                                   });
 
         if (ntk.is_po(n))
         {
-            consumers.emplace_back(ntk.rank_position(n), n);
+            consumers.emplace_back(-1, n);
         }
 
         std::stable_sort(consumers.begin(), consumers.end(),
@@ -443,6 +431,9 @@ class planar_rebalancing_impl
                 new2bal[target] = balanced.clone_node(stripped, target, children);
 
                 out_edges(target, next);
+
+                // a placed node separates the edges of a source: the next one gets its own buffer
+                have_last = false;
             }
 
             for (const auto& [n, sig] : moved)

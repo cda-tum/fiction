@@ -550,7 +550,10 @@ class node_duplication_planarization_impl
                               fis.insert(it, fn);
                           });
 
-        assert(!fis.empty() && "A node without non-constant fanins is dangling");
+        if (fis.empty())
+        {
+            throw std::invalid_argument("A gate has only constant fanins; propagate constants before planarization");
+        }
 
         auto combinations = calculate_pairs<Ntk>(n, fis);
 
@@ -827,8 +830,8 @@ class node_duplication_planarization_impl
         std::vector<mockturtle::signal<NtkDest>> children{};
         children.reserve(ntk.fanin_size(o));
 
-        // ids of the level below that this node connects to, one per non-constant fanin; consumed as matched
-        auto candidates = fanins_of[n];
+        // ids of the level below that this node connects to; a fanin that occurs twice connects to one copy
+        const auto& candidates = fanins_of[n];
 
         ntk.foreach_fanin(o,
                           [&](const auto& f)
@@ -843,13 +846,12 @@ class node_duplication_planarization_impl
                               }
                               else
                               {
-                                  const auto it = std::find_if(candidates.begin(), candidates.end(),
+                                  const auto it = std::find_if(candidates.cbegin(), candidates.cend(),
                                                                [this, &fn](const auto& c) { return origin(c) == fn; });
 
-                                  assert(it != candidates.end() && "A fanin has no copy in the level below");
+                                  assert(it != candidates.cend() && "A fanin has no copy in the level below");
 
                                   sig = old2new[by_origin ? origin(*it) : *it];
-                                  candidates.erase(it);
                               }
 
                               children.push_back(ntk.is_complemented(f) ? dest.create_not(sig) : sig);
@@ -1380,16 +1382,17 @@ class node_duplication_planarization_impl
  * duplicated cones, the crossing cost the size of the gadgets plus their padding after a crossing minimization of the
  * level. Levels that keep their crossings are not duplicated, and the result is then not planar.
  *
- * The input must be balanced (see `network_balancing`), carry ranks (see `mutable_rank_view`), and contain no
- * virtual primary inputs (see `delete_virtual_pis`). The result is ranked; with the duplication strategy it is
- * crossing-free, which `mincross` verifies before the function returns.
+ * The input must be balanced with unified outputs (see `network_balancing`), carry ranks (see `mutable_rank_view`),
+ * and contain no virtual primary inputs (see `delete_virtual_pis`). The result is ranked; with the duplication strategy
+ * it is crossing-free, which `mincross` verifies before the function returns.
  *
  * @tparam Ntk Ranked, balanced source network type.
  * @param ntk Source network.
  * @param ps Parameters.
  * @param pst Statistics.
  * @return `virtual_pi_network` that computes the same functions as `ntk`; planar with the duplication strategy.
- * @throws std::invalid_argument If `ntk` is not balanced or contains virtual primary inputs.
+ * @throws std::invalid_argument If `ntk` is not balanced with unified outputs, contains virtual primary inputs, or
+ * has a gate whose fanins are all constants.
  * @throws std::runtime_error If more than `max_duplications` nodes were duplicated, or if the result of the
  * duplication strategy still contains crossings.
  */
@@ -1403,9 +1406,9 @@ node_duplication_planarization(const Ntk& ntk, const node_duplication_planarizat
     static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position method");
     static_assert(mockturtle::has_depth_v<Ntk>, "Ntk does not implement the depth method");
 
-    if (!is_balanced(ntk))
+    if (!is_balanced(ntk, {.unify_outputs = true}))
     {
-        throw std::invalid_argument("The network must be balanced before planarization");
+        throw std::invalid_argument("The network must be balanced with unified outputs before planarization");
     }
 
     if constexpr (has_num_virtual_pis_v<Ntk>)

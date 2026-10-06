@@ -293,3 +293,27 @@ TEST_CASE("Progress is reported", "[planar-rebalancing]")
     REQUIRE(!done.empty());
     CHECK(done.back() == total);
 }
+
+TEST_CASE("An output driven directly by a node that also drives a gate", "[planar-rebalancing]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+
+    const auto n = tec.create_not(x1);
+    const auto m = tec.create_not(x2);
+    const auto g = tec.create_and(n, m);
+    tec.create_po(g);
+    tec.create_po(n);
+
+    const mutable_rank_view ranked{tec};
+    REQUIRE(count_crossings(ranked) == 0);
+
+    const auto rebalanced = planar_rebalancing(ranked);
+
+    // the input is not fanout-substituted (n drives the gate and the output), so the result is not either
+    CHECK(is_balanced(rebalanced, {.unify_outputs = true}));
+    CHECK(count_crossings(rebalanced) == 0);
+    check_equivalent(tec, rebalanced);
+}

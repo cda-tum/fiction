@@ -18,6 +18,7 @@
 
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
+#include "fiction/synthesis/network_balancing.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/progress.hpp"
 
@@ -28,6 +29,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <queue>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -44,7 +46,7 @@ struct planar_fanout_substitution_params
      */
     utils::progress_callback on_progress{};
     /**
-     * Maximum output degree of each fanout node. Every other node drives exactly one consumer.
+     * Maximum output degree of each fanout node, at least 2. Every other node drives exactly one consumer.
      */
     uint32_t degree = 2u;
 };
@@ -151,7 +153,7 @@ class planar_fanout_substitution_impl
         }
 
         // every fanout node adds `degree - 1` outputs beyond the one it consumes
-        const auto per_node = std::max(ps.degree, 2u) - 1;
+        const auto per_node = ps.degree - 1;
 
         return (fanouts - 1 + per_node - 1) / per_node;
     }
@@ -163,11 +165,6 @@ class planar_fanout_substitution_impl
      */
     [[nodiscard]] uint32_t fanout_node_level(const uint32_t index) const noexcept
     {
-        if (ps.degree <= 1)
-        {
-            return index;
-        }
-
         uint32_t level         = 0;
         uint64_t first_of_next = 1;
 
@@ -256,7 +253,7 @@ class planar_fanout_substitution_impl
                                   child = take_fanout(dest, fn, child);
                               }
 
-                              children.push_back(child);
+                              children.push_back(ntk.is_complemented(f) ? dest.create_not(child) : child);
                           });
 
         return children;
@@ -304,8 +301,10 @@ class planar_fanout_substitution_impl
         return sig;
     }
     /**
-     * Builds the breadth-first fanout tree of a node and pads its shallower leaves with buffers so that every free
-     * slot sits at the depth of the deepest fanout node. The free slots are stored in `available_fanouts`.
+     * Builds the breadth-first fanout tree of a node. Exactly as many outputs as the node has consumers are kept, in
+     * breadth-first order; each of them is padded with buffers to the depth of the tree, so that every consumer
+     * connects at the same depth and no buffer is left without a consumer. The outputs are stored in
+     * `available_fanouts` in planar order.
      *
      * @param dest Destination network.
      * @param n Source node.
@@ -313,13 +312,13 @@ class planar_fanout_substitution_impl
      */
     void generate_fanout_tree(Ntk& dest, const mockturtle::node<Ntk> n, const mockturtle::signal<Ntk> root)
     {
-        const auto k = num_fanout_nodes(fanout_ntk.fanout_size(n));
+        const auto fanouts = fanout_ntk.fanout_size(n);
+        const auto k       = num_fanout_nodes(fanouts);
+        const auto depth   = tree_depth(fanouts);
 
-        // free slots as (signal, level below n)
+        // free outputs as (signal, level below n)
         std::queue<std::pair<mockturtle::signal<Ntk>, uint32_t>> slots{};
         slots.emplace(root, 0);
-
-        uint32_t max_level = 0;
 
         for (uint32_t i = 0; i < k; ++i)
         {
@@ -327,7 +326,6 @@ class planar_fanout_substitution_impl
             slots.pop();
 
             const auto buf = dest.create_buf(sig);
-            max_level      = std::max(max_level, level + 1);
 
             for (uint32_t d = 0; d < ps.degree; ++d)
             {
@@ -335,39 +333,30 @@ class planar_fanout_substitution_impl
             }
         }
 
-        // pad every shallower slot with one buffer; the slots of that buffer replace the slot's copies
-        mockturtle::signal<Ntk> last_padded{};
+        std::vector<mockturtle::signal<Ntk>> ends{};
+        ends.reserve(fanouts);
 
-        while (!slots.empty() && slots.front().second < max_level)
+        for (uint32_t i = 0; i < fanouts && !slots.empty(); ++i)
         {
             const auto [sig, level] = slots.front();
             slots.pop();
 
-            if (sig == last_padded)
-            {
-                continue;
-            }
-
-            last_padded = sig;
-
-            const auto buf = dest.create_buf(sig);
-
-            for (uint32_t d = 0; d < ps.degree; ++d)
-            {
-                slots.emplace(buf, level + 1);
-            }
+            ends.push_back(buffer_chain(dest, sig, depth - level));
         }
 
-        auto& free = available_fanouts[n];
-        while (!slots.empty())
+        // nodes of the deepest level were created from left to right, so their ids give the planar order
+        std::stable_sort(ends.begin(), ends.end(),
+                         [&dest](const auto& a, const auto& b) { return dest.get_node(a) < dest.get_node(b); });
+
+        auto& outputs = available_fanouts[n];
+        for (const auto& sig : ends)
         {
-            free.push(slots.front().first);
-            slots.pop();
+            outputs.push(sig);
         }
     }
     /**
      * Returns the signal a consumer of `n` connects to: `child` itself while it has no output yet, otherwise the
-     * next free slot of the fanout tree of `n`.
+     * next free output of the fanout tree of `n`.
      *
      * @param dest Destination network.
      * @param n Source node.
@@ -382,14 +371,17 @@ class planar_fanout_substitution_impl
             return child;
         }
 
-        auto& free = available_fanouts[n];
+        auto& outputs = available_fanouts[n];
 
-        while (!free.empty() && dest.fanout_size(dest.get_node(free.front())) >= ps.degree)
+        if (outputs.empty())
         {
-            free.pop();
+            return child;
         }
 
-        return free.empty() ? child : free.front();
+        const auto sig = outputs.front();
+        outputs.pop();
+
+        return sig;
     }
     /**
      * Source network.
@@ -400,7 +392,7 @@ class planar_fanout_substitution_impl
      */
     const mockturtle::fanout_view<Ntk> fanout_ntk;
     /**
-     * Free fanout slots per source node, deepest level of its tree.
+     * Free outputs of the fanout tree per source node, each padded to the depth of the tree.
      */
     mockturtle::node_map<std::queue<mockturtle::signal<Ntk>>, Ntk> available_fanouts;
     /**
@@ -420,9 +412,10 @@ class planar_fanout_substitution_impl
  * Virtual primary inputs of the input are kept.
  *
  * @tparam Ntk Ranked network type (see `mutable_rank_view`) that supports `create_buf`.
- * @param ntk Ranked, balanced input network.
+ * @param ntk Ranked input network, balanced with unified outputs.
  * @param ps Parameters.
  * @return A fanout-substituted network of the same type with the same ranks and no new crossings.
+ * @throws std::invalid_argument If `ps.degree` is below 2 or `ntk` is not balanced with unified outputs.
  */
 template <typename Ntk>
 [[nodiscard]] Ntk planar_fanout_substitution(const Ntk& ntk, const planar_fanout_substitution_params& ps = {})
@@ -436,6 +429,16 @@ template <typename Ntk>
     static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po method");
     static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position method");
     static_assert(mockturtle::has_depth_v<Ntk>, "Ntk does not implement the depth method");
+
+    if (ps.degree < 2)
+    {
+        throw std::invalid_argument("The fanout degree must be at least 2");
+    }
+
+    if (!is_balanced(ntk, {.unify_outputs = true}))
+    {
+        throw std::invalid_argument("The network must be balanced with unified outputs before fanout substitution");
+    }
 
     detail::planar_fanout_substitution_impl<Ntk> p{ntk, ps};
 

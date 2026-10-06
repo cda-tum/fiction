@@ -222,8 +222,9 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      *
      * @param n Node to get the rank position of.
      * @return Rank position of node `n`.
+     * @throws std::out_of_range If `n` has no rank, which is the case for a node without a level.
      */
-    uint32_t rank_position(const node& n) const noexcept
+    uint32_t rank_position(const node& n) const
     {
         assert(!this->is_constant(n) && "node must not be constant");
 
@@ -537,7 +538,14 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         std::vector<node> pis{};
         pis.reserve(this->num_pis());
 
-        fiction::networks::views::static_depth_view<Ntk>::foreach_pi([&pis](auto const& pi) { pis.push_back(pi); });
+        fiction::networks::views::static_depth_view<Ntk>::foreach_pi(
+            [this, &pis](auto const& pi)
+            {
+                if (rank_pos.contains(pi))
+                {
+                    pis.push_back(pi);
+                }
+            });
 
         set_ranks(0, pis);
     }

@@ -238,8 +238,9 @@ TEST_CASE("Dangling nodes have no level", "[static-depth-view]")
     CHECK(depth_aig.has_level(aig.get_node(f1)));
     CHECK(depth_aig.has_level(aig.get_node(f2)));
 
-    mockturtle::aig_network dangling_aig = aig;
-    const auto              f3           = dangling_aig.create_nand(b, f1);
+    // networks share their storage on copy; clone to keep `aig` untouched
+    auto       dangling_aig = aig.clone();
+    const auto f3           = dangling_aig.create_nand(b, f1);
 
     const static_depth_view depth_dangling{dangling_aig};
 

@@ -503,3 +503,38 @@ TEST_CASE("Hybrid strategy with lookahead", "[node-duplication-planarization]")
         CHECK(is_balanced(planar, {.unify_outputs = true}));
     }
 }
+TEST_CASE("Balanced networks without unified outputs are rejected", "[node-duplication-planarization]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto a1 = tec.create_and(x1, x2);
+
+    tec.create_po(a1);
+    tec.create_po(tec.create_not(a1));
+
+    const mutable_rank_view ranked{network_balancing<technology_network>(tec)};
+    REQUIRE(is_balanced(ranked));
+    REQUIRE(!is_balanced(ranked, {.unify_outputs = true}));
+
+    CHECK_THROWS_AS(node_duplication_planarization(ranked), std::invalid_argument);
+}
+
+TEST_CASE("Gates with the same fanin twice", "[node-duplication-planarization]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto f1 = tec.create_and(x1, x1);
+    const auto f2 = tec.create_or(f1, x2);
+
+    tec.create_po(f2);
+    tec.create_po(tec.create_not(f1));
+
+    const auto ranked = rank_without_substitution(tec);
+    const auto planar = node_duplication_planarization(ranked);
+
+    check_planar_and_equivalent(tec, planar);
+}

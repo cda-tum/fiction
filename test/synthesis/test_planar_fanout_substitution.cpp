@@ -27,10 +27,12 @@
 #include <fiction/utils/graph/mincross.hpp>
 #include <fiction/verification/virtual_miter.hpp>
 
+#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 
 #include <cstddef>
 #include <cstdint>
+#include <stdexcept>
 #include <string_view>
 #include <vector>
 
@@ -188,10 +190,10 @@ TEST_CASE("Planarized networks keep their virtual inputs and planarity", "[plana
         CHECK(substituted.num_virtual_pis() == planar.num_virtual_pis());
         CHECK(substituted.rank_width(0) == planar.rank_width(0));
 
-        // the primary inputs keep their order
+        // the primary inputs keep their order; both networks create them in the same order, so the ids match
         for (uint32_t i = 0; i < planar.rank_width(0); ++i)
         {
-            CHECK(substituted.rank_position(substituted.at_rank_position(0, i)) == i);
+            CHECK(substituted.at_rank_position(0, i) == planar.at_rank_position(0, i));
         }
     }
 }
@@ -252,4 +254,42 @@ TEST_CASE("Progress is reported once per rank", "[planar-fanout-substitution]")
     CHECK(total == ranked.depth() + 1);
     REQUIRE(!done.empty());
     CHECK(done.back() == total);
+}
+
+TEST_CASE("Invalid parameters and inputs are rejected", "[planar-fanout-substitution]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    tec.create_po(tec.create_and(x1, tec.create_buf(x2)));
+
+    const mutable_rank_view unbalanced{tec};
+    CHECK_THROWS_AS(planar_fanout_substitution(unbalanced), std::invalid_argument);
+
+    const auto ranked = rank(blueprints::full_adder_network<technology_network>());
+
+    planar_fanout_substitution_params ps{};
+    ps.degree = 1;
+    CHECK_THROWS_AS(planar_fanout_substitution(ranked, ps), std::invalid_argument);
+}
+
+TEST_CASE("No buffer is left without a consumer", "[planar-fanout-substitution]")
+{
+    for (const auto& ntk : {blueprints::full_adder_network<technology_network>(),
+                            blueprints::parity_network<technology_network>(), blueprints::clpl<technology_network>()})
+    {
+        const auto planar = node_duplication_planarization(rank(ntk));
+
+        for (const uint32_t degree : {2u, 3u})
+        {
+            planar_fanout_substitution_params ps{};
+            ps.degree = degree;
+
+            const auto substituted = planar_fanout_substitution(planar, ps);
+
+            check_contract(ntk, substituted, {.degree = degree});
+            CHECK(mockturtle::cleanup_dangling(substituted).size() == substituted.size());
+        }
+    }
 }

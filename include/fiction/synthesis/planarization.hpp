@@ -29,6 +29,8 @@
 
 #include <cstdint>
 #include <iostream>
+#include <optional>
+#include <utility>
 
 namespace fiction::synthesis
 {
@@ -39,7 +41,7 @@ namespace fiction::synthesis
 struct planarization_params
 {
     /**
-     * Receives completed work and the phase total of every stage in turn.
+     * Receives completed work and the phase total of every stage in turn, unless `duplication.on_progress` is set.
      */
     utils::progress_callback on_progress{};
     /**
@@ -113,40 +115,48 @@ template <typename Ntk>
 
     planarization_stats st{};
 
-    const mockturtle::stopwatch stop{st.time_total};
+    // a callback set on the duplication stage wins over the pipeline-wide one
+    const auto progress = ps.duplication.on_progress ? ps.duplication.on_progress : ps.on_progress;
 
-    auto duplication_ps        = ps.duplication;
-    duplication_ps.on_progress = ps.on_progress;
+    std::optional<networks::virtual_pi_network<Ntk>> result{};
 
-    auto planar = node_duplication_planarization(ntk, duplication_ps, &st.duplication);
-
-    if (st.duplication.num_crossing_levels > 0)
+    // the stopwatch must stop before the statistics are copied out
     {
-        crossing_gate_planarization_params cg_ps{};
-        cg_ps.on_progress            = ps.on_progress;
-        cg_ps.xor_gates              = ps.duplication.xor_gates;
-        cg_ps.max_crossings_per_rank = ps.duplication.max_crossings_per_rank;
+        const mockturtle::stopwatch stop{st.time_total};
 
-        planar = crossing_gate_planarization(planar, cg_ps, &st.crossing_gates);
+        auto duplication_ps        = ps.duplication;
+        duplication_ps.on_progress = progress;
+
+        auto planar = node_duplication_planarization(ntk, duplication_ps, &st.duplication);
+
+        if (st.duplication.num_crossing_levels > 0)
+        {
+            crossing_gate_planarization_params cg_ps{};
+            cg_ps.on_progress            = progress;
+            cg_ps.xor_gates              = ps.duplication.xor_gates;
+            cg_ps.max_crossings_per_rank = ps.duplication.max_crossings_per_rank;
+
+            planar = crossing_gate_planarization(planar, cg_ps, &st.crossing_gates);
+        }
+
+        planar_fanout_substitution_params fs_ps{};
+        fs_ps.on_progress = progress;
+        fs_ps.degree      = ps.fanout_degree;
+
+        planar_rebalancing_params rb_ps{};
+        rb_ps.on_progress = progress;
+
+        result.emplace(planar_rebalancing(planar_fanout_substitution(planar, fs_ps), rb_ps));
+
+        st.num_nodes = result->size();
     }
-
-    planar_fanout_substitution_params fs_ps{};
-    fs_ps.on_progress = ps.on_progress;
-    fs_ps.degree      = ps.fanout_degree;
-
-    planar_rebalancing_params rb_ps{};
-    rb_ps.on_progress = ps.on_progress;
-
-    auto result = planar_rebalancing(planar_fanout_substitution(planar, fs_ps), rb_ps);
-
-    st.num_nodes = result.size();
 
     if (pst != nullptr)
     {
         *pst = st;
     }
 
-    return result;
+    return std::move(*result);
 }
 
 }  // namespace fiction::synthesis

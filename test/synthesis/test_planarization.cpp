@@ -212,3 +212,39 @@ TEST_CASE("Progress is reported for every stage", "[planarization]")
     check_contract(ntk, result);
     CHECK(tasks.size() >= 3);
 }
+
+TEST_CASE("Statistics report the runtime and progress reaches every stage", "[planarization]")
+{
+    const auto ntk    = blueprints::parity_network<technology_network>();
+    const auto ranked = rank(ntk);
+
+    std::vector<std::string> tasks{};
+
+    planarization_params ps{};
+    ps.duplication.strategy    = node_duplication_planarization_params::planarization_strategy::HYBRID;
+    ps.duplication.xor_gates   = true;
+    ps.duplication.on_progress = [&tasks](const std::string_view task, const std::size_t, const std::size_t)
+    {
+        if (tasks.empty() || tasks.back() != task)
+        {
+            tasks.emplace_back(task);
+        }
+    };
+
+    planarization_stats st{};
+    const auto          result = planarization(ranked, ps, &st);
+
+    check_contract(ntk, result);
+    CHECK(st.time_total.count() > 0);
+    // the callback on the duplication stage is used for every stage
+    CHECK(tasks.size() >= 3);
+}
+
+TEST_CASE("Networks with virtual primary inputs are rejected", "[planarization]")
+{
+    const auto ntk    = blueprints::full_adder_network<technology_network>();
+    const auto planar = planarization(rank(ntk));
+    REQUIRE(planar.num_virtual_pis() > 0);
+
+    CHECK_THROWS_AS(planarization(planar), std::invalid_argument);
+}

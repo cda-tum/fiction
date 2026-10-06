@@ -383,3 +383,27 @@ TEST_CASE("Primary inputs without fanout are visited last", "[mutable-rank-view]
     const auto copy = mockturtle::cleanup_dangling(ranked);
     CHECK(copy.num_pis() == 3);
 }
+TEST_CASE("Several unranked primary inputs keep their index order", "[mutable-rank-view]")
+{
+    technology_network tec{};
+
+    const auto unused_1 = tec.create_pi();
+    const auto x1       = tec.create_pi();
+    const auto unused_2 = tec.create_pi();
+    const auto x2       = tec.create_pi();
+    tec.create_po(tec.create_and(x2, x1));
+
+    mutable_rank_view ranked{tec};
+
+    std::vector<mockturtle::node<technology_network>> visited{};
+    ranked.foreach_pi([&visited](const auto& n) { visited.push_back(n); });
+
+    REQUIRE(visited.size() == 4);
+    CHECK(visited[2] == tec.get_node(unused_1));
+    CHECK(visited[3] == tec.get_node(unused_2));
+
+    // rearranging keeps the unranked inputs out of rank 0
+    ranked.rearrange_pis();
+    CHECK(ranked.rank_width(0) == 2);
+    CHECK(ranked.check_validity());
+}
