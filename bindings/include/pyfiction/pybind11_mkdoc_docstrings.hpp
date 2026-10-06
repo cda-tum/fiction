@@ -6563,6 +6563,18 @@ static const char *mkd_doc_fiction_layouts_tile_clocking_clocking =
 R"doc(Scheme, overridden clock numbers, and synchronization delays per clock
 zone.)doc";
 
+static const char *mkd_doc_fiction_layouts_tile_clocking_floor_div =
+R"doc(Divides and rounds toward negative infinity.
+
+Args:
+    value: Dividend.
+    size: Divisor, greater than zero.
+
+Returns:
+    The largest integer that does not exceed `value / size`.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_tile_clocking_get_clock_number =
 R"doc(The clock number of the clock zone that contains a cell.
 
