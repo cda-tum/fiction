@@ -1024,9 +1024,21 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `t` does not have incoming tiles.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_no_incoming_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_no_incoming_signal(const tile& t) const
     {
-        return incoming_data_flow<RespectClocking>(t).size() == 0u;
+        bool found{};
+        if (const auto id = find_object(t))
+        {
+            foreach_fanin(*id,
+                          [&](const auto port)
+                          {
+                              const auto adjacent = get_tile(port.object);
+                              found               = this->is_adjacent_elevation_of(t, adjacent) &&
+                                                    (!RespectClocking || is_incoming_clocked(t, adjacent));
+                              return !found;
+                          });
+        }
+        return !found;
     }
     /**
      * Checks whether the given tile has an outgoing one in northern direction.
@@ -1132,9 +1144,21 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `t` does not have outgoing tiles.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_no_outgoing_signal(const tile& t) const noexcept
+    [[nodiscard]] bool has_no_outgoing_signal(const tile& t) const
     {
-        return outgoing_data_flow<RespectClocking>(t).size() == 0u;
+        bool found{};
+        if (const auto id = find_object(t))
+        {
+            foreach_fanout(*id,
+                           [&](const auto port)
+                           {
+                               const auto adjacent = get_tile(port);
+                               found               = this->is_adjacent_elevation_of(t, adjacent) &&
+                                                     (!RespectClocking || is_outgoing_clocked(t, adjacent));
+                               return !found;
+                           });
+        }
+        return !found;
     }
     /**
      * Checks whether the given tile `t` has its incoming and outgoing signals on opposite sides of the tile. For this
@@ -1149,7 +1173,7 @@ class gate_level_layout : public CoordinateLayout
      * @return `true` iff `t` has incoming and outgoing signals on opposite sides.
      */
     template <bool RespectClocking = true>
-    [[nodiscard]] bool has_opposite_incoming_and_outgoing_signals(const tile& t) const noexcept
+    [[nodiscard]] bool has_opposite_incoming_and_outgoing_signals(const tile& t) const
     {
         auto opposite_signals = false;
 
@@ -1511,7 +1535,7 @@ class gate_level_layout : public CoordinateLayout
     /**
      * @brief Returns the tiles in the coordinate range.
      * @param start First tile.
-     * @param stop Exclusive end tile; an invalid tile selects the layout end.
+     * @param stop Exclusive end tile; absence selects the layout end.
      * @return Tile range.
      */
     [[nodiscard]] auto tiles(const std::optional<tile>& start = std::nullopt,
@@ -1525,7 +1549,7 @@ class gate_level_layout : public CoordinateLayout
      * @tparam Fn Functor type.
      * @param fn Functor applied to each tile.
      * @param start First tile.
-     * @param stop Exclusive end tile; an invalid tile selects the layout end.
+     * @param stop Exclusive end tile; absence selects the layout end.
      */
     template <typename Fn>
     void foreach_tile(Fn&& fn, const std::optional<tile>& start = std::nullopt,
@@ -1537,7 +1561,7 @@ class gate_level_layout : public CoordinateLayout
     /**
      * @brief Returns ground-layer tiles in the coordinate range.
      * @param start First tile.
-     * @param stop Exclusive end tile; an invalid tile selects the layout end.
+     * @param stop Exclusive end tile; absence selects the layout end.
      * @return Tile range.
      */
     [[nodiscard]] auto ground_tiles(const std::optional<tile>& start = std::nullopt,
@@ -1551,7 +1575,7 @@ class gate_level_layout : public CoordinateLayout
      * @tparam Fn Functor type.
      * @param fn Functor applied to each tile.
      * @param start First tile.
-     * @param stop Exclusive end tile; an invalid tile selects the layout end.
+     * @param stop Exclusive end tile; absence selects the layout end.
      */
     template <typename Fn>
     void foreach_ground_tile(Fn&& fn, const std::optional<tile>& start = std::nullopt,
