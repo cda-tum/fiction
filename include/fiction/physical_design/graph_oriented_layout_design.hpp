@@ -985,7 +985,7 @@ class graph_oriented_layout_design_impl
 
                     if (result)
                     {
-                        best_lyt = *result;
+                        best_lyt = std::move(*result);
                         networks::restore_names(ssg.network, best_lyt);
                         update_stats(best_lyt);
 
@@ -1868,8 +1868,8 @@ class graph_oriented_layout_design_impl
                 layout.resize({layout.width(), static_cast<int64_t>(position.y) + 1, layout.layers()});
             }
             // place primary input node
-            place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] = layout.create_pi(
-                fmt::format("pi{}", ssg.network.node_to_index(ssg.nodes_to_place[place_info.current_node])), position);
+            place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] =
+                place(layout, position, ssg.network, ssg.nodes_to_place[place_info.current_node]);
             place_info.pi2node[ssg.nodes_to_place[place_info.current_node]] =
                 place_info.node2pos[ssg.nodes_to_place[place_info.current_node]].object;
         }
