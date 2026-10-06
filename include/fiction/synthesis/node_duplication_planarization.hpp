@@ -236,9 +236,13 @@ struct hgraph_node
      */
     mockturtle::node<Ntk> root;
     /**
-     * First and last fanin of the ordering.
+     * Leftmost fanin of the ordering; the one a predecessor ordering can share.
      */
-    std::pair<mockturtle::node<Ntk>, mockturtle::node<Ntk>> outer_fanins;
+    mockturtle::node<Ntk> first_fanin;
+    /**
+     * Rightmost fanin of the ordering; the one a successor ordering can share.
+     */
+    mockturtle::node<Ntk> last_fanin;
     /**
      * All remaining fanins.
      */
@@ -250,7 +254,7 @@ struct hgraph_node
     /**
      * Index of the predecessor H-graph node on that shortest path, within the slice of the previous node.
      */
-    std::size_t fanin_it{};
+    std::size_t predecessor{};
     /**
      * Sum of the cone weights of the fanins that the shortest path ending here places once for two consecutive
      * consumers; the tie-break among equally short paths prefers the heaviest sum.
@@ -267,8 +271,9 @@ struct hgraph_node
     hgraph_node(const mockturtle::node<Ntk> r, const mockturtle::node<Ntk> first, const mockturtle::node<Ntk> last,
                 const uint64_t delay_value) :
             root{r},
-            outer_fanins(first, last),
-            delay(delay_value)
+            first_fanin{first},
+            last_fanin{last},
+            delay{delay_value}
     {}
 };
 
@@ -282,25 +287,25 @@ struct hgraph_node
  * @return H-graph nodes of the slice.
  */
 template <typename Ntk>
-[[nodiscard]] std::vector<hgraph_node<Ntk>> calculate_pairs(const mockturtle::node<Ntk>               root,
-                                                            const std::vector<mockturtle::node<Ntk>>& nodes)
+[[nodiscard]] std::vector<hgraph_node<Ntk>> enumerate_orderings(const mockturtle::node<Ntk>               root,
+                                                                const std::vector<mockturtle::node<Ntk>>& nodes)
 {
     constexpr auto inf = std::numeric_limits<uint64_t>::max();
 
-    std::vector<hgraph_node<Ntk>> combinations{};
+    std::vector<hgraph_node<Ntk>> orderings{};
 
     if (nodes.empty())
     {
-        return combinations;
+        return orderings;
     }
 
     if (nodes.size() == 1)
     {
-        combinations.emplace_back(root, nodes.front(), nodes.front(), inf);
-        return combinations;
+        orderings.emplace_back(root, nodes.front(), nodes.front(), inf);
+        return orderings;
     }
 
-    combinations.reserve(nodes.size() * (nodes.size() - 1));
+    orderings.reserve(nodes.size() * (nodes.size() - 1));
 
     for (auto it1 = nodes.cbegin(); it1 != nodes.cend(); ++it1)
     {
@@ -323,12 +328,12 @@ template <typename Ntk>
             forward.middle_fanins  = middle_fanins;
             backward.middle_fanins = std::move(middle_fanins);
 
-            combinations.push_back(std::move(forward));
-            combinations.push_back(std::move(backward));
+            orderings.push_back(std::move(forward));
+            orderings.push_back(std::move(backward));
         }
     }
 
-    return combinations;
+    return orderings;
 }
 
 /**
@@ -345,6 +350,14 @@ class node_duplication_planarization_impl
 {
   public:
     /**
+     * Nodes of one level or the fanins of one node, source ids or copy ids.
+     */
+    using node_list = std::vector<mockturtle::node<Ntk>>;
+    /**
+     * One slice of the H-graph: every ordering of the fanins of one node.
+     */
+    using hgraph_slice = std::vector<hgraph_node<Ntk>>;
+    /**
      * Creates the implementation.
      *
      * @param src Source network.
@@ -360,18 +373,13 @@ class node_duplication_planarization_impl
     {}
 
     /**
-     * Runs the algorithm.
+     * Collects the primary outputs that form the first level: every non-constant output node once, in rank order, or
+     * shuffled when the parameters ask for a random output order.
      *
-     * @return Planar network with duplicated nodes and virtual primary inputs.
+     * @return Nodes of the output level.
      */
-    [[nodiscard]] networks::virtual_pi_network<Ntk> run()
+    [[nodiscard]] std::vector<mockturtle::node<Ntk>> output_level() const
     {
-        const mockturtle::stopwatch stop{pst.time_total};
-
-        // one step per gate level of the input network plus one for building the result
-        utils::progress_reporter progress{ps.on_progress, "planarizing levels", ntk.depth() + 1};
-
-        // first level: the primary outputs in rank order
         std::vector<mockturtle::node<Ntk>> pos{};
         pos.reserve(ntk.num_pos());
         ntk.foreach_node(
@@ -389,58 +397,74 @@ class node_duplication_planarization_impl
             std::shuffle(pos.begin(), pos.end(), generator);
         }
 
-        for (const auto& po : pos)
+        return pos;
+    }
+    /**
+     * Decides for the hybrid strategy whether the level just computed keeps its crossings instead of its duplicates.
+     * If so, the level is replaced by its original rank order and the statistics count the kept crossings.
+     *
+     * @param next_level Level below the current one as the duplication computed it; replaced if crossings are kept.
+     * @return `true` iff the level keeps its crossings.
+     */
+    [[nodiscard]] bool keep_crossings(std::vector<mockturtle::node<Ntk>>& next_level)
+    {
+        if (ps.strategy != node_duplication_planarization_params::planarization_strategy::HYBRID)
         {
-            fis.clear();
-            compute_slice_delays(po);
+            return false;
         }
 
-        ntk_lvls.push_back(pos);
+        // level of `next_level` in the source network
+        const auto lvl = ntk.depth() - static_cast<uint32_t>(levels.size());
+
+        auto       original_rank = ntk.get_ranks(lvl);
+        const auto cross_cost    = crossing_cost(levels.back(), original_rank);
+
+        if (!crossings_are_cheaper(cross_cost.cost, next_level, original_rank, lvl))
+        {
+            return false;
+        }
+
+        next_level = std::move(original_rank);
+        ++pst.num_crossing_levels;
+        pst.num_crossings += cross_cost.num_crossings;
+
+        return true;
+    }
+    /**
+     * Runs the algorithm.
+     *
+     * @return Planar network with duplicated nodes and virtual primary inputs.
+     */
+    [[nodiscard]] networks::virtual_pi_network<Ntk> run()
+    {
+        const mockturtle::stopwatch stop{pst.time_total};
+
+        // one step per gate level of the input network plus one for building the result
+        utils::progress_reporter progress{ps.on_progress, "planarizing levels", ntk.depth() + 1};
+
+        // first level: the primary outputs
+        const auto pos = output_level();
+
+        levels.push_back(pos);
         crossing_level.push_back(false);
         progress.advance();
 
         std::size_t copies_before = copy_origin.size();
 
-        auto next_level    = compute_node_order();
-        bool f_final_level = is_final_level(next_level);
+        auto next_level = next_level_of(pos);
+        bool at_inputs  = is_final_level(next_level);
 
-        while (!next_level.empty() && !f_final_level)
+        while (!next_level.empty() && !at_inputs)
         {
             // the hybrid strategy considers keeping the crossings of a level instead of its duplicates
-            const bool duplicated = copy_origin.size() > copies_before;
-            bool       crossings  = false;
+            const bool crossings = copy_origin.size() > copies_before && keep_crossings(next_level);
 
-            if (ps.strategy == node_duplication_planarization_params::planarization_strategy::HYBRID && duplicated)
-            {
-                // level of `next_level` in the source network
-                const auto lvl = ntk.depth() - static_cast<uint32_t>(ntk_lvls.size());
-
-                auto       original_rank = ntk.get_ranks(lvl);
-                const auto cross_cost    = crossing_cost(ntk_lvls.back(), original_rank);
-
-                if (crossings_are_cheaper(cross_cost.cost, next_level, original_rank, lvl))
-                {
-                    next_level = std::move(original_rank);
-                    crossings  = true;
-                    ++pst.num_crossing_levels;
-                    pst.num_crossings += cross_cost.num_crossings;
-                }
-            }
-
-            ntk_lvls.push_back(next_level);
+            levels.push_back(next_level);
             crossing_level.push_back(crossings);
-            lvl_pairs.clear();
-
-            // one slice of the H-graph per node of the level
-            for (const auto& n : next_level)
-            {
-                fis.clear();
-                compute_slice_delays(n);
-            }
 
             copies_before = copy_origin.size();
-            next_level    = compute_node_order();
-            f_final_level = is_final_level(next_level);
+            next_level    = next_level_of(next_level);
+            at_inputs     = is_final_level(next_level);
             progress.advance();
 
             if (ps.max_duplications > 0 && copy_origin.size() > ps.max_duplications)
@@ -451,9 +475,9 @@ class node_duplication_planarization_impl
         }
 
         // the final level holds the primary inputs
-        if (f_final_level)
+        if (at_inputs)
         {
-            ntk_lvls.push_back(next_level);
+            levels.push_back(next_level);
             crossing_level.push_back(false);
         }
 
@@ -476,7 +500,7 @@ class node_duplication_planarization_impl
      * @param n Source node id or copy id.
      * @return The source node.
      */
-    [[nodiscard]] mockturtle::node<Ntk> origin(const mockturtle::node<Ntk> n) const
+    [[nodiscard]] mockturtle::node<Ntk> origin(const mockturtle::node<Ntk> n) const noexcept
     {
         return n < ntk.size() ? n : copy_origin[n - ntk.size()];
     }
@@ -494,16 +518,35 @@ class node_duplication_planarization_impl
         return static_cast<mockturtle::node<Ntk>>(ntk.size() + copy_origin.size() - 1);
     }
     /**
+     * Computes the planar order of the level below a given level: builds the H-graph of the level, one slice per
+     * node, and follows its shortest path. Duplicates of the level below receive copy ids.
+     *
+     * @param level Nodes of the current level, source ids or copy ids, in planar order.
+     * @return Nodes of the level below in planar order, duplicates as copy ids.
+     */
+    [[nodiscard]] node_list next_level_of(const node_list& level)
+    {
+        hgraph.clear();
+
+        for (const auto& n : level)
+        {
+            slice_fanins.clear();
+            compute_slice_delays(n);
+        }
+
+        return compute_node_order();
+    }
+    /**
      * Adds one slice to the H-graph of the current level.
      *
-     * A slice holds every ordering of the fanins of `n` as an H-graph node (`calculate_pairs`). The delay of each
+     * A slice holds every ordering of the fanins of `n` as an H-graph node (`enumerate_orderings`). The delay of each
      * ordering is the shortest path from the first slice of the level: moving to an ordering whose first fanin equals
      * the last fanin of the previous ordering costs 1, any other move costs 2, and the first slice starts at 1. Every
      * shortest path duplicates the same number of nodes but not the same nodes: where consecutive consumers share
      * several fanins, only one is placed once between them and the others are copied. Ties between equal delays are
      * therefore broken in favour of the path whose shared fanins have the heaviest cones, so that the copies drag the
      * lightest cones along, and then in favour of orderings that share a fanin in the level below, which avoids a
-     * duplication there. The slice is appended to `lvl_pairs`.
+     * duplication there. The slice is appended to `hgraph`.
      *
      * @param n Node (source id or copy id) whose fanins form the slice.
      */
@@ -514,7 +557,7 @@ class node_duplication_planarization_impl
         // primary inputs propagate to the next level, since they must reach the input level without crossings
         if (ntk.is_pi(o))
         {
-            fis.push_back(o);
+            slice_fanins.push_back(o);
         }
 
         // keep rank order among equal delays: a later insertion never overwrites an earlier one
@@ -528,62 +571,63 @@ class node_duplication_planarization_impl
                                   return;
                               }
 
-                              const auto it =
-                                  std::lower_bound(fis.cbegin(), fis.cend(), fn, [this](const auto& a, const auto& b)
-                                                   { return ntk.rank_position(a) < ntk.rank_position(b); });
+                              const auto it = std::lower_bound(slice_fanins.cbegin(), slice_fanins.cend(), fn,
+                                                               [this](const auto& a, const auto& b)
+                                                               { return ntk.rank_position(a) < ntk.rank_position(b); });
 
-                              fis.insert(it, fn);
+                              slice_fanins.insert(it, fn);
                           });
 
-        if (fis.empty())
+        if (slice_fanins.empty())
         {
             throw std::invalid_argument("A gate has only constant fanins; propagate constants before planarization");
         }
 
-        auto combinations = calculate_pairs<Ntk>(n, fis);
+        auto orderings = enumerate_orderings<Ntk>(n, slice_fanins);
 
-        if (lvl_pairs.empty())
+        if (hgraph.empty())
         {
-            for (auto& ordering : combinations)
+            for (auto& ordering : orderings)
             {
                 ordering.delay = 1;
             }
         }
         else
         {
-            const auto& previous = lvl_pairs.back();
+            const auto& previous = hgraph.back();
 
-            for (auto& cur : combinations)
+            for (auto& cur : orderings)
             {
                 // the cone weight of the fanin this ordering can share with the previous one
-                const double share = cone_weight(cur.outer_fanins.first);
+                const double share = cone_weight(cur.first_fanin);
 
+                // relax every edge from the previous slice: a shared fanin costs one placement, otherwise two
                 for (std::size_t last_idx = 0; last_idx < previous.size(); ++last_idx)
                 {
                     const auto& last = previous[last_idx];
 
-                    const bool   shares = cur.outer_fanins.first == last.outer_fanins.second;
+                    const bool   shares = cur.first_fanin == last.last_fanin;
                     const auto   delay  = last.delay + (shares ? 1 : 2);
                     const double weight = last.shared_weight + (shares ? share : 0.0);
 
+                    // shorter path, or equally short with a heavier shared cone
                     if (delay < cur.delay || (delay == cur.delay && weight > cur.shared_weight))
                     {
-                        cur.fanin_it      = last_idx;
+                        cur.predecessor   = last_idx;
                         cur.delay         = delay;
                         cur.shared_weight = weight;
                     }
                     else if (!shares && delay == cur.delay && weight == cur.shared_weight &&
-                             last.fanin_it < previous.size() &&
-                             share_fanin(cur.outer_fanins.first, last.outer_fanins.second))
+                             last.predecessor < previous.size() && share_fanin(cur.first_fanin, last.last_fanin))
                     {
-                        cur.fanin_it = last_idx;
+                        cur.predecessor = last_idx;
                         break;
                     }
                 }
             }
         }
 
-        lvl_pairs.push_back(std::move(combinations));
+        hgraph.push_back(std::move(orderings));
     }
     /**
      * Whether two source nodes have a fanin in common.
@@ -647,16 +691,16 @@ class node_duplication_planarization_impl
         std::vector<mockturtle::node<Ntk>> fanins{};
         fanins.reserve(ordering.middle_fanins.size() + 2);
 
-        place_fanin(ordering.outer_fanins.second, level_rtl, placed, fanins);
+        place_fanin(ordering.last_fanin, level_rtl, placed, fanins);
 
         for (const auto& n : ordering.middle_fanins)
         {
             place_fanin(n, level_rtl, placed, fanins);
         }
 
-        if (ordering.outer_fanins.first != ordering.outer_fanins.second)
+        if (ordering.first_fanin != ordering.last_fanin)
         {
-            place_fanin(ordering.outer_fanins.first, level_rtl, placed, fanins);
+            place_fanin(ordering.first_fanin, level_rtl, placed, fanins);
         }
 
         fanins_of[ordering.root] = std::move(fanins);
@@ -673,36 +717,37 @@ class node_duplication_planarization_impl
         std::vector<mockturtle::node<Ntk>> level_rtl{};
         std::vector<bool>                  placed(ntk.size(), false);
 
-        if (lvl_pairs.empty())
+        if (hgraph.empty())
         {
             return level_rtl;
         }
 
-        const auto& last_slice = lvl_pairs.back();
+        const auto& last_slice = hgraph.back();
 
         // the least delay; among equal delays the heaviest shared weight; among those the first in rank order
-        const auto minimum_it = std::min_element(
+        const auto best = std::min_element(
             last_slice.cbegin(), last_slice.cend(), [](const auto& a, const auto& b)
             { return a.delay < b.delay || (a.delay == b.delay && a.shared_weight > b.shared_weight); });
 
-        if (minimum_it == last_slice.cend())
+        if (best == last_slice.cend())
         {
             return level_rtl;
         }
 
-        place_ordering(*minimum_it, level_rtl, placed);
+        place_ordering(*best, level_rtl, placed);
 
-        std::size_t level    = lvl_pairs.size() - 1;
-        std::size_t fanin_it = minimum_it->fanin_it;
+        // walk the shortest path back to the first slice, placing every ordering on the way
+        std::size_t slice       = hgraph.size() - 1;
+        std::size_t predecessor = best->predecessor;
 
-        while (level > 0 && fanin_it < lvl_pairs[level - 1].size())
+        while (slice > 0 && predecessor < hgraph[slice - 1].size())
         {
-            const auto& ordering = lvl_pairs[level - 1][fanin_it];
+            const auto& ordering = hgraph[slice - 1][predecessor];
 
             place_ordering(ordering, level_rtl, placed);
 
-            --level;
-            fanin_it = ordering.fanin_it;
+            --slice;
+            predecessor = ordering.predecessor;
         }
 
         std::reverse(level_rtl.begin(), level_rtl.end());
@@ -748,13 +793,13 @@ class node_duplication_planarization_impl
             old2new[ntk.get_constant(true)] = dest.get_constant(true);
         }
 
-        ntk.foreach_pi_unranked([&](const auto& n) { old2new[n] = dest.create_pi(); });
+        ntk.foreach_pi_unranked([&old2new, &dest](const auto& n) { old2new[n] = dest.create_pi(); });
 
-        levelized_node_order<ntk_dest_t> lvls_new(ntk_lvls.size());
+        levelized_node_order<ntk_dest_t> lvls_new(levels.size());
 
-        for (auto i = ntk_lvls.size(); i-- > 0;)
+        for (auto i = levels.size(); i-- > 0;)
         {
-            const auto& lvl     = ntk_lvls[i];
+            const auto& lvl     = levels[i];
             auto&       lvl_new = lvls_new[i];
             lvl_new.reserve(lvl.size());
 
@@ -785,14 +830,14 @@ class node_duplication_planarization_impl
         }
 
         ntk.foreach_po(
-            [&](const auto& po)
+            [this, &old2new, &dest](const auto& po)
             {
                 const auto sig = old2new[ntk.get_node(po)];
 
                 dest.create_po(ntk.is_complemented(po) ? dest.create_not(sig) : sig);
             });
 
-        // `ntk_lvls` starts at the primary outputs; ranks start at the primary inputs
+        // `levels` starts at the primary outputs; ranks start at the primary inputs
         std::reverse(lvls_new.begin(), lvls_new.end());
 
         dest.update_ranks();
@@ -825,7 +870,7 @@ class node_duplication_planarization_impl
         const auto& candidates = fanins_of[n];
 
         ntk.foreach_fanin(o,
-                          [&](const auto& f)
+                          [this, &old2new, &dest, &candidates, &children, by_origin](const auto& f)
                           {
                               const auto fn = ntk.get_node(f);
 
@@ -938,36 +983,22 @@ class node_duplication_planarization_impl
     {
         const auto initial = copy_origin.size();
 
-        ntk_lvls.push_back(start);
-        lvl_pairs.clear();
+        levels.push_back(start);
 
-        for (const auto& n : start)
-        {
-            fis.clear();
-            compute_slice_delays(n);
-        }
+        auto next_level = next_level_of(start);
+        bool at_inputs  = is_final_level(next_level);
 
-        auto next_level    = compute_node_order();
-        bool f_final_level = is_final_level(next_level);
-
-        while (!next_level.empty() && !f_final_level)
+        while (!next_level.empty() && !at_inputs)
         {
             if (copy_origin.size() - initial > budget)
             {
                 return budget + 1;
             }
 
-            ntk_lvls.push_back(next_level);
-            lvl_pairs.clear();
+            levels.push_back(next_level);
 
-            for (const auto& n : next_level)
-            {
-                fis.clear();
-                compute_slice_delays(n);
-            }
-
-            next_level    = compute_node_order();
-            f_final_level = is_final_level(next_level);
+            next_level = next_level_of(next_level);
+            at_inputs  = is_final_level(next_level);
         }
 
         return copy_origin.size() - initial;
@@ -993,7 +1024,7 @@ class node_duplication_planarization_impl
      */
     [[nodiscard]] uint64_t gadget_nodes() const noexcept
     {
-        return ps.xor_gates ? XOR_GADGET_NODES : AND_OR_GADGET_NODES;
+        return ps.xor_gates ? xor_gadget_nodes : and_or_gadget_nodes;
     }
     /**
      * Number of levels one crossing gadget spans.
@@ -1002,7 +1033,7 @@ class node_duplication_planarization_impl
      */
     [[nodiscard]] uint64_t gadget_depth() const noexcept
     {
-        return ps.xor_gates ? XOR_GADGET_DEPTH : AND_OR_GADGET_DEPTH;
+        return ps.xor_gates ? xor_gadget_depth : and_or_gadget_depth;
     }
     /**
      * Weighted size of the transitive fanin of a source node, see `duplication_cost_model`.
@@ -1011,7 +1042,7 @@ class node_duplication_planarization_impl
      * @param current_level Level on which the node is duplicated.
      * @return Weighted cone size.
      */
-    [[nodiscard]] uint64_t weighted_tfi_cost(const mockturtle::node<Ntk> root, const uint32_t current_level) const
+    [[nodiscard]] uint64_t cone_cost(const mockturtle::node<Ntk> root, const uint32_t current_level) const
     {
         const auto& m = ps.duplication_cost;
 
@@ -1095,7 +1126,7 @@ class node_duplication_planarization_impl
         {
             if (count > 1)
             {
-                cost += (count - 1) * weighted_tfi_cost(n, lvl);
+                cost += (count - 1) * cone_cost(n, lvl);
             }
         }
 
@@ -1120,6 +1151,28 @@ class node_duplication_planarization_impl
         return pos;
     }
     /**
+     * Positions in the lower level of the non-constant fanins of an upper node.
+     *
+     * @param n Node of the upper level, source id or copy id.
+     * @param pos Position of every source node in the lower level, `npos` for nodes outside it.
+     * @return Positions of the fanins of `n` in fanin order.
+     */
+    [[nodiscard]] std::vector<std::size_t> fanin_positions(const mockturtle::node<Ntk>     n,
+                                                           const std::vector<std::size_t>& pos) const
+    {
+        std::vector<std::size_t> targets{};
+        ntk.foreach_fanin(origin(n),
+                          [this, &pos, &targets](const auto& f)
+                          {
+                              if (const auto p = pos[ntk.get_node(f)]; p != std::numeric_limits<std::size_t>::max())
+                              {
+                                  targets.push_back(p);
+                              }
+                          });
+
+        return targets;
+    }
+    /**
      * Counts the crossings between an upper level and the level below it, both in their current order.
      *
      * @param upper Nodes of the upper level, duplicates as copy ids.
@@ -1137,15 +1190,7 @@ class node_duplication_planarization_impl
 
         for (const auto& n : upper)
         {
-            std::vector<std::size_t> targets{};
-            ntk.foreach_fanin(origin(n),
-                              [&](const auto& f)
-                              {
-                                  if (const auto p = pos[ntk.get_node(f)]; p != std::numeric_limits<std::size_t>::max())
-                                  {
-                                      targets.push_back(p);
-                                  }
-                              });
+            const auto targets = fanin_positions(n, pos);
 
             for (const auto p : targets)
             {
@@ -1187,7 +1232,7 @@ class node_duplication_planarization_impl
         for (std::size_t t = 0; t < upper.size(); ++t)
         {
             ntk.foreach_fanin(origin(upper[t]),
-                              [&](const auto& f)
+                              [this, &pos, &sum, &count, t](const auto& f)
                               {
                                   if (const auto p = pos[ntk.get_node(f)]; p != std::numeric_limits<std::size_t>::max())
                                   {
@@ -1200,7 +1245,7 @@ class node_duplication_planarization_impl
         std::vector<std::size_t> order(lower.size());
         std::iota(order.begin(), order.end(), 0u);
 
-        const auto key = [&](const std::size_t i)
+        const auto key = [&sum, &count](const std::size_t i)
         { return count[i] > 0 ? sum[i] / static_cast<double>(count[i]) : static_cast<double>(i); };
 
         std::stable_sort(order.begin(), order.end(),
@@ -1253,23 +1298,19 @@ class node_duplication_planarization_impl
         const auto                             edge_key = [](const mockturtle::node<Ntk> n, const std::size_t p)
         { return (static_cast<uint64_t>(n) << 32u) | static_cast<uint64_t>(p); };
 
-        std::vector<std::vector<std::pair<uint64_t, uint64_t>>> swept(lower.size() + 1);
-        std::size_t                                             max_pos       = 0;
-        uint64_t                                                num_crossings = 0;
-        uint64_t                                                max_per_edge  = 0;
+        // per position of the lower level: the keys of the edges swept so far and their crossing counts
+        using swept_edges = std::vector<std::pair<uint64_t, uint64_t>>;
+
+        std::vector<swept_edges> swept(lower.size() + 1);
+        std::size_t              max_pos       = 0;
+        uint64_t                 num_crossings = 0;
+        uint64_t                 max_per_edge  = 0;
 
         for (const auto& n : upper)
         {
-            std::vector<std::size_t> targets{};
-            ntk.foreach_fanin(origin(n),
-                              [&](const auto& f)
-                              {
-                                  if (const auto p = pos[ntk.get_node(f)]; p != std::numeric_limits<std::size_t>::max())
-                                  {
-                                      targets.push_back(p);
-                                  }
-                              });
+            const auto targets = fanin_positions(n, pos);
 
+            // every edge swept so far that ends right of this edge's target crosses it
             for (const auto p : targets)
             {
                 const auto key = edge_key(n, p);
@@ -1331,21 +1372,21 @@ class node_duplication_planarization_impl
     /**
      * For every source id and copy id, the ids of the level below it connects to, in placement order.
      */
-    std::vector<std::vector<mockturtle::node<Ntk>>> fanins_of;
+    std::vector<node_list> fanins_of;
     /**
      * H-graph of the current level, one slice per node of the level.
      */
-    std::vector<std::vector<hgraph_node<Ntk>>> lvl_pairs{};
+    std::vector<hgraph_slice> hgraph{};
     /**
      * Fanins of the node whose slice is being computed, in rank order.
      */
-    std::vector<mockturtle::node<Ntk>> fis{};
+    std::vector<mockturtle::node<Ntk>> slice_fanins{};
     /**
      * Levelized duplication order, level 0 being the primary outputs; duplicates as copy ids.
      */
-    levelized_node_order<Ntk> ntk_lvls{};
+    levelized_node_order<Ntk> levels{};
     /**
-     * Whether a level of `ntk_lvls` kept its crossings instead of its duplicates.
+     * Whether a level of `levels` kept its crossings instead of its duplicates.
      */
     std::vector<bool> crossing_level{};
     /**

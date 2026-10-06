@@ -11,6 +11,7 @@
 /**
  * @file
  * @brief Tests for `fiction/synthesis/network_balancing.hpp`.
+ * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */
 

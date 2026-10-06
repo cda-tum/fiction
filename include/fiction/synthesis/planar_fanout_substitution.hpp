@@ -103,7 +103,7 @@ class planar_fanout_substitution_impl
             const auto pad = max_tree_depth(r);
 
             ntk.foreach_node_in_rank(r,
-                                     [&](const auto& n)
+                                     [this, &dest, &old2new, pad](const auto& n)
                                      {
                                          if (ntk.is_constant(n))
                                          {
@@ -122,7 +122,7 @@ class planar_fanout_substitution_impl
         }
 
         ntk.foreach_po(
-            [&](const auto& po)
+            [this, &dest, &old2new](const auto& po)
             {
                 const auto n   = ntk.get_node(po);
                 auto       sig = take_fanout(dest, n, old2new[n]);
@@ -184,9 +184,9 @@ class planar_fanout_substitution_impl
      */
     [[nodiscard]] uint32_t tree_depth(const uint32_t fanouts) const noexcept
     {
-        const auto k = num_fanout_nodes(fanouts);
+        const auto num_nodes = num_fanout_nodes(fanouts);
 
-        return k == 0 ? 0 : fanout_node_level(k - 1) + 1;
+        return num_nodes == 0 ? 0 : fanout_node_level(num_nodes - 1) + 1;
     }
     /**
      * Whether a node already is a fanout node within the degree limit and needs no tree.
@@ -194,7 +194,7 @@ class planar_fanout_substitution_impl
      * @param n Node.
      * @return `true` iff `n` is a proper fanout node.
      */
-    [[nodiscard]] bool is_proper_fanout(const mockturtle::node<Ntk> n) const
+    [[nodiscard]] bool is_proper_fanout(const mockturtle::node<Ntk> n) const noexcept
     {
         if constexpr (has_is_fanout_v<Ntk>)
         {
@@ -242,7 +242,7 @@ class planar_fanout_substitution_impl
         children.reserve(ntk.fanin_size(n));
 
         ntk.foreach_fanin(n,
-                          [&](const auto& f)
+                          [this, &dest, &old2new, &children](const auto& f)
                           {
                               const auto fn    = ntk.get_node(f);
                               auto       child = old2new[fn];
@@ -312,15 +312,15 @@ class planar_fanout_substitution_impl
      */
     void generate_fanout_tree(Ntk& dest, const mockturtle::node<Ntk> n, const mockturtle::signal<Ntk> root)
     {
-        const auto fanouts = fanout_ntk.fanout_size(n);
-        const auto k       = num_fanout_nodes(fanouts);
-        const auto depth   = tree_depth(fanouts);
+        const auto fanouts   = fanout_ntk.fanout_size(n);
+        const auto num_nodes = num_fanout_nodes(fanouts);
+        const auto depth     = tree_depth(fanouts);
 
         // free outputs as (signal, level below n)
         std::queue<std::pair<mockturtle::signal<Ntk>, uint32_t>> slots{};
         slots.emplace(root, 0);
 
-        for (uint32_t i = 0; i < k; ++i)
+        for (uint32_t i = 0; i < num_nodes; ++i)
         {
             const auto [sig, level] = slots.front();
             slots.pop();

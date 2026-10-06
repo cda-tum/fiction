@@ -93,19 +93,19 @@ namespace detail
 /**
  * Number of nodes of one XOR crossing gadget, buffers included.
  */
-inline constexpr uint64_t XOR_GADGET_NODES = 10u;
+inline constexpr uint64_t xor_gadget_nodes = 10u;
 /**
  * Number of levels one XOR crossing gadget spans.
  */
-inline constexpr uint64_t XOR_GADGET_DEPTH = 4u;
+inline constexpr uint64_t xor_gadget_depth = 4u;
 /**
  * Number of nodes of one crossing gadget built from AND, OR, and NOT gates, buffers included.
  */
-inline constexpr uint64_t AND_OR_GADGET_NODES = 59u;
+inline constexpr uint64_t and_or_gadget_nodes = 59u;
 /**
  * Number of levels one crossing gadget built from AND, OR, and NOT gates spans.
  */
-inline constexpr uint64_t AND_OR_GADGET_DEPTH = 14u;
+inline constexpr uint64_t and_or_gadget_depth = 14u;
 
 /**
  * Implementation of the crossing gate planarization algorithm.
@@ -163,7 +163,7 @@ class crossing_gate_planarization_impl
 
             ntk.foreach_node_in_rank(
                 r,
-                [&](const auto& n)
+                [this, &dest, &old2new](const auto& n)
                 {
                     if (ntk.is_constant(n) || ntk.is_ci(n))
                     {
@@ -174,7 +174,7 @@ class crossing_gate_planarization_impl
                     children.reserve(ntk.fanin_size(n));
 
                     ntk.foreach_fanin(n,
-                                      [&](const auto& f)
+                                      [this, &dest, &old2new, &children, &n](const auto& f)
                                       {
                                           const auto fn  = ntk.get_node(f);
                                           auto       sig = old2new[fn];
@@ -194,7 +194,7 @@ class crossing_gate_planarization_impl
         }
 
         ntk.foreach_po(
-            [&](const auto& po)
+            [this, &dest, &old2new](const auto& po)
             {
                 const auto sig = old2new[ntk.get_node(po)];
                 dest.create_po(ntk.is_complemented(po) ? dest.create_not(sig) : sig);
@@ -283,9 +283,24 @@ class crossing_gate_planarization_impl
      *
      * @return Number of levels a gadget occupies.
      */
-    [[nodiscard]] uint32_t gadget_depth() const noexcept
+    /**
+     * Levels an input of the XOR gadget is delayed by so that it meets the buffered XOR of both inputs: the XOR and its
+     * buffer.
+     */
+    static constexpr uint32_t xor_core_delay = 2u;
+    /**
+     * Levels an input of the AND-OR-NOT XOR is delayed by so that it meets the buffered NAND of both inputs: the NAND,
+     * its inverter, and its buffer.
+     */
+    static constexpr uint32_t and_or_inner_delay = 3u;
+    /**
+     * Levels an input of the AND-OR-NOT gadget is delayed by so that it meets the buffered AND-OR-NOT XOR of both
+     * inputs: the XOR of depth six and its buffer.
+     */
+    static constexpr uint32_t and_or_core_delay = 7u;
+    [[nodiscard]] uint32_t    gadget_depth() const noexcept
     {
-        return static_cast<uint32_t>(ps.xor_gates ? XOR_GADGET_DEPTH : AND_OR_GADGET_DEPTH);
+        return static_cast<uint32_t>(ps.xor_gates ? xor_gadget_depth : and_or_gadget_depth);
     }
     /**
      * Finds the crossings between every pair of adjacent ranks. Edges are swept in rank order of their sources; an
@@ -301,7 +316,7 @@ class crossing_gate_planarization_impl
 
         for (uint32_t r = 0; r < ntk.depth(); ++r)
         {
-            stage st{};
+            stage rank_stage{};
 
             // edges already swept, grouped by target position, with the level each one has reached
             std::vector<std::deque<std::pair<edge, uint64_t>>> swept(ntk.rank_width(r + 1) + 1);
@@ -311,14 +326,16 @@ class crossing_gate_planarization_impl
 
             ntk.foreach_node_in_rank(
                 r,
-                [&](const auto& n)
+                [this, &rank_stage, &swept, &max_pos, &rank_crossings](const auto& n)
                 {
                     std::vector<edge> targets{};
                     targets.reserve(fanout_ntk.fanout_size(n));
-                    fanout_ntk.foreach_fanout(n, [&](const auto& fo) { targets.push_back({n, fo}); });
+                    fanout_ntk.foreach_fanout(n, [&targets, &n](const auto& fo) { targets.push_back({n, fo}); });
                     std::sort(targets.begin(), targets.end(), [this](const edge& a, const edge& b)
                               { return ntk.rank_position(a.target) < ntk.rank_position(b.target); });
 
+                    // every edge swept so far that ends right of this edge's target crosses it; the crossing's
+                    // level is one more than the levels both edges have reached, so gadgets stack bottom-up
                     for (const auto& e : targets)
                     {
                         const uint64_t pos       = ntk.rank_position(e.target);
@@ -330,7 +347,7 @@ class crossing_gate_planarization_impl
                             {
                                 const auto level = std::max(local_lvl, prev_lvl);
 
-                                st.crossings.push_back({prev_edge, e, level});
+                                rank_stage.crossings.push_back({prev_edge, e, level});
                                 ++rank_crossings;
 
                                 local_lvl = std::max(local_lvl, prev_lvl) + 1;
@@ -338,7 +355,7 @@ class crossing_gate_planarization_impl
                             }
                         }
 
-                        st.edges.push_back(e);
+                        rank_stage.edges.push_back(e);
                     }
 
                     for (const auto& e : targets)
@@ -357,7 +374,7 @@ class crossing_gate_planarization_impl
 
             pst.num_crossings += rank_crossings;
 
-            stages.push_back(std::move(st));
+            stages.push_back(std::move(rank_stage));
         }
     }
     /**
@@ -378,6 +395,8 @@ class crossing_gate_planarization_impl
 
         std::size_t placed = 0;
 
+        // one pass per gadget depth: adjacent crossing edges get a gadget and swap places, every other edge a
+        // buffer chain of the same depth, until every crossing of the rank is resolved
         while (placed < ordered.size())
         {
             const auto placed_before = placed;
@@ -471,10 +490,10 @@ class crossing_gate_planarization_impl
         const auto fo_a = dest.create_buf(a);
         const auto fo_b = dest.create_buf(b);
 
-        const auto a_delayed = buffer_chain(dest, fo_a, 3);
+        const auto a_delayed = buffer_chain(dest, fo_a, and_or_inner_delay);
         const auto core      = dest.create_buf(dest.create_not(dest.create_and(fo_a, fo_b)));
         const auto p_a       = dest.create_and(a_delayed, core);
-        const auto b_delayed = buffer_chain(dest, fo_b, 3);
+        const auto b_delayed = buffer_chain(dest, fo_b, and_or_inner_delay);
         const auto p_b       = dest.create_and(b_delayed, core);
 
         return dest.create_or(p_a, p_b);
@@ -497,9 +516,9 @@ class crossing_gate_planarization_impl
 
         if (ps.xor_gates)
         {
-            const auto a_delayed = buffer_chain(dest, a, 2);
+            const auto a_delayed = buffer_chain(dest, a, xor_core_delay);
             const auto c0        = dest.create_buf(dest.create_xor(a, b));
-            const auto b_delayed = buffer_chain(dest, b, 2);
+            const auto b_delayed = buffer_chain(dest, b, xor_core_delay);
 
             const auto left_out  = dest.create_xor(a_delayed, c0);  // = b
             const auto right_out = dest.create_xor(c0, b_delayed);  // = a
@@ -509,9 +528,9 @@ class crossing_gate_planarization_impl
         }
         else
         {
-            const auto a_delayed = buffer_chain(dest, a, 7);
+            const auto a_delayed = buffer_chain(dest, a, and_or_core_delay);
             const auto c0        = dest.create_buf(and_or_xor(dest, a, b));
-            const auto b_delayed = buffer_chain(dest, b, 7);
+            const auto b_delayed = buffer_chain(dest, b, and_or_core_delay);
 
             const auto left_out  = and_or_xor(dest, a_delayed, c0);  // = b
             const auto right_out = and_or_xor(dest, c0, b_delayed);  // = a

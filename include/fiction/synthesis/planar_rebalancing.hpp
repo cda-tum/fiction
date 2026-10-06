@@ -117,7 +117,7 @@ class planar_rebalancing_impl
      * @param n Node of the source network.
      * @return `true` iff `n` is a chain buffer.
      */
-    [[nodiscard]] bool is_chain_buffer(const mockturtle::node<Ntk> n) const
+    [[nodiscard]] bool is_chain_buffer(const mockturtle::node<Ntk> n) const noexcept
     {
         return ntk.is_buf(n) && fanout_ntk.fanout_size(n) == 1;
     }
@@ -131,7 +131,7 @@ class planar_rebalancing_impl
     void remove_buffer_chains(Ntk& stripped, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new) const
     {
         ntk.foreach_gate(
-            [&](const auto& n)
+            [this, &stripped, &old2new](const auto& n)
             {
                 if (is_chain_buffer(n))
                 {
@@ -141,13 +141,14 @@ class planar_rebalancing_impl
 
                 std::vector<mockturtle::signal<Ntk>> children{};
                 children.reserve(ntk.fanin_size(n));
-                ntk.foreach_fanin(n, [&](const auto& f) { children.push_back(old2new[ntk.get_node(f)]); });
+                ntk.foreach_fanin(n, [this, &old2new, &children](const auto& f)
+                                  { children.push_back(old2new[ntk.get_node(f)]); });
 
                 old2new[n] = stripped.clone_node(ntk, n, children);
             });
 
         ntk.foreach_po(
-            [&](const auto& po)
+            [this, &stripped, &old2new](const auto& po)
             {
                 const auto sig = old2new[ntk.get_node(po)];
                 stripped.create_po(ntk.is_complemented(po) ? stripped.create_not(sig) : sig);
@@ -172,7 +173,7 @@ class planar_rebalancing_impl
         std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Ntk>> new2old{};
         new2old.reserve(ntk.size());
         ntk.foreach_node(
-            [&](const auto& n)
+            [this, &stripped, &old2new, &new2old](const auto& n)
             {
                 if (!is_chain_buffer(n))
                 {
@@ -191,18 +192,18 @@ class planar_rebalancing_impl
 
         for (uint32_t level = 1; level <= stripped.depth(); ++level)
         {
-            auto       nodes = stripped.get_ranks(level);
-            const auto bary  = networks::barycenters(stripped, nodes);
+            auto       nodes   = stripped.get_ranks(level);
+            const auto centers = networks::barycenters(stripped, nodes);
 
             std::vector<std::size_t> order(nodes.size());
             std::iota(order.begin(), order.end(), 0u);
 
             std::stable_sort(order.begin(), order.end(),
-                             [&](const std::size_t a, const std::size_t b)
+                             [this, &centers, &nodes, &new2old](const std::size_t a, const std::size_t b)
                              {
-                                 if (bary[a] != bary[b])
+                                 if (centers[a] != centers[b])
                                  {
-                                     return bary[a] < bary[b];
+                                     return centers[a] < centers[b];
                                  }
 
                                  return source_position(new2old.at(nodes[a]), new2old.at(nodes[b]));
@@ -271,7 +272,7 @@ class planar_rebalancing_impl
         std::vector<std::pair<int64_t, mockturtle::node<Ntk>>> consumers{};
 
         fanout_ntk.foreach_fanout(n,
-                                  [&](const auto& fo)
+                                  [this, &consumers, n](const auto& fo)
                                   {
                                       auto c = fo;
 
@@ -304,24 +305,26 @@ class planar_rebalancing_impl
         return result;
     }
     /**
-     * Re-inserts buffers into the stripped network so that every edge spans exactly one level and all primary outputs
-     * sit on the top level. Edges are swept level by level in rank order; consecutive edges from the same source share
-     * one buffer per level, so a fanout splits right above its targets. The sweep follows the rank order of the
-     * stripped network, which keeps the result planar.
+     * Consumers of every stripped node in rank order, derived from the source network.
+     */
+    using consumer_map = std::unordered_map<mockturtle::node<Ntk>, std::vector<mockturtle::node<Ntk>>>;
+    /**
+     * Map from stripped nodes to signals of the network under construction.
+     */
+    using signal_map = mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>;
+    /**
+     * Collects the consumers of every stripped node in the rank order of the source network.
      *
      * @param stripped Stripped network with final ranks.
      * @param old2new Map from source nodes to signals of the stripped network.
-     * @return Balanced network.
+     * @return Consumers per stripped node.
      */
-    [[nodiscard]] Ntk insert_buffers(const Ntk&                                                stripped,
-                                     const mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new) const
+    [[nodiscard]] consumer_map stripped_consumers(const Ntk& stripped, const signal_map& old2new) const
     {
-        const mockturtle::fanout_view<Ntk> stripped_fo{stripped};
+        consumer_map consumers{};
 
-        // consumers of every stripped node in rank order, derived from the source network
-        std::unordered_map<mockturtle::node<Ntk>, std::vector<mockturtle::node<Ntk>>> consumers{};
         ntk.foreach_node(
-            [&](const auto& n)
+            [this, &stripped, &old2new, &consumers](const auto& n)
             {
                 if (ntk.is_constant(n) || is_chain_buffer(n))
                 {
@@ -337,6 +340,136 @@ class planar_rebalancing_impl
                 consumers.emplace(stripped.get_node(old2new[n]), std::move(cs));
             });
 
+        return consumers;
+    }
+    /**
+     * Appends the outgoing edges of a placed node to the edge list of its level, in consumer order. A primary output
+     * of the node is an edge from the node to itself that reaches up to the output level.
+     *
+     * @param n Placed node of the stripped network.
+     * @param stripped Stripped network with final ranks.
+     * @param consumers Consumers per stripped node.
+     * @param po_level Level of the primary outputs in the result.
+     * @param level_edges Edge list to append to.
+     */
+    static void append_out_edges(const mockturtle::node<Ntk> n, const Ntk& stripped, const consumer_map& consumers,
+                                 const uint32_t po_level, std::vector<edge>& level_edges)
+    {
+        const auto it = consumers.find(n);
+
+        // a primary input that drives nothing has no edges
+        if (it == consumers.end())
+        {
+            return;
+        }
+
+        for (const auto& c : it->second)
+        {
+            if (c == n)
+            {
+                if (po_level > stripped.level(n))
+                {
+                    level_edges.push_back({n, n, po_level - stripped.level(n) - 1});
+                }
+            }
+            else
+            {
+                level_edges.push_back({n, c, stripped.level(c) - stripped.level(n) - 1});
+            }
+        }
+    }
+    /**
+     * Places one level of the result: edges that span further get a buffer, one per source and level, shared by all
+     * consecutive edges of that source; a node whose fanin edges all end on this level is cloned. The map from
+     * stripped nodes to signals is updated once the level is complete, so that every clone reads the signals of the
+     * level below.
+     *
+     * @param current Edges that enter this level, in rank order.
+     * @param stripped Stripped network with final ranks.
+     * @param consumers Consumers per stripped node.
+     * @param po_level Level of the primary outputs in the result.
+     * @param balanced Network under construction.
+     * @param new2bal Map from stripped nodes to their signals in `balanced`; updated.
+     * @return Edges that enter the next level.
+     * @throws std::runtime_error If the fanin edges of a node are not consecutive, i.e., the input is not planar.
+     */
+    [[nodiscard]] static std::vector<edge> place_level(const std::vector<edge>& current, const Ntk& stripped,
+                                                       const consumer_map& consumers, const uint32_t po_level,
+                                                       Ntk& balanced, signal_map& new2bal)
+    {
+        std::vector<edge>     next{};
+        mockturtle::node<Ntk> last_source{};
+        bool                  have_last = false;
+
+        std::vector<std::pair<mockturtle::node<Ntk>, mockturtle::signal<Ntk>>> moved{};
+
+        for (std::size_t i = 0; i < current.size(); ++i)
+        {
+            const auto& e = current[i];
+
+            if (e.buffers > 0 || e.source == e.target)
+            {
+                // one buffer per source and level, shared by all its edges
+                if (!have_last || e.source != last_source)
+                {
+                    moved.emplace_back(e.source, balanced.create_buf(new2bal[e.source]));
+                    last_source = e.source;
+                    have_last   = true;
+                }
+
+                if (e.buffers > 0)
+                {
+                    next.push_back({e.source, e.target, e.buffers - 1});
+                }
+
+                continue;
+            }
+
+            // all fanin edges of the target are consecutive in a planar order; skip its other ones
+            const auto target = e.target;
+            const auto fanins = non_constant_fanins(stripped, target);
+
+            if (i + fanins > current.size())
+            {
+                throw std::runtime_error("The fanin edges of a node are not consecutive; the network is not planar");
+            }
+
+            i += fanins - 1;
+
+            std::vector<mockturtle::signal<Ntk>> children{};
+            children.reserve(stripped.fanin_size(target));
+            stripped.foreach_fanin(target, [&stripped, &new2bal, &children](const auto& f)
+                                   { children.push_back(new2bal[stripped.get_node(f)]); });
+
+            new2bal[target] = balanced.clone_node(stripped, target, children);
+
+            append_out_edges(target, stripped, consumers, po_level, next);
+
+            // a placed node separates the edges of a source: the next one gets its own buffer
+            have_last = false;
+        }
+
+        for (const auto& [n, sig] : moved)
+        {
+            new2bal[n] = sig;
+        }
+
+        return next;
+    }
+    /**
+     * Re-inserts buffers into the stripped network so that every edge spans exactly one level and all primary outputs
+     * sit on the top level. Edges are swept level by level in rank order; consecutive edges from the same source share
+     * one buffer per level, so a fanout splits right above its targets. The sweep follows the rank order of the
+     * stripped network, which keeps the result planar.
+     *
+     * @param stripped Stripped network with final ranks.
+     * @param old2new Map from source nodes to signals of the stripped network.
+     * @return Balanced network.
+     */
+    [[nodiscard]] Ntk insert_buffers(const Ntk& stripped, const signal_map& old2new) const
+    {
+        const auto consumers = stripped_consumers(stripped, old2new);
+
         auto  init     = networks::initialize_copy_network_with_virtual_pis(stripped);
         auto& balanced = init.first;
         auto& new2bal  = init.second;
@@ -351,102 +484,17 @@ class planar_rebalancing_impl
 
         const auto po_level = max_po_level(stripped);
 
-        // edges of a placed node, in consumer order
-        const auto out_edges = [&](const mockturtle::node<Ntk> n, std::vector<edge>& level_edges)
-        {
-            const auto it = consumers.find(n);
-
-            // a primary input that drives nothing has no edges
-            if (it == consumers.end())
-            {
-                return;
-            }
-
-            for (const auto& c : it->second)
-            {
-                if (c == n)
-                {
-                    if (po_level > stripped.level(n))
-                    {
-                        level_edges.push_back({n, n, po_level - stripped.level(n) - 1});
-                    }
-                }
-                else
-                {
-                    level_edges.push_back({n, c, stripped.level(c) - stripped.level(n) - 1});
-                }
-            }
-        };
-
         std::vector<edge> current{};
-        stripped.foreach_pi([&](const auto& pi) { out_edges(pi, current); });
-
-        std::vector<std::pair<mockturtle::node<Ntk>, mockturtle::signal<Ntk>>> moved{};
+        stripped.foreach_pi([&stripped, &consumers, po_level, &current](const auto& pi)
+                            { append_out_edges(pi, stripped, consumers, po_level, current); });
 
         while (!current.empty())
         {
-            std::vector<edge>     next{};
-            mockturtle::node<Ntk> last_source{};
-            bool                  have_last = false;
-
-            for (std::size_t i = 0; i < current.size(); ++i)
-            {
-                const auto& e = current[i];
-
-                if (e.buffers > 0 || e.source == e.target)
-                {
-                    // one buffer per source and level, shared by all its edges
-                    if (!have_last || e.source != last_source)
-                    {
-                        moved.emplace_back(e.source, balanced.create_buf(new2bal[e.source]));
-                        last_source = e.source;
-                        have_last   = true;
-                    }
-
-                    if (e.buffers > 0)
-                    {
-                        next.push_back({e.source, e.target, e.buffers - 1});
-                    }
-
-                    continue;
-                }
-
-                // all fanin edges of the target are consecutive in a planar order; skip its other ones
-                const auto target = e.target;
-                const auto fanins = non_constant_fanins(stripped, target);
-
-                if (i + fanins > current.size())
-                {
-                    throw std::runtime_error(
-                        "The fanin edges of a node are not consecutive; the network is not planar");
-                }
-
-                i += fanins - 1;
-
-                std::vector<mockturtle::signal<Ntk>> children{};
-                children.reserve(stripped.fanin_size(target));
-                stripped.foreach_fanin(target,
-                                       [&](const auto& f) { children.push_back(new2bal[stripped.get_node(f)]); });
-
-                new2bal[target] = balanced.clone_node(stripped, target, children);
-
-                out_edges(target, next);
-
-                // a placed node separates the edges of a source: the next one gets its own buffer
-                have_last = false;
-            }
-
-            for (const auto& [n, sig] : moved)
-            {
-                new2bal[n] = sig;
-            }
-            moved.clear();
-
-            current = std::move(next);
+            current = place_level(current, stripped, consumers, po_level, balanced, new2bal);
         }
 
         stripped.foreach_po(
-            [&](const auto& po)
+            [&stripped, &balanced, &new2bal](const auto& po)
             {
                 const auto sig = new2bal[stripped.get_node(po)];
                 balanced.create_po(stripped.is_complemented(po) ? balanced.create_not(sig) : sig);
@@ -469,7 +517,7 @@ class planar_rebalancing_impl
     {
         uint32_t level = 0;
         net.foreach_po(
-            [&](const auto& po)
+            [&net, &level](const auto& po)
             {
                 // constants have no level
                 if (const auto n = net.get_node(po); !net.is_constant(n))
@@ -491,7 +539,7 @@ class planar_rebalancing_impl
     {
         std::size_t count = 0;
         net.foreach_fanin(n,
-                          [&](const auto& f)
+                          [&net, &count](const auto& f)
                           {
                               if (!net.is_constant(net.get_node(f)))
                               {
