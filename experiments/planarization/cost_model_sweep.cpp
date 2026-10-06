@@ -93,73 +93,42 @@ std::vector<setting> settings()
 
     result.push_back({"default", base()});
 
-    for (const double v : {0.0, 0.5, 2.0, 4.0})
     {
-        auto ps                  = base();
-        ps.duplication_cost.base = v;
-        result.push_back({fmt::format("base={}", v), ps});
+        auto ps      = base();
+        ps.criterion = params::decision_criterion::WEIGHTED_CONE;
+        result.push_back({"weighted cone", ps});
     }
-    for (const double v : {0.0, 0.5, 2.0})
+    for (const double v : {1.0, 1.5, 3.0, 4.0})
     {
-        auto ps                       = base();
-        ps.duplication_cost.amplitude = v;
-        result.push_back({fmt::format("amplitude={}", v), ps});
+        auto ps                         = base();
+        ps.criterion                    = params::decision_criterion::WEIGHTED_CONE;
+        ps.duplication_cost.node_weight = v;
+        result.push_back({fmt::format("node_weight={}", v), ps});
     }
-    for (const double v : {1.0, 1.01, 1.05, 1.1})
-    {
-        auto ps                          = base();
-        ps.duplication_cost.level_growth = v;
-        result.push_back({fmt::format("level_growth={}", v), ps});
-    }
-    for (const double v : {1.0, 1.01, 1.05, 1.1})
-    {
-        auto ps                          = base();
-        ps.duplication_cost.depth_growth = v;
-        result.push_back({fmt::format("depth_growth={}", v), ps});
-    }
-    for (const double v : {0.0, 0.25, 1.0})
+    for (const double v : {0.0, 1.0, 2.0})
     {
         auto ps                           = base();
+        ps.criterion                      = params::decision_criterion::WEIGHTED_CONE;
         ps.duplication_cost.buffer_weight = v;
         result.push_back({fmt::format("buffer_weight={}", v), ps});
     }
+    for (const double v : {1.0, 1.01, 1.05, 1.1})
     {
-        // plain cone size: every node weighs one, no growth
-        auto ps                           = base();
-        ps.duplication_cost.base          = 1.0;
-        ps.duplication_cost.amplitude     = 0.0;
-        ps.duplication_cost.level_growth  = 1.0;
-        ps.duplication_cost.depth_growth  = 1.0;
-        ps.duplication_cost.buffer_weight = 1.0;
-        result.push_back({"cone size", ps});
+        auto ps                          = base();
+        ps.criterion                     = params::decision_criterion::WEIGHTED_CONE;
+        ps.duplication_cost.depth_growth = v;
+        result.push_back({fmt::format("depth_growth={}", v), ps});
     }
-    {
-        auto ps      = base();
-        ps.cross_min = params::crossing_minimization::BARYCENTER;
-        result.push_back({"no swaps", ps});
-    }
-    for (const uint32_t v : {8u, 128u})
+    for (const uint32_t v : {0u, 8u, 128u})
     {
         auto ps      = base();
         ps.max_swaps = v;
         result.push_back({fmt::format("max_swaps={}", v), ps});
     }
     {
-        auto ps      = base();
-        ps.criterion = params::decision_criterion::LOOKAHEAD;
-        result.push_back({"lookahead", ps});
-    }
-    {
         auto ps             = base();
-        ps.criterion        = params::decision_criterion::LOOKAHEAD;
         ps.lookahead_budget = 100000u;
         result.push_back({"lookahead budget=1e5", ps});
-    }
-    {
-        auto ps                   = base();
-        ps.criterion              = params::decision_criterion::LOOKAHEAD;
-        ps.max_crossings_per_rank = 10000u;
-        result.push_back({"lookahead crossings<=1e4", ps});
     }
     {
         auto ps                   = base();

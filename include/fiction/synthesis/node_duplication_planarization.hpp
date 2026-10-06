@@ -84,20 +84,6 @@ struct node_duplication_planarization_params
         HYBRID
     };
     /**
-     * Crossing minimization applied to a level before its crossings are costed in the hybrid strategy.
-     */
-    enum class crossing_minimization : uint8_t
-    {
-        /**
-         * One barycenter pass.
-         */
-        BARYCENTER,
-        /**
-         * One barycenter pass followed by adjacent swaps that reduce the crossing count.
-         */
-        BARYCENTER_AND_SWAPS
-    };
-    /**
      * How the hybrid strategy estimates the cost of duplicating a level.
      */
     enum class decision_criterion : uint8_t
@@ -108,39 +94,33 @@ struct node_duplication_planarization_params
         WEIGHTED_CONE,
         /**
          * The number of nodes that duplicating the rest of the network actually creates, measured by running the
-         * duplication strategy on the levels below for both options and stopping once one exceeds the other.
+         * duplication strategy on the levels below for both options and stopping once one exceeds the other. On the
+         * benchmark sets this is never worse and up to 16 % better than the weighted cone at the same runtime.
          */
         LOOKAHEAD
     };
     /**
-     * Weights of the duplication cost model of the hybrid strategy. The cost of duplicating a node is the weighted
-     * size of its transitive fanin, since every duplicate drags its whole cone along. A node of level \f$l\f$ weighs
-     * \f$\text{base} + \text{amplitude} \cdot \text{level\_growth}^{l}\f$, a chain buffer or inverter weighs
-     * `buffer_weight`, and the sum is scaled by \f$\text{depth\_growth}^{d}\f$ for a duplication on level
-     * \f$d\f$. The defaults were determined empirically on the benchmark set.
+     * Weights of the duplication cost model of the hybrid strategy's `WEIGHTED_CONE` criterion. The cost of
+     * duplicating a node is the weighted size of its transitive fanin, since every duplicate drags its whole cone
+     * along: a gate weighs `node_weight`, a chain buffer or inverter `buffer_weight`, and the sum is scaled by
+     * \f$\text{depth\_growth}^{d}\f$ for a duplication on level \f$d\f$, because duplicates on deep levels are
+     * duplicated again by the decisions below. The weights are in units of one crossing gadget node. The defaults
+     * were determined empirically on the benchmark sets; see `experiments/planarization/cost_model_sweep.cpp`.
      */
     struct duplication_cost_model
     {
         /**
-         * Weight of every node.
+         * Weight of a gate.
          */
-        double base = 1.0;
-        /**
-         * Amplitude of the level-dependent part of a node's weight.
-         */
-        double amplitude = 1.01;
-        /**
-         * Growth of a node's weight per level.
-         */
-        double level_growth = 1.02;
-        /**
-         * Growth of the duplication cost per level on which the duplication happens.
-         */
-        double depth_growth = 1.02;
+        double node_weight = 2.0;
         /**
          * Weight of a buffer or inverter chain node.
          */
         double buffer_weight = 0.5;
+        /**
+         * Growth of the duplication cost per level on which the duplication happens.
+         */
+        double depth_growth = 1.02;
     };
     /**
      * Receives completed work and the phase total.
@@ -159,11 +139,8 @@ struct node_duplication_planarization_params
      */
     planarization_strategy strategy = planarization_strategy::DUPLICATION;
     /**
-     * Crossing minimization of the hybrid strategy.
-     */
-    crossing_minimization cross_min = crossing_minimization::BARYCENTER_AND_SWAPS;
-    /**
-     * Maximum number of adjacent swaps per level in the hybrid strategy.
+     * Maximum number of adjacent swaps per level that the hybrid strategy tries after the barycenter ordering to
+     * reduce the crossings it costs. `0` keeps the barycenter order.
      */
     uint32_t max_swaps = 32u;
     /**
@@ -179,7 +156,7 @@ struct node_duplication_planarization_params
     /**
      * Decision criterion of the hybrid strategy.
      */
-    decision_criterion criterion = decision_criterion::WEIGHTED_CONE;
+    decision_criterion criterion = decision_criterion::LOOKAHEAD;
     /**
      * Duplication cost model of the hybrid strategy.
      */
@@ -1047,13 +1024,7 @@ class node_duplication_planarization_impl
                 continue;
             }
 
-            const auto level = ntk.has_level(n) ? ntk.level(n) : 0u;
-
-            const double weight = (ntk.fanin_size(n) == 1 && ntk.fanout_size(n) == 1) ?
-                                      m.buffer_weight :
-                                      m.base + m.amplitude * std::pow(m.level_growth, static_cast<double>(level));
-
-            total += weight;
+            total += (ntk.fanin_size(n) == 1 && ntk.fanout_size(n) == 1) ? m.buffer_weight : m.node_weight;
 
             ntk.foreach_fanin(n, [&stack, this](const auto& f) { stack.push_back(ntk.get_node(f)); });
         }
@@ -1168,8 +1139,8 @@ class node_duplication_planarization_impl
         return crossings;
     }
     /**
-     * Orders a level by the barycenters of the positions its nodes are used from in the upper level, then applies
-     * adjacent swaps that reduce the crossing count if the parameters ask for them.
+     * Orders a level by the barycenters of the positions its nodes are used from in the upper level, then applies up
+     * to `max_swaps` adjacent swaps that reduce the crossing count.
      *
      * @param upper Nodes of the upper level, duplicates as copy ids.
      * @param lower Nodes of the lower level, source ids; reordered.
@@ -1216,11 +1187,6 @@ class node_duplication_planarization_impl
             sorted.push_back(lower[i]);
         }
         lower = std::move(sorted);
-
-        if (ps.cross_min != node_duplication_planarization_params::crossing_minimization::BARYCENTER_AND_SWAPS)
-        {
-            return;
-        }
 
         auto     current = count_crossings(upper, lower);
         uint32_t swaps   = 0;

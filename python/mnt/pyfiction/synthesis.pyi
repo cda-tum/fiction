@@ -874,42 +874,41 @@ class decision_criterion(enum.Enum):
     """
     The number of nodes that duplicating the rest of the network actually
     creates, measured by running the duplication strategy on the levels
-    below for both options and stopping once one exceeds the other.
+    below for both options and stopping once one exceeds the other. On the
+    benchmark sets this is never worse and up to 16 % better than the
+    weighted cone at the same runtime.
     """
 
 class duplication_cost_model:
     """
-    Weights of the duplication cost model of the hybrid strategy. The cost
-    of duplicating a node is the weighted size of its transitive fanin,
-    since every duplicate drags its whole cone along. A node of level
-    :math:`l` weighs :math:`\\text{base} + \\text{amplitude} \\cdot
-    \\text{level\\_growth}^{l}`, a chain buffer or inverter weighs
-    `buffer_weight`, and the sum is scaled by
-    :math:`\\text{depth\\_growth}^{d}` for a duplication on level :math:`d`.
-    The defaults were determined empirically on the benchmark set.
+    Weights of the duplication cost model of the hybrid strategy's
+    `WEIGHTED_CONE` criterion. The cost of duplicating a node is the
+    weighted size of its transitive fanin, since every duplicate drags its
+    whole cone
+    along: a gate weighs `node_weight`, a chain buffer or inverter
+           `buffer_weight`, and the sum is scaled by
+    :math:`\\text{depth\\_growth}^{d}` for a duplication on level :math:`d`,
+    because duplicates on deep levels are duplicated again by the
+    decisions below. The weights are in units of one crossing gadget node.
+    The defaults were determined empirically on the benchmark sets; see
+    `experiments/planarization/cost_model_sweep.cpp`.
     """
 
     def __init__(self) -> None:
         """Default constructor."""
 
     @property
-    def base(self) -> float:
-        """Weight of every node."""
+    def node_weight(self) -> float:
+        """Weight of a gate."""
 
-    @base.setter
-    def base(self, arg: float, /) -> None: ...
+    @node_weight.setter
+    def node_weight(self, arg: float, /) -> None: ...
     @property
-    def amplitude(self) -> float:
-        """Amplitude of the level-dependent part of a node's weight."""
+    def buffer_weight(self) -> float:
+        """Weight of a buffer or inverter chain node."""
 
-    @amplitude.setter
-    def amplitude(self, arg: float, /) -> None: ...
-    @property
-    def level_growth(self) -> float:
-        """Growth of a node's weight per level."""
-
-    @level_growth.setter
-    def level_growth(self, arg: float, /) -> None: ...
+    @buffer_weight.setter
+    def buffer_weight(self, arg: float, /) -> None: ...
     @property
     def depth_growth(self) -> float:
         """
@@ -919,12 +918,6 @@ class duplication_cost_model:
 
     @depth_growth.setter
     def depth_growth(self, arg: float, /) -> None: ...
-    @property
-    def buffer_weight(self) -> float:
-        """Weight of a buffer or inverter chain node."""
-
-    @buffer_weight.setter
-    def buffer_weight(self, arg: float, /) -> None: ...
 
 class node_duplication_planarization_params:
     """Parameters for the node duplication planarization algorithm."""
@@ -953,6 +946,16 @@ class node_duplication_planarization_params:
 
     @xor_gates.setter
     def xor_gates(self, arg: bool, /) -> None: ...
+    @property
+    def max_swaps(self) -> int:
+        """
+        Maximum number of adjacent swaps per level that the hybrid strategy
+        tries after the barycenter ordering to reduce the crossings it costs.
+        `0` keeps the barycenter order.
+        """
+
+    @max_swaps.setter
+    def max_swaps(self, arg: int, /) -> None: ...
     @property
     def max_crossings_per_rank(self) -> int:
         """
@@ -1013,7 +1016,8 @@ class planarization_params:
     def duplication(self) -> node_duplication_planarization_params:
         """
         Parameters of the node duplication stage, including the strategy and
-        the gadget type of the crossing gates.
+        the gadget type of the crossing gates. The pipeline defaults to the
+        hybrid strategy, which yields the fewest nodes.
         """
 
     @duplication.setter

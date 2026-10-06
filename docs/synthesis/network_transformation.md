@@ -175,7 +175,8 @@ and re-inserts the minimum that keeps the network balanced.
 ### Planarization Pipeline
 
 `planarization` runs the whole pipeline: node duplication with the chosen strategy, crossing gates for the levels the
-hybrid strategy left crossed, planar fanout substitution, and planar rebalancing.
+hybrid strategy left crossed, planar fanout substitution, and planar rebalancing. The pipeline defaults to the hybrid
+strategy with the lookahead criterion, which produced the fewest nodes on the benchmark sets.
 
 ::::{tab-set}
 :sync-group: language

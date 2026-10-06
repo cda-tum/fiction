@@ -141,16 +141,12 @@ void planarization(nanobind::module_& m)
         m, "duplication_cost_model",
         DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("base", &params::duplication_cost_model::base,
-                DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_base))
-        .def_rw("amplitude", &params::duplication_cost_model::amplitude,
-                DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_amplitude))
-        .def_rw("level_growth", &params::duplication_cost_model::level_growth,
-                DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_level_growth))
-        .def_rw("depth_growth", &params::duplication_cost_model::depth_growth,
-                DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_depth_growth))
+        .def_rw("node_weight", &params::duplication_cost_model::node_weight,
+                DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_node_weight))
         .def_rw("buffer_weight", &params::duplication_cost_model::buffer_weight,
-                DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_buffer_weight));
+                DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_buffer_weight))
+        .def_rw("depth_growth", &params::duplication_cost_model::depth_growth,
+                DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_depth_growth));
 
     py::class_<params>(m, "node_duplication_planarization_params",
                        DOC(fiction_synthesis_node_duplication_planarization_params))
@@ -158,6 +154,7 @@ void planarization(nanobind::module_& m)
         .def_rw("strategy", &params::strategy, DOC(fiction_synthesis_node_duplication_planarization_params_strategy))
         .def_rw("criterion", &params::criterion, DOC(fiction_synthesis_node_duplication_planarization_params_criterion))
         .def_rw("xor_gates", &params::xor_gates, DOC(fiction_synthesis_node_duplication_planarization_params_xor_gates))
+        .def_rw("max_swaps", &params::max_swaps, DOC(fiction_synthesis_node_duplication_planarization_params_max_swaps))
         .def_rw("max_crossings_per_rank", &params::max_crossings_per_rank,
                 DOC(fiction_synthesis_node_duplication_planarization_params_max_crossings_per_rank))
         .def_rw("duplication_cost", &params::duplication_cost,

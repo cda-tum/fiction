@@ -445,9 +445,9 @@ TEST_CASE("Hybrid strategy with a prohibitive duplication cost keeps crossings",
     const auto ranked = rank_without_substitution(ntk);
 
     node_duplication_planarization_params ps{};
-    ps.strategy              = node_duplication_planarization_params::planarization_strategy::HYBRID;
-    ps.duplication_cost.base = 1e6;
-    ps.cross_min             = node_duplication_planarization_params::crossing_minimization::BARYCENTER;
+    ps.strategy                     = node_duplication_planarization_params::planarization_strategy::HYBRID;
+    ps.criterion                    = node_duplication_planarization_params::decision_criterion::WEIGHTED_CONE;
+    ps.duplication_cost.node_weight = 1e6;
 
     node_duplication_planarization_stats st{};
     const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
@@ -537,4 +537,43 @@ TEST_CASE("Gates with the same fanin twice", "[node-duplication-planarization]")
     const auto planar = node_duplication_planarization(ranked);
 
     check_planar_and_equivalent(tec, planar);
+}
+
+TEST_CASE("Hybrid strategy falls back to the cone model when the lookahead budget is exhausted",
+          "[node-duplication-planarization]")
+{
+    const auto ntk    = blueprints::parity_network<technology_network>();
+    const auto ranked = rank_without_substitution(ntk);
+
+    node_duplication_planarization_params ps{};
+    ps.strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID;
+    ps.criterion        = node_duplication_planarization_params::decision_criterion::LOOKAHEAD;
+    ps.lookahead_budget = 1;
+
+    node_duplication_planarization_stats st{};
+    const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
+
+    check_equivalent(ntk, hybrid);
+    CHECK((count_crossings(hybrid) == 0) == (st.num_crossing_levels == 0));
+
+    ps.criterion = node_duplication_planarization_params::decision_criterion::WEIGHTED_CONE;
+    node_duplication_planarization_stats cone_st{};
+    const auto                           cone = node_duplication_planarization(ranked, ps, &cone_st);
+
+    // with a budget of one node every lookahead is cut off, so the decisions are the cone model's
+    CHECK(hybrid.size() == cone.size());
+    CHECK(st.num_crossing_levels == cone_st.num_crossing_levels);
+}
+
+TEST_CASE("Random primary output order without a seed", "[node-duplication-planarization]")
+{
+    const auto ntk    = blueprints::full_adder_network<mockturtle::aig_network>();
+    const auto ranked = prepare(ntk);
+
+    node_duplication_planarization_params ps{};
+    ps.po_order = node_duplication_planarization_params::output_order::RANDOM_PO_ORDER;
+
+    const auto planar = node_duplication_planarization(ranked, ps);
+
+    check_planar_and_equivalent(ntk, planar);
 }

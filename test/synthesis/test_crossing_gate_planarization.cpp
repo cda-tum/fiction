@@ -220,7 +220,7 @@ TEST_CASE("Ranks with too many crossings are rejected", "[crossing-gate-planariz
     CHECK_THROWS_AS(crossing_gate_planarization(ranked, ps), std::runtime_error);
 }
 
-TEST_CASE("Progress is reported once per rank", "[crossing-gate-planarization]")
+TEST_CASE("Progress is reported", "[crossing-gate-planarization]")
 {
     const auto tec    = single_crossing_network();
     const auto ranked = rank(tec);
@@ -241,4 +241,5 @@ TEST_CASE("Progress is reported once per rank", "[crossing-gate-planarization]")
     CHECK(total == ranked.depth());
     REQUIRE(!done.empty());
     CHECK(done.back() == total);
+    // the reporter may throttle intermediate values; only the total and the final count are promised
 }
