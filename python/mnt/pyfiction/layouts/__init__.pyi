@@ -2278,7 +2278,7 @@ class hexagonal_layout:
         """
 
 class cartesian_gate_layout(cartesian_layout):
-    r"""
+    """
     A gate-level FCN layout owns gates, clocking, synchronization delays,
     and persistent obstructions. Clock zones are tiles in the coordinate
     geometry supplied by `CoordinateLayout`. The gate_level_layout class
@@ -2326,8 +2326,8 @@ class cartesian_gate_layout(cartesian_layout):
       its placement. If the provided tile is
     invalid, the location will not be stored and the node will not count
     towards number of gates or wires. A valid tile must have a signal,
-    i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\{0,
-    1\}`; otherwise, the function throws `std::out_of_range` and leaves
+    i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\\{0,
+    1\\}`; otherwise, the function throws `std::out_of_range` and leaves
     the layout unchanged.
 
     - a node can be overwritten by creating another node on its location.
@@ -3358,7 +3358,7 @@ class cartesian_gate_layout(cartesian_layout):
         """
 
 class shifted_cartesian_gate_layout(shifted_cartesian_layout):
-    r"""
+    """
     A gate-level FCN layout owns gates, clocking, synchronization delays,
     and persistent obstructions. Clock zones are tiles in the coordinate
     geometry supplied by `CoordinateLayout`. The gate_level_layout class
@@ -3406,8 +3406,8 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
       its placement. If the provided tile is
     invalid, the location will not be stored and the node will not count
     towards number of gates or wires. A valid tile must have a signal,
-    i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\{0,
-    1\}`; otherwise, the function throws `std::out_of_range` and leaves
+    i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\\{0,
+    1\\}`; otherwise, the function throws `std::out_of_range` and leaves
     the layout unchanged.
 
     - a node can be overwritten by creating another node on its location.
@@ -4441,7 +4441,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         """
 
 class hexagonal_gate_layout(hexagonal_layout):
-    r"""
+    """
     A gate-level FCN layout owns gates, clocking, synchronization delays,
     and persistent obstructions. Clock zones are tiles in the coordinate
     geometry supplied by `CoordinateLayout`. The gate_level_layout class
@@ -4489,8 +4489,8 @@ class hexagonal_gate_layout(hexagonal_layout):
       its placement. If the provided tile is
     invalid, the location will not be stored and the node will not count
     towards number of gates or wires. A valid tile must have a signal,
-    i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\{0,
-    1\}`; otherwise, the function throws `std::out_of_range` and leaves
+    i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\\{0,
+    1\\}`; otherwise, the function throws `std::out_of_range` and leaves
     the layout unchanged.
 
     - a node can be overwritten by creating another node on its location.
