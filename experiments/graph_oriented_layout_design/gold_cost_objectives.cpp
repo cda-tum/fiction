@@ -114,8 +114,8 @@ int main()  // NOLINT
                 // calculate bounding box
                 const auto bounding_box = bounding_box_2d(*gate_level_layout);
 
-                const auto width  = static_cast<uint64_t>(bounding_box.get_x_size()) + 1;
-                const auto height = static_cast<uint64_t>(bounding_box.get_y_size()) + 1;
+                const auto width  = bounding_box.get_x_size();
+                const auto height = bounding_box.get_y_size();
                 const auto area   = width * height;
 
                 const auto num_wires =
