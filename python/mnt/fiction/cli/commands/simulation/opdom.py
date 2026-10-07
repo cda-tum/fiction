@@ -205,12 +205,27 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
     Grid search is the default; random sampling, flood fill, and contour tracing start from N
     random samples. The x and y axes sweep epsilon_r and lambda_tf by default; -z adds a third.
     """
+    validate_outputs(args, log_path=session.log_path)
+    return run_domain(session, args)
+
+
+def run_domain(session: Session, args: argparse.Namespace) -> Result:
+    """Compute the active gate's domain and write the requested outputs.
+
+    Callers validate the outputs first, because validation must precede any log write.
+
+    Args:
+        session: Supplies the active layout, progress, and notices.
+        args: Parsed domain, output, and plot options.
+
+    Returns:
+        Statistics and output paths for the log.
+    """
     layout = _active_sidb_layout(session)
     samples = next((n for n in (args.random_sampling, args.flood_fill, args.contour_tracing) if n is not None), None)
 
     params, parameters = domain_parameters(session, args)
     spec = gate_specification(session, layout, args, params)
-    validate_outputs(args, log_path=session.log_path)
     domain, stats = compute_domain(layout, spec, args, params)
     write_csv(domain, args)
     for path in args.plot:

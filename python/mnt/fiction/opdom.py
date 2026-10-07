@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 from mnt.pyfiction.sidb.io import read_sqd_layout
 
 from .cli.commands.io._common import _existing_file
-from .cli.commands.simulation.opdom import domain_arguments, opdom
+from .cli.commands.simulation.opdom import domain_arguments, run_domain
 from .cli.errors import HelpRequested
 from .cli.opdom_plotting import validate_outputs
 from .cli.parsing import Parser
@@ -103,7 +103,7 @@ def _run(session: Session, args: argparse.Namespace) -> dict[str, object] | None
     _existing_file(args.input, (".sqd",))
     session.cell_layouts.add(CellEntry(read_sqd_layout(str(args.input), args.input.stem)))
     with session.progress("opdom"):
-        return opdom(session, args)
+        return run_domain(session, args)
 
 
 if __name__ == "__main__":
