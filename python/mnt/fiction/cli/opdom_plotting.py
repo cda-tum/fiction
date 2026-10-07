@@ -149,10 +149,12 @@ def _validate_path(path: Path) -> None:
 
 
 def _validate_colors(args: argparse.Namespace, *, html: bool) -> None:
-    """Validate colors using the requested backend's parser.
+    """Validate the requested marker colors using the backend's parser.
+
+    The built-in defaults are valid for both backends, so only explicit colors are checked.
 
     Args:
-        args: Marker colors and analysis mode.
+        args: Marker colors.
         html: Use Plotly's color parser.
 
     Raises:
@@ -161,14 +163,26 @@ def _validate_colors(args: argparse.Namespace, *, html: bool) -> None:
     if html:
         from plotly.graph_objects import Scatter  # ruff: ignore[import-outside-top-level] -- optional backend
 
-        for color in _colors(args):
+        for color in _requested_colors(args):
             Scatter(marker={"color": color})
     else:
         from matplotlib.colors import is_color_like  # ruff: ignore[import-outside-top-level] -- optional backend
 
-        if not all(is_color_like(color) for color in _colors(args)):
+        if not all(is_color_like(color) for color in _requested_colors(args)):
             msg = "invalid marker color"
             raise ValueError(msg)
+
+
+def _requested_colors(args: argparse.Namespace) -> list[str]:
+    """Return the colors the user set explicitly.
+
+    Args:
+        args: Color overrides.
+
+    Returns:
+        The explicit operational and non-operational colors.
+    """
+    return [color for color in (args.operational_color, args.non_operational_color) if color]
 
 
 def _colors(args: argparse.Namespace) -> tuple[str, str]:
