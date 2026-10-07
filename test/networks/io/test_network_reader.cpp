@@ -28,12 +28,13 @@
 #include <mockturtle/algorithms/simulation.hpp>
 
 #include <array>
+#include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <random>
 #include <sstream>
 #include <string>
-#include <vector>
 
 using namespace fiction;
 using namespace fiction::networks::io;
