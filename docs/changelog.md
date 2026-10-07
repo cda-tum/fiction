@@ -441,6 +441,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     gate-based SiDB simulations, `temp -g` and `opdom`, alone.
   - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
     `help --docs`.
+- Code quality:
+
+  - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
 - Data structures:
 
   - **Breaking:** The traits `is_clocked_layout_v`, `has_synchronization_elements_v`, `is_tile_based_layout_v`, and
@@ -461,6 +464,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `is_cell_grid_v`.
   - **Breaking:** The header `sidb/technology.hpp`. `sidb::dot_tag` is defined in `sidb/layout.hpp`, like the cell
     types of the other technologies.
+- Dependencies:
+
+  - Removed the optional TBB dependency.
 - I/O:
 
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
