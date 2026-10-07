@@ -171,7 +171,12 @@ class write_qll_layout_impl
         }
     }();
 
-    [[nodiscard]] std::vector<typename Lyt::cell> sorted_pis() const noexcept
+    /**
+     * @brief Returns primary input cells ordered by y, then x.
+     * @return Sorted input cells.
+     * @throws std::bad_alloc If allocating the cell list fails.
+     */
+    [[nodiscard]] std::vector<typename Lyt::cell> sorted_pis() const
     {
         std::vector<typename Lyt::cell> pi_list{};
         lyt.foreach_pi([&pi_list](const auto& pi) { pi_list.push_back(pi); });
@@ -181,7 +186,12 @@ class write_qll_layout_impl
         return pi_list;
     }
 
-    [[nodiscard]] std::vector<typename Lyt::cell> sorted_pos() const noexcept
+    /**
+     * @brief Returns primary output cells ordered by y, then x.
+     * @return Sorted output cells.
+     * @throws std::bad_alloc If allocating the cell list fails.
+     */
+    [[nodiscard]] std::vector<typename Lyt::cell> sorted_pos() const
     {
         std::vector<typename Lyt::cell> po_list{};
         lyt.foreach_po([&po_list](const auto& po) { po_list.push_back(po); });
