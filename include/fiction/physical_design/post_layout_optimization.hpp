@@ -561,6 +561,7 @@ class post_layout_optimization_impl
                 if (const auto id = lyt.find_object(*above); id && lyt.is_wire(*id))
                 {
                     lyt.move_node(*id, ground);
+                    search_obstructions.clear_obstructed_coordinate(*above);
                 }
             }
         }
