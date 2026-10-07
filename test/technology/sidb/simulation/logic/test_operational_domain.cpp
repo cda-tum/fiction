@@ -63,6 +63,13 @@ using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
 using namespace fiction::utils::math;
 
+/**
+ * @brief Checks domain dimensions, sweep bounds, and the requested operational status.
+ * @tparam OpDomain Operational or critical-temperature domain type.
+ * @param op_domain Domain to inspect.
+ * @param params Sweep parameters to verify.
+ * @param status Optional expected operational status.
+ */
 template <typename OpDomain>
 static void check_op_domain_params_and_operational_status(const OpDomain&                          op_domain,
                                                           const operational_domain_params&         params,
@@ -76,9 +83,8 @@ static void check_op_domain_params_and_operational_status(const OpDomain&       
     }
 
     op_domain.for_each(
-        [&op_domain,  // NOLINT(clang-diagnostic-unused-lambda-capture)
-         &params, &status](const auto& coord,
-                           const auto& op_value)  // NOLINT(misc-unused-parameters)
+        [&](const auto& coord,
+            const auto& op_value)  // NOLINT(misc-unused-parameters)
         {
             for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
             {
