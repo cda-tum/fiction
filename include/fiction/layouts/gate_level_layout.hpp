@@ -1161,16 +1161,12 @@ class gate_level_layout : public CoordinateLayout
         return !found;
     }
     /**
-     * Checks whether the given tile `t` has its incoming and outgoing signals on opposite sides of the tile. For this
-     * purpose, the function relies on `foreach_adjacent_opposite_coordinates` of the underlying `CoordinateLayout`.
+     * @brief Checks whether incoming and outgoing signals lie on opposite sides of `t`.
      *
-     * This function is very helpful for many gate libraries to check for (non-)straight gates, which might look
-     * different.
-     *
-     * @tparam RespectClocking Flag to indicate that the underlying clocking is to be respected when evaluating fanins
-     * and fanouts.
+     * Uses `foreach_adjacent_opposite_coordinates` of the underlying coordinate layout.
+     * @tparam RespectClocking Whether signal queries respect the clocking scheme.
      * @param t Base tile.
-     * @return `true` iff `t` has incoming and outgoing signals on opposite sides.
+     * @return Whether `t` has incoming and outgoing signals on opposite sides.
      */
     template <bool RespectClocking = true>
     [[nodiscard]] bool has_opposite_incoming_and_outgoing_signals(const tile& t) const
@@ -1183,8 +1179,10 @@ class gate_level_layout : public CoordinateLayout
             {
                 const auto s1 = std::get<0>(sp), s2 = std::get<1>(sp);
 
-                if ((is_incoming_signal<RespectClocking>(t, s1) && is_outgoing_signal<RespectClocking>(t, s2)) ||
-                    (is_incoming_signal<RespectClocking>(t, s2) && is_outgoing_signal<RespectClocking>(t, s1)))
+                if ((this->template is_incoming_signal<RespectClocking>(t, s1) &&
+                     this->template is_outgoing_signal<RespectClocking>(t, s2)) ||
+                    (this->template is_incoming_signal<RespectClocking>(t, s2) &&
+                     this->template is_outgoing_signal<RespectClocking>(t, s1)))
                 {
                     opposite_signals = true;
 

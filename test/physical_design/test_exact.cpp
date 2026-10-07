@@ -399,6 +399,12 @@ void check_without_gate_library(const Ntk& ntk, const exact_physical_design_para
     check_tp(layout, 1);
 }
 
+/**
+ * @brief Checks whether each inverter has opposite incoming and outgoing signals.
+ * @tparam Lyt Native gate-level layout type.
+ * @param lyt Layout to inspect.
+ * @return Whether every inverter is straight.
+ */
 template <typename Lyt>
 bool has_straight_inverters(const Lyt& lyt) noexcept
 {
@@ -406,16 +412,10 @@ bool has_straight_inverters(const Lyt& lyt) noexcept
     lyt.foreach_gate(
         [&lyt, &only_straight_inverters](const auto& g)
         {
-            if constexpr (has_is_inv_v<Lyt>)
+            if (lyt.is_inv(g) && !lyt.has_opposite_incoming_and_outgoing_signals(lyt.get_tile(g)))
             {
-                if (lyt.is_inv(g))
-                {
-                    if (!lyt.has_opposite_incoming_and_outgoing_signals(lyt.get_tile(g)))
-                    {
-                        only_straight_inverters = false;
-                        return false;  // break loop
-                    }
-                }
+                only_straight_inverters = false;
+                return false;  // break loop
             }
 
             return true;  // continue
@@ -425,6 +425,17 @@ bool has_straight_inverters(const Lyt& lyt) noexcept
 }
 
 }  // namespace
+
+TEST_CASE("Straight inverter validation", "[exact]")
+{
+    cart_gate_clk_lyt lyt{cart_gate_clk_lyt::extent{3, 2, 1}, clocking::twoddwave()};
+    const auto        input    = lyt.create_pi("a", {0, 0});
+    const auto        inverter = lyt.create_not(input, {1, 0});
+    const auto        output   = lyt.create_po(inverter, "f", {2, 0});
+    CHECK(has_straight_inverters(lyt));
+    lyt.move_node(output.object, {1, 1});
+    CHECK_FALSE(has_straight_inverters(lyt));
+}
 
 TEST_CASE("Exact Cartesian physical design", "[exact]")
 {
