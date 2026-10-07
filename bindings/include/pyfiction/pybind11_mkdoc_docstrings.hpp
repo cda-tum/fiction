@@ -26348,6 +26348,8 @@ states using a provided random state generator. SA as specified above
 is then run on all these random initial states where the best result
 of all generated states is finally returned.
 
+Each initial state runs in its own thread.
+
 Args:
     init_temp: The initial temperature.
     final_temp: The final temperature.
@@ -26369,11 +26371,6 @@ Template Args:
 
 Returns:
     A pair of the overall best optimized state and its cost value.
-
-Note:
-    If compiler support for C++17's execution policies is available,
-    the algorithm is parallelized and/or vectorized using
-    `std::execution::par_unseq`.
 
 Note:
     The State type must be default constructible.
