@@ -350,8 +350,7 @@ class exact_impl
         [[nodiscard]] bool skippable(const typename Lyt::extent& ar) const noexcept
         {
             // skip aspect ratios that extend beyond the specified upper bounds
-            if (((static_cast<int64_t>(ar.width) - 1) + 1) * ((static_cast<int64_t>(ar.height) - 1) + 1) >
-                    params.upper_bound_area ||
+            if (layouts::area_of(ar) > params.upper_bound_area ||
                 (static_cast<int64_t>(ar.width) - 1) >= params.upper_bound_x ||
                 (static_cast<int64_t>(ar.height) - 1) >= params.upper_bound_y)
             {
@@ -1957,8 +1956,7 @@ class exact_impl
                                 }
 
                                 // cannot be placed with too little distance to eastern border
-                                for (int64_t column =
-                                         std::max((static_cast<int64_t>(layout.width()) - 1) - il + 1, int64_t{0});
+                                for (int64_t column = std::max(static_cast<int64_t>(layout.width()) - il, int64_t{0});
                                      column < (static_cast<int64_t>(layout.width()) - 1); ++column)
                                 {
                                     for (int32_t row = 0; row <= (static_cast<int64_t>(layout.height()) - 1); ++row)
@@ -2027,8 +2025,7 @@ class exact_impl
                                 }
 
                                 // cannot be placed with too little distance to southern border
-                                for (int64_t row =
-                                         std::max((static_cast<int64_t>(layout.height()) - 1) - il + 1, int64_t{0});
+                                for (int64_t row = std::max(static_cast<int64_t>(layout.height()) - il, int64_t{0});
                                      row < (static_cast<int64_t>(layout.height()) - 1); ++row)
                                 {
                                     for (int32_t column = 0; column <= (static_cast<int64_t>(layout.width()) - 1);
@@ -3016,8 +3013,7 @@ class exact_impl
 
             progress.advance();
 
-            if (((static_cast<int64_t>(ar.width) - 1) + 1) * ((static_cast<int64_t>(ar.height) - 1) + 1) >
-                    ps.upper_bound_area ||
+            if (layouts::area_of(ar) > ps.upper_bound_area ||
                 ((static_cast<int64_t>(ar.width) - 1) >= ps.upper_bound_x &&
                  (static_cast<int64_t>(ar.height) - 1) >= ps.upper_bound_y))
             {
@@ -3049,11 +3045,8 @@ class exact_impl
                 const std::scoped_lock guard{rar_mutex};
                 (*ti_list)[t_num].worker_aspect_ratio = ar;
             }
-            worker_progress.update(t_num,
-                                   fmt::format("worker {}: {} × {}", t_num + 1,
-                                               (static_cast<int64_t>(ar.width) - 1) + 1,
-                                               (static_cast<int64_t>(ar.height) - 1) + 1),
-                                   0, 0, true);
+            worker_progress.update(t_num, fmt::format("worker {}: {} × {}", t_num + 1, ar.width, ar.height), 0, 0,
+                                   true);
             handler.update(ar);
             {
                 const std::scoped_lock guard{rar_mutex};
@@ -3175,8 +3168,8 @@ class exact_impl
         if (result_aspect_ratio.has_value())
         {
             // statistical information
-            pst.x_size        = static_cast<uint64_t>((static_cast<int64_t>(layout.width()) - 1)) + 1;
-            pst.y_size        = static_cast<uint64_t>((static_cast<int64_t>(layout.height()) - 1)) + 1;
+            pst.x_size        = layout.width();
+            pst.y_size        = layout.height();
             pst.num_gates     = layout.num_gates();
             pst.num_wires     = layout.num_wires();
             pst.num_crossings = layout.num_crossings();
@@ -3214,10 +3207,7 @@ class exact_impl
                 continue;
             }
 
-            worker_progress.update(0,
-                                   fmt::format("examining layout: {} × {}", (static_cast<int64_t>(ar.width) - 1) + 1,
-                                               (static_cast<int64_t>(ar.height) - 1) + 1),
-                                   0, 0, true);
+            worker_progress.update(0, fmt::format("examining layout: {} × {}", ar.width, ar.height), 0, 0, true);
             handler.update(ar);
 
             try
@@ -3228,8 +3218,8 @@ class exact_impl
                 if (sat)
                 {
                     // statistical information
-                    pst.x_size        = static_cast<uint64_t>((static_cast<int64_t>(layout.width()) - 1)) + 1;
-                    pst.y_size        = static_cast<uint64_t>((static_cast<int64_t>(layout.height()) - 1)) + 1;
+                    pst.x_size        = layout.width();
+                    pst.y_size        = layout.height();
                     pst.num_gates     = layout.num_gates();
                     pst.num_wires     = layout.num_wires();
                     pst.num_crossings = layout.num_crossings();
