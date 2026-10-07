@@ -100,23 +100,7 @@ def test_clocked_path_finding(make_lyt: Callable[[], GateLayout]) -> None:
     assert len(a_star(lyt, coordinate(2, 2), coordinate(1, 1))) == 0
 
 
-@pytest.mark.parametrize(
-    "make_lyt",
-    [
-        pytest.param(
-            lambda: cartesian_gate_layout((5, 5), "2DDWave", "Layout"),
-            id="cartesian_gate_layout",
-        ),
-        pytest.param(
-            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (5, 5), "2DDWave", "Layout"),
-            id="shifted_cartesian_gate_layout",
-        ),
-        pytest.param(
-            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (5, 5), "2DDWave", "Layout"),
-            id="hexagonal_gate_layout",
-        ),
-    ],
-)
+@pytest.mark.parametrize("make_lyt", CLOCKED_LAYOUTS)
 def test_path_finding_with_obstructions(make_lyt: Callable[[], GateLayout]) -> None:
     """Route around persistent coordinate obstructions."""
     lyt = make_lyt()
