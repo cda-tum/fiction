@@ -51,7 +51,7 @@ has to have a concrete position assigned, mockturtle cannot be used to generate 
 :sync: cpp
 
 ```cpp
-using layout = fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout<>>;
+using layout = fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>;
 layout lyt{{4, 4}, fiction::layouts::clocking::twoddwave()};
 lyt.assign_synchronization_element({1, 1}, 2);
 lyt.obstruct_coordinate({2, 2});

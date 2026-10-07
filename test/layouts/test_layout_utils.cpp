@@ -23,8 +23,8 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/layout_utils.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/types.hpp>
@@ -36,8 +36,7 @@ using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
 
-TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesian_layout<coords::offset>),
-                   (hexagonal_layout<coords::offset>))
+TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesian_layout), (hexagonal_layout))
 {
     const auto a =
         GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
@@ -99,16 +98,17 @@ TEST_CASE("Gate-level layouts are created with the required arrangement", "[layo
     }
 }
 
-TEST_CASE("Generate random coords::offset coordinate", "[layout-utils]")
+TEST_CASE("Generate random layout_base::coordinate coordinate", "[layout-utils]")
 {
     SECTION("two identical cells as input")
     {
-        const auto randomly_generated_coordinate = random_coordinate<coords::offset>({0, 0, 0}, {0, 0, 0});
+        const auto randomly_generated_coordinate = random_coordinate<layout_base::coordinate>({0, 0, 0}, {0, 0, 0});
         CHECK(randomly_generated_coordinate.x == 0);
         CHECK(randomly_generated_coordinate.y == 0);
         CHECK(randomly_generated_coordinate.z == 0);
 
-        const auto randomly_generated_coordinate_second = random_coordinate<coords::offset>({1, 0, 0}, {1, 0, 0});
+        const auto randomly_generated_coordinate_second =
+            random_coordinate<layout_base::coordinate>({1, 0, 0}, {1, 0, 0});
         CHECK(randomly_generated_coordinate_second.x == 1);
         CHECK(randomly_generated_coordinate_second.y == 0);
         CHECK(randomly_generated_coordinate_second.z == 0);
@@ -116,7 +116,8 @@ TEST_CASE("Generate random coords::offset coordinate", "[layout-utils]")
 
     SECTION("two unidentical cells as input, correct order")
     {
-        const auto randomly_generated_coordinate_second = random_coordinate<coords::offset>({1, 1, 1}, {5, 2, 3});
+        const auto randomly_generated_coordinate_second =
+            random_coordinate<layout_base::coordinate>({1, 1, 1}, {5, 2, 3});
         CHECK(randomly_generated_coordinate_second.x >= 1);
         CHECK(randomly_generated_coordinate_second.x <= 5);
         CHECK(randomly_generated_coordinate_second.y <= 2);
@@ -127,7 +128,7 @@ TEST_CASE("Generate random coords::offset coordinate", "[layout-utils]")
 
     SECTION("two unidentical cells as input, switched correct order")
     {
-        const auto randomly_generated_coordinate = random_coordinate<coords::offset>({5, 2, 3}, {1, 1, 1});
+        const auto randomly_generated_coordinate = random_coordinate<layout_base::coordinate>({5, 2, 3}, {1, 1, 1});
         CHECK(randomly_generated_coordinate.x >= 1);
         CHECK(randomly_generated_coordinate.x <= 5);
         CHECK(randomly_generated_coordinate.y <= 2);
@@ -137,16 +138,18 @@ TEST_CASE("Generate random coords::offset coordinate", "[layout-utils]")
     }
 }
 
-TEST_CASE("Generate random coords::cube coordinate", "[layout-utils]")
+TEST_CASE("Generate random coordinate with negative axes", "[layout-utils]")
 {
     SECTION("two identical cells as input")
     {
-        const auto randomly_generated_coordinate = random_coordinate<coords::cube>({-10, -5, 0}, {-10, -5, 0});
+        const auto randomly_generated_coordinate =
+            random_coordinate<layout_base::coordinate>({-10, -5, 0}, {-10, -5, 0});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -5);
         CHECK(randomly_generated_coordinate.z == 0);
 
-        const auto randomly_generated_coordinate_second = random_coordinate<coords::cube>({1, 0, 0}, {1, 0, 0});
+        const auto randomly_generated_coordinate_second =
+            random_coordinate<layout_base::coordinate>({1, 0, 0}, {1, 0, 0});
         CHECK(randomly_generated_coordinate_second.x == 1);
         CHECK(randomly_generated_coordinate_second.y == 0);
         CHECK(randomly_generated_coordinate_second.z == 0);
@@ -154,7 +157,8 @@ TEST_CASE("Generate random coords::cube coordinate", "[layout-utils]")
 
     SECTION("two unidentical cells as input, correct order")
     {
-        const auto randomly_generated_coordinate = random_coordinate<coords::cube>({-10, -1, 3}, {-10, -1, 6});
+        const auto randomly_generated_coordinate =
+            random_coordinate<layout_base::coordinate>({-10, -1, 3}, {-10, -1, 6});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -1);
         CHECK(randomly_generated_coordinate.z >= 3);
@@ -163,7 +167,8 @@ TEST_CASE("Generate random coords::cube coordinate", "[layout-utils]")
 
     SECTION("two unidentical cells as input, switched correct order")
     {
-        const auto randomly_generated_coordinate = random_coordinate<coords::cube>({-10, -1, 6}, {-10, -1, 3});
+        const auto randomly_generated_coordinate =
+            random_coordinate<layout_base::coordinate>({-10, -1, 6}, {-10, -1, 3});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -1);
         CHECK(randomly_generated_coordinate.z >= 3);

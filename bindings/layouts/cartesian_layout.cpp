@@ -59,9 +59,9 @@ void cartesian_layout(nanobind::module_& m, const char* name)
         .def(py::init<const fiction::aspect_ratio<Lyt>&>(), py::arg("dimension"),
              DOC(fiction_layouts_cartesian_layout_cartesian_layout))
         .def(
-            "coord",
-            [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z) { return layout.coord(x, y, z); },
-            py::arg("x"), py::arg("y"), py::arg("z") = 0l, DOC(fiction_layouts_cartesian_layout_coord))
+            "coord", [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z)
+            { return layout.coord(coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); }, py::arg("x"),
+            py::arg("y"), py::arg("z") = 0l, DOC(fiction_layouts_cartesian_layout_coord))
         .def("x", &Lyt::x, DOC(fiction_layouts_cartesian_layout_x))
         .def("y", &Lyt::y, DOC(fiction_layouts_cartesian_layout_y))
         .def("z", &Lyt::z, DOC(fiction_layouts_cartesian_layout_z))
@@ -177,7 +177,8 @@ void cartesian_layout(nanobind::module_& m, const char* name)
 void cartesian_layout(nanobind::module_& m)
 {
     detail::cartesian_layout<py_cartesian_layout>(m, "cartesian_layout");
-    detail::cartesian_layout<py_stacked_cartesian_layout>(m, "stacked_cartesian_layout");
+    // Cartesian layouts have a signed z extent, so stacked layouts are ordinary Cartesian layouts.
+    m.attr("stacked_cartesian_layout") = m.attr("cartesian_layout");
 }
 
 }  // namespace pyfiction

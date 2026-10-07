@@ -63,9 +63,9 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
             "get_arrangement", [](const Lyt& lyt) { return lyt.get_arrangement(); },
             DOC(fiction_layouts_hexagonal_layout_get_arrangement))
         .def(
-            "coord",
-            [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z) { return layout.coord(x, y, z); },
-            py::arg("x"), py::arg("y"), py::arg("z") = 0l, DOC(fiction_layouts_hexagonal_layout_coord))
+            "coord", [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z)
+            { return layout.coord(coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); }, py::arg("x"),
+            py::arg("y"), py::arg("z") = 0l, DOC(fiction_layouts_hexagonal_layout_coord))
         .def("x", &Lyt::x, DOC(fiction_layouts_hexagonal_layout_x))
         .def("y", &Lyt::y, DOC(fiction_layouts_hexagonal_layout_y))
         .def("z", &Lyt::z, DOC(fiction_layouts_hexagonal_layout_z))
@@ -139,7 +139,7 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
             [](const Lyt& lyt)
             {
                 std::vector<fiction::coordinate<Lyt>> coords{};
-                coords.reserve(lyt.area() * (lyt.z() + 1));
+                coords.reserve(lyt.area() * (static_cast<uint64_t>(lyt.z()) + 1u));
                 lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); });
                 return coords;
             },

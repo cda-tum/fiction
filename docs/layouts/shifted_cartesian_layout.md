@@ -1,6 +1,6 @@
 # Shifted Cartesian Layout
 
-Coordinate system that represents a shifted Cartesian grid of compile-time coordinate types. The faces of a shifted
+Coordinate system that represents a shifted Cartesian grid of signed coordinates. The faces of a shifted
 Cartesian layout are arranged by shifting either odd or even rows (horizontal shift) or columns (vertical shift)
 inwards. The arrangement is a value that the layout receives at construction. The layout shares its members with
 `hexagonal_layout`, and {doc}`hexagonal_layout` documents the `arrangement` type.

@@ -1,6 +1,6 @@
 # Cartesian Layout
 
-Coordinate system that represents a Cartesian grid of compile-time coordinate types.
+Coordinate system that represents a Cartesian grid of signed coordinates.
 
 ::::{tab-set}
 :sync-group: language

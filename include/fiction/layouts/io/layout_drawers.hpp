@@ -161,14 +161,14 @@ class simple_gate_layout_tile_drawer : public networks::io::technology_dot_drawe
     [[nodiscard]] std::vector<std::vector<std::string>> rows(const Lyt& lyt) const noexcept
     {
         std::vector<std::vector<std::string>> rows{};
-        rows.reserve(lyt.y() + 1);
+        rows.reserve(static_cast<std::size_t>(lyt.y()) + 1);
 
-        for (auto y = 0ul; y <= lyt.y(); ++y)
+        for (int32_t y = 0; y <= lyt.y(); ++y)
         {
             std::vector<std::string> row{};
-            row.reserve(lyt.x() + 1);
+            row.reserve(static_cast<std::size_t>(lyt.x()) + 1);
 
-            for (auto x = 0ul; x <= lyt.x(); ++x)
+            for (int32_t x = 0; x <= lyt.x(); ++x)
             {
                 row.emplace_back(tile_id({x, y}));
             }
@@ -182,14 +182,14 @@ class simple_gate_layout_tile_drawer : public networks::io::technology_dot_drawe
     [[nodiscard]] std::vector<std::vector<std::string>> columns(const Lyt& lyt) const noexcept
     {
         std::vector<std::vector<std::string>> columns{};
-        columns.reserve(lyt.x() + 1);
+        columns.reserve(static_cast<std::size_t>(lyt.x()) + 1);
 
-        for (auto x = 0ul; x <= lyt.x(); ++x)
+        for (int32_t x = 0; x <= lyt.x(); ++x)
         {
             std::vector<std::string> col{};
-            col.reserve(lyt.y() + 1);
+            col.reserve(static_cast<std::size_t>(lyt.y()) + 1);
 
-            for (auto y = 0ul; y <= lyt.y(); ++y)
+            for (int32_t y = 0; y <= lyt.y(); ++y)
             {
                 col.emplace_back(tile_id({x, y}));
             }
@@ -322,9 +322,9 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
             topology << "node [label=\"\", width=0.5, height=0.5, style=invis];\n";
         }
 
-        const auto a     = lyt.get_arrangement();
-        const auto rows  = is_row_arrangement(a);
-        const auto first = is_odd_arrangement(a) ? 1ul : 0ul;
+        const auto    a     = lyt.get_arrangement();
+        const auto    rows  = is_row_arrangement(a);
+        const int32_t first = is_odd_arrangement(a) ? 1 : 0;
 
         for (const auto& line : rows ? base_drawer::rows(lyt) : base_drawer::columns(lyt))
         {
@@ -385,7 +385,7 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
      * @param i Index of the row or column.
      * @return Node name.
      */
-    [[nodiscard]] static std::string invisible_node(const uint64_t i) noexcept
+    [[nodiscard]] static std::string invisible_node(const int32_t i) noexcept
     {
         return fmt::format("invis{}", i);
     }
@@ -398,9 +398,9 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
      * @param is_row Whether `index` names a row. Otherwise, it names a column.
      * @param stream Stream to write the DOT statements to.
      */
-    void shift_line(const Lyt& lyt, const uint64_t index, const bool is_row, std::stringstream& stream) const noexcept
+    void shift_line(const Lyt& lyt, const int32_t index, const bool is_row, std::stringstream& stream) const noexcept
     {
-        const auto line_tile = [is_row](const uint64_t i) { return is_row ? tile<Lyt>{0, i} : tile<Lyt>{i, 0}; };
+        const auto line_tile = [is_row](const int32_t i) { return is_row ? tile<Lyt>{0, i} : tile<Lyt>{i, 0}; };
 
         stream << base_drawer::same_rank(
             std::vector<std::string>{invisible_node(index), base_drawer::tile_id(line_tile(index))});

@@ -219,11 +219,13 @@ int main()  // NOLINT
             // log results
             defect_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
                        depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
-                       gate_level_layout->x() + 1, gate_level_layout->y() + 1,
-                       (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1), gate_level_layout->num_gates(),
-                       gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
-                       mockturtle::to_seconds(exact_stats.time_total), *eq, dot_accurate_layout.num_dots(),
-                       layout_area);
+                       static_cast<uint64_t>(gate_level_layout->x()) + 1,
+                       static_cast<uint64_t>(gate_level_layout->y()) + 1,
+                       (static_cast<uint64_t>(gate_level_layout->x()) + 1) *
+                           (static_cast<uint64_t>(gate_level_layout->y()) + 1),
+                       gate_level_layout->num_gates(), gate_level_layout->num_wires(), cp_tp.critical_path_length,
+                       cp_tp.throughput, mockturtle::to_seconds(exact_stats.time_total), *eq,
+                       dot_accurate_layout.num_dots(), layout_area);
         }
         else  // no layout was obtained
         {

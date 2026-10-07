@@ -57,8 +57,7 @@ class a_star_impl
 {
   public:
     a_star_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const distance_functor<Lyt, Dist>& dist_fn,
-                const cost_functor<Lyt, Cost>& cost_fn, const a_star_params& p,
-                const layouts::obstructions<coordinate<Lyt>>& extra) :
+                const cost_functor<Lyt, Cost>& cost_fn, const a_star_params& p, const layouts::obstructions& extra) :
             layout{lyt},
             search_obstructions{extra},
             objective{obj},
@@ -76,7 +75,7 @@ class a_star_impl
      */
     [[nodiscard]] Path run() noexcept
     {
-        assert(!objective.source.is_dead() && !objective.target.is_dead() &&
+        assert(objective.source.is_valid() && objective.target.is_valid() &&
                "Neither source nor target coordinate can be dead");
 
         assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
@@ -108,7 +107,7 @@ class a_star_impl
      */
     const Lyt& layout;
     /** @brief Additional constraints owned by the caller. */
-    const layouts::obstructions<coordinate<Lyt>>& search_obstructions;
+    const layouts::obstructions& search_obstructions;
     /**
      * The source-target coordinate pair.
      */
@@ -360,10 +359,10 @@ class a_star_impl
  * In certain cases it might be desirable to determine regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = gate_level_layout<cartesian_layout<>>;
- * using path = layout_coordinate_path<cartesian_layout<>>;
+ * using clk_lyt = gate_level_layout<cartesian_layout>;
+ * using path = layout_coordinate_path<cartesian_layout>;
  * clk_lyt layout = ...;
- * auto shortest_path = a_star<path>(static_cast<cartesian_layout<>>(layout), {source, target});
+ * auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
  * @endcode
  *
  * A* was introduced in \"A Formal Basis for the Heuristic Determination of Minimum Cost Paths\" by Peter E. Hart, Nils
@@ -388,8 +387,7 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
 [[nodiscard]] Path a_star(const Lyt& layout, const routing_objective<Lyt>& objective,
                           const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, uint64_t>(),
                           const cost_functor<Lyt, Cost>&     cost_fn = unit_cost_functor<Lyt, uint8_t>(),
-                          const a_star_params&               params  = {},
-                          const layouts::obstructions<coordinate<Lyt>>& obstructions = {}) noexcept
+                          const a_star_params& params = {}, const layouts::obstructions& obstructions = {}) noexcept
 {
     return detail::a_star_impl<Path, Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, params, obstructions}.run();
 }
@@ -413,7 +411,7 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
 template <typename Lyt, typename Dist = uint64_t>
     requires is_coordinate_layout_v<Lyt> && (std::integral<Dist> || std::floating_point<Dist>)
 [[nodiscard]] Dist a_star_distance(const Lyt& layout, const coordinate<Lyt>& source, const coordinate<Lyt>& target,
-                                   const layouts::obstructions<coordinate<Lyt>>& obstructions = {}) noexcept
+                                   const layouts::obstructions& obstructions = {}) noexcept
 {
     const auto path_length =
         a_star<layout_coordinate_path<Lyt>>(layout, {source, target}, manhattan_distance_functor<Lyt>(),

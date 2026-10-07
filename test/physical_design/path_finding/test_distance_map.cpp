@@ -18,7 +18,6 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/distance_map.hpp>
@@ -31,7 +30,7 @@ using namespace fiction::physical_design::path_finding;
 
 TEST_CASE("Distance map", "[distance-map]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt = gate_level_layout<cartesian_layout>;
     using dist    = uint64_t;
 
     SECTION("2DDWave clocking")
@@ -110,7 +109,7 @@ TEST_CASE("Distance map", "[distance-map]")
 
 TEST_CASE("Sparse distance map", "[distance-map]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt = gate_level_layout<cartesian_layout>;
     using dist    = uint64_t;
 
     SECTION("2DDWave clocking")
@@ -189,7 +188,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
 
 TEST_CASE("Smart distance cache functor", "[distance-map]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt = gate_level_layout<cartesian_layout>;
     using dist    = uint64_t;
 
     SECTION("2DDWave clocking")

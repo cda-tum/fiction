@@ -12,7 +12,6 @@ import enum
 from typing import overload
 
 import mnt.pyfiction.layouts
-import mnt.pyfiction.layouts.coords
 from mnt.pyfiction.mol_qca import io as io
 
 class mol_qca_cell_type(enum.Enum):
@@ -79,7 +78,7 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
     @overload
     def __init__(
         self,
-        dimension: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        dimension: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
         layout_name: str = "",
     ) -> None:
         """
@@ -92,7 +91,7 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
         """
 
     def get_cell_type(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+        self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> mol_qca_cell_type:
         """
         The cell type at a position.
@@ -104,9 +103,7 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             Cell type at `c`, `EMPTY` if no cell is there.
         """
 
-    def is_empty_cell(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> bool:
+    def is_empty_cell(self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Whether no cell sits at a position.
 
@@ -118,7 +115,7 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
         """
 
     def assign_cell_name(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], n: str
+        self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int], n: str
     ) -> None:
         """
         Assigns a name to a cell. The empty string removes the name.
@@ -128,9 +125,7 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             n: Cell name.
         """
 
-    def get_cell_name(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> str:
+    def get_cell_name(self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]) -> str:
         """
         The name of a cell.
 
@@ -189,7 +184,7 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             Number of output cells.
         """
 
-    def is_pi(self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
+    def is_pi(self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Whether a cell is a primary input, i.e., of type `INPUT`.
 
@@ -200,7 +195,7 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             `true` iff `c` holds an input cell.
         """
 
-    def is_po(self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
+    def is_po(self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Whether a cell is a primary output, i.e., of type `OUTPUT`.
 
@@ -211,18 +206,16 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             `true` iff `c` holds an output cell.
         """
 
-    def cells(self) -> list[mnt.pyfiction.layouts.coords.offset_coordinate]:
+    def cells(self) -> list[mnt.pyfiction.layouts.coordinate]:
         """Returns the positions of all cells, in unspecified order."""
 
-    def pis(self) -> list[mnt.pyfiction.layouts.coords.offset_coordinate]:
+    def pis(self) -> list[mnt.pyfiction.layouts.coordinate]:
         """Returns the positions of all input cells, in unspecified order."""
 
-    def pos(self) -> list[mnt.pyfiction.layouts.coords.offset_coordinate]:
+    def pos(self) -> list[mnt.pyfiction.layouts.coordinate]:
         """Returns the positions of all output cells, in unspecified order."""
 
-    def bounding_box_2d(
-        self,
-    ) -> tuple[mnt.pyfiction.layouts.coords.offset_coordinate, mnt.pyfiction.layouts.coords.offset_coordinate]:
+    def bounding_box_2d(self) -> tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]:
         """
         Returns the minimum and maximum corner of the bounding box.
         A 2D bounding box object computes a minimum-sized box around all
@@ -246,9 +239,7 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
     def __eq__(self, arg: mol_qca_layout, /) -> bool: ...
     def __ne__(self, arg: mol_qca_layout, /) -> bool: ...
     def assign_cell_type(
-        self,
-        c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-        ct: mol_qca_cell_type,
+        self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int], ct: mol_qca_cell_type
     ) -> None:
         """
         Assigns a cell type to a position. Assigning `EMPTY` removes the cell

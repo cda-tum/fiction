@@ -18,8 +18,8 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/cost.hpp>
@@ -36,7 +36,7 @@ using namespace fiction::physical_design::path_finding;
 
 TEST_CASE("A* on 2x2 layouts", "[A*]")
 {
-    using lyt        = cartesian_layout<coords::offset>;
+    using lyt        = cartesian_layout;
     using coord_path = layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
@@ -149,7 +149,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
 
 TEST_CASE("A* on 4x4 layouts", "[A*]")
 {
-    using lyt        = cartesian_layout<coords::offset>;
+    using lyt        = cartesian_layout;
     using coord_path = layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
@@ -206,7 +206,7 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
 
 TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 {
-    using gate_lyt   = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_lyt   = gate_level_layout<cartesian_layout>;
     using obst_lyt   = gate_lyt;
     using coord_path = layout_coordinate_path<obst_lyt>;
 
@@ -216,8 +216,8 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 
         SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
         {
-            auto                                          obstr_lyt = static_cast<cartesian_layout<>>(layout);
-            obstructions<coordinate<decltype(obstr_lyt)>> search_obstructions{};
+            auto         obstr_lyt = static_cast<cartesian_layout>(layout);
+            obstructions search_obstructions{};
 
             // create some PIs as obstruction
             search_obstructions.obstruct_coordinate({3, 0});
@@ -307,7 +307,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 
 TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
 {
-    using gate_lyt   = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_lyt   = gate_level_layout<cartesian_layout>;
     using obst_lyt   = gate_lyt;
     using coord_path = layout_coordinate_path<obst_lyt>;
 
@@ -426,7 +426,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
 
 TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 {
-    using gate_lyt   = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_lyt   = gate_level_layout<cartesian_layout>;
     using coord_path = layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
@@ -435,8 +435,8 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 
         SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
         {
-            auto                                          obstr_lyt = static_cast<cartesian_layout<>>(layout);
-            obstructions<coordinate<decltype(obstr_lyt)>> search_obstructions{};
+            auto         obstr_lyt = static_cast<cartesian_layout>(layout);
+            obstructions search_obstructions{};
 
             // create some connection obstructions
             search_obstructions.obstruct_connection({0, 0}, {1, 0});
@@ -466,8 +466,8 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
             {
-                auto                                          obstr_lyt = layout;
-                obstructions<coordinate<decltype(obstr_lyt)>> search_obstructions{};
+                auto         obstr_lyt = layout;
+                obstructions search_obstructions{};
 
                 // create some connection obstructions
                 search_obstructions.obstruct_connection({0, 0}, {1, 0});
@@ -495,8 +495,8 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
             {
-                auto                                          obstr_lyt = layout;
-                obstructions<coordinate<decltype(obstr_lyt)>> search_obstructions{};
+                auto         obstr_lyt = layout;
+                obstructions search_obstructions{};
 
                 // create a PI as obstruction
                 search_obstructions.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
@@ -520,7 +520,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 
 TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 {
-    using lyt        = cartesian_layout<coords::offset>;
+    using lyt        = cartesian_layout;
     using clk_lyt    = gate_level_layout<lyt>;
     using coord_path = layout_coordinate_path<lyt>;
 
@@ -624,7 +624,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 
 TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
 {
-    using clk_lyt    = gate_level_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt    = gate_level_layout<cartesian_layout>;
     using coord_path = layout_coordinate_path<clk_lyt>;
 
     const clk_lyt layout{{3, 3}, clocking::use()};
@@ -653,7 +653,7 @@ TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
 
 TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]")
 {
-    using lyt        = cartesian_layout<coords::offset>;
+    using lyt        = cartesian_layout;
     using coord_path = layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
