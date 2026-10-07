@@ -80,6 +80,10 @@ struct generate_edge_intersection_graph_stats
      */
     std::vector<std::vector<std::size_t>> cliques{};
     /**
+     * @brief Routing objective index for each vertex ID.
+     */
+    std::vector<std::size_t> objective_indices{};
+    /**
      * Stores the size of the generated edge intersection graph.
      */
     std::size_t num_vertices, num_edges;
@@ -88,10 +92,21 @@ struct generate_edge_intersection_graph_stats
 namespace detail
 {
 
+/**
+ * @brief Construct candidate paths and their intersection graph.
+ * @tparam Lyt Gate layout type.
+ */
 template <typename Lyt>
 class generate_edge_intersection_graph_impl
 {
   public:
+    /**
+     * @brief Set the layout, objectives, parameters, and statistics.
+     * @param lyt Gate layout.
+     * @param obj Routing objectives.
+     * @param p Parameters.
+     * @param st Statistics.
+     */
     generate_edge_intersection_graph_impl(const Lyt& lyt, const std::vector<routing_objective<Lyt>>& obj,
                                           const generate_edge_intersection_graph_params& p,
                                           generate_edge_intersection_graph_stats&        st) :
@@ -101,6 +116,7 @@ class generate_edge_intersection_graph_impl
             pst{st}
     {}
 
+    /** @brief Generate the graph. @return Candidate paths and their intersections. */
     edge_intersection_graph<Lyt> run()
     {
         // measure runtime
@@ -125,7 +141,8 @@ class generate_edge_intersection_graph_impl
                                   }
 
                                   // assign a unique label to each path and create a corresponding node in the graph
-                                  initiate_objective_nodes(obj_paths);
+                                  initiate_objective_nodes(obj_paths,
+                                                           static_cast<std::size_t>(&obj - objectives.data()));
 
                                   // if there are no paths, the objective could not be fulfilled
                                   if (obj_paths.empty())
@@ -280,16 +297,18 @@ class generate_edge_intersection_graph_impl
      * additionally stores their node IDs in the statistics.
      *
      * @param objective_paths Collection of paths belonging to the same objective.
+     * @param objective_index Index of the routing objective.
      */
-    void initiate_objective_nodes(path_collection<clk_path>& objective_paths) noexcept
+    void initiate_objective_nodes(path_collection<clk_path>& objective_paths, const std::size_t objective_index)
     {
         std::vector<std::size_t> clique{};
 
         std::ranges::for_each(objective_paths,
-                              [this, &clique](auto& p)
+                              [this, &clique, objective_index](auto& p)
                               {
                                   p.label = node_id++;
                                   graph.insert_vertex(p.label, p);
+                                  pst.objective_indices.push_back(objective_index);
                                   clique.push_back(p.label);
                               });
 
@@ -351,7 +370,7 @@ class generate_edge_intersection_graph_impl
  *
  * @tparam Lyt Type of the clocked layout.
  * @param lyt The layout to generate the edge intersection graph for.
- * @param objectives A list of routing objectives given as source-target pairs.
+ * @param objectives Source coordinates and indexed destination inputs.
  * @param ps Parameters.
  * @param pst Statistics.
  * @return An edge intersection graph of paths satisfying the given routing objectives in `lyt`.

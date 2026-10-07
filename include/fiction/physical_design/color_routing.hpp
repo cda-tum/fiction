@@ -167,7 +167,7 @@ class color_routing_impl
      */
     template <typename Graph, typename Color>
     void conduct_routing(const Graph& graph, const utils::graph::vertex_coloring<Graph, Color>& coloring,
-                         const Color& color) noexcept
+                         const Color& color)
     {
         std::size_t num_satisfied_objectives{0};
 
@@ -177,7 +177,9 @@ class color_routing_impl
                                   const auto& [vertex, path] = v_path_pair;
                                   if (coloring.at(vertex) == color)
                                   {
-                                      route_path(layout, path);
+                                      const auto& objective = objectives[pst.epg_stats.objective_indices.at(vertex)];
+                                      route_path(layout, path,
+                                                 {layout.find_object(path.target()).value(), objective.input_index});
                                       ++num_satisfied_objectives;
                                   }
                               });
@@ -218,7 +220,7 @@ class color_routing_impl
  *
  * @tparam Lyt The gate-level layout type to route.
  * @param lyt A gate-level layout to route.
- * @param objectives The routing objectives as source-target pairs to fulfill.
+ * @param objectives The routing objectives as source coordinates and indexed destination inputs to fulfill.
  * @param ps Parameters.
  * @param pst Statistics.
  * @return `true` iff routing was successful, i.e., iff all objectives could be satisfied.

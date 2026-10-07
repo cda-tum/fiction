@@ -22,6 +22,7 @@
 #include <fiction/traits.hpp>
 #include <fiction/utils/graph/graph_coloring.hpp>
 
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -30,9 +31,9 @@
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/map.h>            // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/tuple.h>          // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
@@ -42,6 +43,8 @@ namespace pyfiction
 namespace detail
 {
 
+/** @brief Bind routing objectives with explicit destination input indices. @tparam Lyt Gate layout. @param m Python
+ * module. */
 template <typename Lyt>
 void color_routing_impl(nanobind::module_& m)
 {
@@ -49,15 +52,16 @@ void color_routing_impl(nanobind::module_& m)
 
     m.def(
         "color_routing",
-        [](Lyt& lyt, const std::vector<std::pair<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>>>& objectives,
-           const fiction::physical_design::color_routing_params& params)
+        [](Lyt&                                                                                         lyt,
+           const std::vector<std::tuple<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>, uint32_t>>& objectives,
+           const fiction::physical_design::color_routing_params&                                        params)
         {
             std::vector<fiction::physical_design::routing_objective<Lyt>> objs{};
             objs.reserve(objectives.size());
 
             for (const auto& obj : objectives)
             {
-                objs.push_back({obj.first, obj.second});
+                objs.push_back({std::get<0>(obj), std::get<1>(obj), std::get<2>(obj)});
             }
 
             return fiction::physical_design::color_routing(lyt, objs, params);
@@ -68,6 +72,7 @@ void color_routing_impl(nanobind::module_& m)
 
 }  // namespace detail
 
+/** @brief Register color routing. @param m Python module. */
 void color_routing(nanobind::module_& m)
 {
     namespace py = nanobind;

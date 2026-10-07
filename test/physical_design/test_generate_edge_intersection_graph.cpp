@@ -36,7 +36,7 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{1, 1}, clocking::twoddwave()};
+        const gate_lyt layout{{2, 2}, clocking::twoddwave()};
 
         SECTION("Disjoint paths")
         {
@@ -86,7 +86,7 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        gate_lyt layout{{1, 1}, clocking::use()};
+        gate_lyt layout{{2, 2}, clocking::use()};
 
         SECTION("Disjoint paths")
         {
@@ -121,7 +121,7 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
         }
         SECTION("Unsatisfiable objective")
         {
-            layout.resize({0, 2});
+            layout.resize({1, 3});
             // (0,2) --> (0,0), (0,0) --> (0,2)
             const std::vector<routing_objective<gate_lyt>> objectives{{.source = {0, 2}, .target = {0, 0}},
                                                                       {.source = {0, 0}, .target = {0, 2}}};
@@ -144,7 +144,7 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{2, 2}, clocking::twoddwave()};
+        const gate_lyt layout{{3, 3}, clocking::twoddwave()};
 
         SECTION("(0,1) to (2,1) and (1,0) to (1,2)")
         {
@@ -190,7 +190,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{3, 3}, clocking::twoddwave()};
+        const gate_lyt layout{{4, 4}, clocking::twoddwave()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
@@ -208,7 +208,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        const gate_lyt layout{{3, 3}, clocking::use()};
+        const gate_lyt layout{{4, 4}, clocking::use()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
@@ -233,7 +233,7 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
 
     SECTION("2DDWave")
     {
-        gate_lyt layout{{3, 3}, clocking::twoddwave()};
+        gate_lyt layout{{4, 4}, clocking::twoddwave()};
 
         SECTION("(0,0) to (3,3) with obstruction")  // 19 valid paths
         {
@@ -254,7 +254,7 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
     }
     SECTION("USE")
     {
-        gate_lyt layout{{3, 3}, clocking::use()};
+        gate_lyt layout{{4, 4}, clocking::use()};
 
         SECTION("(0,0) to (3,3) with obstruction")  // 1 valid path
         {
