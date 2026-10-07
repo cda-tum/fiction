@@ -29,6 +29,7 @@
 #include <fiction/layouts/io/print_layout.hpp>
 
 #include <sstream>
+#include <string>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -104,6 +105,31 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
         print_gate_level_layout(print_stream, layout, false, false);
 
         CHECK(print_stream.str() == layout_print);
+    }
+}
+
+TEST_CASE("Print object and tile assignments with fanins and fanouts", "[print-gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+
+    gate_layout layout{gate_layout::extent{2, 1, 1}, clocking::open(clocking::num_clks::FOUR)};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    layout.create_po(x1, "f1", {1, 0});
+
+    SECTION("Nodes to tiles")
+    {
+        std::stringstream print_stream{};
+        print_node_to_tile_assignments(layout, print_stream);
+
+        CHECK(print_stream.str().find("	   0:1 @ ") != std::string::npos);
+    }
+    SECTION("Tiles to nodes")
+    {
+        std::stringstream print_stream{};
+        print_tile_to_node_assignments(layout, print_stream);
+
+        CHECK(print_stream.str().find("	   0:1 @ ") != std::string::npos);
     }
 }
 

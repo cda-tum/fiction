@@ -399,12 +399,8 @@ void print_node_to_tile_assignments(const Lyt& lyt, std::ostream& os = std::cout
         {
             os << fmt::format("object {}:{} @ {}\n", n.index, n.generation, lyt.get_tile(n));
             os << "\t with fanins:\n";
-            lyt.foreach_fanin(n,
-                              [&lyt, &os](const auto& f)
-                              {
-                                  const auto fn = f.object;
-                                  os << fmt::format("\t   {}:{} @ {}\n", fn.index, fn.generation, lyt.get_tile(fn));
-                              });
+            lyt.foreach_fanin(n, [&lyt, &os](const auto& f)
+                              { os << fmt::format("\t   {}:{} @ {}\n", f.index, f.generation, lyt.get_tile(f)); });
             os << "\n\t with fanouts:\n";
             lyt.foreach_fanout(n, [&lyt, &os](const auto& fn)
                                { os << fmt::format("\t   {}:{} @ {}\n", fn.index, fn.generation, lyt.get_tile(fn)); });
@@ -437,12 +433,8 @@ void print_tile_to_node_assignments(const Lyt& lyt, std::ostream& os = std::cout
                 const auto n = *object;
                 os << fmt::format("object {}:{} @ {}\n", n.index, n.generation, lyt.get_tile(n));
                 os << "\t with fanins:\n";
-                lyt.foreach_fanin(n,
-                                  [&lyt, &os](const auto& f)
-                                  {
-                                      const auto fn = f.object;
-                                      os << fmt::format("\t   {}:{} @ {}\n", fn.index, fn.generation, lyt.get_tile(fn));
-                                  });
+                lyt.foreach_fanin(n, [&lyt, &os](const auto& f)
+                                  { os << fmt::format("\t   {}:{} @ {}\n", f.index, f.generation, lyt.get_tile(f)); });
                 os << "\n\t with fanouts:\n";
                 lyt.foreach_fanout(
                     n, [&lyt, &os](const auto& fn)
