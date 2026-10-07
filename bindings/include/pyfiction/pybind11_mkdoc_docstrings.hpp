@@ -3321,25 +3321,21 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_has_opposite_incoming_and_outgoing_signals =
-R"doc(Checks whether the given tile `t` has its incoming and outgoing
-signals on opposite sides of the tile. For this purpose, the function
-relies on `foreach_adjacent_opposite_coordinates` of the underlying
-`CoordinateLayout`.
+R"doc(Checks whether incoming and outgoing signals lie on opposite sides of
+`t`.
 
-This function is very helpful for many gate libraries to check for
-(non-)straight gates, which might look different.
+Uses `foreach_adjacent_opposite_coordinates` of the underlying
+coordinate layout.
 
 Args:
     t: Base tile.
 
 Template Args:
-    RespectClocking: Flag to indicate that the underlying clocking is
-                     to be respected when evaluating fanins and
-                     fanouts.
+    RespectClocking: Whether signal queries respect the clocking
+                     scheme.
 
 Returns:
-    `true` iff `t` has incoming and outgoing signals on opposite
-    sides.
+    Whether `t` has incoming and outgoing signals on opposite sides.
 
 )doc";
 
@@ -24250,24 +24246,16 @@ mirrored versions, a double wire and a crossing.)doc";
 static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library_determine_port_routing =
 R"doc(Determines the port directions of a given tile.
 
-
-
-Routes the physical connector ports of an occupied tile.
-
 Args:
     lyt: Layout that contains the tile.
     t: Tile whose incoming and outgoing port directions are
        determined.
-    lyt: Layout.
-    t: Occupied tile.
 
 Template Args:
-    Lyt: Pointy-top hexagonal gate-level layout type. Lyt: Gate-level
-         layout type.
+    Lyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
-    Incoming and outgoing port directions of the tile. Physical
-    connector ports.
+    Incoming and outgoing port directions of the tile.
 
 Raises:
     std::invalid_argument: if `lyt` shifts columns instead of rows.
@@ -25231,6 +25219,9 @@ would clash with the function above.
 Args:
     node: Node ID to convert between graph structures.
 
+Template Args:
+    GraphProxy: Graph type used to distinguish the vertex ID overload.
+
 Returns:
     Corresponding node ID in the Brian Crites graph.
 
@@ -25274,7 +25265,7 @@ static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run = 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run_brian_crites_engine = R"doc()doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_translate_to_brian_crites_graph =
-R"doc(Translates the given graph to a equivalent Brian Crites graph data
+R"doc(Translates the given graph to an equivalent Brian Crites graph data
 structure.
 
 Args:
