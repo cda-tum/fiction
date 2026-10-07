@@ -43,9 +43,13 @@
 #include <mockturtle/networks/aig.hpp>
 
 #include <array>
+#include <filesystem>
+#include <fstream>
 #include <optional>
+#include <random>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 
 using namespace fiction;
@@ -441,4 +445,64 @@ TEMPLATE_TEST_CASE("FGL preserves manual obstructions independently of occupancy
     CHECK_FALSE(restored.is_obstructed_coordinate({-1, -2, -3}));
     CHECK_FALSE(restored.is_obstructed_connection({0, 0}, {1, 0}));
     CHECK(restored.is_obstructed_coordinate({2, 0}));
+}
+
+TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl-layout]")
+{
+    cart_gate_clk_lyt layout{{3, 1, 1}, clocking::twoddwave()};
+    const std::string label{"first\r\nsecond\t<&>"};
+    layout.set_layout_name(label);
+    const auto input = layout.create_pi(label, {0, 0});
+    const auto wire  = layout.create_buf(input, {1, 0});
+    layout.set_name(wire, label);
+    layout.create_po(wire, label, {2, 0});
+    std::stringstream stream{};
+    write_fgl_layout(layout, stream);
+    const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    CHECK(restored.get_layout_name() == label);
+    restored.foreach_node([&](const auto id) { CHECK(restored.get_name(id) == label); });
+}
+
+TEST_CASE("FGL rejects illegal XML controls before changing output", "[write-fgl-layout]")
+{
+    const auto        control = GENERATE(char{0}, char{1}, char{8}, char{11}, char{12}, char{14}, char{31});
+    cart_gate_clk_lyt layout{{3, 1, 1}, clocking::twoddwave()};
+    const auto        input  = layout.create_pi("a", {0, 0});
+    const auto        wire   = layout.create_buf(input, {1, 0});
+    const auto        output = layout.create_po(wire, "f", {2, 0});
+    const std::string label  = std::string{"first"} + control + "second";
+    SECTION("Layout name")
+    {
+        layout.set_layout_name(label);
+    }
+    SECTION("PI name")
+    {
+        layout.set_name(input, label);
+    }
+    SECTION("Wire name")
+    {
+        layout.set_name(wire, label);
+    }
+    SECTION("PO name")
+    {
+        layout.set_name(output, label);
+    }
+    std::stringstream stream{};
+    stream << "sentinel";
+    CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
+    CHECK(stream.str() == "sentinel");
+
+    const auto filename =
+        std::filesystem::temp_directory_path() / ("fiction-fgl-text-" + std::to_string(std::random_device{}()));
+    {
+        std::ofstream original{filename};
+        original << "sentinel";
+    }
+    CHECK_THROWS_AS(write_fgl_layout(layout, filename.string()), std::invalid_argument);
+    std::ifstream original{filename};
+    std::string   contents{};
+    std::getline(original, contents);
+    CHECK(contents == "sentinel");
+    original.close();
+    std::filesystem::remove(filename);
 }

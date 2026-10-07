@@ -54,15 +54,32 @@ namespace fgl
 {
 
 /**
+ * @brief Reject XML 1.0 control characters in a name.
+ * @param value Layout or object name.
+ * @throws std::invalid_argument If the name contains an illegal control character.
+ */
+inline void validate_xml_text(const std::string& value)
+{
+    for (const auto character : value)
+    {
+        if (static_cast<unsigned char>(character) < 0x20 && character != '\t' && character != '\n' && character != '\r')
+            throw std::invalid_argument("FGL names require XML 1.0 text characters");
+    }
+}
+
+/**
  * @brief Escape user-provided text for an XML element.
- * @param value Layout or port name.
- * @return XML text preserving the original label when parsed.
+ * @param value Layout or object name.
+ * @return XML text preserving the original name when parsed.
  */
 inline std::string xml_text(const std::string& value)
 {
     tinyxml2::XMLPrinter printer{};
     printer.PushText(value.c_str());
-    return printer.CStr();
+    std::string text{printer.CStr()};
+    for (auto position = text.find('\r'); position != std::string::npos; position = text.find('\r', position + 5))
+        text.replace(position, 1, "&#13;");
+    return text;
 }
 
 /** @brief FGL XML fragment. */
@@ -273,11 +290,13 @@ class write_fgl_layout_impl
      */
     void validate() const
     {
+        fgl::validate_xml_text(lyt.get_layout_name());
         std::unordered_map<typename Lyt::object_id, uint32_t> remaining{};
         std::vector<typename Lyt::object_id>                  ready{};
         lyt.foreach_node(
             [&](const auto id)
             {
+                fgl::validate_xml_text(lyt.get_name(id));
                 remaining.emplace(id, lyt.input_count(id));
                 for (uint32_t input = 0; input < lyt.input_count(id); ++input)
                 {
@@ -359,7 +378,8 @@ class write_fgl_layout_impl
  * Version 2 stores width, height, and layer counts, explicit PI/PO order, and indexed source references.
  * The file includes every placed object, including complete dangling cones. Clock overrides and synchronization
  * elements and manual coordinate and directed-connection obstructions remain sparse. The format supports the standard
- * named clocking schemes and their overrides. Validation finishes before the output stream changes.
+ * named clocking schemes and their overrides. Names preserve XML whitespace and exclude illegal XML 1.0 controls.
+ * Validation finishes before the output stream changes.
  *
  * This overload uses an output stream to write into.
  *
@@ -367,7 +387,8 @@ class write_fgl_layout_impl
  * @param lyt The layout to be written.
  * @param on_progress Receives completed serialization work.
  * @param os The output stream to write into.
- * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, or uses an unsupported scheme.
+ * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme, or
+ * contains illegal XML text controls.
  */
 template <typename Lyt>
 void write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
@@ -387,7 +408,8 @@ void write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback
  * @param lyt The layout to be written.
  * @param on_progress Receives completed serialization work.
  * @param filename The file name to create and write into. Should preferably use the .fgl extension.
- * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, or uses an unsupported scheme.
+ * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme, or
+ * contains illegal XML text controls.
  */
 template <typename Lyt>
 void write_fgl_layout(const Lyt& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
