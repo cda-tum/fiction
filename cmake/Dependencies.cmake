@@ -158,7 +158,8 @@ set(MOCKTURTLE_INSTALL ON)
 FetchContent_Declare(
   mockturtle
   GIT_REPOSITORY https://github.com/marcelwa/mockturtle.git
-  GIT_TAG b696c4f20917a9d63a268e80475cf2152cb9bc17 # Head of the CMake scoping branch
+  GIT_TAG b696c4f20917a9d63a268e80475cf2152cb9bc17 # Head of the CMake scoping
+                                                   # branch
 )
 FetchContent_MakeAvailable(mockturtle)
 

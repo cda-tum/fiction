@@ -7,7 +7,7 @@ permissions: {}
 
 jobs:
   consumer:
-    name: 📦 ${{ matrix.os }} TBB=${{ matrix.tbb }}
+    name: 📦 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     permissions:
@@ -15,15 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-24.04
-            tbb: ON
-          - os: ubuntu-24.04
-            tbb: OFF
-          - os: macos-15
-            tbb: OFF
-          - os: windows-2025
-            tbb: OFF
+        os: [ubuntu-24.04, macos-15, windows-2025]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -37,16 +29,5 @@ jobs:
       - name: Set up MSVC
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
-      - name: Install TBB
-        if: matrix.tbb == 'ON'
-        run: sudo apt-get update && sudo apt-get install -y libtbb-dev
       - name: Check installed consumer
-        shell: bash
-        env:
-          PACKAGE_TBB: ${{ matrix.tbb }}
-        run: |
-          if [ "$PACKAGE_TBB" = ON ]; then
-            python test/package/run.py --with-tbb
-          else
-            python test/package/run.py
-          fi
+        run: python test/package/run.py

@@ -188,7 +188,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
   - Installed packages now provide mockturtle's dependency headers and SAT libraries, declare
-    the `parallel_hashmap` include directory, and discover TBB when required
+    the `parallel_hashmap` include directory
     ([#1206](https://github.com/cda-tum/fiction/pull/1206)).
 
 - Continuous integration:

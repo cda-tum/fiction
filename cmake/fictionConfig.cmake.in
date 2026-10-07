@@ -10,17 +10,13 @@ function(_fiction_load_package)
       FALSE
       PARENT_SCOPE)
   set(fiction_NOT_FOUND_MESSAGE
-      "A required mockturtle or TBB dependency is unavailable."
+      "The required mockturtle dependency is unavailable."
       PARENT_SCOPE)
   # A cached mockturtle_DIR must not select another installation.
   set(mockturtle_DIR
       "${_fiction_package_prefix}/@CMAKE_INSTALL_LIBDIR@/cmake/mockturtle")
   find_dependency(mockturtle CONFIG PATHS "${_fiction_package_prefix}"
                   NO_DEFAULT_PATH)
-  if(@FICTION_WITH_TBB@)
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
-    find_dependency(TBB)
-  endif()
   include("${CMAKE_CURRENT_LIST_DIR}/fictionTargets.cmake")
 
   # Helper macro to define imported interface library

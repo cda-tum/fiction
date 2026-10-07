@@ -108,11 +108,9 @@ configure_package_config_file(
   ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
   INSTALL_DESTINATION lib/cmake/fiction)
 
-install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/fictionConfigVersion.cmake
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindTBB.cmake
-  DESTINATION lib/cmake/fiction)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/fictionConfigVersion.cmake
+        DESTINATION lib/cmake/fiction)
 
 if(CMAKE_SKIP_INSTALL_RULES)
   return()
