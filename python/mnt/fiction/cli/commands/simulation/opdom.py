@@ -93,6 +93,9 @@ TWO_CHARGE_STATES = 2
 MAX_BDL_INPUTS = 63
 """Maximum input count representable by the native pattern iterator."""
 
+MAX_EXPRESSION_INPUTS = 16
+"""Maximum input count of an expression: variables run from ``a`` to ``p``."""
+
 
 def _opdom_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
@@ -371,6 +374,9 @@ def gate_specification(
     elif args.table:
         spec = [_table_from_string(text) for text in args.table]
     elif args.expression:
+        if len(inputs) > MAX_EXPRESSION_INPUTS:
+            msg = f"--expression supports at most {MAX_EXPRESSION_INPUTS} BDL inputs"
+            raise CommandError(msg)
         spec = []
         for expression in args.expression:
             if any("a" <= char <= "p" and ord(char) - ord("a") >= len(inputs) for char in expression):

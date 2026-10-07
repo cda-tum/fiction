@@ -323,3 +323,17 @@ def test_input_hard_link_is_not_a_log(resource: Callable[[str], str], tmp_path: 
     assert main([str(path), "--gate", "xor", "--log", str(log), "--csv", str(csv), *SMALL_SWEEP]) != 0
     assert path.read_bytes() == source
     assert not csv.exists()
+
+
+def test_expression_rejects_inputs_beyond_variable_names(
+    shell: Shell, wire_with_canvas: sidb_layout, tmp_path: Path
+) -> None:
+    """An expression cannot name more than 16 inputs, so it fails before allocating a truth table."""
+    layout = sidb_layout()
+    for offset in range(0, 1700, 100):
+        for site in wire_with_canvas.sidbs():
+            layout.assign_sidb(lattice_site(site.x + offset, site.y, site.z), wire_with_canvas.get_dot_tag(site))
+    shell.session.cell_layouts.add(CellEntry(layout))
+    path = tmp_path / "domain.csv"
+    assert "at most 16" in shell.fails(f'opdom "{path}" --expression "a"')
+    assert not path.exists()
