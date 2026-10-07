@@ -48,14 +48,11 @@ inline void validate_xml_text(const std::string& value)
 
 /**
  * @brief Return the FGL scheme name, including a three-phase suffix where needed.
- * @tparam Lyt Gate-level layout type.
- * @param lyt Layout.
+ * @param scheme Clocking scheme.
  * @return Scheme name.
  */
-template <typename Lyt>
-[[nodiscard]] std::string clocking_name(const Lyt& lyt)
+[[nodiscard]] inline std::string clocking_name(const clocking::scheme& scheme)
 {
-    const auto scheme = lyt.get_clocking_scheme();
     return scheme.name() + (scheme.num_clocks() == 3u && scheme.name() != layouts::clocking::BANCS_NAME ? "3" : "");
 }
 
@@ -103,10 +100,10 @@ void validate_layout(const Lyt& lyt)
     std::optional<layouts::arrangement> arrangement{};
     if constexpr (is_hexagonal_layout_v<Lyt>)
         arrangement = lyt.get_arrangement();
-    auto scheme = layouts::clocking::get_scheme(clocking_name(lyt), arrangement);
+    const auto source_scheme = lyt.get_clocking_scheme();
+    auto       scheme        = layouts::clocking::get_scheme(clocking_name(source_scheme), arrangement);
     if (!scheme)
         throw std::invalid_argument("FGL requires a supported named clocking scheme");
-    const auto source_scheme = lyt.get_clocking_scheme();
     source_scheme.foreach_override([&](const auto x, const auto y, const auto number)
                                    { scheme->override_clock_number(x, y, number); });
     if (*scheme != source_scheme)

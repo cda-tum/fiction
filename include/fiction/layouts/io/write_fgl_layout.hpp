@@ -178,7 +178,7 @@ class write_fgl_layout_impl
 
         os << fgl::OPEN_CLOCKING;
         const auto& clocking_scheme = lyt.get_clocking_scheme();
-        os << fmt::format(fgl::CLOCKING_SCHEME_NAME, fgl::clocking_name(lyt));
+        os << fmt::format(fgl::CLOCKING_SCHEME_NAME, fgl::clocking_name(clocking_scheme));
 
         os << fgl::OPEN_CLOCK_ZONES;
         utils::progress_reporter clocks{on_progress, "writing clock overrides"};
