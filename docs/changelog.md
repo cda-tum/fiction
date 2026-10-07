@@ -673,6 +673,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Progress parameters now release unreachable callback cycles owned by parameter values.
+    Borrowed nested parameters preserve callbacks in live owners.
   - `copy.copy` and `copy.deepcopy` now preserve gate objects and independently copy layout metadata. Layout simulation extracts ordered logic and rejects incomplete output cones.
   - Linux extensions hide C++ implementation symbols while preserving nanobind's shared exception ABI.
   - `physically_valid_parameters` and `operational_domain_ratio` now release the GIL so
