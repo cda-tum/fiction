@@ -34,6 +34,7 @@
 #include <mockturtle/traits.hpp>
 
 #include <cstddef>
+#include <cstdint>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -71,6 +72,12 @@ static void check_no_explicit_obstructions(const HexLyt& hex_layout)
         });
 }
 
+/**
+ * @brief Checks hexagonalization equivalence and terminal extension positions.
+ * @tparam Lyt Source gate-level layout type.
+ * @tparam Ntk Logic network type.
+ * @param ntk Network to place and map.
+ */
 template <typename Lyt, typename Ntk>
 static void check_mapping_equiv(const Ntk& ntk)
 {
@@ -103,7 +110,7 @@ static void check_mapping_equiv(const Ntk& ntk)
 
     hex_layout_bottom_pos.foreach_po(
         [&hex_layout_bottom_pos](const auto& gate)
-        { CHECK(hex_layout_bottom_pos.get_tile(gate).y == (hex_layout_bottom_pos.height() - 1)); });
+        { CHECK(hex_layout_bottom_pos.get_tile(gate).y == static_cast<int32_t>(hex_layout_bottom_pos.height() - 1)); });
 
     params.input_pin_extension               = hexagonalization_params::io_pin_extension_mode::EXTEND;
     const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_gate_clk_lyt, Lyt>(layout, params, &stats);
@@ -116,9 +123,17 @@ static void check_mapping_equiv(const Ntk& ntk)
                                              { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == 0); });
     hex_layout_top_pis_bottom_pos.foreach_po(
         [&hex_layout_top_pis_bottom_pos](const auto& gate)
-        { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == (hex_layout_top_pis_bottom_pos.height() - 1)); });
+        {
+            CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y ==
+                  static_cast<int32_t>(hex_layout_top_pis_bottom_pos.height() - 1));
+        });
 }
 
+/**
+ * @brief Checks hexagonalization equivalence, names, and terminal extension positions.
+ * @tparam Lyt Source gate-level layout type.
+ * @param lyt Layout to map.
+ */
 template <typename Lyt>
 static void check_mapping_equiv_layout(const Lyt& lyt)
 {
@@ -147,7 +162,7 @@ static void check_mapping_equiv_layout(const Lyt& lyt)
 
     hex_layout_bottom_pos.foreach_po(
         [&hex_layout_bottom_pos](const auto& gate)
-        { CHECK(hex_layout_bottom_pos.get_tile(gate).y == (hex_layout_bottom_pos.height() - 1)); });
+        { CHECK(hex_layout_bottom_pos.get_tile(gate).y == static_cast<int32_t>(hex_layout_bottom_pos.height() - 1)); });
 
     params.input_pin_extension               = hexagonalization_params::io_pin_extension_mode::EXTEND;
     const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_gate_clk_lyt, Lyt>(lyt, params, &stats);
@@ -159,9 +174,17 @@ static void check_mapping_equiv_layout(const Lyt& lyt)
                                              { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == 0); });
     hex_layout_top_pis_bottom_pos.foreach_po(
         [&hex_layout_top_pis_bottom_pos](const auto& gate)
-        { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == (hex_layout_top_pis_bottom_pos.height() - 1)); });
+        {
+            CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y ==
+                  static_cast<int32_t>(hex_layout_top_pis_bottom_pos.height() - 1));
+        });
 }
 
+/**
+ * @brief Checks equivalence, names, and terminal positions after planar rerouting.
+ * @tparam Lyt Source gate-level layout type.
+ * @param lyt Layout to map.
+ */
 template <typename Lyt>
 static void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
 {
@@ -188,7 +211,7 @@ static void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
 
     hex_layout_bottom_pos.foreach_po(
         [&hex_layout_bottom_pos](const auto& gate)
-        { CHECK(hex_layout_bottom_pos.get_tile(gate).y == (hex_layout_bottom_pos.height() - 1)); });
+        { CHECK(hex_layout_bottom_pos.get_tile(gate).y == static_cast<int32_t>(hex_layout_bottom_pos.height() - 1)); });
 
     params.input_pin_extension               = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
     params.output_pin_extension              = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
@@ -202,7 +225,10 @@ static void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
                                              { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == 0); });
     hex_layout_top_pis_bottom_pos.foreach_po(
         [&hex_layout_top_pis_bottom_pos](const auto& gate)
-        { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == (hex_layout_top_pis_bottom_pos.height() - 1)); });
+        {
+            CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y ==
+                  static_cast<int32_t>(hex_layout_top_pis_bottom_pos.height() - 1));
+        });
 }
 
 template <typename Lyt>
