@@ -116,7 +116,6 @@ TEST_CASE("Empty layouts own no implicit constants and require placement", "[gat
     CHECK(lyt.size() == 0);
     CHECK_FALSE(mockturtle::is_network_type_v<layout>);
     static_assert(!std::is_invocable_v<decltype(&layout::create_pi), layout&, const std::string&>);
-    CHECK(lyt.size() == 0);
 }
 
 TEST_CASE("Moved layouts leave reusable empty sources", "[gate-layout-editing]")
@@ -670,6 +669,11 @@ TEST_CASE("Moved-from layouts recover from interrupted cache initialization", "[
         catch (const std::bad_alloc&)
         {
             created = false;
+        }
+        catch (...)
+        {
+            allocation_budget.reset();
+            throw;
         }
         allocation_budget.reset();
         source.clear_tile({0, 0});
