@@ -89,7 +89,7 @@ def make_gate_layout(topology: str, dimension: tuple[int, int], scheme: str = "2
 
     Args:
         topology: A canonical name or an alias.
-        dimension: The highest tile position.
+        dimension: Width and height in tiles.
         scheme: The clocking scheme name.
 
     Returns:
