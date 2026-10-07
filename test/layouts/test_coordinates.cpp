@@ -78,12 +78,8 @@ TEST_CASE("Extent sizes validate the coordinate domain", "[coordinates][size-con
     CHECK_THROWS_AS((extent{uint64_t{2147483649}, 1}), std::invalid_argument);
     CHECK_THROWS_AS((extent{1, std::numeric_limits<uint64_t>::max()}), std::invalid_argument);
     CHECK(area_of(extent{2, 3, 4}) == 6);
-    CHECK(volume_of(extent{2, 3, 4}) == 24);
     CHECK(area_of(extent{}) == 0);
-    CHECK(volume_of(extent{2, 3, 0}) == 0);
     CHECK(area_of(extent{2147483648ull, 2147483648ull}) == 4611686018427387904ull);
-    CHECK_THROWS_AS(volume_of(extent{2147483648ull, 2147483648ull, 4}), std::overflow_error);
-    CHECK(volume_of(extent{2147483648ull, 2147483648ull, 3}) == 13835058055282163712ull);
     auto edited  = extent{};
     edited.width = std::numeric_limits<uint32_t>::max();
     CHECK_THROWS_AS(cartesian_layout{edited}, std::invalid_argument);

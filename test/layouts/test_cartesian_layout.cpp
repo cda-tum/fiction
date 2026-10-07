@@ -59,7 +59,6 @@ TEST_CASE("Cartesian sizes and value copies", "[cartesian-layout][size-contract]
 {
     const cartesian_layout empty{};
     CHECK(empty.area() == 0);
-    CHECK(empty.volume() == 0);
     CHECK(empty.coordinates().empty());
     CHECK(empty.ground_coordinates().empty());
     CHECK(!empty.contains_coordinate({0, 0, 0}));

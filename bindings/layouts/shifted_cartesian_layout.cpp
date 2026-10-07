@@ -85,8 +85,6 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
             "contains_coordinate", [](const Lyt& lyt, const py_coordinate& c) { return lyt.contains_coordinate(c); },
             py::arg("c"), "Tests the half-open geometry bounds.")
         .def(
-            "volume", [](const Lyt& lyt) { return lyt.volume(); }, "Returns the checked volume in coordinates.")
-        .def(
             "area", [](const Lyt& lyt) { return lyt.area(); }, DOC(fiction_layouts_cartesian_layout_area))
         .def(
             "resize", [](Lyt& lyt, const py_extent& dimensions) { lyt.resize(dimensions); }, py::arg("dimensions"),
@@ -220,7 +218,7 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
                 std::vector<fiction::coordinate<Lyt>> coords{};
                 if (!start && !stop)
                 {
-                    coords.reserve(lyt.volume());
+                    coords.reserve(lyt.area() * lyt.layers());
                 }
                 lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); }, start, stop);
                 return coords;

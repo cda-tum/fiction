@@ -76,10 +76,6 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 
 ```
 
-```{doxygenfunction} fiction::layouts::volume_of
-
-```
-
 :::
 
 :::{tab-item} Python
@@ -87,8 +83,6 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 
 ```{eval-rst}
 .. autofunction:: mnt.pyfiction.layouts.area
-
-.. autofunction:: mnt.pyfiction.layouts.volume
 ```
 
 :::

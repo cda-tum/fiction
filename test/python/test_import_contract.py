@@ -125,10 +125,9 @@ def test_extension_exports(name: str) -> None:
 def test_coordinate_namespace_in_fresh_interpreter() -> None:
     """Coordinate imports expose the type and utilities that layout APIs accept."""
     script = (
-        "from mnt.pyfiction.layouts import Extent, area, cartesian_layout, coordinate, volume\n"
+        "from mnt.pyfiction.layouts import Extent, area, cartesian_layout, coordinate\n"
         "assert coordinate.__module__ == 'mnt.pyfiction.layouts'\n"
         "assert area(Extent(3, 4, 2)) == 12\n"
-        "assert volume(Extent(3, 4, 2)) == 24\n"
         "assert cartesian_layout((3, 4)).width() == 3\n"
     )
     subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
