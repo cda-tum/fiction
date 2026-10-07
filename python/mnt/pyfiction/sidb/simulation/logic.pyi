@@ -440,7 +440,10 @@ class bdl_wire:
         """Direction and I/O flags of a BDL wire port."""
 
         def __init__(
-            self, direction: bdl_wire.port_direction.cardinal = ..., pi: bool = False, po: bool = False
+            self,
+            direction: bdl_wire.port_direction.cardinal = ...,
+            pi: bool = False,
+            po: bool = False,
         ) -> None:
             """Constructs a port with a cardinal direction and input/output flags."""
 
@@ -552,7 +555,9 @@ class bdl_wire:
     def __ne__(self, arg: bdl_wire, /) -> bool: ...
 
 def detect_bdl_wires(
-    lyt: mnt.pyfiction.sidb.sidb_layout, params: detect_bdl_wires_params = ..., wire_selection: bdl_wire_selection = ...
+    lyt: mnt.pyfiction.sidb.sidb_layout,
+    params: detect_bdl_wires_params = ...,
+    wire_selection: bdl_wire_selection = ...,
 ) -> list[bdl_wire]:
     """
     Detects the BDL wires of an SiDB layout: the BDL pairs of all types

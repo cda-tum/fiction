@@ -292,7 +292,7 @@ def gate_level_drvs(
     """
 
 class eq_type(enum.Enum):
-    """The different equivalence types possible."""
+    """Equivalence classification for logic and layout throughput."""
 
     NO = 0
     """
