@@ -522,6 +522,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Gate-type counting now compiles for native gate layouts with MSVC.
   - On-the-fly SiDB circuit design now rejects unsupported gate types before starting gate design.
   - Random-coordinate sampling now uses independent inclusive bounds for each axis.
   - Routing conflict graphs now detect overlaps after every path mutation and propagate allocation failures.
