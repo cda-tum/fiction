@@ -171,6 +171,7 @@ target_link_libraries(fanfiction PRIVATE fiction::libfiction)
 
 _fiction_ installs mockturtle into the same prefix and its package configuration finds it there,
 so no extra `CMAKE_PREFIX_PATH` entry is needed for it.
+If _fiction_ was built with TBB, the consumer must provide a discoverable TBB installation.
 
 Then include what you need:
 

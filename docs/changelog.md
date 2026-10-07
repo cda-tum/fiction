@@ -187,11 +187,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
 - Build system:
-  - **Fixed:** an installed _fiction_ shipped mockturtle's own headers but none of the vendored
-    dependencies they include, so `find_package(fiction)` produced a package that failed on
-    `#include <kitty/...>`. mockturtle now installs itself into the same prefix and
-    `fictionConfig.cmake` resolves it from there ([#1206](https://github.com/cda-tum/fiction/pull/1206))
-  - **Fixed:** the installed `libfiction` referenced `include/parallel_hashmap` without declaring it
+  - Installed packages now provide mockturtle's dependency headers and SAT libraries, declare
+    the `parallel_hashmap` include directory, and discover TBB when required
+    ([#1206](https://github.com/cda-tum/fiction/pull/1206)).
 
 - Continuous integration:
   - Read the Docs now builds on Ubuntu 26.04.

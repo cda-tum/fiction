@@ -1,0 +1,52 @@
+name: 📦 • Installed C++ Package
+
+on:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  consumer:
+    name: 📦 ${{ matrix.os }} TBB=${{ matrix.tbb }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            tbb: ON
+          - os: ubuntu-24.04
+            tbb: OFF
+          - os: macos-15
+            tbb: OFF
+          - os: windows-2025
+            tbb: OFF
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Ninja
+        uses: seanmiddleditch/gha-setup-ninja@3b1f8f94a2f8254bd26914c4ab9474d4f0015f67 # v6
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14.x"
+      - name: Set up MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+      - name: Install TBB
+        if: matrix.tbb == 'ON'
+        run: sudo apt-get update && sudo apt-get install -y libtbb-dev
+      - name: Check installed consumer
+        shell: bash
+        env:
+          PACKAGE_TBB: ${{ matrix.tbb }}
+        run: |
+          if [ "$PACKAGE_TBB" = ON ]; then
+            python test/package/run.py --cmake-option=-DCMAKE_REQUIRE_FIND_PACKAGE_TBB=ON
+          else
+            python test/package/run.py --cmake-option=-DCMAKE_DISABLE_FIND_PACKAGE_TBB=ON
+          fi

@@ -89,6 +89,7 @@ jobs:
             !test/python/**
             experiments/**
             cmake/**
+            vendors/CMakeLists.txt
             CMakeLists.txt
             CMakePresets.json
             .codecov.yml
@@ -97,6 +98,7 @@ jobs:
             .github/workflows/cpp-tests-ubuntu.yml
             .github/workflows/cpp-tests-macos.yml
             .github/workflows/cpp-tests-windows.yml
+            .github/workflows/cpp-package.yml
             .github/workflows/cpp-experiments.yml
             .github/workflows/cpp-coverage.yml
             !bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp

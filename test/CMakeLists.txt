@@ -36,6 +36,9 @@ endif()
 
 file(GLOB_RECURSE FILENAMES */*.cpp)
 list(FILTER FILENAMES EXCLUDE REGEX "benchmark/.*$")
+# The installed consumer has its own CMake project, driven by
+# test/package/run.py.
+list(FILTER FILENAMES EXCLUDE REGEX "package/.*$")
 
 # Test files carry the test_ prefix in their own name, so the target and the
 # CTest name are both just the base name -- nothing is synthesized here.
