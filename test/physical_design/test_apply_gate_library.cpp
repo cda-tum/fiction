@@ -42,6 +42,9 @@
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
+
 #include <algorithm>
 #include <cstddef>
 #include <stdexcept>
@@ -97,7 +100,7 @@ TEST_CASE("Gate-library application assigns synchronization to clock zones", "[a
 
     SECTION("Wire")
     {
-        cart_gate_clk_lyt layout{{2, 0}, clocking::twoddwave()};
+        cart_gate_clk_lyt layout{{3, 1}, clocking::twoddwave()};
         const auto        input = layout.create_pi("x", {0, 0});
         const auto        wire  = layout.create_buf(input, {1, 0});
         layout.create_po(wire, "f", {2, 0});
@@ -131,9 +134,11 @@ TEST_CASE("Gate-library application assigns synchronization to clock zones", "[a
 
 TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 {
-    hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {2, 2}, clocking::row()};
+    hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
 
-    layout.create_and(0, 1, {1, 2});
+    kitty::dynamic_truth_table function{2};
+    kitty::create_from_hex_string(function, "8");
+    layout.create_node({}, function, {1, 2});
 
     SECTION("Apply static Bestagon gate library")
     {
@@ -214,7 +219,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 
 TEST_CASE("Gate-level layout with two input wires, one double wire, and two output wires", "[apply-gate-library]")
 {
-    hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {2, 2, 1}, clocking::row()};
+    hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
     const auto x1   = layout.create_pi("x1", {0, 0});
     const auto buf1 = layout.create_buf(x1, {1, 1, 0});
@@ -299,7 +304,7 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
 
 TEST_CASE("On-the-fly SiDB fanout gate", "[apply-gate-library]")
 {
-    hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {2, 2}, clocking::row()};
+    hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
 
     const auto input  = layout.create_pi("input", {0, 0});
     const auto fanout = layout.create_buf(input, {1, 1});
@@ -329,7 +334,7 @@ TEST_CASE("On-the-fly SiDB fanout gate", "[apply-gate-library]")
 
 TEST_CASE("On-the-fly SiDB crossing gate", "[apply-gate-library]")
 {
-    hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {2, 2, 1}, clocking::row()};
+    hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
     const auto input1 = layout.create_pi("input1", {0, 0});
     const auto wire1  = layout.create_buf(input1, {1, 1, 0});
@@ -360,7 +365,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 {
     SECTION("INV with input and output wire tile")
     {
-        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {2, 2, 1}, clocking::row()};
+        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
         const auto x1   = layout.create_pi("x1", {0, 0});
         const auto buf1 = layout.create_not(x1, {1, 1, 0});
@@ -416,7 +421,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("OR with input and output wire tile")
     {
-        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {2, 2, 1}, clocking::row()};
+        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
         const auto x1      = layout.create_pi("x1", {0, 0});
         const auto x2      = layout.create_pi("x2", {1, 0});
@@ -473,7 +478,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("NAND with input and output wire tile")
     {
-        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {2, 2, 1}, clocking::row()};
+        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
         const auto x1        = layout.create_pi("x1", {0, 0});
         const auto x2        = layout.create_pi("x2", {1, 0});
@@ -535,7 +540,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("NOR with input and output wire tile")
     {
-        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {2, 2, 1}, clocking::row()};
+        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
         const auto x1       = layout.create_pi("x1", {0, 0});
         const auto x2       = layout.create_pi("x2", {1, 0});
@@ -572,7 +577,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("XOR with input and output wire tile")
     {
-        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {2, 2, 1}, clocking::row()};
+        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
         const auto x1       = layout.create_pi("x1", {0, 0});
         const auto x2       = layout.create_pi("x2", {1, 0});
@@ -632,7 +637,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("XNOR with input and output wire tile")
     {
-        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {2, 2, 1}, clocking::row()};
+        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
         const auto x1        = layout.create_pi("x1", {0, 0});
         const auto x2        = layout.create_pi("x2", {1, 0});
@@ -678,9 +683,9 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
 
         const auto layout = apply_gate_library<qca_one_library, GateLyt>(gate_lyt);
 
-        CHECK(layout.x() == 16);
-        CHECK(layout.y() == 14);
-        CHECK(layout.z() == 0);
+        CHECK(layout.width() == 17);
+        CHECK(layout.height() == 15);
+        CHECK(layout.layers() == 1);
     }
 
     SECTION("With crossings")
@@ -689,9 +694,9 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
 
         const auto layout = apply_gate_library<qca_one_library, GateLyt>(gate_lyt);
 
-        CHECK(layout.x() == 21);
-        CHECK(layout.y() == 14);
-        CHECK(layout.z() == 1);
+        CHECK(layout.width() == 22);
+        CHECK(layout.height() == 15);
+        CHECK(layout.layers() == 2);
     }
 }
 
@@ -709,8 +714,7 @@ TEST_CASE("Apply molecular QCA gate library end-to-end", "[apply-gate-library]")
 TEST_CASE("Gate-library progress counts completed mappings", "[apply-gate-library]")
 {
     const auto  gate_lyt = blueprints::straight_wire_gate_layout<shifted_cart_gate_clk_lyt>(arrangement::EVEN_ROW);
-    std::size_t expected{};
-    gate_lyt.foreach_node([&](const auto& n) { expected += !gate_lyt.is_constant(n); });
+    const auto  expected = gate_lyt.size();
     std::size_t completed{};
     std::size_t reports{};
     const auto  layout = apply_gate_library<qca_one_library>(gate_lyt,
@@ -731,7 +735,7 @@ TEST_CASE("Bestagon library rejects layouts that shift columns", "[apply-gate-li
 {
     const auto a = GENERATE(arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-    hex_gate_clk_lyt layout{a, {2, 2}, clocking::row()};
+    hex_gate_clk_lyt layout{a, {3, 3}, clocking::row()};
     layout.create_pi("x", {0, 0});
 
     CHECK_THROWS_AS(apply_gate_library<bestagon_library>(layout), std::invalid_argument);
