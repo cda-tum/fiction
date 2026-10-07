@@ -34,11 +34,14 @@ if(FICTION_ENABLE_PCH AND NOT (MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
   target_precompile_headers(libfiction_test_pch PRIVATE pch_test.hpp)
 endif()
 
-file(GLOB_RECURSE FILENAMES */*.cpp)
-list(FILTER FILENAMES EXCLUDE REGEX "benchmark/.*$")
+file(
+  GLOB_RECURSE FILENAMES
+  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  */*.cpp)
+list(FILTER FILENAMES EXCLUDE REGEX "^benchmark/")
 # The installed consumer has its own CMake project, driven by
 # test/package/run.py.
-list(FILTER FILENAMES EXCLUDE REGEX "package/.*$")
+list(FILTER FILENAMES EXCLUDE REGEX "^package/")
 
 # Test files carry the test_ prefix in their own name, so the target and the
 # CTest name are both just the base name -- nothing is synthesized here.

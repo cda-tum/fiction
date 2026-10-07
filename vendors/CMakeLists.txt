@@ -1,5 +1,5 @@
 # Prevent CMake from finding a system-installed fmt package to avoid version conflicts.
-# cmake/Dependencies.cmake fetches fmt and defines the `fmt` target that mockturtle reuses.
+# cmake/Dependencies.cmake supplies fiction's fmt target and installed headers.
 set(CMAKE_DISABLE_FIND_PACKAGE_fmt TRUE)
 
 # Include Dependencies (FetchContent) configuration

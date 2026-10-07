@@ -89,6 +89,7 @@ jobs:
             !test/python/**
             experiments/**
             cmake/**
+            include/CMakeLists.txt
             vendors/CMakeLists.txt
             CMakeLists.txt
             CMakePresets.json
