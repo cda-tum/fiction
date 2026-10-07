@@ -230,10 +230,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     argument instead of a template parameter, and `get_arrangement()` returns it.
   - **Breaking:** Coordinates are signed. `layouts::layout_base::coordinate` with three `int32_t` axes replaces
     `coords::offset` and `coords::cube`, and `cartesian_layout`, `hexagonal_layout`, and `shifted_cartesian_layout`
-    derive from `layout_base` and are no longer templates. `coordinates.hpp` and `layouts::coords` are gone. The default
-    coordinate is invalid, as is any coordinate whose x axis is `INT32_MIN`, and `is_valid()` replaces `is_dead()` on
-    coordinates. Layouts throw `std::invalid_argument` for extents below 0 or above 2^30 - 1, and
-    gate-level layouts throw `std::out_of_range` for tiles with x or y above 2^30 - 1 or z above 1.
+    derive from `layout_base` and are no longer templates. `coordinates.hpp` and `layouts::coords` are gone. Every
+    `int32_t` coordinate is valid, including `INT32_MIN`; absence uses optional values. Layout extents accept axis
+    counts from 0 through 2^31, and gate-level layouts support multiple layers.
   - **Breaking:** `graph_oriented_layout_design_params::tiles_to_skip_between_pis` is an `int32_t`, and
     `graph_oriented_layout_design` throws `std::invalid_argument` for values outside of [0, 2^20].
 
@@ -523,6 +522,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - On-the-fly SiDB circuit design now rejects unsupported gate types before starting gate design.
   - Random-coordinate sampling now uses independent inclusive bounds for each axis.
   - Routing conflict graphs now detect overlaps after every path mutation and propagate allocation failures.
   - Exact placement and GOLD now widen area calculations before multiplication.
@@ -600,7 +600,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
   - Coordinate construction and gate-to-cell conversion now reject narrowing overflow.
-  - Gate layout geometry now retains its two-layer limit through shared coordinate aliases and base references.
   - Cell clock zones now use floor division for negative coordinates.
   - Cell layouts reject zero clock-zone dimensions in constructors and setters.
   - Gate layouts constructed from coordinate layouts initialize their logic functions.
