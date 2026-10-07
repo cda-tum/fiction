@@ -62,7 +62,7 @@ def test_fgl_rejects_unrepresentable_layers(tmp_path: Path, value: str) -> None:
     path = tmp_path / "invalid.fgl"
     write_fgl_layout(layout, str(path))
     path.write_text(path.read_text(encoding="utf-8").replace("<z>1</z>", f"<z>{value}</z>", 1), encoding="utf-8")
-    with pytest.raises(fgl_parsing_error, match=r"range|integer"):
+    with pytest.raises(fgl_parsing_error, match=r"range|integer|two layers"):
         read_cartesian_fgl_layout(str(path))
 
 

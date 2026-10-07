@@ -1247,6 +1247,7 @@ Args:
 
 Raises:
     std::invalid_argument: If a size exceeds the coordinate domain.
+    std::out_of_range: If the layer count exceeds two.
 
 )doc";
 
@@ -1559,14 +1560,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_is_crossing_layer =
-R"doc(Returns whether the given coordinate is located in a crossing layer
-where z is not minimal.
+R"doc(Returns whether the given coordinate is located in the crossing layer
+at z = 1.
 
 Args:
     c: Coordinate to check for elevation.
 
 Returns:
-    `true` iff `c` is in a crossing layer.
+    `true` iff `c.z` is 1.
 
 )doc";
 
@@ -1764,6 +1765,8 @@ Args:
 
 Raises:
     std::invalid_argument: If a size exceeds the coordinate domain.
+    std::out_of_range: If the layer count exceeds two. The dimensions
+                       remain unchanged.
 
 )doc";
 
@@ -4467,6 +4470,7 @@ Args:
 
 Raises:
     std::invalid_argument: If a size exceeds the coordinate domain.
+    std::out_of_range: If the layer count exceeds two.
 
 )doc";
 
@@ -4583,14 +4587,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_is_crossing_layer =
-R"doc(Returns whether the given coordinate is located in a crossing layer
-where z is not minimal.
+R"doc(Returns whether the given coordinate is located in the crossing layer
+at z = 1.
 
 Args:
     c: Coordinate to check for elevation.
 
 Returns:
-    `true` iff `c` is in a crossing layer.
+    `true` iff `c.z` is 1.
 
 )doc";
 
@@ -4845,6 +4849,8 @@ Args:
 
 Raises:
     std::invalid_argument: If a size exceeds the coordinate domain.
+    std::out_of_range: If the layer count exceeds two. The dimensions
+                       remain unchanged.
 
 )doc";
 
@@ -5588,6 +5594,7 @@ Returns:
 
 Raises:
     std::invalid_argument: If a size exceeds `INT32_MAX + 1`.
+    std::out_of_range: If the layer count exceeds two.
 
 )doc";
 
@@ -5676,6 +5683,7 @@ Args:
 
 Raises:
     std::invalid_argument: If a size exceeds the coordinate domain.
+    std::out_of_range: If the layer count exceeds two.
 
 )doc";
 
@@ -6236,6 +6244,7 @@ Args:
 
 Raises:
     std::invalid_argument: If a size exceeds the coordinate domain.
+    std::out_of_range: If the layer count exceeds two.
 
 )doc";
 
