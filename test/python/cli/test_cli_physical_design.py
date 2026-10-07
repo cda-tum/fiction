@@ -60,7 +60,7 @@ def test_plane(mux21_shell: Shell) -> None:
 
 
 def test_plane_options(mux21_shell: Shell) -> None:
-    mux21_shell.ok("plane -n 3 -d 3 -x")
+    mux21_shell.ok("plane -n 3 -x")
     layout = mux21_shell.session.gate_layouts.current()
     assert layout.num_clocks() == 3
     assert layout.num_crossings() == 0

@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -202,6 +203,22 @@ enum class buffer_connection : uint8_t
  */
 inline constexpr std::size_t max_gap = 2u;
 /**
+ * Number of `orientation` enumerators.
+ */
+inline constexpr std::size_t num_orientations = 4u;
+/**
+ * Number of `allowed_orientation` enumerators.
+ */
+inline constexpr std::size_t num_allowed_orientations = 3u;
+/**
+ * Number of `buffer_connection` enumerators.
+ */
+inline constexpr std::size_t num_buffer_connections = 2u;
+/**
+ * Number of `fanout_connection` enumerators.
+ */
+inline constexpr std::size_t num_fanout_connections = 4u;
+/**
  * One entry of a lookup table: the orientation of the node and the routing lines it needs.
  */
 struct placement_rule
@@ -218,7 +235,7 @@ struct placement_rule
 /**
  * Rules indexed by the orientation of the previous node in the rank.
  */
-using rules_by_previous = std::array<placement_rule, 4>;
+using rules_by_previous = std::array<placement_rule, num_orientations>;
 /**
  * Rules indexed by the predecessor gap, then by the previous orientation.
  */
@@ -226,7 +243,7 @@ using rules_by_gap = std::array<rules_by_previous, max_gap + 1>;
 /**
  * Rules indexed by the allowed orientation, then by gap and previous orientation.
  */
-using rules_by_allowed = std::array<rules_by_gap, 3>;
+using rules_by_allowed = std::array<rules_by_gap, num_allowed_orientations>;
 /**
  * Shorthand for the orientation enumerators of the tables below.
  */
@@ -235,7 +252,7 @@ using o = orientation;
  * Placement rules for single-fanin nodes that are not fanouts, indexed by `buffer_connection`, `allowed_orientation`,
  * gap, and the orientation of the previous node.
  */
-inline constexpr std::array<rules_by_allowed, 2> buffer_rules = {{
+inline constexpr std::array<rules_by_allowed, num_buffer_connections> buffer_rules = {{
     // UNCONNECTED
     {{
         // allowed EAST
@@ -283,7 +300,7 @@ inline constexpr std::array<rules_by_allowed, 2> buffer_rules = {{
  * Placement rules for fanout nodes, indexed by `fanout_connection`, `allowed_orientation`, gap, and the orientation
  * of the previous node.
  */
-inline constexpr std::array<rules_by_allowed, 4> fanout_rules = {{
+inline constexpr std::array<rules_by_allowed, num_fanout_connections> fanout_rules = {{
     // BOTH_SINGLE
     {{
         // allowed EAST
@@ -844,9 +861,13 @@ inline void lift_to_common_diagonal(level_wiring& wiring, const std::vector<std:
 
     for (std::size_t i = 0; i < x.size(); ++i)
     {
-        const auto it   = gate_of_position.find(i);
-        const auto own  = it != gate_of_position.cend() ? gate_lines[it->second] : uint64_t{0};
-        const auto diff = max - x[i] - y[i] - own;
+        const auto it     = gate_of_position.find(i);
+        const auto own    = it != gate_of_position.cend() ? gate_lines[it->second] : uint64_t{0};
+        const auto demand = x[i] + y[i] + own;
+
+        assert(demand <= max && "a node demands more than the largest diagonal; the propagation of lines is broken");
+
+        const auto diff = max - demand;
 
         if (i < center)
         {
@@ -1064,13 +1085,13 @@ template <typename Lyt>
     if (east != 0)
     {
         [[maybe_unused]] const auto end = wire_straight(lyt, from, {from.x + east + 1, from.y});
-        from.x += east;
+        from                            = {from.x + east, from.y, from.z};
     }
 
     if (south != 0)
     {
         [[maybe_unused]] const auto end = wire_straight(lyt, from, {from.x, from.y + south + 1});
-        from.y += south;
+        from                            = {from.x, from.y + south, from.z};
     }
 
     return from;
@@ -1110,16 +1131,16 @@ template <typename Lyt, typename Ntk>
  * @param t Tile.
  * @param ntk Network.
  * @param n Node.
- * @param pre1_t Tile that holds one predecessor's signal.
- * @param pre2_t Tile that holds the other predecessor's signal.
+ * @param north_t Tile that holds the northern predecessor's signal, in the column of `t`.
+ * @param west_t Tile that holds the western predecessor's signal, in the row of `t`.
  * @param c Value of a constant third fanin, if any.
  * @return Signal of the placed node.
- * @throws std::logic_error If `t` is occupied.
+ * @throws std::logic_error If `t` is occupied, or if a predecessor is not where its name says.
  */
 template <typename Lyt, typename Ntk>
 [[nodiscard]] mockturtle::signal<Lyt>
-connect_and_place_planar(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, tile<Lyt> pre1_t,
-                         tile<Lyt> pre2_t, const std::optional<bool>& c = std::nullopt)
+connect_and_place_planar(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                         const tile<Lyt>& north_t, const tile<Lyt>& west_t, const std::optional<bool>& c = std::nullopt)
 {
     if (!lyt.is_empty_tile(t))
     {
@@ -1127,12 +1148,7 @@ connect_and_place_planar(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const moc
                                            static_cast<uint64_t>(t.y), n));
     }
 
-    if (pre2_t < pre1_t)
-    {
-        std::swap(pre1_t, pre2_t);
-    }
-
-    return place(lyt, t, ntk, n, wire_straight(lyt, pre1_t, t), wire_straight(lyt, pre2_t, t), c);
+    return place(lyt, t, ntk, n, wire_straight(lyt, north_t, t), wire_straight(lyt, west_t, t), c);
 }
 
 /**
@@ -1288,17 +1304,17 @@ class plane_impl
      *
      * @param n Node.
      * @param i Rank position of `n`.
-     * @param o Orientation of `n`.
+     * @param orient Orientation of `n`.
      * @param wiring Wire lengths of the level.
      */
-    void place_single_fanin(const mockturtle::node<fanout_ntk> n, const std::size_t i, const orientation o,
+    void place_single_fanin(const mockturtle::node<fanout_ntk> n, const std::size_t i, const orientation orient,
                             const level_wiring& wiring)
     {
         const auto pre = networks::fanins(ntk, n).fanin_nodes.front();
         const auto pre_t =
             wire_east_then_south(layout, static_cast<tile<Lyt>>(node2pos[pre]), wiring.x[i], wiring.y[i]);
 
-        place_t = is_east(o) ? tile<Lyt>{pre_t.x + 1, pre_t.y} : tile<Lyt>{pre_t.x, pre_t.y + 1};
+        place_t = is_east(orient) ? tile<Lyt>{pre_t.x + 1, pre_t.y} : tile<Lyt>{pre_t.x, pre_t.y + 1};
 
         node2pos[n] = connect_and_place_planar(layout, place_t, ntk, n, pre_t);
 
@@ -1374,7 +1390,6 @@ class plane_impl
      * south to its row, then east. Rows are assigned in rank order and the outputs are created in output order.
      *
      * @return `1` plus the number of rows the shifts add below the last diagonal, `0` if none were needed.
-     * @throws std::logic_error If a node drives more than two outputs.
      */
     [[nodiscard]] uint64_t route_outputs()
     {
@@ -1397,12 +1412,6 @@ class plane_impl
                                  [this, &outputs_of, &row_of, &next_free_row](const auto& n)
                                  {
                                      const auto& outputs = outputs_of[n];
-
-                                     if (outputs.size() > 2)
-                                     {
-                                         throw std::logic_error(
-                                             fmt::format("node {} drives more than two primary outputs", n));
-                                     }
 
                                      auto row = static_cast<uint64_t>(static_cast<tile<Lyt>>(node2pos[n]).y);
 
@@ -1513,7 +1522,7 @@ class plane_impl
  * level share one diagonal. Primary inputs sit on the left and top borders, primary outputs on the right border.
  *
  * The input must be planar in its rank order (see `synthesis::planarization`) with at most two non-constant fanins
- * per node.
+ * and at most two fanouts per node, primary outputs included.
  *
  * @tparam Lyt Gate-level layout type.
  * @tparam Ntk Ranked network type (see `mutable_rank_view`).
@@ -1522,8 +1531,8 @@ class plane_impl
  * @param pst Statistics.
  * @return Crossing-free gate-level layout that implements `ntk`.
  * @throws networks::high_degree_fanin_exception If a node has more than two non-constant fanins.
- * @throws std::invalid_argument If the rank order of `ntk` has crossings, or if a gate has a constant fanin next to a
- * single non-constant one.
+ * @throws std::invalid_argument If `ntk` has no primary inputs, if a node drives more than two fanouts, if a gate has
+ * a constant fanin next to a single non-constant one, or if the rank order of `ntk` has crossings.
  * @throws std::logic_error If placement or routing cannot keep the layout planar; such an input is a defect.
  */
 template <typename Lyt, typename Ntk>
@@ -1533,9 +1542,30 @@ template <typename Lyt, typename Ntk>
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position method");
 
+    if (ntk.num_pis() == 0)
+    {
+        throw std::invalid_argument("The network has no primary inputs");
+    }
+
     if (networks::has_high_degree_fanin_nodes(ntk, 2))
     {
         throw networks::high_degree_fanin_exception();
+    }
+
+    // the lookup tables and the output rows are made for fanout nodes with two consumers
+    bool high_degree_fanout = false;
+    ntk.foreach_node(
+        [&ntk, &high_degree_fanout](const auto& n)
+        {
+            if (!ntk.is_constant(n) && ntk.fanout_size(n) > 2)
+            {
+                high_degree_fanout = true;
+            }
+        });
+
+    if (high_degree_fanout)
+    {
+        throw std::invalid_argument("A node drives more than two fanouts; substitute fanouts before placement");
     }
 
     // a gate that keeps a single non-constant fanin next to a constant one has no placement; propagate constants first

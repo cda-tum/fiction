@@ -49,14 +49,6 @@ def _plane_arguments(parser: Parser) -> None:
         help="the number of clock phases of the result",
     )
     parser.add_argument(
-        "-d",
-        "--fanout-degree",
-        type=integer,
-        choices=[2, 3],
-        default=2,
-        help="maximum number of outputs of a fanout node",
-    )
-    parser.add_argument(
         "-x", "--xor-gates", action="store_true", help="build crossing gadgets from XOR gates instead of AND, OR, NOT"
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
@@ -86,7 +78,6 @@ def plane(session: Session, args: argparse.Namespace) -> Result:
 
     planarization_parameters = planarization_params()
     planarization_parameters.on_progress = session.report_progress
-    planarization_parameters.fanout_degree = args.fanout_degree
     planarization_parameters.duplication.xor_gates = args.xor_gates
 
     planarization_statistics = planarization_stats()

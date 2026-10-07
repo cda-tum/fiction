@@ -241,6 +241,31 @@ TEST_CASE("Invalid inputs are rejected", "[plane]")
 
         CHECK_THROWS_AS(plane<gate_layout>(ranked), high_degree_fanin_exception);
     }
+    SECTION("a node with three fanouts")
+    {
+        // not fanout-substituted: the gate drives three outputs
+        technology_network tec{};
+
+        const auto x1 = tec.create_pi();
+        const auto x2 = tec.create_pi();
+        const auto a1 = tec.create_and(x1, x2);
+        tec.create_po(a1);
+        tec.create_po(a1);
+        tec.create_po(a1);
+
+        const mutable_rank_view ranked{tec};
+
+        CHECK_THROWS_AS(plane<gate_layout>(ranked), std::invalid_argument);
+    }
+    SECTION("a network without primary inputs")
+    {
+        technology_network tec{};
+        tec.create_po(tec.get_constant(true));
+
+        const mutable_rank_view ranked{tec};
+
+        CHECK_THROWS_AS(plane<gate_layout>(ranked), std::invalid_argument);
+    }
 }
 
 TEST_CASE("Shared wires and routing conflicts", "[plane]")
@@ -252,6 +277,7 @@ TEST_CASE("Shared wires and routing conflicts", "[plane]")
     // a wire east of the input, then a second consumer that reuses it
     const auto first = physical_design::detail::wire_straight(lyt, {0, 0}, {3, 0});
     CHECK(lyt.get_tile(lyt.get_node(first)) == tile<gate_layout>{2, 0});
+    CHECK(lyt.fanout_size(lyt.get_node(a)) == 1);
 
     const auto wires_after_first = lyt.num_wires();
 
@@ -271,6 +297,4 @@ TEST_CASE("Shared wires and routing conflicts", "[plane]")
 
     CHECK(physical_design::detail::rows_between<gate_layout>({0, 0}, {0, 3}) == 2);
     CHECK_THROWS_AS(physical_design::detail::rows_between<gate_layout>({0, 3}, {0, 0}), std::logic_error);
-
-    (void)a;
 }

@@ -12,6 +12,7 @@
  * @file
  * @brief Entry point of the `mnt.pyfiction.physical_design` extension module.
  * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
  */
 
 #include "pyfiction/submodule.hpp"

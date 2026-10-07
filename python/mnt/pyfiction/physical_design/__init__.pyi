@@ -359,8 +359,8 @@ def plane(
         A crossing-free Cartesian gate-level layout that implements `network`.
 
     Raises:
-        ValueError: If the rank order of `network` has crossings, or if a gate has a constant fanin next to a single
-            non-constant one.
+        ValueError: If `network` has no primary inputs, if a node drives more than two fanouts, if a gate has a constant
+            fanin next to a single non-constant one, or if the rank order of `network` has crossings.
         high_degree_fanin_exception: If a node has more than two non-constant fanins.
     """
 

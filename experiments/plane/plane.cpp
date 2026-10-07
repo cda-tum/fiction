@@ -59,6 +59,11 @@ constexpr uint32_t MAX_BALANCED_NODES = 8000;
  */
 constexpr uint32_t MAX_NODES_FOR_SAT = 200000;
 /**
+ * Layouts above this many nodes are not checked for equivalence: the simulation of such a layout needs several
+ * gigabytes. They are still checked for crossings and the diagonal invariant.
+ */
+constexpr uint32_t MAX_NODES_FOR_EQUIVALENCE = 1000000;
+/**
  * Random patterns of the simulation fallback.
  */
 constexpr uint32_t SIMULATION_PATTERNS = 4096;
@@ -82,6 +87,11 @@ tec_nt read_network(const std::string& name)
 template <typename Ntk, typename Lyt>
 std::pair<bool, std::string> layout_equivalent(const Ntk& ntk, const Lyt& lyt)
 {
+    if (lyt.size() > MAX_NODES_FOR_EQUIVALENCE)
+    {
+        return {true, "skipped"};
+    }
+
     if (lyt.size() > MAX_NODES_FOR_SAT)
     {
         using tt_t = kitty::partial_truth_table;
