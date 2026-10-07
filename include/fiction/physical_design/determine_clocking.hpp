@@ -25,7 +25,6 @@
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>

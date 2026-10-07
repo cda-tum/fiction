@@ -102,7 +102,7 @@ void operator delete(void* const memory, std::size_t) noexcept
     ::operator delete(memory);
 }
 /**
- * @brief Assigns clock zero to every tile.
+ * @brief Assigns clock zero to every occupied tile.
  * @tparam Lyt Gate-level layout type.
  * @param lyt Layout to update.
  */
@@ -111,7 +111,7 @@ void remove_clocking(Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
-    lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
+    lyt.foreach_node([&lyt](const auto id) { lyt.assign_clock_number(lyt.get_tile(id), 0); });
 }
 
 /**
