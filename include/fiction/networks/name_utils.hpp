@@ -184,6 +184,7 @@ void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
 }
 /**
  * Transfers signal names from a logic network to a network or placed layout using a `mockturtle::node_map`.
+ * Skips absent native target endpoints. Complemented signal names transfer when used by gates or POs.
  *
  * @tparam NtkSrc Source logic network type.
  * @tparam NtkDest Target network or gate-level layout type.
@@ -205,18 +206,46 @@ void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mocktu
         static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin function");
         static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node function");
 
+        /** Restore one mapped source signal, leaving absent native endpoints untouched. */
         const auto restore_signal_name = [&ntk_src, &ntk_dest, &old2new](const auto& f)
         {
             if (ntk_src.has_name(f))
             {
-                const auto name = ntk_src.get_name(f);
-
-                ntk_dest.set_name((old2new[ntk_src.get_node(f)]), name);
+                /** Target endpoint corresponding to the source node. */
+                const auto target = old2new[ntk_src.get_node(f)];
+                if constexpr (is_gate_level_layout_v<NtkDest>)
+                {
+                    if (target == typename NtkDest::output_port{})
+                    {
+                        return;
+                    }
+                }
+                ntk_dest.set_name(target, ntk_src.get_name(f));
             }
         };
 
-        ntk_src.foreach_node([&ntk_src, &restore_signal_name](const auto& n)
-                             { ntk_src.foreach_fanin(n, restore_signal_name); });
+        ntk_src.foreach_node(
+            [&ntk_src, &restore_signal_name](const auto& n)
+            {
+                restore_signal_name(ntk_src.make_signal(n));
+                // names_view stores complemented signal names separately from node-output names.
+                ntk_src.foreach_fanin(n,
+                                      [&ntk_src, &restore_signal_name](const auto& f)
+                                      {
+                                          if (ntk_src.is_complemented(f))
+                                          {
+                                              restore_signal_name(f);
+                                          }
+                                      });
+            });
+        ntk_src.foreach_po(
+            [&ntk_src, &restore_signal_name](const auto& f)
+            {
+                if (ntk_src.is_complemented(f))
+                {
+                    restore_signal_name(f);
+                }
+            });
     }
 }
 /**
