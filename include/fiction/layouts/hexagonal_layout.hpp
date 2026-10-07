@@ -847,9 +847,10 @@ class hexagonal_layout : public layout_base
      *
      * @tparam Fn Functor type.
      * @param c Coordinate whose adjacent ones are desired.
-     * @param fn Functor to apply to each of `c`'s adjacent coordinates.
+     * @param fn Functor invoked as an lvalue for each of `c`'s adjacent coordinates.
      */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_adjacent_coordinate(const coordinate& c, Fn&& fn) const
     {
         if (!contains_coordinate(c))
@@ -868,7 +869,7 @@ class hexagonal_layout : public layout_base
                                   auto neighbor = bounded_offset(offset_axes(to_cube_coordinate(c) + dir), c.z);
                                   if (neighbor)
                                   {
-                                      std::invoke(std::forward<Fn>(fn), *neighbor);
+                                      std::invoke(fn, *neighbor);
                                   }
                               });
     }
@@ -912,16 +913,17 @@ class hexagonal_layout : public layout_base
      *
      * @tparam Fn Functor type.
      * @param c Coordinate whose opposite adjacent ones are desired.
-     * @param fn Functor to apply to each of `c`'s opposite adjacent coordinate pairs.
+     * @param fn Functor invoked as an lvalue for each of `c`'s opposite adjacent coordinate pairs.
      */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_adjacent_opposite_coordinates(const coordinate& c, Fn&& fn) const
     {
         const auto apply_if_present = [&fn](auto cardinal1, auto cardinal2)
         {
             if (cardinal1 && cardinal2)
             {
-                std::invoke(std::forward<Fn>(fn), std::make_pair(*cardinal1, *cardinal2));
+                std::invoke(fn, std::make_pair(*cardinal1, *cardinal2));
             }
         };
 

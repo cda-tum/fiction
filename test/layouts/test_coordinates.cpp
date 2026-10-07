@@ -16,17 +16,23 @@
  * @author Willem Lambooy (wlambooy)
  */
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 
 #include <fmt/format.h>
 
+#include <concepts>
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <sstream>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -107,4 +113,64 @@ TEST_CASE("Coordinate iteration uses an explicit end", "[coordinates][size-contr
     CHECK(*edge == coordinate{2147483647, 0});
     ++edge;
     CHECK(edge == wide.coordinates().end());
+}
+
+/** @brief Adjacent traversals invoke move-only visitors as lvalues. */
+TEMPLATE_TEST_CASE("Geometry invokes temporary and lvalue visitors as lvalues", "[coordinates][visitors]",
+                   cartesian_layout, hexagonal_layout)
+{
+    /** @brief Geometry with an interior coordinate. */
+    const auto layout = []
+    {
+        if constexpr (std::same_as<TestType, cartesian_layout>)
+        {
+            return TestType{{3, 3}};
+        }
+        else
+        {
+            return TestType{arrangement::ODD_ROW, {3, 3}};
+        }
+    }();
+    /** @brief Move-only visitor callable only through an lvalue. */
+    struct visitor
+    {
+        /** @brief Owned invocation count. */
+        std::unique_ptr<uint32_t> count;
+        /** @brief Observed invocation count. */
+        uint32_t& observed;
+        /** @brief Records one adjacent coordinate. */
+        void operator()(const layout_base::coordinate&) &
+        {
+            observed = ++*count;
+        }
+        /** @brief Rejects consuming invocation for a coordinate. */
+        void operator()(const layout_base::coordinate&) && = delete;
+        /** @brief Records one opposite adjacent pair. */
+        void operator()(const std::pair<layout_base::coordinate, layout_base::coordinate>&) &
+        {
+            observed = ++*count;
+        }
+        /** @brief Rejects consuming invocation for a pair. */
+        void operator()(const std::pair<layout_base::coordinate, layout_base::coordinate>&) && = delete;
+    };
+    /** @brief Invocation count published by the visitor. */
+    uint32_t observed{};
+    SECTION("Temporary visitor")
+    {
+        layout.foreach_adjacent_coordinate({1, 1}, visitor{std::make_unique<uint32_t>(0), observed});
+        CHECK(observed == layout.adjacent_coordinates({1, 1}).size());
+        layout.foreach_adjacent_opposite_coordinates({1, 1}, visitor{std::make_unique<uint32_t>(0), observed});
+        CHECK(observed == layout.adjacent_opposite_coordinates({1, 1}).size());
+    }
+    SECTION("Lvalue visitor")
+    {
+        /** @brief Visitor for individual coordinates. */
+        visitor coordinates{std::make_unique<uint32_t>(0), observed};
+        layout.foreach_adjacent_coordinate({1, 1}, coordinates);
+        CHECK(observed == layout.adjacent_coordinates({1, 1}).size());
+        /** @brief Visitor for coordinate pairs. */
+        visitor pairs{std::make_unique<uint32_t>(0), observed};
+        layout.foreach_adjacent_opposite_coordinates({1, 1}, pairs);
+        CHECK(observed == layout.adjacent_opposite_coordinates({1, 1}).size());
+    }
 }
