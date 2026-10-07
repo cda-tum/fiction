@@ -48,7 +48,9 @@ void orthogonal(nanobind::module_& m)
         .value("FOUR", fiction::layouts::clocking::num_clks::FOUR, DOC(fiction_layouts_clocking_num_clks_FOUR));
 
     py::class_<fiction::physical_design::orthogonal_physical_design_params>(
-        m, "orthogonal_params", DOC(fiction_physical_design_orthogonal_physical_design_params))
+        m, "orthogonal_params",
+        pyfiction::progress_type_slots<fiction::physical_design::orthogonal_physical_design_params>(),
+        DOC(fiction_physical_design_orthogonal_physical_design_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("number_of_clock_phases",
                 &fiction::physical_design::orthogonal_physical_design_params::number_of_clock_phases,

@@ -54,6 +54,7 @@ void clustercomplete(nanobind::module_& m)
      * ClusterComplete parameters.
      */
     py::class_<clustercomplete_params>(m, "clustercomplete_params",
+                                       pyfiction::progress_type_slots<clustercomplete_params>(),
                                        DOC(fiction_sidb_simulation_engines_clustercomplete_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("simulation_parameters", &clustercomplete_params::sim_params,

@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -46,6 +47,7 @@ void operational_domain_ratio(nanobind::module_& m)
     using fiction::sidb::simulation::logic::parameter_point;
 
     py::class_<operational_domain_ratio_params>(m, "operational_domain_ratio_params",
+                                                pyfiction::progress_type_slots<operational_domain_ratio_params>(),
                                                 DOC(fiction_sidb_simulation_logic_operational_domain_ratio_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("op_domain_params", &operational_domain_ratio_params::op_domain_params,

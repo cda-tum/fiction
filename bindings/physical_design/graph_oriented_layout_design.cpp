@@ -73,7 +73,9 @@ void graph_oriented_layout_design(nanobind::module_& m)
                DOC(fiction_physical_design_graph_oriented_layout_design_params_cost_objective_CUSTOM));
 
     py::class_<fiction::physical_design::graph_oriented_layout_design_params>(
-        m, "graph_oriented_layout_design_params", DOC(fiction_physical_design_graph_oriented_layout_design_params))
+        m, "graph_oriented_layout_design_params",
+        pyfiction::progress_type_slots<fiction::physical_design::graph_oriented_layout_design_params>(),
+        DOC(fiction_physical_design_graph_oriented_layout_design_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("timeout", &fiction::physical_design::graph_oriented_layout_design_params::timeout,
                 DOC(fiction_physical_design_graph_oriented_layout_design_params_timeout))

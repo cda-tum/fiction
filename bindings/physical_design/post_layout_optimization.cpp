@@ -44,7 +44,9 @@ void post_layout_optimization(nanobind::module_& m)
     namespace py = nanobind;
 
     py::class_<fiction::physical_design::post_layout_optimization_params>(
-        m, "post_layout_optimization_params", DOC(fiction_physical_design_post_layout_optimization_params))
+        m, "post_layout_optimization_params",
+        pyfiction::progress_type_slots<fiction::physical_design::post_layout_optimization_params>(),
+        DOC(fiction_physical_design_post_layout_optimization_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("max_gate_relocations",
                 &fiction::physical_design::post_layout_optimization_params::max_gate_relocations,

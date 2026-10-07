@@ -42,6 +42,7 @@ void write_mol_qca_layout_svg(nanobind::module_& m)
     using fiction::mol_qca::io::write_mol_qca_layout_svg_params;
 
     py::class_<write_mol_qca_layout_svg_params>(m, "write_mol_qca_layout_svg_params",
+                                                pyfiction::progress_type_slots<write_mol_qca_layout_svg_params>(),
                                                 DOC(fiction_mol_qca_io_write_mol_qca_layout_svg_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &write_mol_qca_layout_svg_params::on_progress, pyfiction::ON_PROGRESS_GETTER,

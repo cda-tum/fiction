@@ -81,8 +81,9 @@ void design_rule_violations(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::class_<fiction::verification::gate_level_drv_params>(m, "gate_level_drv_params",
-                                                             DOC(fiction_verification_gate_level_drv_params))
+    py::class_<fiction::verification::gate_level_drv_params>(
+        m, "gate_level_drv_params", pyfiction::progress_type_slots<fiction::verification::gate_level_drv_params>(),
+        DOC(fiction_verification_gate_level_drv_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::verification::gate_level_drv_params::on_progress,
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,

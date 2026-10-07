@@ -15,6 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/fcn/cell_ports.hpp>
@@ -61,6 +62,7 @@ void on_the_fly_circuit_design(nanobind::module_& m)
                DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_DESIGN_ON_THE_FLY));
 
     py::class_<library_params>(m, "sidb_on_the_fly_gate_library_params",
+                               pyfiction::progress_type_slots<library_params>(),
                                DOC(fiction_sidb_on_the_fly_gate_library_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("design_gate_params", &library_params::design_gate_params,
@@ -74,6 +76,7 @@ void on_the_fly_circuit_design(nanobind::module_& m)
                 DOC(fiction_sidb_on_the_fly_gate_library_params_influence_radius_charged_defects));
 
     py::class_<circuit_params>(m, "on_the_fly_sidb_circuit_design_params",
+                               pyfiction::progress_type_slots<circuit_params>(),
                                DOC(fiction_sidb_generators_on_the_fly_circuit_design_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("timeout", &circuit_params::timeout,

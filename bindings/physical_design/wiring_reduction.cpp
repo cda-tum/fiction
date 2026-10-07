@@ -43,8 +43,10 @@ void wiring_reduction(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::class_<fiction::physical_design::wiring_reduction_params>(m, "wiring_reduction_params",
-                                                                  DOC(fiction_physical_design_wiring_reduction_params))
+    py::class_<fiction::physical_design::wiring_reduction_params>(
+        m, "wiring_reduction_params",
+        pyfiction::progress_type_slots<fiction::physical_design::wiring_reduction_params>(),
+        DOC(fiction_physical_design_wiring_reduction_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("timeout", &fiction::physical_design::wiring_reduction_params::timeout,
                 DOC(fiction_physical_design_wiring_reduction_params_timeout))

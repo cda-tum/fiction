@@ -397,7 +397,9 @@ void operational_domain(nanobind::module_& m)
         ;
 
     py::class_<fiction::sidb::simulation::logic::operational_domain_params>(
-        m, "operational_domain_params", DOC(fiction_sidb_simulation_logic_operational_domain_params))
+        m, "operational_domain_params",
+        pyfiction::progress_type_slots<fiction::sidb::simulation::logic::operational_domain_params>(),
+        DOC(fiction_sidb_simulation_logic_operational_domain_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("operational_params", &fiction::sidb::simulation::logic::operational_domain_params::operational_params,
                 DOC(fiction_sidb_simulation_logic_operational_domain_params_operational_params))

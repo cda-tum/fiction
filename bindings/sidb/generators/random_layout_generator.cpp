@@ -53,6 +53,7 @@ void random_layout_generator(nanobind::module_& m)
      * Parameters.
      */
     py::class_<generate_random_layout_params>(m, "generate_random_sidb_layout_params",
+                                              pyfiction::progress_type_slots<generate_random_layout_params>(),
                                               DOC(fiction_sidb_generators_generate_random_layout_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("coordinate_pair", &generate_random_layout_params::coordinate_pair,

@@ -85,7 +85,9 @@ void design_gates(nanobind::module_& m)
     /**
      * Parameters.
      */
-    py::class_<design_gates_params>(m, "design_sidb_gates_params", DOC(fiction_sidb_generators_design_gates_params))
+    py::class_<design_gates_params>(m, "design_sidb_gates_params",
+                                    pyfiction::progress_type_slots<design_gates_params>(),
+                                    DOC(fiction_sidb_generators_design_gates_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("operational_params", &design_gates_params::operational_params,
                 DOC(fiction_sidb_generators_design_gates_params_operational_params))

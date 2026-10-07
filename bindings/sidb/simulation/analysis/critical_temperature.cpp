@@ -129,7 +129,9 @@ void critical_temperature(nanobind::module_& m)
      * Critical temperature parameters.
      */
     py::class_<fiction::sidb::simulation::analysis::critical_temperature_params>(
-        m, "critical_temperature_params", DOC(fiction_sidb_simulation_analysis_critical_temperature_params))
+        m, "critical_temperature_params",
+        pyfiction::progress_type_slots<fiction::sidb::simulation::analysis::critical_temperature_params>(),
+        DOC(fiction_sidb_simulation_analysis_critical_temperature_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("operational_params",
                 &fiction::sidb::simulation::analysis::critical_temperature_params::operational_params,
