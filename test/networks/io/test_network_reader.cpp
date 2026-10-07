@@ -38,29 +38,17 @@
 using namespace fiction;
 using namespace fiction::networks::io;
 
-// adapted from https://stackoverflow.com/questions/44508228/c-how-to-check-if-ostringstream-is-empty
-template <typename Stream>
-bool is_stream_empty(Stream& stream)
-{
-    stream.flush();
-    std::streampos pos = stream.tellp();    // store current location
-    stream.seekp(0, std::ios_base::end);    // go to end
-    bool is_empty = (stream.tellp() == 0);  // check size == 0 ?
-    stream.seekp(pos);                      // restore location
-
-    return is_empty;
-}
-
 TEST_CASE("Read Verilog", "[network-reader]")
 {
-    constexpr const char* mux21_file_name = "../../benchmarks/TOY/mux21.v";
+    /** @brief Shared Verilog benchmark resolved from the test resource root. */
+    const auto mux21_file_name = (std::filesystem::path{TEST_PATH} / "../benchmarks/TOY/mux21.v").string();
 
     std::ostringstream os{};
 
     network_reader<aig_ptr> reader{mux21_file_name, os};
 
     // no error messages
-    REQUIRE(is_stream_empty(os));
+    REQUIRE(os.str().empty());
 
     const auto nets = reader.get_networks();
 
