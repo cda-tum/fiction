@@ -169,6 +169,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Direct CMake builds of the Python bindings now require nanobind 3.1 or newer.
   - The Docker image uses `uv` to install the `mnt.pyfiction` wheel and starts the Python `fiction` shell.
   - Git ignores the `.pyd` extension modules that Windows builds of the Python bindings produce.
+  - The installed package now ships mockturtle with its SAT libraries and declares the `parallel_hashmap` include
+    directory. It no longer defines `fiction::mockturtle`; link `fiction::libfiction` instead.
 
 - CLI:
 

@@ -1,5 +1,5 @@
 # Prevent CMake from finding a system-installed fmt package to avoid version conflicts.
-# cmake/Dependencies.cmake fetches fmt and defines the `fmt` target that mockturtle reuses.
+# cmake/Dependencies.cmake supplies fiction's fmt target and installed headers.
 set(CMAKE_DISABLE_FIND_PACKAGE_fmt TRUE)
 
 # Include Dependencies (FetchContent) configuration
@@ -25,11 +25,9 @@ target_link_system_libraries(libfiction INTERFACE
 install(DIRECTORY ${fmt_SOURCE_DIR}/include/ DESTINATION include)
 
 # mockturtle
-target_link_system_libraries(libfiction INTERFACE
-    $<BUILD_INTERFACE:mockturtle>
-    $<INSTALL_INTERFACE:fiction::mockturtle>
-)
-install(DIRECTORY ${mockturtle_SOURCE_DIR}/include/ DESTINATION include)
+# Installs itself, so the same target works in both trees. Its own include
+# directories are already marked SYSTEM.
+target_link_libraries(libfiction INTERFACE mockturtle::mockturtle)
 
 # nlohmann_json
 target_link_system_libraries(libfiction INTERFACE
@@ -41,6 +39,7 @@ install(DIRECTORY ${nlohmann_json_SOURCE_DIR}/include/ DESTINATION include)
 # parallel-hashmap
 target_include_directories(libfiction SYSTEM INTERFACE
     $<BUILD_INTERFACE:${parallel-hashmap_SOURCE_DIR}/parallel_hashmap>
+    $<INSTALL_INTERFACE:include/parallel_hashmap>
 )
 install(DIRECTORY ${parallel-hashmap_SOURCE_DIR}/parallel_hashmap DESTINATION include)
 

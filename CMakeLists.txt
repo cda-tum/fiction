@@ -97,6 +97,7 @@ set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT fiction)
 
 # Package Configuration Generation
 include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
 
 write_basic_package_version_file(
   fictionConfigVersion.cmake

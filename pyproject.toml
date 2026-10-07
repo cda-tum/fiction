@@ -140,7 +140,6 @@ targets = [ "pyfiction" ]
 build-type = "Release"
 
 [tool.scikit-build.cmake.define]
-MOCKTURTLE_EXAMPLES = "OFF"
 FICTION_TEST = "OFF"
 FICTION_EXPERIMENTS = "OFF"
 FICTION_ENABLE_IPO = "OFF"
@@ -289,6 +288,12 @@ docstring-code-format = true
 "docs/**" = [ "A", "implicit-namespace-package", "T20" ]
 "noxfile.py" = [ "banned-api", "T20" ]
 "scripts/**" = [ "T20" ]  # maintenance scripts report progress on stdout
+# This standalone runner invokes trusted CMake/CTest commands without a shell.
+"test/package/run.py" = [
+    "implicit-namespace-package",
+    "subprocess-without-shell-equals-true",
+    "suspicious-subprocess-import",
+]
 # `nox -s stubs` generates the stubs: their docstrings come from the Doxygen comments in
 # `include/fiction/`, and their names and signatures from the C++ API
 "*.pyi" = [
