@@ -181,36 +181,38 @@ class wiring_reduction_layout : public layouts::cartesian_layout
      * @param fn The functor to apply to each of `c`'s adjacent coordinates.
      */
     template <typename Fn>
+    // Reuse the visitor as an lvalue, including move-only visitors.
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
     void foreach_adjacent_coordinate(const layouts::layout_base::coordinate& c, Fn&& fn) const
     {
         if (search_dir == search_direction::HORIZONTAL)
         {
             if (c.x == 0)
             {
-                wiring_reduction_layout::foreach_adjacent_coordinate_first_column(c, std::forward<Fn>(fn));
+                wiring_reduction_layout::foreach_adjacent_coordinate_first_column(c, fn);
             }
             else if (std::cmp_equal(c.x, layouts::cartesian_layout::width() - 1))
             {
-                wiring_reduction_layout::foreach_adjacent_coordinate_last_column(c, std::forward<Fn>(fn));
+                wiring_reduction_layout::foreach_adjacent_coordinate_last_column(c, fn);
             }
             else
             {
-                wiring_reduction_layout::foreach_adjacent_coordinate_middle_columns(c, std::forward<Fn>(fn));
+                wiring_reduction_layout::foreach_adjacent_coordinate_middle_columns(c, fn);
             }
         }
         else
         {
             if (c.y == 0)
             {
-                wiring_reduction_layout::foreach_adjacent_coordinate_first_row(c, std::forward<Fn>(fn));
+                wiring_reduction_layout::foreach_adjacent_coordinate_first_row(c, fn);
             }
             else if (std::cmp_equal(c.y, layouts::cartesian_layout::height() - 1))
             {
-                wiring_reduction_layout::foreach_adjacent_coordinate_last_row(c, std::forward<Fn>(fn));
+                wiring_reduction_layout::foreach_adjacent_coordinate_last_row(c, fn);
             }
             else
             {
-                wiring_reduction_layout::foreach_adjacent_coordinate_middle_rows(c, std::forward<Fn>(fn));
+                wiring_reduction_layout::foreach_adjacent_coordinate_middle_rows(c, fn);
             }
         }
     }
@@ -225,24 +227,20 @@ class wiring_reduction_layout : public layouts::cartesian_layout
      * @param fn The functor to apply to each adjacent coordinate.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate_first_column(const layouts::layout_base::coordinate& c, Fn&& fn) const
+    void foreach_adjacent_coordinate_first_column(const layouts::layout_base::coordinate& c, Fn& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto& cardinal)
-        {
-            if (cardinal && *cardinal != c)
-            {
-                std::invoke(fn, *cardinal);
-            }
-        };
-
-        apply_if_not_c(layouts::cartesian_layout::north(c) ?
-                           layouts::cartesian_layout::east(*layouts::cartesian_layout::north(c)) :
-                           std::nullopt);
-        apply_if_not_c(layouts::cartesian_layout::east(c));
-        apply_if_not_c(layouts::cartesian_layout::south(c) ?
-                           layouts::cartesian_layout::east(*layouts::cartesian_layout::south(c)) :
-                           std::nullopt);
-        apply_if_not_c(layouts::cartesian_layout::south(c));
+        apply_if_not_coordinate(c,
+                                layouts::cartesian_layout::north(c) ?
+                                    layouts::cartesian_layout::east(*layouts::cartesian_layout::north(c)) :
+                                    std::nullopt,
+                                fn);
+        apply_if_not_coordinate(c, layouts::cartesian_layout::east(c), fn);
+        apply_if_not_coordinate(c,
+                                layouts::cartesian_layout::south(c) ?
+                                    layouts::cartesian_layout::east(*layouts::cartesian_layout::south(c)) :
+                                    std::nullopt,
+                                fn);
+        apply_if_not_coordinate(c, layouts::cartesian_layout::south(c), fn);
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the middle columns.
@@ -255,23 +253,19 @@ class wiring_reduction_layout : public layouts::cartesian_layout
      * @param fn The functor to apply to each adjacent coordinate.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate_middle_columns(const layouts::layout_base::coordinate& c, Fn&& fn) const
+    void foreach_adjacent_coordinate_middle_columns(const layouts::layout_base::coordinate& c, Fn& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto& cardinal)
-        {
-            if (cardinal && *cardinal != c)
-            {
-                std::invoke(fn, *cardinal);
-            }
-        };
-
-        apply_if_not_c(layouts::cartesian_layout::north(c) ?
-                           layouts::cartesian_layout::east(*layouts::cartesian_layout::north(c)) :
-                           std::nullopt);
-        apply_if_not_c(layouts::cartesian_layout::east(c));
-        apply_if_not_c(layouts::cartesian_layout::south(c) ?
-                           layouts::cartesian_layout::east(*layouts::cartesian_layout::south(c)) :
-                           std::nullopt);
+        apply_if_not_coordinate(c,
+                                layouts::cartesian_layout::north(c) ?
+                                    layouts::cartesian_layout::east(*layouts::cartesian_layout::north(c)) :
+                                    std::nullopt,
+                                fn);
+        apply_if_not_coordinate(c, layouts::cartesian_layout::east(c), fn);
+        apply_if_not_coordinate(c,
+                                layouts::cartesian_layout::south(c) ?
+                                    layouts::cartesian_layout::east(*layouts::cartesian_layout::south(c)) :
+                                    std::nullopt,
+                                fn);
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the last column.
@@ -284,17 +278,9 @@ class wiring_reduction_layout : public layouts::cartesian_layout
      * @param fn The functor to apply to each adjacent coordinate.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate_last_column(const layouts::layout_base::coordinate& c, Fn&& fn) const
+    void foreach_adjacent_coordinate_last_column(const layouts::layout_base::coordinate& c, Fn& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto& cardinal)
-        {
-            if (cardinal && *cardinal != c)
-            {
-                std::invoke(fn, *cardinal);
-            }
-        };
-
-        apply_if_not_c(layouts::cartesian_layout::south(c));
+        apply_if_not_coordinate(c, layouts::cartesian_layout::south(c), fn);
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the first row.
@@ -307,24 +293,20 @@ class wiring_reduction_layout : public layouts::cartesian_layout
      * @param fn The functor to apply to each adjacent coordinate.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate_first_row(const layouts::layout_base::coordinate& c, Fn&& fn) const
+    void foreach_adjacent_coordinate_first_row(const layouts::layout_base::coordinate& c, Fn& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto& cardinal)
-        {
-            if (cardinal && *cardinal != c)
-            {
-                std::invoke(fn, *cardinal);
-            }
-        };
-
-        apply_if_not_c(layouts::cartesian_layout::east(c) ?
-                           layouts::cartesian_layout::south(*layouts::cartesian_layout::east(c)) :
-                           std::nullopt);
-        apply_if_not_c(layouts::cartesian_layout::south(c));
-        apply_if_not_c(layouts::cartesian_layout::west(c) ?
-                           layouts::cartesian_layout::south(*layouts::cartesian_layout::west(c)) :
-                           std::nullopt);
-        apply_if_not_c(layouts::cartesian_layout::east(c));
+        apply_if_not_coordinate(c,
+                                layouts::cartesian_layout::east(c) ?
+                                    layouts::cartesian_layout::south(*layouts::cartesian_layout::east(c)) :
+                                    std::nullopt,
+                                fn);
+        apply_if_not_coordinate(c, layouts::cartesian_layout::south(c), fn);
+        apply_if_not_coordinate(c,
+                                layouts::cartesian_layout::west(c) ?
+                                    layouts::cartesian_layout::south(*layouts::cartesian_layout::west(c)) :
+                                    std::nullopt,
+                                fn);
+        apply_if_not_coordinate(c, layouts::cartesian_layout::east(c), fn);
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the middle rows.
@@ -337,23 +319,19 @@ class wiring_reduction_layout : public layouts::cartesian_layout
      * @param fn The functor to apply to each adjacent coordinate.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate_middle_rows(const layouts::layout_base::coordinate& c, Fn&& fn) const
+    void foreach_adjacent_coordinate_middle_rows(const layouts::layout_base::coordinate& c, Fn& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto& cardinal)
-        {
-            if (cardinal && *cardinal != c)
-            {
-                std::invoke(fn, *cardinal);
-            }
-        };
-
-        apply_if_not_c(layouts::cartesian_layout::east(c) ?
-                           layouts::cartesian_layout::south(*layouts::cartesian_layout::east(c)) :
-                           std::nullopt);
-        apply_if_not_c(layouts::cartesian_layout::south(c));
-        apply_if_not_c(layouts::cartesian_layout::west(c) ?
-                           layouts::cartesian_layout::south(*layouts::cartesian_layout::west(c)) :
-                           std::nullopt);
+        apply_if_not_coordinate(c,
+                                layouts::cartesian_layout::east(c) ?
+                                    layouts::cartesian_layout::south(*layouts::cartesian_layout::east(c)) :
+                                    std::nullopt,
+                                fn);
+        apply_if_not_coordinate(c, layouts::cartesian_layout::south(c), fn);
+        apply_if_not_coordinate(c,
+                                layouts::cartesian_layout::west(c) ?
+                                    layouts::cartesian_layout::south(*layouts::cartesian_layout::west(c)) :
+                                    std::nullopt,
+                                fn);
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the last row.
@@ -366,23 +344,31 @@ class wiring_reduction_layout : public layouts::cartesian_layout
      * @param fn The functor to apply to each adjacent coordinate.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate_last_row(const layouts::layout_base::coordinate& c, Fn&& fn) const
+    void foreach_adjacent_coordinate_last_row(const layouts::layout_base::coordinate& c, Fn& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto& cardinal)
-        {
-            if (cardinal && *cardinal != c)
-            {
-                std::invoke(fn, *cardinal);
-            }
-        };
-
-        apply_if_not_c(layouts::cartesian_layout::east(c));
+        apply_if_not_coordinate(c, layouts::cartesian_layout::east(c), fn);
     }
 
     /** @brief Constraints of this wiring-cut search, passed to path searches on this layout. */
     layouts::obstructions search_obstructions{};
 
   private:
+    /**
+     * @brief Calls the visitor for an existing coordinate distinct from the reference coordinate.
+     * @tparam Fn Reusable visitor type.
+     * @param c Reference coordinate.
+     * @param cardinal Optional neighbor coordinate.
+     * @param fn Visitor called as an lvalue.
+     */
+    template <typename Fn>
+    static void apply_if_not_coordinate(const layouts::layout_base::coordinate&                c,
+                                        const std::optional<layouts::layout_base::coordinate>& cardinal, Fn& fn)
+    {
+        if (cardinal && *cardinal != c)
+        {
+            std::invoke(fn, *cardinal);
+        }
+    }
     /**
      * The current search direction: horizontal (from left to right) and vertical (from top to bottom).
      */
