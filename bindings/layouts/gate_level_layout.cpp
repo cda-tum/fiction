@@ -82,17 +82,19 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
                         return;
                     }
 
-                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                    throw std::invalid_argument("Unknown clocking scheme");
                 },
                 py::arg("dimensions"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
-                DOC(fiction_layouts_gate_level_layout_gate_level_layout_2));
+                fmt::format("{}\n\nRaises:\n    ValueError: The clocking scheme name is unknown.",
+                            DOC(fiction_layouts_gate_level_layout_gate_level_layout_2))
+                    .c_str());
     }
     else
     {
         cls.def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
-                DOC(fiction_layouts_gate_level_layout_gate_level_layout))
+                DOC(fiction_layouts_gate_level_layout_gate_level_layout_3))
             .def(py::init<fiction::layouts::arrangement, const fiction::extent<GateLyt>&>(), py::arg("arrangement"),
-                 py::arg("dimensions"), DOC(fiction_layouts_gate_level_layout_gate_level_layout))
+                 py::arg("dimensions"), DOC(fiction_layouts_gate_level_layout_gate_level_layout_3))
             .def(
                 "__init__",
                 [](py::pointer_and_handle<GateLyt> self, const fiction::layouts::arrangement a,
@@ -108,10 +110,13 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
                         return;
                     }
 
-                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                    throw std::invalid_argument("Unknown clocking scheme");
                 },
                 py::arg("arrangement"), py::arg("dimensions"), py::arg("clocking_scheme") = "2DDWave",
-                py::arg("layout_name") = "", DOC(fiction_layouts_gate_level_layout_gate_level_layout_2));
+                py::arg("layout_name") = "",
+                fmt::format("{}\n\nRaises:\n    ValueError: The clocking scheme name is unknown.",
+                            DOC(fiction_layouts_gate_level_layout_gate_level_layout_4))
+                    .c_str());
     }
 
     cls.def("assign_clock_number", &GateLyt::assign_clock_number, py::arg("cz"), py::arg("cn"),

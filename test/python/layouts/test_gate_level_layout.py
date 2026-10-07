@@ -386,3 +386,19 @@ def test_gate_constant_function_requires_an_explicit_placed_object() -> None:
     assert layout.node_function(constant.object).to_hex() == "1"
     assert layout.gates() == [constant.object]
     assert layout.wires() == []
+
+
+@pytest.mark.parametrize(
+    "make_layout",
+    [
+        pytest.param(lambda: cartesian_gate_layout((2, 2, 1), "unknown-scheme"), id="cartesian"),
+        pytest.param(
+            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 2, 1), "unknown-scheme"), id="shifted"
+        ),
+        pytest.param(lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 1), "unknown-scheme"), id="hexagonal"),
+    ],
+)
+def test_unknown_clocking_scheme_rejects_construction(make_layout: Callable[[], GateLayout]) -> None:
+    """Every gate-layout geometry rejects an unknown scheme with ValueError."""
+    with pytest.raises(ValueError, match="clocking scheme"):
+        make_layout()
