@@ -25,6 +25,7 @@
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
+#include <kitty/bit_operations.hpp>
 
 #include <array>
 #include <cstddef>
