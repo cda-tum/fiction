@@ -97,7 +97,7 @@ the C++ part. If you want to work with the Python bindings, you need a Python 3.
 On Ubuntu, the build dependencies can be installed via:
 
 ```text
-sudo apt-get install build-essential cmake python3
+sudo apt-get install build-essential cmake python3 python3-dev
 ```
 
 ### Building the tests
