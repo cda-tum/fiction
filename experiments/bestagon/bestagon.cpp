@@ -51,7 +51,7 @@
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
 #include <cstdint>
-#include <cstdio>  // NOLINT(misc-include-cleaner): provides the stderr macro, which include-cleaner does not attribute
+#include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <sstream>

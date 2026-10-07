@@ -30,7 +30,9 @@
 
 #include <array>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <string>
 #include <utility>
 #include <vector>
@@ -57,7 +59,9 @@ using namespace fiction::synthesis;
 // fills the swept range, it therefore visits every point and costs more than the grid search it is meant to undercut.
 // The last two columns measure whether that happens for these gates.
 
-int main()  // NOLINT
+/** @brief Runs the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     experiments::experiment<std::string, uint64_t, uint64_t, double, uint64_t, double, uint64_t, double, double, double>
         opdomain_exp{"3D Operational Domain Sketch",
@@ -200,4 +204,11 @@ int main()  // NOLINT
     opdomain_exp.table();
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

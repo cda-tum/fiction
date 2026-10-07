@@ -42,7 +42,9 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <limits>
 #include <string>
@@ -65,7 +67,9 @@ using namespace fiction::utils::math;
 // Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE-NANO 2024
 // (https://ieeexplore.ieee.org/abstract/document/10628671).
 
-int main()  // NOLINT
+/** @brief Runs the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     // 2-input/1-output gate skeleton for the experiments. It is used to design gates with 2 inputs and 1 output.
     static const auto skeleton = read_sqd_layout(fmt::format(
@@ -276,16 +280,34 @@ int main()  // NOLINT
 
     return EXIT_SUCCESS;
 }
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
+}
 
 #else  // FICTION_ALGLIB_ENABLED
 
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 
-int main()  // NOLINT
+/** @brief Runs the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
-    std::cerr << "[e] ALGLIB library is not enabled, please enable ALGLIB and recompile the code" << std::endl;
+    std::cerr << "[e] ALGLIB library is not enabled, please enable ALGLIB and recompile the code" << '\n';
 
+    return EXIT_FAILURE;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
     return EXIT_FAILURE;
 }
 
