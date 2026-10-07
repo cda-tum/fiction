@@ -522,6 +522,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - DOT drawing progress now reports frame areas beyond the unsigned 32-bit range.
   - Gate-type counting now compiles for native gate layouts with MSVC.
   - On-the-fly SiDB circuit design now rejects unsupported gate types before starting gate design.
   - Random-coordinate sampling now uses independent inclusive bounds for each axis.
@@ -649,6 +650,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - I/O:
 
   - BLIF network readers now accept empty and whitespace-only lines without aborting.
+  - Gate-layout DOT output now preserves signed coordinate IDs and quoted terminal names.
   - FGL version 2 now preserves manual obstructions and XML whitespace in names. Readers reject unfinished or physically invalid layouts; writers reject illegal XML control characters before changing output.
   - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.
   - QCA SVG output now includes synchronized cells in tiled layouts and wraps latch clock labels within the clock cycle.
