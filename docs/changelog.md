@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `synthesis::planar_fanout_substitution` and `synthesis::planar_rebalancing` substitute fanouts and rebalance
     with shared buffers while keeping ranks and planarity
   - `utils::graph::count_crossings` counts the edge crossings of a ranked, balanced network without copying it
+  - `physical_design::plane` places and routes a planar, ranked network on the diagonals of a 2DDWave layout
+    without wire crossings (PLANE)
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
   - `physical_design::cell_grid_extent` returns the extent of the cell grid that a gate library spans on a
     gate-level layout
@@ -90,6 +92,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - `mnt.pyfiction.synthesis.planarization` planarizes a balanced technology network and reports its virtual inputs
   - `mnt.pyfiction.synthesis.network_balancing` and `is_balanced` accept the `buffer_constant_outputs` keyword
+  - `mnt.pyfiction.physical_design.plane` places and routes a planarized technology network without crossings
   - The callback members of parameter classes accept `None`, which clears the callback.
   - Shared SiDB deadlines raise `TimeoutError`; gate design releases the GIL.
   - Added directory-based test markers, including `pytest -m simulation`.

@@ -288,6 +288,82 @@ def orthogonal(
     on_progress: Callable[[str, int, int], None] | None = ...,
 ) -> mnt.pyfiction.layouts.cartesian_gate_layout | mnt.pyfiction.layouts.hexagonal_gate_layout: ...
 
+class plane_params:
+    """Parameters for the planar placement and routing."""
+
+    def __init__(self) -> None:
+        """Default constructor."""
+
+    @property
+    def number_of_clock_phases(self) -> num_clks:
+        """
+        Number of clock phases of the 2DDWave clocking scheme. Three and four
+        are supported.
+        """
+
+    @number_of_clock_phases.setter
+    def number_of_clock_phases(self, arg: num_clks, /) -> None: ...
+    @property
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
+        """Receives completed work and the phase total."""
+
+    @on_progress.setter
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
+
+class plane_stats:
+    """Statistics of the planar placement and routing."""
+
+    def __init__(self) -> None:
+        """Default constructor."""
+
+    @property
+    def time_total(self) -> datetime.timedelta:
+        """Runtime of placement and routing."""
+
+    @property
+    def x_size(self) -> int:
+        """Layout width."""
+
+    @property
+    def y_size(self) -> int:
+        """Layout height."""
+
+    @property
+    def num_gates(self) -> int:
+        """Number of gates."""
+
+    @property
+    def num_wires(self) -> int:
+        """Number of wires."""
+
+    @property
+    def num_crossings(self) -> int:
+        """Number of crossings; zero for every layout this algorithm returns."""
+
+def plane(
+    network: mnt.pyfiction.networks.technology_network,
+    parameters: plane_params = ...,
+    statistics: plane_stats | None = None,
+) -> mnt.pyfiction.layouts.cartesian_gate_layout:
+    """
+    Planar Layout from Network Embedding (PLANE): places and routes a planar network as a 2DDWave-clocked
+    Cartesian gate-level layout without wire crossings. The network is the first element of the pair that `planarization`
+    returns: its node order is the planar rank order, which the layout preserves.
+
+    Args:
+        network: Planar, balanced, fanout-substituted technology network from `planarization`.
+        parameters: Parameters.
+        statistics: Optional statistics object that receives the runtime and the layout sizes.
+
+    Returns:
+        A crossing-free Cartesian gate-level layout that implements `network`.
+
+    Raises:
+        ValueError: If the rank order of `network` has crossings, or if a gate has a constant fanin next to a single
+            non-constant one.
+        high_degree_fanin_exception: If a node has more than two non-constant fanins.
+    """
+
 class gold_effort_mode(enum.Enum):
     """
     The `effort_mode` enum defines different levels of computational

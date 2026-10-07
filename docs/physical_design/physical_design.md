@@ -14,6 +14,7 @@ exact
 graph_oriented_layout_design
 hexagonalization
 orthogonal
+plane
 post_layout_optimization
 surface_analysis
 wiring_reduction
