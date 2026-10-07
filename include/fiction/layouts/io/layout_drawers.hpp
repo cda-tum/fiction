@@ -27,9 +27,11 @@
 #include <fmt/ranges.h>
 #include <kitty/bit_operations.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <iomanip>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -70,10 +72,16 @@ class simple_gate_layout_tile_drawer
         }
     }
 
-    /** @brief Return the coordinate label. */
+    /**
+     * @brief Return a DOT identifier for the planar tile position.
+     * @param t Tile coordinate.
+     * @return Identifier with signed axes encoded as letters and digits.
+     */
     [[nodiscard]] virtual std::string tile_id(const tile<Lyt>& t) const
     {
-        return fmt::format("x{}y{}", t.x, t.y);
+        auto id = fmt::format("x{}y{}", t.x, t.y);
+        std::replace(id.begin(), id.end(), '-', 'n');
+        return id;
     }
 
     /** @brief Return node attributes. */
@@ -563,13 +571,15 @@ class gate_layout_hexagonal_drawer : public detail::gate_layout_shifted_tile_dra
     /** @brief Define the drawer configuration. */
     using shifted_drawer = detail::gate_layout_shifted_tile_drawer<Lyt, ClockColors, DrawIndexes>;
 };
-/*! \brief Writes layout in DOT format into output stream
+/**
+ * Writes a layout in DOT format into an output stream. Terminal names use quoted DOT strings.
  *
- * An overloaded variant exists that writes the layout into a file.
- *
- * \param lyt Layout
+ * @tparam Lyt Gate-level layout type.
+ * @tparam Drawer DOT drawer type.
+ * @param lyt Layout.
+ * @param os Output stream.
+ * @param drawer Formats the layout's tiles and topology.
  * @param on_progress Receives completed drawing work.
- * \param os Output stream
  */
 template <class Lyt, class Drawer>
 void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {},
@@ -589,8 +599,8 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
     lyt.foreach_ground_tile(
         [&lyt, &drawer, &nodes, &tiles_progress](const auto& t)
         {
-            nodes << fmt::format("{} [label=\"{}\", fillcolor={}];\n", drawer.tile_id(t), drawer.tile_label(lyt, t),
-                                 drawer.tile_fillcolor(lyt, t));
+            nodes << drawer.tile_id(t) << " [label=" << std::quoted(drawer.tile_label(lyt, t))
+                  << fmt::format(", fillcolor={}];\n", drawer.tile_fillcolor(lyt, t));
             tiles_progress.advance();
         });
 

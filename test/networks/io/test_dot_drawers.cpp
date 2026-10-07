@@ -31,11 +31,16 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <ios>
 #include <iterator>
+#include <limits>
 #include <random>
+#include <regex>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -1042,4 +1047,55 @@ TEST_CASE("Draw object identities and constants", "[dot-drawers]")
           fmt::format("{}:{}: 0", constant.object.index, constant.object.generation));
     CHECK(drawer.tile_label(layout, {1, 0}) == fmt::format("{}:{}: BUF", wire.object.index, wire.object.generation));
     CHECK(drawer.tile_fillcolor(layout, {0, 0}) == "white");
+}
+
+TEST_CASE("Layout DOT identifiers serialize signed coordinate boundaries", "[dot-drawers]")
+{
+    /** Gate layout under test. */
+    using gate_layout = gate_level_layout<cartesian_layout>;
+    const gate_layout_cartesian_drawer<gate_layout> drawer{};
+    // DOT permits bare identifiers, numerals, quoted strings, and HTML strings.
+    const std::regex identifier{
+        R"dot(([A-Za-z_][A-Za-z_0-9]*|-?([0-9]+(\.[0-9]*)?|\.[0-9]+)|"([^"\\]|\\.)*"|<.*>))dot"};
+    const auto            minimum = std::numeric_limits<int32_t>::min();
+    const auto            maximum = std::numeric_limits<int32_t>::max();
+    std::set<std::string> ids{};
+    for (const auto coordinate :
+         {gate_layout::tile{minimum, maximum}, gate_layout::tile{maximum, minimum}, gate_layout::tile{-1, 0},
+          gate_layout::tile{0, -1}, gate_layout::tile{1, 0}, gate_layout::tile{0, 1}})
+    {
+        const auto id = drawer.tile_id(coordinate);
+        CHECK(std::regex_match(id, identifier));
+        CHECK(ids.insert(id).second);
+    }
+
+    gate_layout       layout{{1, 1}};
+    const auto        input  = layout.create_pi("a", {minimum, maximum});
+    const auto        output = layout.create_buf(input, {0, 0});
+    std::stringstream stream{};
+    write_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout>>(layout, stream);
+    const auto source_id = drawer.tile_id(layout.get_tile(input.object));
+    const auto target_id = drawer.tile_id(layout.get_tile(output.object));
+    CHECK(std::regex_match(source_id, identifier));
+    CHECK(std::regex_match(target_id, identifier));
+    CHECK(stream.str().find(source_id + " -> " + target_id + " [style=solid]") != std::string::npos);
+    CHECK(stream.str().find(target_id + " [label=") != std::string::npos);
+}
+
+TEST_CASE("Layout DOT labels preserve terminal names", "[dot-drawers]")
+{
+    /** Gate layout under test. */
+    using gate_layout = gate_level_layout<cartesian_layout>;
+    gate_layout       layout{{1, 1}};
+    const std::string name{"a\"\nb\\c"};
+    layout.create_pi(name, {0, 0});
+    std::stringstream stream{};
+    write_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout>>(layout, stream);
+    const auto label_start = stream.str().find(" [label=");
+    REQUIRE(label_start != std::string::npos);
+    std::istringstream label_stream{stream.str().substr(label_start + std::string_view{" [label="}.size())};
+    std::string        restored_name{};
+    label_stream >> std::quoted(restored_name);
+    CHECK_FALSE(label_stream.fail());
+    CHECK(restored_name == name);
 }
