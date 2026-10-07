@@ -45,11 +45,11 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
     {
         if constexpr (is_cartesian_layout_v<TestType>)
         {
-            return TestType{{4, 4}};
+            return TestType{{5, 5}};
         }
         else
         {
-            return TestType{layout_arrangement, {4, 4}};
+            return TestType{layout_arrangement, {5, 5}};
         }
     }(a);
 
@@ -80,20 +80,20 @@ TEST_CASE("Gate-level layouts are created with the required arrangement", "[layo
 
     SECTION("Cartesian layouts ignore the arrangement")
     {
-        CHECK_NOTHROW(make_gate_level_layout<cart_gate_clk_lyt>(std::nullopt, {2, 2}, clocking::twoddwave()));
-        CHECK_NOTHROW(make_gate_level_layout<cart_gate_clk_lyt>(a, {2, 2}, clocking::twoddwave()));
+        CHECK_NOTHROW(make_gate_level_layout<cart_gate_clk_lyt>(std::nullopt, {3, 3}, clocking::twoddwave()));
+        CHECK_NOTHROW(make_gate_level_layout<cart_gate_clk_lyt>(a, {3, 3}, clocking::twoddwave()));
     }
     SECTION("shifted Cartesian and hexagonal layouts take the arrangement")
     {
-        CHECK(make_gate_level_layout<shifted_cart_gate_clk_lyt>(a, {2, 2}, clocking::twoddwave()).get_arrangement() ==
+        CHECK(make_gate_level_layout<shifted_cart_gate_clk_lyt>(a, {3, 3}, clocking::twoddwave()).get_arrangement() ==
               a);
-        CHECK(make_gate_level_layout<hex_gate_clk_lyt>(a, {2, 2}, clocking::row()).get_arrangement() == a);
+        CHECK(make_gate_level_layout<hex_gate_clk_lyt>(a, {3, 3}, clocking::row()).get_arrangement() == a);
     }
     SECTION("shifted Cartesian and hexagonal layouts reject a missing arrangement")
     {
-        CHECK_THROWS_AS(make_gate_level_layout<shifted_cart_gate_clk_lyt>(std::nullopt, {2, 2}, clocking::twoddwave()),
+        CHECK_THROWS_AS(make_gate_level_layout<shifted_cart_gate_clk_lyt>(std::nullopt, {3, 3}, clocking::twoddwave()),
                         std::invalid_argument);
-        CHECK_THROWS_AS(make_gate_level_layout<hex_gate_clk_lyt>(std::nullopt, {2, 2}, clocking::row()),
+        CHECK_THROWS_AS(make_gate_level_layout<hex_gate_clk_lyt>(std::nullopt, {3, 3}, clocking::row()),
                         std::invalid_argument);
     }
 }
@@ -178,7 +178,7 @@ TEST_CASE("Generate random coordinate with negative axes", "[layout-utils]")
 
 TEST_CASE("Normalize QCA layout coordinates", "[layout-utils]")
 {
-    qca::layout lyt{{6, 5, 1}, clocking::use(), "crossing", 2, 2};
+    qca::layout lyt{{7, 6, 2}, clocking::use(), "crossing", 2, 2};
 
     lyt.assign_cell_type({3, 2}, qca::cell_type::INPUT);
     lyt.assign_cell_name({3, 2}, "a");
@@ -188,9 +188,9 @@ TEST_CASE("Normalize QCA layout coordinates", "[layout-utils]")
 
     const auto normalized = normalize_layout_coordinates(lyt);
 
-    CHECK(normalized.x() == 3);
-    CHECK(normalized.y() == 3);
-    CHECK(normalized.z() == 1);
+    CHECK(normalized.width() == 4);
+    CHECK(normalized.height() == 4);
+    CHECK(normalized.layers() == 2);
     CHECK(normalized.num_cells() == 3);
     CHECK(normalized.get_cell_type({0, 0}) == qca::cell_type::INPUT);
     CHECK(normalized.get_cell_name({0, 0}) == "a");
