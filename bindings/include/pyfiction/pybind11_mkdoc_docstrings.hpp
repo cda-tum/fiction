@@ -2808,9 +2808,11 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_check_output = R"doc(Checks an output endpoint before mutation.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_check_placement =
+R"doc(Rejects occupied placement before any object mutation. Coordinates
+outside the extent are valid during editing.
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_check_placement = R"doc(Rejects absent or occupied placement before any object mutation.)doc";
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_checked_input = R"doc(Validates an input endpoint and returns its connection index.)doc";
 
@@ -3159,8 +3161,6 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_get_layout_name = R
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_name = R"doc(Returns an object's name, or an empty string for an unnamed object.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_name_2 = R"doc(Returns an output's object name.)doc";
-
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_output_name = R"doc(Returns the output name at an interface index.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_synchronization_element =
@@ -3228,8 +3228,6 @@ Returns:
 static const char *mkd_doc_fiction_layouts_gate_level_layout_has_input_name = R"doc(Returns whether an input has a name.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_has_name = R"doc(Returns whether an object has a name.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_name_2 = R"doc(Returns whether an output's object has a name.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_has_no_incoming_signal =
 R"doc(Checks whether the given tile has no incoming tiles.
@@ -3545,6 +3543,30 @@ objects.
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_input_count = R"doc(Returns the number of input slots, including disconnected slots.)doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots =
+R"doc(Connection indices of an object's inputs. Up to three inputs live
+inline; more spill to the heap.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_assign = R"doc(Resets to `n` disconnected slots.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_begin = R"doc(Returns the first slot.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_clear = R"doc(Releases all slots.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_count = R"doc(Number of slots in use.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_end = R"doc(Returns the end of the slots.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_fixed = R"doc(Inline slots.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_operator_array = R"doc(Returns the connection index at slot `i`.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_operator_array_2 = R"doc(Returns the connection index at slot `i`.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_size = R"doc(Number of slots.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_spill = R"doc(Slots of objects with more than `INLINE_CAPACITY` inputs.)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_inputs = R"doc(Declared primary input order.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_and = R"doc(Returns whether the object computes AND.)doc";
@@ -3818,8 +3840,6 @@ clocking and adjacency.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_output = R"doc(Returns output zero of an object.)doc";
-
 static const char *mkd_doc_fiction_layouts_gate_level_layout_outputs = R"doc(Declared primary output order.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_pi_at = R"doc(Returns a primary input in declared interface order.)doc";
@@ -3851,8 +3871,6 @@ mutation.
 static const char *mkd_doc_fiction_layouts_gate_level_layout_set_layout_name = R"doc(Sets the layout name.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_set_name = R"doc(Sets an object's name.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_name_2 = R"doc(Sets an output's object name.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_set_output_name = R"doc(Sets the output name at an interface index.)doc";
 
@@ -5770,14 +5788,6 @@ static const char *mkd_doc_fiction_layouts_layout_object_id_generation = R"doc(S
 static const char *mkd_doc_fiction_layouts_layout_object_id_index = R"doc(Storage slot.)doc";
 
 static const char *mkd_doc_fiction_layouts_layout_object_id_operator_le = R"doc(Compares object identities.)doc";
-
-static const char *mkd_doc_fiction_layouts_layout_output_port = R"doc(Output endpoint of a placed object. FCN objects provide output zero.)doc";
-
-static const char *mkd_doc_fiction_layouts_layout_output_port_index = R"doc(Output index.)doc";
-
-static const char *mkd_doc_fiction_layouts_layout_output_port_object = R"doc(Source object.)doc";
-
-static const char *mkd_doc_fiction_layouts_layout_output_port_operator_le = R"doc(Compares output endpoints.)doc";
 
 static const char *mkd_doc_fiction_layouts_make_gate_level_layout =
 R"doc(Creates an empty gate-level layout of type `Lyt`. Cartesian layouts
