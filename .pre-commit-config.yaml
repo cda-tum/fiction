@@ -141,14 +141,14 @@ repos:
 
   # Format pyproject.toml
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.29.4
+    rev: v2.30.1
     hooks:
       - id: pyproject-fmt
         priority: 6
 
   # Ensure uv lock file is up-to-date
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.21
+    rev: 0.12.23
     hooks:
       - id: uv-lock
         priority: 0
@@ -223,7 +223,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.09.30
+    rev: 2026.10.02
     hooks:
       - id: validate-pyproject
         priority: 0
