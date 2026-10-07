@@ -55,7 +55,7 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
     /**
      * Hexagonal layout.
      */
-    py::class_<Lyt>(m, name, DOC(fiction_hexagonal_layout_overridden))
+    py::class_<Lyt>(m, name, HEXAGONAL_LAYOUT_DOC)
         .def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
              DOC(fiction_layouts_hexagonal_layout_hexagonal_layout))
         .def(py::init<fiction::layouts::arrangement, const typename Lyt::extent&>(), py::arg("arrangement"),

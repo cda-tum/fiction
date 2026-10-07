@@ -16,9 +16,14 @@
 
 #pragma once
 
-#include "pyfiction/pybind11_mkdoc_docstrings.hpp"
+#include "pyfiction/pybind11_mkdoc_docstrings.hpp"  // IWYU pragma: export
 
-inline constexpr auto mkd_doc_fiction_cartesian_layout_overridden =
+/** @brief Python binding documentation. */
+namespace pyfiction
+{
+
+/** @brief Documentation for the Cartesian layout class. */
+inline constexpr auto CARTESIAN_LAYOUT_DOC =
     R"doc(A layout type that utilizes offset coordinates to represent a
 Cartesian grid. Its faces are organized in the following way:
 
@@ -40,7 +45,8 @@ Cartesian grid. Its faces are organized in the following way:
 
 )doc";
 
-inline constexpr auto mkd_doc_fiction_shifted_cartesian_layout_overridden =
+/** @brief Documentation for the shifted Cartesian layout class. */
+inline constexpr auto SHIFTED_CARTESIAN_LAYOUT_DOC =
     R"doc(A layout type that utilizes offset coordinates to represent a
 Cartesian layout with shifted coordinates. In this implementation, odd
 columns are vertically shifted. Its faces are organized in the following
@@ -64,7 +70,8 @@ way:
 
 )doc";
 
-inline constexpr auto mkd_doc_fiction_hexagonal_layout_overridden =
+/** @brief Documentation for the hexagonal layout class. */
+inline constexpr auto HEXAGONAL_LAYOUT_DOC =
     R"doc(A layout type that utilizes offset coordinates to represent a
 hexagonal grid. In this implementation, the hexagons are in the pointy-top
 orientation with even rows horizontally shifted. Its faces are organized
@@ -94,7 +101,8 @@ coordinates make the most sense here.
 https://www.redblobgames.com/grids/hexagons/ is a wonderful resource
 on the topic.)doc";
 
-inline constexpr auto mkd_doc_fiction_bounding_box_2d_overridden =
+/** @brief Documentation for occupied layout bounds. */
+inline constexpr auto BOUNDING_BOX_2D_DOC =
     R"doc(Returns the minimum and maximum corner of the bounding box.
 A 2D bounding box object computes a minimum-sized box around all
 non-empty coordinates in a given layout. Layouts can be of arbitrary
@@ -106,3 +114,5 @@ empty layout coordinates.
 
 Returns:
     The minimum  and maximum enclosing coordinate in the associated layout.)doc";
+
+}  // namespace pyfiction

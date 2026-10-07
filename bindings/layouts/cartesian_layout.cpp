@@ -55,7 +55,7 @@ void cartesian_layout(nanobind::module_& m, const char* name)
     /**
      * Cartesian layout.
      */
-    py::class_<Lyt>(m, name, DOC(fiction_cartesian_layout_overridden))
+    py::class_<Lyt>(m, name, CARTESIAN_LAYOUT_DOC)
         .def(py::init<>(), DOC(fiction_layouts_cartesian_layout_cartesian_layout))
         .def(py::init<const typename Lyt::extent&>(), py::arg("dimensions"),
              DOC(fiction_layouts_cartesian_layout_cartesian_layout))

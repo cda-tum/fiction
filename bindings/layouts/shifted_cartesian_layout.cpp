@@ -58,7 +58,7 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
      * @note All functions had to be redefined, because in the regular C++ version, this layout extends a specific
      * hexagonal layout, which we do not expose in pyfiction.
      */
-    py::class_<Lyt>(m, name, DOC(fiction_shifted_cartesian_layout_overridden))
+    py::class_<Lyt>(m, name, SHIFTED_CARTESIAN_LAYOUT_DOC)
         .def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
              DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout))
         .def(py::init<fiction::layouts::arrangement, const typename Lyt::extent&>(), py::arg("arrangement"),
