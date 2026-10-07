@@ -42,37 +42,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-@pytest.fixture
-def wire_with_canvas() -> sidb_layout:
-    """A BDL wire with two LOGIC dots, so that the sketch has a canvas to enumerate.
-
-    Returns:
-        The wire layout.
-    """
-    lyt = sidb_layout()
-
-    lyt.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
-    lyt.assign_sidb(lattice_site(2, 0, 1), sidb_dot_tag.INPUT)
-
-    lyt.assign_sidb(lattice_site(6, 1, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(8, 1, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(12, 2, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(14, 2, 1), sidb_dot_tag.NORMAL)
-
-    lyt.assign_sidb(lattice_site(11, 3, 1), sidb_dot_tag.LOGIC)
-    lyt.assign_sidb(lattice_site(13, 6, 1), sidb_dot_tag.LOGIC)
-
-    lyt.assign_sidb(lattice_site(14, 7, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(12, 8, 0), sidb_dot_tag.NORMAL)
-
-    lyt.assign_sidb(lattice_site(8, 8, 1), sidb_dot_tag.OUTPUT)
-    lyt.assign_sidb(lattice_site(6, 9, 0), sidb_dot_tag.OUTPUT)
-
-    lyt.assign_sidb(lattice_site(2, 9, 1), sidb_dot_tag.NORMAL)
-
-    return lyt
-
-
 def test_operational_domain_siqad_or_100_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 

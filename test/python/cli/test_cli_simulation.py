@@ -37,17 +37,6 @@ def or_gate(shell: Shell, resource: Callable[[str], str]) -> Shell:
     return shell
 
 
-@pytest.fixture
-def xor_gate(shell: Shell, resource: Callable[[str], str]) -> Shell:
-    """A shell holding a Bestagon XOR gate and the XOR truth table.
-
-    Returns:
-        The shell.
-    """
-    shell.ok(f'read "{resource("hex_21_inputsdbp_xor_v1.sqd")}"; tt -t 0110')
-    return shell
-
-
 @pytest.mark.parametrize("engine", ["quickexact", "quicksim", "clustercomplete"])
 def test_ground_state_engines(or_gate: Shell, engine: str) -> None:
     if engine == "clustercomplete" and not hasattr(engines, "clustercomplete"):

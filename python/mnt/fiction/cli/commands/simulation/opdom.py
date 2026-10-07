@@ -25,6 +25,7 @@ from mnt.pyfiction.sidb.simulation.io import (
 from mnt.pyfiction.sidb.simulation.logic import (
     operational_analysis_strategy,
     operational_condition,
+    operational_domain,
     operational_domain_contour_tracing,
     operational_domain_flood_fill,
     operational_domain_grid_search,
@@ -41,6 +42,8 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
+    from mnt.pyfiction.sidb import sidb_layout
+    from mnt.pyfiction.synthesis import dynamic_truth_table
 from ._common import ENGINES, _active_sidb_layout, _apply_physical, _engine_argument, _physical_arguments
 
 SWEEPS = {
@@ -62,6 +65,15 @@ DEFAULT_SWEEPS = {
 def _opdom_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
     parser.add_argument("file", type=Path, help="the CSV file to write the domain to")
+    domain_arguments(parser)
+
+
+def domain_arguments(parser: Parser) -> None:
+    """Add shared operational domain computation options.
+
+    Args:
+        parser: The command parser.
+    """
     algorithm = parser.add_mutually_exclusive_group()
     algorithm.add_argument(
         "-g", "--grid-search", action="store_true", help="reconstruct the domain by grid search; the default"
@@ -114,31 +126,9 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
     spec = [session.truth_tables.current()]
     samples = next((n for n in (args.random_sampling, args.flood_fill, args.contour_tracing) if n is not None), None)
 
-    params = operational_domain_params()
-    params.on_progress = session.report_progress
-    params.on_worker_progress = session.report_worker_progress
-    params.operational_params.sim_engine = ENGINES[args.engine]
-    parameters = _apply_physical(params.operational_params.simulation_parameters, args)
-    if args.sketch:
-        params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
-        params.operational_params.op_condition = operational_condition.REJECT_KINKS
-    params.sweep_dimensions = _sweep_dimensions(args)
-
-    stats = operational_domain_stats()
-    if args.random_sampling is not None:
-        domain = operational_domain_random_sampling(layout, spec, args.random_sampling, params, stats)
-    elif args.flood_fill is not None:
-        domain = operational_domain_flood_fill(layout, spec, args.flood_fill, params, stats)
-    elif args.contour_tracing is not None:
-        domain = operational_domain_contour_tracing(layout, spec, args.contour_tracing, params, stats)
-    else:
-        domain = operational_domain_grid_search(layout, spec, params, stats)
-
-    writing = write_operational_domain_params()
-    writing.writing_mode = (
-        sample_writing_mode.OPERATIONAL_ONLY if args.operational_only else sample_writing_mode.ALL_SAMPLES
-    )
-    write_operational_domain(domain, str(args.file), writing)
+    params, parameters = domain_parameters(session, args)
+    domain, stats = compute_domain(layout, spec, args, params)
+    write_csv(domain, args)
     session.info(
         f"{stats.num_operational_parameter_combinations} of {stats.num_evaluated_parameter_combinations} "
         f"evaluated points are operational; wrote {args.file}"
@@ -154,6 +144,75 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
         "file": str(args.file),
         "parameters": parameters,
     }
+
+
+def domain_parameters(
+    session: Session, args: argparse.Namespace
+) -> tuple[operational_domain_params, dict[str, object]]:
+    """Build native parameters and describe the fixed physical values.
+
+    Args:
+        session: Supplies progress callbacks.
+        args: Parsed domain options.
+
+    Returns:
+        Native parameters and physical values for the log.
+    """
+    params = operational_domain_params()
+    params.on_progress = session.report_progress
+    params.on_worker_progress = session.report_worker_progress
+    params.operational_params.sim_engine = ENGINES[args.engine]
+    parameters = _apply_physical(params.operational_params.simulation_parameters, args)
+    if args.sketch:
+        params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
+        params.operational_params.op_condition = operational_condition.REJECT_KINKS
+    params.sweep_dimensions = _sweep_dimensions(args)
+
+    return params, parameters
+
+
+def compute_domain(
+    layout: sidb_layout,
+    spec: list[dynamic_truth_table],
+    args: argparse.Namespace,
+    params: operational_domain_params,
+) -> tuple[operational_domain, operational_domain_stats]:
+    """Run the selected reconstruction method once.
+
+    Args:
+        layout: The gate layout.
+        spec: Expected functions, one per output.
+        args: Selects the algorithm and sample count.
+        params: Native domain parameters.
+
+    Returns:
+        The domain and native statistics.
+    """
+    stats = operational_domain_stats()
+    if args.random_sampling is not None:
+        domain = operational_domain_random_sampling(layout, spec, args.random_sampling, params, stats)
+    elif args.flood_fill is not None:
+        domain = operational_domain_flood_fill(layout, spec, args.flood_fill, params, stats)
+    elif args.contour_tracing is not None:
+        domain = operational_domain_contour_tracing(layout, spec, args.contour_tracing, params, stats)
+    else:
+        domain = operational_domain_grid_search(layout, spec, params, stats)
+
+    return domain, stats
+
+
+def write_csv(domain: operational_domain, args: argparse.Namespace) -> None:
+    """Write the domain with the requested sample visibility.
+
+    Args:
+        domain: The computed samples.
+        args: The output path and writing options.
+    """
+    writing = write_operational_domain_params()
+    writing.writing_mode = (
+        sample_writing_mode.OPERATIONAL_ONLY if args.operational_only else sample_writing_mode.ALL_SAMPLES
+    )
+    write_operational_domain(domain, str(args.file), writing)
 
 
 def _sweep_dimensions(args: argparse.Namespace) -> list[operational_domain_value_range]:

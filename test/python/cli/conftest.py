@@ -144,3 +144,14 @@ def mux21_shell(shell: Shell, resource: Callable[[str], str]) -> Shell:
     """
     shell.ok(f'read "{resource("mux21.v")}"')
     return shell
+
+
+@pytest.fixture
+def xor_gate(shell: Shell, resource: Callable[[str], str]) -> Shell:
+    """A shell holding a Bestagon XOR gate and the XOR truth table.
+
+    Returns:
+        The shell.
+    """
+    shell.ok(f'read "{resource("hex_21_inputsdbp_xor_v1.sqd")}"; tt -t 0110')
+    return shell
