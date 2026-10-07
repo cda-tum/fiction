@@ -165,8 +165,9 @@ void coordinate_utility(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    m.def("area", &fiction::layouts::area_of, py::arg("extent"), DOC(fiction_layouts_area_of));
-    m.def("volume", &fiction::layouts::volume_of, py::arg("extent"), DOC(fiction_layouts_volume_of));
+    m.def("area", &fiction::layouts::area_of, py::arg("extent"), extent_doc(DOC(fiction_layouts_area_of)).c_str());
+    m.def("volume", &fiction::layouts::volume_of, py::arg("extent"),
+          extent_doc(DOC(fiction_layouts_volume_of)).c_str());
 }
 
 }  // namespace pyfiction

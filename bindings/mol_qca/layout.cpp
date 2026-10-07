@@ -57,7 +57,7 @@ void mol_qca_layout(nanobind::module_& m)
 
     cls.def(py::init<>())
         .def(py::init<const layout::extent&, std::string>(), py::arg("extent"), py::arg("layout_name") = "",
-             DOC(fiction_mol_qca_layout_layout));
+             extent_doc(DOC(fiction_mol_qca_layout_layout)).c_str());
 
     detail::bind_cell_grid(cls);
 

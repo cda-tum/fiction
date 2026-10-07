@@ -57,9 +57,9 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
      */
     py::class_<Lyt>(m, name, HEXAGONAL_LAYOUT_DOC)
         .def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
-             DOC(fiction_layouts_hexagonal_layout_hexagonal_layout))
+             extent_doc(DOC(fiction_layouts_hexagonal_layout_hexagonal_layout)).c_str())
         .def(py::init<fiction::layouts::arrangement, const typename Lyt::extent&>(), py::arg("arrangement"),
-             py::arg("extent"), DOC(fiction_layouts_hexagonal_layout_hexagonal_layout))
+             py::arg("extent"), extent_doc(DOC(fiction_layouts_hexagonal_layout_hexagonal_layout)).c_str())
         .def(
             "get_arrangement", [](const Lyt& lyt) { return lyt.get_arrangement(); },
             DOC(fiction_layouts_hexagonal_layout_get_arrangement))
@@ -75,7 +75,8 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
         .def("contains_coordinate", &Lyt::contains_coordinate, py::arg("c"), "Tests the half-open geometry bounds.")
         .def("volume", &Lyt::volume, "Returns the checked volume in coordinates.")
         .def("area", &Lyt::area, DOC(fiction_layouts_hexagonal_layout_area))
-        .def("resize", &Lyt::resize, py::arg("extent"), DOC(fiction_layouts_hexagonal_layout_resize))
+        .def("resize", &Lyt::resize, py::arg("extent"),
+             extent_doc(DOC(fiction_layouts_hexagonal_layout_resize)).c_str())
 
         .def("north", &Lyt::north, py::arg("c"), DOC(fiction_layouts_hexagonal_layout_north))
         .def("north_east", &Lyt::north_east, py::arg("c"), DOC(fiction_layouts_hexagonal_layout_north_east))

@@ -60,9 +60,10 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
      */
     py::class_<Lyt>(m, name, SHIFTED_CARTESIAN_LAYOUT_DOC)
         .def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
-             DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout))
+             extent_doc(DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout)).c_str())
         .def(py::init<fiction::layouts::arrangement, const typename Lyt::extent&>(), py::arg("arrangement"),
-             py::arg("extent"), DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout))
+             py::arg("extent"),
+             extent_doc(DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout)).c_str())
         .def(
             "get_arrangement", [](const Lyt& lyt) { return lyt.get_arrangement(); },
             DOC(fiction_layouts_hexagonal_layout_get_arrangement))
@@ -90,7 +91,7 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
             "area", [](const Lyt& lyt) { return lyt.area(); }, DOC(fiction_layouts_cartesian_layout_area))
         .def(
             "resize", [](Lyt& lyt, const py_extent& extent) { lyt.resize(extent); }, py::arg("extent"),
-            DOC(fiction_layouts_cartesian_layout_resize))
+            extent_doc(DOC(fiction_layouts_cartesian_layout_resize)).c_str())
         .def(
             "north", [](const Lyt& lyt, const py_coordinate& c) { return lyt.north(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_north))

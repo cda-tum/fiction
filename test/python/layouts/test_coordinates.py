@@ -270,3 +270,19 @@ def test_coordinate_ranges_accept_optional_bounds(
     huge = make_layout((2**31, 2**31, 4))
     assert huge.coordinates(stop=(2, 0)) == [coordinate(0, 0), coordinate(1, 0)]
     assert huge.ground_coordinates(stop=(2, 0)) == [coordinate(0, 0), coordinate(1, 0)]
+
+
+def test_extent_argument_docstrings_name_the_keyword() -> None:
+    for api in (
+        area,
+        volume,
+        cartesian_layout.__init__,
+        cartesian_layout.resize,
+        hexagonal_layout.__init__,
+        hexagonal_layout.resize,
+        shifted_cartesian_layout.__init__,
+        shifted_cartesian_layout.resize,
+    ):
+        assert api.__doc__ is not None
+        assert "\n    extent:" in api.__doc__
+        assert "\n    size:" not in api.__doc__

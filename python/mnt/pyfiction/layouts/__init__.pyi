@@ -194,7 +194,7 @@ def area(extent: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
     Computes width times height.
 
     Args:
-        size: Axis sizes.
+        extent: Axis sizes.
 
     Returns:
         Area.
@@ -205,7 +205,7 @@ def volume(extent: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
     Computes width times height times layers with checked multiplication.
 
     Args:
-        size: Axis sizes.
+        extent: Axis sizes.
 
     Returns:
         Volume.
@@ -263,7 +263,7 @@ class cartesian_layout:
         extent is empty.
 
         Args:
-            size: Axis sizes.
+            extent: Axis sizes.
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.
@@ -327,7 +327,7 @@ class cartesian_layout:
         Changes the geometry's axis sizes.
 
         Args:
-            size: Axis sizes.
+            extent: Axis sizes.
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.
@@ -894,7 +894,7 @@ class shifted_cartesian_layout:
 
         Args:
             a: Arrangement of shifted rows or columns.
-            size: Axis sizes.
+            extent: Axis sizes.
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.
@@ -966,7 +966,7 @@ class shifted_cartesian_layout:
         Changes the geometry's axis sizes.
 
         Args:
-            size: Axis sizes.
+            extent: Axis sizes.
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.
@@ -1539,7 +1539,7 @@ class hexagonal_layout:
 
         Args:
             a: Arrangement of shifted rows or columns.
-            size: Axis sizes.
+            extent: Axis sizes.
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.
@@ -1611,7 +1611,7 @@ class hexagonal_layout:
         Changes the geometry's axis sizes.
 
         Args:
-            size: Axis sizes.
+            extent: Axis sizes.
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.

@@ -56,9 +56,9 @@ void cartesian_layout(nanobind::module_& m, const char* name)
      * Cartesian layout.
      */
     py::class_<Lyt>(m, name, CARTESIAN_LAYOUT_DOC)
-        .def(py::init<>(), DOC(fiction_layouts_cartesian_layout_cartesian_layout))
+        .def(py::init<>(), extent_doc(DOC(fiction_layouts_cartesian_layout_cartesian_layout)).c_str())
         .def(py::init<const typename Lyt::extent&>(), py::arg("extent"),
-             DOC(fiction_layouts_cartesian_layout_cartesian_layout))
+             extent_doc(DOC(fiction_layouts_cartesian_layout_cartesian_layout)).c_str())
         .def(
             "coord", [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z)
             { return layout.coord(coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); }, py::arg("x"),
@@ -71,7 +71,8 @@ void cartesian_layout(nanobind::module_& m, const char* name)
         .def("contains_coordinate", &Lyt::contains_coordinate, py::arg("c"), "Tests the half-open geometry bounds.")
         .def("volume", &Lyt::volume, "Returns the checked volume in coordinates.")
         .def("area", &Lyt::area, DOC(fiction_layouts_cartesian_layout_area))
-        .def("resize", &Lyt::resize, py::arg("extent"), DOC(fiction_layouts_cartesian_layout_resize))
+        .def("resize", &Lyt::resize, py::arg("extent"),
+             extent_doc(DOC(fiction_layouts_cartesian_layout_resize)).c_str())
 
         .def("north", &Lyt::north, py::arg("c"), DOC(fiction_layouts_cartesian_layout_north))
         .def("north_east", &Lyt::north_east, py::arg("c"), DOC(fiction_layouts_cartesian_layout_north_east))

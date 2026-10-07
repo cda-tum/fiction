@@ -18,9 +18,31 @@
 
 #include "pyfiction/pybind11_mkdoc_docstrings.hpp"  // IWYU pragma: export
 
+#include <string>
+#include <string_view>
+
 /** @brief Python binding documentation. */
 namespace pyfiction
 {
+
+/**
+ * @brief Maps the C++ size parameter to the Python extent keyword in layout documentation.
+ * @param documentation Extracted C++ documentation.
+ * @return Documentation with the Python keyword.
+ */
+inline std::string extent_doc(const char* documentation)
+{
+    /** C++ parameter heading in the extracted documentation. */
+    constexpr std::string_view parameter{"\n    size:"};
+    /** Documentation owned while the parameter heading is replaced. */
+    std::string result{documentation};
+    /** Position of the C++ parameter heading, when present. */
+    if (const auto position = result.find(parameter); position != std::string::npos)
+    {
+        result.replace(position, parameter.size(), "\n    extent:");
+    }
+    return result;
+}
 
 /** @brief Documentation for the Cartesian layout class. */
 inline constexpr auto CARTESIAN_LAYOUT_DOC =

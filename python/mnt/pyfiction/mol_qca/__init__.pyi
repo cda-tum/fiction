@@ -83,7 +83,7 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
         Creates an empty layout.
 
         Args:
-            size: Half-open cell sizes; a nonzero layer count selects one
+            extent: Half-open cell sizes; a nonzero layer count selects one
                   layer.
             name: Layout name.
 

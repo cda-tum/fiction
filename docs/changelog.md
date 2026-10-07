@@ -27,7 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `aig`, `abc`, and `generate` provide AIG optimization, external ABC scripts, and network generators.
   - `show` supports optional Graphviz SVG rendering, explicit viewers, and temporary-file cleanup.
   - Long-running CLI commands show responsive progress. Counted phases use real bars; searches show
-    candidate dimensions on one aggregate row. Quiet mode and redirected output suppress displays.
+    candidate extents on one aggregate row. Quiet mode and redirected output suppress displays.
 
 - Code quality:
 
@@ -245,6 +245,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Python layout docstrings use `extent` for the extent argument.
   - Corrected the coordinate page's `last_coordinate()` accessor reference.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
