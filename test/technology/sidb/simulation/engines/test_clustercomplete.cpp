@@ -184,7 +184,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
             CHECK_FALSE(gate_lyt.source({id, 1}).has_value());
         });
 
-    const auto cell_lyt = (apply_gate_library<bestagon_library>(gate_lyt));
+    const auto cell_lyt = apply_gate_library<bestagon_library>(gate_lyt);
 
     clustercomplete_params params{.sim_params = simulation_parameters{2}};
 
