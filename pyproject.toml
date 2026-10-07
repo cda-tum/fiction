@@ -297,7 +297,6 @@ docstring-code-format = true
     "invalid-class-name",
     "line-too-long",
     "overload-with-docstring",
-    "snake-case-type-alias",                 # `stacked_cartesian_layout` aliases the snake_case class `cartesian_layout`
 ]
 # `mnt/__init__.py` registers the Windows DLL search path before any extension is imported, and
 # `mnt/pyfiction/__init__.py` loads the submodules lazily. A re-export-only `__init__` cannot do either
