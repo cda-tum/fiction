@@ -3551,6 +3551,8 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_assign 
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_begin = R"doc(Returns the first slot.)doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_begin_mutable = R"doc(Returns the first slot.)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_clear = R"doc(Releases all slots.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_count = R"doc(Number of slots in use.)doc";
