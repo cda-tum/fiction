@@ -617,6 +617,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB-to-cell-level conversion preserves bounds from converted cells.
 
 - Documentation:
+  - Corrected SiDB reader file references and removed an obsolete clocking-scheme overload reference.
   - The documentation session builds Python bindings with the installed Z3 dependency.
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
   - Nanobind API documentation now keeps its custom class renderer with Sphinx's deferred registration.

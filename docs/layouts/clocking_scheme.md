@@ -154,7 +154,3 @@ can be overridden.
 ```{doxygenfunction} fiction::layouts::clocking::get_scheme(const std::string_view scheme_name, const std::optional<arrangement> hex)
 
 ```
-
-```{doxygenfunction} fiction::layouts::clocking::get_scheme(const std::string_view scheme_name)
-
-```
