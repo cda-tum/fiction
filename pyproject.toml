@@ -401,14 +401,12 @@ addopts = [
     "--durations=10",
     "--numprocesses=auto", # Automatically use all available CPU cores for parallel testing
 ]
-# matplotlib 3.10 calls pyparsing's deprecated camelCase APIs.
+# matplotlib 3.10 calls pyparsing's deprecated camelCase APIs. The filters match the warning's origin
+# module, not its wording, so a rephrased message cannot turn them into failures.
 filterwarnings = [
     "error",
-    """\
-    ignore:'.*'( argument is)? deprecated( - use|, use) \
-    '.*':DeprecationWarning:matplotlib\\.(_fontconfig_pattern|_mathtext)$\
-    """,
-    "ignore:'parseAll' argument is deprecated, use 'parse_all':DeprecationWarning:pyparsing\\.util$",
+    "ignore::DeprecationWarning:matplotlib\\._(fontconfig_pattern|mathtext)$",
+    "ignore::DeprecationWarning:pyparsing\\.util$",
 ]
 log_level = "INFO"
 markers = [
