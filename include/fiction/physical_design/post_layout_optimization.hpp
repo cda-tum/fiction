@@ -417,7 +417,7 @@ class post_layout_optimization_impl
                 std::vector<tile<Lyt>> gate_tiles{};
                 gate_tiles.reserve(layout.num_gates() + layout.num_pis() + layout.num_pos());
                 layout.foreach_node(
-                    [this, &layout, &gate_tiles](const auto& node) noexcept
+                    [this, &layout, &gate_tiles](const auto& node)
                     {
                         if (const tile<Lyt> gate_tile = layout.get_tile(node);
                             layout.is_gate(node) || layout.is_fanout(node) || layout.is_pi_tile(gate_tile) ||

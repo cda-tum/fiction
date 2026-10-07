@@ -23,10 +23,69 @@
 #include <fiction/types.hpp>
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdlib>
+#include <new>
+#include <optional>
 #include <vector>
 
 using namespace fiction;
 using namespace fiction::physical_design;
+
+namespace
+{
+/**
+ * Number of successful allocations before the test injects a failure; unset disables injection.
+ */
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables): Test allocation control.
+thread_local std::optional<std::size_t> allocation_budget{};
+}  // namespace
+/**
+ * Allocates memory and injects a failure when the test allocation budget is exhausted.
+ *
+ * @param size Requested byte count.
+ * @return Allocated memory.
+ * @throws std::bad_alloc if allocation fails or the test exhausts its budget.
+ */
+void* operator new(const std::size_t size)
+{
+    if (allocation_budget.has_value())
+    {
+        if (*allocation_budget == 0)
+        {
+            allocation_budget.reset();
+            throw std::bad_alloc{};
+        }
+        --*allocation_budget;
+    }
+    // The global new replacement must use malloc to avoid recursion.
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,hicpp-no-malloc)
+    if (auto* const memory = std::malloc(size == 0 ? 1 : size))
+    {
+        return memory;
+    }
+    throw std::bad_alloc{};
+}
+/**
+ * Releases memory allocated by the test's global allocation replacement.
+ *
+ * @param memory Memory to release.
+ */
+void operator delete(void* const memory) noexcept
+{
+    // Matches malloc in the global new replacement.
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,hicpp-no-malloc)
+    std::free(memory);
+}
+/**
+ * Releases a sized allocation through the matching global deallocator.
+ *
+ * @param memory Memory to release.
+ */
+void operator delete(void* const memory, std::size_t) noexcept
+{
+    ::operator delete(memory);
+}
 
 /** @brief Checks objective coordinates and logical input indices. @tparam Lyt Layout type.
  * @param objectives Extracted objectives. @param expected_objectives Expected connections.
@@ -233,4 +292,43 @@ TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[r
     const auto objectives = extract_routing_objectives(layout);
     CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 1}, 0}) != objectives.end());
     CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 1}, {4, 1}, 1}) != objectives.end());
+}
+
+TEST_CASE("Routing paths propagate allocation failure", "[routing-utils]")
+{
+    layout_coordinate_path<cart_gate_clk_lyt>                  path{};
+    path_collection<layout_coordinate_path<cart_gate_clk_lyt>> collection{};
+    path_set<layout_coordinate_path<cart_gate_clk_lyt>>        paths{};
+    /** @brief Checks that a failed path allocation reaches the caller. */
+    const auto fail = [&](auto&& append)
+    {
+        bool threw{};
+        allocation_budget = 0;
+        try
+        {
+            append();
+        }
+        catch (const std::bad_alloc&)
+        {
+            threw = true;
+        }
+        catch (...)
+        {
+            allocation_budget.reset();
+            throw;
+        }
+        allocation_budget.reset();
+        CHECK(threw);
+    };
+    fail([&] { path.append({0, 0}); });
+    CHECK(path.empty());
+    path.append({0, 0});
+    fail([&] { collection.add(path); });
+    CHECK(collection.empty());
+    fail([&] { paths.add(path); });
+    CHECK(paths.empty());
+    collection.add(path);
+    paths.add(path);
+    CHECK(collection.front() == path);
+    CHECK(paths.contains(path));
 }

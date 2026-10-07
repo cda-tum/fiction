@@ -206,8 +206,9 @@ class generate_edge_intersection_graph_impl
          * Overwrites the append function to additionally store the given coordinate in a set.
          *
          * @param c Coordinate to append to the path.
+         * @throws std::bad_alloc If storage allocation fails.
          */
-        void append(const coordinate<Lyt>& c) noexcept
+        void append(const coordinate<Lyt>& c)
         {
             path_elements.insert(c);
             layout_coordinate_path<Lyt>::append(c);
@@ -298,6 +299,7 @@ class generate_edge_intersection_graph_impl
      *
      * @param objective_paths Collection of paths belonging to the same objective.
      * @param objective_index Index of the routing objective.
+     * @throws std::bad_alloc If storage allocation fails.
      */
     void initiate_objective_nodes(path_collection<clk_path>& objective_paths, const std::size_t objective_index)
     {
@@ -322,8 +324,9 @@ class generate_edge_intersection_graph_impl
      * graph between each pair of corresponding nodes, thus, forming a clique (complete sub-graph).
      *
      * @param objective_paths Collection of paths belonging to the same objective.
+     * @throws std::bad_alloc If storage allocation fails.
      */
-    void connect_clique(path_collection<clk_path>& objective_paths) noexcept
+    void connect_clique(path_collection<clk_path>& objective_paths)
     {
         combinations::for_each_combination(objective_paths.begin(), objective_paths.begin() + 2, objective_paths.end(),
                                            [this](const auto begin, [[maybe_unused]] const auto end)
@@ -339,8 +342,9 @@ class generate_edge_intersection_graph_impl
      * with it, i.e., that share at least one coordinate.
      *
      * @param objective_paths Collection of paths belonging to the same objective.
+     * @throws std::bad_alloc If storage allocation fails.
      */
-    void create_intersection_edges(path_collection<clk_path>& objective_paths) noexcept
+    void create_intersection_edges(path_collection<clk_path>& objective_paths)
     {
         std::ranges::for_each(objective_paths,
                               [this](const auto& obj_p)

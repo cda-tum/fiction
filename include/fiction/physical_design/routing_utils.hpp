@@ -102,7 +102,9 @@ template <typename Lyt>
 class layout_coordinate_path : public std::vector<coordinate<Lyt>>
 {
   public:
-    void append(const coordinate<Lyt>& c) noexcept
+    /** @brief Appends a coordinate. @param c Coordinate to append. @throws std::bad_alloc If storage allocation fails.
+     */
+    void append(const coordinate<Lyt>& c)
     {
         this->push_back(c);
     }
@@ -133,7 +135,8 @@ template <typename Path>
 class path_collection : public std::vector<Path>
 {
   public:
-    void add(const Path& p) noexcept
+    /** @brief Adds a path. @param p Path to add. @throws std::bad_alloc If storage allocation fails. */
+    void add(const Path& p)
     {
         this->push_back(p);
     }
@@ -165,7 +168,8 @@ template <typename Path>
 class path_set : public std::set<Path>
 {
   public:
-    void add(const Path& p) noexcept
+    /** @brief Adds a path. @param p Path to add. @throws std::bad_alloc If storage allocation fails. */
+    void add(const Path& p)
     {
         this->insert(p);
     }
