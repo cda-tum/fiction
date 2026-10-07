@@ -779,18 +779,36 @@ class post_layout_optimization_impl
             for (int64_t x{}; x <= diagonal; ++x)
             {
                 const auto y = diagonal - x;
-                if (x < lyt.width() && y < lyt.height() && x >= min_x && y >= min_y && diagonal <= diagonal_limit &&
-                    (diagonal < diagonal_limit || y <= original.y) && (!lyt.is_pi(gate) || x == 0 || y == 0) &&
-                    !(lyt.is_po(gate) && ((x < max_non_po.x && y < max_non_po.y) || diagonal == diagonal_limit)))
+                if (x >= lyt.width() || y >= lyt.height())
                 {
-                    if (!check_new_position(lyt, {x, y}, attempts, current, data, moved, original))
+                    continue;
+                }
+                if (x < min_x || y < min_y)
+                {
+                    continue;
+                }
+                if (diagonal > diagonal_limit || (diagonal == diagonal_limit && y > original.y))
+                {
+                    continue;
+                }
+                if (lyt.is_pi(gate) && x != 0 && y != 0)
+                {
+                    continue;
+                }
+                if (lyt.is_po(gate))
+                {
+                    if ((x < max_non_po.x && y < max_non_po.y) || diagonal == diagonal_limit)
                     {
-                        return false;
+                        continue;
                     }
-                    if (moved)
-                    {
-                        break;
-                    }
+                }
+                if (!check_new_position(lyt, {x, y}, attempts, current, data, moved, original))
+                {
+                    return false;
+                }
+                if (moved)
+                {
+                    break;
                 }
             }
             if (moved || (attempts >= max_gate_relocations && !lyt.is_po(gate)))
