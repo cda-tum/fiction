@@ -529,7 +529,7 @@ class exact_impl
          * updated. Additionally, a container for assumptions, i.e., assertions that are only valid in this and only
          * this run, is needed. All of that is packaged in a solver check point.
          */
-        struct solver_check_point  // NOLINT: assumptions cannot be default-initialized
+        struct solver_check_point  // NOLINT(cppcoreguidelines-pro-type-member-init): assumptions require a Z3 context.
         {
             /**
              * Solver and watched literals.

@@ -55,7 +55,8 @@ Ntk read_ntk(const std::string& name)
     return network;
 }
 
-int main()  // NOLINT
+/** @brief Run the experiment. @return Process exit status. */
+int main()
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
 
