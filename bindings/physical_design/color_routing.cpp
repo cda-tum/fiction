@@ -27,15 +27,9 @@
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/map.h>            // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/tuple.h>          // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner): Converts an unset path limit to None.
+#include <nanobind/stl/tuple.h>     // NOLINT(misc-include-cleaner): Converts objective triples from Python tuples.
+#include <nanobind/stl/vector.h>    // NOLINT(misc-include-cleaner): Converts objective collections from Python lists.
 
 namespace pyfiction
 {
@@ -48,8 +42,6 @@ namespace detail
 template <typename Lyt>
 void color_routing_impl(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     m.def(
         "color_routing",
         [](Lyt&                                                                                         lyt,
@@ -66,7 +58,8 @@ void color_routing_impl(nanobind::module_& m)
 
             return fiction::physical_design::color_routing(lyt, objs, params);
         },
-        py::arg("layout"), py::arg("objectives"), py::arg("params") = fiction::physical_design::color_routing_params{},
+        nanobind::arg("layout"), nanobind::arg("objectives"),
+        nanobind::arg("params") = fiction::physical_design::color_routing_params{},
         DOC(fiction_physical_design_color_routing));
 }
 
