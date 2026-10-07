@@ -40,7 +40,7 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 
     post_layout_optimization_params full_optimization_params{};
 
-    full_optimization_params.max_gate_relocations = layout.width() * layout.height();
+    full_optimization_params.max_gate_relocations = layout.area();
     full_optimization_params.optimize_pos_only    = false;
     full_optimization_params.planar_optimization  = false;
     full_optimization_params.timeout              = 100000;
