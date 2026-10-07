@@ -74,6 +74,18 @@ Ntk read_ntk(const std::string& name)
     return network;
 }
 
+/**
+ * @brief Reroute a layout and record its dimensions, timing, and equivalence.
+ * @tparam Ntk Logic network.
+ * @tparam GateLyt Gate layout.
+ * @tparam Stats Placement statistics.
+ * @param benchmark Benchmark name.
+ * @param ntk Source network.
+ * @param lyt Layout to route.
+ * @param routing_params Routing parameters.
+ * @param stats Placement statistics.
+ * @param exp Experiment table.
+ */
 template <typename Ntk, typename GateLyt, typename Stats>
 void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt,
                       const color_routing_params& routing_params, const Stats& stats, color_routing_experiment& exp)
@@ -97,10 +109,9 @@ void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt
     }
 
     // log results
-    exp(benchmark, ntk.num_pis(), ntk.num_pos(), ntk.num_gates(), lyt.get_clocking_scheme().name(),
-        static_cast<uint64_t>(lyt.x()) + 1, static_cast<uint64_t>(lyt.y()) + 1,
-        (static_cast<uint64_t>(lyt.x()) + 1) * (static_cast<uint64_t>(lyt.y()) + 1), lyt.num_gates(), lyt.num_wires(),
-        objectives.size(), routing_stats.number_of_unsatisfied_objectives, routing_stats.epg_stats.num_vertices,
+    exp(benchmark, ntk.num_pis(), ntk.num_pos(), ntk.num_gates(), lyt.get_clocking_scheme().name(), lyt.width(),
+        lyt.height(), lyt.area(), lyt.num_gates(), lyt.num_wires(), objectives.size(),
+        routing_stats.number_of_unsatisfied_objectives, routing_stats.epg_stats.num_vertices,
         routing_stats.epg_stats.num_edges, mockturtle::to_seconds(stats.time_total),
         mockturtle::to_seconds(routing_stats.time_total), mockturtle::to_seconds(routing_stats.epg_stats.time_total),
         mockturtle::to_seconds(routing_stats.color_stats.time_total), equiv_stats.eq != eq_type::NO);
@@ -262,6 +273,7 @@ void ortho_mcs()
     }
 }
 
+/** @brief Run the experiment. @return Process exit status. */
 int main()  // NOLINT
 {
     smt_sat_complete();
@@ -275,6 +287,7 @@ int main()  // NOLINT
 
 #include <iostream>
 
+/** @brief Run the experiment. @return Process exit status. */
 int main()  // NOLINT
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;

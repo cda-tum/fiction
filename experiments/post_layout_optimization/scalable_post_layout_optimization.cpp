@@ -55,6 +55,7 @@ Ntk read_ntk(const std::string& name)
     return *nets.front();
 }
 
+/** @brief Run the experiment. @return Process exit status. */
 int main()  // NOLINT
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
@@ -97,11 +98,9 @@ int main()  // NOLINT
             // calculate bounding box
             const auto bounding_box_before_optimization = bounding_box_2d(gate_level_layout);
 
-            const auto width_before_optimization =
-                static_cast<uint64_t>(bounding_box_before_optimization.get_x_size()) + 1;
-            const auto height_before_optimization =
-                static_cast<uint64_t>(bounding_box_before_optimization.get_y_size()) + 1;
-            const auto area_before_optimization = width_before_optimization * height_before_optimization;
+            const auto width_before_optimization  = bounding_box_before_optimization.get_x_size();
+            const auto height_before_optimization = bounding_box_before_optimization.get_y_size();
+            const auto area_before_optimization   = width_before_optimization * height_before_optimization;
 
             if (max_relocations <= max_gate_relocations)
             {
@@ -109,8 +108,7 @@ int main()  // NOLINT
             }
             else
             {
-                max_relocations = (static_cast<uint64_t>(gate_level_layout.x()) + 1) *
-                                  (static_cast<uint64_t>(gate_level_layout.y()) + 1);
+                max_relocations = gate_level_layout.area();
             }
             // perform post-layout optimization
             post_layout_optimization<gate_lyt>(gate_level_layout, post_layout_optimization_params,
@@ -132,11 +130,9 @@ int main()  // NOLINT
             // calculate bounding box
             const auto bounding_box_after_optimization = bounding_box_2d(gate_level_layout);
 
-            const auto width_after_optimization =
-                static_cast<uint64_t>(bounding_box_after_optimization.get_x_size()) + 1;
-            const auto height_after_optimization =
-                static_cast<uint64_t>(bounding_box_after_optimization.get_y_size()) + 1;
-            const auto area_after_optimization = width_after_optimization * height_after_optimization;
+            const auto width_after_optimization  = bounding_box_after_optimization.get_x_size();
+            const auto height_after_optimization = bounding_box_after_optimization.get_y_size();
+            const auto area_after_optimization   = width_after_optimization * height_after_optimization;
 
             const float improv = 100 * static_cast<float>((area_before_optimization - area_after_optimization)) /
                                  static_cast<float>(area_before_optimization);

@@ -55,6 +55,7 @@ void remove_clocking(Lyt& lyt) noexcept
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
 
+/** @brief Run the experiment. @return Process exit status. */
 int main()  // NOLINT
 {
     const std::string network_folder = fmt::format("{}/../benchmarks/IWLS93/", EXPERIMENTS_PATH);
@@ -102,9 +103,9 @@ int main()  // NOLINT
         const auto original_layout = orthogonal<gate_lyt>(mapped_network);
 
         // obtain layout characteristics
-        const auto width  = static_cast<uint64_t>(original_layout.x()) + 1;
-        const auto height = static_cast<uint64_t>(original_layout.y()) + 1;
-        const auto area   = width * height;
+        const auto width  = original_layout.width();
+        const auto height = original_layout.height();
+        const auto area   = original_layout.area();
 
         // deep-copy the original layout
         auto newly_clocked_layout = original_layout.clone();
