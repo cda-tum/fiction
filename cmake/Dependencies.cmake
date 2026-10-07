@@ -118,10 +118,8 @@ FetchContent_MakeAvailable(tinyxml2)
 
 # fmt
 #
-# mockturtle bundles fmt 11.0.2 and creates a header-only `fmt` target unless
-# one exists. That copy does not compile with clang 20, so fiction fetches a
-# release and defines the target first; mockturtle and lorina then link this
-# one.
+# fiction supplies fmt explicitly so its headers are available in both the build
+# tree and the installed package.
 set(FMT_VERSION
     12.2.0
     CACHE STRING "fmt version")
