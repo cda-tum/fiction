@@ -129,6 +129,6 @@ def test_coordinate_namespace_in_fresh_interpreter() -> None:
         "assert coordinate.__module__ == 'mnt.pyfiction.layouts'\n"
         "assert area(coordinate(2, 3, 1)) == 12\n"
         "assert volume(coordinate(2, 3, 1)) == 24\n"
-        "assert cartesian_layout(coordinate(2, 3)).x() == 2\n"
+        "assert cartesian_layout((3, 4)).width() == 3\n"
     )
     subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
