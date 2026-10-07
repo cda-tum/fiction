@@ -237,6 +237,10 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
              DOC(fiction_layouts_gate_level_layout_set_layout_name))
         .def("get_layout_name", &GateLyt::get_layout_name, DOC(fiction_layouts_gate_level_layout_get_layout_name))
         .def("clone", &GateLyt::clone, DOC(fiction_layouts_gate_level_layout_clone))
+        .def("__copy__", &GateLyt::clone, "Returns an independent layout copy, including placed objects and metadata.")
+        .def(
+            "__deepcopy__", [](const GateLyt& lyt, const py::dict&) { return lyt.clone(); }, py::arg("memo"),
+            "Returns an independent layout copy, including placed objects and metadata.")
         .def("set_input_name", &GateLyt::set_input_name, py::arg("index"), py::arg("name"),
              DOC(fiction_layouts_gate_level_layout_set_input_name))
         .def("get_input_name", &GateLyt::get_input_name, py::arg("index"),

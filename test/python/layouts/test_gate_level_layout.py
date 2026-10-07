@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import copy
 from typing import TYPE_CHECKING, cast
 
 import pytest
@@ -325,7 +326,8 @@ def test_gate_move_and_removal_preserve_identity_contract() -> None:
     assert layout.source(LayoutInputPort(output.object, 0)) == replacement
 
 
-def test_gate_interface_order_and_clone_ownership() -> None:
+@pytest.mark.parametrize("copy_layout", [lambda layout: layout.clone(), copy.copy, copy.deepcopy])
+def test_gate_interface_order_and_clone_ownership(copy_layout: Callable[[GateLayout], GateLayout]) -> None:
     """Keep declared interfaces independent of allocation and copied layout edits."""
     layout = cartesian_gate_layout((3, 3, 1), "2DDWave", "original")
     b = layout.create_pi("b", (1, 0))
@@ -345,7 +347,7 @@ def test_gate_interface_order_and_clone_ownership() -> None:
         layout.set_input_order([a.object, a.object])
     with pytest.raises(ValueError, match="terminal"):
         layout.set_output_order([result.object])
-    clone = layout.clone()
+    clone = copy_layout(layout)
     clone.set_layout_name("copy")
     clone.set_input_name(0, "copy_a")
     clone.set_output_name(0, "copy_compare")
