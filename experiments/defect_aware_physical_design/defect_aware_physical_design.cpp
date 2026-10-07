@@ -72,18 +72,11 @@ using namespace fiction::verification;
 // https://github.com/cda-tum/sidb-defect-aware-physical-design
 
 /** @brief Run the published circuit-design experiment. */
-int main()  // NOLINT
+int main()
 {
     using gate_lyt = hex_gate_clk_lyt;
 
     static const std::string layouts_folder = fmt::format("{}/defect_aware_physical_design/layouts", EXPERIMENTS_PATH);
-
-    // Fabricated surface 1: 740 x 545 dimers = 740 x 1090 DB positions = 12 x 31 Bestagon tiles
-    // static const std::string surface_data_path =
-    // fmt::format("{}/defect_aware_physical_design/full_scan_area/defects_full70.sqd", EXPERIMENTS_PATH);
-    // Fabricated surface 2: 830 x 326 dimers = 830 x 652 DB positions = 13 x 18 Bestagon tiles
-    //    static const std::string surface_data_path =
-    //        fmt::format("{}/defect_aware_physical_design/full_scan_area/defects_full56_Oct.sqd", EXPERIMENTS_PATH);
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, bool,
@@ -138,12 +131,9 @@ int main()  // NOLINT
     // read surface scan lattice data
     const auto surface_lattice =
         read_surface_defects("../../experiments/defect_aware_physical_design/py_test_surface.txt", "py_test_surface");
-    // read_sqd_layout(surface_lattice, surface_data_path);
 
     const auto lattice_tiling =
         gate_lyt{arrangement::EVEN_ROW, {12, 31}};  // our surface data is 12 x 31 Bestagon tiles
-    //    const auto lattice_tiling = gate_lyt{arrangement::EVEN_ROW, {12, 17}};  // our surface data is 13 x 18
-    //    Bestagon tiles
     const auto black_list = surface_analysis<bestagon_library>(lattice_tiling, surface_lattice);
 
     // parameters for SMT-based physical design
@@ -153,11 +143,9 @@ int main()  // NOLINT
     exact_params.crossings          = true;
     exact_params.border_io          = false;
     exact_params.desynchronize      = true;
-    exact_params.upper_bound_x      = 11;  // 12 x 31 tiles
-    exact_params.upper_bound_y      = 30;  // 12 x 31 tiles
-    // exact_params.upper_bound_x = 12;    // 13 x 18 tiles
-    // exact_params.upper_bound_y = 17;    // 13 x 18 tiles
-    exact_params.timeout = 3'600'000;  // 1h in ms
+    exact_params.upper_bound_x      = 11;         // 12 x 31 tiles
+    exact_params.upper_bound_y      = 30;         // 12 x 31 tiles
+    exact_params.timeout            = 3'600'000;  // 1h in ms
     exact_physical_design_stats exact_stats{};
 
     constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &
@@ -250,7 +238,7 @@ int main()  // NOLINT
 #include <iostream>
 
 /** @brief Report the unavailable Z3 solver. */
-int main()  // NOLINT
+int main()
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
 

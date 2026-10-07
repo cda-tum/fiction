@@ -67,7 +67,7 @@ using namespace fiction::synthesis;
 // (https://ieeexplore.ieee.org/abstract/document/10628962).
 
 /** @brief Run the published circuit-design experiment. */
-int main()  // NOLINT
+int main()
 {
     using gate_lyt = hex_gate_clk_lyt;
 
@@ -222,7 +222,7 @@ int main()  // NOLINT
 #include <iostream>
 
 /** @brief Report the unavailable Z3 solver. */
-int main()  // NOLINT
+int main()
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
 
