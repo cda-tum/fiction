@@ -105,6 +105,14 @@ jobs:
       runs-on: ${{ matrix.runs-on }}
       toolset: ${{ matrix.toolset }}
 
+  cpp-package:
+    name: 📦 C++ Package
+    permissions:
+      contents: read
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
+    uses: $/.github/workflows/cpp-package.yml
+
   cpp-experiments:
     name: 🧪 Experiments
     permissions:
@@ -335,6 +343,7 @@ jobs:
       - cpp-tests-ubuntu
       - cpp-tests-macos
       - cpp-tests-windows
+      - cpp-package
       - cpp-experiments
       - cpp-linter
       - cpp-coverage
@@ -357,7 +366,7 @@ jobs:
         with:
           allowed-skips: >-
             ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
-            && 'cpp-tests-ubuntu,cpp-tests-macos,cpp-tests-windows,cpp-experiments,cpp-coverage,' || '' }}
+            && 'cpp-tests-ubuntu,cpp-tests-macos,cpp-tests-windows,cpp-package,cpp-experiments,cpp-coverage,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-cpp-linter)
             && 'cpp-linter,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-codeql)

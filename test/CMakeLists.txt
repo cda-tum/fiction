@@ -34,8 +34,14 @@ if(FICTION_ENABLE_PCH AND NOT (MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
   target_precompile_headers(libfiction_test_pch PRIVATE pch_test.hpp)
 endif()
 
-file(GLOB_RECURSE FILENAMES */*.cpp)
-list(FILTER FILENAMES EXCLUDE REGEX "benchmark/.*$")
+file(
+  GLOB_RECURSE FILENAMES
+  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  */*.cpp)
+list(FILTER FILENAMES EXCLUDE REGEX "^benchmark/")
+# The installed consumer has its own CMake project, driven by
+# test/package/run.py.
+list(FILTER FILENAMES EXCLUDE REGEX "^package/")
 
 # These tests include utils/allocation_failure.hpp and own global new/delete. A
 # second allocator replacement conflicts with their fault injection.

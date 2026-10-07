@@ -71,9 +71,6 @@ target_sources(
 # Ensure header verification is enabled for this target
 set_property(TARGET libfiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
 
-# Enforce project-wide C++ standard feature requirement (redundant but explicit)
-target_compile_features(libfiction INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
-
 # Installation
 install(
   TARGETS libfiction
