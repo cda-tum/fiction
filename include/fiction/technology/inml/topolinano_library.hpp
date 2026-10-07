@@ -25,7 +25,6 @@
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
-#include <mockturtle/traits.hpp>
 #include <phmap.h>
 
 #include <algorithm>

@@ -22,7 +22,6 @@
 #include "fiction/technology/mol_qca/layout.hpp"
 #include "fiction/traits.hpp"
 
-#include <mockturtle/traits.hpp>
 #include <phmap.h>
 
 #include <stdexcept>
