@@ -36,14 +36,11 @@
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>          // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>   // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner): Converts absent objects, input sources, and bounds to None.
+#include <nanobind/stl/pair.h>  // NOLINT(misc-include-cleaner): Converts obstruction connections and bounding-box coordinate pairs.
+#include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner): Converts layout names and clocking scheme arguments.
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): Converts Python scheme names to string views.
-#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner): Converts ordered ports, interfaces, and coordinate collections.
 
 namespace pyfiction
 {
@@ -61,7 +58,7 @@ namespace detail
 template <typename LytBase, typename GateLyt>
 void gate_level_layout(nanobind::module_& m, const std::string& topology)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
     py::class_<GateLyt, LytBase> cls(m, fmt::format("{}_gate_layout", topology).c_str(),
                                      DOC(fiction_layouts_gate_level_layout));
