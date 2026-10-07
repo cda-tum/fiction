@@ -2044,6 +2044,7 @@ class graph_oriented_layout_design_impl
     {
         std::vector<std::pair<coord_vec_type<Lyt>, double>> next_positions;
         next_positions.reserve(2 * ps.num_vertex_expansions);
+        const auto node_count = static_cast<double>(ssg.nodes_to_place.size());
 
         for (const auto& position : possible_positions)
         {
@@ -2057,22 +2058,21 @@ class graph_oriented_layout_design_impl
             {
                 // current layout size
                 const double layout_size =
-                    static_cast<double>(((std::max(static_cast<int32_t>(layout.width() - 1) - 1, position.x) + 1) *
-                                         (std::max(static_cast<int32_t>(layout.height() - 1) - 1, position.y) + 1))) /
-                    static_cast<double>((ssg.nodes_to_place.size() * ssg.nodes_to_place.size()));
+                    ((std::max(static_cast<double>(layout.width()) - 2.0, static_cast<double>(position.x)) + 1.0) *
+                     (std::max(static_cast<double>(layout.height()) - 2.0, static_cast<double>(position.y)) + 1.0)) /
+                    (node_count * node_count);
 
                 // position of last placed node
                 const double last_position =
-                    static_cast<double>(((position.x + 1) * (position.y + 1))) /
-                    static_cast<double>((ssg.nodes_to_place.size() * ssg.nodes_to_place.size()));
+                    ((static_cast<double>(position.x) + 1.0) * (static_cast<double>(position.y) + 1.0)) /
+                    (node_count * node_count);
 
                 double priority = remaining_nodes_to_place + layout_size + last_position;
                 next_positions.push_back({new_sequence, priority});
             }
             else
             {
-                const double cost = static_cast<double>(calculate_cost(layout, ssg.cost)) /
-                                    static_cast<double>(1000 * ssg.nodes_to_place.size());
+                const double cost = static_cast<double>(calculate_cost(layout, ssg.cost)) / (1000.0 * node_count);
 
                 double priority = remaining_nodes_to_place + cost;
 
