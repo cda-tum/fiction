@@ -332,3 +332,16 @@ TEST_CASE("Routing paths propagate allocation failure", "[routing-utils]")
     CHECK(collection.front() == path);
     CHECK(paths.contains(path));
 }
+
+TEST_CASE("Coordinate paths expose construction and edits", "[routing-utils]")
+{
+    const std::vector<tile<cart_gate_clk_lyt>> coordinates{{0, 0}, {1, 0}};
+    layout_coordinate_path<cart_gate_clk_lyt>  path{coordinates.cbegin(), coordinates.cend()};
+    path.push_back({2, 0});
+    path.insert(path.begin(), {0, 1});
+    path.front() = {1, 1};
+    path.back()  = {3, 0};
+    CHECK(path.source() == tile<cart_gate_clk_lyt>{1, 1});
+    CHECK(path.target() == tile<cart_gate_clk_lyt>{3, 0});
+    CHECK(path.size() == 4);
+}

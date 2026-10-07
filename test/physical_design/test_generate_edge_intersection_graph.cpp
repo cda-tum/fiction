@@ -274,3 +274,16 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
         }
     }
 }
+
+TEST_CASE("Limited paths retain interior conflicts", "[generate-edge-intersection-graph]")
+{
+    using gate_lyt = gate_level_layout<cartesian_layout>;
+    const gate_lyt                                 layout{{3, 3, 2}, clocking::twoddwave()};
+    const std::vector<routing_objective<gate_lyt>> objectives{{{0, 1}, {2, 1}}, {{1, 0}, {1, 2}}};
+    for (const auto limit : {1u, 2u})
+    {
+        const auto graph = generate_edge_intersection_graph(layout, objectives, {.path_limit = limit});
+        CHECK(graph.size_vertices() == 2);
+        CHECK(graph.size_edges() == 1);
+    }
+}
