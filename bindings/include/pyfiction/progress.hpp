@@ -54,8 +54,10 @@ namespace detail
  * @return Zero, or the visitor error code.
  */
 template <typename Params>
+// NOLINTNEXTLINE(misc-include-cleaner): CPython requires Python.h, whose child headers lack IWYU provider mappings.
 int progress_traverse(PyObject* self, visitproc visit, void* arg)
 {
+    // NOLINTNEXTLINE(misc-include-cleaner): Python.h provides the CPython garbage collection macros.
     Py_VISIT(Py_TYPE(self));
     // Borrowed reference_internal views can retain owner cycles through hidden keep_alive records.
     // Collecting those cycles requires a change to nested property ownership.
@@ -149,6 +151,7 @@ nanobind::type_slots progress_type_slots()
      */
     // CPython stores callback pointers in PyType_Slot::pfunc, whose ABI type is void*.
     // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
+    // NOLINTNEXTLINE(misc-include-cleaner): Python.h is the required public provider of PyType_Slot.
     static const std::array<PyType_Slot, 3> slots = {
         {{.slot = Py_tp_traverse, .pfunc = reinterpret_cast<void*>(detail::progress_traverse<Params>)},
          {.slot = Py_tp_clear, .pfunc = reinterpret_cast<void*>(detail::progress_clear<Params>)},
