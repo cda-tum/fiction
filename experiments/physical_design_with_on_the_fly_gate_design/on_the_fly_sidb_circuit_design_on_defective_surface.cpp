@@ -45,11 +45,11 @@
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/depth_view.hpp>
 
-#include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <stdexcept>
 #include <string>
 
 using namespace fiction;
@@ -134,9 +134,12 @@ try
         fmt::print("[attempts] processing {}\n", benchmark);
         mockturtle::xag_network xag{};
 
-        [[maybe_unused]] const auto read_verilog_result =
+        const auto read_verilog_result =
             lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
-        assert(read_verilog_result == lorina::return_code::success);
+        if (read_verilog_result != lorina::return_code::success)
+        {
+            throw std::runtime_error{"Failed to read Verilog benchmark."};
+        }
 
         // compute depth
         const mockturtle::depth_view depth_xag{xag};

@@ -35,11 +35,11 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <array>
-#include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -64,6 +64,13 @@ static color_routing_stats              routing_stats{};
 static equivalence_checking_stats       equiv_stats{};
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
+/**
+ * @brief Read a Verilog benchmark into a logic network.
+ * @tparam Ntk Logic network type.
+ * @param name Benchmark name.
+ * @return Parsed logic network.
+ * @throws std::runtime_error If the benchmark cannot be parsed.
+ */
 template <typename Ntk>
 Ntk read_ntk(const std::string& name)
 {
@@ -71,9 +78,12 @@ Ntk read_ntk(const std::string& name)
 
     Ntk network{};
 
-    [[maybe_unused]] const auto read_verilog_result =
+    const auto read_verilog_result =
         lorina::read_verilog(fiction_experiments::benchmark_path(name), mockturtle::verilog_reader(network));
-    assert(read_verilog_result == lorina::return_code::success);
+    if (read_verilog_result != lorina::return_code::success)
+    {
+        throw std::runtime_error{"Failed to read Verilog benchmark."};
+    }
 
     return network;
 }

@@ -637,6 +637,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB reader documentation now lists every overload without ambiguous signatures.
 
 - Experiments:
+  - Layout experiments now reject failed GENLIB and Verilog reads in Release builds.
   - SiDB circuit experiments now reject missing placement and equivalence results before reporting.
   - SiDB sweep initializers now name their fields, and pruning helpers propagate allocation failures.
     Experiment parameters, output columns, and calculations remain unchanged.

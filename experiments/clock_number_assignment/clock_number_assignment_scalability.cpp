@@ -33,13 +33,13 @@
 #include <mockturtle/utils/stopwatch.hpp>     // time measurements
 #include <mockturtle/utils/tech_library.hpp>  // technology library utils
 
-#include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -89,9 +89,11 @@ try
 
     std::vector<mockturtle::gate> gates{};
 
-    [[maybe_unused]] const auto read_genlib_result =
-        lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
-    assert(read_genlib_result == lorina::return_code::success);
+    const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
+    if (read_genlib_result != lorina::return_code::success)
+    {
+        throw std::runtime_error{"Failed to read GENLIB library."};
+    }
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // parameters for technology mapping

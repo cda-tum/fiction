@@ -44,12 +44,12 @@
 #include <mockturtle/utils/tech_library.hpp>  // technology library utils
 #include <mockturtle/views/depth_view.hpp>
 
-#include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -117,9 +117,11 @@ try
     // parameters for technology mapping
     const mockturtle::map_params map_params{};
 
-    [[maybe_unused]] const auto read_genlib_result =
-        lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
-    assert(read_genlib_result == lorina::return_code::success);
+    const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
+    if (read_genlib_result != lorina::return_code::success)
+    {
+        throw std::runtime_error{"Failed to read GENLIB library."};
+    }
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // stats for ortho
@@ -137,9 +139,12 @@ try
         fmt::print("[i] processing {}\n", benchmark);
         mockturtle::xag_network xag{};
 
-        [[maybe_unused]] const auto read_verilog_result =
+        const auto read_verilog_result =
             lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
-        assert(read_verilog_result == lorina::return_code::success);
+        if (read_verilog_result != lorina::return_code::success)
+        {
+            throw std::runtime_error{"Failed to read Verilog benchmark."};
+        }
 
         // compute depth
         const mockturtle::depth_view depth_xag{xag};
