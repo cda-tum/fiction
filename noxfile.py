@@ -106,6 +106,7 @@ def _run_tests(
     install_args: Sequence[str] = (),
     extra_command: Sequence[str] = (),
     pytest_run_args: Sequence[str] = (),
+    extras: Sequence[str] = ("plot",),
 ) -> None:
     env = {"UV_PROJECT_ENVIRONMENT": session.virtualenv.location}
     _install_build_tools(session)
@@ -127,6 +128,7 @@ def _run_tests(
         "sync",
         "--inexact",
         "--no-dev",  # do not auto-install dev dependencies
+        *(argument for extra in extras for argument in ("--extra", extra)),
         "--no-build-isolation-package",
         "mnt-pyfiction",  # build the project without isolation
         *install_args,
@@ -170,6 +172,12 @@ def minimums(session: nox.Session) -> None:
     this session next to anything else in the same worktree.
     """
     with preserve_lockfile(session):
+        _run_tests(
+            session,
+            install_args=["--resolution", "lowest-direct"],
+            extras=(),
+            pytest_run_args=["test/python/cli/test_cli_opdom.py", "-k", "without_plot_extra"],
+        )
         _run_tests(session, install_args=["--resolution", "lowest-direct"])
 
 

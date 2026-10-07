@@ -82,6 +82,9 @@ email = "benjamin.hien@tum.de"
 name = "Willem Lambooy"
 email = "willem.lambooy@tum.de"
 
+[project.optional-dependencies]
+plot = [ "matplotlib>=3.10.0", "plotly>=6.0.0" ]
+
 [project.urls]
 Source = "https://github.com/cda-tum/fiction"
 Tracker = "https://github.com/cda-tum/fiction/issues"
@@ -90,6 +93,7 @@ Research = "https://www.cda.cit.tum.de/research/fcn/"
 
 [project.scripts]
 fiction = "mnt.fiction.cli.app:main"
+fiction-opdom = "mnt.fiction.opdom:main"
 
 [dependency-groups]
 dev = [
@@ -205,6 +209,7 @@ skip = [ "*-musllinux*", "cp3*t-*" ]
 archs = "auto64"
 build-frontend = "build[uv]"
 test-command = "pytest"
+test-extras = [ "plot" ]
 # The wheel does not ship its own tests, so the suite is copied in next to the installed
 # wheel. `test-sources` keeps the relative path, and copying `pyproject.toml` along with it
 # gives pytest its configuration file, so the wheel runs the same suite under the same

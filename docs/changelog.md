@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
+  - Added `fiction-opdom` and shared `opdom` options for SQD computation, statistics, and 2D/3D static or
+    interactive plots, including Sketch. Install `mnt-pyfiction[plot]` for plotting support.
   - `pip install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
     completion, script files, piped input, and JSON statistics. The shell also runs as `python -m mnt.fiction.cli`.
   - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
