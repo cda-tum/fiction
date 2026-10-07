@@ -46,7 +46,7 @@ jobs:
           PACKAGE_TBB: ${{ matrix.tbb }}
         run: |
           if [ "$PACKAGE_TBB" = ON ]; then
-            python test/package/run.py --cmake-option=-DCMAKE_REQUIRE_FIND_PACKAGE_TBB=ON
+            python test/package/run.py --with-tbb
           else
-            python test/package/run.py --cmake-option=-DCMAKE_DISABLE_FIND_PACKAGE_TBB=ON
+            python test/package/run.py
           fi

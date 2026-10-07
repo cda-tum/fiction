@@ -3,21 +3,33 @@
 # mockturtle is installed into this prefix alongside _fiction_, so look there
 # first rather than asking the consumer to put the prefix on CMAKE_PREFIX_PATH.
 include(CMakeFindDependencyMacro)
-# Dependency configs can overwrite PACKAGE_PREFIX_DIR before CMake 3.30.
-set(_fiction_package_prefix "${PACKAGE_PREFIX_DIR}")
-# A cached mockturtle_DIR must not select another installation.
-set(mockturtle_DIR
-    "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/cmake/mockturtle")
-find_dependency(mockturtle CONFIG PATHS "${PACKAGE_PREFIX_DIR}" NO_DEFAULT_PATH)
-if(@TBB_FOUND@)
-  set(_fiction_module_path "${CMAKE_MODULE_PATH}")
-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
-  find_dependency(TBB)
-  set(CMAKE_MODULE_PATH "${_fiction_module_path}")
-  unset(_fiction_module_path)
+# Keep dependency lookup state local, including find_dependency's early returns.
+function(_fiction_find_dependencies)
+  set(fiction_FOUND
+      FALSE
+      PARENT_SCOPE)
+  set(fiction_NOT_FOUND_MESSAGE
+      "A required mockturtle or TBB dependency is unavailable."
+      PARENT_SCOPE)
+  # A cached mockturtle_DIR must not select another installation.
+  set(mockturtle_DIR
+      "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/cmake/mockturtle")
+  find_dependency(mockturtle CONFIG PATHS "${PACKAGE_PREFIX_DIR}"
+                  NO_DEFAULT_PATH)
+  if(@FICTION_WITH_TBB@)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+    find_dependency(TBB)
+  endif()
+  set(fiction_FOUND
+      TRUE
+      PARENT_SCOPE)
+  unset(fiction_NOT_FOUND_MESSAGE PARENT_SCOPE)
+endfunction()
+
+_fiction_find_dependencies()
+if(NOT fiction_FOUND)
+  return()
 endif()
-set(PACKAGE_PREFIX_DIR "${_fiction_package_prefix}")
-unset(_fiction_package_prefix)
 
 include("${CMAKE_CURRENT_LIST_DIR}/fictionTargets.cmake")
 

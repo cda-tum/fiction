@@ -21,6 +21,7 @@ def main() -> None:
     """Install fiction, remove its producer tree, and check SAT equivalence."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cmake-option", action="append", default=[])
+    parser.add_argument("--with-tbb", action="store_true")
     args = parser.parse_args()
     source = Path(__file__).resolve().parents[2]
     scratch = source / ".ai"
@@ -52,6 +53,7 @@ def main() -> None:
             "-DFICTION_TEST=OFF",
             "-DFICTION_ENABLE_CACHE=OFF",
             "-DCMAKE_BUILD_TYPE=Release",
+            f"-DCMAKE_{'REQUIRE' if args.with_tbb else 'DISABLE'}_FIND_PACKAGE_TBB=ON",
             f"-DCMAKE_INSTALL_PREFIX={prefix.as_posix()}",
             *args.cmake_option,
             cwd=producer,
@@ -86,6 +88,18 @@ def main() -> None:
         )
         run("cmake", "--build", build, "--parallel", "2")
         run("ctest", "--test-dir", build, "--output-on-failure")
+        if args.with_tbb:
+            run(
+                "cmake",
+                "-S",
+                work / "consumer-source",
+                "-B",
+                work / "missing-tbb",
+                "-G",
+                "Ninja",
+                "-DEXPECT_MISSING_TBB=ON",
+                f"-Dfiction_DIR={relocated.as_posix()}/lib/cmake/fiction",
+            )
 
 
 if __name__ == "__main__":
