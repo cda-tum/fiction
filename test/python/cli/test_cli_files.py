@@ -151,7 +151,7 @@ def test_fgl_round_trip(shell: Shell, resource: Callable[[str], str], tmp_path: 
     if topology == "hexagonal":
         shell.ok("hex")
     if topology == "shifted_cartesian":
-        layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (1, 0), "2DDWave", "wire")
+        layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 1), "2DDWave", "wire")
         source = layout.create_pi("a", (0, 0))
         layout.create_po(source, "f", (1, 0))
         shell.session.gate_layouts.add(layout)
@@ -278,7 +278,7 @@ def test_write_more_cell_formats(shell: Shell, resource: Callable[[str], str], t
 
 def test_write_qcc_component_name(shell: Shell, tmp_path: Path) -> None:
     """--component-name names the QCC component after the file, as the C++ `qcc -c` did."""
-    layout = inml_layout((3, 0))
+    layout = inml_layout((4, 1))
     layout.set_layout_name("mygate")
     cell = inml_magnet_type
     layout.assign_cell_type((0, 0), cell.INPUT)

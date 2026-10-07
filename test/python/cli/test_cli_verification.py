@@ -45,7 +45,7 @@ def test_check(mux21_shell: Shell) -> None:
     assert isinstance(result, dict)
     assert result["DRVs"] == 0
     assert result["Warnings"] == 0
-    for section in ("Unplaced nodes", "Dead placed nodes", "Missing connections", "I/O counts"):
+    for section in ("Objects outside extent", "Missing connections", "I/O counts"):
         assert section in result, f"the report lost '{section}'"
     assert "violations" in mux21_shell.output
 
