@@ -424,7 +424,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - **Breaking:** `offset_coordinate` becomes `coordinate`, and `offset_area` and `offset_volume` become `area_of` and
     `volume_of`, in `mnt.pyfiction.layouts`. `cube_coordinate`, `cube_area`, `cube_volume`, and the `int_repr` constructor
-    are gone. `stacked_cartesian_layout` is an alias of `cartesian_layout`.
+    are gone.
 
   - **Breaking:** `coordinate()` denotes the origin, and coordinates accept the full signed 32-bit range. Layout dimensions
     use `Extent(width, height, layers)` counts. Missing neighbors and empty bounds return `None`; `is_valid()` and coordinate
@@ -450,6 +450,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** `reserve_input_nodes` is gone. Place each primary input with `place` or `create_pi` when its coordinate is known.
 - Data structures:
 
+  - **Breaking:** Layouts now reject more than two layers. Use one ground layer and an optional crossing layer;
+    empty layouts remain supported.
   - **Breaking:** The traits `is_clocked_layout_v`, `has_synchronization_elements_v`, `is_tile_based_layout_v`, and
     the capability traits that every gate-level layout satisfies: the clocked-zone traits
     `has_is_incoming_clocked_v`, `has_is_outgoing_clocked_v`, `has_foreach_incoming_clocked_zone_v`, and
@@ -473,6 +475,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
 - Python bindings:
 
+  - **Breaking:** Removed `stacked_cartesian_layout`. Use `cartesian_layout` with at most two layers.
   - The `report` methods of the statistics classes that took a C++ output stream, which no Python
     call could satisfy; `repr()` returns the same text.
   - **Breaking:** The classes `clocked_cartesian_layout`, `clocked_shifted_cartesian_layout`,

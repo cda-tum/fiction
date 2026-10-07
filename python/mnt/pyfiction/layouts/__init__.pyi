@@ -10,7 +10,7 @@
 
 import enum
 from collections.abc import Sequence
-from typing import TypeAlias, overload
+from typing import overload
 
 import mnt.pyfiction.inml
 import mnt.pyfiction.mol_qca
@@ -857,8 +857,6 @@ class cartesian_layout:
 
     def __deepcopy__(self, memo: dict) -> cartesian_layout:
         """Returns an independent geometry copy."""
-
-stacked_cartesian_layout: TypeAlias = cartesian_layout
 
 class shifted_cartesian_layout:
     """

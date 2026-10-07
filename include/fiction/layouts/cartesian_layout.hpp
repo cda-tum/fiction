@@ -77,6 +77,7 @@ class cartesian_layout : public layout_base
      * Creates geometry with half-open, zero-origin bounds. The default extent is empty.
      * @param size Axis sizes.
      * @throws std::invalid_argument If a size exceeds the coordinate domain.
+     * @throws std::out_of_range If the layer count exceeds two.
      */
     explicit cartesian_layout(const extent& size = {}) : dimension{checked(size)} {}
     /** @return Independent copy of the geometry. */
@@ -141,6 +142,7 @@ class cartesian_layout : public layout_base
      * Changes the geometry's axis sizes.
      * @param size Axis sizes.
      * @throws std::invalid_argument If a size exceeds the coordinate domain.
+     * @throws std::out_of_range If the layer count exceeds two. The dimensions remain unchanged.
      */
     void resize(const extent& size)
     {
@@ -509,14 +511,14 @@ class cartesian_layout : public layout_base
         return c.z == decltype(c.z){0};
     }
     /**
-     * Returns whether the given coordinate is located in a crossing layer where z is not minimal.
+     * Returns whether the given coordinate is located in the crossing layer at z = 1.
      *
      * @param c Coordinate to check for elevation.
-     * @return `true` iff `c` is in a crossing layer.
+     * @return `true` iff `c.z` is 1.
      */
     [[nodiscard]] constexpr bool is_crossing_layer(const coordinate& c) const noexcept
     {
-        return c.z > decltype(c.z){0};
+        return c.z == 1;
     }
     // NOLINTEND(readability-convert-member-functions-to-static)
     /**

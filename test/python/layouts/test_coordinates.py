@@ -14,15 +14,18 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from mnt.pyfiction import layouts
 from mnt.pyfiction.layouts import (
     Extent,
     area,
     arrangement,
+    cartesian_gate_layout,
     cartesian_layout,
     coordinate,
+    hexagonal_gate_layout,
     hexagonal_layout,
+    shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
-    stacked_cartesian_layout,
     volume,
 )
 
@@ -108,14 +111,48 @@ def test_repr():
     assert repr(coordinate(-3, 2, 1)) == "(-3,2,1)"
 
 
-def test_stacked_cartesian_layout_is_an_alias_of_cartesian_layout():
-    assert stacked_cartesian_layout is cartesian_layout
+@pytest.mark.parametrize("layers", [0, 1, 2])
+@pytest.mark.parametrize(
+    "a", [arrangement.ODD_ROW, arrangement.EVEN_ROW, arrangement.ODD_COLUMN, arrangement.EVEN_COLUMN]
+)
+@pytest.mark.parametrize(
+    "make_layout",
+    [
+        pytest.param(lambda size, _a: cartesian_layout(size), id="cartesian"),
+        pytest.param(lambda size, a: hexagonal_layout(a, size), id="hexagonal"),
+        pytest.param(lambda size, a: shifted_cartesian_layout(a, size), id="shifted_cartesian"),
+        pytest.param(lambda size, _a: cartesian_gate_layout(size), id="cartesian_gate"),
+        pytest.param(lambda size, a: hexagonal_gate_layout(a, size), id="hexagonal_gate"),
+        pytest.param(lambda size, a: shifted_cartesian_gate_layout(a, size), id="shifted_cartesian_gate"),
+    ],
+)
+def test_layout_layer_limit(make_layout: Callable, a: arrangement, layers: int) -> None:
+    """Layouts accept at most two layers and retain dimensions after rejected resize."""
+    layout = make_layout((2, 3, layers), a)
+    assert layout.layers() == layers
+    assert not layout.is_crossing_layer((0, 0, -1))
+    assert not layout.is_crossing_layer((0, 0, 0))
+    assert layout.is_crossing_layer((0, 0, 1))
+    assert not layout.is_crossing_layer((0, 0, 2))
+    for too_many in (3, 2**31):
+        with pytest.raises(IndexError):
+            make_layout((2, 3, too_many), a)
+        with pytest.raises(IndexError):
+            layout.resize((4, 5, too_many))
+        assert layout.dimensions() == Extent(2, 3, layers)
+    duplicate = copy.copy(layout)
+    with pytest.raises(IndexError):
+        duplicate.resize((4, 5, 3))
+    assert duplicate.dimensions() == layout.dimensions()
+    layout.resize((4, 5, 2))
+    assert layout.dimensions() == Extent(4, 5, 2)
+    layout.resize((0, 0, 0))
+    assert layout.coordinates() == []
 
-    stacked = cartesian_layout((3, 3, 4))
 
-    assert stacked.above((0, 0, 0)) == coordinate(0, 0, 1)
-    assert stacked.above((0, 0, 3)) is None
-    assert stacked.above((0, 0, 4)) is None
+def test_stacked_layout_is_not_exported() -> None:
+    """The layouts module exports Cartesian layouts without a stacked alias."""
+    assert not hasattr(layouts, "stacked_cartesian_layout")
 
 
 def test_layouts_reject_negative_extents():
@@ -266,6 +303,6 @@ def test_coordinate_ranges_accept_optional_bounds(
     assert len(layout.coordinates(start=None, stop=None)) == 24
     with pytest.raises(ValueError, match="layer zero"):
         layout.ground_coordinates(stop=(0, 0, 1))
-    huge = make_layout((2**31, 2**31, 4))
+    huge = make_layout((2**31, 2**31, 2))
     assert huge.coordinates(stop=(2, 0)) == [coordinate(0, 0), coordinate(1, 0)]
     assert huge.ground_coordinates(stop=(2, 0)) == [coordinate(0, 0), coordinate(1, 0)]

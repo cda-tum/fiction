@@ -236,7 +236,7 @@ TEST_CASE("Clock determination uses explicit constants and logical input ports",
 TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[determine-clocking-ports]")
 {
     using layout = gate_level_layout<cartesian_layout>;
-    layout lyt{{3, 1, 3}, clocking::open()};
+    layout lyt{{3, 1, 2}, clocking::open()};
     SECTION("Floating crossing wire")
     {
         const auto pi   = lyt.create_pi("a", {0, 0});
@@ -244,9 +244,9 @@ TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[d
         lyt.create_po(wire, "out", {2, 0});
         CHECK_FALSE(lyt.find_object({1, 0}).has_value());
     }
-    SECTION("Occupied layers with an empty intermediate layer")
+    SECTION("Occupied ground and crossing layers")
     {
-        for (const auto layer : {0, 2})
+        for (const auto layer : {0, 1})
         {
             const auto pi   = lyt.create_pi("a", {0, 0, layer});
             const auto wire = lyt.create_buf(pi, {1, 0, layer});

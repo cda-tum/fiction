@@ -2010,12 +2010,29 @@ TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-la
 
 TEST_CASE("Legacy FGL maximum layer indices become layer counts", "[read-fgl-layout]")
 {
-    std::stringstream stream{R"(<fgl><layout><size><x>0</x><y>0</y><z>2</z></size>
+    std::stringstream stream{R"(<fgl><layout><size><x>0</x><y>0</y><z>1</z></size>
       <clocking><name>2DDWave</name></clocking></layout></fgl>)"};
     const auto        layout = read_fgl_layout<cart_gate_clk_lyt>(stream);
     CHECK(layout.width() == 1);
     CHECK(layout.height() == 1);
-    CHECK(layout.layers() == 3);
+    CHECK(layout.layers() == 2);
+}
+
+TEST_CASE("FGL rejects more than two layers", "[read-fgl-layout]")
+{
+    /** Version and z value of an unsupported layer extent. */
+    const auto xml = GENERATE(
+        std::string{R"(<fgl><layout><size><x>0</x><y>0</y><z>2</z></size>
+          <clocking><name>2DDWave</name></clocking></layout></fgl>)"},
+        std::string{R"(<fgl version="2"><layout><size><x>1</x><y>1</y><z>3</z></size>
+          <clocking><name>2DDWave</name></clocking></layout></fgl>)"});
+    /** Target layout that a rejected read preserves. */
+    cart_gate_clk_lyt target{{2, 3, 1}, clocking::twoddwave(), "kept"};
+    /** Input with an unsupported layer extent. */
+    std::stringstream stream{xml};
+    CHECK_THROWS_AS(read_fgl_layout(target, stream), fgl_parsing_error);
+    CHECK(target.dimensions() == layout_base::extent{2, 3, 1});
+    CHECK(target.get_layout_name() == "kept");
 }
 
 TEST_CASE("Malformed manual FGL obstructions leave the target unchanged", "[read-fgl-layout]")

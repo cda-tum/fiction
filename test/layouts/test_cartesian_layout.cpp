@@ -69,22 +69,22 @@ TEST_CASE("Cartesian sizes and value copies", "[cartesian-layout][size-contract]
     CHECK(!empty.southern_border_of({0, 0}));
     CHECK(!empty.western_border_of({0, 0}));
     CHECK(!empty.is_at_any_border({0, 0}));
-    const cartesian_layout original{{5, 4, 3}};
+    const cartesian_layout original{{5, 4, 2}};
     auto                   copy = original;
-    copy.resize({10, 9, 8});
-    CHECK(original.dimensions() == layout_base::extent{5, 4, 3});
+    copy.resize({10, 9, 1});
+    CHECK(original.dimensions() == layout_base::extent{5, 4, 2});
     CHECK(original.clone().dimensions() == original.dimensions());
-    CHECK(copy.dimensions() == layout_base::extent{10, 9, 8});
+    CHECK(copy.dimensions() == layout_base::extent{10, 9, 1});
     CHECK(original.width() == 5);
     CHECK(original.height() == 4);
-    CHECK(original.layers() == 3);
-    CHECK(original.last_coordinate() == layout_base::coordinate{4, 3, 2});
+    CHECK(original.layers() == 2);
+    CHECK(original.last_coordinate() == layout_base::coordinate{4, 3, 1});
     CHECK(original.coord(-1, 2, 7) == layout_base::coordinate{-1, 2, 7});
     CHECK(!original.contains_coordinate({5, 0}));
     CHECK(!original.contains_coordinate({0, 4}));
     CHECK(!original.contains_coordinate({0, 0, 3}));
     CHECK(!original.contains_coordinate({-1, 0}));
-    for (const auto sizes : {layout_base::extent{0, 4, 3}, layout_base::extent{5, 0, 3}, layout_base::extent{5, 4, 0}})
+    for (const auto sizes : {layout_base::extent{0, 4, 2}, layout_base::extent{5, 0, 2}, layout_base::extent{5, 4, 0}})
     {
         const cartesian_layout layout{sizes};
         CHECK(!layout.last_coordinate());

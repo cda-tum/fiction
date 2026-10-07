@@ -118,6 +118,7 @@ class shifted_cartesian_layout : public hexagonal_layout
      * @param a Arrangement of shifted rows or columns.
      * @param size Axis sizes.
      * @throws std::invalid_argument If a size exceeds the coordinate domain.
+     * @throws std::out_of_range If the layer count exceeds two.
      */
     explicit shifted_cartesian_layout(const arrangement a, const HexagonalLayout::extent& size = {}) :
             HexagonalLayout(a, size)

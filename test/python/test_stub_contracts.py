@@ -19,7 +19,6 @@ from mnt.pyfiction.layouts import (
     cartesian_gate_layout,
     cartesian_layout,
     coordinate,
-    stacked_cartesian_layout,
 )
 from mnt.pyfiction.physical_design import place, post_layout_optimization_params
 from mnt.pyfiction.sidb.simulation import sidb_simulation_result
@@ -45,8 +44,8 @@ def test_coordinate_input_and_output_types() -> None:
     layout.resize((3, 3, 1))
     east = layout.east((0, 0))
     assert east == coordinate(1, 0)
-    stacked = stacked_cartesian_layout((2, 2, 3))
-    above = stacked.above((0, 0, 0))
+    layout.resize((2, 2, 2))
+    above = layout.above((0, 0, 0))
     assert above == coordinate(0, 0, 1)
     if TYPE_CHECKING:
         assert_type(east, coordinate | None)

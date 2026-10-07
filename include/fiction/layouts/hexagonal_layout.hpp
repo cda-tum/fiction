@@ -200,6 +200,7 @@ class hexagonal_layout : public layout_base
      * @param a Arrangement of shifted rows or columns.
      * @param size Axis sizes.
      * @throws std::invalid_argument If a size exceeds the coordinate domain.
+     * @throws std::out_of_range If the layer count exceeds two.
      */
     explicit hexagonal_layout(const layouts::arrangement a, const extent& size = {}) :
             dimension{checked(size)},
@@ -276,6 +277,7 @@ class hexagonal_layout : public layout_base
      * Changes the geometry's axis sizes.
      * @param size Axis sizes.
      * @throws std::invalid_argument If a size exceeds the coordinate domain.
+     * @throws std::out_of_range If the layer count exceeds two. The dimensions remain unchanged.
      */
     void resize(const extent& size)
     {
@@ -714,14 +716,14 @@ class hexagonal_layout : public layout_base
         return c.z == 0;
     }
     /**
-     * Returns whether the given coordinate is located in a crossing layer where z is not minimal.
+     * Returns whether the given coordinate is located in the crossing layer at z = 1.
      *
      * @param c Coordinate to check for elevation.
-     * @return `true` iff `c` is in a crossing layer.
+     * @return `true` iff `c.z` is 1.
      */
     [[nodiscard]] constexpr bool is_crossing_layer(const coordinate& c) const noexcept
     {
-        return c.z > 0;
+        return c.z == 1;
     }
     // NOLINTEND(readability-convert-member-functions-to-static)
     /**
