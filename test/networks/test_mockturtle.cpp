@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Tests that a gate-level layout satisfies the mockturtle network interface.
+ * @brief Tests extracted layout simulation and mockturtle technology mapping.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -22,6 +22,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>
 
@@ -44,34 +45,37 @@ using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::synthesis;
 
-TEST_CASE("Simulation", "[mockturtle]")
+TEST_CASE("Extracted layout simulation", "[mockturtle]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
+    /** @brief Placed layout whose logic enters mockturtle through extraction. */
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
+    REQUIRE_FALSE(mockturtle::is_network_type_v<gate_layout>);
 
-    auto and_or_layout   = blueprints::and_or_gate_layout<gate_layout>();
-    auto xor_maj_layout  = blueprints::xor_maj_gate_layout<gate_layout>();
-    auto crossing_layout = blueprints::crossing_layout<gate_layout>();
+    const auto and_or_layout   = blueprints::and_or_gate_layout<gate_layout>();
+    const auto xor_maj_layout  = blueprints::xor_maj_gate_layout<gate_layout>();
+    const auto crossing_layout = blueprints::crossing_layout<gate_layout>();
+
+    REQUIRE((mockturtle::has_compute_v<decltype(extract_layout_network(and_or_layout)), kitty::dynamic_truth_table>));
 
     kitty::dynamic_truth_table tt_maj(3u), tt_and(2u), tt_or(2u);
     kitty::create_from_hex_string(tt_maj, "e8");
     kitty::create_from_hex_string(tt_and, "8");
     kitty::create_from_hex_string(tt_or, "e");
 
-    auto and_or_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
-        and_or_layout,
-        mockturtle::default_simulator<kitty::dynamic_truth_table>(static_cast<unsigned>(and_or_layout.num_pis())));
+    const auto and_or_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
+        extract_layout_network(and_or_layout),
+        mockturtle::default_simulator<kitty::dynamic_truth_table>{and_or_layout.num_pis()});
 
     REQUIRE(and_or_tts.size() == 2);
     CHECK(and_or_tts[0] == tt_and);
     CHECK(and_or_tts[1] == tt_or);
 
-    auto xor_maj_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
-        xor_maj_layout,
-        mockturtle::default_simulator<kitty::dynamic_truth_table>(static_cast<unsigned>(xor_maj_layout.num_pis())));
+    const auto xor_maj_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
+        extract_layout_network(xor_maj_layout),
+        mockturtle::default_simulator<kitty::dynamic_truth_table>{xor_maj_layout.num_pis()});
 
     kitty::dynamic_truth_table tt_3xor2(3u);
     kitty::create_from_hex_string(tt_3xor2, "66");  // 2-input XOR in three variables (1 xor 2)
@@ -80,9 +84,9 @@ TEST_CASE("Simulation", "[mockturtle]")
     CHECK(xor_maj_tts[0] == tt_maj);
     CHECK(xor_maj_tts[1] == tt_3xor2);
 
-    auto crossing_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
-        crossing_layout,
-        mockturtle::default_simulator<kitty::dynamic_truth_table>(static_cast<unsigned>(crossing_layout.num_pis())));
+    const auto crossing_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
+        extract_layout_network(crossing_layout),
+        mockturtle::default_simulator<kitty::dynamic_truth_table>{crossing_layout.num_pis()});
 
     kitty::dynamic_truth_table tt_and12(4u), tt_and34(4u);
 
@@ -95,15 +99,16 @@ TEST_CASE("Simulation", "[mockturtle]")
 
     SECTION("Synchronization elements")
     {
+        /** @brief Placed layout with owned synchronization elements. */
         using se_layout = gate_level_layout<cartesian_layout>;
 
-        REQUIRE(mockturtle::has_compute_v<se_layout, kitty::dynamic_truth_table>);
+        REQUIRE_FALSE(mockturtle::is_network_type_v<se_layout>);
 
-        auto se_or_layout = blueprints::se_gate_layout<se_layout>();
+        const auto se_or_layout = blueprints::se_gate_layout<se_layout>();
 
-        auto se_or_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
-            se_or_layout,
-            mockturtle::default_simulator<kitty::dynamic_truth_table>(static_cast<unsigned>(se_or_layout.num_pis())));
+        const auto se_or_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
+            extract_layout_network(se_or_layout),
+            mockturtle::default_simulator<kitty::dynamic_truth_table>{se_or_layout.num_pis()});
 
         REQUIRE(se_or_tts.size() == 1);
         CHECK(se_or_tts[0] == tt_or);
