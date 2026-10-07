@@ -173,6 +173,34 @@ TEST_CASE("Inputs that drive outputs directly", "[plane]")
     check_plane_both_gadgets(tec);
 }
 
+TEST_CASE("Nodes with two outputs push the following output rows down", "[plane]")
+{
+    // the first node of the output level drives two outputs; the next node sits right below it on the diagonal, so
+    // its output row has to move down, and so has the row of the node after that
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto x3 = tec.create_pi();
+    const auto x4 = tec.create_pi();
+    const auto a1 = tec.create_and(x1, x2);
+    const auto o1 = tec.create_or(x2, x3);
+    const auto a2 = tec.create_and(x3, x4);
+    tec.create_po(a1);
+    tec.create_po(a1);
+    tec.create_po(o1);
+    tec.create_po(a2);
+    tec.create_po(a2);
+
+    check_plane_both_gadgets(tec);
+
+    const auto planar = planarization(rank(tec));
+    const auto layout = plane<gate_layout>(planar);
+
+    CHECK(layout.num_pos() == 5);
+    CHECK(layout.num_crossings() == 0);
+}
+
 TEST_CASE("Progress is reported", "[plane]")
 {
     const auto planar = planarization(rank(blueprints::full_adder_network<mockturtle::mig_network>()));

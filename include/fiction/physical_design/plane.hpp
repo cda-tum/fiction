@@ -1196,10 +1196,10 @@ class plane_impl
             progress.advance();
         }
 
-        const auto extra_row = route_outputs();
+        const auto extra_rows = route_outputs();
         progress.advance();
 
-        layout.resize({first_pos.x + 1, place_t.y + extra_row, 0});
+        layout.resize({first_pos.x + 1, place_t.y + extra_rows, 0});
 
         networks::restore_names(ntk, layout, node2pos);
 
@@ -1368,20 +1368,56 @@ class plane_impl
         }
     }
     /**
-     * Routes every primary output to the right border. A node with two outputs gets the second one from a wire two
-     * tiles below it.
+     * Routes every primary output to the right border. The nodes of the output level sit on one diagonal, so each
+     * node owns the row of its tile. A node with two outputs takes the row below as well, which pushes the rows of
+     * every following node down by one until a gap between two nodes absorbs the shift; a pushed node first runs
+     * south to its row, then east. Rows are assigned in rank order and the outputs are created in output order.
      *
-     * @return `1` if the second output of the last node needs a row below the last diagonal, `0` otherwise.
+     * @return `1` plus the number of rows the shifts add below the last diagonal, `0` if none were needed.
      * @throws std::logic_error If a node drives more than two outputs.
      */
     [[nodiscard]] uint64_t route_outputs()
     {
-        mockturtle::node_map<uint8_t, fanout_ntk> outputs_of{ntk, 0};
-        uint64_t                                  extra_row = 0;
-        uint32_t                                  po_index  = 0;
+        // outputs per driver, in output order
+        mockturtle::node_map<std::vector<uint32_t>, fanout_ntk> outputs_of{ntk};
+        ntk.foreach_po(
+            [this, &outputs_of](const auto& po, const auto i)
+            {
+                if (const auto drv = ntk.get_node(po); !ntk.is_constant(drv))
+                {
+                    outputs_of[drv].push_back(static_cast<uint32_t>(i));
+                }
+            });
+
+        // row of every output, assigned in the rank order of the drivers
+        std::vector<uint64_t> row_of(ntk.num_pos(), 0);
+        uint64_t              next_free_row = 0;
+
+        ntk.foreach_node_in_rank(ntk.depth(),
+                                 [this, &outputs_of, &row_of, &next_free_row](const auto& n)
+                                 {
+                                     const auto& outputs = outputs_of[n];
+
+                                     if (outputs.size() > 2)
+                                     {
+                                         throw std::logic_error(
+                                             fmt::format("node {} drives more than two primary outputs", n));
+                                     }
+
+                                     auto row = static_cast<uint64_t>(static_cast<tile<Lyt>>(node2pos[n]).y);
+
+                                     for (const auto po_index : outputs)
+                                     {
+                                         row              = std::max(row, next_free_row);
+                                         row_of[po_index] = row;
+                                         next_free_row    = row + 1;
+                                     }
+                                 });
+
+        uint64_t last_row = 0;
 
         ntk.foreach_po(
-            [this, &outputs_of, &extra_row, &po_index](const auto& po)
+            [this, &row_of, &last_row](const auto& po, const auto i)
             {
                 const auto drv = ntk.get_node(po);
 
@@ -1390,35 +1426,25 @@ class plane_impl
                     return;
                 }
 
-                auto& count = outputs_of[drv];
+                const auto po_index = static_cast<uint32_t>(i);
+                auto       anchor   = static_cast<tile<Lyt>>(node2pos[drv]);
 
-                if (count >= 2)
+                // down to the output's row, sharing the south run with the node's other output
+                if (row_of[po_index] > anchor.y)
                 {
-                    throw std::logic_error(fmt::format("node {} drives more than two primary outputs", drv));
+                    anchor = static_cast<tile<Lyt>>(wire_straight(layout, anchor, {anchor.x, row_of[po_index] + 1}));
                 }
 
-                auto po_tile = static_cast<tile<Lyt>>(node2pos[drv]);
+                const tile<Lyt> border{first_pos.x + 1, anchor.y};
 
-                if (count == 1)
-                {
-                    if (po_tile.y == place_t.y)
-                    {
-                        extra_row = 1;
-                    }
+                layout.create_po(wire_straight(layout, anchor, border), output_name(po_index), border);
 
-                    po_tile = static_cast<tile<Lyt>>(wire_straight(layout, po_tile, {po_tile.x, po_tile.y + 2}));
-                }
-
-                const tile<Lyt> anchor{po_tile};
-                po_tile.x = first_pos.x + 1;
-
-                layout.create_po(wire_straight(layout, anchor, po_tile), output_name(po_index), po_tile);
-
-                ++count;
-                ++po_index;
+                last_row = std::max(last_row, static_cast<uint64_t>(anchor.y));
             });
 
-        return extra_row;
+        const auto bottom = static_cast<uint64_t>(place_t.y);
+
+        return last_row > bottom ? last_row - bottom : 0;
     }
     /**
      * Name of a primary output: the network's if it has one, `po<index>` otherwise.
