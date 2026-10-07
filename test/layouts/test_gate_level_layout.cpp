@@ -124,6 +124,30 @@ TEST_CASE("Layouts move without throwing so containers move them on growth", "[g
     STATIC_REQUIRE(std::is_nothrow_move_assignable_v<gate_level_layout<cartesian_layout>>);
 }
 
+TEST_CASE("Objects with more inputs than the inline capacity keep ordered ports", "[gate-layout-editing]")
+{
+    gate_level_layout<cartesian_layout>                           lyt{{6, 6}};
+    std::vector<gate_level_layout<cartesian_layout>::output_port> pis{};
+    for (uint32_t i = 0; i < 5; ++i)
+    {
+        pis.push_back(lyt.create_pi("pi" + std::to_string(i), {static_cast<int64_t>(i), 0}));
+    }
+    kitty::dynamic_truth_table parity{5};
+    kitty::create_from_hex_string(parity, "96696996");
+    const auto gate = lyt.create_node(pis, parity, {2, 2});
+    CHECK(lyt.input_count(gate.object) == 5);
+    CHECK(lyt.fanin_size(gate.object) == 5);
+    for (uint32_t i = 0; i < 5; ++i)
+    {
+        CHECK(lyt.source({gate.object, i}) == pis[i]);
+    }
+    lyt.disconnect({gate.object, 3});
+    CHECK(lyt.fanin_size(gate.object) == 4);
+    CHECK_FALSE(lyt.source({gate.object, 3}).has_value());
+    CHECK(lyt.source({gate.object, 4}) == pis[4]);
+    CHECK_THROWS_AS(lyt.source({gate.object, 5}), std::out_of_range);
+}
+
 TEST_CASE("Moved layouts leave reusable empty sources", "[gate-layout-editing]")
 {
     gate_level_layout<cartesian_layout> source{{4, 4}};

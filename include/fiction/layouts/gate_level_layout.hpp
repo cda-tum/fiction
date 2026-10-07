@@ -1688,6 +1688,62 @@ class gate_level_layout : public CoordinateLayout
         /** @brief Logic gate. */
         GATE
     };
+    /** @brief Connection indices of an object's inputs. Up to three inputs live inline; more spill to the heap. */
+    class input_slots
+    {
+      public:
+        /** @brief Number of slots. */
+        [[nodiscard]] uint32_t size() const noexcept
+        {
+            return count;
+        }
+        /** @brief Resets to `n` disconnected slots. */
+        void assign(const uint32_t n)
+        {
+            count = n;
+            fixed.fill(NO_INDEX);
+            if (n > INLINE_CAPACITY)
+            {
+                spill.assign(n, NO_INDEX);
+            }
+        }
+        /** @brief Releases all slots. */
+        void clear() noexcept
+        {
+            count = 0;
+            spill.clear();
+        }
+        /** @brief Returns the connection index at slot `i`. */
+        [[nodiscard]] uint32_t& operator[](const uint32_t i) noexcept
+        {
+            return count > INLINE_CAPACITY ? spill[i] : fixed[i];
+        }
+        /** @brief Returns the connection index at slot `i`. */
+        [[nodiscard]] const uint32_t& operator[](const uint32_t i) const noexcept
+        {
+            return count > INLINE_CAPACITY ? spill[i] : fixed[i];
+        }
+        /** @brief Returns the first slot. */
+        [[nodiscard]] const uint32_t* begin() const noexcept
+        {
+            return count > INLINE_CAPACITY ? spill.data() : fixed.data();
+        }
+        /** @brief Returns the end of the slots. */
+        [[nodiscard]] const uint32_t* end() const noexcept
+        {
+            return begin() + count;
+        }
+
+      private:
+        /** @brief Slots stored without allocation; covers every built-in gate. */
+        static constexpr uint32_t INLINE_CAPACITY = 3;
+        /** @brief Number of slots in use. */
+        uint32_t count{};
+        /** @brief Inline slots. */
+        std::array<uint32_t, INLINE_CAPACITY> fixed{NO_INDEX, NO_INDEX, NO_INDEX};
+        /** @brief Slots of objects with more than `INLINE_CAPACITY` inputs. */
+        std::vector<uint32_t> spill{};
+    };
     /** @brief Hot object data. Names and truth-table payloads are stored separately. */
     struct object_record
     {
@@ -1704,7 +1760,7 @@ class gate_level_layout : public CoordinateLayout
         /** @brief Physical role. */
         object_kind kind{object_kind::REMOVED};
         /** @brief Input-index to connection mapping; missing entries remain holes. */
-        std::vector<uint32_t> inputs{};
+        input_slots inputs{};
     };
     /** @brief Mutable connection with constant-time removal from the source's sink list. */
     struct edge_record
@@ -1880,7 +1936,7 @@ class gate_level_layout : public CoordinateLayout
         record.position = t;
         record.function = function;
         record.kind     = kind;
-        record.inputs.resize(arity, NO_INDEX);
+        record.inputs.assign(arity);
         if (children.size() > NO_INDEX - edges.size())
         {
             throw std::length_error("Layout connection capacity exhausted");
