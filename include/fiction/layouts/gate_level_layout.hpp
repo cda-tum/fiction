@@ -196,15 +196,14 @@ class gate_level_layout : public CoordinateLayout
         }
         return *this;
     }
-    // Resetting the source's clock state can allocate.
-    // NOLINTBEGIN(cppcoreguidelines-noexcept-move-operations,hicpp-noexcept-move,performance-noexcept-move-constructor)
     /** @brief Moves owned state and leaves an empty reusable source with its original geometry. */
-    gate_level_layout(gate_level_layout&& other) : CoordinateLayout{static_cast<const CoordinateLayout&>(other).clone()}
+    gate_level_layout(gate_level_layout&& other) noexcept :
+            CoordinateLayout{static_cast<const CoordinateLayout&>(other).clone()}
     {
         swap_owned_state(other);
     }
     /** @brief Moves owned state and leaves an empty reusable source. */
-    gate_level_layout& operator=(gate_level_layout&& other)
+    gate_level_layout& operator=(gate_level_layout&& other) noexcept
     {
         if (this != &other)
         {
@@ -214,7 +213,6 @@ class gate_level_layout : public CoordinateLayout
         }
         return *this;
     }
-    // NOLINTEND(cppcoreguidelines-noexcept-move-operations,hicpp-noexcept-move,performance-noexcept-move-constructor)
     /** @brief Releases owned layout state. */
     ~gate_level_layout() = default;
     /** @brief Returns an independent value copy. */
@@ -1817,7 +1815,8 @@ class gate_level_layout : public CoordinateLayout
         }
         return object.inputs[port.index];
     }
-    /** @brief Rejects absent or occupied placement before any object mutation. */
+    /** @brief Rejects occupied placement before any object mutation. Coordinates outside the extent are valid during
+     * editing. */
     void check_placement(const tile& t) const
     {
         if (occupancy.contains(t))

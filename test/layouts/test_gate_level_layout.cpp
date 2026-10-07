@@ -118,6 +118,12 @@ TEST_CASE("Empty layouts own no implicit constants and require placement", "[gat
     static_assert(!std::is_invocable_v<decltype(&layout::create_pi), layout&, const std::string&>);
 }
 
+TEST_CASE("Layouts move without throwing so containers move them on growth", "[gate-layout-editing]")
+{
+    STATIC_REQUIRE(std::is_nothrow_move_constructible_v<gate_level_layout<cartesian_layout>>);
+    STATIC_REQUIRE(std::is_nothrow_move_assignable_v<gate_level_layout<cartesian_layout>>);
+}
+
 TEST_CASE("Moved layouts leave reusable empty sources", "[gate-layout-editing]")
 {
     gate_level_layout<cartesian_layout> source{{4, 4}};
