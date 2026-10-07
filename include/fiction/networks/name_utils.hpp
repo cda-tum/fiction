@@ -183,11 +183,9 @@ void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
     }
 }
 /**
- * Assigns all signal names from one network to another. For this purpose, a mapping between signals is needed in terms
- * of a `mockturtle::node_map`. Since gate-level layout's are network types as well, this function naturally works for
- * them, too.
+ * Transfers signal names from a logic network to a network or placed layout using a `mockturtle::node_map`.
  *
- * @tparam NtkSrc Source network type.
+ * @tparam NtkSrc Source logic network type.
  * @tparam NtkDest Target network or gate-level layout type.
  * @param ntk_src Source logic network whose signal names are to be transferred to `ntk_dest`.
  * @param ntk_dest Target logic network whose signal names are to be assigned `ntk_src`'s names.
@@ -197,7 +195,7 @@ void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
 template <typename NtkSrc, typename NtkDest, typename Signal>
 void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<Signal, NtkSrc>& old2new)
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc> || is_gate_level_layout_v<NtkSrc>);
+    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a logic network");
     static_assert(mockturtle::is_network_type_v<NtkDest> || is_gate_level_layout_v<NtkDest>);
 
     if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> &&
@@ -226,7 +224,7 @@ void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mocktu
  * branching_signal_container that is specifically used for networks or layouts that allow branches to be distinct,
  * e.g., by their position on the layout.
  *
- * @tparam NtkSrc Source network type.
+ * @tparam NtkSrc Source logic network type.
  * @tparam NtkDest Target network or gate-level layout type.
  * @tparam fanout_size Maximum fanout size in the network.
  * @param ntk_src Source logic network whose signal names are to be transferred to `ntk_dest`.
@@ -239,7 +237,7 @@ void restore_signal_names(
     const mockturtle::node_map<physical_design::branching_signal_container<NtkDest, NtkSrc, fanout_size>, NtkSrc>&
         old2new)
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc> || is_gate_level_layout_v<NtkSrc>);
+    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a logic network");
     static_assert(mockturtle::is_network_type_v<NtkDest> || is_gate_level_layout_v<NtkDest>);
 
     if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> &&
