@@ -49,8 +49,8 @@ def test_coordinate_input_and_output_types() -> None:
     above = stacked.above((0, 0, 0))
     assert above == coordinate(0, 0, 1)
     if TYPE_CHECKING:
-        assert_type(east, coordinate)
-        assert_type(above, coordinate)
+        assert_type(east, coordinate | None)
+        assert_type(above, coordinate | None)
 
 
 def test_optional_relocation_limit() -> None:

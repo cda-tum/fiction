@@ -88,7 +88,9 @@ def test_circuit_timeout(and_circuit: hexagonal_gate_layout, *, per_gate: bool) 
 
     assert and_circuit.num_pis() == 2
     assert and_circuit.num_pos() == 1
-    assert and_circuit.is_and(and_circuit.find_object((1, 1, 0)))
+    gate = and_circuit.find_object((1, 1, 0))
+    assert gate is not None
+    assert and_circuit.is_and(gate)
     assert (gates.operational_params.timeout if per_gate else params.timeout) == 0
 
 
@@ -134,7 +136,9 @@ def test_design_and_export(and_circuit: hexagonal_gate_layout, tmp_path: Path) -
     assert read_sqd_layout(str(output)).num_dots() == result.num_dots()
     assert and_circuit.num_pis() == 2
     assert and_circuit.num_pos() == 1
-    assert and_circuit.is_and(and_circuit.find_object((1, 1, 0)))
+    gate = and_circuit.find_object((1, 1, 0))
+    assert gate is not None
+    assert and_circuit.is_and(gate)
 
 
 def test_unsuccessful_design(and_circuit: hexagonal_gate_layout) -> None:

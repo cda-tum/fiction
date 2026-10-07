@@ -135,30 +135,15 @@ def test_gate_level_layout_iteration(make_layout: Callable[[], GateLayout]) -> N
     for port, name in ((x1, "x1"), (x2, "x2"), (x3, "x3"), (x4, "x4"), (f1, "f1"), (f2, "f2")):
         assert layout.get_name(port) == name
 
-    # incoming data flow
-    inx1 = layout.fanins(coordinate(1, 0))
-    assert len(inx1) == 0
+    # Declared inputs retain logical argument order.
+    assert layout.inputs(x1.object) == []
+    assert layout.inputs(f1.object) == [c]
+    assert layout.inputs(a2.object) == [b1, b2]
 
-    inf1 = layout.fanins(coordinate(3, 1))
-    assert len(inf1) == 1
-    assert coordinate(2, 1, 1) in inf1
-
-    ina2 = layout.fanins(coordinate(2, 2))
-    assert len(ina2) == 2
-    assert coordinate(2, 1) in ina2
-    assert coordinate(1, 2) in ina2
-
-    # outgoing data flow
-    outx1 = layout.fanouts(coordinate(1, 0))
-    assert len(outx1) == 1
-    assert coordinate(1, 1) in outx1
-
-    outf1 = layout.fanouts(coordinate(3, 1))
-    assert len(outf1) == 0
-
-    outa2 = layout.fanouts(coordinate(2, 2))
-    assert len(outa2) == 1
-    assert coordinate(3, 2) in outa2
+    # Sink ports identify each destination input.
+    assert layout.sinks(x1) == [LayoutInputPort(a1.object, 0)]
+    assert layout.sinks(f1) == []
+    assert layout.sinks(a2) == [LayoutInputPort(f2.object, 0)]
 
     cp, tp = critical_path_length_and_throughput(layout)
     assert cp == 4
@@ -295,6 +280,14 @@ def test_gate_function_owns_truth_table_and_preserves_input_holes(make_layout: C
     assert layout.source(LayoutInputPort(gate.object, 0)) == a
     assert layout.source(LayoutInputPort(gate.object, 1)) is None
     assert layout.source(LayoutInputPort(gate.object, 2)) == b
+    assert layout.inputs(gate.object) == [a, None, b]
+    layout.connect(a, LayoutInputPort(gate.object, 2))
+    assert layout.inputs(gate.object) == [a, None, a]
+    sinks = layout.sinks(a)
+    assert len(sinks) == 2
+    assert LayoutInputPort(gate.object, 0) in sinks
+    assert LayoutInputPort(gate.object, 2) in sinks
+    layout.connect(b, LayoutInputPort(gate.object, 2))
     with pytest.raises(IndexError, match="arity"):
         layout.connect(a, LayoutInputPort(gate.object, 3))
     assert layout.source(LayoutInputPort(gate.object, 2)) == b
