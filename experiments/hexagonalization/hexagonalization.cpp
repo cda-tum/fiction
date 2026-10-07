@@ -18,7 +18,6 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
 #include <fiction/physical_design/hexagonalization.hpp>      // layout conversion to hexagonal gird
@@ -60,7 +59,7 @@ using namespace fiction::verification;
 
 int main()  // NOLINT
 {
-    using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_lyt = gate_level_layout<cartesian_layout>;
     using hex_lyt  = hex_gate_clk_lyt;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
@@ -177,19 +176,20 @@ int main()  // NOLINT
 
         // the area of the Cartesian cell grid that the Bestagon tiles span
         area_stats area_stats{};
-        area(cartesian_layout<coords::offset>{cell_grid_extent<bestagon_library>(hex_layout)}, area_params<layout>{},
-             &area_stats);
+        area(cartesian_layout{cell_grid_extent<bestagon_library>(hex_layout)}, area_params<layout>{}, &area_stats);
 
         // log results
-        hexagonalization_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
-                             cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
-                             depth_mapped_network.depth(), gate_level_layout.x() + 1, gate_level_layout.y() + 1,
-                             (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), (hex_layout.x() + 1),
-                             (hex_layout.y() + 1), (hex_layout.x() + 1) * (hex_layout.y() + 1),
-                             gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length,
-                             cp_tp.throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
-                             mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result,
-                             cell_level_layout.num_dots(), area_stats.area);
+        hexagonalization_exp(
+            benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
+            depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
+            static_cast<uint64_t>(gate_level_layout.x()) + 1, static_cast<uint64_t>(gate_level_layout.y()) + 1,
+            (static_cast<uint64_t>(gate_level_layout.x()) + 1) * (static_cast<uint64_t>(gate_level_layout.y()) + 1),
+            static_cast<uint64_t>(hex_layout.x()) + 1, static_cast<uint64_t>(hex_layout.y()) + 1,
+            (static_cast<uint64_t>(hex_layout.x()) + 1) * (static_cast<uint64_t>(hex_layout.y()) + 1),
+            gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
+            mockturtle::to_seconds(orthogonal_stats.time_total),
+            mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result, cell_level_layout.num_dots(),
+            area_stats.area);
 
         hexagonalization_exp.save();
         hexagonalization_exp.table();

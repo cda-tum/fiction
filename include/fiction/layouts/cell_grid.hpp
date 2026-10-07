@@ -17,7 +17,7 @@
 #pragma once
 
 #include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/layout_base.hpp"
 
 #include <phmap.h>
 
@@ -42,7 +42,7 @@ namespace fiction::layouts
  * @tparam CellType Enumeration of the cell types of one technology.
  */
 template <typename CellType>
-class cell_grid : public cartesian_layout<coords::offset>
+class cell_grid : public cartesian_layout
 {
     static_assert(std::is_enum_v<CellType>, "CellType must be an enumeration");
 
@@ -50,7 +50,7 @@ class cell_grid : public cartesian_layout<coords::offset>
     /**
      * Cell position.
      */
-    using cell = coords::offset;
+    using cell = layout_base::coordinate;
     /**
      * Cell type.
      */
@@ -62,7 +62,7 @@ class cell_grid : public cartesian_layout<coords::offset>
      * @param name Layout name.
      */
     explicit cell_grid(const aspect_ratio& ar = {}, std::string name = "") :
-            cartesian_layout<coords::offset>(ar),
+            cartesian_layout(ar),
             layout_name{std::move(name)}
     {}
     /**
@@ -71,7 +71,7 @@ class cell_grid : public cartesian_layout<coords::offset>
      * @param other Grid to copy.
      */
     cell_grid(const cell_grid& other) :
-            cartesian_layout<coords::offset>(other.clone()),
+            cartesian_layout(other.clone()),
             layout_name{other.layout_name},
             cell_types{other.cell_types},
             cell_names{other.cell_names}

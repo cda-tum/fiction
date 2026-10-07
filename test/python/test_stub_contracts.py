@@ -14,8 +14,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, cartesian_layout, stacked_cartesian_layout
-from mnt.pyfiction.layouts.coords import cube_coordinate, offset_coordinate
+from mnt.pyfiction.layouts import cartesian_gate_layout, cartesian_layout, coordinate, stacked_cartesian_layout
 from mnt.pyfiction.physical_design import post_layout_optimization_params, reserve_input_nodes
 from mnt.pyfiction.sidb.simulation import sidb_simulation_result
 from mnt.pyfiction.sidb.simulation.logic import (
@@ -34,20 +33,18 @@ if TYPE_CHECKING:
 
 def test_coordinate_input_and_output_types() -> None:
     """Tuple inputs convert to coordinates, while outputs retain their class."""
-    coordinate = offset_coordinate(tuple_repr=(1, 2))
-    assert offset_coordinate(c=coordinate) == coordinate
-    cube = cube_coordinate(tuple_repr=(1, 2, 3))
-    assert cube_coordinate(c=cube) == cube
+    origin = coordinate(tuple_repr=(1, 2))
+    assert coordinate(c=origin) == origin
     layout = cartesian_layout((2, 2))
     layout.resize((3, 3, 1))
     east = layout.east((0, 0))
-    assert east == offset_coordinate(1, 0)
+    assert east == coordinate(1, 0)
     stacked = stacked_cartesian_layout((2, 2, 3))
     above = stacked.above((0, 0, 0))
-    assert above == cube_coordinate(0, 0, 1)
+    assert above == coordinate(0, 0, 1)
     if TYPE_CHECKING:
-        assert_type(east, offset_coordinate)
-        assert_type(above, cube_coordinate)
+        assert_type(east, coordinate)
+        assert_type(above, coordinate)
 
 
 def test_optional_relocation_limit() -> None:

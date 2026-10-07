@@ -21,8 +21,8 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
@@ -45,7 +45,7 @@ TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
 
 TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::or_not_gate_layout<gate_layout>();
 
@@ -122,7 +122,7 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
 
 TEST_CASE("Setting up wires", "[molecular-qca-library]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::three_wire_paths_gate_layout<gate_layout>();
 
@@ -194,7 +194,7 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
 
 TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::fanout_layout<gate_layout>();
 
@@ -288,9 +288,9 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 
 TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
 {
-    using gate_layout           = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout           = gate_level_layout<cartesian_layout>;
     using clock_number_t        = gate_layout::clock_number_t;
-    using orientation_exception = unsupported_gate_orientation_exception<coords::offset, port_position>;
+    using orientation_exception = unsupported_gate_orientation_exception<layout_base::coordinate, port_position>;
 
     static constexpr auto input_clock  = static_cast<clock_number_t>(0);
     static constexpr auto fanout_clock = static_cast<clock_number_t>(1);
@@ -396,7 +396,7 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
 
 TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::res_maj_gate_layout<gate_layout>();
 
@@ -458,7 +458,7 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
 
 TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
 
@@ -624,9 +624,10 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
 
 TEST_CASE("Check unsupported gate type", "[molecular-qca-library]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
 
-    REQUIRE_THROWS_AS(sim7_mol_library::set_up_gate(layout, {1, 2}), unsupported_gate_type_exception<coords::offset>);
+    REQUIRE_THROWS_AS(sim7_mol_library::set_up_gate(layout, {1, 2}),
+                      unsupported_gate_type_exception<layout_base::coordinate>);
 }

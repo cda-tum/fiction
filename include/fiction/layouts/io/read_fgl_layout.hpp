@@ -619,16 +619,22 @@ class read_fgl_layout_impl
      */
     static tile<Lyt> read_position(const tinyxml2::XMLElement* element, const bool with_z = true)
     {
-        const auto      x = read_number(element, "x");
-        const auto      y = read_number(element, "y");
-        const auto      z = with_z ? read_number(element, "z") : 0u;
-        const tile<Lyt> position{x, y, z};
-        if (static_cast<uint64_t>(position.x) != x || static_cast<uint64_t>(position.y) != y ||
-            static_cast<uint64_t>(position.z) != z)
+        const auto x = read_number(element, "x");
+        const auto y = read_number(element, "y");
+        const auto z = with_z ? read_number(element, "z") : 0u;
+        try
+        {
+            const tile<Lyt> position{x, y, z};
+            if (!position.fits_signal())
+            {
+                throw fgl_parsing_error("Error parsing FGL file: coordinate exceeds the target layout's range");
+            }
+            return position;
+        }
+        catch (const std::overflow_error&)
         {
             throw fgl_parsing_error("Error parsing FGL file: coordinate exceeds the target layout's range");
         }
-        return position;
     }
     /**
      * @struct gate_storage

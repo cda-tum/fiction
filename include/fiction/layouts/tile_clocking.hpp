@@ -18,7 +18,7 @@
 
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/clocking_state.hpp"
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/layout_base.hpp"
 
 #include <cstdint>
 #include <stdexcept>
@@ -43,7 +43,7 @@ class tile_clocking
     /**
      * Coordinate identifying a clock zone, i.e., a tile.
      */
-    using clock_zone = coords::offset;
+    using clock_zone = layout_base::coordinate;
     /**
      * Clocking scheme over clock zones.
      */
@@ -114,14 +114,19 @@ class tile_clocking
         tile_y = checked(tile_size_y);
     }
     /**
-     * The clock zone that contains a cell: its tile on layer 0.
+     * The clock zone that contains a cell: its tile on layer 0. Negative axes use floor division.
      *
      * @param c Cell position.
-     * @return Clock zone of `c`.
+     * @return Clock zone of `c`, or the invalid clock zone if `c` is invalid.
      */
-    [[nodiscard]] clock_zone get_clock_zone(const coords::offset& c) const noexcept
+    [[nodiscard]] clock_zone get_clock_zone(const layout_base::coordinate& c) const noexcept
     {
-        return {c.x / tile_x, c.y / tile_y};
+        if (!c.is_valid())
+        {
+            return {};
+        }
+
+        return {floor_div(c.x, tile_x), floor_div(c.y, tile_y)};
     }
     /**
      * Replaces the clocking scheme.
@@ -148,7 +153,7 @@ class tile_clocking
      * @param c Cell position.
      * @return Clock number of `get_clock_zone(c)`.
      */
-    [[nodiscard]] clock_number_t get_clock_number(const coords::offset& c) const noexcept
+    [[nodiscard]] clock_number_t get_clock_number(const layout_base::coordinate& c) const noexcept
     {
         return clocking.get_clock_number(get_clock_zone(c));
     }
@@ -194,9 +199,22 @@ class tile_clocking
     /**
      * Scheme, overridden clock numbers, and synchronization delays per clock zone.
      */
-    clocking::state<clock_zone> clocking{clocking::open()};
+    clocking::state clocking{clocking::open()};
 
   private:
+    /**
+     * Divides and rounds toward negative infinity.
+     *
+     * @param value Dividend.
+     * @param size Divisor, greater than zero.
+     * @return The largest integer that does not exceed `value / size`.
+     */
+    [[nodiscard]] static constexpr int32_t floor_div(const int32_t value, const int32_t size) noexcept
+    {
+        const int32_t quotient = value / size;
+
+        return value % size < 0 ? quotient - 1 : quotient;
+    }
     /**
      * Tile width in cells.
      */

@@ -95,11 +95,11 @@ void on_the_fly_circuit_design(nanobind::module_& m)
             {
                 return fiction::sidb::generators::on_the_fly_circuit_design(snapshot, params);
             }
-            catch (const fiction::fcn::unsupported_gate_type_exception<py_offset_coordinate>& error)
+            catch (const fiction::fcn::unsupported_gate_type_exception<py_coordinate>& error)
             {
                 throw std::invalid_argument{fmt::format("Unsupported gate type at tile {}", error.where())};
             }
-            catch (const fiction::fcn::unsupported_gate_orientation_exception<py_offset_coordinate,
+            catch (const fiction::fcn::unsupported_gate_orientation_exception<py_coordinate,
                                                                               fiction::fcn::port_direction>& error)
             {
                 throw std::invalid_argument{fmt::format("Unsupported gate orientation at tile {}", error.where())};

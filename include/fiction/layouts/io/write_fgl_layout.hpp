@@ -36,6 +36,7 @@
 #include <cstdint>
 #include <ctime>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -130,6 +131,18 @@ class write_fgl_layout_impl
 
     void run()
     {
+        // the reader accepts only placed nodes on non-negative tiles
+        lyt.foreach_node(
+            [this](const auto& n)
+            {
+                if (const auto t = lyt.get_tile(n);
+                    !lyt.is_constant(n) && (!t.is_valid() || t.x < 0 || t.y < 0 || t.z < 0))
+                {
+                    throw std::invalid_argument(
+                        fmt::format("Node {} is not placed on a tile with non-negative coordinates", n));
+                }
+            });
+
         // metadata
         os << fgl::FGL_HEADER << fgl::OPEN_FGL;
         const auto current_time = std::time(nullptr);
@@ -169,9 +182,9 @@ class write_fgl_layout_impl
             os << fgl::OPEN_CLOCK_ZONES;
             utils::progress_reporter clocks{on_progress, "writing clock columns",
                                             static_cast<std::size_t>(lyt.x()) + 1};
-            for (uint64_t x = 0; x <= lyt.x(); ++x)
+            for (int32_t x = 0; x <= lyt.x(); ++x)
             {
-                for (uint64_t y = 0; y <= lyt.y(); ++y)
+                for (int32_t y = 0; y <= lyt.y(); ++y)
                 {
                     const int clock{clocking_scheme(static_cast<int64_t>(x), static_cast<int64_t>(y))};
                     os << fmt::format(fgl::CLOCK_ZONE, x, y, clock);
@@ -383,6 +396,7 @@ class write_fgl_layout_impl
  * @param lyt The layout to be written.
  * @param on_progress Receives completed serialization work.
  * @param os The output stream to write into.
+ * @throws std::invalid_argument If a node is unplaced or placed on a tile with a negative coordinate.
  */
 template <typename Lyt>
 void write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
@@ -402,6 +416,7 @@ void write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback
  * @param lyt The layout to be written.
  * @param on_progress Receives completed serialization work.
  * @param filename The file name to create and write into. Should preferably use the .fgl extension.
+ * @throws std::invalid_argument If a node is unplaced or placed on a tile with a negative coordinate.
  */
 template <typename Lyt>
 void write_fgl_layout(const Lyt& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})

@@ -28,10 +28,10 @@
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/name_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
@@ -42,6 +42,7 @@
 
 #include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <string_view>
 
 using namespace fiction;
@@ -163,7 +164,7 @@ void check_parsing_equiv_layout_all()
 
 TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     const gate_layout layout{{}, "empty"};
 
     std::stringstream layout_stream{};
@@ -175,7 +176,7 @@ TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
 
 TEST_CASE("Write and read layouts", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     check_parsing_equiv_all<gate_layout>();
     check_parsing_equiv_layout_all();
@@ -226,7 +227,7 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
 
 TEST_CASE("FGL preserves clock numbers on crossing layers", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     gate_layout original{{2, 2, 1}, clocking::open(), "crossing clocks"};
     original.assign_clock_number({1, 1, 1}, 2);
@@ -237,4 +238,33 @@ TEST_CASE("FGL preserves clock numbers on crossing layers", "[write-fgl-layout]"
 
     CHECK(restored.get_clock_number({1, 1, 0}) == 2);
     CHECK(restored.get_clock_number({1, 1, 1}) == 2);
+}
+
+TEST_CASE("FGL refuses nodes it cannot place", "[write-fgl-layout]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+
+    std::stringstream stream{};
+
+    SECTION("Unplaced node")
+    {
+        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
+        lyt.create_pi("a");
+
+        CHECK_THROWS_AS(write_fgl_layout(lyt, stream), std::invalid_argument);
+    }
+    SECTION("Node on a negative tile")
+    {
+        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
+        lyt.create_pi("a", {-1, 0, 0});
+
+        CHECK_THROWS_AS(write_fgl_layout(lyt, stream), std::invalid_argument);
+    }
+    SECTION("Placed nodes")
+    {
+        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
+        lyt.create_pi("a", {0, 0, 0});
+
+        CHECK_NOTHROW(write_fgl_layout(lyt, stream));
+    }
 }

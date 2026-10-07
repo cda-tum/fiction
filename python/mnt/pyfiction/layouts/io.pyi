@@ -82,6 +82,10 @@ def write_fgl_layout(
 
     Template Args:
         Lyt: Layout.
+
+    Raises:
+        std::invalid_argument: If a node is unplaced or placed on a tile
+                               with a negative coordinate.
     """
 
 class fgl_parsing_error(RuntimeError): ...

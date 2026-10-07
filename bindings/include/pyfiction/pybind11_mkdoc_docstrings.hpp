@@ -752,9 +752,27 @@ static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl = R"doc(
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_bb = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_bb_x = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_bb_x =
+R"doc(Returns the x axis relative to the bounding box.
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_bb_y = R"doc()doc";
+Args:
+    c: Cell coordinate.
+
+Returns:
+    The relative x axis.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_bb_y =
+R"doc(Returns the y axis relative to the bounding box.
+
+Args:
+    c: Cell coordinate.
+
+Returns:
+    The relative y axis.
+
+)doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_generate_layout_id_hash = R"doc()doc";
 
@@ -1012,6 +1030,21 @@ static const char *mkd_doc_fiction_is_shifted_cartesian_layout = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_virtual_network_type = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_area_of =
+R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
+0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)`.
+
+Args:
+    coord: Coordinate.
+
+Template Args:
+    CoordinateType: Coordinate type.
+
+Returns:
+    Area of coord.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_arrangement =
 R"doc(Arrangement of the shifted rows or columns of a shifted Cartesian or
 hexagonal layout.)doc";
@@ -1051,9 +1084,9 @@ Args:
 static const char *mkd_doc_fiction_layouts_bounding_box_2d_get_max =
 R"doc(Returns the maximum corner of the bounding box.
 
-In a `cartesian_layout<coords::offset>` object, this location
-represents the most south-eastern coordinate of the bounding box
-enclosing every non-empty coordinate.
+In a `cartesian_layout` object, this location represents the most
+south-eastern coordinate of the bounding box enclosing every non-empty
+coordinate.
 
 Returns:
     The maximum enclosing coordinate in the associated layout.
@@ -1063,9 +1096,9 @@ Returns:
 static const char *mkd_doc_fiction_layouts_bounding_box_2d_get_min =
 R"doc(Returns the minimum corner of the bounding box.
 
-In a `cartesian_layout<coords::offset>` object, this location
-represents the most north-western coordinate of the bounding box
-enclosing every non-empty coordinate.
+In a `cartesian_layout` object, this location represents the most
+north-western coordinate of the bounding box enclosing every non-empty
+coordinate.
 
 Returns:
     The minimum enclosing coordinate in the associated layout.
@@ -1116,7 +1149,7 @@ static const char *mkd_doc_fiction_layouts_bounding_box_2d_x_size = R"doc(The ho
 static const char *mkd_doc_fiction_layouts_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout =
-R"doc( A layout type that utilizes offset coordinates to represent a
+R"doc( A layout type that utilizes signed offset coordinates to represent a
  Cartesian grid. Its faces are organized in the following way:
 
  
@@ -1134,12 +1167,7 @@ R"doc( A layout type that utilizes offset coordinates to represent a
 | (0,2) | (1,2) | (2,2) | (3,2) |
 |       |       |       |       |
 +-------+-------+-------+-------+
-```
-
-
-
-Template Args:
-    OffsetCoordinateType: The coordinate implementation to be used.)doc";
+```)doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_above =
 R"doc(Returns the coordinate that is directly above a given coordinate `c`,
@@ -1220,6 +1248,10 @@ exactly one coordinate.
 Args:
     ar: Highest possible position in the layout.
 
+Raises:
+    std::invalid_argument: If an axis of `ar` is negative or larger
+                           than :math:`2^{30} - 1`.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_2 =
@@ -1235,6 +1267,10 @@ static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_sto
 static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_cartesian_layout_storage = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_dimension = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_two_layers_only =
+R"doc(Whether a gate-level layout shares these dimensions and limits the z
+extent to 1.)doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_clone =
 R"doc(Clones the layout returning a deep copy.
@@ -1259,11 +1295,14 @@ Template Args:
     Z: z-type.
 
 Returns:
-    A coordinate in the layout of type `OffsetCoordinateType`.
+    A coordinate in the layout of type `coordinate`.
+
+Raises:
+    std::overflow_error: If an axis is outside the signed 32-bit
+                         range.
 
 Note:
-    This function is equivalent to calling `OffsetCoordinateType(x, y,
-    z)`.
+    This function is equivalent to calling `coordinate(x, y, z)`.
 
 )doc";
 
@@ -1714,6 +1753,21 @@ R"doc(Updates the layout's dimensions, effectively resizing it.
 
 Args:
     ar: New aspect ratio.
+
+Raises:
+    std::invalid_argument: If an axis of `ar` is negative or larger
+                           than :math:`2^{30} - 1`.
+    std::out_of_range: If shared gate geometry limits the z extent to
+                       1 and `ar.z` exceeds 1.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_restrict_to_two_layers =
+R"doc(Limits the shared geometry to the two layers represented by gate-level
+signals.
+
+Raises:
+    std::out_of_range: If the z extent exceeds 1.
 
 )doc";
 
@@ -2411,10 +2465,7 @@ static const char *mkd_doc_fiction_layouts_clocking_state =
 R"doc(Clock numbers and synchronization delays, independent of layout
 geometry.
 
-Copies own independent schemes and synchronization maps.
-
-Template Args:
-    Coordinate: Coordinate identifying a clock zone.)doc";
+Copies own independent schemes and synchronization maps.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_state_assign_clock_number =
 R"doc(Overrides the clock number of a clock zone in the stored scheme. A
@@ -2615,491 +2666,15 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_area_of =
-R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
-0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)`.
+static const char *mkd_doc_fiction_layouts_detail_abs_axis =
+R"doc(Absolute value of one coordinate axis. It widens first, so that
+`INT32_MIN` does not overflow.
 
 Args:
-    coord: Coordinate.
-
-Template Args:
-    CoordinateType: Coordinate type.
+    axis: Axis value.
 
 Returns:
-    Area of coord.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator =
-R"doc(An iterator type that allows to enumerate coordinates in order within
-a boundary.
-
-Template Args:
-    CoordinateType: Type of coordinate to enumerate.
-
-Note:
-    Only `offset` and `cube` are supported. This is enforced on the
-    boundary-and-start constructor via a `requires` clause rather than
-    on the class itself, so that the default constructor (required for
-    `std::semiregular`) remains usable for any `CoordinateType`.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_aspect_ratio =
-R"doc(Boundary within to enumerate. Not `const`:
-`std::input_or_output_iterator` requires `iterator` to be
-`std::movable`, which in turn requires it to be assignable.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_coord = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_coordinate_iterator =
-R"doc(Default constructor. Required so that iterator satisfies
-`std::semiregular`, which in turn is required for it to serve as its
-own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_coordinate_iterator_2 =
-R"doc(Standard constructor. Initializes the iterator with a starting
-position and the boundary within to enumerate.
-
-With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following
-order would be enumerated for offset or cubic
-coordinates:
-
-- (0, 0, 0) - (1, 0, 0) - (0, 1, 0) - (1, 1, 0) - (0, 2, 0) - (1, 2,
-  0) - (0, 0, 1) - (1, 0, 1) - (0, 1, 1) - (1, 1, 1) - (0, 2, 1) - (1,
-  2, 1)
-
-iterator is compatible with the STL forward_iterator category. Does
-not iterate over negative coordinates.
-
-Args:
-    dimension: Boundary within to enumerate. Iteration wraps at its
-               limits.
-    start: Starting coordinate to enumerate first.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_eq = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_inc =
-R"doc(Increments the iterator, while keeping it within the boundary. Also
-defined on iterators that are out of bounds.
-
-Returns:
-    Reference to the incremented iterator.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_inc_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_le = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_lt = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_mul = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_ne = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube =
-R"doc(Signed cube coordinates.
-
-This implementation allows for negative coordinate values and offers a
-balance between memory consumption and range of values. Coordinates
-span from :math:`(-2^{31}, -2^{31}, -2^{31})` to :math:`(2^{31} - 1,
-2^{31} - 1, 2^{31} - 1)`. Each coordinate has a dead indicator `d`
-that can be used to represent that it is not in use.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_cube = R"doc(Default constructor. Creates a dead coordinate at (0, 0, 0).)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_cube_2 =
-R"doc(Standard constructor. Creates a non-dead coordinate at (x_, y_, z_).
-
-Args:
-    x_: x position.
-    y_: y position.
-    z_: z position.
-
-Template Args:
-    X: Type of x.
-    Y: Type of y.
-    Z: Type of z.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_cube_3 =
-R"doc(Standard constructor. Creates a non-dead coordinate at (x_, y_, 0).
-
-Args:
-    x_: x position.
-    y_: y position.
-
-Template Args:
-    X: Type of x.
-    Y: Type of y.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_d = R"doc(Dead indicator.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_get_dead =
-R"doc(Returns a dead copy of the coordinate, i.e., (1, x, y, z).
-
-Returns:
-    A dead copy of the coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_is_dead =
-R"doc(Returns whether the coordinate is dead.
-
-Returns:
-    `true` iff coordinate is dead.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_operator_add =
-R"doc(Adds another coordinate to this one and returns the result. Does not
-modify this coordinate.
-
-Args:
-    other: Coordinate to add.
-
-Returns:
-    Sum of both coordinates.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_operator_eq =
-R"doc(Compares against another coordinate for equality. Respects the dead
-indicator.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    `true` iff both coordinates are identical.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_operator_ge =
-R"doc(Determine whether this coordinate is "greater than or equal to"
-another one. This is the case if this one is not "less than" the
-other.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    `true` iff this coordinate is "greater than or equal to" the other
-    coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_operator_gt =
-R"doc(Determine whether this coordinate is "greater than" another one. This
-is the case if the other one is "less than".
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    `true` iff this coordinate is "greater than" the other coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_operator_le =
-R"doc(Determine whether this coordinate is "less than or equal to" another
-one. This is the case if this one is not "greater than" the other.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    `true` iff this coordinate is "less than or equal to" the other
-    coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_operator_lt =
-R"doc(Determine whether this coordinate is "less than" another one. This is
-the case if z is smaller, or if z is equal but y is smaller, or if z
-and y are equal but x is smaller.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    `true` iff this coordinate is "less than" the other coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_operator_ne =
-R"doc(Compares against another coordinate for inequality. Respects the dead
-indicator.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    `true` iff both coordinates are not identical.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_operator_sub =
-R"doc(Subtracts another coordinate from this one and returns the result.
-Does not modify this coordinate.
-
-Args:
-    other: Coordinate to subtract.
-
-Returns:
-    Difference of both coordinates.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_str =
-R"doc(Returns a string representation of the coordinate of the form `"(x, y,
-z)"` that does not respect the dead indicator.
-
-Returns:
-    String representation of the form `"(x, y, z)"`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_wrap =
-R"doc(Wraps the coordinate with respect to the given aspect ratio by
-iterating over the dimensions in the order defined by the coordinate
-type. For any dimension of the coordinate that is strictly larger than
-the associated dimension of the aspect ratio, this dimension will be
-wrapped to zero, and the next dimension is increased. The resulting
-coordinate becomes a dead copy of the aspect ratio if it is not
-contained in the aspect ratio after iterating. An example use case of
-this function is the coordinate iterator, which implements iterator
-advancing by first incrementing the x dimension, then wrapping the
-coordinate to the boundary within to enumerate.
-
-Args:
-    aspect_ratio: Aspect ratio to wrap the coordinate to.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_x = R"doc(x coordinate.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_y = R"doc(y coordinate.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_cube_z = R"doc(z coordinate.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset =
-R"doc(Unsigned offset coordinates.
-
-This implementation is optimized for memory-efficiency and fits within
-64 bits. Coordinates span from :math:`(0, 0, 0)` to :math:`(2^{31} -
-1, 2^{31} - 1, 1)`. Each coordinate has a dead indicator `d` that can
-be used to represent that it is not in use.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_d = R"doc(MSB acts as dead indicator.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_get_dead =
-R"doc(Returns a dead copy of the coordinate, i.e., (1, x, y, z).
-
-Returns:
-    A dead copy of the coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_is_dead =
-R"doc(Returns whether the coordinate is dead.
-
-Returns:
-    `true` iff coordinate is dead.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_offset = R"doc(Default constructor. Creates a dead coordinate at (0, 0, 0).)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_offset_2 =
-R"doc(Standard constructor. Creates a non-dead coordinate at (x_, y_, z_).
-
-Args:
-    x_: x position.
-    y_: y position.
-    z_: z position.
-
-Template Args:
-    X: Type of x.
-    Y: Type of y.
-    Z: Type of z.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_offset_3 =
-R"doc(Standard constructor. Creates a non-dead coordinate at (x_, y_, 0).
-
-Args:
-    x_: x position.
-    y_: y position.
-
-Template Args:
-    X: Type of x.
-    Y: Type of y.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_offset_4 =
-R"doc(Standard constructor. Instantiates a coordinate from an uint64_t,
-where the positions are encoded in the following four parts of the
-unsigned 64-bit integer (from MSB to LSB):
- - 1 bit for the dead indicator - 1 bit for the z position - 31 bit
-   for the y position - 31 bit for the x position
-
-Args:
-    t: Unsigned 64-bit integer to instantiate the coordinate from.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_eq =
-R"doc(Compares against another coordinate for equality. Respects the dead
-indicator.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    `true` iff both coordinates are identical.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_eq_2 =
-R"doc(Compares against another coordinate's `uint64_t` representation for
-equality. Respects the dead indicator.
-
-Args:
-    other: Right-hand side coordinate representation in `uint64_t`
-           format.
-
-Returns:
-    `true` iff this coordinate is equal to the converted one.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_ge =
-R"doc(Determine whether this coordinate is "greater than or equal to"
-another one. This is the case if this one is not "less than" the
-other.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    `true` iff this coordinate is "greater than or equal to" the other
-    coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_gt =
-R"doc(Determine whether this coordinate is "greater than" another one. This
-is the case if the other one is "less than".
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    `true` iff this coordinate is "greater than" the other coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_le =
-R"doc(Determine whether this coordinate is "less than or equal to" another
-one. This is the case if this one is not "greater than" the other.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    `true` iff this coordinate is "less than or equal to" the other
-    coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_lt =
-R"doc(Determine whether this coordinate is "less than" another one. This is
-the case if z is smaller, or if z is equal but y is smaller, or if z
-and y are equal but x is smaller.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    `true` iff this coordinate is "less than" the other coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_ne =
-R"doc(Compares against another coordinate for inequality. Respects the dead
-indicator.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    `true` iff both coordinates are not identical.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_operator_unsigned_long =
-R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
-integer into four parts (from MSB to LSB):
- - 1 bit for the dead indicator - 1 bit for the z position - 31 bit
-   for the y position - 31 bit for the x position
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_str =
-R"doc(Returns a string representation of the coordinate of the form `"(x, y,
-z)"` that does not respect the dead indicator.
-
-Returns:
-    String representation of the form `"(x, y, z)"`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_wrap =
-R"doc(Wraps the coordinate with respect to the given aspect ratio by
-iterating over the dimensions in the order defined by the coordinate
-type. For any dimension of the coordinate that is strictly larger than
-the associated dimension of the aspect ratio, this dimension will be
-wrapped to zero, and the next dimension is increased. The resulting
-coordinate becomes a dead copy of the aspect ratio if it is not
-contained in the aspect ratio after iterating. An example use case of
-this function is the coordinate iterator, which implements iterator
-advancing by first incrementing the x dimension, then wrapping the
-coordinate to the boundary within to enumerate.
-
-Args:
-    aspect_ratio: Aspect ratio to wrap the coordinate to.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_x = R"doc(31 bit for the x coordinate.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_y = R"doc(31 bit for the y coordinate.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_z = R"doc(1 bit for the z coordinate.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_operator_lshift = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_volume_of =
-R"doc(Computes the volume of a given coordinate assuming its origin is (0,
-0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)`.
-
-Args:
-    coord: Coordinate.
-
-Template Args:
-    CoordinateType: Coordinate type.
-
-Returns:
-    Volume of coord.
+    :math:`|axis|`.
 
 )doc";
 
@@ -3148,9 +2723,12 @@ interchangeably.
 checked for via is_inv.
 
 - each `create_...` function requires a tile parameter that determines
-  its placement. If the provided tile is dead,
-the location will not be stored and the node will not count towards
-number of gates or wires.
+  its placement. If the provided tile is
+invalid, the location will not be stored and the node will not count
+towards number of gates or wires. A valid tile must have a signal,
+i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\{0,
+1\}`; otherwise, the function throws `std::out_of_range` and leaves
+the layout unchanged.
 
 - a node can be overwritten by creating another node on its location.
   This can, however, lead to unwanted effects and
@@ -3211,6 +2789,37 @@ Args:
     cz: Clock zone to turn into a synchronization element.
     se: Number of full clock cycles to extend `cz`'s Hold phase by. If
         this value is 0, `cz` is turned back into a normal clock zone.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_check_tile =
+R"doc(Checks that a tile has a signal. An invalid tile stands for an
+unplaced node and passes.
+
+Args:
+    t: Tile to check.
+
+Raises:
+    std::out_of_range: If `t` is valid but its x or y value lies
+                       outside of :math:`[-2^{30}, 2^{30} - 1]` or its
+                       z value is neither 0 nor 1.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_checked_extent =
+R"doc(Returns an aspect ratio after checking that all tiles within it have a
+signal.
+
+Args:
+    ar: Aspect ratio to check.
+
+Returns:
+    `ar`.
+
+Raises:
+    std::out_of_range: If the x or y value of `ar` is larger than
+                       :math:`2^{30} - 1` or its z value is larger
+                       than 1.
 
 )doc";
 
@@ -3337,9 +2946,40 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_create_not = R"doc(
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_create_or = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_pi = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_pi =
+R"doc(Creates a primary input on tile `t`.
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_po = R"doc()doc";
+Args:
+    name: Name of the PI. If empty, the name is `pi<i>`, where `i` is
+          the number of PIs before the new one.
+    t: Tile to place the PI on. An invalid tile leaves the PI
+       unplaced.
+
+Returns:
+    Signal pointing to `t`.
+
+Raises:
+    std::out_of_range: If `t` is valid but has no signal encoding.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_po =
+R"doc(Creates a primary output on tile `t` that is driven by signal `s`.
+
+Args:
+    s: Signal that drives the PO.
+    name: Name of the PO. If empty, the name is `po<i>`, where `i` is
+          the number of POs before the new one.
+    t: Tile to place the PO on. An invalid tile leaves the PO
+       unplaced.
+
+Returns:
+    Signal pointing to `t`.
+
+Raises:
+    std::out_of_range: If `t` is valid but has no signal encoding.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_create_xnor = R"doc()doc";
 
@@ -3486,7 +3126,7 @@ R"doc(Applies a function to each ground-layer tile in the coordinate range.
 Args:
     fn: Functor applied to each tile.
     start: First tile.
-    stop: Exclusive end tile; a dead tile selects the layout end.
+    stop: Exclusive end tile; an invalid tile selects the layout end.
 
 Template Args:
     Fn: Functor type.
@@ -3564,7 +3204,7 @@ R"doc(Applies a function to each tile in the coordinate range.
 Args:
     fn: Functor applied to each tile.
     start: First tile.
-    stop: Exclusive end tile; a dead tile selects the layout end.
+    stop: Exclusive end tile; an invalid tile selects the layout end.
 
 Template Args:
     Fn: Functor type.
@@ -3652,10 +3292,17 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_7 =
-R"doc(Copy constructor from another `CoordinateLayout`.
+R"doc(Copy constructor from another `CoordinateLayout`. All geometry aliases
+retain the two-layer extent limit of gate-level signals.
 
 Args:
     lyt: Coordinate layout.
+
+Raises:
+    std::out_of_range: If the extent of `lyt` exceeds the range that
+                       gate-level signals can represent, i.e., if its
+                       x or y value is larger than :math:`2^{30} - 1`
+                       or its z value is larger than 1.
 
 )doc";
 
@@ -3768,14 +3415,13 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_tile =
 R"doc(The inverse function of `get_node`. Fetches the tile that the provided
-node is placed on. Returns a default dead tile if the node is not
-placed.
+node is placed on. Returns the invalid tile if the node is not placed.
 
 Args:
     n: Node whose location is desired.
 
 Returns:
-    Tile at which `n` is placed or a default dead tile if `n` is not
+    Tile at which `n` is placed or the invalid tile if `n` is not
     placed.
 
 )doc";
@@ -3785,7 +3431,7 @@ R"doc(Returns ground-layer tiles in the coordinate range.
 
 Args:
     start: First tile.
-    stop: Exclusive end tile; a dead tile selects the layout end.
+    stop: Exclusive end tile; an invalid tile selects the layout end.
 
 Returns:
     Tile range.
@@ -4536,6 +4182,9 @@ Args:
 Returns:
     Signal pointing to `n`'s new tile.
 
+Raises:
+    std::out_of_range: If `t` has no signal encoding.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_node_function = R"doc()doc";
@@ -4674,6 +4323,21 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_resize =
+R"doc(Updates the layout's dimensions, effectively resizing it.
+
+Args:
+    ar: New aspect ratio.
+
+Raises:
+    std::invalid_argument: If an axis of `ar` is negative.
+    std::out_of_range: If `ar` exceeds the range that gate-level
+                       signals can represent, i.e., if its x or y
+                       value is larger than :math:`2^{30} - 1` or its
+                       z value is larger than 1.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_revive_node = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_set_input_name = R"doc()doc";
@@ -4707,7 +4371,7 @@ R"doc(Returns the tiles in the coordinate range.
 
 Args:
     start: First tile.
-    stop: Exclusive end tile; a dead tile selects the layout end.
+    stop: Exclusive end tile; an invalid tile selects the layout end.
 
 Returns:
     Tile range.
@@ -4819,13 +4483,7 @@ _____/ (1,0) \_____/ (3,0) \
  coordinates make the most sense here.
 
  https://www.redblobgames.com/grids/hexagons/ is a wonderful resource
- on the topic.
-
-Template Args:
-    OffsetCoordinateType: The coordinate implementation to be used.
-                          Offset coordinates are required.
-    CubeCoordinateType: Internally, cube coordinates are needed for
-                        certain algorithms or calculations.)doc";
+ on the topic.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_above =
 R"doc(Returns the coordinate that is directly above a given coordinate `c`,
@@ -4903,6 +4561,18 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_bounded_offset =
+R"doc(Checks layout bounds before narrowing offset axes.
+
+Args:
+    axes: Signed 64-bit offset axes.
+    layer: Coordinate layer.
+
+Returns:
+    Coordinate in the layout, or the invalid coordinate.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_clone =
 R"doc(Clones the layout returning a deep copy.
 
@@ -4926,11 +4596,14 @@ Template Args:
     Z: z-type.
 
 Returns:
-    A coordinate in the layout of type `OffsetCoordinateType`.
+    A coordinate in the layout of type `coordinate`.
+
+Raises:
+    std::overflow_error: If an axis is outside the signed 32-bit
+                         range.
 
 Note:
-    This function is equivalent to calling `OffsetCoordinateType(x, y,
-    z)`.
+    This function is equivalent to calling `coordinate(x, y, z)`.
 
 )doc";
 
@@ -4955,6 +4628,52 @@ Returns:
     provided, the first/last coordinate is used as a default.
 
 )doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate =
+R"doc(Cube coordinates identify faces of the hexagonal grid with three
+signed axes that sum to zero. The layout uses them internally for
+neighbor calculations. A wonderful resource on the topic is
+https://www.redblobgames.com/grids/hexagons/#coordinates-cube)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_cube_coordinate = R"doc(Creates a cube coordinate at the origin.)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_cube_coordinate_2 =
+R"doc(Creates a cube coordinate from its three axes.
+
+Args:
+    cube_x: x coordinate.
+    cube_y: y coordinate.
+    cube_z: z coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_operator_add =
+R"doc(Adds another cube coordinate axis by axis.
+
+Args:
+    other: Right-hand side coordinate.
+
+Returns:
+    The sum of both coordinates.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_operator_eq =
+R"doc(Compares against another cube coordinate for equality.
+
+Args:
+    other: Right-hand side coordinate.
+
+Returns:
+    `true` iff all axes are equal.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_x = R"doc(x coordinate.)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_y = R"doc(y coordinate.)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_z = R"doc(z coordinate.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_east =
 R"doc(Returns the coordinate that is directly adjacent in eastern direction
@@ -5089,6 +4808,21 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_half_shifted =
+R"doc(Halves an axis value after moving an odd value by `offset`, which is
+the shift between neighboring rows or columns in offset coordinates.
+
+Args:
+    value: Axis value.
+    offset: Shift of odd values, -1 for odd and +1 for even
+            arrangements.
+
+Returns:
+    `(value + offset) / 2` for an odd value and `value / 2` for an
+    even one.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout =
 R"doc(Standard constructor. The given aspect ratio points to the highest
 possible coordinate in the layout. That means in the
@@ -5100,6 +4834,10 @@ Args:
     a: Arrangement of the shifted rows or columns. It cannot change
        after construction.
     ar: Highest possible position in the layout.
+
+Raises:
+    std::invalid_argument: If an axis of `ar` is negative or larger
+                           than :math:`2^{30} - 1`.
 
 )doc";
 
@@ -5126,6 +4864,10 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_shift = R"doc(Arrangement of the shifted rows or columns.)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_two_layers_only =
+R"doc(Whether a gate-level layout shares these dimensions and limits the z
+extent to 1.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_is_above =
 R"doc(Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
@@ -5448,7 +5190,8 @@ Args:
     c: Coordinate whose north-eastern counterpart is desired.
 
 Returns:
-    Coordinate directly north-eastern of `c`.
+    Coordinate directly north-eastern of `c`; `c` itself if the
+    neighbor lies outside of the layout.
 
 )doc";
 
@@ -5461,7 +5204,8 @@ Args:
     c: Coordinate whose north-western counterpart is desired.
 
 Returns:
-    Coordinate directly north-western of `c`.
+    Coordinate directly north-western of `c`; `c` itself if the
+    neighbor lies outside of the layout.
 
 )doc";
 
@@ -5477,11 +5221,37 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_offset_axes =
+R"doc(Converts cube coordinates to offset axes without narrowing.
+
+Args:
+    cube_coord: Cube coordinate.
+
+Returns:
+    Signed 64-bit x and y offset axes.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_resize =
 R"doc(Updates the layout's dimensions, effectively resizing it.
 
 Args:
     ar: New aspect ratio.
+
+Raises:
+    std::invalid_argument: If an axis of `ar` is negative or larger
+                           than :math:`2^{30} - 1`.
+    std::out_of_range: If shared gate geometry limits the z extent to
+                       1 and `ar.z` exceeds 1.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_restrict_to_two_layers =
+R"doc(Limits the shared geometry to the two layers represented by gate-level
+signals.
+
+Raises:
+    std::out_of_range: If the z extent exceeds 1.
 
 )doc";
 
@@ -5508,7 +5278,8 @@ Args:
     c: Coordinate whose south-eastern counterpart is desired.
 
 Returns:
-    Coordinate directly south-eastern of `c`.
+    Coordinate directly south-eastern of `c`; `c` itself if the
+    neighbor lies outside of the layout.
 
 )doc";
 
@@ -5521,7 +5292,8 @@ Args:
     c: Coordinate whose south-western counterpart is desired.
 
 Returns:
-    Coordinate directly south-western of `c`.
+    Coordinate directly south-western of `c`; `c` itself if the
+    neighbor lies outside of the layout.
 
 )doc";
 
@@ -5537,7 +5309,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_strg = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_strg = R"doc(Shared storage for the layout dimensions and arrangement.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_to_cube_coordinate =
 R"doc(Converts an offset coordinate to a cube coordinate.
@@ -5555,7 +5327,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_to_offset_coordinate =
-R"doc(Converts a cube coordinate to an offset coordinate.
+R"doc(Converts a cube coordinate to an offset coordinate. The result lies in
+the ground layer.
 
 This implementation is adapted from
 https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
@@ -5564,8 +5337,8 @@ Args:
     cube_coord: Cube coordinate to convert.
 
 Returns:
-    Offset coordinate representing `cube_coord` in the layout's
-    arrangement.
+    Offset coordinate representing `cube_coord`, or the invalid
+    coordinate if an axis exceeds 32 bits.
 
 )doc";
 
@@ -6058,6 +5831,10 @@ Args:
 Template Args:
     Lyt: Layout.
 
+Raises:
+    std::invalid_argument: If a node is unplaced or placed on a tile
+                           with a negative coordinate.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_write_fgl_layout_2 =
@@ -6073,6 +5850,10 @@ Args:
 
 Template Args:
     Lyt: Layout.
+
+Raises:
+    std::invalid_argument: If a node is unplaced or placed on a tile
+                           with a negative coordinate.
 
 )doc";
 
@@ -6098,6 +5879,324 @@ Returns:
     `true` iff `a` is `ODD_ROW` or `EVEN_ROW`.
 
 )doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base =
+R"doc(Base class of all layouts. It defines the signed coordinate type that
+every layout topology (Cartesian, shifted Cartesian, and hexagonal)
+exposes under the same API.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_checked =
+R"doc(Returns an aspect ratio after checking that it describes a layout. An
+invalid aspect ratio describes the layout with exactly one coordinate.
+The upper limit keeps the coordinate arithmetic of every layout within
+`int32_t`.
+
+Args:
+    ar: Aspect ratio to check.
+    two_layers_only: Whether shared gate geometry limits the z extent
+                     to 1.
+
+Returns:
+    `ar`, or (0, 0, 0) if `ar` is invalid.
+
+Raises:
+    std::invalid_argument: If an axis of `ar` is negative or larger
+                           than :math:`2^{30} - 1`.
+    std::out_of_range: If `two_layers_only` is set and the z extent
+                       exceeds 1.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate =
+R"doc(Signed coordinates.
+
+A coordinate defines a location relative to a fixed point (origin).
+Each axis is a signed 32-bit integer. The default-constructed
+coordinate is invalid; it has all axes set to `INVALID_AXIS` and
+stands for "no coordinate", e.g., a neighbor outside of a layout or
+the tile of a node that is not placed. A coordinate is invalid iff its
+x axis is `INVALID_AXIS`; no other axis of a coordinate should have
+this value.
+
+Gate-level layouts pack a coordinate into a 64-bit signal with
+`explicit operator uint64_t`. This encoding holds 31-bit signed x and
+y values and a single z bit.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_checked_axis =
+R"doc(Converts an integral axis without narrowing.
+
+Args:
+    value: Axis value.
+
+Template Args:
+    Axis: Integral input type.
+
+Returns:
+    Signed 32-bit axis.
+
+Raises:
+    std::overflow_error: If `value` is outside the signed 32-bit
+                         range.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_coordinate = R"doc(Default constructor. Creates the invalid coordinate.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_coordinate_2 =
+R"doc(Standard constructor. Creates a coordinate at (x_, y_, z_).
+
+Args:
+    x_: x position.
+    y_: y position.
+    z_: z position.
+
+Template Args:
+    X: Type of x.
+    Y: Type of y.
+    Z: Type of z.
+
+Raises:
+    std::overflow_error: If an axis is outside the signed 32-bit
+                         range.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_coordinate_3 =
+R"doc(Standard constructor. Creates a coordinate at (x_, y_, 0).
+
+Args:
+    x_: x position.
+    y_: y position.
+
+Template Args:
+    X: Type of x.
+    Y: Type of y.
+
+Raises:
+    std::overflow_error: If an axis is outside the signed 32-bit
+                         range.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_coordinate_4 =
+R"doc(Standard constructor. Instantiates a coordinate from the 64-bit
+encoding of a gate-level signal, where the positions are encoded in
+the following four parts (from MSB to LSB):
+ - 1 bit for the invalid indicator - 1 bit for the z position - 31 bit
+   for the y position in two's complement - 31 bit for the x position
+   in two's complement
+
+A set invalid indicator yields the invalid coordinate.
+
+Args:
+    t: Unsigned 64-bit integer to instantiate the coordinate from.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_fits_signal =
+R"doc(Returns whether the coordinate fits the 64-bit signal encoding, i.e.,
+x and y are 31-bit signed values and z is either 0 or 1.
+
+Returns:
+    `true` iff the signal encoding of the coordinate can be decoded to
+    the coordinate itself.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_is_valid =
+R"doc(Returns whether the coordinate is valid, i.e., whether its x axis
+differs from `INVALID_AXIS`.
+
+Returns:
+    `true` iff the coordinate is valid.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator =
+R"doc(An iterator type that allows to enumerate coordinates in order within
+a boundary.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_bound =
+R"doc(Boundary within to enumerate. Not `const`:
+`std::input_or_output_iterator` requires `iterator` to be
+`std::movable`, which in turn requires it to be assignable.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_coordinate_iterator =
+R"doc(Default constructor. Required so that iterator satisfies
+`std::semiregular`, which in turn is required for it to serve as its
+own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_coordinate_iterator_2 =
+R"doc(Standard constructor. Initializes the iterator with a starting
+position and the boundary within to enumerate.
+
+With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following
+order would be enumerated:
+
+- (0, 0, 0) - (1, 0, 0) - (0, 1, 0) - (1, 1, 0) - (0, 2, 0) - (1, 2,
+  0) - (0, 0, 1) - (1, 0, 1) - (0, 1, 1) - (1, 1, 1) - (0, 2, 1) - (1,
+  2, 1)
+
+iterator is compatible with the STL forward_iterator category. Does
+not iterate over negative coordinates.
+
+Args:
+    dimension: Boundary within to enumerate. Iteration wraps at its
+               limits.
+    start: Starting coordinate to enumerate first.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_current = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_eq = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_inc =
+R"doc(Increments the iterator, while keeping it within the boundary. Also
+defined on iterators that are out of bounds.
+
+Returns:
+    Reference to the incremented iterator.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_inc_2 = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_le = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_lt = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_mul = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_ne = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_operator_eq =
+R"doc(Compares against another coordinate for equality, axis by axis.
+
+Args:
+    other: Right-hand side coordinate.
+
+Returns:
+    `true` iff both coordinates are identical.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_operator_ge =
+R"doc(Determine whether this coordinate is "greater than or equal to"
+another one. This is the case if this one is not "less than" the
+other.
+
+Args:
+    other: Right-hand side coordinate.
+
+Returns:
+    `true` iff this coordinate is "greater than or equal to" the other
+    coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_operator_gt =
+R"doc(Determine whether this coordinate is "greater than" another one. This
+is the case if the other one is "less than".
+
+Args:
+    other: Right-hand side coordinate.
+
+Returns:
+    `true` iff this coordinate is "greater than" the other coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_operator_le =
+R"doc(Determine whether this coordinate is "less than or equal to" another
+one. This is the case if this one is not "greater than" the other.
+
+Args:
+    other: Right-hand side coordinate.
+
+Returns:
+    `true` iff this coordinate is "less than or equal to" the other
+    coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_operator_lt =
+R"doc(Determine whether this coordinate is "less than" another one. This is
+the case if z is smaller, or if z is equal but y is smaller, or if z
+and y are equal but x is smaller.
+
+Args:
+    other: Right-hand side coordinate.
+
+Returns:
+    `true` iff this coordinate is "less than" the other coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_operator_ne =
+R"doc(Compares against another coordinate for inequality.
+
+Args:
+    other: Right-hand side coordinate.
+
+Returns:
+    `true` iff both coordinates are not identical.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_operator_unsigned_long =
+R"doc(Allows explicit conversion to `uint64_t`, the encoding of gate-level
+signals. See the constructor for the encoding. For non-negative x and
+y, it equals the concatenation of the bits `0`, `z`, `y`, and `x`. An
+invalid coordinate encodes as `0x8000000000000000`. Coordinates
+outside of the representable range (x and y in :math:`[-2^{30}, 2^{30}
+- 1]`, z in :math:`\{0, 1\}`) lose their higher bits.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_sign_extend_31 =
+R"doc(Sign-extends a 31-bit two's complement value.
+
+Args:
+    v: Value with its 31 low bits set.
+
+Returns:
+    The represented signed value.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_str =
+R"doc(Returns a string representation of the coordinate of the form `"(x, y,
+z)"`.
+
+Returns:
+    String representation of the form `"(x, y, z)"`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_wrap =
+R"doc(Wraps the coordinate with respect to the given aspect ratio by
+iterating over the dimensions in the order x, y, z. For any dimension
+of the coordinate that is strictly larger than the associated
+dimension of the aspect ratio, this dimension will be wrapped to zero,
+and the next dimension is increased. The resulting coordinate becomes
+invalid if it is not contained in the aspect ratio after iterating. An
+example use case of this function is the coordinate iterator, which
+implements iterator advancing by first incrementing the x dimension,
+then wrapping the coordinate to the boundary within to enumerate.
+
+Args:
+    aspect_ratio: Aspect ratio to wrap the coordinate to.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_x = R"doc(x coordinate.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_y = R"doc(y coordinate.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_z = R"doc(z coordinate.)doc";
 
 static const char *mkd_doc_fiction_layouts_make_gate_level_layout =
 R"doc(Creates an empty gate-level layout of type `Lyt`. Cartesian layouts
@@ -6161,10 +6260,7 @@ R"doc(Explicit obstructions stored by layouts or supplied to a routing
 search.
 
 Copies are independent. This object contains no layout or occupancy
-information.
-
-Template Args:
-    Coordinate: Coordinate identifying a position.)doc";
+information.)doc";
 
 static const char *mkd_doc_fiction_layouts_obstructions_clear_obstructed_connection =
 R"doc(Clears the obstruction status of the connection from coordinate `src`
@@ -6248,6 +6344,8 @@ static const char *mkd_doc_fiction_layouts_obstructions_obstructed_connections =
 
 static const char *mkd_doc_fiction_layouts_obstructions_obstructed_coordinates = R"doc(Explicitly blocked positions.)doc";
 
+static const char *mkd_doc_fiction_layouts_operator_lshift = R"doc()doc";
+
 static const char *mkd_doc_fiction_layouts_port_direction_to_coordinate =
 R"doc(Port directions address coordinates relative to each other by
 specifying cardinal directions. This function converts such a relative
@@ -6302,12 +6400,16 @@ Template Args:
     GateSizeX: Horizontal tile size.
     GateSizeY: Vertical tile size.
     GateLyt: Gate-level layout type.
-    Coordinate: Cell coordinate type: `coords::offset`, or
-                `coords::cube` where hexagonal tiles yield negative
-                positions.
+    Coordinate: Cell coordinate type, e.g., `layout_base::coordinate`.
+                Hexagonal tiles can yield negative positions.
 
 Returns:
     Absolute cell position in a layout.
+
+Raises:
+    std::invalid_argument: If the relative cell lies outside the tile.
+    std::overflow_error: If the absolute cell is outside the signed
+                         32-bit coordinate range.
 
 )doc";
 
@@ -6414,13 +6516,7 @@ R"doc( A layout type that utilizes offset coordinates to represent a
 +-------+ (1,2) +-------+ (3,2) |
 |       |       |       |
 +-------+       +-------+
-```
-
-
-
-Template Args:
-    OffsetCoordinateType: The coordinate implementation to be used.
-                          Offset coordinates are required.)doc";
+```)doc";
 
 static const char *mkd_doc_fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout =
 R"doc(Standard constructor. The given aspect ratio points to the highest
@@ -6467,6 +6563,18 @@ static const char *mkd_doc_fiction_layouts_tile_clocking_clocking =
 R"doc(Scheme, overridden clock numbers, and synchronization delays per clock
 zone.)doc";
 
+static const char *mkd_doc_fiction_layouts_tile_clocking_floor_div =
+R"doc(Divides and rounds toward negative infinity.
+
+Args:
+    value: Dividend.
+    size: Divisor, greater than zero.
+
+Returns:
+    The largest integer that does not exceed `value / size`.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_tile_clocking_get_clock_number =
 R"doc(The clock number of the clock zone that contains a cell.
 
@@ -6479,13 +6587,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_tile_clocking_get_clock_zone =
-R"doc(The clock zone that contains a cell: its tile on layer 0.
+R"doc(The clock zone that contains a cell: its tile on layer 0. Negative
+axes use floor division.
 
 Args:
     c: Cell position.
 
 Returns:
-    Clock zone of `c`.
+    Clock zone of `c`, or the invalid clock zone if `c` is invalid.
 
 )doc";
 
@@ -6608,6 +6717,21 @@ Args:
 
 Returns:
     Name of `a`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_volume_of =
+R"doc(Computes the volume of a given coordinate assuming its origin is (0,
+0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)`.
+
+Args:
+    coord: Coordinate.
+
+Template Args:
+    CoordinateType: Coordinate type.
+
+Returns:
+    Volume of coord.
 
 )doc";
 
@@ -8089,10 +8213,11 @@ R"doc(Standard constructor. Takes a starting value and computes an initial
 factorization. The value `n` represents the amount of faces in the
 desired aspect ratios. For example, :math:`n = 1` will yield aspect
 ratios with exactly :math:`1` face, i.e. :math:`1 \times 1` which is
-equal to `coords::offset{0, 0}`. If :math:`n = 2`, the aspect ratios
-:math:`1 \times 2` and :math:`2 \times 1` will result, which are equal
-to `coords::offset{0, 1}` and `coords::offset{1, 0}`. Both examples
-with `AspectRatio == coords::offset`.
+equal to `layout_base::coordinate{0, 0}`. If :math:`n = 2`, the aspect
+ratios :math:`1 \times 2` and :math:`2 \times 1` will result, which
+are equal to `layout_base::coordinate{0, 1}` and
+`layout_base::coordinate{1, 0}`. Both examples with `AspectRatio ==
+layout_base::coordinate`.
 
 Args:
     n: Starting value of the aspect ratio iteration.
@@ -8226,6 +8351,10 @@ Template Args:
 Returns:
     Highest cell position of the grid, including the layer count of
     `gate_lyt`.
+
+Raises:
+    std::overflow_error: If an extent is outside the signed 32-bit
+                         coordinate range.
 
 )doc";
 
@@ -9799,8 +9928,8 @@ static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersec
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_run = R"doc()doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_get_offset =
-R"doc(Utility function to calculate the offset that has to be subtracted
-from any x-coordinate on the hexagonal layout.
+R"doc(Utility function to calculate the shift that has to be added to any
+x-coordinate on the hexagonal layout.
 
 This function iterates through diagonals starting from the bottom left
 corner until it finds a non-empty tile or until it has traversed all
@@ -9823,7 +9952,8 @@ Template Args:
     CartLyt: Input Cartesian gate-level layout type.
 
 Returns:
-    positive and negative offset.
+    Signed shift that has to be added to any x-coordinate on the
+    hexagonal layout.
 
 )doc";
 
@@ -10332,6 +10462,22 @@ static const char *mkd_doc_fiction_physical_design_detail_new_gate_location_DEST
 static const char *mkd_doc_fiction_physical_design_detail_new_gate_location_NONE = R"doc(Do not check any tiles.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_new_gate_location_SRC = R"doc(Check if the source tile is empty.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_offset_at =
+R"doc(Accesses the entry of an offset matrix at a tile position.
+
+Args:
+    matrix: Offset matrix.
+    y: Row index, i.e., the y-coordinate.
+    x: Column index, i.e., the x-coordinate.
+
+Template Args:
+    Matrix: Offset matrix type, possibly `const`.
+
+Returns:
+    The entry at row `y` and column `x`.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_optimize_output_positions =
 R"doc(Utility function that moves outputs from the last row to the previous
@@ -10948,12 +11094,7 @@ R"doc(Represents a layout used for wiring reduction derived from the
 This class provides functionality for a wiring reduction layout based
 on a Cartesian coordinate system. It inherits from the
 `cartesian_layout` class and extends it with specific behavior for
-finding excess wiring.
-
-Template Args:
-    OffsetCoordinateType: The type of coordinates used in the layout.
-                          Defaults to `coords::offset` if not
-                          explicitly provided.)doc";
+finding excess wiring.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_foreach_adjacent_coordinate =
 R"doc(Iterates over adjacent coordinates of a given coordinate and applies a
@@ -11489,6 +11630,14 @@ Returns:
     The smallest layout yielded by the graph-oriented layout design
     algorithm under the given parameters.
 
+Raises:
+    networks::high_degree_fanin_exception: If `ntk` has a node with
+                                           more than two fanins.
+    std::invalid_argument: If the cost objective is `CUSTOM` and no
+                           custom cost objective is provided, or if
+                           `ps.tiles_to_skip_between_pis` does not lie
+                           in :math:`[0, 2^{20}]`.
+
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params = R"doc(Parameters for the graph-oriented layout design algorithm.)doc";
@@ -11636,7 +11785,7 @@ many empty tiles *after* the current frontier:
 This soft margin can reduce local congestion and increase the
 probability of finding a routable layout at the expense of a
 temporarily larger footprint, which post-layout optimization may later
-shrink. Defaults to `0`.)doc";
+shrink. Must lie in :math:`[0, 2^{20}]`. Defaults to `0`.)doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
 
@@ -11953,10 +12102,10 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = gate_level_layout<cartesian_layout<>>;
-using path = layout_coordinate_path<cartesian_layout<>>;
+using clk_lyt = gate_level_layout<cartesian_layout>;
+using path = layout_coordinate_path<cartesian_layout>;
 clk_lyt layout = ...;
-auto shortest_path = a_star<path>(static_cast<cartesian_layout<>>(layout), {source, target});
+auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
 ```
 
 
@@ -12477,10 +12626,10 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = gate_level_layout<cartesian_layout<>>;
-using path = layout_coordinate_path<cartesian_layout<>>;
+using clk_lyt = gate_level_layout<cartesian_layout>;
+using path = layout_coordinate_path<cartesian_layout>;
 clk_lyt layout = ...;
-auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target});
+auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout>(layout), {source, target});
 ```
 
 
@@ -12861,10 +13010,10 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = gate_level_layout<cartesian_layout<>>;
-using path = layout_coordinate_path<cartesian_layout<>>;
+using clk_lyt = gate_level_layout<cartesian_layout>;
+using path = layout_coordinate_path<cartesian_layout>;
 clk_lyt layout = ...;
-auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target}, k);
+auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);
 ```
 
 
@@ -24528,8 +24677,8 @@ Args:
     c: Grid coordinate.
 
 Template Args:
-    Coordinate: Grid coordinate type, e.g., `layouts::coords::offset`
-                or `layouts::coords::cube`.
+    Coordinate: Grid coordinate type, e.g.,
+                `layouts::layout_base::coordinate`.
 
 Returns:
     The site of `c`.
@@ -27535,23 +27684,17 @@ static const char *mkd_doc_fmt_formatter_2 = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_3 = R"doc()doc";
 
-static const char *mkd_doc_fmt_formatter_4 = R"doc()doc";
-
 static const char *mkd_doc_fmt_formatter_format = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_format_2 = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_format_3 = R"doc()doc";
 
-static const char *mkd_doc_fmt_formatter_format_4 = R"doc()doc";
-
 static const char *mkd_doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_parse_2 = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_parse_3 = R"doc()doc";
-
-static const char *mkd_doc_fmt_formatter_parse_4 = R"doc()doc";
 
 static const char *mkd_doc_formatter = R"doc(`fmt` formatter for lattice sites, printing `(x,y,z)`.)doc";
 
@@ -27613,17 +27756,15 @@ static const char *mkd_doc_std_hash_2 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_3 = R"doc()doc";
 
-static const char *mkd_doc_std_hash_4 = R"doc()doc";
+static const char *mkd_doc_std_hash_4 = R"doc(Hash for charge distributions, over the charge states.)doc";
 
-static const char *mkd_doc_std_hash_5 = R"doc(Hash for charge distributions, over the charge states.)doc";
+static const char *mkd_doc_std_hash_5 = R"doc(Hash for lattice sites.)doc";
 
-static const char *mkd_doc_std_hash_6 = R"doc(Hash for lattice sites.)doc";
+static const char *mkd_doc_std_hash_6 = R"doc(Hash for SiDB layouts, over the SiDBs and their dot tags.)doc";
 
-static const char *mkd_doc_std_hash_7 = R"doc(Hash for SiDB layouts, over the SiDBs and their dot tags.)doc";
+static const char *mkd_doc_std_hash_7 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
 
-static const char *mkd_doc_std_hash_8 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
-
-static const char *mkd_doc_std_hash_9 = R"doc(Hashes parameter points on the equality comparison grid.)doc";
+static const char *mkd_doc_std_hash_8 = R"doc(Hashes parameter points on the equality comparison grid.)doc";
 
 static const char *mkd_doc_std_hash_operator_call = R"doc()doc";
 
@@ -27631,9 +27772,7 @@ static const char *mkd_doc_std_hash_operator_call_2 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_operator_call_3 = R"doc()doc";
 
-static const char *mkd_doc_std_hash_operator_call_4 = R"doc()doc";
-
-static const char *mkd_doc_std_hash_operator_call_5 =
+static const char *mkd_doc_std_hash_operator_call_4 =
 R"doc(Computes a hash from the ordered charge states.
 
 Args:
@@ -27644,7 +27783,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_6 =
+static const char *mkd_doc_std_hash_operator_call_5 =
 R"doc(Args:
     s: Site to hash.
 
@@ -27653,7 +27792,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_7 =
+static const char *mkd_doc_std_hash_operator_call_6 =
 R"doc(Args:
     lyt: Layout to hash.
 
@@ -27662,7 +27801,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_8 =
+static const char *mkd_doc_std_hash_operator_call_7 =
 R"doc(Computes the hash value of a given SiDB defect.
 
 Every member that `fiction::defect`'s equality operator compares
@@ -27676,7 +27815,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_9 =
+static const char *mkd_doc_std_hash_operator_call_8 =
 R"doc(Mixes the quantized parameter values across the hash bits for
 partitioned processing.
 
@@ -27688,9 +27827,15 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_iterator_traits = R"doc(Iterator traits for enumerating SiDB input patterns.)doc";
+static const char *mkd_doc_std_iterator_traits =
+R"doc(Makes `coordinate_iterator` compatible with STL iterator categories.
+`reference` and `difference_type` are required for the iterator to
+satisfy `std::input_or_output_iterator` (e.g., for
+`std::ranges::subrange` CTAD).)doc";
 
-static const char *mkd_doc_std_iterator_traits_2 = R"doc()doc";
+static const char *mkd_doc_std_iterator_traits_2 = R"doc(Iterator traits for enumerating SiDB input patterns.)doc";
+
+static const char *mkd_doc_std_iterator_traits_3 = R"doc()doc";
 
 #if defined(__GNUG__)
 #pragma GCC diagnostic pop

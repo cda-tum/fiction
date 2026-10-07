@@ -24,7 +24,6 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
@@ -114,14 +113,14 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
         check_layout_equiv_all<gate_layout>();
     }
 
     SECTION("Corner cases")
     {
-        using gate_layout = gate_level_layout<cartesian_layout<>>;
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
         SECTION("optimization_layout_corner_case_outputs_1")
         {
@@ -174,7 +173,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
     SECTION("Maximum gate relocations")
     {
-        using gate_layout = gate_level_layout<cartesian_layout<>>;
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
         for (int64_t max_gate_relocations = 0; max_gate_relocations < 10; max_gate_relocations++)
         {
@@ -191,7 +190,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
     SECTION("Optimize POs only")
     {
-        using gate_layout = gate_level_layout<cartesian_layout<>>;
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
         const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
@@ -205,7 +204,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
     SECTION("Timeout")
     {
-        using gate_layout = gate_level_layout<cartesian_layout<>>;
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
         const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
@@ -219,7 +218,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
     SECTION("Timeout exceeded")
     {
-        using gate_layout = gate_level_layout<cartesian_layout<>>;
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
         const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
@@ -234,7 +233,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
     SECTION("Planar optimization with planar layout")
     {
-        using gate_layout = gate_level_layout<cartesian_layout<>>;
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
         const auto layout = blueprints::planar_unoptimized_layout<gate_layout>();
 
@@ -249,7 +248,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
     SECTION("Planar optimization with crossing layout")
     {
-        using gate_layout = gate_level_layout<cartesian_layout<>>;
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
         const auto layout = blueprints::planar_optimization_layout<gate_layout>();
 
@@ -268,7 +267,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
 TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     const auto layout    = blueprints::use_and_gate_layout<gate_layout>();
     auto       obstr_lyt = gate_layout(layout);
@@ -283,7 +282,7 @@ TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
 
 TEST_CASE("PI and PO border validation", "[post_layout_optimization]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     SECTION("Invalid layout with PI not in borders")
     {
@@ -320,7 +319,7 @@ TEST_CASE("PI and PO border validation", "[post_layout_optimization]")
 
 TEST_CASE("Post-layout optimization reports progress", "[post_layout_optimization]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     const auto ntk    = blueprints::mux21_network<technology_network>();
     const auto layout = orthogonal<gate_layout>(ntk);

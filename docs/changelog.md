@@ -226,6 +226,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     landscape instead of copying a `charge_distribution_surface` for every configuration
   - **Breaking:** `hexagonal_layout` and `shifted_cartesian_layout` take their `layouts::arrangement` as a constructor
     argument instead of a template parameter, and `get_arrangement()` returns it.
+  - **Breaking:** Coordinates are signed. `layouts::layout_base::coordinate` with three `int32_t` axes replaces
+    `coords::offset` and `coords::cube`, and `cartesian_layout`, `hexagonal_layout`, and `shifted_cartesian_layout`
+    derive from `layout_base` and are no longer templates. `coordinates.hpp` and `layouts::coords` are gone. The default
+    coordinate is invalid, as is any coordinate whose x axis is `INT32_MIN`, and `is_valid()` replaces `is_dead()` on
+    coordinates. Layouts throw `std::invalid_argument` for extents below 0 or above 2^30 - 1, and
+    gate-level layouts throw `std::out_of_range` for tiles with x or y above 2^30 - 1 or z above 1.
+  - **Breaking:** `graph_oriented_layout_design_params::tiles_to_skip_between_pis` is an `int32_t`, and
+    `graph_oriented_layout_design` throws `std::invalid_argument` for values outside of [0, 2^20].
 
 - Dependencies:
 
@@ -288,15 +296,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `networks/io/dot_drawers.hpp`
   - Namespaces mirror the directories, so `fiction::quickexact` becomes
     `fiction::sidb::simulation::engines::quickexact`. `technology/` itself adds no
-    namespace level; `coordinates.hpp` and `clocking_scheme.hpp` add `layouts::coords`
-    and `layouts::clocking` for the families they define
+    namespace level; `clocking_scheme.hpp` adds `layouts::clocking` for the family it
+    defines
   - Identifiers shed prefixes the namespace now carries, so `sidb_simulation_parameters`
     becomes `fiction::sidb::model::simulation_parameters`, `design_sidb_gates` becomes
     `fiction::sidb::generators::design_gates`, and `gate_library::fcn_gate` becomes
     `gate`. Published names are kept, so `qca_one_library` stays
     `fiction::qca::qca_one_library`
-  - The coordinate types are renamed: `fiction::offset::ucoord_t` becomes
-    `fiction::layouts::coords::offset`, and likewise for `cube` and `siqad`
+  - The offset coordinate type `fiction::offset::ucoord_t` becomes
+    `fiction::layouts::layout_base::coordinate`
   - The cluster hierarchy that `clustercomplete` and `ground_state_space` build is
     implementation detail, `fiction::sidb::simulation::engines::detail`, and leaves the
     documented API; `ground_state_space_results::top_cluster` stays as the handle into it
@@ -338,12 +346,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `fiction/synthesis/truth_tables.hpp`. Neither header depends on a network; both include only
   `kitty` and the standard library
 
-- **Breaking:** `fiction::layouts::coords` adopts one naming rule: a bare noun is a coordinate
-  type, everything else is an operation on one. `coord_iterator` becomes
-  `coordinate_iterator`, `area` and `volume` become `area_of` and `volume_of`, and the
-  three conversions unify from `to_fiction_coord`, `to_siqad_coord` and `offset_to_cube`
-  into `from_siqad`, `to_siqad` and `to_cube`. The coordinate types `offset`, `cube`
-  and `siqad` keep their names
+- **Breaking:** The coordinate helpers adopt one naming rule: a bare noun is a type, everything
+  else is an operation on one. `coord_iterator` becomes `layout_base::coordinate_iterator`, and
+  `area` and `volume` become `area_of` and `volume_of`
 
 - **Breaking:** `fiction::constants` is gone. `ERROR_MARGIN`, the floating-point comparison
   tolerance, is `fiction::utils::math::ERROR_MARGIN`; `ELEMENTARY_CHARGE`, `K_E`,
@@ -369,10 +374,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - The C++ test suite and the experiments now open the namespaces they use, one
     `using namespace` directive per namespace, rather than qualifying every symbol below
-    `fiction`. That removes about 14,000 qualifier tokens. `fiction::layouts::coords` and
-    `fiction::layouts::clocking` are deliberately left closed, so those references read
-    `coords::offset` and `clocking::scheme`, and `detail` namespaces stay qualified by
-    their module
+    `fiction`. That removes about 14,000 qualifier tokens. `fiction::layouts::clocking`
+    is deliberately left closed, so those references read `clocking::scheme`, and `detail`
+    namespaces stay qualified by their module
   - The `license-tools` hook now covers `.hpp` and `.cpp` as well as Python, and skips the
     generated `pybind11_mkdoc_docstrings.hpp`
   - Every C++ file now opens with the MIT copyright block and a Doxygen block carrying `@file`,
@@ -392,8 +396,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     it that carries the toctree
 
 - Python bindings:
-
-  - Coordinate types and area/volume functions now live in `mnt.pyfiction.layouts.coords`.
 
   - **Breaking:** `mnt.pyfiction` has one submodule per C++ namespace, such as `mnt.pyfiction.layouts` and
     `mnt.pyfiction.sidb.simulation.engines`; import each name from its submodule. The package root
@@ -415,6 +417,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** `shifted_cartesian_layout`, `hexagonal_layout`, and their gate layouts take a `layouts.arrangement` as
     first argument. One class per family replaces the per-arrangement classes, and `exact` and `orthogonal` parameters
     expose `layout_arrangement`.
+
+  - **Breaking:** `offset_coordinate` becomes `coordinate`, and `offset_area` and `offset_volume` become `area` and `volume`, in
+    `mnt.pyfiction.layouts`. `cube_coordinate`, `cube_area`, `cube_volume`, and the `int_repr` constructor are gone. `coordinate()` has
+    `x`, `y`, and `z` equal to -2147483648 and `is_valid()` returns `False` for it. Axes must lie in [-2147483647,
+    2147483647]; `coordinate`, `coord`, and the axis setters raise `OverflowError` outside of it, and setting an axis of an invalid coordinate raises
+    `ValueError`. Negative or oversized
+    layout extents raise `ValueError`, and gate-level tiles outside of the signal range raise `IndexError`.
+    `stacked_cartesian_layout` is an alias of `cartesian_layout`.
 
 ### Removed
 
@@ -576,6 +586,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+  - Coordinate construction and gate-to-cell conversion now reject narrowing overflow.
+  - Gate layout geometry now retains its two-layer limit through shared coordinate aliases and base references.
+  - Cell clock zones now use floor division for negative coordinates.
   - Cell layouts reject zero clock-zone dimensions in constructors and setters.
   - Gate layouts constructed from coordinate layouts initialize their logic functions.
   - Clocked degree counts each eligible neighbor once, including neighbors enabled by synchronization.

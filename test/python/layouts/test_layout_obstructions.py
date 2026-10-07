@@ -13,10 +13,10 @@ import pytest
 from mnt.pyfiction.layouts import (
     arrangement,
     cartesian_gate_layout,
+    coordinate,
     hexagonal_gate_layout,
     shifted_cartesian_gate_layout,
 )
-from mnt.pyfiction.layouts.coords import offset_coordinate
 from mnt.pyfiction.verification import critical_path_length_and_throughput, gate_level_drv_params, gate_level_drvs
 
 OBSTRUCTION_LAYOUTS = [
@@ -58,10 +58,10 @@ def test_gate_layout_clocking_inheritance(make_layout):
     assert layout.outgoing_clocked_zones((2, 2)) == []
 
     for icz in layout.incoming_clocked_zones((1, 1)):
-        assert icz in [offset_coordinate(1, 0), offset_coordinate(0, 1)]
+        assert icz in [coordinate(1, 0), coordinate(0, 1)]
 
     for icz in layout.outgoing_clocked_zones((1, 1)):
-        assert icz in [offset_coordinate(1, 2), offset_coordinate(2, 1)]
+        assert icz in [coordinate(1, 2), coordinate(2, 1)]
 
 
 @pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
@@ -145,18 +145,18 @@ def test_cartesian_gate_layout_gate_level_inheritance():
     # Pis
     pis = layout.pis()
     assert len(pis) == 4
-    assert offset_coordinate(x1) in pis
-    assert offset_coordinate(x2) in pis
-    assert offset_coordinate(x3) in pis
-    assert offset_coordinate(x4) in pis
-    assert layout.get_node(offset_coordinate(x1)) == 2
-    assert layout.get_node(offset_coordinate(x2)) == 3
-    assert layout.get_node(offset_coordinate(x3)) == 4
-    assert layout.get_node(offset_coordinate(x4)) == 5
-    assert layout.get_tile(2) == offset_coordinate(x1)
-    assert layout.get_tile(3) == offset_coordinate(x2)
-    assert layout.get_tile(4) == offset_coordinate(x3)
-    assert layout.get_tile(5) == offset_coordinate(x4)
+    assert coordinate(1, 0) in pis
+    assert coordinate(0, 1) in pis
+    assert coordinate(2, 0) in pis
+    assert coordinate(0, 2) in pis
+    assert layout.get_node(coordinate(1, 0)) == 2
+    assert layout.get_node(coordinate(0, 1)) == 3
+    assert layout.get_node(coordinate(2, 0)) == 4
+    assert layout.get_node(coordinate(0, 2)) == 5
+    assert layout.get_tile(2) == coordinate(1, 0)
+    assert layout.get_tile(3) == coordinate(0, 1)
+    assert layout.get_tile(4) == coordinate(2, 0)
+    assert layout.get_tile(5) == coordinate(0, 2)
     assert layout.make_signal(2) == x1
     assert layout.make_signal(3) == x2
     assert layout.make_signal(4) == x3
@@ -165,35 +165,35 @@ def test_cartesian_gate_layout_gate_level_inheritance():
     # POs
     pos = layout.pos()
     assert len(pos) == 2
-    assert offset_coordinate(f1) in pos
-    assert offset_coordinate(f2) in pos
-    assert layout.get_node(offset_coordinate(f1)) == 11
-    assert layout.get_node(offset_coordinate(f2)) == 12
-    assert layout.get_tile(11) == offset_coordinate(f1)
-    assert layout.get_tile(12) == offset_coordinate(f2)
+    assert coordinate(3, 1) in pos
+    assert coordinate(3, 2) in pos
+    assert layout.get_node(coordinate(3, 1)) == 11
+    assert layout.get_node(coordinate(3, 2)) == 12
+    assert layout.get_tile(11) == coordinate(3, 1)
+    assert layout.get_tile(12) == coordinate(3, 2)
     assert layout.make_signal(11) == f1
     assert layout.make_signal(12) == f2
 
     # gates
     gates = layout.gates()
     assert len(gates) == 7
-    assert offset_coordinate(a1) in gates
-    assert offset_coordinate(a2) in gates
-    assert offset_coordinate(b1) in gates
-    assert offset_coordinate(b2) in gates
-    assert offset_coordinate(c) in gates
-    assert offset_coordinate(f1) in gates
-    assert offset_coordinate(f2) in gates
-    assert layout.get_node(offset_coordinate(a1)) == 6
-    assert layout.get_node(offset_coordinate(b1)) == 7
-    assert layout.get_node(offset_coordinate(b2)) == 8
-    assert layout.get_node(offset_coordinate(a2)) == 9
-    assert layout.get_node(offset_coordinate(c)) == 10
-    assert layout.get_tile(6) == offset_coordinate(a1)
-    assert layout.get_tile(7) == offset_coordinate(b1)
-    assert layout.get_tile(8) == offset_coordinate(b2)
-    assert layout.get_tile(9) == offset_coordinate(a2)
-    assert layout.get_tile(10) == offset_coordinate(c)
+    assert coordinate(1, 1) in gates
+    assert coordinate(2, 2) in gates
+    assert coordinate(2, 1) in gates
+    assert coordinate(1, 2) in gates
+    assert coordinate(2, 1, 1) in gates
+    assert coordinate(3, 1) in gates
+    assert coordinate(3, 2) in gates
+    assert layout.get_node(coordinate(1, 1)) == 6
+    assert layout.get_node(coordinate(2, 1)) == 7
+    assert layout.get_node(coordinate(1, 2)) == 8
+    assert layout.get_node(coordinate(2, 2)) == 9
+    assert layout.get_node(coordinate(2, 1, 1)) == 10
+    assert layout.get_tile(6) == coordinate(1, 1)
+    assert layout.get_tile(7) == coordinate(2, 1)
+    assert layout.get_tile(8) == coordinate(1, 2)
+    assert layout.get_tile(9) == coordinate(2, 2)
+    assert layout.get_tile(10) == coordinate(2, 1, 1)
     assert layout.make_signal(6) == a1
     assert layout.make_signal(7) == b1
     assert layout.make_signal(8) == b2
@@ -203,40 +203,40 @@ def test_cartesian_gate_layout_gate_level_inheritance():
     # wires
     wires = layout.wires()
     assert len(wires) == 9
-    assert offset_coordinate(x1) in wires
-    assert offset_coordinate(x2) in wires
-    assert offset_coordinate(x3) in wires
-    assert offset_coordinate(x4) in wires
-    assert offset_coordinate(b1) in wires
-    assert offset_coordinate(b2) in wires
-    assert offset_coordinate(c) in wires
-    assert offset_coordinate(f1) in wires
-    assert offset_coordinate(f2) in wires
+    assert coordinate(1, 0) in wires
+    assert coordinate(0, 1) in wires
+    assert coordinate(2, 0) in wires
+    assert coordinate(0, 2) in wires
+    assert coordinate(2, 1) in wires
+    assert coordinate(1, 2) in wires
+    assert coordinate(2, 1, 1) in wires
+    assert coordinate(3, 1) in wires
+    assert coordinate(3, 2) in wires
 
     # incoming data flow
-    inx1 = layout.fanins(offset_coordinate(x1))
+    inx1 = layout.fanins(coordinate(1, 0))
     assert len(inx1) == 0
 
-    inf1 = layout.fanins(offset_coordinate(f1))
+    inf1 = layout.fanins(coordinate(3, 1))
     assert len(inf1) == 1
-    assert offset_coordinate(c) in inf1
+    assert coordinate(2, 1, 1) in inf1
 
-    ina2 = layout.fanins(offset_coordinate(a2))
+    ina2 = layout.fanins(coordinate(2, 2))
     assert len(ina2) == 2
-    assert offset_coordinate(b1) in ina2
-    assert offset_coordinate(b2) in ina2
+    assert coordinate(2, 1) in ina2
+    assert coordinate(1, 2) in ina2
 
     # outgoing data flow
-    outx1 = layout.fanouts(offset_coordinate(x1))
+    outx1 = layout.fanouts(coordinate(1, 0))
     assert len(outx1) == 1
-    assert offset_coordinate(a1) in outx1
+    assert coordinate(1, 1) in outx1
 
-    outf1 = layout.fanouts(offset_coordinate(f1))
+    outf1 = layout.fanouts(coordinate(3, 1))
     assert len(outf1) == 0
 
-    outa2 = layout.fanouts(offset_coordinate(a2))
+    outa2 = layout.fanouts(coordinate(2, 2))
     assert len(outa2) == 1
-    assert offset_coordinate(f2) in outa2
+    assert coordinate(3, 2) in outa2
 
     cp, tp = critical_path_length_and_throughput(layout)
     assert cp == 4
@@ -274,18 +274,18 @@ def test_hexagonal_gate_layout_gate_level_inheritance():
     # Pis
     pis = layout.pis()
     assert len(pis) == 4
-    assert offset_coordinate(x1) in pis
-    assert offset_coordinate(x2) in pis
-    assert offset_coordinate(x3) in pis
-    assert offset_coordinate(x4) in pis
-    assert layout.get_node(offset_coordinate(x1)) == 2
-    assert layout.get_node(offset_coordinate(x2)) == 3
-    assert layout.get_node(offset_coordinate(x3)) == 4
-    assert layout.get_node(offset_coordinate(x4)) == 5
-    assert layout.get_tile(2) == offset_coordinate(x1)
-    assert layout.get_tile(3) == offset_coordinate(x2)
-    assert layout.get_tile(4) == offset_coordinate(x3)
-    assert layout.get_tile(5) == offset_coordinate(x4)
+    assert coordinate(1, 0) in pis
+    assert coordinate(0, 1) in pis
+    assert coordinate(2, 0) in pis
+    assert coordinate(0, 2) in pis
+    assert layout.get_node(coordinate(1, 0)) == 2
+    assert layout.get_node(coordinate(0, 1)) == 3
+    assert layout.get_node(coordinate(2, 0)) == 4
+    assert layout.get_node(coordinate(0, 2)) == 5
+    assert layout.get_tile(2) == coordinate(1, 0)
+    assert layout.get_tile(3) == coordinate(0, 1)
+    assert layout.get_tile(4) == coordinate(2, 0)
+    assert layout.get_tile(5) == coordinate(0, 2)
     assert layout.make_signal(2) == x1
     assert layout.make_signal(3) == x2
     assert layout.make_signal(4) == x3
@@ -294,35 +294,35 @@ def test_hexagonal_gate_layout_gate_level_inheritance():
     # POs
     pos = layout.pos()
     assert len(pos) == 2
-    assert offset_coordinate(f1) in pos
-    assert offset_coordinate(f2) in pos
-    assert layout.get_node(offset_coordinate(f1)) == 11
-    assert layout.get_node(offset_coordinate(f2)) == 12
-    assert layout.get_tile(11) == offset_coordinate(f1)
-    assert layout.get_tile(12) == offset_coordinate(f2)
+    assert coordinate(3, 1) in pos
+    assert coordinate(3, 2) in pos
+    assert layout.get_node(coordinate(3, 1)) == 11
+    assert layout.get_node(coordinate(3, 2)) == 12
+    assert layout.get_tile(11) == coordinate(3, 1)
+    assert layout.get_tile(12) == coordinate(3, 2)
     assert layout.make_signal(11) == f1
     assert layout.make_signal(12) == f2
 
     # gates
     gates = layout.gates()
     assert len(gates) == 7
-    assert offset_coordinate(a1) in gates
-    assert offset_coordinate(a2) in gates
-    assert offset_coordinate(b1) in gates
-    assert offset_coordinate(b2) in gates
-    assert offset_coordinate(c) in gates
-    assert offset_coordinate(f1) in gates
-    assert offset_coordinate(f2) in gates
-    assert layout.get_node(offset_coordinate(a1)) == 6
-    assert layout.get_node(offset_coordinate(b1)) == 7
-    assert layout.get_node(offset_coordinate(b2)) == 8
-    assert layout.get_node(offset_coordinate(a2)) == 9
-    assert layout.get_node(offset_coordinate(c)) == 10
-    assert layout.get_tile(6) == offset_coordinate(a1)
-    assert layout.get_tile(7) == offset_coordinate(b1)
-    assert layout.get_tile(8) == offset_coordinate(b2)
-    assert layout.get_tile(9) == offset_coordinate(a2)
-    assert layout.get_tile(10) == offset_coordinate(c)
+    assert coordinate(1, 1) in gates
+    assert coordinate(2, 2) in gates
+    assert coordinate(2, 1) in gates
+    assert coordinate(1, 2) in gates
+    assert coordinate(2, 1, 1) in gates
+    assert coordinate(3, 1) in gates
+    assert coordinate(3, 2) in gates
+    assert layout.get_node(coordinate(1, 1)) == 6
+    assert layout.get_node(coordinate(2, 1)) == 7
+    assert layout.get_node(coordinate(1, 2)) == 8
+    assert layout.get_node(coordinate(2, 2)) == 9
+    assert layout.get_node(coordinate(2, 1, 1)) == 10
+    assert layout.get_tile(6) == coordinate(1, 1)
+    assert layout.get_tile(7) == coordinate(2, 1)
+    assert layout.get_tile(8) == coordinate(1, 2)
+    assert layout.get_tile(9) == coordinate(2, 2)
+    assert layout.get_tile(10) == coordinate(2, 1, 1)
     assert layout.make_signal(6) == a1
     assert layout.make_signal(7) == b1
     assert layout.make_signal(8) == b2
@@ -332,40 +332,40 @@ def test_hexagonal_gate_layout_gate_level_inheritance():
     # wires
     wires = layout.wires()
     assert len(wires) == 9
-    assert offset_coordinate(x1) in wires
-    assert offset_coordinate(x2) in wires
-    assert offset_coordinate(x3) in wires
-    assert offset_coordinate(x4) in wires
-    assert offset_coordinate(b1) in wires
-    assert offset_coordinate(b2) in wires
-    assert offset_coordinate(c) in wires
-    assert offset_coordinate(f1) in wires
-    assert offset_coordinate(f2) in wires
+    assert coordinate(1, 0) in wires
+    assert coordinate(0, 1) in wires
+    assert coordinate(2, 0) in wires
+    assert coordinate(0, 2) in wires
+    assert coordinate(2, 1) in wires
+    assert coordinate(1, 2) in wires
+    assert coordinate(2, 1, 1) in wires
+    assert coordinate(3, 1) in wires
+    assert coordinate(3, 2) in wires
 
     # incoming data flow
-    inx1 = layout.fanins(offset_coordinate(x1))
+    inx1 = layout.fanins(coordinate(1, 0))
     assert len(inx1) == 0
 
-    inf1 = layout.fanins(offset_coordinate(f1))
+    inf1 = layout.fanins(coordinate(3, 1))
     assert len(inf1) == 1
-    assert offset_coordinate(c) in inf1
+    assert coordinate(2, 1, 1) in inf1
 
-    ina2 = layout.fanins(offset_coordinate(a2))
+    ina2 = layout.fanins(coordinate(2, 2))
     assert len(ina2) == 2
-    assert offset_coordinate(b1) in ina2
-    assert offset_coordinate(b2) in ina2
+    assert coordinate(2, 1) in ina2
+    assert coordinate(1, 2) in ina2
 
     # outgoing data flow
-    outx1 = layout.fanouts(offset_coordinate(x1))
+    outx1 = layout.fanouts(coordinate(1, 0))
     assert len(outx1) == 1
-    assert offset_coordinate(a1) in outx1
+    assert coordinate(1, 1) in outx1
 
-    outf1 = layout.fanouts(offset_coordinate(f1))
+    outf1 = layout.fanouts(coordinate(3, 1))
     assert len(outf1) == 0
 
-    outa2 = layout.fanouts(offset_coordinate(a2))
+    outa2 = layout.fanouts(coordinate(2, 2))
     assert len(outa2) == 1
-    assert offset_coordinate(f2) in outa2
+    assert coordinate(3, 2) in outa2
 
     cp, tp = critical_path_length_and_throughput(layout)
     assert cp == 4

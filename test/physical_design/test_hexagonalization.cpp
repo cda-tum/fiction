@@ -23,8 +23,8 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/hexagonalization.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
@@ -32,6 +32,8 @@
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
+
+#include <cstddef>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -253,7 +255,7 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
         check_mapping_equiv_all<gate_layout>();
     }
@@ -261,53 +263,53 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
 
 TEST_CASE("Cartesian to hexagonal")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     using hex_lyt     = hex_gate_clk_lyt;
 
     constexpr const auto layout_height = 3;
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 0, 0), layout_height) ==
-          coords::offset(1, 0, 0));
+          layout_base::coordinate(1, 0, 0));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 0, 1), layout_height) ==
-          coords::offset(1, 0, 1));
+          layout_base::coordinate(1, 0, 1));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 0, 0), layout_height) ==
-          coords::offset(2, 1, 0));
+          layout_base::coordinate(2, 1, 0));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 0, 1), layout_height) ==
-          coords::offset(2, 1, 1));
+          layout_base::coordinate(2, 1, 1));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 0, 0), layout_height) ==
-          coords::offset(2, 2, 0));
+          layout_base::coordinate(2, 2, 0));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 0, 1), layout_height) ==
-          coords::offset(2, 2, 1));
+          layout_base::coordinate(2, 2, 1));
 
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 1, 0), layout_height) ==
-          coords::offset(1, 1, 0));
+          layout_base::coordinate(1, 1, 0));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 1, 1), layout_height) ==
-          coords::offset(1, 1, 1));
+          layout_base::coordinate(1, 1, 1));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 1, 0), layout_height) ==
-          coords::offset(1, 2, 0));
+          layout_base::coordinate(1, 2, 0));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 1, 1), layout_height) ==
-          coords::offset(1, 2, 1));
+          layout_base::coordinate(1, 2, 1));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 1, 0), layout_height) ==
-          coords::offset(2, 3, 0));
+          layout_base::coordinate(2, 3, 0));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 1, 1), layout_height) ==
-          coords::offset(2, 3, 1));
+          layout_base::coordinate(2, 3, 1));
 
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 2, 0), layout_height) ==
-          coords::offset(0, 2, 0));
+          layout_base::coordinate(0, 2, 0));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 2, 1), layout_height) ==
-          coords::offset(0, 2, 1));
+          layout_base::coordinate(0, 2, 1));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 2, 0), layout_height) ==
-          coords::offset(1, 3, 0));
+          layout_base::coordinate(1, 3, 0));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 2, 1), layout_height) ==
-          coords::offset(1, 3, 1));
+          layout_base::coordinate(1, 3, 1));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 2, 0), layout_height) ==
-          coords::offset(1, 4, 0));
+          layout_base::coordinate(1, 4, 0));
     CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 2, 1), layout_height) ==
-          coords::offset(1, 4, 1));
+          layout_base::coordinate(1, 4, 1));
 }
 
 TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     using hex_lyt     = hex_gate_clk_lyt;
 
     const auto ntk    = blueprints::mux21_network<technology_network>();
@@ -324,7 +326,7 @@ TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
     check_eq(ntk, hex_layout);
 
     CHECK(rec.is_consistent("diagonals"));
-    CHECK(rec.final_count("diagonals") == layout.x() + layout.y() + 1);
+    CHECK(rec.final_count("diagonals") == static_cast<std::size_t>(layout.x() + layout.y() + 1));
     CHECK(rec.is_consistent("input pins"));
     CHECK(rec.is_consistent("output pins"));
 }

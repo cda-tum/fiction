@@ -17,6 +17,7 @@
 #pragma once
 
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/layout_base.hpp"
 
 #include <cstdint>
 #include <string_view>
@@ -28,14 +29,12 @@ namespace fiction::layouts::clocking
 /**
  * @brief Clock numbers and synchronization delays, independent of layout geometry.
  * Copies own independent schemes and synchronization maps.
- * @tparam Coordinate Coordinate identifying a clock zone.
  */
-template <typename Coordinate>
 class state
 {
   public:
     /** @brief Coordinate identifying a clock zone. */
-    using clock_zone = Coordinate;
+    using clock_zone = layout_base::coordinate;
     /** @brief Clocking scheme over tile positions. */
     using clocking_scheme_t = scheme;
     /** @brief Clock phase index. */
@@ -209,6 +208,6 @@ class state
      */
     clocking_scheme_t clocking;
     /** @brief Nonzero synchronization delays indexed by coordinate. */
-    std::unordered_map<Coordinate, sync_elem_t> synchronization{};
+    std::unordered_map<clock_zone, sync_elem_t> synchronization{};
 };
 }  // namespace fiction::layouts::clocking

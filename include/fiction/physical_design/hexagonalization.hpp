@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
@@ -193,7 +194,7 @@ struct routing_objective_with_fanin_update_information : public routing_objectiv
  * @return corresponding tile on the hexagonal grid.
  */
 template <typename CartLyt, typename HexLyt>
-[[nodiscard]] tile<HexLyt> to_hex(tile<CartLyt> cartesian_tile, uint64_t cartesian_layout_height) noexcept
+[[nodiscard]] tile<HexLyt> to_hex(tile<CartLyt> cartesian_tile, const int32_t cartesian_layout_height) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "Old tile is not Cartesian");
     static_assert(is_hexagonal_layout_v<HexLyt>, "New tile is not hexagonal");
@@ -205,7 +206,7 @@ template <typename CartLyt, typename HexLyt>
     const auto half_height = static_cast<double>(cartesian_layout_height) / 2.0;
 
     // calculate adjustment based on layout height and y coordinate
-    const auto adjustment = static_cast<int64_t>(std::ceil(std::floor(half_height) - (static_cast<double>(y) / 2.0)));
+    const auto adjustment = static_cast<int32_t>(std::ceil(std::floor(half_height) - (static_cast<double>(y) / 2.0)));
 
     // compute new x coordinate by adding adjustment
     const auto x = cartesian_tile.x + adjustment;
@@ -224,9 +225,9 @@ template <typename CartLyt, typename HexLyt>
  * @return The number of primary inputs that are placed to the left of the middle primary input.
  */
 template <typename CartLyt>
-[[nodiscard]] uint64_t compute_num_inputs_left_to_middle_pi(const CartLyt& lyt) noexcept
+[[nodiscard]] int32_t compute_num_inputs_left_to_middle_pi(const CartLyt& lyt) noexcept
 {
-    uint64_t num_inputs_left_to_middle_pi = 0;
+    int32_t num_inputs_left_to_middle_pi = 0;
 
     // iterate over all primary inputs
     lyt.foreach_pi(
@@ -252,9 +253,9 @@ template <typename CartLyt>
  * @return The number of primary outputs that are placed to the left of the middle primary output.
  */
 template <typename CartLyt>
-[[nodiscard]] uint64_t compute_num_outputs_left_to_middle_po(const CartLyt& lyt) noexcept
+[[nodiscard]] int32_t compute_num_outputs_left_to_middle_po(const CartLyt& lyt) noexcept
 {
-    uint64_t num_outputs_left_to_middle_po = 0;
+    int32_t num_outputs_left_to_middle_po = 0;
 
     // iterate over all primary inputs
     lyt.foreach_po(
@@ -280,9 +281,9 @@ template <typename CartLyt>
  * @return The number of primary inputs that are placed to the right of the middle primary input.
  */
 template <typename CartLyt>
-[[nodiscard]] uint64_t compute_num_inputs_right_to_middle_pi(const CartLyt& lyt) noexcept
+[[nodiscard]] int32_t compute_num_inputs_right_to_middle_pi(const CartLyt& lyt) noexcept
 {
-    uint64_t num_inputs_right_to_middle_pi = 0;
+    int32_t num_inputs_right_to_middle_pi = 0;
 
     // iterate over all primary inputs
     lyt.foreach_pi(
@@ -308,9 +309,9 @@ template <typename CartLyt>
  * @return The number of primary outputs that are placed to the right of the middle primary output.
  */
 template <typename CartLyt>
-[[nodiscard]] uint64_t compute_num_outputs_right_to_middle_po(const CartLyt& lyt) noexcept
+[[nodiscard]] int32_t compute_num_outputs_right_to_middle_po(const CartLyt& lyt) noexcept
 {
-    uint64_t num_outputs_right_to_middle_po = 0;
+    int32_t num_outputs_right_to_middle_po = 0;
 
     // iterate over all primary inputs
     lyt.foreach_po(
@@ -327,7 +328,7 @@ template <typename CartLyt>
 }
 
 /**
- * Utility function to calculate the offset that has to be subtracted from any x-coordinate on the hexagonal layout.
+ * Utility function to calculate the shift that has to be added to any x-coordinate on the hexagonal layout.
  *
  * This function iterates through diagonals starting from the bottom left corner until it finds a non-empty tile or
  * until it has traversed all diagonals. In each iteration, it checks tiles along the diagonal line. If it finds a
@@ -341,26 +342,26 @@ template <typename CartLyt>
  * @param cartesian_layout_height Height of the Cartesian layout.
  * @param input_mode Adjust offset based on PIs relocated to the top row.
  * @param output_mode Adjust offset based on POs relocated to the bottom row.
- * @return positive and negative offset.
+ * @return Signed shift that has to be added to any x-coordinate on the hexagonal layout.
  */
 template <typename HexLyt, typename CartLyt>
-[[nodiscard]] std::pair<uint64_t, uint64_t>
-get_offset(const CartLyt& lyt, const uint64_t cartesian_layout_width, const uint64_t cartesian_layout_height,
-           const hexagonalization_params::io_pin_extension_mode input_mode,
-           const hexagonalization_params::io_pin_extension_mode output_mode) noexcept
+[[nodiscard]] int32_t get_offset(const CartLyt& lyt, const int32_t cartesian_layout_width,
+                                 const int32_t                                        cartesian_layout_height,
+                                 const hexagonalization_params::io_pin_extension_mode input_mode,
+                                 const hexagonalization_params::io_pin_extension_mode output_mode) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
     static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
 
-    int64_t    offset               = 0;
+    int32_t    offset               = 0;
     bool       found_non_empty_tile = false;
     const auto total_diagonals      = cartesian_layout_height + cartesian_layout_width - 1;
 
     // 1) Find the first diagonal that contains at least one non-empty tile
     //    and track the maximum X-coordinate among those tiles (in hex coords).
-    for (uint64_t diagonal = 0; diagonal < total_diagonals && !found_non_empty_tile; ++diagonal)
+    for (int32_t diagonal = 0; diagonal < total_diagonals && !found_non_empty_tile; ++diagonal)
     {
-        for (uint64_t row = 0; row < cartesian_layout_height; ++row)
+        for (int32_t row = 0; row < cartesian_layout_height; ++row)
         {
             // 'col' is derived from current diagonal index minus the row.
             if (diagonal >= row)
@@ -371,7 +372,7 @@ get_offset(const CartLyt& lyt, const uint64_t cartesian_layout_width, const uint
                         !lyt.is_empty_tile(current_tile))
                     {
                         const auto hex_coord = to_hex<CartLyt, HexLyt>(current_tile, cartesian_layout_height);
-                        offset               = std::max(offset, static_cast<int64_t>(hex_coord.x));
+                        offset               = std::max(offset, hex_coord.x);
                         found_non_empty_tile = true;  // We only need the first diagonal that has a non-empty tile
                     }
                 }
@@ -382,37 +383,21 @@ get_offset(const CartLyt& lyt, const uint64_t cartesian_layout_width, const uint
     // 2) Adjust offset to accommodate primary inputs if required.
     if (input_mode != hexagonalization_params::io_pin_extension_mode::NONE)
     {
-        const auto middle_pi                 = detail::to_hex<CartLyt, HexLyt>({0, 0}, cartesian_layout_height);
-        const auto num_inputs_left_to_middle = compute_num_inputs_left_to_middle_pi(lyt);
-        const auto needed_offset = static_cast<int64_t>(middle_pi.x) - static_cast<int64_t>(num_inputs_left_to_middle);
+        const auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, cartesian_layout_height);
 
-        offset = std::min(needed_offset, offset);
+        offset = std::min(middle_pi.x - compute_num_inputs_left_to_middle_pi(lyt), offset);
     }
 
     // 3) Adjust offset to accommodate primary outputs if required.
     if (output_mode != hexagonalization_params::io_pin_extension_mode::NONE)
     {
         const auto middle_po = detail::to_hex<CartLyt, HexLyt>({lyt.x(), lyt.y()}, cartesian_layout_height);
-        const auto num_outputs_left_to_middle = compute_num_outputs_left_to_middle_po(lyt);
-        const auto needed_offset = static_cast<int64_t>(middle_po.x) - static_cast<int64_t>(num_outputs_left_to_middle);
 
-        offset = std::min(needed_offset, offset);
+        offset = std::min(middle_po.x - compute_num_outputs_left_to_middle_po(lyt), offset);
     }
 
-    // 4) Convert the signed offset into a pair of positive values indicating how much to add or subtract.
-    uint64_t offset_to_add      = 0;
-    uint64_t offset_to_subtract = 0;
-
-    if (offset < 0)
-    {
-        offset_to_add = static_cast<uint64_t>(-offset);
-    }
-    else
-    {
-        offset_to_subtract = static_cast<uint64_t>(offset);
-    }
-
-    return {offset_to_add, offset_to_subtract};
+    // 4) The hexagonal layout is shifted by the negated offset.
+    return -offset;
 }
 
 template <typename HexLyt, typename CartLyt>
@@ -466,10 +451,8 @@ class hexagonalization_impl
             const mockturtle::stopwatch stop{stats.time_total};
 
             // calculate horizontal offset for hexagonal layout
-            const auto offset_info = detail::get_offset<HexLyt, CartLyt>(
-                layout, layout_width, layout_height, ps.input_pin_extension, ps.output_pin_extension);
-            const auto offset_to_add      = offset_info.first;
-            const auto offset_to_subtract = offset_info.second;
+            const auto x_shift = detail::get_offset<HexLyt, CartLyt>(layout, layout_width, layout_height,
+                                                                     ps.input_pin_extension, ps.output_pin_extension);
 
             // determine the top primary input coordinate
             auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
@@ -490,23 +473,22 @@ class hexagonalization_impl
             right_pos.reserve(layout.num_pos());
 
             // keep track of maximum coordinates
-            uint64_t x_max = 0;
-            uint64_t y_max = 0;
+            int32_t x_max = 0;
+            int32_t y_max = 0;
 
             // map primary inputs to the hexagonal layout
             layout.foreach_pi(
-                [this, &hex_layout, &left_pis, &right_pis, &x_max, &y_max, layout_height, offset_to_add,
-                 offset_to_subtract](const auto& gate)
+                [this, &hex_layout, &left_pis, &right_pis, &x_max, &y_max, layout_height, x_shift](const auto& gate)
                 {
                     const auto old_coord = layout.get_tile(gate);
                     // convert Cartesian coordinate to hex coordinate
                     auto hex_coord = detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height);
-                    hex_coord.x += offset_to_add - offset_to_subtract;
+                    hex_coord.x += x_shift;
                     // create primary input in hex layout
                     hex_layout.create_pi(layout.get_name(layout.get_node(old_coord)), hex_coord);
 
-                    x_max = std::max(static_cast<uint64_t>(hex_coord.x), x_max);
-                    y_max = std::max(static_cast<uint64_t>(hex_coord.y), y_max);
+                    x_max = std::max(hex_coord.x, x_max);
+                    y_max = std::max(hex_coord.y, y_max);
 
                     // collect PIs to the left and to the right of the middle PI
                     if (old_coord.x == 0 && old_coord.y != 0)
@@ -531,8 +513,7 @@ class hexagonalization_impl
                 // adjust offset based on primary inputs in the first row
                 const auto num_inputs_right_to_middle_pi = compute_num_inputs_right_to_middle_pi(layout);
 
-                const auto min_width =
-                    middle_pi.x + num_inputs_right_to_middle_pi + 2 + offset_to_add - offset_to_subtract;
+                const auto min_width = middle_pi.x + num_inputs_right_to_middle_pi + 2 + x_shift;
                 if (hex_width < min_width)
                 {
                     hex_layout.resize({min_width, hex_height, hex_depth});
@@ -545,8 +526,7 @@ class hexagonalization_impl
                 // adjust offset based on primary outputs in the last row
                 const auto num_outputs_right_to_middle_po = compute_num_outputs_right_to_middle_po(layout);
 
-                const auto min_width =
-                    middle_po.x + num_outputs_right_to_middle_po + 2 + offset_to_add - offset_to_subtract;
+                const auto min_width = middle_po.x + num_outputs_right_to_middle_po + 2 + x_shift;
                 if (hex_width < min_width)
                 {
                     hex_layout.resize({min_width, hex_height, hex_depth});
@@ -554,11 +534,12 @@ class hexagonalization_impl
             }
 
             // process internal nodes by iterating diagonally over the Cartesian layout
-            utils::progress_reporter diagonal_progress{ps.on_progress, "diagonals", layout_width + layout_height - 1};
+            utils::progress_reporter diagonal_progress{ps.on_progress, "diagonals",
+                                                       static_cast<std::size_t>(layout_width + layout_height - 1)};
 
-            for (uint64_t k = 0; k < layout_width + layout_height - 1; ++k)
+            for (int32_t k = 0; k < layout_width + layout_height - 1; ++k)
             {
-                for (uint64_t x = 0; x <= k; ++x)
+                for (int32_t x = 0; x <= k; ++x)
                 {
                     const auto y = k - x;
 
@@ -566,7 +547,7 @@ class hexagonalization_impl
                     if (y < layout_height && x < layout_width)
                     {
                         // iterate through all layers
-                        for (uint64_t z = 0; z <= hex_depth; ++z)
+                        for (int32_t z = 0; z <= hex_depth; ++z)
                         {
                             // define the current Cartesian tile
                             tile<CartLyt> old_tile{x, y, z};
@@ -588,10 +569,10 @@ class hexagonalization_impl
 
                             // convert the Cartesian tile to a hexagonal tile and adjust x-coordinate
                             auto hex_tile = detail::to_hex<CartLyt, HexLyt>(old_tile, layout_height);
-                            hex_tile.x += offset_to_add - offset_to_subtract;
+                            hex_tile.x += x_shift;
 
-                            x_max = std::max(static_cast<uint64_t>(hex_tile.x), x_max);
-                            y_max = std::max(static_cast<uint64_t>(hex_tile.y), y_max);
+                            x_max = std::max(hex_tile.x, x_max);
+                            y_max = std::max(hex_tile.y, y_max);
 
                             // get incoming data flow signals for the tile
                             const auto signals = layout.incoming_data_flow(old_tile);
@@ -599,10 +580,10 @@ class hexagonalization_impl
                             // process single input signals (buffer or inverter)
                             if (signals.size() == 1)
                             {
-                                const auto hex_source = [&signals, layout_height, offset_to_add, offset_to_subtract]
+                                const auto hex_source = [&signals, layout_height, x_shift]
                                 {
                                     auto t = detail::to_hex<CartLyt, HexLyt>(signals[0], layout_height);
-                                    t.x += offset_to_add - offset_to_subtract;
+                                    t.x += x_shift;
                                     return t;
                                 }();
 
@@ -623,8 +604,8 @@ class hexagonalization_impl
                                 auto hex_tile_b = detail::to_hex<CartLyt, HexLyt>(signals[1], layout_height);
 
                                 // adjust coordinates for offset
-                                hex_tile_a.x += offset_to_add - offset_to_subtract;
-                                hex_tile_b.x += offset_to_add - offset_to_subtract;
+                                hex_tile_a.x += x_shift;
+                                hex_tile_b.x += x_shift;
 
                                 // create signals for both inputs
                                 const auto hex_signal_a = hex_layout.make_signal(hex_layout.get_node(hex_tile_a));
@@ -642,8 +623,7 @@ class hexagonalization_impl
 
             // map primary outputs to hex layout
             layout.foreach_po(
-                [this, &hex_layout, &left_pos, &right_pos, &x_max, &y_max, layout_height, offset_to_add,
-                 offset_to_subtract](const auto& gate)
+                [this, &hex_layout, &left_pos, &right_pos, &x_max, &y_max, layout_height, x_shift](const auto& gate)
                 {
                     // get the original Cartesian tile for the output
                     const auto old_coord = layout.get_tile(layout.get_node(gate));
@@ -653,12 +633,12 @@ class hexagonalization_impl
 
                     // convert coordinates to hex format and adjust x-coordinate
                     auto hex_coord = detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height);
-                    hex_coord.x += offset_to_add - offset_to_subtract;
+                    hex_coord.x += x_shift;
                     auto hex_tile = detail::to_hex<CartLyt, HexLyt>(signal, layout_height);
-                    hex_tile.x += offset_to_add - offset_to_subtract;
+                    hex_tile.x += x_shift;
 
-                    x_max = std::max(static_cast<uint64_t>(hex_coord.x), x_max);
-                    y_max = std::max(static_cast<uint64_t>(hex_coord.y), y_max);
+                    x_max = std::max(hex_coord.x, x_max);
+                    y_max = std::max(hex_coord.y, y_max);
 
                     // create the primary output in the hex layout
                     const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_tile));
@@ -683,7 +663,7 @@ class hexagonalization_impl
             if (ps.input_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
             {
                 // adjust positions and prepare for routing
-                middle_pi.x += offset_to_add - offset_to_subtract;
+                middle_pi.x += x_shift;
                 std::vector<routing_objective_with_fanin_update_information<HexLyt>> objectives{};
                 objectives.reserve(hex_layout.num_pis());
 
@@ -734,15 +714,15 @@ class hexagonalization_impl
                         obj.update_first_fanin = first_fanin_is_c;
                     }
 
-                    x_max = std::max(static_cast<uint64_t>(middle_pi.x), x_max);
-                    y_max = std::max(static_cast<uint64_t>(middle_pi.y), y_max);
+                    x_max = std::max(middle_pi.x, x_max);
+                    y_max = std::max(middle_pi.y, y_max);
                     hex_layout.move_node(hex_layout.get_node(fanout), fanout, fins);
 
                     objectives.push_back(obj);
                 }
 
                 // move back to middle PIs original position
-                middle_pi.x += left_pis.size();
+                middle_pi.x += static_cast<int32_t>(left_pis.size());
 
                 // process PIs from top row of the Cartesian layout (similar to before)
                 for (const auto& c : right_pis)
@@ -781,8 +761,8 @@ class hexagonalization_impl
                             }
                         });
 
-                    x_max = std::max(static_cast<uint64_t>(middle_pi.x), x_max);
-                    y_max = std::max(static_cast<uint64_t>(middle_pi.y), y_max);
+                    x_max = std::max(middle_pi.x, x_max);
+                    y_max = std::max(middle_pi.y, y_max);
                     hex_layout.move_node(hex_layout.get_node(c), middle_pi);
 
                     if (const auto target_node = hex_layout.get_node(fanout);
@@ -798,7 +778,7 @@ class hexagonalization_impl
                 }
 
                 // perform routing using A*
-                layouts::obstructions<coordinate<HexLyt>> search_obstructions{};
+                layouts::obstructions search_obstructions{};
                 using path           = layout_coordinate_path<decltype(hex_layout)>;
                 const auto crossings = ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
                 const physical_design::path_finding::a_star_params params_astar{crossings};
@@ -834,8 +814,8 @@ class hexagonalization_impl
 
                         for (const auto& t : new_path)
                         {
-                            x_max = std::max(static_cast<uint64_t>(t.x), x_max);
-                            y_max = std::max(static_cast<uint64_t>(t.y), y_max);
+                            x_max = std::max(t.x, x_max);
+                            y_max = std::max(t.y, y_max);
                             search_obstructions.obstruct_coordinate(t);
                         }
                         // if the flag is set, re-collect and update fanins
@@ -871,7 +851,7 @@ class hexagonalization_impl
             if (ps.output_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
             {
                 // adjust positions and prepare for routing
-                middle_po.x += offset_to_add - offset_to_subtract;
+                middle_po.x += x_shift;
                 std::vector<routing_objective_with_fanin_update_information<HexLyt>> objectives{};
                 objectives.reserve(hex_layout.num_pos());
 
@@ -887,14 +867,14 @@ class hexagonalization_impl
 
                     routing_objective_with_fanin_update_information<HexLyt> obj{fanin, middle_po, false};
 
-                    x_max = std::max(static_cast<uint64_t>(middle_po.x), x_max);
-                    y_max = std::max(static_cast<uint64_t>(middle_po.y), y_max);
+                    x_max = std::max(middle_po.x, x_max);
+                    y_max = std::max(middle_po.y, y_max);
                     hex_layout.move_node(hex_layout.get_node(c), middle_po);
                     objectives.push_back(obj);
                 }
 
                 // move back to middle POs original position
-                middle_po.x += left_pos.size();
+                middle_po.x += static_cast<int32_t>(left_pos.size());
 
                 // process POs from bottom row of the Cartesian layout (similar to before)
                 for (const auto& c : right_pos)
@@ -907,14 +887,14 @@ class hexagonalization_impl
                     middle_po.x += 1;
                     routing_objective_with_fanin_update_information<HexLyt> obj{fanin, middle_po, false};
 
-                    x_max = std::max(static_cast<uint64_t>(middle_po.x), x_max);
-                    y_max = std::max(static_cast<uint64_t>(middle_po.y), y_max);
+                    x_max = std::max(middle_po.x, x_max);
+                    y_max = std::max(middle_po.y, y_max);
                     hex_layout.move_node(hex_layout.get_node(c), middle_po);
                     objectives.push_back(obj);
                 }
 
                 // perform routing using A*
-                layouts::obstructions<coordinate<HexLyt>> search_obstructions{};
+                layouts::obstructions search_obstructions{};
                 using path = layout_coordinate_path<decltype(hex_layout)>;
                 const auto crossings =
                     ps.output_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
@@ -983,8 +963,8 @@ class hexagonalization_impl
 
                         for (const auto& t : new_path)
                         {
-                            x_max = std::max(static_cast<uint64_t>(t.x), x_max);
-                            y_max = std::max(static_cast<uint64_t>(t.y), y_max);
+                            x_max = std::max(t.x, x_max);
+                            y_max = std::max(t.y, y_max);
                             search_obstructions.obstruct_coordinate(t);
                         }
                     }
@@ -1008,8 +988,8 @@ class hexagonalization_impl
             networks::restore_names<CartLyt, HexLyt>(layout, hex_layout);
         }
 
-        stats.x_size        = hex_layout.x() + 1;
-        stats.y_size        = hex_layout.y() + 1;
+        stats.x_size        = static_cast<uint64_t>(hex_layout.x()) + 1;
+        stats.y_size        = static_cast<uint64_t>(hex_layout.y()) + 1;
         stats.num_gates     = hex_layout.num_gates();
         stats.num_wires     = hex_layout.num_wires();
         stats.num_crossings = hex_layout.num_crossings();

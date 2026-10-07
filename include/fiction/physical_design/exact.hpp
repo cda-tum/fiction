@@ -368,12 +368,12 @@ class exact_impl
             else if (layout.is_clocking_scheme(layouts::clocking::COLUMNAR_NAME))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
-                if (ar.x < depth_ntk.depth())
+                if (ar.x < static_cast<int32_t>(depth_ntk.depth()))
                 {
                     return true;
                 }
                 // if border I/Os are enforced, skip all aspect ratios that are too narrow for hosting all I/Os
-                if (params.border_io && ar.y < std::max(network.num_pis(), network.num_pos()) - 1)
+                if (params.border_io && ar.y < static_cast<int32_t>(std::max(network.num_pis(), network.num_pos())) - 1)
                 {
                     return true;
                 }
@@ -382,12 +382,12 @@ class exact_impl
             else if (layout.is_clocking_scheme(layouts::clocking::ROW_NAME))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
-                if (ar.y < depth_ntk.depth())
+                if (ar.y < static_cast<int32_t>(depth_ntk.depth()))
                 {
                     return true;
                 }
                 // if border I/Os are enforced, skip all aspect ratios that are too narrow for hosting all I/Os
-                if (params.border_io && ar.x < std::max(network.num_pis(), network.num_pos()) - 1)
+                if (params.border_io && ar.x < static_cast<int32_t>(std::max(network.num_pis(), network.num_pos())) - 1)
                 {
                     return true;
                 }
@@ -1532,7 +1532,8 @@ class exact_impl
                 apply_to_added_tiles(
                     [this, &pi](const auto& t)
                     {
-                        if (t.x > layout.num_clocks() - 1u || t.y > layout.num_clocks() - 1u)
+                        if (t.x >= static_cast<int32_t>(layout.num_clocks()) ||
+                            t.y >= static_cast<int32_t>(layout.num_clocks()))
                         {
                             solver->add(!(get_tn(t, pi)));
                         }
@@ -1913,13 +1914,13 @@ class exact_impl
                             if (!skip_const_or_io_node(n))
                             {
                                 const auto l  = depth_ntk.level(n);
-                                const auto il = inv_levels[network.node_to_index(n)];
+                                const auto il = static_cast<int32_t>(inv_levels[network.node_to_index(n)]);
 
                                 // cannot be placed with too little distance to western border
-                                for (auto column = 0u;
+                                for (int32_t column = 0;
                                      column < std::min(static_cast<decltype(layout.y())>(l), layout.x()); ++column)
                                 {
-                                    for (auto row = 0u; row <= layout.y(); ++row)
+                                    for (int32_t row = 0; row <= layout.y(); ++row)
                                     {
                                         if (const auto t = typename Lyt::tile{column, row}; is_added_tile(t))
                                         {
@@ -1939,9 +1940,9 @@ class exact_impl
                                 }
 
                                 // cannot be placed with too little distance to eastern border
-                                for (auto column = layout.x() - il + 1; column < layout.x(); ++column)
+                                for (int32_t column = std::max(layout.x() - il + 1, 0); column < layout.x(); ++column)
                                 {
-                                    for (auto row = 0u; row <= layout.y(); ++row)
+                                    for (int32_t row = 0; row <= layout.y(); ++row)
                                     {
                                         const auto t = typename Lyt::tile{column, row};
 
@@ -1977,13 +1978,13 @@ class exact_impl
                             if (!skip_const_or_io_node(n))
                             {
                                 const auto l  = depth_ntk.level(n);
-                                const auto il = inv_levels[network.node_to_index(n)];
+                                const auto il = static_cast<int32_t>(inv_levels[network.node_to_index(n)]);
 
                                 // cannot be placed with too little distance to northern border
-                                for (auto row = 0u; row < std::min(static_cast<decltype(layout.y())>(l), layout.y());
+                                for (int32_t row = 0; row < std::min(static_cast<decltype(layout.y())>(l), layout.y());
                                      ++row)
                                 {
-                                    for (auto column = 0u; column <= layout.x(); ++column)
+                                    for (int32_t column = 0; column <= layout.x(); ++column)
                                     {
                                         if (const auto t = typename Lyt::tile{column, row}; is_added_tile(t))
                                         {
@@ -2003,9 +2004,9 @@ class exact_impl
                                 }
 
                                 // cannot be placed with too little distance to southern border
-                                for (auto row = layout.y() - il + 1; row < layout.y(); ++row)
+                                for (int32_t row = std::max(layout.y() - il + 1, 0); row < layout.y(); ++row)
                                 {
-                                    for (auto column = 0u; column <= layout.x(); ++column)
+                                    for (int32_t column = 0; column <= layout.x(); ++column)
                                     {
                                         const auto t = typename Lyt::tile{column, row};
 
@@ -2041,7 +2042,7 @@ class exact_impl
                             if (!skip_const_or_io_node(n))
                             {
                                 const auto l  = depth_ntk.level(n);
-                                const auto il = inv_levels[network.node_to_index(n)];
+                                const auto il = static_cast<int32_t>(inv_levels[network.node_to_index(n)]);
 
                                 // cannot be placed with too little distance to north-west corner
                                 apply_to_added_tiles(
@@ -2997,7 +2998,7 @@ class exact_impl
                 if (result_aspect_ratio)
                 {
                     // stop working if its area is smaller or equal to the one currently at hand
-                    if (layouts::coords::area_of(*result_aspect_ratio) <= layouts::coords::area_of(ar))
+                    if (layouts::area_of(*result_aspect_ratio) <= layouts::area_of(ar))
                     {
                         return std::nullopt;
                     }
@@ -3033,7 +3034,7 @@ class exact_impl
                         }
                         else  // or if the own one is smaller
                         {
-                            if (layouts::coords::area_of(*result_aspect_ratio) > layouts::coords::area_of(ar))
+                            if (layouts::area_of(*result_aspect_ratio) > layouts::area_of(ar))
                             {
                                 result_aspect_ratio = ar;
                             }
@@ -3050,7 +3051,7 @@ class exact_impl
                         for (const auto& ti : *ti_list)
                         {
                             if (ti.solver && ti.ctx != ctx &&
-                                layouts::coords::area_of(ar) <= layouts::coords::area_of(ti.worker_aspect_ratio))
+                                layouts::area_of(ar) <= layouts::area_of(ti.worker_aspect_ratio))
                             {
                                 // Context-wide interruption also cancels model evaluation inside noexcept traversals.
                                 Z3_solver_interrupt(*ti.ctx, *ti.solver);
@@ -3131,8 +3132,8 @@ class exact_impl
         if (result_aspect_ratio.has_value())
         {
             // statistical information
-            pst.x_size        = layout.x() + 1;
-            pst.y_size        = layout.y() + 1;
+            pst.x_size        = static_cast<uint64_t>(layout.x()) + 1;
+            pst.y_size        = static_cast<uint64_t>(layout.y()) + 1;
             pst.num_gates     = layout.num_gates();
             pst.num_wires     = layout.num_wires();
             pst.num_crossings = layout.num_crossings();
@@ -3181,8 +3182,8 @@ class exact_impl
                 if (sat)
                 {
                     // statistical information
-                    pst.x_size        = layout.x() + 1;
-                    pst.y_size        = layout.y() + 1;
+                    pst.x_size        = static_cast<uint64_t>(layout.x()) + 1;
+                    pst.y_size        = static_cast<uint64_t>(layout.y()) + 1;
                     pst.num_gates     = layout.num_gates();
                     pst.num_wires     = layout.num_wires();
                     pst.num_crossings = layout.num_crossings();

@@ -59,7 +59,7 @@ int main()  // NOLINT
 {
     const std::string network_folder = fmt::format("{}/../benchmarks/IWLS93/", EXPERIMENTS_PATH);
 
-    using gate_lyt = gate_level_layout<cartesian_layout<>>;
+    using gate_lyt = gate_level_layout<cartesian_layout>;
 
     experiments::experiment<std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, bool>
         clock_number_assignment_exp{"clock number assignment",
@@ -102,8 +102,8 @@ int main()  // NOLINT
         const auto original_layout = orthogonal<gate_lyt>(mapped_network);
 
         // obtain layout characteristics
-        const auto width  = original_layout.x() + 1;
-        const auto height = original_layout.y() + 1;
+        const auto width  = static_cast<uint64_t>(original_layout.x()) + 1;
+        const auto height = static_cast<uint64_t>(original_layout.y()) + 1;
         const auto area   = width * height;
 
         // deep-copy the original layout

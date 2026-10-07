@@ -103,7 +103,7 @@ class layout : public layouts::cell_grid<cell_type>, public layouts::tile_clocki
     /**
      * Hold-phase extension in full clock cycles.
      */
-    using sync_elem_t = typename layouts::clocking::state<clock_zone>::sync_elem_t;
+    using sync_elem_t = layouts::clocking::state::sync_elem_t;
     /**
      * Cell width in nm, the QCADesigner default.
      */

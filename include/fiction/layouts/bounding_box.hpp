@@ -23,10 +23,6 @@
 #include <algorithm>
 #include <limits>
 
-// data types cannot properly be converted to bit field types
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-
 namespace fiction::layouts
 {
 /**
@@ -99,6 +95,13 @@ class bounding_box_2d
             layout.foreach_cell([&](const auto& c) { update_min_max(min, max, c); });
         }
 
+        // no non-empty coordinate lies within the layout
+        if (min.x > max.x)
+        {
+            min = {0, 0, 0};
+            max = {0, 0, 0};
+        }
+
         // Final bounding box dimensions
         x_size = max.x - min.x;
         y_size = max.y - min.y;
@@ -106,7 +109,7 @@ class bounding_box_2d
     /**
      * Returns the minimum corner of the bounding box.
      *
-     * In a `cartesian_layout<coords::offset>` object, this location represents the most north-western coordinate
+     * In a `cartesian_layout` object, this location represents the most north-western coordinate
      * of the bounding box enclosing every non-empty coordinate.
      *
      * @return The minimum enclosing coordinate in the associated layout.
@@ -118,7 +121,7 @@ class bounding_box_2d
     /**
      * Returns the maximum corner of the bounding box.
      *
-     * In a `cartesian_layout<coords::offset>` object, this location represents the most south-eastern coordinate
+     * In a `cartesian_layout` object, this location represents the most south-eastern coordinate
      * of the bounding box enclosing every non-empty coordinate.
      *
      * @return The maximum enclosing coordinate in the associated layout.
@@ -190,4 +193,3 @@ class bounding_box_2d
 };
 
 }  // namespace fiction::layouts
-#pragma GCC diagnostic pop

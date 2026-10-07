@@ -18,7 +18,6 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
-#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 
 #include <type_traits>
@@ -100,13 +99,11 @@ namespace fiction::layouts
           +-------+       +-------+
   \endverbatim
  *
- * @tparam OffsetCoordinateType The coordinate implementation to be used. Offset coordinates are required.
  */
-template <typename OffsetCoordinateType = coords::offset>
-class shifted_cartesian_layout : public hexagonal_layout<OffsetCoordinateType, coords::cube>
+class shifted_cartesian_layout : public hexagonal_layout
 {
   private:
-    using HexagonalLayout = hexagonal_layout<OffsetCoordinateType, coords::cube>;
+    using HexagonalLayout = hexagonal_layout;
 
   public:
     /**
@@ -123,7 +120,7 @@ class shifted_cartesian_layout : public hexagonal_layout<OffsetCoordinateType, c
      * @param a Arrangement of the shifted rows or columns. It cannot change after construction.
      * @param ar Highest possible position in the layout.
      */
-    explicit shifted_cartesian_layout(const arrangement a, const typename HexagonalLayout::aspect_ratio& ar = {}) :
+    explicit shifted_cartesian_layout(const arrangement a, const HexagonalLayout::aspect_ratio& ar = {}) :
             HexagonalLayout(a, ar)
     {}
 
