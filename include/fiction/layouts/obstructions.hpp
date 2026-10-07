@@ -119,9 +119,13 @@ class obstructions
      * @param fn Callback for each manual obstruction.
      */
     template <typename Fn>
-    void foreach_obstructed_coordinate(Fn&& fn) const
+    void foreach_obstructed_coordinate(
+        Fn&& fn) const  // NOLINT(cppcoreguidelines-missing-std-forward): repeated calls use the callback as an lvalue
     {
-        for (const auto& coordinate : obstructed_coordinates) std::invoke(fn, coordinate);
+        for (const auto& coordinate : obstructed_coordinates)
+        {
+            std::invoke(fn, coordinate);
+        }
     }
     /**
      * Visits explicitly obstructed directed connections in unspecified order.
@@ -129,9 +133,13 @@ class obstructions
      * @param fn Callback for each manual obstruction.
      */
     template <typename Fn>
-    void foreach_obstructed_connection(Fn&& fn) const
+    void foreach_obstructed_connection(
+        Fn&& fn) const  // NOLINT(cppcoreguidelines-missing-std-forward): repeated calls use the callback as an lvalue
     {
-        for (const auto& [source, target] : obstructed_connections) std::invoke(fn, source, target);
+        for (const auto& [source, target] : obstructed_connections)
+        {
+            std::invoke(fn, source, target);
+        }
     }
 
   private:

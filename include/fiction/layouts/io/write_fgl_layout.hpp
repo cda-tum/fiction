@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/io/detail/fgl_layout_validation.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
@@ -29,7 +30,6 @@
 #include <kitty/print.hpp>
 #include <tinyxml2.h>
 
-#include <cstddef>
 #include <cstdint>
 #include <ctime>
 #include <ostream>
@@ -57,7 +57,9 @@ inline std::string xml_text(const std::string& value)
     printer.PushText(value.c_str());
     std::string text{printer.CStr()};
     for (auto position = text.find('\r'); position != std::string::npos; position = text.find('\r', position + 5))
+    {
         text.replace(position, 1, "&#13;");
+    }
     return text;
 }
 
@@ -230,10 +232,24 @@ class write_fgl_layout_impl
             [this, &progress](const auto id)
             {
                 const auto coordinate = lyt.get_tile(id);
-                const auto type       = lyt.is_pi(id)  ? std::string{"PI"} :
-                                        lyt.is_po(id)  ? std::string{"PO"} :
-                                        lyt.is_buf(id) ? std::string{"BUF"} :
-                                                         kitty::to_hex(lyt.node_function(id));
+                /** @brief Serialized gate type or truth-table hexadecimal text. */
+                std::string type{};
+                if (lyt.is_pi(id))
+                {
+                    type = "PI";
+                }
+                else if (lyt.is_po(id))
+                {
+                    type = "PO";
+                }
+                else if (lyt.is_buf(id))
+                {
+                    type = "BUF";
+                }
+                else
+                {
+                    type = kitty::to_hex(lyt.node_function(id));
+                }
                 os << fgl::OPEN_GATE;
                 os << fmt::format(fgl::GATE, id.index, type, fgl::xml_text(lyt.get_name(id)), coordinate.x,
                                   coordinate.y, coordinate.z);

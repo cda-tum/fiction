@@ -28,7 +28,6 @@
 #include <optional>
 #include <random>
 #include <stdexcept>
-#include <utility>
 
 namespace fiction::layouts
 {

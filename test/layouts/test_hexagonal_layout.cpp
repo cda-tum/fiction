@@ -751,7 +751,10 @@ TEST_CASE("Hexagonal empty geometry and signed edge arithmetic", "[hexagonal-lay
     CHECK(empty.is_in_even_column({-2, 0}));
     CHECK(!empty.to_offset_coordinate({std::numeric_limits<int64_t>::max(), 0, 0}));
     CHECK(!empty.to_offset_coordinate({0, 0, std::numeric_limits<int64_t>::min()}));
+    /** @brief Geometry covering every nonnegative signed x- and y-coordinate. */
     const hexagonal_layout wide{a, {2147483648ull, 2147483648ull, 2}};
+    CHECK(wide.eastern_border_of({0, 0}) == layout_base::coordinate{2147483647, 0});
+    CHECK(wide.southern_border_of({0, 0}) == layout_base::coordinate{0, 2147483647});
     CHECK(!wide.east({2147483647, 0}));
     CHECK(!wide.south({0, 2147483647}));
     for (const auto c : {layout_base::coordinate{2147483647, 2147483647}, layout_base::coordinate{0, 0}})

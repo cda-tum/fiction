@@ -135,6 +135,8 @@ class scheme
     }
     /** @brief Moves the clocking scheme. @return This scheme. */
     scheme& operator=(scheme&&) noexcept = default;
+    /** @brief Releases owned clocking state. */
+    ~scheme() = default;
     /**
      * Returns the clock number of the tile at \f$(x, y)\f$: its overridden clock number if one exists, and the
      * repeated cutout entry otherwise.
@@ -226,7 +228,8 @@ class scheme
      * @param fn Callback for each override.
      */
     template <typename Fn>
-    void foreach_override(Fn&& fn) const
+    void foreach_override(
+        Fn&& fn) const  // NOLINT(cppcoreguidelines-missing-std-forward): repeated calls use the callback as an lvalue
     {
         for (const auto& [position, number] : overrides)
         {

@@ -22,7 +22,6 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/clocking_state.hpp"
 #include "fiction/layouts/obstructions.hpp"
-#include "fiction/traits.hpp"
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -31,8 +30,8 @@
 
 #include <algorithm>
 #include <array>
-#include <compare>
 #include <concepts>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <limits>
@@ -92,7 +91,7 @@ struct hash<fiction::layouts::layout_object_id>
     /** @brief Returns the identity's hash. */
     size_t operator()(const fiction::layouts::layout_object_id id) const noexcept
     {
-        return hash<uint64_t>{}((static_cast<uint64_t>(id.generation) << 32) | id.index);
+        return hash<uint64_t>{}((static_cast<uint64_t>(id.generation) << 32u) | id.index);
     }
 };
 }  // namespace std
@@ -132,9 +131,9 @@ class gate_level_layout : public CoordinateLayout
     using base_type = gate_level_layout;
 
     /** @brief Creates an empty layout with the given geometry and name. */
-    explicit gate_level_layout(const typename CoordinateLayout::extent& dimensions = {}, const std::string& name = {})
+    explicit gate_level_layout(const typename CoordinateLayout::extent& dimensions = {}, std::string name = {})
         requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::extent&>
-            : CoordinateLayout{dimensions}, layout_name{name}
+            : CoordinateLayout{dimensions}, layout_name{std::move(name)}
     {
         initialize_functions();
     }
@@ -148,10 +147,10 @@ class gate_level_layout : public CoordinateLayout
     }
     /** @brief Creates an empty layout with shifted rows or columns. */
     explicit gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::extent& dimensions = {},
-                               const std::string& name = {})
+                               std::string name = {})
         requires std::constructible_from<CoordinateLayout, layouts::arrangement,
                                          const typename CoordinateLayout::extent&>
-            : CoordinateLayout{a, dimensions}, layout_name{name}
+            : CoordinateLayout{a, dimensions}, layout_name{std::move(name)}
     {
         initialize_functions();
     }
@@ -197,6 +196,8 @@ class gate_level_layout : public CoordinateLayout
         }
         return *this;
     }
+    // Resetting the source's clock state can allocate.
+    // NOLINTBEGIN(cppcoreguidelines-noexcept-move-operations,hicpp-noexcept-move,performance-noexcept-move-constructor)
     /** @brief Moves owned state and leaves an empty reusable source with its original geometry. */
     gate_level_layout(gate_level_layout&& other) : CoordinateLayout{static_cast<const CoordinateLayout&>(other).clone()}
     {
@@ -213,6 +214,9 @@ class gate_level_layout : public CoordinateLayout
         }
         return *this;
     }
+    // NOLINTEND(cppcoreguidelines-noexcept-move-operations,hicpp-noexcept-move,performance-noexcept-move-constructor)
+    /** @brief Releases owned layout state. */
+    ~gate_level_layout() = default;
     /** @brief Returns an independent value copy. */
     [[nodiscard]] gate_level_layout clone() const
     {
@@ -222,7 +226,7 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Creates a primary input at `t`. Occupied coordinates reject without mutation. */
     output_port create_pi(const std::string& name, const tile& t)
     {
-        const auto p = create_object({}, 2, object_kind::pi, 0, t);
+        const auto p = create_object({}, 2, object_kind::PI, 0, t);
         try
         {
             set_name(p.object, name);
@@ -248,73 +252,73 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Creates a wire driven by `a`. */
     output_port create_buf(const output_port a, const tile& t)
     {
-        return create_object(std::array{a}, 2, object_kind::wire, 1, t);
+        return create_object(std::array{a}, 2, object_kind::WIRE, 1, t);
     }
     /** @brief Creates a wire with its input disconnected. */
     output_port create_buf(const tile& t)
     {
-        return create_object({}, 2, object_kind::wire, 1, t);
+        return create_object({}, 2, object_kind::WIRE, 1, t);
     }
     /** @brief Creates a NOT gate. */
     output_port create_not(const output_port a, const tile& t)
     {
-        return create_object(std::array{a}, 3, object_kind::gate, 1, t);
+        return create_object(std::array{a}, 3, object_kind::GATE, 1, t);
     }
     /** @brief Creates a AND gate. */
     output_port create_and(const output_port a, const output_port b, const tile& t)
     {
-        return create_object(std::array{a, b}, 4, object_kind::gate, 2, t);
+        return create_object(std::array{a, b}, 4, object_kind::GATE, 2, t);
     }
     /** @brief Creates a NAND gate. */
     output_port create_nand(const output_port a, const output_port b, const tile& t)
     {
-        return create_object(std::array{a, b}, 5, object_kind::gate, 2, t);
+        return create_object(std::array{a, b}, 5, object_kind::GATE, 2, t);
     }
     /** @brief Creates a OR gate. */
     output_port create_or(const output_port a, const output_port b, const tile& t)
     {
-        return create_object(std::array{a, b}, 6, object_kind::gate, 2, t);
+        return create_object(std::array{a, b}, 6, object_kind::GATE, 2, t);
     }
     /** @brief Creates a NOR gate. */
     output_port create_nor(const output_port a, const output_port b, const tile& t)
     {
-        return create_object(std::array{a, b}, 7, object_kind::gate, 2, t);
+        return create_object(std::array{a, b}, 7, object_kind::GATE, 2, t);
     }
     /** @brief Creates a LT gate. */
     output_port create_lt(const output_port a, const output_port b, const tile& t)
     {
-        return create_object(std::array{a, b}, 8, object_kind::gate, 2, t);
+        return create_object(std::array{a, b}, 8, object_kind::GATE, 2, t);
     }
     /** @brief Creates a GE gate. */
     output_port create_ge(const output_port a, const output_port b, const tile& t)
     {
-        return create_object(std::array{a, b}, 9, object_kind::gate, 2, t);
+        return create_object(std::array{a, b}, 9, object_kind::GATE, 2, t);
     }
     /** @brief Creates a GT gate. */
     output_port create_gt(const output_port a, const output_port b, const tile& t)
     {
-        return create_object(std::array{a, b}, 10, object_kind::gate, 2, t);
+        return create_object(std::array{a, b}, 10, object_kind::GATE, 2, t);
     }
     /** @brief Creates a LE gate. */
     output_port create_le(const output_port a, const output_port b, const tile& t)
     {
-        return create_object(std::array{a, b}, 11, object_kind::gate, 2, t);
+        return create_object(std::array{a, b}, 11, object_kind::GATE, 2, t);
     }
     /** @brief Creates a XOR gate. */
     output_port create_xor(const output_port a, const output_port b, const tile& t)
     {
-        return create_object(std::array{a, b}, 12, object_kind::gate, 2, t);
+        return create_object(std::array{a, b}, 12, object_kind::GATE, 2, t);
     }
     /** @brief Creates a XNOR gate. */
     output_port create_xnor(const output_port a, const output_port b, const tile& t)
     {
-        return create_object(std::array{a, b}, 13, object_kind::gate, 2, t);
+        return create_object(std::array{a, b}, 13, object_kind::GATE, 2, t);
     }
 
     /** @brief Creates a majority gate. */
     output_port create_maj(const output_port a, const output_port b, const output_port c, const tile& t)
     {
-        return create_object(std::array{a, b, c}, 14, object_kind::gate, 3, t);
+        return create_object(std::array{a, b, c}, 14, object_kind::GATE, 3, t);
     }
     /**
      * @brief Creates a gate with an ordered truth table and initial input connections.
@@ -336,13 +340,13 @@ class gate_level_layout : public CoordinateLayout
         }
         ensure_functions();
         const auto literal = functions.insert(function);
-        return create_object(children, literal, literal == 2 ? object_kind::wire : object_kind::gate,
+        return create_object(children, literal, literal == 2 ? object_kind::WIRE : object_kind::GATE,
                              function.num_vars(), t);
     }
     /** @brief Returns whether this identity names a live object. */
     [[nodiscard]] bool contains(const object_id id) const noexcept
     {
-        return id.generation != 0 && id.index < objects.size() && objects[id.index].kind != object_kind::removed &&
+        return id.generation != 0 && id.index < objects.size() && objects[id.index].kind != object_kind::REMOVED &&
                objects[id.index].generation == id.generation;
     }
     /** @brief Finds the object at a coordinate; empty coordinates have no identity. */
@@ -376,7 +380,7 @@ class gate_level_layout : public CoordinateLayout
     [[nodiscard]] std::optional<output_port> source(const input_port port) const
     {
         const auto edge = checked_input(port);
-        return edge == no_index ? std::nullopt : std::optional{output_port{identity(edges[edge].source), 0}};
+        return edge == NO_INDEX ? std::nullopt : std::optional{output_port{identity(edges[edge].source), 0}};
     }
     /**
      * @brief Connects an output to an ordered input, replacing the input's existing source.
@@ -387,19 +391,19 @@ class gate_level_layout : public CoordinateLayout
     {
         check_output(src);
         const auto old_edge = checked_input(dst);
-        if (old_edge != no_index && edges[old_edge].source == src.object.index)
+        if (old_edge != NO_INDEX && edges[old_edge].source == src.object.index)
         {
             return;
         }
-        if (old_edge != no_index)
+        if (old_edge != NO_INDEX)
         {
             unlink_edge(old_edge);
         }
         const auto edge_id    = allocate_edge();
         auto&      edge       = edges[edge_id];
         auto&      src_object = objects[src.object.index];
-        edge                  = {src.object.index, dst.object.index, dst.index, no_index, src_object.first_sink};
-        if (edge.next != no_index)
+        edge                  = {src.object.index, dst.object.index, dst.index, NO_INDEX, src_object.first_sink};
+        if (edge.next != NO_INDEX)
         {
             edges[edge.next].previous = edge_id;
         }
@@ -410,7 +414,7 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Disconnects one input without changing the indices of other inputs. */
     void disconnect(const input_port port)
     {
-        if (const auto edge = checked_input(port); edge != no_index)
+        if (const auto edge = checked_input(port); edge != NO_INDEX)
         {
             unlink_edge(edge);
         }
@@ -435,29 +439,29 @@ class gate_level_layout : public CoordinateLayout
         auto& object = checked_object(id);
         for (const auto edge : object.inputs)
         {
-            if (edge != no_index)
+            if (edge != NO_INDEX)
             {
                 unlink_edge(edge);
             }
         }
-        while (object.first_sink != no_index)
+        while (object.first_sink != NO_INDEX)
         {
             unlink_edge(object.first_sink);
         }
         occupancy.erase(object.position);
         names.erase(id);
-        if (object.kind == object_kind::pi)
+        if (object.kind == object_kind::PI)
         {
             std::erase(inputs, id.index);
         }
-        if (object.kind == object_kind::po)
+        if (object.kind == object_kind::PO)
         {
             std::erase(outputs, id.index);
         }
         --live_count;
         wire_count -= object.function == 2;
         object.inputs.clear();
-        object.kind = object_kind::removed;
+        object.kind = object_kind::REMOVED;
         if (object.generation == std::numeric_limits<uint32_t>::max())
         {
             object.generation = 0;  // Exhausted generations retire the slot rather than revive a stale identity.
@@ -523,7 +527,7 @@ class gate_level_layout : public CoordinateLayout
     [[nodiscard]] uint32_t fanin_size(const object_id id) const
     {
         const auto& ins = checked_object(id).inputs;
-        return static_cast<uint32_t>(std::ranges::count_if(ins, [](const auto edge) { return edge != no_index; }));
+        return static_cast<uint32_t>(std::ranges::count_if(ins, [](const auto edge) { return edge != NO_INDEX; }));
     }
     /** @brief Counts sink input ports, including multiple ports on one object. */
     [[nodiscard]] uint32_t fanout_size(const object_id id) const
@@ -543,27 +547,27 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Sets the complete input permutation. Invalid orders reject without mutation. */
     void set_input_order(const std::span<const object_id> order)
     {
-        set_terminal_order(inputs, order, object_kind::pi);
+        set_terminal_order(inputs, order, object_kind::PI);
     }
     /** @brief Sets the complete output permutation. Invalid orders reject without mutation. */
     void set_output_order(const std::span<const object_id> order)
     {
-        set_terminal_order(outputs, order, object_kind::po);
+        set_terminal_order(outputs, order, object_kind::PO);
     }
     /** @brief Returns whether an object is a primary input. */
     [[nodiscard]] bool is_pi(const object_id id) const
     {
-        return checked_object(id).kind == object_kind::pi;
+        return checked_object(id).kind == object_kind::PI;
     }
     /** @brief Returns whether an object is a primary output. */
     [[nodiscard]] bool is_po(const object_id id) const
     {
-        return checked_object(id).kind == object_kind::po;
+        return checked_object(id).kind == object_kind::PO;
     }
     /** @brief Returns whether an object is a logic gate rather than a wire or terminal. */
     [[nodiscard]] bool is_gate(const object_id id) const
     {
-        return checked_object(id).kind == object_kind::gate;
+        return checked_object(id).kind == object_kind::GATE;
     }
     /** @brief Returns whether an object computes the identity function. */
     [[nodiscard]] bool is_buf(const object_id id) const
@@ -672,12 +676,13 @@ class gate_level_layout : public CoordinateLayout
     }
     /** @brief Visits live objects. Callbacks may accept an object and enumeration index and return false to stop. */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_node(Fn&& fn) const
     {
         uint32_t index{};
         for (uint32_t slot{}; slot < objects.size(); ++slot)
         {
-            if (objects[slot].kind != object_kind::removed && !visit(fn, identity(slot), index++))
+            if (objects[slot].kind != object_kind::REMOVED && !visit(fn, identity(slot), index++))
             {
                 break;
             }
@@ -685,18 +690,21 @@ class gate_level_layout : public CoordinateLayout
     }
     /** @brief Visits primary inputs in declared interface order. */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_pi(Fn&& fn) const
     {
         foreach_terminal(inputs, fn);
     }
     /** @brief Visits primary outputs in declared interface order. */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_po(Fn&& fn) const
     {
         foreach_terminal(outputs, fn);
     }
     /** @brief Visits logic gates. */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_gate(Fn&& fn) const
     {
         uint32_t index{};
@@ -704,6 +712,7 @@ class gate_level_layout : public CoordinateLayout
     }
     /** @brief Visits identity objects, including terminals. */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_wire(Fn&& fn) const
     {
         uint32_t index{};
@@ -714,13 +723,14 @@ class gate_level_layout : public CoordinateLayout
      * Callbacks must not remove the traversed object or change its input connections.
      */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_fanin(const object_id id, Fn&& fn) const
     {
         const auto count = input_count(id);
         for (uint32_t input{}; input < count; ++input)
         {
             const auto edge = objects[id.index].inputs[input];
-            if (edge != no_index && !visit(fn, output_port{identity(edges[edge].source), 0}, input))
+            if (edge != NO_INDEX && !visit(fn, output_port{identity(edges[edge].source), 0}, input))
             {
                 break;
             }
@@ -731,11 +741,12 @@ class gate_level_layout : public CoordinateLayout
      * Callbacks must not remove the source object or change its sink connections.
      */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_sink(const output_port src, Fn&& fn) const
     {
         check_output(src);
         uint32_t index{};
-        for (auto edge = objects[src.object.index].first_sink; edge != no_index; edge = edges[edge].next)
+        for (auto edge = objects[src.object.index].first_sink; edge != NO_INDEX; edge = edges[edge].next)
         {
             const auto& connection = edges[edge];
             if (!visit(fn, input_port{identity(connection.destination), connection.input}, index++))
@@ -746,6 +757,7 @@ class gate_level_layout : public CoordinateLayout
     }
     /** @brief Visits destination objects once per connected input port. */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_fanout(const object_id id, Fn&& fn) const
     {
         foreach_sink(output(id), [&](const auto port, const auto index) { return visit(fn, port.object, index); });
@@ -1663,15 +1675,20 @@ class gate_level_layout : public CoordinateLayout
 
   private:
     /** @brief Missing slot or edge index. */
-    static constexpr uint32_t no_index = std::numeric_limits<uint32_t>::max();
+    static constexpr uint32_t NO_INDEX = std::numeric_limits<uint32_t>::max();
     /** @brief Object role; removed slots have no coordinate or connections visible through the API. */
     enum class object_kind : uint8_t
     {
-        removed,
-        pi,
-        po,
-        wire,
-        gate
+        /** @brief Removed object slot. */
+        REMOVED,
+        /** @brief Primary input terminal. */
+        PI,
+        /** @brief Primary output terminal. */
+        PO,
+        /** @brief Identity wire. */
+        WIRE,
+        /** @brief Logic gate. */
+        GATE
     };
     /** @brief Hot object data. Names and truth-table payloads are stored separately. */
     struct object_record
@@ -1683,11 +1700,11 @@ class gate_level_layout : public CoordinateLayout
         /** @brief Interned truth-table literal. */
         uint32_t function{};
         /** @brief First reverse connection, or next free object when removed. */
-        uint32_t first_sink{no_index};
+        uint32_t first_sink{NO_INDEX};
         /** @brief Number of connected sink input ports. */
         uint32_t sink_count{};
         /** @brief Physical role. */
-        object_kind kind{object_kind::removed};
+        object_kind kind{object_kind::REMOVED};
         /** @brief Input-index to connection mapping; missing entries remain holes. */
         std::vector<uint32_t> inputs{};
     };
@@ -1701,9 +1718,9 @@ class gate_level_layout : public CoordinateLayout
         /** @brief Destination input index. */
         uint32_t input{};
         /** @brief Previous sink edge. */
-        uint32_t previous{no_index};
+        uint32_t previous{NO_INDEX};
         /** @brief Next sink edge, or next free edge when disconnected. */
-        uint32_t next{no_index};
+        uint32_t next{NO_INDEX};
     };
     /** @brief Reusable object slots. */
     std::vector<object_record> objects{};
@@ -1726,9 +1743,9 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Layout name. */
     std::string layout_name{};
     /** @brief First reusable object slot. */
-    uint32_t free_object{no_index};
+    uint32_t free_object{NO_INDEX};
     /** @brief First reusable connection slot. */
-    uint32_t free_edge{no_index};
+    uint32_t free_edge{NO_INDEX};
     /** @brief Live object count. */
     uint32_t live_count{};
     /** @brief Live identity-function count. */
@@ -1811,13 +1828,13 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Allocates an edge from the free list or grows storage. */
     uint32_t allocate_edge()
     {
-        if (free_edge != no_index)
+        if (free_edge != NO_INDEX)
         {
             const auto id = free_edge;
             free_edge     = edges[id].next;
             return id;
         }
-        if (edges.size() == no_index)
+        if (edges.size() == NO_INDEX)
         {
             throw std::length_error("Layout connection capacity exhausted");
         }
@@ -1829,7 +1846,7 @@ class gate_level_layout : public CoordinateLayout
     {
         auto& edge = edges[id];
         auto& src  = objects[edge.source];
-        if (edge.previous != no_index)
+        if (edge.previous != NO_INDEX)
         {
             edges[edge.previous].next = edge.next;
         }
@@ -1837,12 +1854,12 @@ class gate_level_layout : public CoordinateLayout
         {
             src.first_sink = edge.next;
         }
-        if (edge.next != no_index)
+        if (edge.next != NO_INDEX)
         {
             edges[edge.next].previous = edge.previous;
         }
         --src.sink_count;
-        objects[edge.destination].inputs[edge.input] = no_index;
+        objects[edge.destination].inputs[edge.input] = NO_INDEX;
         edge.next                                    = free_edge;
         free_edge                                    = id;
     }
@@ -1864,13 +1881,13 @@ class gate_level_layout : public CoordinateLayout
         record.position = t;
         record.function = function;
         record.kind     = kind;
-        record.inputs.resize(arity, no_index);
-        if (children.size() > no_index - edges.size())
+        record.inputs.resize(arity, NO_INDEX);
+        if (children.size() > NO_INDEX - edges.size())
         {
             throw std::length_error("Layout connection capacity exhausted");
         }
-        const bool reuse = free_object != no_index;
-        if (!reuse && objects.size() == no_index)
+        const bool reuse = free_object != NO_INDEX;
+        if (!reuse && objects.size() == NO_INDEX)
         {
             throw std::length_error("Layout object capacity exhausted");
         }
@@ -1895,7 +1912,7 @@ class gate_level_layout : public CoordinateLayout
             }
         }
         ++live_count;
-        wire_count += function == 2;
+        wire_count += static_cast<uint32_t>(function == 2);
         const auto id = identity(slot);
         try
         {
@@ -1914,7 +1931,7 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Creates a named output terminal. */
     output_port create_terminal(const std::span<const output_port> children, const std::string& name, const tile& t)
     {
-        const auto p = create_object(children, 2, object_kind::po, 1, t);
+        const auto p = create_object(children, 2, object_kind::PO, 1, t);
         try
         {
             set_name(p.object, name);
@@ -2003,7 +2020,9 @@ class gate_level_layout : public CoordinateLayout
                  {{0x1, 1}, {0x8, 2}, {0xe, 2}, {0x2, 2}, {0xb, 2}, {0x6, 2}, {0xe8, 3}}})
         {
             kitty::dynamic_truth_table table{arity};
-            kitty::create_from_words(table, &literal, &literal + 1);
+            /** @brief One truth-table word consumed by the gate-function constructor. */
+            const std::array words{literal};
+            kitty::create_from_words(table, words.cbegin(), words.cend());
             initialized.insert(table);
         }
         functions = std::move(initialized);

@@ -313,17 +313,17 @@ class layout_base
             int64_t x = std::max(current.x, 0);
             int64_t y = std::max(current.y, 0);
             int64_t z = std::max(current.z, 0);
-            if (x >= bound.width)
+            if (std::cmp_greater_equal(x, bound.width))
             {
                 x = 0;
                 ++y;
             }
-            if (y >= bound.height)
+            if (std::cmp_greater_equal(y, bound.height))
             {
                 y = 0;
                 ++z;
             }
-            ended = z >= bound.layers;
+            ended = std::cmp_greater_equal(z, bound.layers);
             if (!ended)
             {
                 current = coordinate{x, y, z};

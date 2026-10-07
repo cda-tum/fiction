@@ -177,7 +177,10 @@ TEST_CASE("Cartesian predicates ignore frame bounds", "[cartesian-layout][size-c
     CHECK(layout.is_adjacent_elevation_of({-3, -2, 8}, {-2, -2, 9}));
     CHECK(!layout.is_adjacent_elevation_of({-3, -2, 8}, {-2, -2, 10}));
     CHECK(!layout.is_east_of({2147483647, 0}, {-2147483648ll, 0}));
-    const cartesian_layout wide{{2147483648ull, 1, 1}};
+    /** @brief Geometry covering every nonnegative signed coordinate. */
+    const cartesian_layout wide{{2147483648ull, 2147483648ull, 1}};
+    CHECK(wide.eastern_border_of({0, 0}) == layout_base::coordinate{2147483647, 0});
+    CHECK(wide.southern_border_of({0, 0}) == layout_base::coordinate{0, 2147483647});
     CHECK(!wide.east({2147483647, 0}));
     CHECK(wide.west({2147483647, 0}) == layout_base::coordinate{2147483646, 0});
 }

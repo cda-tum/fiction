@@ -27,10 +27,12 @@
 #include <array>
 #include <concepts>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <limits>
 #include <optional>
 #include <ranges>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -670,7 +672,7 @@ class hexagonal_layout : public layout_base
         {
             return std::nullopt;
         }
-        const coordinate projected{static_cast<int64_t>(width()) - 1, c.y, c.z};
+        const coordinate projected{static_cast<int32_t>(width() - 1), c.y, c.z};
         return contains_coordinate(projected) ? std::optional{projected} : std::nullopt;
     }
     /**
@@ -684,7 +686,7 @@ class hexagonal_layout : public layout_base
         {
             return std::nullopt;
         }
-        const coordinate projected{c.x, static_cast<int64_t>(height()) - 1, c.z};
+        const coordinate projected{c.x, static_cast<int32_t>(height() - 1), c.z};
         return contains_coordinate(projected) ? std::optional{projected} : std::nullopt;
     }
     /**
@@ -1046,8 +1048,8 @@ class hexagonal_layout : public layout_base
                                                            const int32_t                      layer) const noexcept
     {
         const auto [nx, ny] = axes;
-        if (nx < 0 || nx >= width() || ny < 0 || ny >= height() || layer < 0 ||
-            static_cast<uint32_t>(layer) >= layers())
+        if (nx < 0 || std::cmp_greater_equal(nx, width()) || ny < 0 || std::cmp_greater_equal(ny, height()) ||
+            layer < 0 || static_cast<uint32_t>(layer) >= layers())
         {
             return {};
         }
@@ -1071,7 +1073,8 @@ class hexagonal_layout : public layout_base
         const auto nx = static_cast<int64_t>(c.x) + dx;
         const auto ny = static_cast<int64_t>(c.y) + dy;
         const auto nz = static_cast<int64_t>(c.z) + dz;
-        if (nx < 0 || nx >= width() || ny < 0 || ny >= height() || nz < 0 || nz >= layers())
+        if (nx < 0 || std::cmp_greater_equal(nx, width()) || ny < 0 || std::cmp_greater_equal(ny, height()) || nz < 0 ||
+            std::cmp_greater_equal(nz, layers()))
         {
             return std::nullopt;
         }

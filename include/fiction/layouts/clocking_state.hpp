@@ -65,6 +65,8 @@ class state
     }
     /** @brief Moves the scheme and synchronization delays. @return This state. */
     state& operator=(state&&) noexcept = default;
+    /** @brief Releases owned clocking state. */
+    ~state() = default;
     /**
      * Replaces the stored clocking scheme with the provided one. Copy failure preserves the stored scheme.
      *
@@ -233,7 +235,8 @@ class state
      * @param fn Callback for each synchronization element.
      */
     template <typename Fn>
-    void foreach_synchronization_element(Fn&& fn) const
+    void foreach_synchronization_element(
+        Fn&& fn) const  // NOLINT(cppcoreguidelines-missing-std-forward): repeated calls use the callback as an lvalue
     {
         for (const auto& [zone, delay] : synchronization)
         {

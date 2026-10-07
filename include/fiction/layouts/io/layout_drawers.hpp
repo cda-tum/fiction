@@ -29,7 +29,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cstddef>
 #include <cstdint>
 #include <iomanip>
 #include <ostream>
@@ -53,6 +52,16 @@ template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class simple_gate_layout_tile_drawer
 {
   public:
+    /** @brief Creates a stateless drawer. */
+    simple_gate_layout_tile_drawer() = default;
+    /** @brief Copies the stateless drawer. */
+    simple_gate_layout_tile_drawer(const simple_gate_layout_tile_drawer&) = default;
+    /** @brief Moves the stateless drawer. */
+    simple_gate_layout_tile_drawer(simple_gate_layout_tile_drawer&&) noexcept = default;
+    /** @brief Copies the stateless drawer. @return This drawer. */
+    simple_gate_layout_tile_drawer& operator=(const simple_gate_layout_tile_drawer&) = default;
+    /** @brief Moves the stateless drawer. @return This drawer. */
+    simple_gate_layout_tile_drawer& operator=(simple_gate_layout_tile_drawer&&) noexcept = default;
     /** @brief Destroy the drawer. */
     virtual ~simple_gate_layout_tile_drawer() = default;
     /** @brief Return graph attributes. */
@@ -108,7 +117,11 @@ class simple_gate_layout_tile_drawer
         const auto id = lyt.find_object(t).value();
         if (lyt.is_pi(id) || lyt.is_po(id))
         {
-            return lyt.has_name(id) ? lyt.get_name(id) : lyt.is_pi(id) ? "PI" : "PO";
+            if (lyt.has_name(id))
+            {
+                return lyt.get_name(id);
+            }
+            return lyt.is_pi(id) ? "PI" : "PO";
         }
         if (const auto above = lyt.above(t); above && lyt.is_wire(id) && lyt.is_wire_tile(*above))
         {

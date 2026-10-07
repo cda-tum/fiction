@@ -124,8 +124,7 @@ class shifted_cartesian_layout : public hexagonal_layout
     {}
 
     /** @param lyt Hexagonal geometry to copy. */
-    // NOLINTNEXTLINE(*-explicit-constructor, *-explicit-conversions): implicit geometry conversion preserves clone
-    // usage
+    // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions): accepts inherited clone results.
     shifted_cartesian_layout(const HexagonalLayout& lyt) : HexagonalLayout(lyt) {}
 
   private:

@@ -96,7 +96,9 @@ class read_fgl_layout_impl
     read_fgl_layout_impl(const Lyt& tgt, std::istream& s) : layout_name{tgt.get_layout_name()}, is{s}
     {
         if constexpr (!is_cartesian_layout_v<Lyt>)
+        {
             expected_arrangement = tgt.get_arrangement();
+        }
     }
 
     /** @brief Parse legacy maximum-index extents or version-2 extent counts. @return Parsed layout. */
@@ -312,21 +314,27 @@ class read_fgl_layout_impl
                 {
                     for (const auto* coordinate = coordinates->FirstChildElement("coordinate"); coordinate != nullptr;
                          coordinate             = coordinate->NextSiblingElement("coordinate"))
+                    {
                         lyt.obstruct_coordinate(read_position<int64_t>(coordinate));
+                    }
                 }
                 if (const auto* connections = manual->FirstChildElement("connections"); connections != nullptr)
                 {
                     for (const auto* connection = connections->FirstChildElement("connection"); connection != nullptr;
                          connection             = connection->NextSiblingElement("connection"))
+                    {
                         lyt.obstruct_connection(read_position<int64_t>(connection->FirstChildElement("source")),
                                                 read_position<int64_t>(connection->FirstChildElement("target")));
+                    }
                 }
             }
         }
 
         if (version_two &&
             (layout->FirstChildElement("inputs") == nullptr || layout->FirstChildElement("outputs") == nullptr))
+        {
             throw fgl_parsing_error("Error parsing FGL file: missing interface order");
+        }
 
         // parse layout gates
         std::vector<gate_storage> gates{};
@@ -359,7 +367,9 @@ class read_fgl_layout_impl
                 {
                     gate.name = name->GetText() == nullptr ? "" : name->GetText();
                     if (!version_two && (gate.type == "PI" || gate.type == "PO") && name->GetText() == nullptr)
+                    {
                         throw fgl_parsing_error("Error parsing FGL file: missing interface name");
+                    }
                 }
                 else if (gate.type == "PI" || gate.type == "PO")
                 {
@@ -369,7 +379,9 @@ class read_fgl_layout_impl
                 {
                     const auto arity = read_number(gate_xml, "arity");
                     if (arity > std::numeric_limits<uint32_t>::max())
+                    {
                         throw fgl_parsing_error("Error parsing FGL file: arity exceeds the target range");
+                    }
                     gate.arity = static_cast<uint32_t>(arity);
                 }
 
@@ -393,7 +405,9 @@ class read_fgl_layout_impl
                             const auto index  = read_number(incoming_signal, "index");
                             const auto input  = read_number(incoming_signal, "input");
                             if (source > std::numeric_limits<uint32_t>::max() || index != 0 || input >= gate.arity)
+                            {
                                 throw fgl_parsing_error("Error parsing FGL file: invalid connection port");
+                            }
                             gate.connections.emplace_back(static_cast<uint32_t>(source), static_cast<uint32_t>(input));
                         }
                         else
@@ -415,15 +429,23 @@ class read_fgl_layout_impl
                 for (const auto& gate : gates)
                 {
                     if (objects.contains(gate.id))
+                    {
                         throw fgl_parsing_error("Error parsing FGL file: duplicate gate ID");
+                    }
                     typename Lyt::output_port port{};
                     const auto arity = version_two ? gate.arity : static_cast<uint32_t>(gate.incoming.size());
                     if (gate.type == "PI" && arity == 0)
+                    {
                         port = lyt.create_pi(gate.name, gate.loc);
+                    }
                     else if (gate.type == "PO" && arity == 1)
+                    {
                         port = lyt.create_po(gate.name, gate.loc);
+                    }
                     else if (gate.type == "BUF" && arity == 1)
+                    {
                         port = lyt.create_buf(gate.loc);
+                    }
                     else
                     {
                         std::string hex      = gate.type;
@@ -444,9 +466,11 @@ class read_fgl_layout_impl
                         if (arity < 2)
                         {
                             uint32_t bits{};
-                            std::from_chars(hex.data(), hex.data() + hex.size(), bits, 16);
+                            std::from_chars(hex.data(), std::to_address(hex.end()), bits, 16);
                             if (bits >= (uint32_t{1} << (uint32_t{1} << arity)))
+                            {
                                 throw fgl_parsing_error("Error parsing FGL file: truth table exceeds its arity");
+                            }
                         }
                         kitty::dynamic_truth_table function{arity};
                         kitty::create_from_hex_string(function, hex);
@@ -463,7 +487,9 @@ class read_fgl_layout_impl
                         for (const auto& [source, input] : gate.connections)
                         {
                             if (!objects.contains(source) || lyt.source({id, input}))
+                            {
                                 throw fgl_parsing_error("Error parsing FGL file: missing source or duplicate input");
+                            }
                             lyt.connect(lyt.output(objects.at(source)), {id, input});
                         }
                     }
@@ -473,13 +499,19 @@ class read_fgl_layout_impl
                         {
                             const auto source = lyt.find_object(gate.incoming[input]);
                             if (!source)
+                            {
                                 throw fgl_parsing_error("Error parsing FGL file: missing source object");
+                            }
                             lyt.connect(lyt.output(*source), {id, input});
                         }
                     }
                     for (uint32_t input = 0; input < lyt.input_count(id); ++input)
+                    {
                         if (!lyt.source({id, input}))
+                        {
                             throw fgl_parsing_error("Error parsing FGL file: missing input");
+                        }
+                    }
                 }
                 if (version_two)
                 {
@@ -487,7 +519,9 @@ class read_fgl_layout_impl
                     {
                         const auto* order = layout->FirstChildElement(tag);
                         if (order == nullptr)
+                        {
                             throw fgl_parsing_error("Error parsing FGL file: missing interface order");
+                        }
                         std::vector<typename Lyt::object_id> ids{};
                         for (const auto* entry = order->FirstChildElement("id"); entry != nullptr;
                              entry             = entry->NextSiblingElement("id"))
@@ -495,7 +529,9 @@ class read_fgl_layout_impl
                             const auto serialized = read_value(entry);
                             if (serialized > std::numeric_limits<uint32_t>::max() ||
                                 !objects.contains(static_cast<uint32_t>(serialized)))
+                            {
                                 throw fgl_parsing_error("Error parsing FGL file: unknown interface object");
+                            }
                             ids.push_back(objects.at(static_cast<uint32_t>(serialized)));
                         }
                         return ids;
@@ -530,19 +566,19 @@ class read_fgl_layout_impl
 
   private:
     /** @brief Legacy gate names, truth tables, and declared input counts. */
-    inline static constexpr std::array<std::tuple<std::string_view, std::string_view, uint32_t>, 12>
-        LEGACY_GATE_FUNCTIONS{{{"INV", "1", 1},
-                               {"AND", "8", 2},
-                               {"NAND", "7", 2},
-                               {"OR", "e", 2},
-                               {"NOR", "1", 2},
-                               {"XOR", "6", 2},
-                               {"XNOR", "9", 2},
-                               {"LT", "2", 2},
-                               {"GT", "4", 2},
-                               {"LE", "b", 2},
-                               {"GE", "d", 2},
-                               {"MAJ", "e8", 3}}};
+    static constexpr std::array<std::tuple<std::string_view, std::string_view, uint32_t>, 12> LEGACY_GATE_FUNCTIONS{
+        {{"INV", "1", 1},
+         {"AND", "8", 2},
+         {"NAND", "7", 2},
+         {"OR", "e", 2},
+         {"NOR", "1", 2},
+         {"XOR", "6", 2},
+         {"XNOR", "9", 2},
+         {"LT", "2", 2},
+         {"GT", "4", 2},
+         {"LE", "b", 2},
+         {"GE", "d", 2},
+         {"MAJ", "e8", 3}}};
     /**
      * Scratch layout created from the file.
      */
@@ -586,7 +622,9 @@ class read_fgl_layout_impl
     static Integer read_value(const tinyxml2::XMLElement* child)
     {
         if (child->GetText() == nullptr)
+        {
             throw fgl_parsing_error("Error parsing FGL file: empty integer");
+        }
         const std::string_view text{child->GetText()};
         const auto             first = text.find_first_not_of(" \t\r\n");
         const auto             last  = text.find_last_not_of(" \t\r\n");
@@ -616,7 +654,9 @@ class read_fgl_layout_impl
     static tile<Lyt> read_position(const tinyxml2::XMLElement* element, const bool with_z = true)
     {
         if (element == nullptr)
+        {
             throw fgl_parsing_error("Error parsing FGL file: missing position");
+        }
         const auto x = read_number<Integer>(element, "x");
         const auto y = read_number<Integer>(element, "y");
         const auto z = with_z ? read_number<Integer>(element, "z") : Integer{0};

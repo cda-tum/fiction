@@ -42,7 +42,9 @@ inline void validate_xml_text(const std::string& value)
     for (const auto character : value)
     {
         if (static_cast<unsigned char>(character) < 0x20 && character != '\t' && character != '\n' && character != '\r')
+        {
             throw std::invalid_argument("FGL names require XML 1.0 text characters");
+        }
     }
 }
 
@@ -82,7 +84,9 @@ void validate_layout(const Lyt& lyt)
                 }
             }
             if (lyt.input_count(id) == 0)
+            {
                 ready.push_back(id);
+            }
         });
     for (std::size_t i = 0; i < ready.size(); ++i)
     {
@@ -90,7 +94,9 @@ void validate_layout(const Lyt& lyt)
                          [&](const auto port)
                          {
                              if (--remaining.at(port.object) == 0)
+                             {
                                  ready.push_back(port.object);
+                             }
                          });
     }
     if (ready.size() != remaining.size())
@@ -99,27 +105,37 @@ void validate_layout(const Lyt& lyt)
     }
     std::optional<layouts::arrangement> arrangement{};
     if constexpr (is_hexagonal_layout_v<Lyt>)
+    {
         arrangement = lyt.get_arrangement();
+    }
     const auto source_scheme = lyt.get_clocking_scheme();
     auto       scheme        = layouts::clocking::get_scheme(clocking_name(source_scheme), arrangement);
     if (!scheme)
+    {
         throw std::invalid_argument("FGL requires a supported named clocking scheme");
+    }
     source_scheme.foreach_override([&](const auto x, const auto y, const auto number)
                                    { scheme->override_clock_number(x, y, number); });
     if (*scheme != source_scheme)
+    {
         throw std::invalid_argument("FGL requires a supported named clocking base scheme");
+    }
     source_scheme.foreach_override(
         [&lyt](const auto x, const auto y, const auto)
         {
             if (x < 0 || y < 0 || static_cast<uint64_t>(x) >= lyt.width() || static_cast<uint64_t>(y) >= lyt.height() ||
                 lyt.layers() == 0)
+            {
                 throw std::invalid_argument("FGL requires clock overrides inside the extent");
+            }
         });
     lyt.foreach_synchronization_element(
         [&lyt](const auto& coordinate, const auto)
         {
             if (!lyt.contains_coordinate(coordinate))
+            {
                 throw std::invalid_argument("FGL requires synchronization elements inside the extent");
+            }
         });
     verification::gate_level_drv_params params{};
     params.missing_connections = false;
