@@ -99,7 +99,8 @@ independent = lyt.clone()
 
 ::::
 
-Ordinary C++ copies and `clone()` copy geometry, objects, connections, clocking,
+Ordinary C++ copies, `clone()`, Python `copy.copy()`, and Python `copy.deepcopy()` copy
+geometry, objects, connections, clocking,
 synchronization, and obstructions independently. Corresponding objects retain their numeric IDs;
 an ID must still be used with the layout that owns it. Explicit obstructions survive clearing
 or moving gates; removing an explicit obstruction does not remove a gate or wire.

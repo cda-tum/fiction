@@ -9,6 +9,8 @@ directed: blocking `a` to `b` does not block `b` to `a`.
 Use separate obstruction data for search constraints. A*, path enumeration, and Yen's
 algorithm combine this data with the layout's obstructions without changing either input.
 The same data works with bare coordinate grids. Search data contains no layout or occupancy.
+`foreach_obstructed_coordinate` and `foreach_obstructed_connection` enumerate manual assignments.
+Python exposes these assignments through `obstructed_coordinates()` and `obstructed_connections()`.
 
 ::::{tab-set}
 :sync-group: language
@@ -20,7 +22,7 @@ The same data works with bare coordinate grids. Search data contains no layout o
 
 ```cpp
 using grid = fiction::layouts::cartesian_layout;
-grid lyt{{3, 3}};
+grid lyt{{4, 4}};
 fiction::layouts::obstructions blocked;
 blocked.obstruct_coordinate({1, 1});
 using path = fiction::physical_design::layout_coordinate_path<grid>;
@@ -41,7 +43,7 @@ auto paths = fiction::physical_design::path_finding::yen_k_shortest_paths<path>(
 from mnt.pyfiction.layouts import cartesian_layout, obstructions
 from mnt.pyfiction.physical_design.path_finding import yen_k_shortest_paths
 
-lyt = cartesian_layout((3, 3))
+lyt = cartesian_layout((4, 4))
 blocked = obstructions()
 blocked.obstruct_coordinate((1, 1))
 paths = yen_k_shortest_paths(lyt, (0, 0), (3, 3), 3, obstructions=blocked)

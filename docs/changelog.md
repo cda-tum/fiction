@@ -253,6 +253,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
+  - Gate-layout experiments use extent counts and extract logic networks for mockturtle algorithms. The reported dimensions and areas retain their definitions.
   - The Bestagon and hexagonalization experiments compute their unchanged area from the cell-grid extent.
   - Gate-layout experiments use direct capability headers and simpler status reporting.
   - The Bestagon, defect-aware, and on-the-fly experiments pass the even-row arrangement at runtime with unchanged results.
@@ -521,6 +522,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Random-coordinate sampling now uses independent inclusive bounds for each axis.
+  - Routing conflict graphs now detect overlaps after every path mutation and propagate allocation failures.
+  - Exact placement and GOLD now widen area calculations before multiplication.
+  - Layout optimization now accepts interior terminals and clears crossing obstructions when lowering wires.
+  - Name restoration now preserves unused inputs and gates that drive outputs.
   - Yen's algorithm now returns no paths for a zero limit and preserves valid alternatives at each spur node.
   - Path enumeration now reaches occupied crossing-layer targets under the same constraints as A*.
   - Critical-path analysis now handles long routed paths without overflowing the native stack.
@@ -640,6 +646,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - FGL version 2 now preserves manual obstructions and XML whitespace in names. Readers reject unfinished or physically invalid layouts; writers reject illegal XML control characters before changing output.
   - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.
   - QCA SVG output now includes synchronized cells in tiled layouts and wraps latch clock labels within the clock cycle.
   - QCA SVG output now preserves synchronized cell positions, draws mixed tiles once, and includes partial boundary tiles.
@@ -661,6 +668,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - `copy.copy` and `copy.deepcopy` now preserve gate objects and independently copy layout metadata. Layout simulation extracts ordered logic and rejects incomplete output cones.
   - Linux extensions hide C++ implementation symbols while preserving nanobind's shared exception ABI.
   - `physically_valid_parameters` and `operational_domain_ratio` now release the GIL so
     worker progress callbacks can execute without deadlocking.
