@@ -20,6 +20,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/synthesis/technology_mapping.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
@@ -51,6 +52,7 @@
 using namespace fiction;
 using namespace fiction::sidb;
 using namespace fiction::layouts;
+using namespace fiction::networks;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
@@ -64,6 +66,7 @@ using namespace fiction::synthesis;
 // J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE NANO 2024
 // (https://ieeexplore.ieee.org/abstract/document/10628962).
 
+/** @brief Run the published circuit-design experiment. */
 int main()  // NOLINT
 {
     using gate_lyt = hex_gate_clk_lyt;
@@ -111,7 +114,7 @@ int main()  // NOLINT
             }
         });
 
-    const auto lattice_tiling = gate_lyt{arrangement::EVEN_ROW, {11, 30}};
+    const auto lattice_tiling = gate_lyt{arrangement::EVEN_ROW, {12, 31}};
 
     experiments::experiment<std::string, double, uint64_t, bool, uint64_t> sidb_circuits_with_defects{
         "sidb_circuits_with_defects", "benchmark", "runtime", "number of aspect ratios", "equivalent", "#SiDBs"};
@@ -180,7 +183,8 @@ int main()  // NOLINT
                 continue;
             }
 
-            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, *st.gate_layout);
+            const auto miter =
+                mockturtle::miter<mockturtle::klut_network>(mapped_network, extract_layout_network(*st.gate_layout));
 
             if (!miter.has_value())
             {
@@ -217,6 +221,7 @@ int main()  // NOLINT
 #include <cstdlib>
 #include <iostream>
 
+/** @brief Report the unavailable Z3 solver. */
 int main()  // NOLINT
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;

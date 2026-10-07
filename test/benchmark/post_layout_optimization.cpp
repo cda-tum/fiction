@@ -40,14 +40,16 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 
     post_layout_optimization_params full_optimization_params{};
 
-    full_optimization_params.max_gate_relocations = (layout.x() + 1) * (layout.y() + 1);
+    full_optimization_params.max_gate_relocations = layout.width() * layout.height();
     full_optimization_params.optimize_pos_only    = false;
     full_optimization_params.planar_optimization  = false;
     full_optimization_params.timeout              = 100000;
 
     BENCHMARK("post_layout_optimization: full optimization")
     {
-        post_layout_optimization<gate_layout>(layout.clone(), full_optimization_params);
+        /** @brief Layout copy for one optimization measurement. */
+        auto optimized_layout = layout.clone();
+        post_layout_optimization<gate_layout>(optimized_layout, full_optimization_params);
     };
 
     post_layout_optimization_params wiring_reduction_only_params{};
@@ -59,7 +61,9 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 
     BENCHMARK("post_layout_optimization: wiring reduction only")
     {
-        post_layout_optimization<gate_layout>(layout.clone(), wiring_reduction_only_params);
+        /** @brief Layout copy for one optimization measurement. */
+        auto optimized_layout = layout.clone();
+        post_layout_optimization<gate_layout>(optimized_layout, wiring_reduction_only_params);
     };
 }
 

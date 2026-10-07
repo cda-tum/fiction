@@ -21,6 +21,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>       // layout conversion to cell-level
 #include <fiction/physical_design/exact.hpp>                    // SMT-based physical design of FCN layouts
 #include <fiction/physical_design/surface_analysis.hpp>         // SiDB surface analysis
@@ -59,6 +60,7 @@
 using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
+using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::sidb;
 using namespace fiction::sidb::io;
@@ -69,6 +71,7 @@ using namespace fiction::verification;
 // NOTE: You can find the surface data in the following repository:
 // https://github.com/cda-tum/sidb-defect-aware-physical-design
 
+/** @brief Run the published circuit-design experiment. */
 int main()  // NOLINT
 {
     using gate_lyt = hex_gate_clk_lyt;
@@ -138,7 +141,7 @@ int main()  // NOLINT
     // read_sqd_layout(surface_lattice, surface_data_path);
 
     const auto lattice_tiling =
-        gate_lyt{arrangement::EVEN_ROW, {11, 30}};  // our surface data is 12 x 31 Bestagon tiles
+        gate_lyt{arrangement::EVEN_ROW, {12, 31}};  // our surface data is 12 x 31 Bestagon tiles
     //    const auto lattice_tiling = gate_lyt{arrangement::EVEN_ROW, {12, 17}};  // our surface data is 13 x 18
     //    Bestagon tiles
     const auto black_list = surface_analysis<bestagon_library>(lattice_tiling, surface_lattice);
@@ -191,7 +194,8 @@ int main()  // NOLINT
         if (gate_level_layout.has_value())
         {
             // check equivalence
-            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, *gate_level_layout);
+            const auto miter =
+                mockturtle::miter<mockturtle::klut_network>(mapped_network, extract_layout_network(*gate_level_layout));
             if (!miter.has_value())
             {
                 continue;
@@ -219,13 +223,11 @@ int main()  // NOLINT
             // log results
             defect_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
                        depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
-                       static_cast<uint64_t>(gate_level_layout->x()) + 1,
-                       static_cast<uint64_t>(gate_level_layout->y()) + 1,
-                       (static_cast<uint64_t>(gate_level_layout->x()) + 1) *
-                           (static_cast<uint64_t>(gate_level_layout->y()) + 1),
-                       gate_level_layout->num_gates(), gate_level_layout->num_wires(), cp_tp.critical_path_length,
-                       cp_tp.throughput, mockturtle::to_seconds(exact_stats.time_total), *eq,
-                       dot_accurate_layout.num_dots(), layout_area);
+                       gate_level_layout->width(), gate_level_layout->height(),
+                       gate_level_layout->width() * gate_level_layout->height(), gate_level_layout->num_gates(),
+                       gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
+                       mockturtle::to_seconds(exact_stats.time_total), *eq, dot_accurate_layout.num_dots(),
+                       layout_area);
         }
         else  // no layout was obtained
         {
@@ -247,6 +249,7 @@ int main()  // NOLINT
 #include <cstdlib>
 #include <iostream>
 
+/** @brief Report the unavailable Z3 solver. */
 int main()  // NOLINT
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
