@@ -1434,13 +1434,13 @@ class graph_oriented_layout_design_impl
 
         const auto& pre             = fc.fanin_nodes[0];
         const auto  pre_t           = layout.get_tile(place_info.node2pos[pre].object);
-        const auto  expansion_limit = std::max(static_cast<int32_t>(layout.width() - 1) - pre_t.x,
-                                               static_cast<int32_t>(layout.height() - 1) - pre_t.y);
+        const auto  expansion_limit = std::max(static_cast<int64_t>(layout.width()) - 1 - pre_t.x,
+                                               static_cast<int64_t>(layout.height()) - 1 - pre_t.y);
 
         possible_positions.reserve(static_cast<std::size_t>(expansion_limit));
 
         // check if path from previous tile to PO exists
-        auto check_tile = [&](const int32_t x, const int32_t y)
+        auto check_tile = [&](const int64_t x, const int64_t y)
         {
             const tile<Lyt> tile{x, y, 0};
             const auto check_straight_inverter = ps.straight_inverters && layout.is_inv(*layout.find_object(pre_t));
@@ -1451,15 +1451,15 @@ class graph_oriented_layout_design_impl
             }
         };
 
-        for (int32_t k = 0; k <= expansion_limit; ++k)
+        for (int64_t k = 0; k <= expansion_limit; ++k)
         {
-            if (pre_t.x + k <= static_cast<int32_t>(layout.width() - 1))
+            if (static_cast<int64_t>(pre_t.x) + k < static_cast<int64_t>(layout.width()))
             {
-                check_tile(pre_t.x + k, static_cast<int32_t>(layout.height() - 1));
+                check_tile(static_cast<int64_t>(pre_t.x) + k, static_cast<int32_t>(layout.height() - 1));
             }
-            if (pre_t.y + k < static_cast<int32_t>(layout.height() - 1))
+            if (static_cast<int64_t>(pre_t.y) + k < static_cast<int64_t>(layout.height()) - 1)
             {
-                check_tile(static_cast<int32_t>(layout.width() - 1), pre_t.y + k);
+                check_tile(static_cast<int32_t>(layout.width() - 1), static_cast<int64_t>(pre_t.y) + k);
             }
         }
 
@@ -1488,9 +1488,9 @@ class graph_oriented_layout_design_impl
         const auto  pre_t = layout.get_tile(place_info.node2pos[pre].object);
 
         // check if path from previous tile to new tile and from new tile to drain exist
-        const auto check_tile = [&](const int32_t x, const int32_t y)
+        const auto check_tile = [&](const int64_t x, const int64_t y)
         {
-            const tile<Lyt> new_pos{pre_t.x + x, pre_t.y + y, 0};
+            const tile<Lyt> new_pos{static_cast<int64_t>(pre_t.x) + x, static_cast<int64_t>(pre_t.y) + y, 0};
             const auto check_straight_inverter = ps.straight_inverters && layout.is_inv(*layout.find_object(pre_t));
 
             if (!check_path(layout, pre_t, new_pos, new_gate_location::DEST, check_straight_inverter).empty())
@@ -1512,13 +1512,13 @@ class graph_oriented_layout_design_impl
         };
 
         // iterate diagonally
-        for (int32_t k = 0; k < static_cast<int32_t>(layout.width() - 1) + layout.height(); ++k)
+        for (int64_t k = 0; k < static_cast<int64_t>(layout.width()) + layout.height() - 1; ++k)
         {
-            for (int32_t x = 0; x < k + 1; ++x)
+            for (int64_t x = 0; x <= k; ++x)
             {
                 const auto y = k - x;
-                if ((pre_t.y + y) <= static_cast<int32_t>(layout.height() - 1) &&
-                    (pre_t.x + x) <= static_cast<int32_t>(layout.width() - 1))
+                if ((static_cast<int64_t>(pre_t.y) + y) < static_cast<int64_t>(layout.height()) &&
+                    (static_cast<int64_t>(pre_t.x) + x) < static_cast<int64_t>(layout.width()))
                 {
                     check_tile(x, y);
                 }
@@ -1555,11 +1555,11 @@ class graph_oriented_layout_design_impl
         const auto pre1_t = layout.get_tile(place_info.node2pos[pre1].object);
         const auto pre2_t = layout.get_tile(place_info.node2pos[pre2].object);
 
-        const auto min_x = std::max(pre1_t.x, pre2_t.x) + (pre1_t.x == pre2_t.x ? 1 : 0);
-        const auto min_y = std::max(pre1_t.y, pre2_t.y) + (pre1_t.y == pre2_t.y ? 1 : 0);
+        const auto min_x = static_cast<int64_t>(std::max(pre1_t.x, pre2_t.x)) + (pre1_t.x == pre2_t.x ? 1 : 0);
+        const auto min_y = static_cast<int64_t>(std::max(pre1_t.y, pre2_t.y)) + (pre1_t.y == pre2_t.y ? 1 : 0);
 
         // check if path from previous tiles to new tile and from new tile to drain exist
-        auto check_tile = [&](int32_t x, int32_t y)
+        auto check_tile = [&](const int64_t x, const int64_t y)
         {
             const tile<Lyt> new_pos{min_x + x, min_y + y, 0};
             auto check_straight_inverter = ps.straight_inverters && layout.is_inv(*layout.find_object(pre1_t));
@@ -1598,13 +1598,13 @@ class graph_oriented_layout_design_impl
         };
 
         // iterate diagonally
-        for (int32_t k = 0; k < static_cast<int32_t>(layout.width() - 1) + layout.height(); ++k)
+        for (int64_t k = 0; k < static_cast<int64_t>(layout.width()) + layout.height() - 1; ++k)
         {
-            for (int32_t x = 0; x < k + 1; ++x)
+            for (int64_t x = 0; x <= k; ++x)
             {
                 const auto y = k - x;
-                if ((min_y + y) <= static_cast<int32_t>(layout.height() - 1) &&
-                    (min_x + x) <= static_cast<int32_t>(layout.width() - 1))
+                if ((min_y + y) < static_cast<int64_t>(layout.height()) &&
+                    (min_x + x) < static_cast<int64_t>(layout.width()))
                 {
                     check_tile(x, y);
                 }
