@@ -28,6 +28,7 @@
 // NOLINTEND(misc-include-cleaner)
 // clang-format on
 
+#include "fiction/layouts/io/detail/fgl_layout_validation.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
@@ -513,6 +514,17 @@ class read_fgl_layout_impl
         {
             throw fgl_parsing_error("Error parsing FGL file: no element 'gates'");
         }
+        if (version_two)
+        {
+            try
+            {
+                fgl::validate_layout(lyt);
+            }
+            catch (const std::invalid_argument& error)
+            {
+                throw fgl_parsing_error(error.what());
+            }
+        }
         return std::move(lyt);
     }
 
@@ -669,6 +681,7 @@ class read_fgl_layout_impl
 
 /**
  * Reads legacy maximum-index extents or version-2 extent counts, declared interface order, and manual obstructions.
+ * Version 2 requires a complete, acyclic, physically valid layout. Validation finishes before assigning a target.
  * The target layout changes only after a successful read.
  *
  * May throw an `fgl_parsing_error` if the FGL file is malformed.
@@ -688,6 +701,7 @@ template <typename Lyt>
 }
 /**
  * Reads legacy maximum-index extents or version-2 extent counts, declared interface order, and manual obstructions.
+ * Version 2 requires a complete, acyclic, physically valid layout. Validation finishes before assigning a target.
  * The target layout changes only after a successful read.
  *
  * May throw an `fgl_parsing_error` if the FGL file is malformed.

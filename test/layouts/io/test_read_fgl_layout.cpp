@@ -2015,3 +2015,59 @@ TEST_CASE("Malformed manual FGL obstructions leave the target unchanged", "[read
     CHECK(target.is_obstructed_coordinate({-4, -5, -6}));
     CHECK(target.is_obstructed_connection({-4, -5, -6}, {7, 8, 9}));
 }
+
+TEST_CASE("Version-2 FGL requires a finished layout before assigning the target", "[read-fgl-layout]")
+{
+    cart_gate_clk_lyt original{{3, 2, 1}, clocking::twoddwave()};
+    const auto        input = original.create_pi("a", {0, 0});
+    original.create_po(input, "f", {1, 0});
+    const auto wire = original.create_buf(input, {0, 1});
+    original.create_buf(wire, {1, 1});
+    std::stringstream serialized{};
+    write_fgl_layout(original, serialized);
+    auto xml = serialized.str();
+    SECTION("PO self-cycle")
+    {
+        xml.replace(xml.find("<source>0</source>"), 18, "<source>1</source>");
+    }
+    SECTION("Dangling cycle")
+    {
+        xml.replace(xml.rfind("<source>0</source>"), 18, "<source>3</source>");
+    }
+    SECTION("Outside extent")
+    {
+        const auto width = xml.find("<x>3</x>", xml.find("<size>"));
+        xml.replace(width, 8, "<x>1</x>");
+    }
+    SECTION("Nonadjacent connection")
+    {
+        const auto po = xml.find("<type>PO</type>");
+        const auto x  = xml.find("<x>1</x>", po);
+        xml.replace(x, 8, "<x>2</x>");
+    }
+    SECTION("Wrong clock")
+    {
+        xml.insert(xml.find("</zones>"), "<zone><x>1</x><y>0</y><clock>0</clock></zone>");
+    }
+    cart_gate_clk_lyt target{{1, 1, 1}, clocking::twoddwave(), "kept"};
+    const auto        kept = target.create_pi("input", {0, 0});
+    target.obstruct_coordinate({-1, -2, -3});
+    std::stringstream malformed{xml};
+    CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
+    CHECK(target.get_layout_name() == "kept");
+    CHECK(target.output(*target.find_object({0, 0})) == kept);
+    CHECK(target.is_obstructed_coordinate({-1, -2, -3}));
+    std::stringstream rejected{xml};
+    CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(rejected), fgl_parsing_error);
+}
+
+TEST_CASE("Legacy FGL keeps editable physical placement", "[read-fgl-layout]")
+{
+    std::stringstream stream{R"(<fgl><layout><size><x>0</x><y>0</y><z>0</z></size>
+<clocking><name>2DDWave</name></clocking></layout><gates>
+<gate><id>0</id><type>PI</type><name>a</name><loc><x>1</x><y>0</y><z>0</z></loc></gate>
+</gates></fgl>)"};
+    const auto        layout = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    CHECK(layout.width() == 1);
+    CHECK(layout.find_object({1, 0}).has_value());
+}

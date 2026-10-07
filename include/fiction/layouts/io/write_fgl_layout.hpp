@@ -17,14 +17,12 @@
 
 #pragma once
 
-#include "fiction/layouts/arrangement.hpp"
-#include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/io/detail/fgl_layout_validation.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/progress.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
-#include "fiction/verification/design_rule_violations.hpp"
 
 #include <fmt/chrono.h>
 #include <fmt/format.h>
@@ -34,15 +32,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <ctime>
-#include <optional>
 #include <ostream>
-#include <sstream>
-#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <utility>
-#include <vector>
 
 namespace fiction::layouts::io
 {
@@ -52,20 +45,6 @@ namespace detail
 
 namespace fgl
 {
-
-/**
- * @brief Reject XML 1.0 control characters in a name.
- * @param value Layout or object name.
- * @throws std::invalid_argument If the name contains an illegal control character.
- */
-inline void validate_xml_text(const std::string& value)
-{
-    for (const auto character : value)
-    {
-        if (static_cast<unsigned char>(character) < 0x20 && character != '\t' && character != '\n' && character != '\r')
-            throw std::invalid_argument("FGL names require XML 1.0 text characters");
-    }
-}
 
 /**
  * @brief Escape user-provided text for an XML element.
@@ -168,7 +147,7 @@ class write_fgl_layout_impl
     /** @brief Validate the finished layout and serialize FGL version 2. */
     void run()
     {
-        validate();
+        fgl::validate_layout(lyt);
 
         // metadata
         os << fgl::FGL_HEADER << fgl::OPEN_FGL;
@@ -199,7 +178,7 @@ class write_fgl_layout_impl
 
         os << fgl::OPEN_CLOCKING;
         const auto& clocking_scheme = lyt.get_clocking_scheme();
-        os << fmt::format(fgl::CLOCKING_SCHEME_NAME, clocking_name());
+        os << fmt::format(fgl::CLOCKING_SCHEME_NAME, fgl::clocking_name(lyt));
 
         os << fgl::OPEN_CLOCK_ZONES;
         utils::progress_reporter clocks{on_progress, "writing clock overrides"};
@@ -276,88 +255,6 @@ class write_fgl_layout_impl
     }
 
   private:
-    /** @brief Return the FGL scheme name, including a three-phase suffix where needed. @return Scheme name. */
-    [[nodiscard]] std::string clocking_name() const
-    {
-        const auto scheme = lyt.get_clocking_scheme();
-        return scheme.name() + (scheme.num_clocks() == 3u && scheme.name() != layouts::clocking::BANCS_NAME ? "3" : "");
-    }
-
-    /**
-     * @brief Reject missing inputs, cycles, and physical rule violations before stream mutation.
-     * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, or uses an unsupported
-     * scheme.
-     */
-    void validate() const
-    {
-        fgl::validate_xml_text(lyt.get_layout_name());
-        std::unordered_map<typename Lyt::object_id, uint32_t> remaining{};
-        std::vector<typename Lyt::object_id>                  ready{};
-        lyt.foreach_node(
-            [&](const auto id)
-            {
-                fgl::validate_xml_text(lyt.get_name(id));
-                remaining.emplace(id, lyt.input_count(id));
-                for (uint32_t input = 0; input < lyt.input_count(id); ++input)
-                {
-                    if (!lyt.source({id, input}))
-                    {
-                        throw std::invalid_argument("FGL requires every declared input to be connected");
-                    }
-                }
-                if (lyt.input_count(id) == 0)
-                    ready.push_back(id);
-            });
-        for (std::size_t i = 0; i < ready.size(); ++i)
-        {
-            lyt.foreach_sink(lyt.output(ready[i]),
-                             [&](const auto port)
-                             {
-                                 if (--remaining.at(port.object) == 0)
-                                     ready.push_back(port.object);
-                             });
-        }
-        if (ready.size() != remaining.size())
-        {
-            throw std::invalid_argument("FGL requires an acyclic layout");
-        }
-        std::optional<layouts::arrangement> arrangement{};
-        if constexpr (is_hexagonal_layout_v<Lyt>)
-            arrangement = lyt.get_arrangement();
-        auto scheme = layouts::clocking::get_scheme(clocking_name(), arrangement);
-        if (!scheme)
-            throw std::invalid_argument("FGL requires a supported named clocking scheme");
-        const auto source_scheme = lyt.get_clocking_scheme();
-        source_scheme.foreach_override([&](const auto x, const auto y, const auto number)
-                                       { scheme->override_clock_number(x, y, number); });
-        if (*scheme != source_scheme)
-            throw std::invalid_argument("FGL requires a supported named clocking base scheme");
-        source_scheme.foreach_override(
-            [this](const auto x, const auto y, const auto)
-            {
-                if (x < 0 || y < 0 || static_cast<uint64_t>(x) >= lyt.width() ||
-                    static_cast<uint64_t>(y) >= lyt.height() || lyt.layers() == 0)
-                    throw std::invalid_argument("FGL requires clock overrides inside the extent");
-            });
-        lyt.foreach_synchronization_element(
-            [this](const auto& coordinate, const auto)
-            {
-                if (!lyt.contains_coordinate(coordinate))
-                    throw std::invalid_argument("FGL requires synchronization elements inside the extent");
-            });
-        verification::gate_level_drv_params params{};
-        params.missing_connections = false;
-        params.has_io              = false;
-        std::ostringstream report{};
-        params.out = &report;
-        verification::gate_level_drv_stats stats{};
-        verification::gate_level_drvs(lyt, params, &stats);
-        if (stats.drvs != 0)
-        {
-            throw std::invalid_argument("FGL requires a physically valid layout");
-        }
-    }
-
     /**
      * The layout to be written.
      */
