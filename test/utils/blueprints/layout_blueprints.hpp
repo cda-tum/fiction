@@ -39,19 +39,19 @@ namespace blueprints
  *
  * @tparam GateLyt Gate-level layout type.
  * @param a Arrangement of the shifted rows or columns.
- * @param ar Axis sizes of the layout.
+ * @param ex Axis sizes of the layout.
  * @return The empty layout.
  */
 template <typename GateLyt>
-GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, const typename GateLyt::extent& ar)
+GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, const typename GateLyt::extent& ex)
 {
     if constexpr (fiction::is_cartesian_layout_v<GateLyt>)
     {
-        return GateLyt{ar};
+        return GateLyt{ex};
     }
     else
     {
-        return GateLyt{a, ar};
+        return GateLyt{a, ex};
     }
 }
 
@@ -61,21 +61,21 @@ GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, cons
  *
  * @tparam GateLyt Gate-level layout type.
  * @param a Arrangement of the shifted rows or columns.
- * @param ar Axis sizes of the layout.
+ * @param ex Axis sizes of the layout.
  * @param scheme Clocking scheme to apply to the layout.
  * @return The empty layout.
  */
 template <typename GateLyt>
-GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, const typename GateLyt::extent& ar,
+GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, const typename GateLyt::extent& ex,
                     const fiction::layouts::clocking::scheme& scheme)
 {
     if constexpr (fiction::is_cartesian_layout_v<GateLyt>)
     {
-        return GateLyt{ar, scheme};
+        return GateLyt{ex, scheme};
     }
     else
     {
-        return GateLyt{a, ar, scheme};
+        return GateLyt{a, ex, scheme};
     }
 }
 

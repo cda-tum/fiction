@@ -56,24 +56,24 @@ void require_arrangement([[maybe_unused]] const std::optional<arrangement>& a)
  *
  * @tparam Lyt Gate-level layout type.
  * @param a Arrangement of the shifted rows or columns. Shifted Cartesian and hexagonal layouts require it.
- * @param ar Axis sizes of the layout.
+ * @param ex Axis sizes of the layout.
  * @param scheme Clocking scheme to apply to the layout.
  * @return Empty layout.
  * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and `a` is empty.
  */
 template <typename Lyt>
 [[nodiscard]] Lyt make_gate_level_layout([[maybe_unused]] const std::optional<arrangement>& a,
-                                         const typename Lyt::extent& ar, const clocking::scheme& scheme)
+                                         const typename Lyt::extent& ex, const clocking::scheme& scheme)
 {
     require_arrangement<Lyt>(a);
 
     if constexpr (is_cartesian_layout_v<Lyt>)
     {
-        return Lyt{ar, scheme};
+        return Lyt{ex, scheme};
     }
     else
     {
-        return Lyt{*a, ar, scheme};
+        return Lyt{*a, ex, scheme};
     }
 }
 

@@ -5786,7 +5786,7 @@ ignore the arrangement.
 Args:
     a: Arrangement of the shifted rows or columns. Shifted Cartesian
        and hexagonal layouts require it.
-    ar: Axis sizes of the layout.
+    ex: Axis sizes of the layout.
     scheme: Clocking scheme to apply to the layout.
 
 Template Args:
@@ -8640,9 +8640,9 @@ static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ps = R"doc(
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_pst = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_rar_mutex = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_result_extent = R"doc(Extent of the found result. Only needed for the asynchronous case.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_result_aspect_ratio = R"doc(Aspect ratio of found result. Only needed for the asynchronous case.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_result_extent_mutex = R"doc()doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_run = R"doc()doc";
 
@@ -8857,20 +8857,20 @@ paths transitively.
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_fetch_solver =
 R"doc(Accesses the solver tree and looks for a solver state that is
-associated with an aspect ratio smaller by 1 row or column than given
-aspect ratio. The found one is returned together with the tiles that
-are new to this solver.
+associated with an extent smaller by one row or column than the given
+extent. The found one is returned together with the tiles that are new
+to this solver.
 
 If no such solver could be found, a new solver is created from the
 context given.
 
 Args:
-    ar: aspect ratio of size x * y.
+    ex: Layout extent with width x and height y.
 
 Returns:
-    Solver state associated with an aspect ratio of size x - 1 * y or
-    x * y - 1 and, additionally, the tiles new to the solver. If no
-    such solver is available, a new one is created.
+    Solver state associated with an extent of size (x - 1) * y or x *
+    (y - 1) and, additionally, the tiles new to the solver. If no such
+    solver is available, a new one is created.
 
 )doc";
 
@@ -9293,10 +9293,10 @@ optimality guarantee. This function should never be overly
 restrictive!
 
 Args:
-    ar: Aspect ratio to evaluate.
+    ex: Layout extent to evaluate.
 
 Returns:
-    `true` if ar can safely be skipped because it is UNSAT anyway.
+    `true` if `ex` can safely be skipped because it is UNSAT anyway.
 
 )doc";
 
@@ -9367,11 +9367,11 @@ be reused at a later point. In the example, the 4 x 4 solver would be
 stored and revisited when 4 x 5 is to be explored.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_store_solver_state =
-R"doc(Stores the current solver state in the solver tree with aspect ratio
-ar as key.
+R"doc(Stores the current solver state in the solver tree with extent ex as
+key.
 
 Args:
-    ar: Key to storing the current solver state.
+    ex: Key to storing the current solver state.
 
 )doc";
 
@@ -9399,7 +9399,7 @@ R"doc(Resizes the layout and creates a new solver checkpoint from where on
 the next incremental instance can be generated.
 
 Args:
-    ar: Current aspect ratio to work on.
+    ex: Current layout extent.
 
 )doc";
 
@@ -9411,7 +9411,7 @@ free. Symmetry breaking constraints.
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info =
-R"doc(Shares worker solvers and aspect ratios under `rar_mutex`.
+R"doc(Shares worker solvers and extents under `result_extent_mutex`.
 
 A worker with a result interrupts solvers exploring layouts of equal
 or greater area.)doc";
@@ -9420,7 +9420,7 @@ static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_solver = R"doc(Current solver, kept alive while other workers may interrupt it.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_worker_aspect_ratio = R"doc(Currently examined layout aspect ratio.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_worker_extent = R"doc(Currently examined layout extent.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_update_timeout =
 R"doc(Calculates the time left for solving by subtracting the time passed
@@ -10865,7 +10865,7 @@ static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layou
 R"doc(Constructs a search grid with a zero-origin, half-open extent.
 
 Args:
-    ar: Search-grid extent. Defaults to an empty extent.
+    ex: Search-grid extent. Defaults to an empty extent.
     direction: The search direction to be used. Defaults to HORIZONTAL
                if not provided.
 

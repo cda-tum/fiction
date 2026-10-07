@@ -250,9 +250,9 @@ template <typename Lyt>
 void check_visited_coordinates(const arrangement a)
 {
     /** @brief Extent whose coordinate iteration is checked. */
-    const typename Lyt::extent ar{10, 10, 2};
+    const typename Lyt::extent ex{10, 10, 2};
 
-    Lyt layout{a, ar};
+    Lyt layout{a, ex};
 
     std::set<typename Lyt::coordinate> visited{};
 

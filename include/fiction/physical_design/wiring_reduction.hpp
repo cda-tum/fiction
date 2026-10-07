@@ -153,12 +153,12 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     /**
      * Constructs a search grid with a zero-origin, half-open extent.
      *
-     * @param ar Search-grid extent. Defaults to an empty extent.
+     * @param ex Search-grid extent. Defaults to an empty extent.
      * @param direction The search direction to be used. Defaults to HORIZONTAL if not provided.
      */
-    explicit wiring_reduction_layout(const layouts::cartesian_layout::extent& ar = {},
+    explicit wiring_reduction_layout(const layouts::cartesian_layout::extent& ex = {},
                                      search_direction direction                  = search_direction::HORIZONTAL) :
-            layouts::cartesian_layout(ar),
+            layouts::cartesian_layout(ex),
             search_dir(direction)
     {}
     /**
