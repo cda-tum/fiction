@@ -127,6 +127,7 @@ TEST_CASE("Objects with more inputs than the inline capacity keep ordered ports"
 {
     gate_level_layout<cartesian_layout>                         lyt{{6, 6}};
     std::vector<gate_level_layout<cartesian_layout>::object_id> pis{};
+    pis.reserve(5);
     for (uint32_t i = 0; i < 5; ++i)
     {
         pis.push_back(lyt.create_pi("pi" + std::to_string(i), {static_cast<int64_t>(i), 0}));

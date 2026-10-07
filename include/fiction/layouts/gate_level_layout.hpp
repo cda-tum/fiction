@@ -1681,12 +1681,12 @@ class gate_level_layout : public CoordinateLayout
         /** @brief Returns the connection index at slot `i`. */
         [[nodiscard]] uint32_t& operator[](const uint32_t i) noexcept
         {
-            return count > INLINE_CAPACITY ? spill[i] : fixed[i];
+            return std::span{begin_mutable(), count}[i];
         }
         /** @brief Returns the connection index at slot `i`. */
         [[nodiscard]] const uint32_t& operator[](const uint32_t i) const noexcept
         {
-            return count > INLINE_CAPACITY ? spill[i] : fixed[i];
+            return std::span{begin(), count}[i];
         }
         /** @brief Returns the first slot. */
         [[nodiscard]] const uint32_t* begin() const noexcept
@@ -1700,6 +1700,11 @@ class gate_level_layout : public CoordinateLayout
         }
 
       private:
+        /** @brief Returns the first slot. */
+        [[nodiscard]] uint32_t* begin_mutable() noexcept
+        {
+            return count > INLINE_CAPACITY ? spill.data() : fixed.data();
+        }
         /** @brief Slots stored without allocation; covers every built-in gate. */
         static constexpr uint32_t INLINE_CAPACITY = 3;
         /** @brief Number of slots in use. */
