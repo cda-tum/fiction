@@ -48,7 +48,8 @@ TEST_CASE("Test find_first_two_of with array input", "[find_first_two_of]")
     static constexpr const std::array a2{1, 2, 3, 3};
 
     /** @brief First matching adjacent pair in the array. */
-    const auto* it = find_first_two_of(std::begin(a1), std::end(a1), std::begin(a2), std::end(a2));
+    // NOLINTNEXTLINE(readability-qualified-auto): MSVC Debug uses checked array iterators instead of pointers.
+    auto it = find_first_two_of(std::begin(a1), std::end(a1), std::begin(a2), std::end(a2));
     CHECK(*it == 1);
     CHECK(*(std::next(it, 1)) == 2);
 
